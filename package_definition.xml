@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition schema="3.0.0">
+  <package id="homescreen" name="Home Screen Apps" levels="fw apps">
+    <collection id="idlehomescreen" name="Idle Home Screen" level="apps">
+      <component id="nativeuicontroller" filter="s60" name="Native UI Controller">
+        <unit bldFile="idlehomescreen/nativeuicontroller/group"/>
+      </component>
+      <component id="exths" filter="s60" name="Active Idle Container" class="plugin">
+      	<!-- why is the ID so different from the name? Is one wrong? -->
+        <unit bldFile="idlehomescreen/exths/group"/>
+      </component>
+      <component id="activeidle3" filter="s60" name="Active Idle 3">
+        <unit bldFile="idlehomescreen/activeidle3/group"/>
+        <!-- do these need to be built? -->
+        <!-- <unit bldFile="idlehomescreen/activeidle3/data/group"/> -->
+        <!-- <unit bldFile="idlehomescreen/activeidle3/xmluirendering/uiengine/group"/> -->
+      </component>
+      <component id="hsplugins" filter="s60" name="Home Screen Plugins" class="plugin">
+        <unit bldFile="idlehomescreen/hsplugins/group"/>
+        <!-- do these need to be built? -->
+        <!-- <unit bldFile="idlehomescreen/hsplugins/organizer/qhd_tch/organizer_2001f481/group"/> -->
+        <!-- <unit bldFile="idlehomescreen/hsplugins/organizer/vga/organizer_2001f48d/group"/> -->
+        <!-- <unit bldFile="idlehomescreen/hsplugins/organizer/vga/organizer_2001fdba/group"/> -->
+      </component>
+    </collection>
+    <collection id="menufw" name="Menu Framework" level="fw">
+      <component id="hierarchynavigator" filter="s60" name="Hierarchy Navigator">
+        <unit bldFile="menufw/hierarchynavigator/group"/>
+      </component>
+      <component id="menufwui" filter="s60" name="Menu Framework UI">
+        <unit bldFile="menufw/menufwui/group"/>
+      </component>
+      <component id="menusuites" filter="s60" name="Menu Suites">
+        <unit bldFile="menufw/menusuites/group"/>
+      </component>
+      <component id="menufw_build" filter="s60" name="Menu Framework Build">
+      	<!-- can the exports be exported by the other components? -->
+        <unit bldFile="menufw/group"/>
+      </component>
+    </collection>
+    <collection id="homescreen_info" name="Home Screen Apps Info" level="apps">
+      <component id="homescreen_test" filter="s60" purpose="development" name="Home Screen Apps Test">
+      	<!-- should this be commented out or not? -->
+        <!-- <unit bldFile="tsrc/group"/> -->
+      </component>
+      <component id="homescreen_plat" filter="s60" name="Home Screen Apps Platform Interfaces" class="api">
+        <unit bldFile="homescreen_plat/group"/>
+      </component>
+    </collection>
+  </package>
+</SystemDefinition>

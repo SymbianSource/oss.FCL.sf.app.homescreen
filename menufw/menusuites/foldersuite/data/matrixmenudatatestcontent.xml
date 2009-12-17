@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xcfwml SYSTEM "matrixmenudata.dtd">
+<menu:data xmlns:menu="http:://www.s60.com/xml/applicationshell/1" version="5.0">
+    <menu:folder title_name="&qtn_fldr_root_level;" long_name="&qtn_fldr_root_level;" short_name="&qtn_fldr_root_level;">  
+        <!--Office folder-->
+        <!-- <menu:folder title_name="&qtn_apps_office_title;"
+                    long_name="&qtn_apps_office_list;" 
+                    short_name="&qtn_apps_office_grid;"
+                    applicationgroup_name="Office"
+                    icon_file="z:\resource\apps\matrixmenudata.mif"
+                    icon_id="16398" 
+                    mask_id="16399" 
+                    icon_skin_minor_id="0x1ead" 
+                    icon_skin_major_id="0x101F86E3"> -->
+            <!--Calendar-->
+            <menu:application uid="0x10005901"/>
+        <!-- </menu:folder> -->
+        <!--Contacts application-->
+        <menu:application uid="0x101F4CCE"/>  
+        <!--music folder-->
+        <menu:folder title_name="&qtn_apps_music_title;"
+                    long_name="&qtn_apps_music_list;" 
+                    short_name="&qtn_apps_music_grid;"
+                    applicationgroup_name="Music"
+                    icon_file="z:\resource\apps\matrixmenudata.mif"
+                    icon_id="16384" 
+                    mask_id="16385" 
+                    icon_skin_minor_id="0x217e" 
+                    icon_skin_major_id="0x101F86E3">
+          <!-- Music Player (MusicPlayer)-->
+          <menu:application uid="0x102072C3"/>
+          <!-- Radio -->
+          <menu:application uid="0x10207A89"/>
+          <!-- Music Store -->
+          <menu:application uid="0x101FFB51"/>
+          <!-- Podcasting -->
+          <menu:application uid="0x1028190B"/>
+        </menu:folder>
+        <!--Internet folder-->
+        <!--  now using qgnmenugroupweb available in skin -->
+        <menu:folder title_name="&qtn_apps_browserng_title;" 
+                    long_name="&qtn_apps_internet_list;" 
+                    short_name="&qtn_apps_internet_grid;"
+                    applicationgroup_name="internet"
+                    icon_file="z:\resource\apps\matrixmenudata.mif" 
+                    icon_id="16386" 
+                    mask_id="16387"
+                    icon_skin_minor_id="0x2005" 
+                    icon_skin_major_id="0x101F86E3" >
+            <!--Browser-->
+            <menu:application uid="0x10008D39"/>
+            <!--Share Online-->
+            <menu:application uid="0x2000BB53"/>
+            <!--Online Search-->
+            <menu:application uid="0x20000907"/>
+        </menu:folder>
+        <!--Messaging application-->
+        <menu:application uid="0x100058C5"/>
+        <!--Photos suite-->
+        <menu:suite title_name="&qtn_apps_photos_title;" 
+                    long_name="&qtn_apps_photos_list;" 
+                    short_name="&qtn_apps_photos_grid;" 
+                    suite_name="photossuite"
+                    icon_file="z:\resource\apps\matrixmenudata.mif" 
+                    icon_id="16398" 
+                    mask_id="16399" 
+                    icon_skin_minor_id="0x217c" 
+                    icon_skin_major_id="0x101F86E3" />
+        <!--Download! application-->                         
+        <menu:application uid="0x20007803" />
+        <!--Maps application-->
+        <menu:application uid="0x20001F63"/>
+        <!--Video & TV suite-->
+        <menu:suite title_name="&qtn_apps_videotv_title;" 
+                    long_name="&qtn_apps_videotv_list;" 
+                    short_name="&qtn_apps_videotv_grid;" 
+                    suite_name="tvvideosuite"
+                    icon_file="z:\resource\apps\matrixmenudata.mif" 
+                    icon_id="16402" 
+                    mask_id="16403" 
+                    icon_skin_minor_id="0x217d" 
+                    icon_skin_major_id="0x101F86E3"/>
+        <!--Settings/Control Panel-->           
+        <menu:application uid="0x100058EC"/>
+        <!--Games folder-->
+        <menu:folder title_name="&qtn_apps_games_title;"
+                    long_name="&qtn_apps_games_list;" 
+                    short_name="&qtn_apps_games_grid;"
+                    applicationgroup_name="Games"
+                    icon_file="z:\resource\apps\matrixmenudata.mif"
+                    icon_id="16396" 
+                    mask_id="16397" 
+                    icon_skin_minor_id="0x2184" 
+                    icon_skin_major_id="0x101F86E3" >
+            <!--Games/N-Gage application-->
+            <!-- <menu:application uid="0x20007B39" /> -->
+        </menu:folder>
+        <!--Application folder-->
+        <menu:folder applicationgroup_name="applications" 
+                    default="1" 
+                    title_name="&qtn_apps_appsfolder_title;" 
+                    long_name="&qtn_apps_applications_list;" 
+                    short_name="&qtn_apps_applications_grid;"
+                    icon_file="z:\resource\apps\matrixmenudata.mif" 
+                    icon_id="16392" 
+                    mask_id="16393" 
+                    icon_skin_minor_id="0x2174" 
+                    icon_skin_major_id="0x101F86E3">
+            <menu:application uid="0x20001BB9"/>
+            <!--Adobe PDF-->
+            <menu:application uid="0x10005902"/>
+            <!--Calculator-->
+            <menu:application uid="0x10005903"/>
+            <!--Clock-->
+            <menu:application uid="0x101F4668"/>
+            <!--Converter-->
+            <menu:application uid="0x10275458"/>
+            <!-- Service configurator -->
+            <menu:application uid="0x10208A0A"/>
+            <!--Home media ?? Home Connect ??--> 
+            <menu:application uid="0x10005907"/>
+            <!--Notepad-->            
+            <menu:application uid="0x1028190B"/>
+            <!--Podcasting-->            
+            <menu:application uid="0x100058CA"/>
+            <!--Voice recorder-->
+            <menu:application uid="0x10282411"/>
+            <!--Search application-->
+        </menu:folder>
+
+        <!-- Test suites -->        
+        <menu:suite title_name="Base" 
+                    long_name="Base" 
+                    short_name="Base"
+                    suite_name="basicsuite"
+                    icon_file="z:\resource\apps\matrixmenudata.mif" 
+                    icon_id="16394" 
+                    mask_id="16395" 
+                    icon_skin_minor_id="0x13fc" 
+                    icon_skin_major_id="0x101F86E3"/>        
+        <menu:suite title_name="Demo" 
+                    long_name="Demo" 
+                    short_name="Demo"
+                    suite_name="demosuite"
+                    icon_file="z:\resource\apps\matrixmenudata.mif" 
+                    icon_id="16394" 
+                    mask_id="16395" 
+                    icon_skin_minor_id="0x13fc" 
+                    icon_skin_major_id="0x101F86E3"/> 
+        <menu:suite title_name="&qtn_apps_office_title;" 
+                    long_name="&qtn_apps_office_list;" 
+                    short_name="&qtn_apps_office_grid;"
+                    suite_name="ziadromsuite"
+                    icon_file="z:\resource\apps\iadromsuite.mif" 
+                    icon_id="16384" 
+                    mask_id="16385" 
+                    icon_skin_minor_id="0x13fc" 
+                    icon_skin_major_id="0x101F86E3"/>        
+    </menu:folder>
+</menu:data>

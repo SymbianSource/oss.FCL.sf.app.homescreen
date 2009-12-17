@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <!DOCTYPE xmluiml SYSTEM "AI3_Demo.dtd"> -->
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+    <widget>
+      <contentsource id="triple_row_widget" class="ContentSource" name="" value="0x20019594"/>
+      <configuration name="service" value="Service.ContentPublishing"/>
+      <configuration name="interface" value="IContentPublishing"/>
+      <configuration name="command" value="GetList"/>
+	    <configuration id="pub_id" name="publisher" value=""/>
+	    
+	    <box id="triple_row_widget" focusable="true" _s60-initial-focus="1">
+      	<!-- Template designer choice -->
+	        <actions>
+	          <action>
+	            <trigger name="stylus">
+	              <property name="eventtype" value="downup" />
+	            </trigger>
+	            <trigger name="activate"/>
+                  <trigger name="keyevent">
+                      <property name="scancode" value="3"/>
+                      <property name="eventtype" value="1"/>
+                  </trigger>
+	            <event id="trigger1" name=""/>
+	          </action>
+	        </actions>
+    	<box id="triple_text_box1" class="triple_text_box" >
+        <text id="r1text1" class="text_box">
+					<configuration name="content_type" value="row1"/>
+          <property id="prop1" class=""/>
+      	</text>
+     </box>
+     <box id="triple_text_box2"  class="triple_text_box">
+      	<text id="r2text2" class="text_box">
+      	  <configuration name="content_type" value="row2"/>
+          <property id="prop2" class=""/>
+      	</text>
+			</box>
+			<box id="triple_text_box3"  class="triple_text_box">
+      	<text id="r2text3" class="text_box">
+      	  <configuration name="content_type" value="row3"/> 
+          <property id="prop3" class=""/>
+      	</text>
+			</box>
+		</box>
+   </widget>
+</xmluiml>

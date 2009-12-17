@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+
+<package version="1.0">
+
+
+
+  <family>qhd_tch</family>
+
+  
+
+  <type>template</type>
+
+
+
+  <!-- interface uid -->
+
+	<interfaceuid>0x2001f48a</interfaceuid>
+
+
+
+	<!-- vendor uid  -->
+
+	<provideruid>0x101fb657</provideruid>
+
+
+
+	<!-- uid -->
+
+	<configurationuid>0x2001fdbc</configurationuid>
+
+	
+
+	<!-- description -->
+
+	<fullname>posterwideimage</fullname>
+
+	<shortname>posterwide</shortname>
+
+	<version>1.0</version>
+
+
+
+	<!-- configuration -->
+
+	<filexml>widgetconfiguration.xml</filexml>
+
+
+
+  <!-- Locale independent/common resources -->
+
+  <fileresource>posterwideimage.o0000</fileresource>
+
+
+
+  <!-- Locale specific resources -->
+
+	<localization/>
+
+
+
+</package>

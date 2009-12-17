@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project extension manager
+*
+*/
+
+
+// To get the APP_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+TARGET        mmextensionmanager.dll
+TARGETTYPE    DLL
+UID			  0x1000008d 0x2000E57F
+VENDORID      VID_DEFAULT
+
+CAPABILITY    CAP_GENERAL_DLL
+
+SOURCEPATH    	../src
+
+SOURCE		mmextensionmanager.cpp
+SOURCE      mmecomobserver.cpp
+
+
+USERINCLUDE   	.
+USERINCLUDE 	../inc
+USERINCLUDE   ../../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY       euser.lib 
+LIBRARY       ECom.lib
+
+DEBUGLIBRARY  flogger.lib
+
+// End of File

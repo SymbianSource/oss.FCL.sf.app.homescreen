@@ -1,0 +1,75 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project hierarchy navigator utilities
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET          hnutilities.dll
+TARGETTYPE      dll
+
+UID             0x1000008d 0x2001843B
+
+CAPABILITY      CAP_GENERAL_DLL
+
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+
+SOURCE          hnrepositorymanager.cpp
+// static utils
+SOURCE          hnconvutils.cpp
+SOURCE          hnliwutils.cpp
+// keys
+SOURCE          hnmdbasekey.cpp
+SOURCE          hnmdbooleankey.cpp
+SOURCE          hnmdintegerkey.cpp
+SOURCE          hnmdlistkey.cpp
+SOURCE          hnmdmapkey.cpp
+SOURCE          hnmdstring16key.cpp
+SOURCE          hnmdstring8key.cpp
+SOURCE          hnmdundefkey.cpp
+SOURCE          hnmduidkey.cpp
+SOURCE          hnmdkeyfactory.cpp
+// service handling
+SOURCE          hnservicehandler.cpp 
+SOURCE          hnmduintegerkey.cpp hnmdinteger64key.cpp
+
+USERINCLUDE     ../inc
+
+SYSTEMINCLUDE   ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         estor.lib 
+LIBRARY         euser.lib
+LIBRARY         bafl.lib
+LIBRARY         efsrv.lib
+LIBRARY         CentralRepository.lib
+LIBRARY         charconv.lib              // for CnvUtfConverter
+LIBRARY         liwservicehandler.lib     // LIW Framework
+LIBRARY         XmlEngineDOM.lib          // XML parser
+LIBRARY         commonengine.lib          // StringLoader
+
+#ifdef _MATRIX_MENU_TRACE_PERFORMANCE
+LIBRARY         flogger.lib
+#else
+DEBUGLIBRARY    flogger.lib
+#endif
+
+
+// End of file
+

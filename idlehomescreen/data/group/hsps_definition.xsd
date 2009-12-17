@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- Validation of the HSPS definition files -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">  
+  
+<!-- Configuration element -->
+<xs:element name="configuration">    
+  <xs:complexType>
+    <xs:sequence>
+    
+      <!-- Configuration|Control element -->
+  	  <xs:element name="control">    	  
+  	    <xs:complexType>
+  	      <xs:sequence>  	      
+  	        <xs:element name="plugins" minOccurs="0">
+  	          <xs:complexType>
+    	          <xs:sequence>  	      
+    	          
+    	            <!-- Configuration|Control|Plugins|Plugin element -->
+    	            <xs:element name="plugin" minOccurs="0" maxOccurs="unbounded">
+    	              <xs:complexType>    	                
+                      <xs:attribute name="uid" type="xs:string" use="required"/>
+                      <xs:attribute name="interface" type="xs:string"/>
+                      <xs:attribute name="name" type="xs:string"/>
+    	              </xs:complexType>
+    	            </xs:element>
+    	            
+  	            </xs:sequence>  	      
+  	          </xs:complexType>
+  	        </xs:element>
+  	        
+  	        <!-- Configuration|Control|Settings element -->
+  	        <xs:element name="settings">
+              <xs:complexType>  	      
+                <xs:sequence>  	       
+                                      
+                    <!-- Configuration|Control|Settings|Item element -->
+                    <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>  	      
+                        <xs:sequence>  	       
+                                                          
+                          <!-- Configuration|Control|Settings|Item|Property element -->
+                          <xs:element name="property" maxOccurs="unbounded">
+                            <xs:complexType>  	      
+                              <xs:sequence>  	       
+                              </xs:sequence>  	      
+                              <xs:attribute name="name" type="xs:string" use="required"/>
+                              <xs:attribute name="value" type="xs:string" use="required"/> 
+                              <xs:anyAttribute/>
+                            </xs:complexType>  	      
+                          </xs:element>
+                                                                                                
+                        </xs:sequence>  	       
+                        <xs:attribute name="id" type="xs:string" use="required"/>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="_name" type="xs:string"/>
+                      </xs:complexType>  	      
+                    </xs:element>
+                                          
+                </xs:sequence>  	                    
+              </xs:complexType>
+  	        </xs:element>
+  	        
+  	      </xs:sequence>
+  	      <xs:attribute name="name" type="xs:string"/>
+  	    </xs:complexType>
+  	  </xs:element>
+  	  
+  	  <!-- Configuration|Resources element -->
+  	  <xs:element name="resources" minOccurs="0"/>    	    	
+    	
+  	</xs:sequence>
+  </xs:complexType>
+</xs:element>
+  
+</xs:schema>

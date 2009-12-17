@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema xmlns:mmenu="http://nokia.com/mmenu" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://nokia.com/mmenu" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="content">
+    <xs:annotation>
+      <xs:documentation>This Tag is the root element of configuration and defines namespaces for XML needs</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="localization" type="mmenu:localizationType">
+          <xs:annotation>
+            <xs:documentation>Localization tag should be used in order to map resource sources to namespaces. It enables use of resources in context of namespaces. Namespace are not only limited to single xml file – they have global scope, and once defined, are available in all definition files.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element minOccurs="0" name="suite" type="mmenu:suiteType">
+          <xs:annotation>
+            <xs:documentation>This tag defines single suite</xs:documentation>
+          </xs:annotation>
+          <xs:unique name="uniqueEventNameSuite">
+            <xs:selector xpath="mmenu:event" />
+            <xs:field xpath="@event" />
+          </xs:unique>
+        </xs:element>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="item">
+          <xs:annotation>
+            <xs:documentation>This tag defines suite’s single or multiple items. It contains information about graphical representation, menu structure, actions, and queries. </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:complexContent mixed="false">
+              <xs:extension base="mmenu:itemType" />
+            </xs:complexContent>
+          </xs:complexType>
+          <xs:unique name="uniqueEventNameItem">
+            <xs:selector xpath="mmenu:event" />
+            <xs:field xpath="@event" />
+          </xs:unique>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="genre" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>This defines the suite name, for which the contents of the tag should relate to. It should be specified, for xml files containing items for a suite. Xml configuration files for suites do not require this, since they define the suite.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="menuItemType">
+    <xs:sequence>
+      <xs:annotation>
+        <xs:documentation>Menu item may contain nested menu items.</xs:documentation>
+      </xs:annotation>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="menuitem" type="mmenu:menuItemType">
+        <xs:annotation>
+          <xs:documentation>A nested menu item.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Localized name of the menu item, which will be displayed in the menu.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="position" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>Position in the menu (used to control the order in which the items are displayed). Predefined menu items have their position defined at 100, 200 etc, so it is easy to position custom menu items between the predefined ones.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="event" type="mmenu:eventTypeType">
+      <xs:annotation>
+        <xs:documentation>Event related with the item. Mapped to specific action in mmenu:event section. Parameter should start with custom:” string followed with event name to indicate creation of a new event related to menu item and not to a predefined event. For list of predefined event see event Tag description (3.7)
+</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attributeGroup ref="mmenu:conditionGroup" />
+  </xs:complexType>
+  <xs:complexType name="keySeqType">
+    <xs:annotation>
+      <xs:documentation>Defines a key structure. A key, may contain nested keys. Keys are store information.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="key">
+        <xs:complexType>
+          <xs:complexContent mixed="false">
+            <xs:extension base="mmenu:keySeqType" />
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" use="optional">
+      <xs:annotation>
+        <xs:documentation>name of the parameter</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:minLength value="1" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="type" use="optional">
+      <xs:annotation>
+        <xs:documentation>type of the parameter Values: 
+- string 
+- string16
+- formatted_string
+- integer
+- uid
+- boolean</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="string" />
+          <xs:enumeration value="string8" />
+          <xs:enumeration value="string16" />
+          <xs:enumeration value="integer64" />
+          <xs:enumeration value="integer" />
+          <xs:enumeration value="uid" />
+          <xs:enumeration value="boolean" />
+          <xs:enumeration value="list" />
+          <xs:enumeration value="map" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="value" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>value of the parameter</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:simpleType name="logicalTemplateType">
+    <xs:annotation>
+      <xs:documentation>Describes the logicla template to be used for widget's presentation. Logical templates are specific for widgets, so configuration should be consulted with documentation. If suite allows multiple widget types, multiple tempaltes may be specified using the "|" character.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(list_single_hc_apps_pane|single_large_graphic_pane|(logical_template_([0-9])*([0-9a-z]))+[|]{0,1})+|empty" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="widgetTypeType">
+    <xs:annotation>
+      <xs:documentation>Desribes the type of a widget. If a suite allows multiple widgets, the values should be separated by "|" character.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="((grid|list|coverflow)[|]{0,1})+" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="serviceType">
+    <xs:annotation>
+      <xs:documentation>Type defines the structure to access liw services.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element xmlns:q1="http://nokia.com/mmenu" minOccurs="0" name="constructor" type="q1:keySeqType">
+        <xs:annotation>
+          <xs:documentation>Element defines the parameters needed to fetch the service interface. In this section service specific parameters may be defined. The section should contain a series of mmenu:key elements</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="command">
+        <xs:annotation>
+          <xs:documentation>Defines command name (to be invoked on the interface) and invocation method (synchronous or asynchronous)</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element xmlns:q2="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="key" type="q2:keySeqType">
+              <xs:annotation>
+                <xs:documentation>This tak contains xml structured data (mmenu:key) as it will be passed to the service</xs:documentation>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="name">
+            <xs:annotation>
+              <xs:documentation>name of the command to invoke on the interface</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:minLength value="1" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="mode" use="optional">
+            <xs:annotation>
+              <xs:documentation>mode definition. Either “sync” for synchronous invocation or “async” 
+asynchronous invocation
+</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="sync" />
+                <xs:enumeration value="async" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="service">
+      <xs:annotation>
+        <xs:documentation>name of the service producing output: e.g. “Service.TestMatrixDataService”.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:minLength value="1" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="interface" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>interface used for the query: e.g. “ITestMatrixDataSource”.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="eventType">
+    <xs:annotation>
+      <xs:documentation>Type defines the configuration of a specific event handling.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="action">
+        <xs:complexType>
+          <xs:complexContent mixed="false">
+            <xs:extension base="mmenu:serviceType">
+              <xs:attributeGroup ref="mmenu:conditionGroup" />
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="event" use="required">
+      <xs:simpleType>
+        <xs:restriction base="mmenu:eventTypeType" />
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="imageType">
+    <xs:annotation>
+      <xs:documentation>Type defines the configuration of an image.</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="application_uid" type="xs:string" use="optional" />
+        <xs:attribute name="file" type="xs:string" use="optional" />
+        <xs:attribute name="effect">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="backdrop" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attributeGroup ref="mmenu:imageBitmapBufferType" />
+        <xs:attributeGroup ref="mmenu:imageResourceAttributeGroup" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="eventTypeType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(custom:[_a-zA-Z0-9]+)|(key:select)|(key:select2)|(key:select3)|(key:call)|(item:focus)|(item:unfocus)|(suite:load)|(suite:unload)|(key:clear)|(key:move_into)|(key:move)" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="textType">
+    <xs:annotation>
+      <xs:documentation>Type defines the configuration of text value.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="param">
+        <xs:complexType>
+          <xs:attribute name="value" type="xs:string" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attributeGroup ref="mmenu:textResourceAttributeGroup" />
+    <xs:attribute name="value" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="toolbarType">
+    <xs:annotation>
+      <xs:documentation>This type defines the configuration of a toolbar.
+</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="3" name="button">
+        <xs:complexType>
+          <xs:complexContent mixed="false">
+            <xs:extension base="mmenu:buttonType" />
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="buttonType">
+    <xs:annotation>
+      <xs:documentation>This type defines the configuration of a button in a toolbar.
+</xs:documentation>
+    </xs:annotation>
+    <xs:all>
+      <xs:element minOccurs="0" maxOccurs="1" name="text">
+        <xs:complexType>
+          <xs:complexContent mixed="false">
+            <xs:extension base="mmenu:textType" />
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="image" type="mmenu:imageType" />
+    </xs:all>
+    <xs:attribute name="index" type="xs:integer" use="required" />
+    <xs:attribute name="condition" type="xs:string" use="optional" />
+    <xs:attribute name="dimm" type="xs:string" use="optional" />
+    <xs:attribute name="event" type="mmenu:eventTypeType">
+      <xs:annotation>
+        <xs:documentation>Event related with the item. Mapped to specific action in mmenu:event section. Parameter should start with custom:” string followed with event name to indicate creation of a new event related to menu item and not to a predefined event. For list of predefined event see event Tag description (3.7)
+</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="itemType">
+    <xs:annotation>
+      <xs:documentation>This type defines the configuration of an item.
+</xs:documentation>
+    </xs:annotation>
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element xmlns:q1="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="menuitem" type="q1:menuItemType">
+        <xs:annotation>
+          <xs:documentation>The tag is used to describe user menu appearance when item is focused, and which events will occur when menu item is selected. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element xmlns:q1="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="menuitem_specific" type="q1:menuItemType">
+        <xs:annotation>
+          <xs:documentation>This tag is the same as menuitem but describes menu items displayed only which have specific relation to the item</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="toolbar" type="mmenu:toolbarType">
+        <xs:annotation>
+          <xs:documentation>This element describes the layout of toolbar, for the highlighted item.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="query">
+        <xs:annotation>
+          <xs:documentation>Defines parameters used to construct queries to services and display dynamically modifiable data.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent mixed="false">
+            <xs:extension xmlns:q2="http://nokia.com/mmenu" base="q2:serviceType">
+              <xs:attribute name="namespace" type="xs:string" />
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element xmlns:q3="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="notify_request" type="q3:serviceType">
+        <xs:annotation>
+          <xs:documentation>Registers for notifications in a liw service.
+</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="output">
+        <xs:annotation>
+          <xs:documentation>Configures layout of graphical items.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType mixed="true">
+          <xs:choice>
+            <xs:element minOccurs="0" name="image" type="mmenu:imageType" />
+            <xs:element minOccurs="0" name="text" type="mmenu:textType" />
+          </xs:choice>
+          <xs:attribute name="alias" use="required">
+            <xs:annotation>
+              <xs:documentation>Defines UI graphical element to which content will be linked to. Some UI  elements:
+- mul_name is the main item shown in graphical list item,
+- mul_detail represents secondary line,
+- mul_icon is the icon for the list item.
+
+The complete definition of all aliases can be obtained from [3]. Aliases are dependant of the presentation type, thus one should be well acquainted with [3] to achieve expected result.
+</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="mul_title" />
+                <xs:enumeration value="mul_detail" />
+                <xs:enumeration value="mul_icon" />
+                <xs:enumeration value="mul_icon_2" />
+                <xs:enumeration value="mul_icon_3" />
+                <xs:enumeration value="mul_indicator_1" />
+                <xs:enumeration value="mul_indicator_2" />
+                <xs:enumeration value="mul_move_indicator_arrow_top" />
+                <xs:enumeration value="mul_move_indicator_arrow_bottom" />
+                <xs:enumeration value="mul_move_indicator_arrow_left" />
+                <xs:enumeration value="mul_move_indicator_arrow_right" />
+                <xs:enumeration value="mul_move_indicator_frame" />
+                <xs:enumeration value="mul_icon_backdrop" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="type" use="optional">
+            <xs:annotation>
+              <xs:documentation>Content type. Values: 
+- string 
+- string16
+- formatted_string
+- integer
+- uid
+- boolean
+
+Use “string” type for icons and constant texts and “formatted_string” type for texts with parameters
+
+</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="string" />
+                <xs:enumeration value="string8" />
+                <xs:enumeration value="string16" />
+                <xs:enumeration value="formatted_string" />
+                <xs:enumeration value="integer" />
+                <xs:enumeration value="uid" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="value" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Hard coded value for the parameter or a reference.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attributeGroup ref="mmenu:conditionGroup" />
+        </xs:complexType>
+      </xs:element>
+      <xs:element xmlns:q4="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="event" type="q4:eventType">
+        <xs:annotation>
+          <xs:documentation>Used to specify event handling, for predefined and custom events.
+</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="edit_mode" type="mmenu:itemType" />
+      <xs:element minOccurs="0" maxOccurs="1" name="msk" type="mmenu:mskType" />
+    </xs:choice>
+    <xs:attribute xmlns:q5="http://nokia.com/mmenu" name="template" type="q5:logicalTemplateType" use="optional">
+      <xs:annotation>
+        <xs:documentation>Logical template which will be used to represent data. The attribute is optional. When not specified a default value from suite definition is used. For more details see 2.3</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="count" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Number of items current section refers to. If all the available elements are to be retrieved a “*” sing should be used to indicate quantity</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="type" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Type of an item (MCS).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="id" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Unique id of the item in the scope of the suite.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="remove_locked" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Information if item can be to move to other position</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="running" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Information if item is currently running</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="custom_id" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Item's custom id, can be set using a value from liw variant or simple number.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="uid" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Item's uid, can be set using a value from liw variant or simple uid.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attributeGroup ref="mmenu:conditionGroup" />
+    <xs:attribute name="drm_protection" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="suiteType">
+    <xs:annotation>
+      <xs:documentation>This type defines the configuration of a suite
+</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="query">
+        <xs:annotation>
+          <xs:documentation>Defines parameters used to construct queries to services and display dynamically modifiable data.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent mixed="false">
+            <xs:extension base="mmenu:serviceType">
+              <xs:attribute name="namespace" type="xs:string" />
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="event" type="mmenu:eventType">
+        <xs:annotation>
+          <xs:documentation>Used to specify event handling, for predefined and custom events.
+</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="genre" use="required">
+      <xs:annotation>
+        <xs:documentation>Unique string identification of a suite</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string" />
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="type" use="required">
+      <xs:annotation>
+        <xs:documentation>Ttype of presentation. Available types are:
+- grid
+- list
+- coverflow
+
+If a suite allows multiple types, they should be separated with "|" character.
+</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="mmenu:widgetTypeType" />
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute xmlns:q2="http://nokia.com/mmenu" name="template" type="q2:logicalTemplateType" use="required">
+      <xs:annotation>
+        <xs:documentation>Logical template to specify the layout of a specific presentation type. 
+This parameter is strictly dependant on the values defined in [3]. One should be aware that although values of logical template may seem similar for different presentation types, they are different in their specification and count. Usually they are in form logical_template_x, where x is a number. For more details please consult [3].
+</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="title" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>Suite title, should contain localized value
+</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="emptytext" type="xs:string" />
+    <xs:attribute name="custom_id" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>Suite's custom id, can be set using a value from liw variant or simple number.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="localizationType">
+    <xs:attribute name="namespace" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>identifier used to access the resource</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="source" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>binary file with resources. File extension should be:
+- RSC file for logical names, 
+- MBM for images and
+- MIF for icons. </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="mskType">
+    <xs:all>
+      <xs:element minOccurs="0" maxOccurs="1" name="text" type="mmenu:textType" />
+    </xs:all>
+    <xs:attribute name="event" use="optional">
+      <xs:simpleType>
+        <xs:restriction xmlns:q1="http://nokia.com/mmenu" base="q1:eventTypeType" />
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:attributeGroup name="imageBitmapBufferType">
+    <xs:annotation>
+      <xs:documentation>Group of attributes, used to configure image from resource from liw bitmap buffer.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="mask" type="xs:string" use="optional" />
+    <xs:attribute name="bitmap" type="xs:string" use="optional" />
+  </xs:attributeGroup>
+  <xs:attributeGroup name="textResourceAttributeGroup">
+    <xs:annotation>
+      <xs:documentation>Group of attributes, used to configure text from resource.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="resource" type="xs:string" />
+    <xs:attribute name="id" type="xs:string" />
+  </xs:attributeGroup>
+  <xs:attributeGroup name="imageResourceAttributeGroup">
+    <xs:annotation>
+      <xs:documentation>Group of attributes, used to configure image from resource and/or skin.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="skinid_minor" type="xs:string" use="optional" />
+    <xs:attribute name="skinid_major" type="xs:string" use="optional" />
+    <xs:attribute name="mif_file" type="xs:string" use="optional" />
+    <xs:attribute name="bitmap_id" type="xs:string" use="optional" />
+    <xs:attribute name="mask_id" type="xs:string" use="optional" />
+  </xs:attributeGroup>
+  <xs:attributeGroup name="conditionGroup">
+    <xs:attribute name="condition" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>If condition is fulfilled the menu is added to the item. May contain query reference which will be checked against specified condition. More about condition definition in mmenu:action section.
+</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:attributeGroup>
+</xs:schema>

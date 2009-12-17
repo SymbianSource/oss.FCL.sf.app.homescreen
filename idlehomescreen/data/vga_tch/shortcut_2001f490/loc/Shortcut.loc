@@ -1,0 +1,29 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for Shortcut1 widget (Xuikon)
+*
+*/
+
+
+// d: Shortcuts
+// l: ai_gene_pane_1_t1
+// w: 
+// r: TB9.1
+#define qtn_hs_sc2_widget  "Shortcuts 2"
+
+// d: Open
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.1
+#define qtn_msk_open "Open"

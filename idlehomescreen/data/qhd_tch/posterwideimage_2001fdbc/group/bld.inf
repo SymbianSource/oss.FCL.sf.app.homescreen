@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+* The information required for building
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/hsps/widgetconfiguration.xml
+../xuikon/00/posterwideimage.dat /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/posterwideimage_2001fdbc.dat
+../xuikon/00/posterwideimage.css /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/posterwideimage.css
+../xuikon/00/posterwideimage.xml /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/posterwideimage.xml
+
+
+// Support for S60 builds
+//***********************
+../rom/posterwideimage_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc_variant.iby)
+../rom/posterwideimage.iby CORE_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc.iby)
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME posterwideimage_2001fdbc
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  
+
+
+
+

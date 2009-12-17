@@ -1,0 +1,25 @@
+widget#posterwideimage_template
+{
+    padding-top: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    nav-index:appearance;
+    background-color: none;
+}
+
+image#wide_image
+{
+    display: none;
+}
+
+text#wide_text
+{
+    padding-left: 5px;
+    text-align: center;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 23px;
+    color: "SKIN(268458534 13056 74)";
+}
+
+

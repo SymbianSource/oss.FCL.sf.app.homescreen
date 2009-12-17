@@ -1,0 +1,95 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project ui extension plugin
+*
+*/
+
+
+// To get the APP_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+TARGET        mmfolderuiextensionplugin.dll
+TARGETTYPE    PLUGIN
+UID 0x10009D8D 0x2001CB78
+
+CAPABILITY    CAP_ECOM_PLUGIN
+LANG	      SC
+
+SOURCEPATH    ../src
+SOURCE	      mmproxy.cpp
+SOURCE	      mmfolderuiextplugin.cpp
+SOURCE	      mmfoldercommand.cpp
+SOURCE        mmfoldercommandadd.cpp
+SOURCE        mmfoldercommanddelete.cpp
+SOURCE        mmfoldercommandrename.cpp
+SOURCE        mmmovetofoldercommand.cpp
+SOURCE        mmpluginsharedresources.cpp
+
+USERINCLUDE   ../inc
+USERINCLUDE   ../loc
+USERINCLUDE   ../../../../inc
+USERINCLUDE   ../../mmextensionmanager/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH    ../data
+START RESOURCE mmfolderuiextensionplugin.rss
+HEADER
+TARGET        mmfolderuiextensionplugin.rsc
+TARGETPATH    ECOM_RESOURCE_DIR
+END
+
+SOURCEPATH		../data
+START RESOURCE mmfolderuiextplugin.rss
+HEADER
+TARGET         mmfolderuiextplugin.rsc
+TARGETPATH     APP_RESOURCE_DIR 
+LANGUAGE_IDS
+END //RESOURCE
+
+
+LIBRARY       euser.lib
+LIBRARY       ecom.lib 
+LIBRARY       liwservicehandler.lib     // CLiwGenericParamList
+LIBRARY       avkon.lib                 // CAknListQueryDialog
+LIBRARY       bafl.lib                  // CDesCArrayFlat
+LIBRARY       eikdlg.lib                // CEikDialog
+LIBRARY       commonengine.lib          // StringLoader
+LIBRARY       hnmetadatamodel.lib
+LIBRARY       hnutilities.lib
+LIBRARY       eikcoctl.lib
+LIBRARY       aknicon.lib
+LIBRARY       egul.lib
+LIBRARY       cone.lib
+LIBRARY       favouritesengine.lib
+LIBRARY       commondialogs.lib 
+LIBRARY       swinstcli.lib
+LIBRARY       sisregistryclient.lib
+LIBRARY       apgrfx.lib
+LIBRARY       ws32.lib
+LIBRARY       apparc.lib
+LIBRARY       widgetregistryclient.lib
+LIBRARY       featmgr.lib
+LIBRARY       mcsmenu.lib
+LIBRARY       estor.lib 
+
+#ifdef _MATRIX_MENU_TRACE_PERFORMANCE
+LIBRARY         flogger.lib
+#else
+DEBUGLIBRARY    flogger.lib
+#endif
+
+// End of file
+

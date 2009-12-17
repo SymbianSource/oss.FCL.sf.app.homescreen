@@ -1,0 +1,18 @@
+<project name="menufw" default="validate" basedir=".">
+    <description>
+        this script validates MenuFw suites definitiona against XML Scheme 
+    </description>
+    
+  <echo>VALIDATION SCRIPT: This script validates files in ${xmllocation} againsts XML shema</echo>
+
+  <target name="validate" >
+    <xmlvalidate  failonerror="true">
+        <attribute name="http://xml.org/sax/features/validation" value="true"/>
+        <attribute name="http://apache.org/xml/features/validation/schema" value="true"/>
+        <attribute name="http://xml.org/sax/features/namespaces" value="true"/>
+        
+        <fileset dir="${xmllocation}" includes="**/*.xml" excludes="*.xml"/>
+    </xmlvalidate >
+  </target>
+
+</project>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dhuiml version="1.0" xmlns="http://www.series60.com/xml/dhuiml/1">
+<orientation id ="portrait" width="360">
+	<element id="base"> 
+			<layout id="mainlayout" positionx="0" positiony="0" width="360" height="515" />
+            <layout id="grid" positionx="0" positiony="0" width="360" height="515" />			
+			<layout id="gridlayout" positionx="0" positiony="0" width="340" scrollwidth="20" height="515" row="6" col="4" />						
+	    <layout id="bgimage" state="1" />	
+	</element>
+	
+  	<element id="nohighlight">
+  	    <layout id="anchor" name="anchor" height="85" width="85" >	
+  	    
+			<imagevisual id="mul_icon" positionx="3" positiony="3" width="79" height="79" fitmode="on">
+				<attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+				<attributesetter name="opacity" targetvalue="1" />
+			</imagevisual>
+			
+			<imagevisual id="mul_indicator_1" positionx="55" positiony="3" width="27" height="27">
+				<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+				<attributesetter name="opacity" targetvalue="1" />
+			</imagevisual>
+			
+			<imagevisual id="mul_indicator_2" positionx="55" positiony="55" width="27" height="27">
+				<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+				<attributesetter name="opacity" targetvalue="1" />
+			</imagevisual>
+			
+		</layout>
+	 </element>		  
+		
+	<element id ="highlight">	    
+	 </element>		  
+	 	
+</orientation>
+ 
+<orientation id ="landscape" width="502">
+	
+	<element id="base"> 
+			<layout id="mainlayout" positionx="0" positiony="0" width="502" height="288" />
+            <layout id="grid" positionx="0" positiony="0" width="502" height="288" />						
+			<layout id="gridlayout" positionx="0" positiony="0" width="482" scrollwidth="20" height="288" row="3" col="5" />						
+	    <layout id="bgimage" state="1" />	
+	</element>
+	
+    <element id="nohighlight">
+        <layout id="anchor" name="anchor" height="96" width="96" >
+        
+			<imagevisual id="mul_icon" positionx="3" positiony="3" width="90" height="90" fitmode="on">
+				<attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+				<attributesetter name="opacity" targetvalue="1" />
+			</imagevisual>
+			
+			<imagevisual id="mul_indicator_1" positionx="66" positiony="3" width="27" height="27">
+				<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+				<attributesetter name="opacity" targetvalue="1" />
+			</imagevisual>
+			
+			<imagevisual id="mul_indicator_2" positionx="66" positiony="66" width="27" height="27">
+				<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+				<attributesetter name="opacity" targetvalue="1" />
+			</imagevisual>
+			
+		</layout>
+    </element>		  
+
+	<element id ="highlight">		
+	</element>		  
+ 	
+</orientation>
+</dhuiml>

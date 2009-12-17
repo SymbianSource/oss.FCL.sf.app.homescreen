@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2002-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include        <platform/mw/aisystemuids.hrh>
+
+TARGET          xn3newstickerfactory.dll
+TARGETTYPE      PLUGIN
+UID             0x10009d8d AI3_UID_RENDERING_PLUGIN_NEWSTICKERFACTORY
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src 
+SOURCE          xnnewstickerfactory.cpp
+SOURCE          xnnewsticker.cpp
+SOURCE          xnnewstickeradapter.cpp
+SOURCE          xnnewstickercontrol.cpp
+SOURCE          xnnewstickersvgcontrol.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib  
+LIBRARY         cone.lib
+LIBRARY         gdi.lib
+LIBRARY         egul.lib
+LIBRARY         charconv.lib
+LIBRARY         aknskins.lib
+LIBRARY         xn3layoutengine.lib
+LIBRARY         xn3utils.lib
+LIBRARY         xn3domdocument.lib
+LIBRARY         avkon.lib
+LIBRARY         fbscli.lib
+LIBRARY         bitgdi.lib
+LIBRARY         aknicon.lib
+LIBRARY         svgengine.lib
+
+LANG            SC
+START RESOURCE  xn3newstickerfactory.rss
+#ifdef SYMBIAN_SECURE_ECOM
+TARGET xn3newstickerfactory.rsc
+#endif
+END

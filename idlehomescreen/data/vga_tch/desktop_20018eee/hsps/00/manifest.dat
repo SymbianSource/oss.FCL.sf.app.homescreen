@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package version="1.0">
+
+    <family>vga_tch</family>
+    
+    <type>widget</type>
+
+    <!-- interface uid -->
+    <interfaceuid>0x2001f48a</interfaceuid>
+
+    <!-- vendor uid  -->
+    <provideruid>0x101fb657</provideruid>
+
+    <!-- uid -->
+    <configurationuid>0x20018eee</configurationuid>
+
+    <!-- description -->
+    <fullname>Desktop</fullname>
+    <shortname>desktop</shortname>
+    <version>1.0</version>
+
+    <!-- configuration -->
+    <filexml>widgetconfiguration.xml</filexml>
+        
+    <!-- Locale independent/common resources -->
+    
+    
+    <!-- Locale specific resources -->
+    <localization>
+        <fileresource>desktop.o0000</fileresource>
+    </localization>
+
+</package>

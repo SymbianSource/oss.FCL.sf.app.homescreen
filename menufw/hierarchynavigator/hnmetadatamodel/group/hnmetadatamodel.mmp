@@ -1,0 +1,120 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project hierarchy navigator meta data model
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+TARGET          hnmetadatamodel.dll
+TARGETTYPE      dll
+
+UID             0x1000008d 0x2000F8C7
+
+CAPABILITY      CAP_GENERAL_DLL
+
+
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+
+SOURCE          hnmdaction.cpp
+SOURCE          hnmditem.cpp
+SOURCE          hnmdevent.cpp
+SOURCE          hnmdeventmapping.cpp
+SOURCE          hnmdeventmappingelement.cpp
+SOURCE          hnmdquery.cpp
+SOURCE          hnmdsuite.cpp
+SOURCE          hnmdvaluebase.cpp
+SOURCE          hnmdvalueimage.cpp
+SOURCE          hnmdvaluetext.cpp
+SOURCE          hnmduimapping.cpp
+SOURCE          hnmduimappingelement.cpp
+SOURCE          hnmdmenuitem.cpp
+SOURCE          hnmdmodel.cpp
+SOURCE          hnutils.cpp
+SOURCE          hnmdlocalizationelement.cpp
+SOURCE          hnmdlocalization.cpp
+SOURCE          hnmdqueries.cpp
+SOURCE          hnstringhandler.cpp
+SOURCE          hnfilter.cpp
+SOURCE          hnitemid.cpp
+SOURCE          hnxmlmodelprovider.cpp
+SOURCE          hnmdnotifyrequest.cpp
+SOURCE          hnmdnotifyrequests.cpp 
+SOURCE          hnmdbutton.cpp 
+SOURCE          hnmdtoolbar.cpp
+SOURCE	        hnrepositoryobserver.cpp
+SOURCE          hnmdservicecommand.cpp
+SOURCE 	        hnmdservice.cpp
+SOURCE          hnsimplecondition.cpp
+SOURCE          hncomplexcondition.cpp
+SOURCE          hnconditionfactory.cpp 
+SOURCE          hnsimpleconditionequal.cpp 
+SOURCE          hnsimpleconditiondifferent.cpp 
+SOURCE          hnsimpleconditionsmaller.cpp 
+SOURCE          hnqueryresultcollector.cpp
+SOURCE          hnsimpleconditiongreater.cpp
+SOURCE          hnsimpleconditionhas.cpp
+SOURCE          hnsimpleconditionhasnot.cpp
+SOURCE          hnxmlmodelcache.cpp 
+SOURCE          hnxmlsuitefilesreg.cpp
+SOURCE          hnbitmapidcache.cpp
+
+USERINCLUDE     ../inc
+//USERINCLUDE     ../../../inc
+
+SYSTEMINCLUDE   ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         estor.lib 
+LIBRARY         euser.lib
+LIBRARY         XmlEngineDOM.lib
+LIBRARY         bafl.lib
+LIBRARY         efsrv.lib
+LIBRARY         cone.lib //for CCoeEnv
+LIBRARY         CommonEngine.lib //for String Loader
+LIBRARY         mmextensionmanager.lib
+LIBRARY         liwservicehandler.lib //LIW Framework
+LIBRARY         hnpresentationmodel.lib
+LIBRARY         aknicon.lib
+LIBRARY         XCFW.lib
+LIBRARY         libpthread.lib
+LIBRARY	        aknskins.lib
+LIBRARY	        aknskinsrv.lib
+LIBRARY	        aknswallpaperutils.lib
+LIBRARY         CentralRepository.lib
+LIBRARY	        hnutilities.lib
+LIBRARY         mediaclientimage.lib
+LIBRARY         fbscli.lib
+LIBRARY         egul.lib 
+LIBRARY         cenrepnotifhandler.lib 
+LIBRARY         bitgdi.lib 
+LIBRARY         ws32.lib 
+LIBRARY         gdi.lib
+LIBRARY         sysutil.lib
+    
+#ifdef _MATRIX_MENU_TRACE_PERFORMANCE
+LIBRARY         flogger.lib
+#else
+DEBUGLIBRARY    flogger.lib
+#endif
+
+
+
+// End of file
+

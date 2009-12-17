@@ -1,0 +1,71 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+* The information required for building
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/templateview_20026f50/hsps/manifest.dat
+../hsps/00/templateviewconfiguration.xml /epoc32/data/Z/resource/homescreen/templateview_20026f50/hsps/templateviewconfiguration.xml
+
+../xuikon/00/templateview.dat /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/templateview_20026f50.dat
+../xuikon/00/templateview.css /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/templateview.css
+../xuikon/00/templateview.xml /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/templateview.xml
+../xuikon/00/view.dtd /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/view.dtd
+
+// Arabic languages
+//*****************
+../xuikon/37/templateview.css /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/37/templateview.css
+../xuikon/50/templateview.css /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/50/templateview.css
+../xuikon/57/templateview.css /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/57/templateview.css
+../xuikon/94/templateview.css /epoc32/data/Z/resource/homescreen/templateview_20026f50/xuikon/94/templateview.css
+
+
+// Support for S60 localization
+//*****************************
+#ifndef __TEMPLATEVIEW_LOC__
+#define __TEMPLATEVIEW_LOC__
+../loc/templateview.loc APP_LAYER_LOC_EXPORT_PATH(templateview.loc)
+#endif // __TEMPLATEVIEW_LOC__
+
+// Support for S60 builds
+//***********************
+../rom/templateview_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(templateview_20026f50_resources.iby)
+../rom/templateview_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(templateview_20026f50_customer.iby)
+../rom/templateview_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(templateview_20026f50_variant.iby)
+../rom/templateview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(templateview_20026f50.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME templateview_20026f50
+OPTION DTD_TYPE widget
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  

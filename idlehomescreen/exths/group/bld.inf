@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file provides the information required for building the
+*                whole AI application.
+*
+*/
+
+#ifdef RD_CUSTOMIZABLE_AI
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../rom/aicontainer.iby CORE_APP_LAYER_IBY_EXPORT_PATH(aicontainer.iby)
+
+// Backup registration
+//backup_registration.xml  /epoc32/data/z/private/101fd657/backup_registration.xml
+//backup_registration.xml  /epoc32/release/winscw/udeb/z/private/101fd657/backup_registration.xml
+//backup_registration.xml  /epoc32/release/winscw/urel/z/private/101fd657/backup_registration.xml
+
+// Generic configuration interface for component cenrep settings
+../conf/activeidle.confml                  APP_LAYER_CONFML(activeidle.confml)
+../conf/activeidle_10207467.crml           APP_LAYER_CRML(activeidle_10207467.crml)
+
+PRJ_MMPFILES
+../group/aicontainer.mmp
+
+PRJ_TESTMMPFILES
+
+
+#endif // RD_CUSTOMIZABLE_AI

@@ -1,0 +1,68 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project hierarchy navigator engine
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+TARGET          hnengine.dll
+TARGETTYPE      dll
+
+UID             0x1000008d 0x2000F8C5
+
+CAPABILITY      CAP_GENERAL_DLL
+
+
+
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          hnengine.cpp
+SOURCE          hninstallnotifier.cpp
+
+USERINCLUDE     ../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../inc
+
+LIBRARY         euser.lib
+LIBRARY         bafl.lib
+LIBRARY         efsrv.lib
+LIBRARY         hnmetadatamodel.lib
+LIBRARY         hnpresentationmodel.lib
+LIBRARY         liwservicehandler.lib
+LIBRARY         xmlenginedom.lib
+LIBRARY         inetprotutil.lib        // for parsing message URI
+LIBRARY         hnutilities.lib
+LIBRARY         centralrepository.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         HWRMLightClient.lib
+LIBRARY         avkon.lib
+
+LIBRARY         eikcore.lib             // for error info notes
+LIBRARY         cone.lib                // for error info notes
+LIBRARY         apgrfx.lib
+#ifdef _MATRIX_MENU_TRACE_PERFORMANCE
+LIBRARY         flogger.lib
+#else
+DEBUGLIBRARY    flogger.lib
+#endif
+
+
+
+// End of file
+

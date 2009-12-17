@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition for XnResult
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET          xn3resource.dll
+TARGETTYPE      dll
+
+VENDORID        VID_DEFAULT
+
+CAPABILITY      CAP_GENERAL_DLL
+
+SOURCEPATH    ../src 
+SOURCE          xnresource.cpp
+
+USERINCLUDE     . 
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         efsrv.lib
+LIBRARY         estor.lib
+LIBRARY         apmime.lib // MIME-library
+LIBRARY         bafl.lib
+LIBRARY         charconv.lib
+LANG    SC

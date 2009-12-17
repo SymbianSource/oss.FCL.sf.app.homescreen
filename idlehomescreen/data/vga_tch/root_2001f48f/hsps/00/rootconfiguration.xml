@@ -1,0 +1,16 @@
+<configuration>
+
+	<!-- name = localized name e.g. "classic theme" -->
+	<control>
+		<plugins>
+			<!-- portrait view -->
+			<plugin uid="0x2001fdb9"/>
+			<plugin uid="0x2001fdb9"/>
+			<plugin uid="0x2001fdb9"/>	
+			<plugin uid="0x2001fdb9"/>
+      <plugin uid="0x2001fdb9"/>  		
+		</plugins>
+		<settings/>
+	</control>
+
+</configuration>

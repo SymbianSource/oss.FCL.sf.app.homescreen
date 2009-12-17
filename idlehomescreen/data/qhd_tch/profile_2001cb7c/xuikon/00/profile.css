@@ -1,0 +1,157 @@
+widget#profilewidget
+{
+    padding-top: 3px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    background-color: none;
+}
+
+box#clock_profile_container
+{
+    direction: ltr;
+    block-progression: lr;
+}
+
+clock
+{
+    width: 152px;
+    margin-right: 3px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    _s60-format: locale;
+    _s60-ampm-font-size: 16px;
+    _s60-digital-font-size: 56px;
+    color: "SKIN(268458534 13056 74)";
+    background-color: "SKIN(268458534 9886)";
+    nav-index: appearance;
+}
+
+box.clock_profile
+{
+    background-color: "SKIN(268458534 9886)";
+        
+    nav-index: appearance;
+}
+
+box#date_profiles_container
+{
+    width: auto;
+    block-progression: tb;
+}
+
+box#date_container
+{
+    width: auto;
+    height: 26px;
+    block-progression: lr;
+    margin-bottom: 3px;
+    padding-bottom: 2px;
+}
+
+box#date_content
+{
+    width: adaptive;
+    height: adaptive;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+text#date_text
+{
+    text-align: center;
+    margin-left: 2px;
+    margin-right: 2px;
+    width: adaptive;
+    height: adaptive;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 3.5u;
+    _s60-text-valign: top;
+    color:"SKIN(268458534 13056 74)";
+}
+
+box#profile_softindicator
+{
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    direction: ltr;
+}
+
+image#SatIdleModeIcon
+{
+    display: block;
+    width: 18px;
+    height: 20px;
+    position: static;
+    margin-top: auto;
+}
+
+/* Default system profiles */
+text.systemprofileitem
+{
+    display: block;
+}
+
+/* Placeholders for profiles added by user */
+text.userprofileitem
+{
+    display: none;
+}
+
+/******************
+    SOFT INDICATOR WIDGET AREA 
+*******************/
+newsticker.SIText
+{
+    text-align: center;
+    display: block;
+    visibility: visible;
+    width: auto;
+    margin-left: 2px;
+    margin-right: 2px;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 23px;
+    color: "SKIN(268458534 13056 74)";
+    
+    white-space-collapse: collapse;
+    
+    _s60-scroll-behaviour: scroll-alternate;
+    
+    _s60-display-time: 2000;
+    _s60-scroll-loop: false;
+    _s60-start-delay: 0;
+    _s60-restart-after-update: true;
+}
+
+box#NT_CUGMCN
+{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: adaptive;
+    height: auto;
+    block-progression: rl;
+}
+
+box#NT_SATVHZ
+{
+    display: none;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: adaptive;
+    height: auto;
+    block-progression: rl;
+}
+
+title#title_vhz
+{
+    display: none;
+}
+
+title#title_sat
+{
+    display: none;
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<package version="1.0">
+
+    <family>qhd_tch</family>
+    <type>widget</type>
+
+    <!-- interface uid -->
+    <interfaceuid>0x2001f48a</interfaceuid>
+
+    <!-- vendor uid  -->
+    <provideruid>0x101fb657</provideruid>
+    <!-- uid -->
+
+    <configurationuid>0x2001cb7c</configurationuid>
+
+    <!-- description -->
+    <fullname>&amp;qtn_hs_profile_edit;</fullname>
+    <shortname>profile</shortname>
+    <version>1.0</version>
+
+    <!-- configuration -->
+    <filexml>widgetconfiguration.xml</filexml>
+
+    <description>RnD description profile plugin</description>
+    <filelogo>skin(270501603 8433):mif(icon.mif 16384 16385)</filelogo>
+    <!-- Locale specific resources -->
+    <localization>
+    <fileresource tag="xuikon">profile.o0000</fileresource>
+    </localization>
+
+</package>

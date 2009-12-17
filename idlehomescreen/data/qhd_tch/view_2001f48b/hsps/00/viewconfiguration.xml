@@ -1,0 +1,22 @@
+<configuration>
+  <control>
+    <settings>
+      <item id="hs_qhd_tch_view">
+        <property name="use_empty_widget" value="true"/>
+      </item>
+      <item id="wallpaper">
+        <property name="path" value=""/>
+      </item>
+    </settings>  
+  	<plugins>
+      <plugin uid="0x2001cb7c"/>
+      <plugin uid="0x20026f4f"/>
+      <plugin uid="0x10207c18"/>
+      <plugin uid="0x2001f481"/>
+      <plugin uid="0x2001f47f"/>
+      <plugin uid="0x2001f47f"/>
+  	</plugins>
+    <settings/>
+  </control>
+
+</configuration>

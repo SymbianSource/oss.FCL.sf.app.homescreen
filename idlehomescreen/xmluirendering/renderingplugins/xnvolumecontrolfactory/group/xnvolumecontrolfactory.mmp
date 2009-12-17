@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2002-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include        <platform/mw/aisystemuids.hrh>
+
+TARGET          xn3volumecontrolfactory.dll
+TARGETTYPE      PLUGIN
+UID             0x10009d8d AI3_UID_RENDERING_PLUGIN_VOLUMECONTROLFACTORY
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          xnvolumecontrolfactory.cpp
+SOURCE          xnvolumecontrol.cpp
+SOURCE          xnvolumecontroladapter.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../../inc
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib  
+LIBRARY         eikcoctl.lib
+LIBRARY         cone.lib
+LIBRARY         xn3layoutengine.lib
+LIBRARY         xn3utils.lib
+LIBRARY         xn3domdocument.lib
+LIBRARY         avkon.lib
+LIBRARY         bafl.lib
+LIBRARY         efsrv.lib
+LANG            SC
+
+RESOURCE        xn3volumecontrol.rss
+
+START RESOURCE        xn3volumecontrolfactory.rss
+#ifdef SYMBIAN_SECURE_ECOM
+TARGET xn3volumecontrolfactory.rsc
+#endif
+END

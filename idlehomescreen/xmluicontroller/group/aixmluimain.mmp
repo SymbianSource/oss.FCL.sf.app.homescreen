@@ -1,0 +1,100 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#include <platform_paths.hrh>
+
+#include        <platform/mw/aisystemuids.hrh>
+#include        <data_caging_paths.hrh>
+
+TARGET          ai3xmluimain.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D AI3_UID_ECOM_DLL_UICONTROLLER_XML
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_ECOM_PLUGIN
+
+SOURCEPATH      ../src
+SOURCE          xmluicontroller.cpp
+SOURCE          application.cpp
+SOURCE          document.cpp
+SOURCE          appui.cpp
+SOURCE          aixuikoneventhandler.cpp
+SOURCE          aieventhandler.cpp
+SOURCE          contentrenderer.cpp
+SOURCE          activetransactionstack.cpp
+SOURCE          transactionfactoryimpl.cpp
+SOURCE          transaction.cpp
+SOURCE          transactionelement.cpp
+SOURCE          texttransactionelement.cpp
+SOURCE          newstickertransactionelement.cpp
+SOURCE          imagetransactionelement.cpp
+SOURCE          emptycontenttransactionelement.cpp
+SOURCE          xmlnodeidgenerator.cpp
+SOURCE          aixmluiutils.cpp
+SOURCE          xmluicontrollerpanic.cpp
+SOURCE          databuffertransactionelement.cpp
+SOURCE          newstickercallbackhandler.cpp
+SOURCE          csspropertymap.cpp
+SOURCE          aipolicyelement.cpp
+SOURCE          policyevaluator.cpp
+SOURCE          psobserver.cpp
+SOURCE          pmodtiterator.cpp
+SOURCE          contentpublisher.cpp
+SOURCE          globalqueryhandler.cpp
+SOURCE          onlineofflinehelper.cpp
+
+
+START RESOURCE  ai3xmluimain.rss
+TARGET          ai3xmluimain.rsc
+
+END
+START RESOURCE  ai3xmlui.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS
+
+END
+
+USERINCLUDE     .
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../help/inc
+
+USERINCLUDE     ../../xmluirendering/uiengine/inc
+USERINCLUDE     ../../sapiwrapper/hspswrapper/inc // hspswrapper
+
+SYSTEMINCLUDE   .
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib efsrv.lib
+LIBRARY         ecom.lib centralrepository.lib
+LIBRARY         fbscli.lib apparc.lib cone.lib
+LIBRARY         eikcore.lib eikcoctl.lib egul.lib avkon.lib aknskins.lib
+LIBRARY         xn3layoutengine.lib xn3utils.lib xn3domdocument.lib
+LIBRARY         aiidleint.lib aiutils.lib
+LIBRARY         imageconversion.lib
+LIBRARY         apgrfx.lib
+LIBRARY         bafl.lib
+LIBRARY         flogger.lib
+LIBRARY         aknicon.lib
+LIBRARY         cdlengine.lib liwservicehandler.lib
+LIBRARY         hlplch.lib commonengine.lib
+LIBRARY         charconv.lib
+LIBRARY         aknnotify.lib 
+LIBRARY         networkhandling.lib
+LIBRARY         profileeng.lib
+
+

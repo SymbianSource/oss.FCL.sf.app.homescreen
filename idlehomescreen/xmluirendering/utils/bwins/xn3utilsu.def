@@ -1,0 +1,25 @@
+EXPORTS
+	?Container@CXnPointerArray@@QAEAAV?$RPointerArray@VCBase@@@@XZ @ 1 NONAME ; class RPointerArray<class CBase> & CXnPointerArray::Container(void)
+	??0TTracer@@QAE@XZ @ 2 NONAME ; TTracer::TTracer(void)
+	?Find@CXnMap@@QBEPAVCBase@@AAV2@AAVMXnComparator@@@Z @ 3 NONAME ; class CBase * CXnMap::Find(class CBase &, class MXnComparator &) const
+	?Equals@MXnComparator@@UAEHAAVCBase@@0@Z @ 4 NONAME ; int MXnComparator::Equals(class CBase &, class CBase &)
+	??0CXnType@@IAE@XZ @ 5 NONAME ; CXnType::CXnType(void)
+	?Get@CXnMap@@QBEPAVCBase@@AAV2@@Z @ 6 NONAME ; class CBase * CXnMap::Get(class CBase &) const
+	?Container@CXnMap@@QAEAAV?$RPointerArray@VCBase@@@@XZ @ 7 NONAME ; class RPointerArray<class CBase> & CXnMap::Container(void)
+	?Container@CXnPointerArrayWithOwnership@@QAEAAV?$RPointerArray@VCBase@@@@XZ @ 8 NONAME ; class RPointerArray<class CBase> & CXnPointerArrayWithOwnership::Container(void)
+	?NewL@CXnPointerArrayWithOwnership@@SAPAV1@XZ @ 9 NONAME ; class CXnPointerArrayWithOwnership * CXnPointerArrayWithOwnership::NewL(void)
+	?NewL@CXnMap@@SAPAV1@PAVMXnComparator@@@Z @ 10 NONAME ; class CXnMap * CXnMap::NewL(class MXnComparator *)
+	?NewL@CXnPointerArray@@SAPAV1@XZ @ 11 NONAME ; class CXnPointerArray * CXnPointerArray::NewL(void)
+	?NewL@CXnArray@@SAPAV1@XZ @ 12 NONAME ; class CXnArray * CXnArray::NewL(void)
+	?NewL@CXnEcomHandler@@SAPAV1@XZ @ 13 NONAME ; class CXnEcomHandler * CXnEcomHandler::NewL(void)
+	?PutL@CXnMap@@QAEXPAVCBase@@@Z @ 14 NONAME ; void CXnMap::PutL(class CBase *)
+	?PluginsL@CXnEcomHandler@@QAEXVTUid@@ABVTDesC8@@AAVCXnArray@@@Z @ 15 NONAME ; void CXnEcomHandler::PluginsL(class TUid, class TDesC8 const &, class CXnArray &)
+	??1TTracer@@QAE@XZ @ 16 NONAME ; TTracer::~TTracer(void)
+	?Print@TTracer@@SAXVTPtrC16@@@Z @ 17 NONAME ; void TTracer::Print(class TPtrC16)
+	?NewL@CXnType@@SAPAV1@ABVTDesC8@@@Z @ 18 NONAME ; class CXnType * CXnType::NewL(class TDesC8 const &)
+	?Container@CXnArray@@QAEAAV?$RArray@PAX@@XZ @ 19 NONAME ; class RArray<void *> & CXnArray::Container(void)
+	?ConstructL@CXnType@@IAEXABVTDesC8@@@Z @ 20 NONAME ; void CXnType::ConstructL(class TDesC8 const &)
+	??1CXnType@@UAE@XZ @ 21 NONAME ; CXnType::~CXnType(void)
+	??0TTracer@@QAE@VTPtrC16@@@Z @ 22 NONAME ; TTracer::TTracer(class TPtrC16)
+	?Type@CXnType@@QAEABVTDesC8@@XZ @ 23 NONAME ; class TDesC8 const & CXnType::Type(void)
+

@@ -1,0 +1,171 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project Menu Framework.
+*
+*/
+
+
+CHARACTER_SET UTF8
+
+//d: Name of the root level.
+//d: Displayed in move to folder popup.
+//l: list_single_graphic_pane_t1_cp2
+//r: 1.0
+#define qtn_fldr_root_level "Root level"
+
+//d: Title of the Photos suite.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_photos_grid "Photos"
+
+//d: Title of the Music suite.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_music_grid "Music"
+
+//d: Title of the Video & TV suite.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_videotv_grid "Video & TV"
+
+//d: Title of the Games suite.
+//d: Displayed as an item title in grid.
+//l: aagrid_cell_image_pane_t1/opt2
+//r: 1.0
+#define qtn_apps_games_grid "Games"
+
+//d: Title of the Contacts suite.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_contacts_grid "Contacts"
+
+//d: Title of the Office suite.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_office_grid "Office"
+
+//d: Title of the Internet folder.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_internet_grid "Internet"
+
+//d: Title of the Applications folder.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_applications_grid "Applications"
+
+//d: Title of the Photos suite.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_photos_list "Photos"
+
+//d: Title of the Music suite.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_music_list "Music"
+
+//d: Title of the Video & TV suite.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_videotv_list "Video & TV"
+
+//d: Title of the Games suite.
+//d: Displayed as an item title in list.
+//l: aalist_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_games_list "Games"
+
+//d: Title of the Contacts suite.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_contacts_list "Contacts"
+
+//d: Title of the Office suite.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_office_list "Office"
+
+//d: Title of the Internet folder.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_internet_list "Internet"
+
+//d: Title of the Applications folder.
+//d: Displayed as an item title in list.
+//l: list_single_large_graphic_pane_t1
+//r: 1.0
+#define qtn_apps_applications_list "Applications"
+
+//d: Title of the Photos suite.
+//d: Displayed as an item title in grid.
+//l: title_pane_t2/opt9
+//r: 1.0
+#define qtn_apps_photos_title "Photos"
+
+//d: Title of the Music suite.
+//d: Displayed as an item title in grid.
+//l: aagrid_cell_image_pane_t1/opt2
+//r: 1.0
+#define qtn_apps_music_title "Music"
+
+//d: Title of the Video & TV suite.
+//d: Displayed as an item title in grid.
+//l: title_pane_t2/opt9
+//r: 1.0
+#define qtn_apps_videotv_title "Video & TV"
+
+//d: Title of the Games suite.
+//d: Displayed as an item title in grid.
+//l: title_pane_t2/opt9
+//r: 1.0
+#define qtn_apps_games_title "Games"
+
+//d: Title of the Contacts suite.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_phonebook_title "Contacts"
+
+//d: Title of the Office suite.
+//d: Displayed as an item title in grid.
+//l: title_pane_t2/opt9
+//r: 1.0
+#define qtn_apps_office_title "Office"
+
+//d: Title of the Internet folder.
+//d: Displayed as an item title in grid.
+//l: title_pane_t2/opt9
+//r: 1.0
+#define qtn_apps_browserng_title "Internet"
+
+//d: Title of the Applications folder.
+//d: Displayed as an item title in grid.
+//l: title_pane_t2/opt9
+//r: 1.0
+#define qtn_apps_appsfolder_title "Applications"
+
+// end of file

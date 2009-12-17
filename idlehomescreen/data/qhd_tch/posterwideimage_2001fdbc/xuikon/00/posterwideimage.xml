@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--!DOCTYPE xmluiml SYSTEM "wideimage.dtd"-->
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+
+    <widget id="posterwideimage_template" focusable="true" _s60-initial-focus="1">
+        <!-- Data plugin in this widget -->
+        <contentsource id="posterwideimage_plugin" name="" value="0x20019594" />
+        
+        <configuration name="service" value="Service.ContentPublishing"/>
+        <configuration name="interface" value="IContentPublishing"/>
+        <configuration name="command" value="GetList"/>
+        <configuration id="pub_id" name="publisher" value=""/>
+
+        <actions>
+          <action>
+            <trigger name="activate"/>
+            <event id="p_trigger" name="selected" />
+          </action>
+        </actions>
+        <box id="image_container" sizeaware="true" >
+        	<actions>
+            <action>
+              <trigger name="sizechanged"/>
+              <event name="ui/setelementsizetocps(image_container)"/>
+            </action>
+          </actions>
+          <image id="wide_image">
+            <configuration name="content_type" value="image1"/>
+            <property id="prop1" class=""/>
+            <property class="policy/emptyContent" name="wide_image" value="display: none;"/>
+            <property class="policy/Content" name="wide_image" value="display: block;"/>
+            <property class="policy/emptyContent" name="wide_text" value="display: block;"/>
+            <property class="policy/Content" name="wide_text" value="display: none;"/>
+          </image>
+          <text id="wide_text">#Loading Content</text>
+        </box>
+        <menuextension>
+            <!-- dynmenuitems are mapped to HS view.xml menu based on target attribute.
+                 HS view.xml provides localisation for predined items: "settings" and "refresh". -->                
+            <dynmenuitem type="widgetsettings" target="hs_widget_menuitem_settings">
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="menuitem(widgetsettings)" destination="posterwideimage_plugin"/>  
+                    </action>
+                </actions>
+            </dynmenuitem>                    
+            <dynmenuitem type="refresh" target="hs_widget_menuitem_refresh">
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="menuitem(refresh)" destination="posterwideimage_plugin"/>  
+                    </action>
+                </actions>
+            </dynmenuitem>        
+        </menuextension>
+    </widget>
+</xmluiml>

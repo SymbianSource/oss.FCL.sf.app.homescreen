@@ -1,0 +1,70 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/profile_2001cb7c/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/profile_2001cb7c/hsps/widgetconfiguration.xml
+../xuikon/00/profile.dat /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profile_2001cb7c.dat
+../xuikon/00/profile.css /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profile.css
+../xuikon/00/profile.xml /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profile.xml
+../xuikon/00/profilewidget.dtd /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profilewidget.dtd
+
+// logo icon
+../gfx/icon.mif /epoc32/data/Z/resource/homescreen/profile_2001cb7c/hsps/icon.mif
+
+// Arabic languages
+//*****************
+../xuikon/37/profile.css /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/37/profile.css
+../xuikon/50/profile.css /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/50/profile.css
+../xuikon/57/profile.css /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/57/profile.css
+../xuikon/94/profile.css /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/94/profile.css
+
+// Support for S60 localization
+//*****************************
+// export localizable loc files (engineering versions)
+../loc/profilewidget.loc    APP_LAYER_LOC_EXPORT_PATH(profilewidget.loc)
+
+// Support for S60 builds
+//***********************
+../rom/profilewidget_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(profile_2001cb7c_resources.iby)
+../rom/profilewidget_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(profile_2001cb7c_customer.iby)
+../rom/profilewidget_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(profile_2001cb7c_variant.iby)
+../rom/profilewidget.iby CORE_APP_LAYER_IBY_EXPORT_PATH(profile_2001cb7c.iby)
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME profile_2001cb7c
+OPTION DTD_TYPE widget
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  
+
+
+
+

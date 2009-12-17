@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+============================================================================
+<FileName: "View.dtd">
+<PartOf  : "AI3">
+
+<FileDescription: "Localization strings for AI3">
+<FileVersion    : >
+
+<Copyright:
+"Copyright © 2005 Nokia Corporation.
+This material, including documentation and any related
+computer programs, is protected by copyright controlled by
+Nokia Corporation. All rights are reserved. Copying,
+including reproducing, storing,  adapting or translating, any
+or all of this material requires the prior written consent of
+Nokia Corporation. This material also contains confidential
+information which may not be disclosed to others without the
+prior written consent of Nokia Corporation.">
+============================================================================
+-->
+
+<!--
+qtn_options_help.attributes
+qtn_options_help.layout "list_single_pane_t1_cp2"
+qtn_options_help.release "TB9.2"
+qtn_options_help.description "Help"
+qtn_options_help.grammar "Help"
+qtn_options_help.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_options_help "Help">
+
+<!--
+qtn_msk_open.attributes
+qtn_msk_open.layout "control_pane_t1/opt7"
+qtn_msk_open.release "TB9.2"
+qtn_msk_open.description "Open"
+qtn_msk_open.grammar "Open"
+qtn_msk_open.parents "control_pane"
+-->
+<!ENTITY qtn_msk_open "Open">
+
+<!--
+text_softkey_done.attributes
+text_softkey_done.layout "control_pane_t1/opt7"
+text_softkey_done.release "TB9.2"
+text_softkey_done.description "Done"
+text_softkey_done.grammar "Done"
+text_softkey_done.parents "control_pane"
+-->
+<!ENTITY text_softkey_done "Done">
+
+<!--
+qtn_options_open.attributes
+qtn_options_open.layout "list_single_pane_t1_cp2"
+qtn_options_open.release "TB9.2"
+qtn_options_open.description "Open"
+qtn_options_open.grammar "Open"
+qtn_options_open.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_options_open "Open">
+
+<!--
+text_softkey_back.attributes
+text_softkey_back.layout "control_pane_t1/opt7"
+text_softkey_back.release "TB9.2"
+text_softkey_back.description "Back text for SK2"
+text_softkey_back.parents "control_pane"
+-->
+<!ENTITY text_softkey_back "Back">
+
+<!--
+shortcut_EmptyCaption.attributes
+shortcut_EmptyCaption.layout "control_pane_t1/opt7"
+shortcut_EmptyCaption.release "TB9.2"
+shortcut_EmptyCaption.description "Empty shortcut"
+shortcut_EmptyCaption.parents "list_ai2_gene_pane"
+-->
+<!ENTITY shortcut_EmptyCaption " ">
+
+<!--
+qtn_hs_add_page.attributes
+qtn_hs_add_page.layout "list_single_pane_t1_cp2"
+qtn_hs_add_page.release "TB9.2"
+qtn_hs_add_page.description "Add page"
+qtn_hs_add_page.grammar "Add page"
+qtn_hs_add_page.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_add_page "Add page">
+
+<!--
+qtn_options_select_widget.attributes
+qtn_options_select_widget.layout "list_single_pane_t1_cp2"
+qtn_options_select_widget.release "TB9.2"
+qtn_options_select_widget.description "Select"
+qtn_options_select_widget.grammar "Select"
+qtn_options_select_widget.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_options_select_widget "Select">
+
+<!--
+qtn_hs_add_widget.attributes
+qtn_hs_add_widget.layout "list_single_pane_t1_cp2"
+qtn_hs_add_widget.release "TB9.2"
+qtn_hs_add_widget.description "Add content"
+qtn_hs_add_widget.grammar "Add content"
+qtn_hs_add_widget.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_add_widget "Add content">
+
+<!--
+text_softkey_search.attributes
+text_softkey_search.layout "control_pane_t1/opt7"
+text_softkey_search.release "TB9.2"
+text_softkey_search.description "Search"
+text_softkey_search.grammar "Search"
+text_softkey_search.parents "control_pane"
+-->
+<!ENTITY text_softkey_search "Search">
+
+<!--
+text_softkey_options.attributes
+text_softkey_options.layout "control_pane_t1/opt7"
+text_softkey_options.release "TB9.2"
+text_softkey_options.description "Options"
+text_softkey_options.grammar "Options"
+text_softkey_options.parents "control_pane"
+-->
+<!ENTITY text_softkey_options "Options">
+
+<!--
+qtn_hs_refresh_widget.attributes
+qtn_hs_refresh_widget.layout "list_single_pane_t1_cp2/opt3"
+qtn_hs_refresh_widget.release "TB9.2"
+qtn_hs_refresh_widget.description "Refresh"
+qtn_hs_refresh_widget.grammar "Refresh"
+qtn_hs_refresh_widget.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_refresh_widget "Refresh">
+
+<!--
+qtn_hs_refresh_one_widget.attributes
+qtn_hs_refresh_one_widget.layout "list_single_popup_submenu_pane_t1"
+qtn_hs_refresh_one_widget.release "TB9.2"
+qtn_hs_refresh_one_widget.description "One"
+qtn_hs_refresh_one_widget.grammar "One"
+qtn_hs_refresh_one_widget.parents "list_single_popup_submenu_pane"
+-->
+<!ENTITY qtn_hs_refresh_one_widget "One">
+
+<!--
+qtn_hs_refresh_all_widgets.attributes
+qtn_hs_refresh_all_widgets.layout "list_single_popup_submenu_pane_t1"
+qtn_hs_refresh_all_widgets.release "TB9.2"
+qtn_hs_refresh_all_widgets.description "All"
+qtn_hs_refresh_all_widgets.grammar "All"
+qtn_hs_refresh_all_widgets.parents "list_single_popup_submenu_pane"
+-->
+<!ENTITY qtn_hs_refresh_all_widgets "All">
+
+<!--
+qtn_hs_remove_widget.attributes
+qtn_hs_remove_widget.layout "list_single_pane_t1_cp2"
+qtn_hs_remove_widget.release "TB9.2"
+qtn_hs_remove_widget.description "Remove content"
+qtn_hs_remove_widget.grammar "Remove content"
+qtn_hs_remove_widget.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_remove_widget "Remove content">
+
+<!--
+qtn_hs_hide_widgets.attributes
+qtn_hs_hide_widgets.layout "list_single_pane_t1_cp2"
+qtn_hs_hide_widgets.release "TB9.2"
+qtn_hs_hide_widgets.description "Hide the content"
+qtn_hs_hide_widgets.grammar "Hide the content"
+qtn_hs_hide_widgets.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_hide_widgets "Hide the content">
+
+<!--
+qtn_hs_edit_content.attributes
+qtn_hs_edit_content.layout "list_single_pane_t1_cp2"
+qtn_hs_edit_content.release "TB9.2"
+qtn_hs_edit_content.description "Edit contents"
+qtn_hs_edit_content.grammar "Edit contents"
+qtn_hs_edit_content.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_edit_content "Edit content">
+
+<!--
+qtn_hs_change_wallpaper.attributes
+qtn_hs_change_wallpaper.layout "list_single_pane_t1_cp2"
+qtn_hs_change_wallpaper.release "TB9.2"
+qtn_hs_change_wallpaper.description "Change Wallpaper"
+qtn_hs_change_wallpaper.grammar "Change Wallpaper"
+qtn_hs_change_wallpaper.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_change_wallpaper "Change Wallpaper">
+
+<!--
+qtn_hs_change_shortcut_settings.attributes
+qtn_hs_change_shortcut_settings.layout "list_single_pane_t1_cp2"
+qtn_hs_change_shortcut_settings.release "TB9.2"
+qtn_hs_change_shortcut_settings.description "Change Shortcut Settings"
+qtn_hs_change_shortcut_settings.grammar "Change Shortcut Settings"
+qtn_hs_change_shortcut_settings.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_change_shortcut_settings "Change Shortcut Settings">
+
+<!--
+qtn_hs_widget_settings.attributes
+qtn_hs_widget_settings.layout "list_single_pane_t1_cp2"
+qtn_hs_widget_settings.release "TB9.2"
+qtn_hs_widget_settings.description "Widget settings"
+qtn_hs_widget_settings.grammar "Widget settings"
+qtn_hs_widget_settings.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_widget_settings "Widget settings">
+
+<!--
+qtn_hs_show_widgets.attributes
+qtn_hs_show_widgets.layout "list_single_pane_t1_cp2"
+qtn_hs_show_widgets.release "TB9.2"
+qtn_hs_show_widgets.description "Show widgets"
+qtn_hs_show_widgets.grammar "Show widgets"
+qtn_hs_show_widgets.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_show_widgets "Show the content">
+
+<!--
+qtn_hs_change_page.attributes
+qtn_hs_change_page.layout "list_single_pane_t1_cp2"
+qtn_hs_change_page.release "TB9.2"
+qtn_hs_change_page.description "Change Home screen page"
+qtn_hs_change_page.grammar "Change Home screen page"
+qtn_hs_change_page.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_change_page "Change Home screen page">
+
+<!--
+qtn_msk_change.attributes
+qtn_msk_change.layout "control_pane_t1/opt7"
+qtn_msk_change.release "TB9.2"
+qtn_msk_change.description "Change"
+qtn_msk_change.grammar "Change"
+qtn_msk_change.parents "control_pane"
+-->
+<!ENTITY qtn_msk_change "Change">
+
+<!--
+qtn_hs_show_profiles.attributes
+qtn_hs_show_profiles.layout "list_single_pane_t1_cp2"
+qtn_hs_show_profiles.release "TB9.2"
+qtn_hs_show_profiles.description "Show all profiles"
+qtn_hs_show_profiles.grammar "Show all profiles"
+qtn_hs_show_profiles.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_show_profiles "Show all profiles">
+
+<!--
+qtn_set_right_idle_softkey.attributes
+qtn_set_right_idle_softkey.layout "list_single_pane_t1_cp2"
+qtn_set_right_idle_softkey.release "TB9.2"
+qtn_set_right_idle_softkey.description "Right selection key"
+qtn_set_right_idle_softkey.grammar "Right selection key"
+qtn_set_right_idle_softkey.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_set_right_idle_softkey "Right selection key">
+
+<!--
+text_softkey_select.attributes
+text_softkey_select.layout "control_pane_t1/opt7"
+text_softkey_select.release "TB9.2"
+text_softkey_select.description "Select"
+text_softkey_select.grammar "Select"
+text_softkey_select.parents "control_pane"
+-->
+<!ENTITY text_softkey_select "Select">
+
+<!--
+text_softkey_cancel.attributes
+text_softkey_cancel.layout "control_pane_t1/opt7"
+text_softkey_cancel.release "TB9.2"
+text_softkey_cancel.description "Cancel"
+text_softkey_cancel.grammar "Cancel"
+text_softkey_cancel.parents "control_pane"
+-->
+<!ENTITY text_softkey_cancel "Cancel">
+
+<!--
+qtn_hs_web_online.attributes
+qtn_hs_web_online.layout "list_single_pane_t1_cp2"
+qtn_hs_web_online.release "TB9.2"
+qtn_hs_web_online.description "Online"
+qtn_hs_web_online.grammar "Online"
+qtn_hs_web_online.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_online "Switch Home to online">
+
+<!--
+qtn_hs_web_offline.attributes
+qtn_hs_web_offline.layout "list_single_pane_t1_cp2"
+qtn_hs_web_offline.release "TB9.2"
+qtn_hs_web_offline.description "Offline"
+qtn_hs_web_offline.grammar "Offline"
+qtn_hs_web_offline.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_offline "Switch Home to offline">
+
+<!--
+qtn_hs_longtap_settings.attributes
+qtn_hs_longtap_settings.layout "list_single_touch_menu_pane_t1"
+qtn_hs_longtap_settings.release "TB9.2"
+qtn_hs_longtap_settings.description "String which is shown in long tap menu of Home screen if tapped widget has settings."
+qtn_hs_longtap_settings.parents "control_pane"
+-->
+<!ENTITY qtn_hs_longtap_settings "Settings">
+
+<!--
+qtn_hs_longtap_remove_element.attributes
+qtn_hs_longtap_remove_element.layout "list_single_touch_menu_pane_t1"
+qtn_hs_longtap_remove_element.release "TB9.2"
+qtn_hs_longtap_remove_element.description "String which is shown in long tap menu of Home screen if tapped some widget which is removable."
+qtn_hs_longtap_remove_element.parents "control_pane"
+-->
+<!ENTITY qtn_hs_longtap_remove_element "Remove">
+
+<!--
+qtn_hs_longtap_add.attributes
+qtn_hs_longtap_add.layout "list_single_touch_menu_pane_t1"
+qtn_hs_longtap_add.release "TB9.2"
+qtn_hs_longtap_add.description "String which is shown in long tap menu of Home screen if tapped empty space in home screen."
+qtn_hs_longtap_add.parents "control_pane"
+-->
+<!ENTITY qtn_hs_longtap_add  "Add content">
+
+<!--
+qtn_hs_change_longtap_wallpaper.attributes
+qtn_hs_change_longtap_wallpaper.layout "list_single_touch_menu_pane_t1"
+qtn_hs_change_longtap_wallpaper.release "TB9.2"
+qtn_hs_change_longtap_wallpaper.description "String which is shown in long tap menu of Home screen."
+qtn_hs_change_longtap_wallpaper.parents "control_pane"
+-->
+<!ENTITY qtn_hs_change_longtap_wallpaper "Change wallpaper">
+
+<!--
+qtn_hs_download_new_widgets.attributes
+qtn_hs_download_new_widgets.layout "list_single_pane_t1_cp2"
+qtn_hs_download_new_widgets.release "TB9.2"
+qtn_hs_download_new_widgets.description "User can download new HS widgets String is visible in add content list query"
+qtn_hs_download_new_widgets.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_download_new_widgets "Download">
+
+<!--
+qtn_hs_edit_replace.attributes
+qtn_hs_edit_replace.layout "list_single_touch_menu_pane_t1"
+qtn_hs_edit_replace.release "TB9.2"
+qtn_hs_edit_replace.description "Changes focused widget"
+qtn_hs_edit_replace.parents ""
+-->
+<!ENTITY qtn_hs_edit_replace "Replace">
+
+<!--
+qtn_hs_edit_replace.attributes
+qtn_hs_edit_replace.layout "list_single_pane_t1_cp2"
+qtn_hs_edit_replace.release "TB9.2"
+qtn_hs_edit_replace.description "deletes current home screen page"
+qtn_hs_edit_replace.parents ""
+-->
+<!ENTITY qtn_hs_page_options_delete "Delete page">
+
+<!--
+qtn_hs_edit_replace.attributes
+qtn_hs_edit_replace.layout "list_single_pane_t1_cp2"
+qtn_hs_edit_replace.release "TB9.2"
+qtn_hs_edit_replace.description "creates new home screen page"
+qtn_hs_edit_replace.parents ""
+-->
+<!ENTITY qtn_hs_page_options_new "New page">
+
+<!--
+qtn_hs_title_editing_view.attributes
+qtn_hs_title_editing_view.layout "title_pane_t2"
+qtn_hs_title_editing_view.release "TB9.2"
+qtn_hs_title_editing_view.description "view title in editing mode"
+qtn_hs_title_editing_view.parents ""
+-->
+<!ENTITY qtn_hs_title_editing_view "Editing view">
+

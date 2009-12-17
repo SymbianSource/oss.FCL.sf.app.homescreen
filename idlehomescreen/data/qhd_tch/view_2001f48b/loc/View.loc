@@ -1,0 +1,256 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project Active Idle 3
+*
+*/
+
+// d: Help
+// l: list_single_pane_t1_cp2
+// w: 
+// r: TB9.2
+#define qtn_options_help "Help"
+
+// d: Open
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define qtn_msk_open "Open"
+
+// d: Options
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define text_softkey_done "Done"
+
+// d: Open 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_options_open "Open"
+
+// d: Back
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define text_softkey_back "Back"
+
+// d: Empty string
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define shortcut_emptycaption " "
+
+// d: Add page
+// l: list_single_pane_t1_cp2
+// w: 
+// r: TB9.2
+#define qtn_hs_add_page "Add page"
+
+// d: Select
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_options_select_widget "Select"
+
+// d: Add content
+// l: list_single_pane_t1_cp2
+// w: 
+// r: TB9.2
+#define qtn_hs_add_widget "Add content"
+
+// d: Access the widget catalog
+// l: list_single_pane_t1_cp2
+// w: 
+// r: TB9.2
+#define qtn_hs_widget_catalog "Widget catalog"
+
+// d: Search
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define text_softkey_search "Search"
+
+// d: Options
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define text_softkey_options "Options"
+
+// d: Refresh 
+// l: list_single_pane_t1_cp2/opt3
+// w:
+// r: TB9.2
+#define qtn_hs_refresh_widget "Refresh"
+
+// d: Focused widget
+// l: list_single_popup_submenu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_refresh_one_widget "One"
+
+// d: All widgets 
+// l: list_single_popup_submenu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_refresh_all_widgets "All"
+
+// d: Remove content 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_remove_widget "Remove content"
+
+// d: Hide the content 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_hide_widgets "Hide the content"
+
+// d: Edit contents 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_edit_content "Edit content"
+
+// d: Change Wallpaper
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_change_wallpaper "Change Wallpaper"
+
+// d: Change Shortcut Settings
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_change_shortcut_settings "Change Shortcut Settings"
+
+// d: Widget settings
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_widget_settings "Widget settings"
+
+// d: Show widgets
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_show_widgets "Show the content"
+
+// d: Change Home screen page
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_change_page "Change Home screen page"
+
+// d: Change
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define qtn_msk_change "Change"
+
+// d: Show all profiles in Profiles widget
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_show_profiles "Show all profiles"
+
+// d: Right selection key
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_set_right_idle_softkey "Right selection key"
+
+// d: Select
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define text_softkey_select "Select"
+
+// d: Cancel
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+#define text_softkey_cancel "Cancel"
+
+// d: Options menu item which switches home to online. Web widgets get updates from network.
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_online "Switch Home to online"
+
+// d: Options menu item which switches home to offline. Web widgets are not updated
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_offline "Switch Home to offline"
+
+// d: String which is shown in long tap menu of Home screen if tapped widget has settings
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_longtap_settings "Settings"
+
+// d: String which is shown in long tap menu of Home screen if tapped some widget which is removable
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_longtap_remove_element "Remove"
+
+// d: String which is shown in long tap menu of Home screen if tapped empty space in home screen
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_longtap_add "Add content"
+
+// d: String which is shown in long tap menu of Home screen
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_change_longtap_wallpaper "Change wallpaper"
+
+// d: User can download new HS widgets. String is visible in add content list query
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_download_new_widgets "Download"
+
+// d: Changes focused widget
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_edit_replace "Replace"
+
+// d: deletes current home screen page
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_page_options_delete "Delete page"
+
+// d: creates new home screen page
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_page_options_new "New page"
+
+// d: view title in editing mode
+// l: title_pane_t2
+// w:
+// r: TB9.2
+#define qtn_hs_title_editing_view "Editing view"
+
+// d: right softkey caption in inactive call state
+// l: text_softkey call
+// w:
+// r: TB9.2
+#define text_softkey_call "Call"

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+  <!ENTITY layer_real_source_path "sf/app/homescreen" >
+]>
+
+<SystemDefinition name="homescreen" schema="1.4.0">
+  <systemModel>
+
+
+    <layer name="app_layer">
+      <module name="homescreen">
+        <unit unitID="hs.homescreen" mrp="" bldFile="&layer_real_source_path;/group" name="homescreen" />
+      </module>
+    </layer>
+
+    <layer name="unit_test_layer">
+      <module name="homescreen_unit_tests">
+         <unit unitID="hsdo.wmunit.test" mrp="" bldFile="&layer_real_source_path;/widgetmanager/tsrc/wmunittest/group" name="wmunit.test" />
+      </module>
+    </layer>
+
+  </systemModel>
+</SystemDefinition>
+
+

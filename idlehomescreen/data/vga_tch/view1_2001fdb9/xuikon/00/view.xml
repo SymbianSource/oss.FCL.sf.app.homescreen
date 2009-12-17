@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmluiml SYSTEM "View.dtd">
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+    <view id="homescreen">
+        <actions>
+            <action>
+                <trigger name="screendevicechange" reason="portrait" />
+                <!-- main_container -->
+                <event name="system/set">
+                    <property name="name" value="margin-left"/>
+                    <property name="value" value="17px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="main_container"/>
+                </event>                                                        
+                <event name="system/set">
+                    <property name="name" value="margin-right"/>
+                    <property name="value" value="17px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="main_container"/>
+                </event>     
+                <!-- class sub_container -->
+                <event name="system/set">
+                    <property name="name" value="width"/>
+                    <property name="value" value="223px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="class" value="sub_container"/>
+                </event>                                
+                <event name="system/set">
+                    <property name="name" value="height"/>
+                    <property name="value" value="132px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="class" value="sub_container"/>
+                </event>                                            
+                <!-- profile_switcher_container -->
+                <event name="system/set">
+                    <property name="name" value="top"/>
+                    <property name="value" value="0px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="profile_switcher_container"/>
+                </event>                                            
+                <event name="system/set">
+                    <property name="name" value="left"/>
+                    <property name="value" value="223px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="profile_switcher_container"/>
+                </event>                                            
+                <!-- plugins_container -->
+                <event name="system/set">
+                    <property name="name" value="top"/>
+                    <property name="value" value="135px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="plugins_container"/>
+                </event>                                            
+                <event name="system/set">
+                    <property name="name" value="left"/>
+                    <property name="value" value="0px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="plugins_container"/>
+                </event>                                                                        
+                <!-- clock font sizes -->                
+                <event name="system/set">
+                    <property name="name" value="_s60-ampm-font-size"/>
+                    <property name="value" value="3.5u"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="clock"/>
+                </event>                                                        
+                <event name="system/set">
+                    <property name="name" value="_s60-digital-font-size"/>
+                    <property name="value" value="72px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="clock"/>
+                </event>                                                        
+                <event name="system/set">
+                    <property name="name" value="_s60-date-font-size"/>
+                    <property name="value" value="3.5u"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="clock"/>
+                </event>                                                                        
+            </action>
+            <action>
+                <trigger name="screendevicechange" reason="landscape" />
+                <!-- main_container -->
+                <event name="system/set">
+                    <property name="name" value="margin-left"/>
+                    <property name="value" value="5px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="main_container"/>
+                </event>                                                        
+                <event name="system/set">
+                    <property name="name" value="margin-right"/>
+                    <property name="value" value="5px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="main_container"/>
+                </event>     
+                <!-- class="sub_container" -->            
+                <event name="system/set">
+                    <property name="name" value="width"/>
+                    <property name="value" value="184px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="class" value="sub_container"/>
+                </event>                                
+                <event name="system/set">
+                    <property name="name" value="height"/>
+                    <property name="value" value="106px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="class" value="sub_container"/>
+                </event>                                            
+                <!-- profile_switcher_container -->
+                <event name="system/set">
+                    <property name="name" value="top"/>
+                    <property name="value" value="106px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="profile_switcher_container"/>
+                </event>                                            
+                <event name="system/set">
+                    <property name="name" value="left"/>
+                    <property name="value" value="0px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="profile_switcher_container"/>
+                </event>                                            
+                <!-- plugins_container -->
+                <event name="system/set">
+                    <property name="name" value="top"/>
+                    <property name="value" value="3px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="plugins_container"/>
+                </event>                                            
+                <event name="system/set">
+                    <property name="name" value="left"/>
+                    <property name="value" value="184px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="plugins_container"/>
+                </event>      
+                <!-- clock font sizes -->                
+                <event name="system/set">
+                    <property name="name" value="_s60-ampm-font-size"/>
+                    <property name="value" value="3.0u"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="clock"/>
+                </event>                                                        
+                <event name="system/set">
+                    <property name="name" value="_s60-digital-font-size"/>
+                    <property name="value" value="56px"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="clock"/>
+                </event>                                                        
+                <event name="system/set">
+                    <property name="name" value="_s60-date-font-size"/>
+                    <property name="value" value="3.0u"/>
+                    <property name="type" value="numeric"/>
+                    <property name="id" value="clock"/>
+                </event>                                                                                                                                          
+            </action>
+            <action> 
+                <!-- End key, move focus to initial location -->
+                <trigger name="keyevent">
+                    <property name="scancode" value="197"/>                
+                    <property name="eventtype" value="1"/>                
+                </trigger>
+            </action>
+            <action>
+                <trigger name="viewactivate"/>
+                <event name="system/endfullscreeneffect"/>        
+            </action>              
+            <action>
+                <!-- No widgets in this view -->
+                <trigger name="widgetamount" value="0"/>
+                <event name="system/set">
+                    <!-- Hide "hide content" menuitem -->
+                    <property name="name" value="display"/>
+                    <property name="value" value="none"/>
+                    <property name="type" value="string"/>
+                    <property name="id" value="hs_hide_widgets"/>                
+                </event>                              
+                <event name="system/set">
+                    <!-- Hide "show content" menuitem -->
+                    <property name="name" value="display"/>
+                    <property name="value" value="none"/>
+                    <property name="type" value="string"/>
+                    <property name="id" value="hs_show_widgets"/>                
+                </event>                                          
+            </action>
+            <action>
+                <!-- At least one widget added to this view -->
+                <trigger name="widgetamount" value="1"/>
+                <event name="system/set">
+                    <!-- Show "hide content" menuitem -->
+                    <property name="name" value="display"/>
+                    <property name="value" value="block"/>
+                    <property name="type" value="string"/>
+                    <property name="id" value="hs_hide_widgets"/>                
+                </event>                              
+                <event name="system/set">
+                    <!-- Show "show content" menuitem -->
+                    <property name="name" value="display"/>
+                    <property name="value" value="block"/>
+                    <property name="type" value="string"/>
+                    <property name="id" value="hs_show_widgets"/>                
+                </event>                                          
+            </action>            
+        </actions>
+        
+        <!-- Data plugins in this view -->
+        <contentsource name="Profile" value="0x10275101" />
+        <contentsource name="SAT" value="0x102078EB" />
+        <contentsource name="Shortcut" value="0x102750FA" />
+        <contentsource name="DeviceStatus" value="0x102750F8" />
+        
+        <!-- All layout capable elements are inside this container -->
+        <box id="main_container">
+            <box id="clock_container" class="sub_container">
+                <clock id="clock" focusable="true" _s60-initial-focus="1">
+                    <softkey id="clock_msk_open" type="middle" label="&qtn_msk_open;" />
+                    <menuitem id="hs_view_open" target="hs_widget_menuitem_open">
+                        <actions>
+                            <action>
+                                <trigger name="activate"/>
+                                <event name="system/activateselecteditem"/>
+                            </action>
+                        </actions>            
+                    </menuitem>                                
+                    <text id="Clock/DateInformation" display="none">
+                        <property id="DeviceStatusDate" class="DeviceStatus/Date" />
+                    </text>                                         
+                    <actions>
+                        <action>
+                            <trigger name="stylus">
+                                <property name="eventtype" value="downup" />
+                            </trigger>
+                            <trigger name="activate"/>
+                            <trigger name="keyevent">
+                                <property name="scancode" value="3"/>
+                                <!-- enter key / EStdKeyEnter -->
+                                <property name="eventtype" value="1"/>
+                            </trigger>                            
+                            <event name="Shortcut/LaunchByValue(localapp:0x10005903)" />
+                        </action>
+                    </actions>                
+                </clock>                    
+            </box>        
+            <box id="profile_switcher_container" class="sub_container">
+                <box id="profile" focusable="true">
+                    <softkey id="profile_msk_select" type="middle" label="&qtn_msk_select;" />
+                    <menuitem id="hs_view_select" target="hs_widget_menuitem_select">
+                        <actions>
+                            <action>
+                                <trigger name="activate"/>
+                                <event name="system/activateselecteditem"/>
+                            </action>
+                        </actions>            
+                    </menuitem>                                        
+                    <!-- Profile UI resources -->
+                    <desc id="Profile/ActiveProfileGeneralIconResource" path="SKIN(270501603 8586 19)"/>
+                    <desc id="Profile/ActiveProfileSilentIconResource" path="SKIN(270501603 8587 19)"/>
+                    <desc id="Profile/ActiveProfileTimedIconResource" path="SKIN(270501603 8631 19)"/>
+                    <actions>
+                        <!-- Show profile dialog menu -->
+                        <action>
+                            <trigger name="activate"/>
+                            <trigger name="stylus">
+                                <property name="eventtype" value="downup" />
+                            </trigger>
+                            <trigger name="keyevent">
+                                <property name="scancode" value="3"/>
+                                <!-- enter key / EStdKeyEnter -->
+                                <property name="eventtype" value="1"/>
+                            </trigger>
+                            <event name="system/trydisplayinglistquerydialog">
+                                <property name="id" value="profiledialog"/>
+                            </event>
+                        </action>
+                    </actions>                            
+                    <!-- MCN, CUG & Profile -->
+                    <box id="mcn_cug_profile_container">
+                        <newsticker id="mcn_cug_profile" class="statusindicator">
+                            <title id="mcn" titleindex="0">
+                                <property id="MCNIndicator" class="DeviceStatus/MCNIndicator" />    
+                            </title>
+                            <title id="cug" titleindex="1">
+                                <property id="CUGIndicator" class="DeviceStatus/CUGIndicator" />    
+                            </title>
+                            <title id="profile" titleindex="2">
+                                <property id="ActiveProfileIndicator" class="Profile/ActiveProfileNameAndIconChar" />            
+                            </title>
+                        </newsticker>
+                    </box>    
+                    <!-- SAT & VHZ -->
+                    <box id="sat_vhz_container">
+                        <image id="sat_icon">
+                            <property id="Sat_sat_icon" class="SAT/sat_icon" />        
+                            <property class="policy/emptyContent" name="sat_icon" value="display:none"/>
+                            <property class="policy/emptyContent" name="sat_icon" value="visibility:hidden"/>
+                            <property class="policy/Content" name="sat_icon" value="display:block"/>
+                            <property class="policy/Visibility" name="sat_vhz_container" value="if !+(vhz) visibility: visible" />
+                        </image>    
+                        <newsticker id="sat_vhz" class="statusindicator">
+                            <actions>
+                                <action>
+                                    <trigger name="titletoscroll" titleindex="0"/>
+                                    <event name="system/set">
+                                        <property name="name" value="visibility"/>
+                                        <property name="value" value="hidden"/>
+                                        <property name="type" value="string"/>
+                                        <property name="id" value="sat_icon"/>
+                                    </event>
+                                </action>
+                                <action>
+                                    <trigger name="titlescrolled" titleindex="0"/>
+                                    <event name="system/set">
+                                        <property name="name" value="visibility"/>
+                                        <property name="value" value="hidden"/>
+                                        <property name="type" value="string"/>
+                                        <property name="id" value="sat_icon"/>
+                                    </event>
+                                </action>
+                                <action>
+                                    <trigger name="titletoscroll" titleindex="1"/>
+                                    <event name="system/set">
+                                        <property name="name" value="visibility"/>
+                                        <property name="value" value="visible"/>
+                                        <property name="type" value="string"/>
+                                        <property name="id" value="sat_icon"/>
+                                    </event>
+                                </action>
+                                <action>
+                                    <trigger name="titlescrolled" titleindex="1"/>
+                                    <event name="system/set">
+                                        <property name="name" value="visibility"/>
+                                        <property name="value" value="visible"/>
+                                        <property name="type" value="string"/>
+                                        <property name="id" value="sat_icon"/>
+                                    </event>
+                                </action>
+                            </actions>
+                            <title id="vhz" titleindex="0">
+                                <property id="VHZText" class="DeviceStatus/VHZText" />
+                                <property class="policy/emptyContent" name="vhz" value="display: none" />
+                                <property class="policy/Content" name="vhz" value="display: block" />
+                                <property class="policy/Visibility" name="sat_vhz_container" value="if (vhz,sat,sat_icon) display: block" />
+                                <property class="policy/Visibility" name="sat_vhz_container" value="if !+(vhz,sat,sat_icon) display: none" />
+                            </title>
+                            <title id="sat" titleindex="1">
+                                <property id="Sat_SatIdleModeText" class="SAT/SatIdleModeText" />            
+                                <property class="policy/emptyContent" name="sat" value="display: none" />
+                                <property class="policy/Content" name="sat" value="display: block" />
+                                <property class="policy/Visibility" name="sat_vhz_container" value="if (vhz,sat,sat_icon) display: block" />
+                                <property class="policy/Visibility" name="sat_vhz_container" value="if !+(vhz,sat,sat_icon) display: none" />
+                            </title>
+                        </newsticker>
+                    </box>                                    
+                </box>
+                <!-- View switcher -->
+                <box id="switcher" focusable="true">
+                    <softkey id="switcher_msk_select" type="middle" label="&qtn_msk_select;" />
+                    <menuitem id="hs_view_select" target="hs_widget_menuitem_select">
+                        <actions>
+                            <action>
+                                <trigger name="activate"/>
+                                <event name="system/activateselecteditem"/>
+                            </action>
+                        </actions>            
+                    </menuitem>                    
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <trigger name="stylus">
+                                <property name="eventtype" value="downup" />
+                            </trigger>
+                            <trigger name="keyevent">
+                                <property name="scancode" value="3"/>
+                                <property name="eventtype" value="1"/>
+                            </trigger>
+                            <event name="system/activatenextview"/>                    
+                            <event name="system/beginfullscreeneffect" effectid="1003"/>
+                        </action>
+                    </actions>                    
+                    <image id="switcher_icon" />                        
+                    <!-- View information is filled in runtime by View Manager -->
+                    <text id="switcher_text" />
+                </box>
+            </box>
+            <!-- Plugins -->
+            <box id="plugins_container">
+                <plugin id="plugin1" class="plugins" />
+                <plugin id="plugin2" class="plugins" />
+                <plugin id="plugin3" class="plugins" />
+                <plugin id="plugin4" class="plugins" />
+                <plugin id="plugin5" class="plugins" />
+            </box>
+        </box>
+        
+        <!-- Profile list query dialog. Avkon dialog is not layout capable -->
+        <listquerydialog id="profiledialog" display="none">
+            <text id="profileseditactive" class="profileitem">qtn_hs_profile_edit
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/EditActiveProfile"/>
+                    </action>
+                </actions>		
+            </text>						
+            <text id="profileitem1" class="systemprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="1"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(0)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem2" class="systemprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="2"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(1)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem3" class="systemprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="3"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(2)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem4" class="systemprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="4"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(3)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem5" class="systemprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="5"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(4)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem6" class="systemprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="6"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(5)"/>
+                    </action>
+                </actions>
+            </text>
+            <!-- Profiles added by user - show only when such profiles exist -->
+            <text id="profileitem7" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="7"/>
+                <property class="policy/Content" name="profileitem7" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem7" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(6)"/>
+                    </action>
+                </actions>
+            </text> 
+            <text id="profileitem8" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="8"/>
+                <property class="policy/Content" name="profileitem8" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem8" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(7)"/>
+                    </action>        
+               </actions>
+            </text>
+            <text id="profileitem9" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="9"/>
+                <property class="policy/Content" name="profileitem9" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem9" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(8)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem10" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="10"/>
+                <property class="policy/Content" name="profileitem10" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem10" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(9)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem11" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="11"/>
+                <property class="policy/Content" name="profileitem11" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem11" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(10)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem12" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="12"/>
+                <property class="policy/Content" name="profileitem12" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem12" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(11)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem13" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="13"/>
+                <property class="policy/Content" name="profileitem13" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem13" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(12)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem14" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="14"/>
+                <property class="policy/Content" name="profileitem14" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem14" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(13)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem15" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="15"/>
+                <property class="policy/Content" name="profileitem15" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem15" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(14)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem16" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="16"/>
+                <property class="policy/Content" name="profileitem16" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem16" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(15)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem17" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="17"/>
+                <property class="policy/Content" name="profileitem17" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem17" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(16)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem18" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="18"/>
+                <property class="policy/Content" name="profileitem18" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem18" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(17)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem19" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="19"/>
+                <property class="policy/Content" name="profileitem19" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem19" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(18)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem20" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="20"/>
+                <property class="policy/Content" name="profileitem20" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem20" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(19)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem21" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="21"/>
+                <property class="policy/Content" name="profileitem21" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem21" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(20)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem22" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="22"/>
+                <property class="policy/Content" name="profileitem22" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem22" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(21)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem23" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="23"/>
+                <property class="policy/Content" name="profileitem23" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem23" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(22)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem24" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="24"/>
+                <property class="policy/Content" name="profileitem24" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem24" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(23)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem25" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="25"/>
+                <property class="policy/Content" name="profileitem25" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem25" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(24)"/>
+                    </action>
+                </actions>
+            </text>
+            <text id="profileitem26" class="userprofileitem">
+                <property class="Profile/ProfileName" name="ordinal" value="26"/>
+                <property class="policy/Content" name="profileitem26" value="display:block"/>
+                <property class="policy/emptyContent" name="profileitem26" value="display:none"/>
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="Profile/SwitchProfileByIndex(25)"/>
+                    </action>
+                </actions>
+            </text>
+        </listquerydialog>
+                
+        <!-- RSK shortcut, default AppShell -->    			
+        <property class="Settings/Shortcut" name="0x01000101" value="localapp:0x101F4CD2"/>
+        <!-- UI resources for RSK shortcut -->
+        <desc id="Shortcut/EmptyCaption">&shortcut_emptycaption;</desc>
+        <desc id="Shortcut/BackCaption">&text_softkey_back;</desc>
+        
+        <menubar id="hs_menubar">                  
+            <!-- menu item grouping table is traversed through in run-time always when options menu is launched. -->                     
+            <menuitemgrouping>
+                <!-- These items are shown when widget is selected (focus is in widget) -->
+                <menuitemgroup id="Menu/WidgetSpecific">
+                    <property name="hs_widget_select"/>
+                    <property name="hs_widget_open"/>
+                    <property name="hs_widget_settings"/>        
+                    <property name="hs_move_widget"/>        
+                    <property name="hs_remove_widget"/>                        
+                </menuitemgroup>   
+                <!-- These items are shown when view is selected (focus is in view) -->
+                <menuitemgroup id="Menu/ViewSpecific">
+                    <property name="hs_widget_select"/>
+                    <property name="hs_widget_open"/>                
+                </menuitemgroup>           
+                <!-- These items are shown when content is hidden -->
+                <menuitemgroup id="Menu/WidgetsHidden">                
+                    <property name="hs_show_widgets"/>
+                </menuitemgroup>   
+                <!-- These items are shown when content is visible -->
+                <menuitemgroup id="Menu/WidgetsShown">                                
+                    <property name="hs_add_widget"/>        
+                    <property name="hs_hide_widgets"/>                                
+                </menuitemgroup>        
+                <!-- These items are always shown, if not otherwise changed in the declaration -->
+                <menuitemgroup id="Menu/AlwaysShown">
+                    <property name="hs_lock_keypad"/>                
+                    <property name="hs_change_wallpaper"/>
+                    <property name="hs_rsk_setting"/>
+                    <property name="hs_show_help"/>
+                </menuitemgroup>        
+            </menuitemgrouping>            
+            <menu id="options_menu">
+                <menuitem id="hs_lock_keypad" label="&qtn_hs_lock_keypad;">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="Shortcut/LaunchByValue(localapp:keylock?on)" />
+                        </action>
+                    </actions>
+                </menuitem>            
+                <!-- widget specified options menu item select -->
+                <widgetmenuitem id="hs_widget_select" source="hs_widget_menuitem_select" label="&qtn_options_select_widget;"/>
+                <!-- widget specified options menu item open -->                         
+                <widgetmenuitem id="hs_widget_open" source="hs_widget_menuitem_open" label="&qtn_options_open;"/>
+                <menuitem id="hs_show_widgets" label="&qtn_hs_show_widgets;">
+                    <actions>
+                        <action>
+                            <trigger name="activate" />                        
+                            <event name="system/beginfullscreeneffect" effectid="1508"/>
+                            <event name="system/togglewidgetsvisibilty"/>
+                            <event name="system/endfullscreeneffect"/>                                                                        
+                            <event name="system/set">
+                                <!-- Show "add content" menuitem -->
+                                <property name="name" value="display"/>
+                                <property name="value" value="block"/>
+                                <property name="type" value="string"/>
+                                <property name="id" value="hs_add_widget"/>                
+                            </event>                                                                                                      
+                        </action>
+                    </actions>
+                </menuitem>                                    
+                <menuitem id="hs_add_widget" label="&qtn_hs_add_widget;">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="system/runaddwidgetquery"/>
+                        </action>
+                    </actions>
+                </menuitem>
+                <!-- TODO: implement properly
+                <menuitem id="hs_refresh" name="refresh" source="contentmodel" label="&qtn_hs_refresh_widget;">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="menu_event"/>
+                        </action>
+                    </actions>
+                </menuitem>-->
+                <menuitem id="hs_hide_widgets" label="&qtn_hs_hide_widgets;">
+                    <actions>
+                        <action>
+                            <trigger name="activate" />                        
+                            <event name="system/beginfullscreeneffect" effectid="1508"/>
+                            <event name="system/togglewidgetsvisibilty"/>
+                            <event name="system/endfullscreeneffect"/>                                                                                                
+                            <event name="system/set">
+                                <!-- Hide "add content" menuitem -->
+                                <property name="name" value="display"/>
+                                <property name="value" value="none"/>
+                                <property name="type" value="string"/>
+                                <property name="id" value="hs_add_widget"/>                
+                            </event>                                                                              
+                        </action>
+                    </actions>
+                </menuitem>            
+                <!-- widget sub-menu -->
+                <menu id="hs_widget_submenu" label="&qtn_hs_edit_widget;">
+                    <!-- settings controlled by widgets -->
+                    <widgetmenuitem id="hs_widget_settings" source="hs_widget_menuitem_settings" label="&qtn_hs_widget_settings;"/>                                
+                    <menuitem id="hs_move_widget" label="&qtn_hs_move_widget;">
+                        <actions>
+                            <action>
+                                <trigger name="activate"/>
+                                <event name="system/set">
+                                    <property name="name" value="focusable"/>
+                                    <property name="value" value="true"/>
+                                    <property name="type" value="string"/>
+                                    <property name="class" value="plugins"/>
+                                </event>
+                                <event name="system/seteditmode">
+                                    <property name="class" value="plugins"/>                                
+                                    <property name="class" value="normal_mode_sk"/>
+                                    <property name="class" value="edit_mode_sk"/>
+                                    <property name="keymovemode" value="true"/>
+                                </event>
+                            </action>
+                        </actions>
+                    </menuitem>                
+                    <menuitem id="hs_remove_widget" label="&qtn_hs_remove_widget;">
+                        <actions>
+                            <action>
+                                <trigger name="activate"/>
+                                <event name="system/removefocusedwidget"/>
+                            </action>
+                        </actions>
+                    </menuitem>
+                </menu>            
+                <!-- Dymanic menu items for web online/offline capability when installing a new internet/web widget -->
+                <!--<menuitem id="hs_online" status="online" name="online_offline" source="contentmodel" label="&qtn_hs_online;">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="menu_event"/>
+                        </action>
+                    </actions>   
+                </menuitem>
+                <menuitem id="hs_offline" status="offline" name="online_offline" source="contentmodel" label="&qtn_hs_offline;">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="menu_event"/>
+                        </action>
+                    </actions>   
+                </menuitem>                        -->
+                <menuitem id="hs_change_wallpaper" label ="&qtn_hs_change_wallpaper;">
+                    <actions>
+                        <action id="a_setwallpaper">
+                            <trigger id="t_setwallpaper" name="activate"/>
+                            <event id="e_setwallpaper" name="setwallpaper_event"/>
+                        </action>
+                    </actions>
+                </menuitem>                        
+                <menuitem id="hs_rsk_setting" label="&qtn_hs_options_sk2;">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="Shortcut/ShowSetting(0x01000101)" />
+                        </action>
+                    </actions>
+                </menuitem>            
+                <menuitem id="hs_show_help" label="&qtn_options_help;">
+                    <actions>
+                        <action id="a_help">
+                            <trigger name="activate"/>
+                            <event name="help_event"/>
+                        </action>
+                    </actions>
+                </menuitem>            
+            </menu>            
+            <!-- softkeys -->
+            <widgetsoftkey source="hs_widget_msk_select" label="&qtn_msk_select;"/>
+            <widgetsoftkey source="hs_widget_msk_open" label="&qtn_msk_open;"/>
+            <softkey id="lsk" type="left" class="normal_mode_sk" label="&qtn_ai_softkey_options;" >
+                <actions>
+                    <action>
+                        <trigger name="stylus"/>
+                        <trigger name="activate">
+                            <property name="eventtype" value="2"/>
+                        </trigger>
+                        <event name="system/trydisplayingmenu">
+                            <property name="id" value="options_menu"/>
+                        </event>
+                    </action>
+                    <action>
+                        <trigger name="hold"/>
+                        <event name="Shortcut/LaunchByValue(localapp:0x10201B00?ui=read_new)"/>
+                    </action>
+                </actions>
+            </softkey>
+            <softkey id="SK2" type="right" class="normal_mode_sk" label="">
+                <property class="Shortcut/ShortcutSkCaption" name="ordinal" value="0x01000101"/>
+                <!--<property class="Shortcut/ShortcutSkIcon" name="ordinal" value="0x01000101"/>-->
+                <actions>
+                    <action>
+                        <trigger name="stylus"/>
+                        <trigger name="activate">
+                            <property name="eventtype" value="2"/>
+                        </trigger>
+                        <event name="Shortcut/LaunchByIndex(0x01000101)"/>
+                    </action>
+                        <action>
+                            <trigger name="hold"/>
+                            <event name="Shortcut/LaunchByValue(localapp:0x101F8543)"/>
+                        </action>
+                </actions>
+            </softkey>            
+            <softkey id="edit_lsk_ok" type="left" class="edit_mode_sk" label="&qtn_softkey_ok;">
+                <actions>
+                    <action>
+                        <trigger name="stylus"/>
+                        <trigger name="activate"/>
+                        <event name="system/reseteditmode">
+                            <property name="class" value="plugins"/>
+                            <property name="class" value="edit_mode_sk"/>
+                            <property name="class" value="normal_mode_sk"/>
+                        </event>
+                        <event name="system/set">
+                            <property name="name" value="focusable"/>
+                            <property name="value" value="false"/>
+                            <property name="type" value="string"/>
+                            <property name="class" value="plugins"/>
+                        </event>
+                    </action>
+                </actions>
+            </softkey>
+            <softkey id="edit_msk_ok" type="middle" class="edit_mode_sk" label="#mskdot">
+                <actions>
+                    <action>
+                        <trigger name="stylus"/>
+                        <trigger name="activate"/>
+                        <event name="system/reseteditmode">
+                            <property name="class" value="plugins"/>
+                            <property name="class" value="edit_mode_sk"/>
+                            <property name="class" value="normal_mode_sk"/>                                                
+                        </event>
+                        <event name="system/set">
+                            <property name="name" value="focusable"/>
+                            <property name="value" value="false"/>
+                            <property name="type" value="string"/>
+                            <property name="class" value="plugins"/>
+                        </event>
+                    </action>
+                </actions>
+            </softkey>
+        </menubar>            
+    </view>
+</xmluiml>

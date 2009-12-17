@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Master bld.inf which builds all Xuikon Framework's essential
+*                components, variant dependent initial data, and testing modules.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+#include <bldvariant.hrh>
+#include "../inc/xuikon_builds_cfg.hrh"
+
+// building Xuikon Framework always-needed modules:
+#include "../dom/group/bld.inf"
+#include "../uiresource/group/bld.inf"
+#include "../odt/group/bld.inf"
+
+
+#include "../utils/group/bld.inf"
+#include "../renderingplugins/extrenderingplugin/group/bld.inf"
+#include "../uiengine/group/bld.inf"
+#include "../renderingplugins/xntextfactory/group/bld.inf"
+#include "../renderingplugins/xnviewfactory/group/bld.inf"
+#include "../renderingplugins/xnbitmapfactory/group/bld.inf"
+#include "../renderingplugins/xnmenufactory/group/bld.inf"
+#include "../renderingplugins/xnpopupfactory/group/bld.inf"
+#include "../renderingplugins/xnnppluginfactory/group/bld.inf"
+#include "../renderingplugins/xnclockfactory/group/bld.inf"
+#include "../renderingplugins/xnvolumecontrolfactory/group/bld.inf"
+#include "../renderingplugins/xnnewstickerfactory/group/bld.inf"
+#include "../renderingplugins/xntexteditorfactory/group/bld.inf"
+#include "../ecomelement/group/bld.inf"
+
+PRJ_PLATFORMS
+
+ARMV5 WINSCW
+
+PRJ_EXPORTS
+../rom/ai3xmluirendering.iby     	CORE_APP_LAYER_IBY_EXPORT_PATH(ai3xmluirendering.iby)
+../rom/ai3xmluirendering_resources.iby	LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(ai3xmluirendering_resources.iby)
+
+PRJ_MMPFILES

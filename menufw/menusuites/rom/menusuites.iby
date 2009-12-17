@@ -1,0 +1,51 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  IBY file for the menusuites subsystem
+*
+*/
+
+
+#ifndef MENUSUITES_IBY
+#define MENUSUITES_IBY
+
+
+data=\epoc32\data\z\resource\apps\gridroot.mif        resource\apps\gridroot.mif 
+data=\epoc32\include\gridroot.mbg                     resource\apps\gridroot.mbg
+
+data=\epoc32\data\z\resource\apps\matrixmenudata.mif        resource\apps\matrixmenudata.mif 
+data=\epoc32\include\matrixmenudata.mbg                     resource\apps\matrixmenudata.mbg
+
+data=\epoc32\data\Z\private\200113DD\content\matrixmenudata.xml private\200113DD\content\matrixmenudata.xml
+
+#ifndef __PEN_SUPPORT
+data=\epoc32\data\z\resource\apps\move_indicator_icons.mif       resource\apps\move_indicator_icons.mif
+data=\epoc32\data\z\resource\apps\move_indicator_icons.mbg       resource\apps\move_indicator_icons.mbg
+#endif
+
+// FOLDER SUITE
+
+#ifdef __PEN_SUPPORT
+data=/epoc32/data/z/private/101F4CD2/import/suites/foldersuite_touch\suite.xml private\101F4CD2\import\suites\foldersuite\suite.xml
+data=/epoc32/data/z/private/101F4CD2/import/suites/foldersuite_touch\items.xml private\101F4CD2\import\suites\foldersuite\items.xml
+#else 
+data=/epoc32/data/z/private/101F4CD2/import/suites/foldersuite_nontouch\suite.xml private\101F4CD2\import\suites\foldersuite\suite.xml
+data=/epoc32/data/z/private/101F4CD2/import/suites/foldersuite_nontouch\items.xml private\101F4CD2\import\suites\foldersuite\items.xml
+#endif
+
+/* File containing localization strings */
+data=\epoc32\include\foldersuite.rsg                     resource\apps\foldersuite.rsg
+
+#endif // MENUSUITES_IBY
+
+//  End of File  

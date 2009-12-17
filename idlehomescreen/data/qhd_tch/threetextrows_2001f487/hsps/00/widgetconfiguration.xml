@@ -1,0 +1,41 @@
+<configuration>
+    <control>
+        <settings>
+          <item id="threetextrows_plugin" name="ContentSource">
+            <property  name="name" value=""/>
+          </item>
+          <!--Def value "Test_Publisher"-->
+          <item id="pub_id" name="publisher">
+            <property name="value" value=""/> 
+          </item>
+          
+          <!-- Template designer choice -->
+          <item id="prop1" name="contentdata">
+            <property  name="class" value="text1"/>
+          </item>
+				  <!-- Template designer choice -->
+          <item id="p1trigger" name="trigger" > 
+            <property  name="name" value="text1"/> 
+          </item>
+          
+          <!-- Template designer choice -->
+          <item id="prop2" name="contentdata">
+            <property  name="class" value="text2"/>
+          </item>
+          <!-- Template designer choice -->
+          <item id="p2trigger" name="trigger" > 
+            <property  name="name" value="text2"/> 
+          </item>
+          
+          <!-- Template designer choice -->
+          <item id="prop3" name="contentdata">
+            <property  name="class" value="text3"/>
+          </item>
+				  <!-- Template designer choice -->             
+          <item id="p3trigger" name="trigger"> 
+            <property  name="name" value="text3"/> 
+          </item>
+          
+        </settings>
+    </control>
+</configuration>

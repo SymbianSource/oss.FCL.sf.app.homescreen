@@ -1,0 +1,72 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  The information required for building
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/hsps/widgetconfiguration.xml
+../hsps/00/shortcut2configuration.dtd /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/hsps/shortcut2configuration.dtd
+
+../xuikon/00/shortcut2.dat /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/shortcut2_2001fdbb.dat
+../xuikon/00/shortcut2.css /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/shortcut2.css
+../xuikon/00/shortcut2.xml /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/shortcut2.xml
+
+// Arabic languages
+//*****************
+../xuikon/37/shortcut2.css /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/37/shortcut2.css
+../xuikon/50/shortcut2.css /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/50/shortcut2.css
+../xuikon/57/shortcut2.css /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/57/shortcut2.css
+../xuikon/94/shortcut2.css /epoc32/data/Z/resource/homescreen/shortcut2_2001fdbb/xuikon/94/shortcut2.css
+
+
+// Support for S60 localization
+//*****************************
+#ifndef __SHORTCUT2CONFIGURATION_LOC__
+#define __SHORTCUT2CONFIGURATION_LOC__
+../loc/shortcut2configuration.loc APP_LAYER_LOC_EXPORT_PATH(shortcut2configuration.loc)
+#endif // __SHORTCUT2CONFIGURATION_LOC__
+
+// Support for S60 builds
+//***********************
+../rom/shortcut2_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(shortcut2_2001fdbb_resources.iby)
+../rom/shortcut2_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(shortcut2_2001fdbb_customer.iby)
+../rom/shortcut2_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(shortcut2_2001fdbb_variant.iby)
+../rom/shortcut2.iby CORE_APP_LAYER_IBY_EXPORT_PATH(shortcut2_2001fdbb.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME shortcut2_2001fdbb
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  

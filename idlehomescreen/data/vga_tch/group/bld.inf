@@ -1,0 +1,36 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Homescreen's Buzzidle (vga) widgets
+*
+*/
+
+
+#include "../double_row_icon_widget_2001fdbd/group/bld.inf"
+#include "../double_row_widget_2001fdc2/group/bld.inf"
+#include "../root_2001f48f/group/bld.inf"
+//#include "../shortcut2_2001fdbb/group/bld.inf"
+//#include "../shortcut_2001f490/group/bld.inf"
+#include "../single_row_icon_widget_2001fdc0/group/bld.inf"
+#include "../single_row_widget_2001fdc1/group/bld.inf"
+#include "../triple_row_icon_widget_2001fdbe/group/bld.inf"
+#include "../triple_row_widget_2001fdbf/group/bld.inf"
+#include "../view1_2001fdb9/group/bld.inf"
+#include "../wideimage_10009dff/group/bld.inf"
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+

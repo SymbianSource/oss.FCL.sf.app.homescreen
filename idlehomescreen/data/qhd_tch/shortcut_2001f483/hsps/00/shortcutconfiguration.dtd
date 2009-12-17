@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+============================================================================
+<FileName: "shortcutconfiguration.dtd">
+<PartOf  : "shortcutconfiguration">
+
+<FileDescription: "Localization strings for the configuration">
+<FileVersion    : >
+
+<Copyright:
+"Copyright © 2007 Nokia Corporation.
+This material, including documentation and any related
+computer programs, is protected by copyright controlled by
+Nokia Corporation. All rights are reserved. Copying,
+including reproducing, storing,  adapting or translating, any
+or all of this material requires the prior written consent of
+Nokia Corporation. This material also contains confidential
+information which may not be disclosed to others without the
+prior written consent of Nokia Corporation.">
+============================================================================
+-->
+
+<!-- NOTE: make sure that there is at last one space character (hex 20) after the entity name -->
+
+<!--
+qtn_shortcut1_configuration_name.attributes
+qtn_shortcut1_configuration_name.layout "list_single_pane_t1_cp2"
+qtn_shortcut1_configuration_name.release "TB9.2"
+qtn_shortcut1_configuration_name.description "Shortcut 1"
+qtn_shortcut1_configuration_name.parents ""
+-->
+<!ENTITY qtn_shortcut1_configuration_name  "Shortcut 1">
+<!ENTITY qtn_shortcut1_configuration_desc  "RnD shortcut 1 description.">

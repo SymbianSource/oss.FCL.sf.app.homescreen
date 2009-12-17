@@ -1,0 +1,102 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+;Languages
+&EN
+
+;Header
+#{"MenuFW"},(0x101f4cd2),1,0,0, TYPE=SA
+; Supports Series 60 v5.0
+(0x1028315F), 0, 0, 0, {"Series60ProductID"}
+
+;Localised Vendor name
+%{"Nokia"}
+
+;Unique Vendor name
+:"Nokia"
+
+;Files
+
+;hierarchynavigator
+"" -"z:\sys\bin\hnengine.dll"
+"" -"z:\sys\bin\hnpresentationmodel.dll"
+"" -"z:\sys\bin\hnmetadatamodel.dll"
+"" -"z:\sys\bin\hnutilities.dll"
+
+;menufwui
+"" -"z:\sys\bin\mmextensionmanager.dll"
+"" -"z:\sys\bin\mmfolderuiextensionplugin.dll"
+"" -"z:\resource\plugins\mmfolderuiextensionplugin.rsc"
+"" -"z:\resource\apps\mmfolderuiextplugin.rsc"
+
+;matrixmenu
+"" -"z:\sys\bin\matrixmenu.exe"
+"" -"z:\private\10003a3f\import\apps\matrixmenu_reg.rsc"
+"" -"z:\resource\apps\matrixmenu.mif"
+"" -"z:\resource\apps\matrixmenu.r*"
+
+
+"" -"z:\resource\apps\gridroot.mbg"
+"" -"z:\resource\apps\gridroot.mif"
+
+"" -"z:\resource\apps\move_indicator_icons.mbg"
+"" -"z:\resource\apps\move_indicator_icons.mif"
+
+;mmwidgets
+"" -"z:\sys\bin\mmwidgets.dll"
+
+;tamplates
+
+"" -"z:\resource\list\custom\akn_single_large_graphic_pane.xml"
+"" -"z:\resource\list\custom\akn_logical_template_1.xml"
+"" -"z:\resource\list\custom\akn_logical_template_2.xml"
+"" -"z:\resource\list\custom\akn_logical_template_3.xml"
+"" -"z:\resource\list\custom\akn_logical_template_4.xml"
+"" -"z:\resource\list\custom\akn_logical_template_5.xml"
+"" -"z:\resource\list\custom\akn_logical_template_6.xml"
+"" -"z:\resource\list\custom\akn_logical_template_7.xml"
+"" -"z:\resource\list\custom\akn_logical_template_8.xml"
+"" -"z:\resource\list\custom\akn_logical_template_10.xml"
+"" -"z:\resource\list\custom\akn_logical_template_11.xml"
+"" -"z:\resource\list\custom\akn_logical_template_12.xml"
+"" -"z:\resource\list\custom\akn_logical_template_13.xml"
+
+"" -"z:\resource\grid\custom\akn_single_large_graphic_pane.xml"
+"" -"z:\resource\grid\custom\akn_logical_template_1.xml"
+"" -"z:\resource\grid\custom\akn_logical_template_2.xml"
+"" -"z:\resource\grid\custom\akn_logical_template_3.xml"
+"" -"z:\resource\grid\custom\akn_logical_template_4.xml"
+
+;lct
+"" -"z:\resource\list\lct\akn_single_large_graphic_pane.xml"
+"" -"z:\resource\list\lct\akn_logical_template_1.xml"
+"" -"z:\resource\list\lct\akn_logical_template_2.xml"
+"" -"z:\resource\list\lct\akn_logical_template_3.xml"
+"" -"z:\resource\list\lct\akn_logical_template_4.xml"
+"" -"z:\resource\list\lct\akn_logical_template_5.xml"
+"" -"z:\resource\list\lct\akn_logical_template_6.xml"
+"" -"z:\resource\list\lct\akn_logical_template_7.xml"
+"" -"z:\resource\list\lct\akn_logical_template_8.xml"
+"" -"z:\resource\list\lct\akn_logical_template_12.xml"
+;suites
+"" -"z:\private\101f4cd2\import\suites\foldersuite\suite.xml"
+"" -"z:\private\101f4cd2\import\suites\foldersuite\items.xml"
+"" -"z:\resource\apps\foldersuite.rsc"
+"" -"z:\resource\apps\foldersuite.rsg"
+
+
+;TEST CONTENT:
+;removed

@@ -1,0 +1,235 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies)..
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* 
+*
+*/
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <appinfo.rh>
+#include <avkon.mbg>
+
+#include "widgetmanager.hrh"
+#include "widgetmanagerview.loc"
+
+//  RESOURCE IDENTIFIER
+NAME    WIGZ // 4 letter ID
+
+RESOURCE RSS_SIGNATURE
+	{
+	}
+
+// ----------------------------------------------------
+// MAIN VIEW AND ITS PARTS
+// ----------------------------------------------------
+
+RESOURCE AVKON_VIEW r_wm_main_container_view
+    {
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT;
+    menubar = r_wm_main_container_options_menu;
+    toolbar = 0;
+    }
+
+RESOURCE TITLE_PANE r_wm_main_container_title_resource
+    {
+    txt = qtn_wm_title_text;
+    }
+
+// ----------------------------------------------------
+// MENU
+// ----------------------------------------------------
+
+RESOURCE MENU_BAR r_wm_main_container_options_menu
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_wm_main_container_menu_pane;
+            }
+        };
+    }
+
+RESOURCE MENU_PANE r_wm_main_container_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewOpenPortalMenuItemCommand;
+            txt = qtn_options_wm_open;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewAddMenuItemCommand;
+            txt = qtn_options_wm_add;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewWiddetDetailsMenuItemCommand;
+            txt = qtn_options_wm_show_details;
+            flags = EEikMenuItemSpecific;
+            },    
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewLaunchMenuItemCommand;
+            txt = qtn_options_wm_launch_widget;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewSearchMenuItemCommand;
+            txt = qtn_options_wm_search;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewSortAlphaMenuItemCommand;
+            txt = qtn_options_wm_sort_alpha;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewUninstallMenuItemCommand;
+            txt = qtn_options_wm_uninstall;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewHelpMenuItemCommand;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EWmMainContainerViewBackMenuItemCommand;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ----------------------------------------------------
+// OVI STORE BUTTON
+// ----------------------------------------------------
+
+RESOURCE AVKON_BUTTON r_wm_portal_button
+    {
+    flags = 0;
+    states =
+        {
+        AVKON_BUTTON_STATE
+            {
+            flags = 0;
+            txt = qtn_wm_ovi_store_title;
+            bmpfile = AVKON_BITMAP_FILE;
+            bmpid = EMbmAvkonQgn_graf_wml_wait_globe_04;
+            bmpmask = EMbmAvkonQgn_graf_wml_wait_globe_04_mask;
+            press_bmpid = EMbmAvkonQgn_graf_wml_wait_globe_04;
+            press_bmpmask = EMbmAvkonQgn_graf_wml_wait_globe_04_mask;
+            }
+        };
+    }
+
+RESOURCE TBUF r_qtn_wm_go_to_ovi_store
+    {
+    buf = qtn_wm_ovi_store_title;
+    }
+
+// ----------------------------------------------------
+// MISCELLANEOUS INFO MESSAGES
+// ----------------------------------------------------
+
+RESOURCE TBUF r_qtn_hs_add_widget_no_space_note
+    {
+    buf = qtn_hs_add_widget_no_space_note;
+    }
+
+RESOURCE TBUF r_qtn_hs_add_widget_max_count_note
+    {
+    buf = qtn_hs_add_widget_max_count_note;
+    }
+
+RESOURCE TBUF r_qtn_wm_details_no_description
+    {
+    buf = qtn_wm_details_no_description;
+    }
+
+RESOURCE TBUF r_qtn_wm_uninst_not_allowed
+    {
+    buf = qtn_wm_uninst_not_allowed;
+    }
+
+// ----------------------------------------------------
+// Wm Details dialog
+// ----------------------------------------------------
+
+STRUCT WMDLGCONTROL
+    {
+    STRUCT control;
+    }
+	
+RESOURCE DIALOG r_wm_details_add_dialog
+    {
+    flags = EEikDialogFlagNoDrag |
+            EEikDialogFlagCbaButtons |
+            EEikDialogFlagWait |
+            EEikDialogFlagNoTitleBar;
+    buttons = r_wm_details_add_close_cba;
+    }
+
+RESOURCE CBA r_wm_details_add_close_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON // add
+            {
+            id = ECbaAddToHs; 
+            txt = qtn_wm_details_add_to_hs; 
+            },
+        CBA_BUTTON // close
+            {
+            id = EAknSoftkeyClose; 
+            txt = text_softkey_close;
+            }
+        };
+    }
+
+RESOURCE DIALOG r_wm_details_only_dialog
+    {
+    flags = EEikDialogFlagNoDrag |
+            EEikDialogFlagCbaButtons |
+            EEikDialogFlagWait |
+            EEikDialogFlagNoTitleBar;
+    buttons = r_wm_details_empty_close_cba;
+    }
+
+RESOURCE CBA r_wm_details_empty_close_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON // empty
+            {
+            id = 0; 
+            txt = text_softkey_empty; 
+            },
+        CBA_BUTTON // close
+            {
+            id = EAknSoftkeyClose; 
+            txt = text_softkey_close;
+            }
+        };
+    }
