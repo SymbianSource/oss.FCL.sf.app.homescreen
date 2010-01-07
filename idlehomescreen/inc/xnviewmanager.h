@@ -87,7 +87,8 @@ public:
 NONSHARABLE_CLASS( CXnViewManager ) : public CBase
     {
     // Friend classes
-    friend class CXnViewAdapter;    
+    friend class CXnViewAdapter;
+    
 public:
     /**
      * Two-phased constructor.
@@ -234,10 +235,8 @@ private:
 public:
     void UpdatePageManagementInformationL();
 
-#if 0 // MSK icon change
 private:
     TInt ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const;
-#endif // MSK icon change
         
 private:
     // data

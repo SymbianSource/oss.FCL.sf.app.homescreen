@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.42 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.44 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -21,7 +21,7 @@
 #include <e32math.h>
 #include <AknsDrawUtils.h>
 #include <layoutmetadata.cdl.h>
-#include <aknlongtapdetector.h> 
+#include <aknlongtapdetector.h>
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
 #include <aknlistloadertfx.h>
@@ -223,7 +223,7 @@ void CMmWidgetContainer::HandleResourceChange( TInt aType )
         {
         static_cast<CMmListBoxItemDrawer*>( iDrawer )->InvalidateCache();
         }
-    
+
     CCoeControl::HandleResourceChange( aType );
     }
 
@@ -344,9 +344,9 @@ EXPORT_C void CMmWidgetContainer::CancelDragL( TBool aAnimate )
         {
         iDrawer->AnimateDragItemTransitionL();
         }
-    
+
     SetHighlightAfterDrag();
-    
+
     iDraggedIndex = -1;
     iDrawer->SetDraggedIndexL( iDraggedIndex, TPoint(0,0) );
     SetDraggableL( EFalse );
@@ -587,12 +587,12 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     	{
     	iMarqueeAdapter->StopMarqueeDrawing();
     	}
-    
+
     TInt index = KErrNotFound;
     TBool itemExists = iWidget->View()->XYPosToItemIndex( aPointerEvent.iPosition, index );
 
     CCoeControl::HandlePointerEventL(aPointerEvent);
-    
+
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down
             && itemExists  )
         {
@@ -621,7 +621,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     	}
 
 	TInt lastTopItemIndex = Widget()->TopItemIndex();
-	
+
     TBool abortAnimation = lastTopItemIndex != Widget()->TopItemIndex();
 
     if (abortAnimation)
@@ -633,7 +633,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     	{
 		HandlePointerEventsInEditModeL(aPointerEvent, abortAnimation);
     	}
-    
+
     if ( iLongTapDetector )
     	{
     	TPointerEvent longTapPointerEvent = aPointerEvent;
@@ -642,8 +642,8 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
         	longTapPointerEvent.iType = TPointerEvent::EDrag;
         	}
         iLongTapDetector->PointerEventL( longTapPointerEvent );
-    	}	
-    
+    	}
+
     }
 
 // -----------------------------------------------------------------------------
@@ -664,7 +664,7 @@ EXPORT_C TRect CMmWidgetContainer::GetItemRectL( TInt aItemIndex )
 //
 void CMmWidgetContainer::SetDraggableL( TBool aDraggable )
     {
-    
+
     iDrawer = STATIC_CAST(CMmListBoxItemDrawer*, iWidget->View()->ItemDrawer());
     iDrawer->SetDraggableL( aDraggable );
     }
@@ -860,9 +860,9 @@ void CMmWidgetContainer::SetHighlightL( TInt aItemIndex )
             {
             HideOptionsMenuIfDisplayed();
             }
-        
+
         CHnSuiteModel* suiteModel = GetMmModel()->GetSuiteModel();
-        
+
         if (suiteModel)
             {
             suiteModel->SetSuiteHighlightL( iCurrentHighlight );
@@ -959,7 +959,7 @@ TKeyResponse CMmWidgetContainer::OfferKeyEventL(const TKeyEvent &aKeyEvent,
 
     if (!AknLayoutUtils::PenEnabled() && iIsEditMode )
         {
-		if ((GetHighlight() + ColumnsInCurrentView() > NumberOfItems() - 1) 
+		if ((GetHighlight() + ColumnsInCurrentView() > NumberOfItems() - 1)
 						&& aKeyEvent.iScanCode == EStdKeyDownArrow)
 			// the second condition is needed to block moving item down when there is no item below the moved item.
 			{
@@ -974,7 +974,7 @@ TKeyResponse CMmWidgetContainer::OfferKeyEventL(const TKeyEvent &aKeyEvent,
             static_cast<CMmListBoxItemDrawer*>(iDrawer)->SetHighlightShown( ETrue );
             SetHighlightL( iWidget->CurrentItemIndex() );
             ScrollViewIfNeededL(); //only edit mode non-touch
-            
+
             if ( prevIndex != GetHighlight()
             		&& KErrNotFound != prevIndex  )
             	{
@@ -1104,7 +1104,7 @@ TInt CMmWidgetContainer::ColumnsInCurrentView()
 //
 TInt CMmWidgetContainer::RowsInCurrentView()
     {
-    //should be overridden by deriving classes   
+    //should be overridden by deriving classes
     CListBoxView *view = ((CListBoxView*) Widget()->View());
     return view->NumberOfItemsThatFitInRect( Rect());//Widget()->View()->ViewRect());
     }
@@ -1200,14 +1200,14 @@ TKeyResponse CMmWidgetContainer::HandleKeyEventL( const TKeyEvent &aKeyEvent,
     	}
     else if ( iAllowLongPress && aType == EEventKey && aKeyEvent.iRepeats > 0 &&
     		( aKeyEvent.iScanCode == EStdKeyDevice3
-				|| aKeyEvent.iScanCode == EStdKeyEnter 
+				|| aKeyEvent.iScanCode == EStdKeyEnter
 				|| aKeyEvent.iScanCode == EStdKeyNkpEnter ) )
     	{
     	HandleRockerPressL();
     	resp = EKeyWasConsumed;
     	iAllowLongPress = EFalse;
     	}
-    
+
     return resp;
     }
 
@@ -1243,7 +1243,7 @@ void CMmWidgetContainer::SetSuiteModelL(CHnSuiteModel* aModel)
         }
     iWidget->MakeVisible(ETrue);
 
-    Widget()->View()->ItemDrawer()->ClearFlags( 
+    Widget()->View()->ItemDrawer()->ClearFlags(
     		CListItemDrawer::EPressedDownState );
 	iPostProcessor->StartAt( iWidget->BottomItemIndex() + 1 );
     }
@@ -1376,37 +1376,6 @@ EXPORT_C void CMmWidgetContainer::HandleItemRemovalL()
 //
 // ---------------------------------------------------------------------------
 //
-TBool CMmWidgetContainer::FlipOpen()
-	{
-	return iFlipOpen;
-	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CMmWidgetContainer::SetFlipOpenL( TBool aIsFlipOpen )
-	{
-    if ( aIsFlipOpen != iFlipOpen )
-    	{
-    	iFlipOpen = aIsFlipOpen;
-    	FlipStateChangedL();
-		}
-	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CMmWidgetContainer::FlipStateChangedL()
-	{
-//	default do nothing
-	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
 EXPORT_C void CMmWidgetContainer::StopMovingL()
 	{
 	if ( !AknLayoutUtils::PenEnabled() && iDragAndDropObserver )
@@ -1426,26 +1395,26 @@ void CMmWidgetContainer::ScrollViewIfNeededL()
 		return;
 		}
 
-	TBool needToScrollUp = 
+	TBool needToScrollUp =
 		GetHighlight() - iWidget->TopItemIndex() < ColumnsInCurrentView()
 		&& iWidget->TopItemIndex() != 0;
-	
+
 	TBool needToScrollDown =
 		iWidget->BottomItemIndex() - GetHighlight() < ColumnsInCurrentView()
-		&& iWidget->BottomItemIndex() / ColumnsInCurrentView() 
+		&& iWidget->BottomItemIndex() / ColumnsInCurrentView()
 			!= ( NumberOfItems() - 1 )  / ColumnsInCurrentView();
-	
+
 	if ( WidgetType() == EGridWidget )
 		{
 		// TODO: temporary - invisible partial items in MCL grid :/
-		needToScrollDown = 
+		needToScrollDown =
 			iWidget->BottomItemIndex() - ColumnsInCurrentView() - GetHighlight() < ColumnsInCurrentView()
 		    && ( iWidget->BottomItemIndex() / ColumnsInCurrentView() ) - 1
 				!= ( NumberOfItems() - 1 ) / ColumnsInCurrentView()
 			&& iWidget->BottomItemIndex() - iWidget->TopItemIndex()
 				> ColumnsInCurrentView() * RowsInCurrentView();
 		}
-	
+
 	if ( needToScrollUp )
 		{
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
@@ -1468,7 +1437,7 @@ void CMmWidgetContainer::ScrollViewIfNeededL()
 		}
 	else if ( needToScrollDown )
 		{
-		
+
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
 			MAknListBoxTfxInternal *transApi = CAknListLoader::TfxApiInternal( iDrawer->Gc() );
 			if ( transApi )
@@ -1486,7 +1455,7 @@ void CMmWidgetContainer::ScrollViewIfNeededL()
 				transApi->Draw( Rect() );
 				}
 #endif
-		
+
 		UpdateViewScrollBarThumbs();
 		}
 	}
@@ -1497,7 +1466,7 @@ void CMmWidgetContainer::ScrollViewIfNeededL()
 //
 void CMmWidgetContainer::UpdateViewScrollBarThumbs()
 	{
-	
+
 	}
 
 //----------------------------------------------------------------------------
@@ -1510,7 +1479,7 @@ void CMmWidgetContainer::StartOrStopMarquee()
         {
         TBool marqueeShouldBeEnabled = iHasFocus && iInForeground
                 && !iIsFaded && !IsEditMode();
-        
+
          // logical Ex-OR
         if ( !!marqueeShouldBeEnabled != !!iMarqueeAdapter->IsMarqueeEnabled() )
             {
@@ -1524,38 +1493,6 @@ void CMmWidgetContainer::StartOrStopMarquee()
         }
     }
 
-//----------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CMmWidgetContainer::HandleZoomChanged( TAknUiZoom aZoom )
-	{
-	SetZoom( aZoom );
-	if( WidgetType() == EGridWidget )
-	    {
-	    CMmGrid* grid = static_cast<CMmGrid*>( iWidget );
-	    grid->SetupLayout();
-	    }
-	Widget()->DrawDeferred();
-	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CMmWidgetContainer::SetZoom( TAknUiZoom aZoom )
-	{
-	CMmTemplateLibrary * templateLibrary =
-	static_cast<CMmListBoxItemDrawer*> (
-			Widget()->View()->ItemDrawer() )->TemplateLibrary();
-
-	if ( WidgetType() == EGridWidget && EAknUiZoomSmall == aZoom )
-		{
-		aZoom = EAknUiZoomNormal;
-		}
-	templateLibrary->SetZoom( aZoom );
-	}
-
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -1563,13 +1500,13 @@ EXPORT_C void CMmWidgetContainer::SetZoom( TAknUiZoom aZoom )
 void CMmWidgetContainer::SetHighlightAfterDrag()
 	{
     if ( AknLayoutUtils::PenEnabled() &&
-    		iDraggedIndex != KErrNotFound && 
+    		iDraggedIndex != KErrNotFound &&
 			iDraggedIndex != Widget()->CurrentItemIndex()
 			&& iDraggedIndex < NumberOfItems() )
     	{
     	TBool isFolder(EFalse);
     	CHnSuiteModel* model = GetMmModel()->GetSuiteModel();
-		CHnItemModel* onItemModel = model->GetItemModel( 
+		CHnItemModel* onItemModel = model->GetItemModel(
 				model->IdByIndex( Widget()->CurrentItemIndex() ));
 	    if (onItemModel)
 	    	{
@@ -1589,7 +1526,7 @@ void CMmWidgetContainer::SetHighlightAfterDrag()
 //
 void CMmWidgetContainer::ValidateWidgetCurrentItemIndex()
 	{
-	if (Widget()->CurrentItemIndex() >= GetMmModel()->NumberOfItems() 
+	if (Widget()->CurrentItemIndex() >= GetMmModel()->NumberOfItems()
 			|| Widget()->CurrentItemIndex() == KErrNotFound )
 		{
 		iCurrentHighlight = GetMmModel()->NumberOfItems();
@@ -1615,7 +1552,7 @@ EXPORT_C void CMmWidgetContainer::CacheWidgetPosition()
 	iWidgetPositionCache.iLandscape
 			= Layout_Meta_Data::IsLandscapeOrientation();
 	iWidgetPositionCache.iHighlightedItemId = KErrNotFound;
-	
+
 	TInt highlightedItemIndex = Widget()->CurrentItemIndex();
 	CHnSuiteModel* suiteModel = GetMmModel()->GetSuiteModel();
 	if ( suiteModel && highlightedItemIndex != KErrNotFound
@@ -1625,7 +1562,7 @@ EXPORT_C void CMmWidgetContainer::CacheWidgetPosition()
 	    iWidgetPositionCache.iHighlightedItemId =
             suiteModel->IdByIndex( highlightedItemIndex );
 	    }
-	
+
 	iWidgetPositionCache.iValid = ETrue;
 	}
 
@@ -1654,7 +1591,7 @@ EXPORT_C void CMmWidgetContainer::RestoreWidgetPosition()
 			Widget()->View()->SetTopItemIndex(iWidgetPositionCache.iTopItemIndex);
 			SetVerticalItemOffset(iWidgetPositionCache.iVerticalItemOffset);
 			TRAP_IGNORE( AlignBottomOfViewL() );
-			
+
 			// Important: If an item that was previously highlighted and visible is
 			// still highlighted and yet somehow is not visible after the position
 			// has been restored, fix the problem by scrolling the view until that
@@ -1677,7 +1614,7 @@ EXPORT_C void CMmWidgetContainer::RestoreWidgetPosition()
 			{
 			TRAP_IGNORE( ScrollToItemL(Widget()->CurrentItemIndex()) );
 			}
-		
+
 		iWidgetPositionCache.iValid = EFalse;
 		}
 	}
@@ -1728,9 +1665,9 @@ EXPORT_C void CMmWidgetContainer::NumberOfItemsChangedL( TItemsChangeType aChang
 		{
 		CacheWidgetPosition();
 		Widget()->View()->SetDisableRedraw( ETrue );
-		
+
 		HandleNumberOfItemsChangedL( aChange );
-		
+
 		Widget()->View()->SetDisableRedraw( EFalse );
 		RestoreWidgetPosition();
 		}
@@ -1769,7 +1706,7 @@ TBool CMmWidgetContainer::AlignBottomOfViewL()
 	{
 	TInt scrollConsumed( EFalse );
 	TInt pixelsToScroll( 0 );
-	
+
 	if ( NumberOfItems() > 0 )
 		{
 		pixelsToScroll = CalcBottomPixelsToScroll();
@@ -1796,7 +1733,7 @@ TInt CMmWidgetContainer::CalcBottomPixelsToScroll()
     TInt lastItemBottomY = Widget()->View()->ItemPos(lastItemIndex).iY
                 + Widget()->ItemHeight();
     TInt pixelsToScroll( 0 );
-    
+
     if ( Widget()->ScrollBarFrame()->VerticalScrollBar()->IsVisible() )
         {
         pixelsToScroll = Min( 0, lastItemBottomY - viewHeight );
@@ -1805,7 +1742,7 @@ TInt CMmWidgetContainer::CalcBottomPixelsToScroll()
         {
         pixelsToScroll = Widget()->View()->ItemPos( firstItemIndex ).iY;
         }
-    
+
     return pixelsToScroll;
     }
 
@@ -1836,7 +1773,7 @@ EXPORT_C TBool CMmWidgetContainer::ItemIsFullyVisible(TInt aIndex)
 void CMmWidgetContainer::ScrollInPixelsL(TInt aPixels)
 	{
 	SetupScrollingEffectsL( aPixels > 0 );
-	
+
 	if ( AknLayoutUtils::PenEnabled() )
 		{
 		Widget()->HandlePhysicsScrollEventL(aPixels);
@@ -1846,8 +1783,8 @@ void CMmWidgetContainer::ScrollInPixelsL(TInt aPixels)
 		// non-touch avkon doesn't seem to support scrolling by given
 		// amount of pixels
 		TInt delta = aPixels / Widget()->View()->ItemHeight();
-		
-		Widget()->View()->VScrollTo( Widget()->TopItemIndex() + 
+
+		Widget()->View()->VScrollTo( Widget()->TopItemIndex() +
 				delta * ColumnsInCurrentView() );
 		}
 	}
@@ -1864,7 +1801,7 @@ EXPORT_C TBool CMmWidgetContainer::ScrollToItemL(TInt aIndex)
 		scrollConsumed = AlignBottomOfViewL();
 		if ( !scrollConsumed && Widget()->View()->ItemIsPartiallyVisible(aIndex))
 			{
-//			the case when the item is partially visible at top or 
+//			the case when the item is partially visible at top or
 //			bottom of screen. Th e view is scrolled the offset to
 //			make the item entirely visible.
 			TInt offsetBottom = Widget()->View()->ItemPos(aIndex).iY
@@ -1878,7 +1815,7 @@ EXPORT_C TBool CMmWidgetContainer::ScrollToItemL(TInt aIndex)
 				ScrollInPixelsL( offset );
 				scrollConsumed = ETrue;
 				}
-				
+
 			}
 		else if (!Widget()->View()->ItemIsVisible(aIndex))
 			{
@@ -1918,7 +1855,7 @@ void CMmWidgetContainer::SetupScrollingEffectsL(TBool aDown)
 EXPORT_C void CMmWidgetContainer::PrepareForGarbage()
 	{
 //	This is called when the suite model is destoyed and the container is set to be destroyed
-//	by the garbage collector. There should be no redraws done to the widget in this period 
+//	by the garbage collector. There should be no redraws done to the widget in this period
 //	because this will cause the screen to be redrawn only containing the balnk background.
 //	Before garbage cleanup an asynchronous redraw event may intend to redraw the widget.
 //	SetDisableRedraw() prevents redrawing. Animator is also prepared for garbage so there is
@@ -1948,7 +1885,7 @@ TBool CMmWidgetContainer::IsTimerActive( TInt aItemIndex )
 //
 // -----------------------------------------------------------------------------
 //
-void CMmWidgetContainer::HandleLongTapEventL( const TPoint& aPenEventLocation, 
+void CMmWidgetContainer::HandleLongTapEventL( const TPoint& aPenEventLocation,
                                       const TPoint& aPenEventScreenLocation )
 	{
 	TInt index( KErrNotFound );
@@ -1977,7 +1914,7 @@ EXPORT_C void CMmWidgetContainer::SetLongTapObserver( MMmLongTapObserver* aObser
 //
 // -----------------------------------------------------------------------------
 //
-EXPORT_C void CMmWidgetContainer::HandleTopFocusL( TBool aStopTimer )
+EXPORT_C void CMmWidgetContainer::EndLongTapL( TBool aStopTimer )
 	{
 	if ( iLongTapInProgress )
 		{
@@ -1991,7 +1928,7 @@ EXPORT_C void CMmWidgetContainer::HandleTopFocusL( TBool aStopTimer )
 	}
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
@@ -2035,7 +1972,7 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 			break;
 			}
 		}
- 
+
 //    handle different behaviour in edit mode and normal mode
 	if ( !IsEditMode() )
 		{
@@ -2043,14 +1980,14 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 			{
 			case MEikListBoxObserver::EEventFlickStarted:
 				{
-				static_cast<CMmListBoxItemDrawer*>( 
+				static_cast<CMmListBoxItemDrawer*>(
 						Widget()->View()->ItemDrawer() )->
 						EnableCachedDataUse( ETrue );
 				break;
 				}
 			case MEikListBoxObserver::EEventFlickStopped:
 				{
-				static_cast<CMmListBoxItemDrawer*>( 
+				static_cast<CMmListBoxItemDrawer*>(
 						Widget()->View()->ItemDrawer() )->
 						EnableCachedDataUse( EFalse );
 				DrawView();
@@ -2058,32 +1995,32 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 				}
 			}
 		}
-	else 
+	else
 		{
 		switch ( aEventType )
 			{
 			case MEikListBoxObserver::EEventFlickStopped:
 				{
-				// this fixes some problems with messed edit mode 
+				// this fixes some problems with messed edit mode
 				// caused by kinetic scrolling
 				iDrawer->GetAnimator()->SetNextRedrawToWholeScreen();
 				break;
 				}
 			}
 		}
-	
+
     if ( iListBoxObserver && !iLongTapInProgress )
         {
         iListBoxObserver->HandleListBoxEventL( aListBox, aEventType );
         }
-    
+
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CMmWidgetContainer::HandleOptionsMenuVisibilityChangeL( 
+EXPORT_C void CMmWidgetContainer::HandleOptionsMenuVisibilityChangeL(
 		TBool aOptionsMenuVisible )
 	{
 	if ( IsTimerActive() )

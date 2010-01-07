@@ -21,10 +21,11 @@
 
 // User include files
 #include "hscontentcontrolfactory.h"
+#include "hscontentcontrolecomlistener.h"
 
 // Local constants
 
-// TODO: Content controller ECom interface UID
+// Content controller ECom interface UID
 const TUid KInterfaceUidContentController = { 0x20026F51 };
 
 // ======== LOCAL FUNCTIONS ========
@@ -73,6 +74,10 @@ EXPORT_C CHsContentControlFactory* CHsContentControlFactory::NewL()
 //
 void CHsContentControlFactory::ConstructL()
     {
+    iHsContentControlEComListener = 
+            CHsContentControlEComListener::NewL( *this );
+    REComSession::ListImplementationsL( 
+            KInterfaceUidContentController, iImplArray );
     }
 
 // ----------------------------------------------------------------------------
@@ -89,7 +94,10 @@ CHsContentControlFactory::CHsContentControlFactory()
 //
 EXPORT_C CHsContentControlFactory::~CHsContentControlFactory()
     {
+    iImplArray.ResetAndDestroy();
+    iImplArray.Close();
     iHsContentControlUis.ResetAndDestroy();
+	delete iHsContentControlEComListener;
     }
 
 // ---------------------------------------------------------------------------------
@@ -115,17 +123,17 @@ EXPORT_C MHsContentControlUi* CHsContentControlFactory::GetHsContentController(
                 {
                 CImplementationInformation* information( plugins[i] );
                 
-                if ( information->OpaqueData().Compare( aControlType ) == 0 )
+                if ( information->OpaqueData().CompareF( aControlType ) == 0 )
                     {
                     CHsContentControlUi* ccUi = CHsContentControlUi::NewL( 
                         information->ImplementationUid() );
+                    CleanupStack::PushL( ccUi );
                     
                     ccUi->SetContentControlTypeL( information->OpaqueData() );
-                    
                     iHsContentControlUis.AppendL( ccUi );
                     
+                    CleanupStack::Pop(); //ccUi
                     retval = ccUi;
-                    
                     // All done
                     break;
                     }
@@ -149,13 +157,140 @@ MHsContentControlUi* CHsContentControlFactory::FindHsContentController(
         {
         CHsContentControlUi* cc( iHsContentControlUis[ i ] );
         
-        if ( cc->ContentControlType().Compare( aControlType ) == 0 )                
+        if ( cc->ContentControlType().CompareF( aControlType ) == 0 )                
             {
             return cc;
             } 
         }
     
     return NULL;
+    }
+
+// ----------------------------------------------------------------------------
+// CHsContentControlFactory::HandleEComChangeEvent()
+// ----------------------------------------------------------------------------
+//
+void CHsContentControlFactory::HandleEComChangeEvent()
+    {
+    // ignore event if no plugin loaded.
+    if ( iHsContentControlUis.Count() > 0 )
+        {
+        TRAP_IGNORE( CheckPluginChangesL(); );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CHsContentControlFactory::CheckPluginChangesL
+// ----------------------------------------------------------------------------
+//
+void CHsContentControlFactory::CheckPluginChangesL()
+    {
+    // Array to return all implementations in an interface
+    RImplInfoPtrArray plugInArray;
+    CleanupResetAndDestroyPushL( plugInArray );
+
+    // Get the list of all implementations.
+    REComSession::ListImplementationsL( 
+            KInterfaceUidContentController, plugInArray );
+        
+    TUid uid( KNullUid );
+    TBool done( EFalse );
+    
+    // If an implementation is not present in present in the plugInArray then its removed. 
+    for( TInt index( iImplArray.Count() - 1 ); index >= 0 && !done; --index )
+        {
+        uid = plugInArray[ index ]->ImplementationUid();
+        CImplementationInformation* implInfo = 
+                FindPluginImplInfo( uid, plugInArray );
+        if ( implInfo && PluginUpgradeDowngrade( *implInfo ) )
+            {
+            done = ETrue;
+            }
+        else
+            {
+            // check if ContenControlUi is loaded, unload it
+            for( TInt innerIndex( iHsContentControlUis.Count() - 1 );
+                    innerIndex >= 0 && !done; --innerIndex )
+                {
+                CHsContentControlUi* cc( iHsContentControlUis[ innerIndex ] );
+                if ( cc && cc->ImplUid() == uid )
+                    {
+                    iHsContentControlUis.Remove( innerIndex );
+                    delete cc;
+                    cc = NULL;
+                    done = ETrue;
+                    }
+                }
+            done = ETrue;
+            }
+        }
+
+    // Cleanup.
+    CleanupStack::PopAndDestroy(); // plugInArray
+    
+    // Reset the array and refresh the plugin list.
+    iImplArray.ResetAndDestroy();
+    iImplArray.Close();    
+    REComSession::ListImplementationsL( 
+            KInterfaceUidContentController, iImplArray );
+    }
+
+// ----------------------------------------------------------------------------
+// CHsContentControlFactory::FindPluginImplInfo
+// ----------------------------------------------------------------------------
+//
+CImplementationInformation* CHsContentControlFactory::FindPluginImplInfo( 
+        const TUid& aUid, const RImplInfoPtrArray& aPlugInArray )
+    {
+    CImplementationInformation* implInfo( NULL );
+    for( TInt index( aPlugInArray.Count() - 1 ); index >= 0; --index )
+        {
+        implInfo = aPlugInArray[ index ];
+        if( aUid == implInfo->ImplementationUid() )
+            {
+            break;
+            }
+        }
+    return implInfo;
+    }
+
+// ----------------------------------------------------------------------------
+// CHsContentControlFactory::PluginUpgradeDowngrade
+// ----------------------------------------------------------------------------
+//
+TBool CHsContentControlFactory::PluginUpgradeDowngrade( 
+        const CImplementationInformation& aPluginImplInfo )
+    {
+    // Check for each plugin in the array if the version matches with the plugin we have
+    TUid uid = aPluginImplInfo.ImplementationUid();
+    for( TInt outterIndex( iImplArray.Count() - 1 ); outterIndex >= 0; --outterIndex )
+        {
+        if( uid == iImplArray[ outterIndex ]->ImplementationUid() )
+            {
+            if( aPluginImplInfo.Version() != iImplArray[ outterIndex ]->Version() ||
+               aPluginImplInfo.Drive() != iImplArray[ outterIndex ]->Drive() ||
+               aPluginImplInfo.DisplayName() != iImplArray[ outterIndex ]->DisplayName() ||
+               aPluginImplInfo.OpaqueData() != iImplArray[ outterIndex ]->OpaqueData() )
+                {
+                // If control reaches here, it means we either have an upgrade or downgrade.
+                // check if we have loaded this plugin, reload it if found in array.
+                for( TInt innerIndex( iHsContentControlUis.Count() - 1 ); 
+                        innerIndex >= 0; --innerIndex )
+                    {
+                    CHsContentControlUi* cc( iHsContentControlUis[ innerIndex ] );
+                    if ( cc && cc->ImplUid() == uid )
+                        {
+                        iHsContentControlUis.Remove( innerIndex );
+                        delete cc;
+                        cc = NULL;
+                        innerIndex = KErrNotFound;
+                        }
+                    }                    
+                return ETrue;
+                }
+            }
+        }
+    return EFalse;
     }
 
 // End of file

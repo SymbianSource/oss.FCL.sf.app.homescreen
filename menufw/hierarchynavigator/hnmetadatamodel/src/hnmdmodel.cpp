@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   
+* Description:
 *
 */
 
@@ -52,7 +52,7 @@ void CHnMdModel::ConstructL( MHnMdModelEventObserver *aModelObserver,
     MMPERF(("CHnMetaDataModel::ConstructL - model privider ready"));
     iXmlModelProvider->ReloadModelL();
     MMPERF(("CHnMetaDataModel::ConstructL - model reloaded"));
-            
+
     iCmnPtrs.iLocalization = iLocalization;
     iCmnPtrs.iIdGenerator = &iIdGenerator;
     iCmnPtrs.iModel = this;
@@ -60,13 +60,12 @@ void CHnMdModel::ConstructL( MHnMdModelEventObserver *aModelObserver,
     iCmnPtrs.iContainer = aSuiteModelContainer;
     iCmnPtrs.iModelEventObserver = aModelObserver;
     iCmnPtrs.iBitmapIdCache = iBitmapIdCache;
-    
+
     THnMdCommonPointers::SetStatic(&iCmnPtrs);
-    
+
     iMode = EMdModeNormal;
     iRepositoryWidgetTypeObserver = CHnRepositoryWidgetTypeObserver::NewL( &iCmnPtrs, KMatrixRepositoryUid );
     iRepositoryShowFolderObserver = CHnRepositoryShowFolderObserver::NewL( &iCmnPtrs, KCRUidMenu, KMenuShowFolder );
-    iRepositoryZoomObserver = CHnRepositoryZoomObserver::NewL( &iCmnPtrs, KCRUidAvkon, KAknGlobalUiZoom );
     MMPERF(("CHnMetaDataModel::ConstructL - rep. observer ready"));
     }
 
@@ -74,7 +73,7 @@ void CHnMdModel::ConstructL( MHnMdModelEventObserver *aModelObserver,
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CHnMdModel* CHnMdModel::NewL( 
+EXPORT_C CHnMdModel* CHnMdModel::NewL(
         MHnMdModelEventObserver* aModelObserver,
         CHnSuiteModelContainer * aSuiteModelContainer  )
     {
@@ -88,7 +87,7 @@ EXPORT_C CHnMdModel* CHnMdModel::NewL(
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CHnMdModel* CHnMdModel::NewLC( 
+EXPORT_C CHnMdModel* CHnMdModel::NewLC(
         MHnMdModelEventObserver* aModelObserver,
         CHnSuiteModelContainer * aSuiteModelContainer )
     {
@@ -114,7 +113,6 @@ CHnMdModel::~CHnMdModel()
     {
     delete iRepositoryWidgetTypeObserver;
     delete iRepositoryShowFolderObserver;
-    delete iRepositoryZoomObserver;
     iLoadedSuites.ResetAndDestroy();
     delete iXmlModelProvider;
     delete iLocalization;
@@ -136,7 +134,7 @@ EXPORT_C TInt CHnMdModel::HandleBackEventL(
     CHnMdSuite* lastMdModel = GetLastSuite();
     ASSERT( !lastMdModel->SuiteName().Compare( aSuiteName ) );
 #endif
-    
+
     TInt countDown( aIterations );
     CHnSuiteModel* current = NULL;
     while( ( current = aMulContainer->GetParentSuiteModel() ) != NULL &&
@@ -145,12 +143,12 @@ EXPORT_C TInt CHnMdModel::HandleBackEventL(
         current = aMulContainer->GetLastSuiteModel();
         // pop the suite model
         aMulContainer->PopSuiteModelL( current->SuiteName() );
-        
+
         // remove the suite that we are leaving
         DeleteLastSuite();
         countDown--;
         }
-    
+
     current = aMulContainer->GetLastSuiteModel();
     current->GetItemsOrder()->MarkSuiteUninitialized();
     CHnFilter* filter = CHnFilter::NewLC();
@@ -191,7 +189,7 @@ void CHnMdModel::ReloadStackSuitesL( CHnSuiteModelContainer* aModelContainer )
             {
             break;
             }
-        
+
         CHnMdSuite* suite = GetLastSuite();
         if( iXmlModelProvider->SuiteExistsL( suite->SuiteName() ) )
             {
@@ -204,13 +202,13 @@ void CHnMdModel::ReloadStackSuitesL( CHnSuiteModelContainer* aModelContainer )
         aModelContainer->PopSuiteModelL( suite->SuiteName() );
         DeleteLastSuite();
         }
-    
+
     TInt err( KErrNone );
     CHnFilter* filter = CHnFilter::NewLC();
     filter->SetEvaluateSuiteL( ETrue );
 
     SetModeL( iMode );
-    
+
     for( TInt i( paramsArray.Count() - 1 ); i >= 0 && !err; i-- )
         {
         CLiwGenericParamList* suiteParams = CLiwGenericParamList::NewL();
@@ -231,7 +229,7 @@ void CHnMdModel::ReloadStackSuitesL( CHnSuiteModelContainer* aModelContainer )
                 *filter, *iCmnPtrs.iContainer->GetLastSuiteModel() );
         GetLastSuite()->EvaluateL( *iCmnPtrs.iContainer->GetLastSuiteModel() );
         }
-    
+
     CleanupStack::PopAndDestroy( filter );
     CleanupStack::PopAndDestroy( &paramsArray );
 	}
@@ -296,7 +294,7 @@ EXPORT_C void CHnMdModel::SetModeL( TMdMode aMode )
 //
 EXPORT_C CHnMdSuite* CHnMdModel::GetLastSuite()
     {
-    return (iLoadedSuites.Count()>0) 
+    return (iLoadedSuites.Count()>0)
             ? iLoadedSuites[ iLoadedSuites.Count()-1 ]
             : NULL;
     }
@@ -355,7 +353,7 @@ void CHnMdModel::SuiteModelReadyToShowL( CHnSuiteModel* aJustEvaluatedSuite )
         {
         User::Leave( KErrArgument );
         }
-    
+
     if ( IsForegroundQueued() && ( !iForegroundTriggeringSuite ||
             iForegroundTriggeringSuite == aJustEvaluatedSuite ) )
     	{
@@ -373,7 +371,7 @@ void CHnMdModel::SuiteModelReadyToShowL( CHnSuiteModel* aJustEvaluatedSuite )
 //
 CHnMdSuite* CHnMdModel::GetSuite( TInt aPosition )
     {
-    return ( (aPosition >= 0) && (aPosition < iLoadedSuites.Count()) ) 
+    return ( (aPosition >= 0) && (aPosition < iLoadedSuites.Count()) )
             ? iLoadedSuites[ aPosition ]
             : NULL;
     }
@@ -405,11 +403,11 @@ EXPORT_C void CHnMdModel::EvaluateL( CHnFilter& aFilter )
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre, 
+EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
         CLiwGenericParamList* aSuiteParams )
     {
     TInt err( KErrNone );
-      
+
 	RXmlEngDocument xmlDoc;
 	// Xml model provider takes ownership of xmlDoc.
 	TRAP( err, iXmlModelProvider->GetModelL( aGenre, xmlDoc ) );
@@ -423,28 +421,28 @@ EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
             err = KErrCorrupt;
             }
         }
-    
+
     if ( !err )
         {
         CHnMdSuite* newSuite = CHnMdSuite::NewLC( element, &iCmnPtrs );
-        
+
         if (aSuiteParams)
             {
             newSuite->SetSuiteParametersL( *aSuiteParams );
             }
-        
+
         TInt pos( 0 );
         newSuite->GetSuiteParameters().FindFirst( pos, KSuiteName8);
         if ( pos == KErrNotFound )
         	{
-        	newSuite->GetSuiteParameters().AppendL( 
+        	newSuite->GetSuiteParameters().AppendL(
         			TLiwGenericParam(KSuiteName8, TLiwVariant( aGenre ) ) );
         	}
 
         iCmnPtrs.iContainer->PushNewSuiteModelL( newSuite->SuiteName() );
         iCmnPtrs.iContainer->GetLastSuiteModel()->GetItemsOrder()->
             SetSuiteId( iCmnPtrs.iIdGenerator->GetNextId() );
-        
+
         CleanupStack::Pop( newSuite );
         iLoadedSuites.AppendL( newSuite );
         }
@@ -452,7 +450,7 @@ EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
     	{
     	MMPERF(("CHnMdModel::LoadSuiteL - Error TRAPPED!"));
     	}
-    
+
     return err;
     }
 
@@ -477,7 +475,7 @@ EXPORT_C TBool CHnMdModel::SuiteModelExistsL( const TDesC8& aSuiteModel )
 EXPORT_C void CHnMdModel::GetCurrentUriL( TDes& aUri )
     {
     iXmlModelProvider->ReloadModelL();
-    
+
     aUri.Append( KPrefMm );
     for( TInt i(0); i < iLoadedSuites.Count(); i++ )
         {

@@ -28,7 +28,7 @@
     <multiinstance>2</multiinstance>
 
     <description>RnD description desktop plugin</description>
-    <filelogo>mif(icon.mif 16384 16385)</filelogo>
+    <filelogo>skin(270501603 9361):mif(icon.mif 16384 16385)</filelogo>
     
     <!-- Locale independent/common resources -->
 

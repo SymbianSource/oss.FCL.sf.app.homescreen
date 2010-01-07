@@ -16,9 +16,9 @@
  */
 
 // System include files
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
 #include <bamdesca.h>
 
 // User include files

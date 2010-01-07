@@ -36,6 +36,11 @@ _LIT8(KViewportHeight, "viewport-height");
 _LIT8(KViewportWidth, "viewport-width");
 _LIT8(KViewportTop, "viewport-top");
 _LIT8(KViewportLeft, "viewport-left");
+_LIT8(KScrollDirection, "scroll-direction");                         
+_LIT8(KHorizontal, "horizontal");
+
+const TInt EVertical( 0 );
+const TInt EHorizontal( 1 );
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -90,6 +95,16 @@ void CXnScrollableControlAdapter::ConstructL()
     iUiEngine = iNode.Node().UiEngine();
     
     iNode.Node().SetScrollableControl( this );
+    
+    // Default
+    iDirection = EVertical;
+    
+    CXnProperty* prop( iNode.GetPropertyL( KScrollDirection ) );
+    
+    if ( prop && prop->StringValue() == KHorizontal )
+        {
+        iDirection = EHorizontal;
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -104,7 +119,9 @@ void CXnScrollableControlAdapter::HandlePointerEventL(
         {
         return;
         }
-    TPoint stylusPos = aPointerEvent.iPosition;   
+    
+    TPoint stylusPos( aPointerEvent.iPosition );
+    
     switch( aPointerEvent.iType )
         {
         case TPointerEvent::EButton1Down:
@@ -118,17 +135,20 @@ void CXnScrollableControlAdapter::HandlePointerEventL(
             }
             break;            
         case TPointerEvent::EButton1Up:
-            {
-            TInt distance = iStartPosition.iY - stylusPos.iY;
-            TPoint drag( 0, distance );
-            iPhysics->StartPhysics( drag, iStartTime );
+            {                                                        
+            TInt distanceY( iStartPosition.iY - stylusPos.iY );                                              
+            TInt distanceX( iStartPosition.iX - stylusPos.iX );
+            
+            TPoint drag( distanceX, distanceY );
+            iPhysics->StartPhysics( drag, iStartTime );                                
             }
             break; 
         case TPointerEvent::EDrag:        
             {
             TPoint distanceFromStart( iStartPosition - stylusPos );
 
-            if( Abs( distanceFromStart.iY ) > KOffset )                 
+            if( ( Abs( distanceFromStart.iY ) > KOffset && iDirection == EVertical ) || 
+                ( Abs( distanceFromStart.iX ) > KOffset && iDirection == EHorizontal ) )                 
                 {
                 CXnNode* focused( iUiEngine->FocusedNode() );
                 
@@ -142,8 +162,12 @@ void CXnScrollableControlAdapter::HandlePointerEventL(
                 }
             
             TInt deltaY( iStylusPosition.iY - stylusPos.iY );
+            TInt deltaX( iStylusPosition.iX - stylusPos.iX );
+            
             iStylusPosition = stylusPos;
-            TPoint deltaPoint( 0, deltaY );
+            
+            TPoint deltaPoint( deltaX, deltaY );
+            
             iPhysics->RegisterPanningPosition( deltaPoint );
             }
             break;
@@ -161,7 +185,7 @@ void CXnScrollableControlAdapter::HandlePointerEventL(
 //    
 void CXnScrollableControlAdapter::Draw( const TRect& aRect ) const
     {
-    CXnControlAdapter::Draw( aRect );    
+    CXnControlAdapter::Draw( aRect );           
     }
 
 // -----------------------------------------------------------------------------
@@ -248,20 +272,44 @@ void CXnScrollableControlAdapter::ResetState()
 // -----------------------------------------------------------------------------
 void CXnScrollableControlAdapter::ShowItem( CXnNode& aNode )
     {
-    TRect rect = aNode.MarginRect();
+    TRect rect( aNode.MarginRect() );
+    
     if( !iViewPort.Contains( rect.iTl ) || !iViewPort.Contains( rect.iBr ) )
         {
-        TInt delta( 0 );
-        if( rect.iTl.iY < iViewPort.iTl.iY )
-            {
-            delta = rect.iTl.iY - iViewPort.iTl.iY;
+        if ( iDirection == EVertical )
+            {                            
+            TInt delta( 0 );
+
+            if( rect.iTl.iY < iViewPort.iTl.iY )
+                {
+                delta = rect.iTl.iY - iViewPort.iTl.iY;
+                }
+            else if( rect.iBr.iY > iViewPort.iBr.iY )
+                {
+                delta = rect.iBr.iY - iViewPort.iBr.iY;
+                }
+            
+            TPoint newPosition( iPreviousPosition + TPoint( 0, delta ) );
+            
+            ViewPositionChanged( newPosition, ETrue, 0 );
             }
-        else if( rect.iBr.iY > iViewPort.iBr.iY )
+        else
             {
-            delta = rect.iBr.iY - iViewPort.iBr.iY;
+            TInt delta( 0 );
+            
+            if( rect.iTl.iX < iViewPort.iTl.iX )
+                {
+                delta = rect.iTl.iX - iViewPort.iTl.iX;
+                }
+            else if( rect.iBr.iX > iViewPort.iBr.iX )
+                {
+                delta = rect.iBr.iX - iViewPort.iBr.iX;
+                }
+            
+            TPoint newPosition( iPreviousPosition + TPoint( delta, 0 ) );
+            
+            ViewPositionChanged( newPosition, ETrue, 0 );            
             }
-        TPoint newPosition = iPreviousPosition + TPoint( 0, delta );
-        ViewPositionChanged( newPosition, ETrue, 0 );
         }
     }
 
@@ -286,7 +334,17 @@ void CXnScrollableControlAdapter::LayoutChangedL()
 void CXnScrollableControlAdapter::ViewPositionChanged( 
     const TPoint& aNewPosition, TBool aDrawNow, TUint /*aFlags*/ )
     {
-    TPoint diff = TPoint( 0, aNewPosition.iY - iPreviousPosition.iY );
+    TPoint diff;
+    
+    if ( iDirection == EVertical )
+        {
+        diff = TPoint( 0, aNewPosition.iY - iPreviousPosition.iY );
+        }
+    else
+        {
+        diff = TPoint( aNewPosition.iX - iPreviousPosition.iX, 0 );
+        }
+    
     iPreviousPosition = aNewPosition;
     iCurrentPosition += diff;
     TPoint tmpPos = iNode.Control()->Position();
@@ -341,9 +399,21 @@ void CXnScrollableControlAdapter::InitPhysicEngineL()
         return;
         }
     TSize viewPortSize = iViewPort.Size();
-    TSize totalSize( iNode.MarginRect().Size() );
-    iPhysics->InitPhysicsL( totalSize, viewPortSize, EFalse );
-    iCurrentPosition = TPoint( 0, viewPortSize.iHeight / 2 );  
+    TSize totalSize( iNode.Rect().Size() );
+    
+    if ( iDirection == EVertical )
+        {
+        iPhysics->InitPhysicsL( totalSize, viewPortSize, EFalse );
+        }
+    else
+        {
+        iPhysics->InitPhysicsL( totalSize, viewPortSize, ETrue );
+        }
+    
+    
+    iCurrentPosition = 
+        TPoint( viewPortSize.iWidth / 2, viewPortSize.iHeight / 2 ); 
+                  
     iPreviousPosition = iStartViewPosition =  iCurrentPosition;
     }
 
@@ -358,16 +428,18 @@ void CXnScrollableControlAdapter::ReadPropertiesL()
     TInt top( 0 );
     TInt left( 0 );
 
+    CXnNode& node( iNode.Node() );
+    
     // Width
     CXnProperty* prop = iNode.GetPropertyL( KViewportWidth );
     if( prop )
         {
         width = iUiEngine->HorizontalPixelValueL(
-            prop, iNode.MarginRect().Width() );
+            prop, iNode.Rect().Width() );
         }
     if( width == 0 )
         {
-        width = iNode.MarginRect().Width();
+        width = node.Parent()->Rect().Width();
         }
 
     // Height
@@ -375,11 +447,11 @@ void CXnScrollableControlAdapter::ReadPropertiesL()
     if( prop )
         {
         height = iUiEngine->VerticalPixelValueL(
-            prop, iNode.MarginRect().Height() );
+            prop, iNode.Rect().Height() );
         }
     if( height == 0 )
         {
-        height = iNode.MarginRect().Height();
+        height = node.Parent()->Rect().Height();
         }
 
     // Top
@@ -387,7 +459,7 @@ void CXnScrollableControlAdapter::ReadPropertiesL()
     if( prop )
         {
         top = iUiEngine->VerticalPixelValueL(
-            prop, iNode.MarginRect().Height() );
+            prop, iNode.Rect().Height() );
         }
 
     // Left
@@ -395,10 +467,10 @@ void CXnScrollableControlAdapter::ReadPropertiesL()
     if( prop )
         {
         left = iUiEngine->HorizontalPixelValueL(
-            prop, iNode.MarginRect().Width() );
+            prop, iNode.Rect().Width() );
         }
 
-    iViewPort = TRect( iNode.MarginRect().iTl, TSize( width, height ) );
+    iViewPort = TRect( iNode.Rect().iTl, TSize( width, height ) );
     iViewPort.Move( left, top );
     }
 

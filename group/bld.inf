@@ -20,7 +20,6 @@
 #include "../homescreen_plat/group/bld.inf"
 #include "../idlehomescreen/group/bld.inf"
 #include "../menufw/group/bld.inf"
-#include "../widgetmanager/group/bld.inf"
 
 PRJ_PLATFORMS
 

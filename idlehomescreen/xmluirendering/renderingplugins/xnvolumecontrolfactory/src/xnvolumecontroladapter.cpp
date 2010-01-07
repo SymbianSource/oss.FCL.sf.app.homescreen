@@ -214,10 +214,24 @@ void CXnVolumeControlAdapter::SetRangeL( TInt aMinimumValue, TInt aMaximumValue 
 void CXnVolumeControlAdapter::GetRangeL( TInt& aMinimumValue, TInt& aMaximumValue )
 	{
 	CXnProperty* minRange = iNode.GetPropertyL( XnPropertyNames::volumecontrol::KMinRange );
-	aMinimumValue = static_cast<TInt>( minRange->FloatValueL() );
+	if ( minRange )
+	    {
+	    aMinimumValue = static_cast<TInt>( minRange->FloatValueL() );
+	    }
+	else
+	    {
+	    aMinimumValue = 1;
+	    }
 	
 	CXnProperty* maxRange = iNode.GetPropertyL( XnPropertyNames::volumecontrol::KMaxRange );
-	aMaximumValue = static_cast<TInt>( maxRange->FloatValueL() );
+	if ( maxRange )
+	    {
+	    aMaximumValue = static_cast<TInt>( maxRange->FloatValueL() );
+	    }
+	else
+	    {
+	    aMaximumValue = aMinimumValue;
+	    }
 	}
 
 // -----------------------------------------------------------------------------
@@ -517,7 +531,12 @@ void CXnVolumeControlAdapter::SetVolumeControlPropertiesL()
 TInt CXnVolumeControlAdapter::GetCurrentValueL()
 	{
 	CXnProperty* valueProperty = iNode.GetPropertyL( XnPropertyNames::action::KValue );
-    return static_cast<TInt>( valueProperty->FloatValueL() );    
+	TInt retVal( 1 );
+	if ( valueProperty )
+	    {
+	    retVal = static_cast<TInt>( valueProperty->FloatValueL() );
+	    }
+    return retVal;    
 	}
 	
 // ----------------------------------------------------------------------------

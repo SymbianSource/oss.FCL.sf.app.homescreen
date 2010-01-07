@@ -18,9 +18,9 @@
 #include "contentpublisher.h"
 #include "globalqueryhandler.h"
 
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
 #include <AknQueryDialog.h>
 #include <ai3xmlui.rsg>
 #include "xmluicontroller.h"

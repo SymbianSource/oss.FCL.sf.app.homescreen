@@ -17,10 +17,10 @@
 
 
 // INCLUDE FILES
-#include <LiwCommon.h>
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
+#include <liwcommon.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
 
 #include "cpsobserver.h"
 #include "cpswrapper.h"
@@ -71,7 +71,7 @@ namespace cpswrapper
 	//
 	CCpsObserver::~CCpsObserver()
 		{
-		ReleaseL();
+	    TRAP_IGNORE( ReleaseL() );	    
 		ReleaseLiw();
 		}
 	

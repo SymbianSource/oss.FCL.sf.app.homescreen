@@ -22,8 +22,6 @@
 #include "xncontroladapter.h"
 #include <e32base.h>
 
-#include "xncontroladapter.h"
-
 // Forward declarations
 class CXnAppUiAdapter;
 class CXnNode;

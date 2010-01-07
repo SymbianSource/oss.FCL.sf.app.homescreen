@@ -35,7 +35,7 @@
 
 class CHnServiceHandler;
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryObserver::ConstructL( const TUid aRepositoryUid )
@@ -44,27 +44,27 @@ void CHnRepositoryObserver::ConstructL( const TUid aRepositoryUid )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryObserver::CHnRepositoryObserver( THnMdCommonPointers* aCmnPtrs ) 
+CHnRepositoryObserver::CHnRepositoryObserver( THnMdCommonPointers* aCmnPtrs )
     : iCmnPtrs(aCmnPtrs)
     {
-         
+
     }
 
-// ---------------------------------------------------------------------------
-// 
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryObserver::CHnRepositoryObserver( THnMdCommonPointers* aCmnPtrs, TUint32 aId  ) 
+// ---------------------------------------------------------------------------
+//
+CHnRepositoryObserver::CHnRepositoryObserver( THnMdCommonPointers* aCmnPtrs, TUint32 aId  )
 : iId( aId ), iCmnPtrs(aCmnPtrs)
     {
-         
+
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnRepositoryObserver::~CHnRepositoryObserver()
@@ -78,10 +78,10 @@ CHnRepositoryObserver::~CHnRepositoryObserver()
 
 // class CHnRepositoryWidgetTypeObserver
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryWidgetTypeObserver * CHnRepositoryWidgetTypeObserver::NewL( 
+CHnRepositoryWidgetTypeObserver * CHnRepositoryWidgetTypeObserver::NewL(
         THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid )
     {
     CHnRepositoryWidgetTypeObserver * self = CHnRepositoryWidgetTypeObserver::NewLC( aCmnPtrs, aRepositoryUid );
@@ -90,10 +90,10 @@ CHnRepositoryWidgetTypeObserver * CHnRepositoryWidgetTypeObserver::NewL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryWidgetTypeObserver * CHnRepositoryWidgetTypeObserver::NewLC( 
+CHnRepositoryWidgetTypeObserver * CHnRepositoryWidgetTypeObserver::NewLC(
         THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid )
     {
     CHnRepositoryWidgetTypeObserver * self = new (ELeave) CHnRepositoryWidgetTypeObserver( aCmnPtrs );
@@ -103,7 +103,7 @@ CHnRepositoryWidgetTypeObserver * CHnRepositoryWidgetTypeObserver::NewLC(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryWidgetTypeObserver::ConstructL( const TUid aRepositoryUid )
@@ -115,26 +115,26 @@ void CHnRepositoryWidgetTypeObserver::ConstructL( const TUid aRepositoryUid )
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryWidgetTypeObserver::CHnRepositoryWidgetTypeObserver( THnMdCommonPointers* aCmnPtrs ) 
+CHnRepositoryWidgetTypeObserver::CHnRepositoryWidgetTypeObserver( THnMdCommonPointers* aCmnPtrs )
     : CHnRepositoryObserver( aCmnPtrs )
     {
-         
+
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnRepositoryWidgetTypeObserver::~CHnRepositoryWidgetTypeObserver()
     {
     iWidgetSwitches.Close();
     }
-   
+
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryWidgetTypeObserver::HandleNotifyGeneric(TUint32 aId)
@@ -143,7 +143,7 @@ void CHnRepositoryWidgetTypeObserver::HandleNotifyGeneric(TUint32 aId)
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryWidgetTypeObserver::HandleNotifyGenericL(TUint32 aId)
@@ -152,9 +152,9 @@ void CHnRepositoryWidgetTypeObserver::HandleNotifyGenericL(TUint32 aId)
     DEBUG(("\tID: %d",aId));
     THnSuiteWidgetType suiteState( EUnspecified );
 
-    iRepository->Get( aId, (int &) suiteState);   
+    iRepository->Get( aId, (int &) suiteState);
     TInt id = iWidgetSwitches.Find(aId);
-    
+
     if ( suiteState == EChangeWidget )
         {
         iWidgetSwitches.AppendL(aId);
@@ -164,7 +164,7 @@ void CHnRepositoryWidgetTypeObserver::HandleNotifyGenericL(TUint32 aId)
         iWidgetSwitches.Remove(id);
         return;
         }
-    
+
     CHnSuiteModel* lastSuiteModel = iCmnPtrs->iContainer->GetLastSuiteModel();
     TBuf <NCentralRepositoryConstants::KMaxUnicodeStringLength> suiteName;
     if ( iRepository->Get( aId - 1, suiteName ) == KErrNone && lastSuiteModel
@@ -172,21 +172,21 @@ void CHnRepositoryWidgetTypeObserver::HandleNotifyGenericL(TUint32 aId)
         {
         DEBUG16(("\t\tSuite Name: %S",&suiteName));
         lastSuiteModel->GetItemsOrder()->MarkSuiteUninitialized();
-        
+
         TInt32 suiteId = lastSuiteModel->CustomId();
-        
+
         CLiwGenericParamList* inParam = CLiwGenericParamList::NewL();
         CleanupStack::PushL( inParam );
-               
+
         CLiwDefaultMap* map = CLiwDefaultMap::NewLC();
-        
+
         map->InsertL( KGenreName8, TLiwVariant(suiteName) );
         map->InsertL( KId8, TLiwVariant(suiteId) );
         inParam->AppendL(TLiwGenericParam( KFilterElementItem8, TLiwVariant(map) ));
         CleanupStack::PopAndDestroy( map );
-        
+
         iCmnPtrs->iModelEventObserver->HandleModelEventL( KReevaluateMdEvent, *inParam );
- 
+
         CleanupStack::PopAndDestroy( inParam );
         }
     DEBUG(("_MM_:CHnRepositoryObserver::HandleNotifyGeneric OUT"));
@@ -195,10 +195,10 @@ void CHnRepositoryWidgetTypeObserver::HandleNotifyGenericL(TUint32 aId)
 
 // class CHnRepositoryShowFolderObserver
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryShowFolderObserver * CHnRepositoryShowFolderObserver::NewL( 
+CHnRepositoryShowFolderObserver * CHnRepositoryShowFolderObserver::NewL(
         THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid, const TUint32 aId )
     {
     CHnRepositoryShowFolderObserver * self = CHnRepositoryShowFolderObserver::NewLC( aCmnPtrs, aRepositoryUid, aId );
@@ -207,10 +207,10 @@ CHnRepositoryShowFolderObserver * CHnRepositoryShowFolderObserver::NewL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryShowFolderObserver * CHnRepositoryShowFolderObserver::NewLC( 
+CHnRepositoryShowFolderObserver * CHnRepositoryShowFolderObserver::NewLC(
         THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid, const TUint32 aId )
     {
     CHnRepositoryShowFolderObserver * self = new (ELeave) CHnRepositoryShowFolderObserver( aCmnPtrs, aId );
@@ -220,7 +220,7 @@ CHnRepositoryShowFolderObserver * CHnRepositoryShowFolderObserver::NewLC(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::ConstructL( const TUid aRepositoryUid )
@@ -228,24 +228,24 @@ void CHnRepositoryShowFolderObserver::ConstructL( const TUid aRepositoryUid )
     CHnRepositoryObserver::ConstructL( aRepositoryUid );
     TInt ret = iRepository->Create( iId, KBlank );
     iNotifyHandler = CCenRepNotifyHandler::NewL(
-        *this, *iRepository, 
+        *this, *iRepository,
     	CCenRepNotifyHandler::EStringKey, iId );
     iNotifyHandler->StartListeningL();
     }
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnRepositoryShowFolderObserver::CHnRepositoryShowFolderObserver( THnMdCommonPointers* aCmnPtrs, TUint32 aId  ) 
+CHnRepositoryShowFolderObserver::CHnRepositoryShowFolderObserver( THnMdCommonPointers* aCmnPtrs, TUint32 aId  )
     : CHnRepositoryObserver( aCmnPtrs, aId )
     {
-    
+
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnRepositoryShowFolderObserver::~CHnRepositoryShowFolderObserver()
@@ -254,7 +254,7 @@ CHnRepositoryShowFolderObserver::~CHnRepositoryShowFolderObserver()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::HandleNotifyString(TUint32 aId, const TDesC16& aNewValue )
@@ -263,20 +263,20 @@ void CHnRepositoryShowFolderObserver::HandleNotifyString(TUint32 aId, const TDes
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDesC16& aNewValue)
     {
     DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyStringL IN"));
     DEBUG(("\tID: %d : %S", aId, &aNewValue));
-       
+
     //++Show Folder
     if( aId == iId && aNewValue.Length())
 		{
         iNotifyType = 0;
 		ExtractCRKeyShowFolderName( aNewValue );
-		
+
 		// iCRKeyFolderItemUid can contain mcs id or uid
 		// in case of uid it will be replaced whith id in HandleNotifyL callback
 		if( iCRKeyFolderItemUid.Length()>0 )
@@ -294,7 +294,7 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
         CHnMdBaseKey* inDataKey = HnMdKeyFactory::CreateL(
             KInData8, KKeyTypeMap, KDefaultParentId8 );
         CleanupStack::PushL( inDataKey );
-        
+
         CHnMdBaseKey* filter( NULL );
         HBufC8* id( NULL );
         if ( iCRKeyFolderName.Length()>0 && !( iNotifyType & EAPP_UID ) )
@@ -306,8 +306,8 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KIdParam, KKeyTypeInteger, *id ) );
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KRecursiveSearch8, KKeyTypeBoolean, KStringTrue8 ) );
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KFlatResult8, KKeyTypeBoolean, KStringTrue8 ) );
-    
-            filter = HnMdKeyFactory::CreateL( 
+
+            filter = HnMdKeyFactory::CreateL(
                     KFilter8, KKeyTypeMap, KStringTrue8 );
             CleanupStack::PushL( filter );
             filter->AddSubKeyL( HnMdKeyFactory::CreateL( KMcsAppGroupName8, KKeyTypeString, iCRKeyFolderName ) );
@@ -331,7 +331,7 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KRecursiveSearch8, KKeyTypeBoolean, KStringTrue8 ) );
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KFlatResult8, KKeyTypeBoolean, KStringTrue8 ) );
 
-            filter = HnMdKeyFactory::CreateL( 
+            filter = HnMdKeyFactory::CreateL(
                 KFilter8, KKeyTypeMap, KStringTrue8 );
             CleanupStack::PushL( filter );
             filter->AddSubKeyL( HnMdKeyFactory::CreateL( KUid8, KKeyTypeInteger, iCRKeyFolderItemUid ) );
@@ -346,7 +346,7 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KIdParam, KKeyTypeInteger, *id ) );
             inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KParentOnly8, KKeyTypeBoolean, KStringTrue8 ) );
             }
-        
+
         RPointerArray< CHnMdBaseKey > data;
         CleanupClosePushL( data );
         data.AppendL( inDataKey );
@@ -393,32 +393,32 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
             }
         CleanupStack::PopAndDestroy( inDataKey );
 		}
-    
+
     DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyStringL OUT"));
-    
+
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName( const TDesC& aNewValue )
 	{
-	DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName IN" ));    	
+	DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName IN" ));
 	iCRKeyFolderName.Copy( KBlank );
 	iCRKeyFolderItemUid.Copy( KBlank );
-	
+
 	int keyValueLength = aNewValue.Length();
 	if( keyValueLength )
 		{
 			TApaAppGroupName folder;
 	        TBuf<KTimeStampBufferLength + KUidStringLength + 1> tempBuf;
 	        TBuf<KTimeStampBufferLength> timeStamp;
-	        
+
 	        TInt ret = aNewValue.Find( KComma );
 	        if( (ret == KErrNotFound )|| ( ret == ( keyValueLength-1 ) ) )
 	            {
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad CR key value input) OUT" ));    		        	            
+	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad CR key value input) OUT" ));
 	        	return;	//bad CR key value input
 	            }
 	        if( ret>KApaMaxAppGroupName )
@@ -431,7 +431,7 @@ void CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName( const TDesC& a
 	            return;
 	            }
 	        tempBuf.Copy(aNewValue.Mid( ret + 1 ) );
-	        
+
 	        TInt posUid = tempBuf.Find( KComma );
 	        if ( KErrNotFound != posUid )
 	        	{
@@ -454,31 +454,31 @@ void CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName( const TDesC& a
                     }
 	        	timeStamp.Copy( tempBuf );
 	        	}
-	        	
+
 	        TTime currentTime;
 	        currentTime.HomeTime();
 	        TTimeIntervalSeconds interval;
-	        
+
 	        TTime timeStampTime;
 	        ret = timeStampTime.Set(timeStamp);
-	        
+
 	        if(ret == KErrGeneral )
 	            {
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad timestamp) OUT" ));    		        	            
-	        	return; // bad time stamp value                
+	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad timestamp) OUT" ));
+	        	return; // bad time stamp value
 	            }
-	        
+
 	        ret = currentTime.SecondsFrom( timeStampTime, interval );
-	        
+
 	        if( interval.Int() < 0 )
 	            {//negative timestamp is set ahead of current time...!
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (negative interval) OUT" ));    		        	            	            
+	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (negative interval) OUT" ));
 	        	return;
 	            }
-	        
+
 	        if(( interval.Int()) > KTimeStampCutOff )
 	            {//positive timestamp but more than 5 seconds
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (more than 5 seconds) OUT" ));    		        
+	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (more than 5 seconds) OUT" ));
 	        	return;
 	            }
 	        else
@@ -486,16 +486,16 @@ void CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName( const TDesC& a
 	        	iCRKeyFolderName.Copy(folder);
         	    }
 		}
-	DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName OUT" ));    	
+	DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName OUT" ));
 	}
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::GetShowFolderL( TUint32 aFolderId )
     {
-       
+
     CHnMdBaseKey* inDataKey = HnMdKeyFactory::CreateL(
         KInData8, KKeyTypeMap, KDefaultParentId8 );
     CleanupStack::PushL( inDataKey );
@@ -507,7 +507,7 @@ void CHnRepositoryShowFolderObserver::GetShowFolderL( TUint32 aFolderId )
     RPointerArray< CHnMdBaseKey > data;
     CleanupClosePushL( data );
     data.Append( inDataKey );
-    
+
     CHnMdBaseKey* serviceData = HnMdKeyFactory::CreateL(
         KServiceContentName, KKeyTypeString, KMatrixMenuData );
     CleanupStack::PushL( serviceData );
@@ -542,12 +542,12 @@ void CHnRepositoryShowFolderObserver::GetShowFolderL( TUint32 aFolderId )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::GetShowFolderGroupNameL()
     {
-       
+
     CHnMdBaseKey* inDataKey = HnMdKeyFactory::CreateL(
         KInData8, KKeyTypeMap, KDefaultParentId8 );
     CleanupStack::PushL( inDataKey );
@@ -556,14 +556,14 @@ void CHnRepositoryShowFolderObserver::GetShowFolderGroupNameL()
     inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KIdParam, KKeyTypeInteger, *id ) );
     inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KRecursiveSearch8, KKeyTypeBoolean, KStringTrue8 ) );
     inDataKey->AddSubKeyL( HnMdKeyFactory::CreateL( KFlatResult8, KKeyTypeBoolean, KStringTrue8 ) );
-    
-    CHnMdBaseKey* filter = HnMdKeyFactory::CreateL( 
+
+    CHnMdBaseKey* filter = HnMdKeyFactory::CreateL(
             KFilter8, KKeyTypeMap, KStringTrue8 );
     CleanupStack::PushL( filter );
     filter->AddSubKeyL( HnMdKeyFactory::CreateL( KMcsAppGroupName8, KKeyTypeString, iCRKeyFolderName ) );
     filter->AddSubKeyL( HnMdKeyFactory::CreateL( KType8, KKeyTypeString, KMenuFolder8 ) );
     filter->AddSubKeyL( HnMdKeyFactory::CreateL( KHidden8, KKeyTypeBoolean, KStringFalse8 ) );
-    
+
     RPointerArray< CHnMdBaseKey > data;
     CleanupClosePushL( data );
     data.AppendL( inDataKey );
@@ -571,7 +571,7 @@ void CHnRepositoryShowFolderObserver::GetShowFolderGroupNameL()
         {
         data.AppendL( filter );
         }
-    
+
     CHnMdBaseKey* serviceData = HnMdKeyFactory::CreateL(
         KServiceContentName, KKeyTypeString, KMatrixMenuData );
     CleanupStack::PushL( serviceData );
@@ -607,7 +607,7 @@ void CHnRepositoryShowFolderObserver::GetShowFolderGroupNameL()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
@@ -644,7 +644,7 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
                 iNotifyType |= ESECOND_NOTIFY;
                 TLiwVariant varId; varId.PushL();
                 TLiwVariant varParentId; varParentId.PushL();
-                
+
                 HnLiwUtils::GetVariantL( aEventParamList, KIdPath8, 0, varId );
                 HnLiwUtils::GetVariantL( aEventParamList, KParentIdPath8, 0, varParentId );
 
@@ -656,7 +656,7 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
 
                 CleanupStack::PopAndDestroy( &varParentId );
                 CleanupStack::PopAndDestroy( &varId );
-                
+
                 GetShowFolderL( parentId );
                 return KErrNone;
                 }
@@ -692,43 +692,43 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
                 {
                 return KErrNotFound;
                 }
-    
+
             TLiwVariant varId; varId.PushL();
             TLiwVariant varAppGroupName; varAppGroupName.PushL();
             TLiwVariant varSuiteName; varSuiteName.PushL();
             TLiwVariant varChildrenCount; varChildrenCount.PushL();
-    
+
             HnLiwUtils::GetVariantL( aEventParamList, KIdPath8, 0, varId );
             HnLiwUtils::GetVariantL( aEventParamList, KAppGroupNamePath8, 0, varAppGroupName );
             HnLiwUtils::GetVariantL( aEventParamList, KTitleNamePath8, 0, varSuiteName );
             HnLiwUtils::GetVariantL( aEventParamList, KChildrenCountPath8, 0, varChildrenCount );
-            
+
             CLiwGenericParamList* paramList = CLiwGenericParamList::NewL();
             CleanupStack::PushL( paramList );
-                   
+
             CLiwDefaultMap* map = CLiwDefaultMap::NewLC();
-            
-            paramList->AppendL( TLiwGenericParam( KSuiteName8, 
-                    TLiwVariant( KFolderSuite ) ) );    
-            
-            map->InsertL( KSuiteName8, varSuiteName ); 
+
+            paramList->AppendL( TLiwGenericParam( KSuiteName8,
+                    TLiwVariant( KFolderSuite ) ) );
+
+            map->InsertL( KSuiteName8, varSuiteName );
             map->InsertL( KFolderId8, varId );
             map->InsertL( KRemoveLocked8, TLiwVariant( KStringFalse8 ) );
             map->InsertL( KParentFolderId8, varId );
             map->InsertL( KTmpParentFolderId8, varId );
             map->InsertL( KMcsAppGroupName8, varAppGroupName );
-                
+
             paramList->AppendL( TLiwGenericParam( KParams8, TLiwVariant( map ) ) );
-            
+
             CleanupStack::PopAndDestroy( map );
-            
+
             while ( iCmnPtrs->iModel->LoadedSuitesCount() > 1 )
                 {
                 CHnMdSuite* suite = iCmnPtrs->iModel->GetLastSuite();
                 iCmnPtrs->iContainer->PopSuiteModelL( suite->SuiteName() );
-                iCmnPtrs->iModel->DeleteLastSuite();  
+                iCmnPtrs->iModel->DeleteLastSuite();
                 }
-    
+
             if ( iCmnPtrs->iContainer->GetLastSuiteModel()->CustomId() != varId.AsTInt64() )
                 {
                 iCmnPtrs->iModelEventObserver->HandleModelEventL( KNewSuiteLoadedMdEvent, *paramList );
@@ -754,33 +754,33 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
                 CleanupStack::PopAndDestroy( pl );
                 CleanupStack::PopAndDestroy( &varId );
                 CleanupStack::PopAndDestroy( &varItemCustomId );
-    
+
                 iCRKeyFolderItemUid.Copy( KBlank );
                 }
-    
+
             iNotifyType = 0;
             iCRKeyFolderName.Copy( KBlank );
             iRepository->Set( iId, KBlank );
-            
+
             CleanupStack::PopAndDestroy( paramList );
             CleanupStack::PopAndDestroy( &varChildrenCount );
             CleanupStack::PopAndDestroy( &varSuiteName );
             CleanupStack::PopAndDestroy( &varAppGroupName );
             CleanupStack::PopAndDestroy( &varId );
         }
-	
+
 	DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyL OUT"));
 	return KErrNone;
 	}
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-void CHnRepositoryShowFolderObserver::HandleSuiteEventL ( THnCustomSuiteEvent aCustomSuiteEvent, 
+void CHnRepositoryShowFolderObserver::HandleSuiteEventL ( THnCustomSuiteEvent aCustomSuiteEvent,
         CHnSuiteModel *aModel )
 	{
-	
+
 	if ( aCustomSuiteEvent == ESuiteModelInitialized && iCRKeyFolderItemUid.Length() > 0 )
 		{
 	      if (iCRKeyFolderItemUid.Length() > 0 )
@@ -802,112 +802,4 @@ void CHnRepositoryShowFolderObserver::HandleSuiteEventL ( THnCustomSuiteEvent aC
 		}
 	}
 
-
-// class CHnRepositoryZoomObserver
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-CHnRepositoryZoomObserver * CHnRepositoryZoomObserver::NewL( 
-        THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid, const TUint32 aId )
-    {
-    CHnRepositoryZoomObserver * self = CHnRepositoryZoomObserver::NewLC( aCmnPtrs, aRepositoryUid, aId );
-    CleanupStack::Pop(self);
-    return self;
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-CHnRepositoryZoomObserver * CHnRepositoryZoomObserver::NewLC( 
-        THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid, const TUint32 aId )
-    {
-    CHnRepositoryZoomObserver * self = new (ELeave) CHnRepositoryZoomObserver( aCmnPtrs, aId );
-    CleanupStack::PushL(self);
-    self->ConstructL( aRepositoryUid );
-    return self;
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnRepositoryZoomObserver::ConstructL( const TUid aRepositoryUid )
-    {
-    CHnRepositoryObserver::ConstructL( aRepositoryUid );
-    iNotifyHandler = CCenRepNotifyHandler::NewL(
-        *this, *iRepository, 
-    	CCenRepNotifyHandler::EIntKey, iId );
-    InitializeL();
-    iNotifyHandler->StartListeningL();
-    }
-
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-CHnRepositoryZoomObserver::CHnRepositoryZoomObserver( THnMdCommonPointers* aCmnPtrs, TUint32 aId  ) 
-    : CHnRepositoryObserver( aCmnPtrs, aId )
-    {
-    
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-CHnRepositoryZoomObserver::~CHnRepositoryZoomObserver()
-    {
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnRepositoryZoomObserver::HandleNotifyInt(TUint32 aId, TInt aNewValue )
-    {
-    TRAP_IGNORE( HandleNotifyIntL(aId, aNewValue) );
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnRepositoryZoomObserver::HandleNotifyIntL(TUint32 aId, TInt aNewValue )
-    {
-    DEBUG(("_MM_:CHnRepositoryZoomObserver::HandleNotifyStringL IN"));
-    DEBUG(("\tID: %d : %d", aId, aNewValue));
-    
-	CLiwGenericParamList* paramList = CLiwGenericParamList::NewL();
-	CleanupStack::PushL( paramList );
-    
-	if ( (TAknUiZoom)aNewValue == EAknUiZoomLarge )
-		{
-		iCmnPtrs->iModelEventObserver->HandleModelEventL( KZoomLarge, *paramList );
-		}
-	else if ( (TAknUiZoom)aNewValue == EAknUiZoomSmall )
-		{
-		iCmnPtrs->iModelEventObserver->HandleModelEventL( KZoomSmall, *paramList );
-		}
-	else
-		{
-		iCmnPtrs->iModelEventObserver->HandleModelEventL( KZoomNormal, *paramList );
-		}
-	 
-    CleanupStack::PopAndDestroy( paramList );
-    DEBUG(("_MM_:CHnRepositoryZoomObserver::HandleNotifyStringL OUT"));
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnRepositoryZoomObserver::InitializeL()
-	{
-	TInt value(0);
-	iRepository->Get( iId, value); 
-	HandleNotifyIntL( iId, value );
-	}  
 // End of File

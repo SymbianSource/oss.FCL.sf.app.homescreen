@@ -9247,111 +9247,115 @@ void CXnUiEngineImpl::AddToRedrawListL( CXnNode* aNode, TRect aRect )
 //
 void CXnUiEngineImpl::AddToDirtyListL( CXnNode* aNode )
     {
-    CXnNode* nodeToRedrawList( aNode );
-    CXnNode* nodeToDirtyList( aNode );
-
-    if ( aNode == RootNode() )
+    
+    if ( aNode )
         {
-        // Force relayout and redraw from current view
-        iDirtyList.Reset();
-        iDirtyList.AppendL( iCurrentView );
-        TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
-        if( dirtyRegion )
+        CXnNode* nodeToRedrawList( aNode );
+        CXnNode* nodeToDirtyList( aNode );
+    
+        if ( aNode == RootNode() )
             {
-            dirtyRegion->iRegion.Clear();        
-            }
-        iLayoutControl |= XnLayoutControl::EViewDirty;
-        nodeToDirtyList = nodeToRedrawList = iCurrentView;
-        nodeToDirtyList->ClearRenderedAndLaidOut();
-
-        // Add to draw list for redraw
-        AddToRedrawListL( nodeToRedrawList );
-        }
-    else
-        {
-        if ( !IsAbsoluteL( *aNode ) && !IsNodeTooltip( *aNode ) )
-            {
-            // Check adaptives in normal flow
-            CXnNode* oldest( NULL );
-            CXnNode* adaptive( aNode );
-
-            if ( !aNode->IsAdaptive( ETrue ) )
+            // Force relayout and redraw from current view
+            iDirtyList.Reset();
+            iDirtyList.AppendL( iCurrentView );
+            TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
+            if( dirtyRegion )
                 {
-                adaptive = aNode->Parent();
+                dirtyRegion->iRegion.Clear();        
                 }
-
-            for ( ; adaptive && adaptive->IsAdaptive( ETrue );
-                adaptive = adaptive->Parent() )
-                {
-                oldest = adaptive;
-                }
-
-            // Now we have found the oldest adaptive node if present
-            if ( oldest )
-                {
-                nodeToRedrawList = nodeToDirtyList = adaptive;
-                }
-            }
-
-        RPointerArray< CXnNode > dirtyList;
-        CleanupClosePushL( dirtyList );
-        TInt count( iDirtyList.Count() );
-        TBool found;
-
-        // first, check that aNode's children are not in the dirty array
-        for ( TInt i = 0; i < count; ++i )
-            {
-            found = EFalse;
-            CXnNode* candidate( iDirtyList[i] );
-
-            for ( CXnNode* node = candidate->Parent(); node && !found;
-                node = node->Parent() )
-                {
-                if ( nodeToDirtyList == node )
-                    {
-                    found = ETrue;
-                    }
-                }
-
-            if ( !found )
-                {
-                // Put candidate back to list as child is not found
-                dirtyList.AppendL( candidate );
-                }
-            }
-
-        found = EFalse;
-
-        // second, check that aNode's parent is not in dirty array
-        for ( TInt i = 0; i < count && !found; ++i )
-            {
-            CXnNode* candidate( iDirtyList[i] );
-
-            for ( CXnNode* node = nodeToDirtyList; node && !found;
-                node = node->Parent() )
-                {
-                if ( node == candidate )
-                    {
-                    found = ETrue;
-                    }
-                }
-            }
-
-        if ( !found && iDirtyList.Find( nodeToDirtyList ) == KErrNotFound )
-            {
-            // Add node to dirty list as parent is neither found
-            dirtyList.AppendL( nodeToDirtyList );
+            iLayoutControl |= XnLayoutControl::EViewDirty;
+            nodeToDirtyList = nodeToRedrawList = iCurrentView;
             nodeToDirtyList->ClearRenderedAndLaidOut();
-            
+    
             // Add to draw list for redraw
             AddToRedrawListL( nodeToRedrawList );
             }
-
-        // finally update the dirty list
-        iDirtyList.Reset();
-        iDirtyList = dirtyList;
-
-        CleanupStack::Pop( &dirtyList );
+        else
+            {
+            if ( !IsAbsoluteL( *aNode ) && !IsNodeTooltip( *aNode ) )
+                {
+                // Check adaptives in normal flow
+                CXnNode* oldest( NULL );
+                CXnNode* adaptive( aNode );
+    
+                if ( !aNode->IsAdaptive( ETrue ) )
+                    {
+                    adaptive = aNode->Parent();
+                    }
+    
+                for ( ; adaptive && adaptive->IsAdaptive( ETrue );
+                    adaptive = adaptive->Parent() )
+                    {
+                    oldest = adaptive;
+                    }
+    
+                // Now we have found the oldest adaptive node if present
+                if ( oldest )
+                    {
+                    nodeToRedrawList = nodeToDirtyList = adaptive;
+                    }
+                }
+    
+            RPointerArray< CXnNode > dirtyList;
+            CleanupClosePushL( dirtyList );
+            TInt count( iDirtyList.Count() );
+            TBool found;
+    
+            // first, check that aNode's children are not in the dirty array
+            for ( TInt i = 0; i < count; ++i )
+                {
+                found = EFalse;
+                CXnNode* candidate( iDirtyList[i] );
+    
+                for ( CXnNode* node = candidate->Parent(); node && !found;
+                    node = node->Parent() )
+                    {
+                    if ( nodeToDirtyList == node )
+                        {
+                        found = ETrue;
+                        }
+                    }
+    
+                if ( !found )
+                    {
+                    // Put candidate back to list as child is not found
+                    dirtyList.AppendL( candidate );
+                    }
+                }
+    
+            found = EFalse;
+    
+            // second, check that aNode's parent is not in dirty array
+            for ( TInt i = 0; i < count && !found; ++i )
+                {
+                CXnNode* candidate( iDirtyList[i] );
+    
+                for ( CXnNode* node = nodeToDirtyList; node && !found;
+                    node = node->Parent() )
+                    {
+                    if ( node == candidate )
+                        {
+                        found = ETrue;
+                        }
+                    }
+                }
+    
+            if ( !found && iDirtyList.Find( nodeToDirtyList ) == KErrNotFound )
+                {
+                // Add node to dirty list as parent is neither found
+                dirtyList.AppendL( nodeToDirtyList );
+                nodeToDirtyList->ClearRenderedAndLaidOut();
+                
+                // Add to draw list for redraw
+                AddToRedrawListL( nodeToRedrawList );
+                }
+    
+            // finally update the dirty list
+            iDirtyList.Reset();
+            iDirtyList = dirtyList;
+    
+            CleanupStack::Pop( &dirtyList );
+            }
         }
     }
 

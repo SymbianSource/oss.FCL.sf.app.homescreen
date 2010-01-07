@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -21,11 +21,11 @@
 
 #include "hnsuiteobserver.h"
 
-class CLiwGenericParamList; 
+class CLiwGenericParamList;
 
 /**
  * @ingroup group_hnengine
- * User interface refresh type 
+ * User interface refresh type
  */
 enum THnUiRefreshType
     {
@@ -33,9 +33,6 @@ enum THnUiRefreshType
         ERefreshToolbar,
         EStartEditMode,
         EStopEditMode,
-        EZoomLarge,
-        EZoomSmall,
-        EZoomNormal,
         EForegroundGain,
         EBackgroundGain,
         ELightOn,
@@ -63,22 +60,22 @@ public:
      * @param aRefreshType Defines reason for refresh.
      */
     virtual void NotifyUiRefreshL( const THnUiRefreshType aRefreshType ) = 0;
-    
+
     /**
      * Trigger appropriate action on suite model.
-     * 
+     *
      * @param aCustomSuiteEvent Event that is associated
      *                          with the lifecycle of a suite
      * @param aModel Suite model on that custom event should be performed.
      */
-    virtual void HandleSuiteEventL ( THnCustomSuiteEvent aCustomSuiteEvent, 
+    virtual void HandleSuiteEventL ( THnCustomSuiteEvent aCustomSuiteEvent,
             CHnSuiteModel *aModel ) = 0;
-    
+
     /**
      * Whenever an action for extension manager occurs it invokes
      * this method to execute one, passing the information needed
      * by extension manager about the action as a parameters.
-     * 
+     *
      * @param aUid UID of the ECom plugin's.
      * @param aCommand Command which has to be executed on the plugin.
      *                 Request to the Service.

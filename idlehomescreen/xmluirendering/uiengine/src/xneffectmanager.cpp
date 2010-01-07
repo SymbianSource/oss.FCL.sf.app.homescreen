@@ -156,7 +156,6 @@ void CXnEffectManager::UiRendered()
     {
     for ( TInt i = 0; i < iEffects.Count(); )
         {
-        TInt count = iEffects.Count(); // for debugging
         TXnEffect* effect = iEffects[i];
         if ( effect && effect->iState == KEffectStarted )
             {
@@ -183,9 +182,9 @@ void CXnEffectManager::UiRendered()
 //
 void CXnEffectManager::UiLayouted()
     {
-    TInt count = iEffects.Count();
-    for ( TInt i = 0; i < count; i++ )
+    for ( TInt i = 0; i < iEffects.Count(); )
         {
+        TBool effectStarted = ETrue;
         TXnEffect* effect = iEffects[i];
         if ( effect && effect->iNode &&
              effect->iState == KWaitForLayout &&
@@ -193,12 +192,22 @@ void CXnEffectManager::UiLayouted()
             {
             if ( effect->iType == KEffectTypeFullscreen )
                 {
-                DoBeginFullscreenEffect( *effect );
+                effectStarted = DoBeginFullscreenEffect( *effect );
                 }
             else if ( effect->iType == KEffectTypeControl )
                 {
-                DoBeginControlEffect( *effect );
+                effectStarted = DoBeginControlEffect( *effect );
                 }
+            }
+        
+        if ( effectStarted )
+            {
+            i++;
+            }
+        else
+            {
+            // effect cannot be started, remove it
+            RemoveEffect( effect );
             }
         }
     }
@@ -207,7 +216,7 @@ void CXnEffectManager::UiLayouted()
 // CXnEffectManager::DoBeginFullscreenEffect
 // -----------------------------------------------------------------------------
 //
-void CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
+TBool CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
     {
     CCoeEnv* coe( CCoeEnv::Static() );
            
@@ -215,8 +224,7 @@ void CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
          coe->RootWin().Identifier() )
         {
         // Window group is not focused
-        RemoveEffect( &aEffect );
-        return;
+        return EFalse;
         }
 
     const TInt flags( AknTransEffect::TParameter::EActivateExplicitCancel );
@@ -228,22 +236,23 @@ void CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
         targetAppUid, flags ) );
     
     aEffect.iState = KEffectStarted;
+    return ETrue;
     }
 
 // -----------------------------------------------------------------------------
 // CXnEffectManager::DoBeginControlEffect
 // -----------------------------------------------------------------------------
 //
-void CXnEffectManager::DoBeginControlEffect( TXnEffect& aEffect )
+TBool CXnEffectManager::DoBeginControlEffect( TXnEffect& aEffect )
     {
+    TBool ret = EFalse;
     CCoeEnv* coe( CCoeEnv::Static() );
            
     if ( coe->WsSession().GetFocusWindowGroup() != 
          coe->RootWin().Identifier() )
         {
         // Window group is not focused
-        RemoveEffect( &aEffect );
-        return;
+        return ret;
         }
 
     // Set effect begin point
@@ -251,11 +260,10 @@ void CXnEffectManager::DoBeginControlEffect( TXnEffect& aEffect )
         {
         GfxTransEffect::Begin( aEffect.iNode->Control() , aEffect.iId );
         aEffect.iState = KEffectStarted;
+        ret = ETrue;
         }
-    else
-        {
-        RemoveEffect( &aEffect );
-        }
+    
+    return ret;
     }
 
 // -----------------------------------------------------------------------------

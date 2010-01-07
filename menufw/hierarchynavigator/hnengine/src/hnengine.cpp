@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -19,7 +19,7 @@
 #include <uri8.h>
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 #include <sacls.h>
-#include <apgtask.h> 
+#include <apgtask.h>
 #include <centralrepository.h>
 #include <AknUtils.h>
 
@@ -143,7 +143,7 @@ TBool CHnEngine::SuiteModelLoadedL( TInt aId )
 //
 CHnSuiteModel* CHnEngine::GetLastSuiteModelL()
     {
-    return iSuiteContainer->GetLastSuiteModel(); 
+    return iSuiteContainer->GetLastSuiteModel();
     }
 
 // ---------------------------------------------------------------------------
@@ -152,14 +152,14 @@ CHnSuiteModel* CHnEngine::GetLastSuiteModelL()
 //
 CHnSuiteModel* CHnEngine::GetParentSuiteModelL()
     {
-    return iSuiteContainer->GetParentSuiteModel(); 
+    return iSuiteContainer->GetParentSuiteModel();
     }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CHnEngine::TriggerHnEventL( const TInt aHnEventId, 
+EXPORT_C TInt CHnEngine::TriggerHnEventL( const TInt aHnEventId,
         const TInt aRecipientId, CLiwGenericParamList* aEventParameters )
     {
     TInt ret = iSuiteContainer->OfferHnEventL( aHnEventId, aRecipientId,
@@ -187,14 +187,14 @@ void CHnEngine::HighlightPlacementFromUriL( const TDesC8& aUriFragment )
 //
 // ---------------------------------------------------------------------------
 //
-TInt CHnEngine::LoadSuiteFromUriL( const TDesC8& aSuiteName,  
+TInt CHnEngine::LoadSuiteFromUriL( const TDesC8& aSuiteName,
         const TDesC8& aUriQuery, const TDesC8& aUriFragment )
     {
     TInt error( KErrNone );
-    
+
     if( !( aSuiteName.Compare( KRoot8 ) ) )
         {
-        CLiwGenericParamList* uriParams = 
+        CLiwGenericParamList* uriParams =
 			UriQueryToLiwListLC( aUriQuery, aUriFragment, aSuiteName );
         CLiwGenericParamList* params = CLiwGenericParamList::NewLC();
         params->AppendL( iMetaDataModel->GetSuiteParameters( 0 ) );
@@ -211,15 +211,15 @@ TInt CHnEngine::LoadSuiteFromUriL( const TDesC8& aSuiteName,
 			UriQueryToLiwListLC( aUriQuery, aUriFragment, aSuiteName );
 
         HBufC* suiteName = HnConvUtils::Str8ToStrLC( aSuiteName );
-        params->AppendL( TLiwGenericParam( KNewSuiteParamNameEn, 
+        params->AppendL( TLiwGenericParam( KNewSuiteParamNameEn,
             TLiwVariant( *suiteName ) ) );
-        
+
         error = HandleNewSuiteLoadedEventL( *params );
-        
+
         CleanupStack::PopAndDestroy( suiteName );
         CleanupStack::PopAndDestroy( params );
         }
-    
+
     return error;
     }
 
@@ -255,7 +255,7 @@ void CHnEngine::HandleTheSameSuitesL( TBool aNextExists, const TDesC8& aParams )
         // set parameters
         iSuiteContainer->GetLastSuiteModel()->SetExitMode( EExitModeHide );
         }
-    
+
     CleanupStack::PopAndDestroy( params );
     CleanupStack::PopAndDestroy( &exitMode );
 
@@ -273,25 +273,25 @@ EXPORT_C void CHnEngine::LoadSuitesFromUriL( const TDesC8& aUri )
 	{
 	DEBUG(("_MM_:CHnEngine::LoadSuitesFromUriL IN"));
 	DEBUG8(("_MM_:\tURI: %S",&aUri));
-	
+
 	TBool consumed(EFalse);
-	
+
     if ( aUri.Find( KSetFocusWithPref ) != KErrNotFound )
 	    {
 	    LoadFromCrL( aUri );
 	    consumed = ETrue;
 	    }
-    
+
     if ( !consumed )
     	{
     	consumed = HandleActionL( aUri );
     	}
-    
+
     if ( !consumed )
     	{
     	LoadSuitesL( aUri );
     	}
-    
+
     DEBUG(("_MM_:CHnEngine::LoadSuitesFromUriL OUT"));
     }
 
@@ -303,10 +303,10 @@ TInt CHnEngine::HandleModelEventL( const TDesC& aEventName,
                                 CLiwGenericParamList& aParams )
     {
     TInt ret(KErrNotFound);
-    
+
     if ( aEventName == KNewSuiteLoadedMdEvent )
         {
-        // This handles new suite creation, putting its visual model 
+        // This handles new suite creation, putting its visual model
         // onto the stack eventually.
         ret = HandleNewSuiteLoadedEventL( aParams );
         }
@@ -349,30 +349,12 @@ TInt CHnEngine::HandleModelEventL( const TDesC& aEventName,
         // Stopping edit mode
         iControllerInterface.NotifyUiRefreshL( EStopEditMode );
         ret = KErrNone;
-        }    
+        }
     else if (aEventName == KSetFocusEvent )
         {
         // SetFocus
         ret = HandleSetFocusEventL( aParams );
         }
-    else if (aEventName == KZoomLarge )
-        {
-        // Stopping edit mode
-        iControllerInterface.NotifyUiRefreshL( EZoomLarge );
-        ret = KErrNone;
-        }
-    else if (aEventName == KZoomSmall)
-		{
-		// Stopping edit mode
-		iControllerInterface.NotifyUiRefreshL( EZoomSmall );
-		ret = KErrNone;
-		}
-    else if (aEventName == KZoomNormal )
-        {
-        // Stopping edit mode
-        iControllerInterface.NotifyUiRefreshL( EZoomNormal );
-        ret = KErrNone;
-        }   
     else if (aEventName == KAppGainForeground )
     	{
     	//force matrix gain foreground
@@ -387,7 +369,7 @@ TInt CHnEngine::HandleModelEventL( const TDesC& aEventName,
         iControllerInterface.NotifyUiRefreshL( EBackgroundGain );
         ret = KErrNone;
     	}
-    
+
     return ret;
     }
 
@@ -395,10 +377,10 @@ TInt CHnEngine::HandleModelEventL( const TDesC& aEventName,
 //
 // ---------------------------------------------------------------------------
 //
-TInt CHnEngine::HandleWidgetChangeL( 
+TInt CHnEngine::HandleWidgetChangeL(
         CLiwGenericParamList& aParams )
     {
-    THnSuiteWidgetType type = EChangeWidget;   
+    THnSuiteWidgetType type = EChangeWidget;
     TInt pos( 0 );
     const TLiwGenericParam* param = NULL;
     param = aParams.FindFirst( pos,  KWidgetTypeAttrName8 );
@@ -407,13 +389,13 @@ TInt CHnEngine::HandleWidgetChangeL(
         TPtrC widgetType( KNullDesC );
         param->Value().Get( widgetType );
         if ( widgetType.Compare( KWidgetTypeList ) == 0 )
-            type = EListWidget; 
-        else if ( widgetType.Compare( KWidgetTypeGrid ) == 0 ) 
-            type = EGridWidget; 
+            type = EListWidget;
+        else if ( widgetType.Compare( KWidgetTypeGrid ) == 0 )
+            type = EGridWidget;
         else if ( widgetType.Compare( KWidgetTypeCoverFlow ) == 0 )
-            type = ECoverFlowWidget;  
+            type = ECoverFlowWidget;
         }
-  
+
     CHnSuiteModel* model  = iSuiteContainer->GetLastSuiteModel();
     return HandleWidgetChangeL( model->SuiteName(), type );
     }
@@ -424,16 +406,16 @@ TInt CHnEngine::HandleWidgetChangeL(
 //
 TInt CHnEngine::HandleWidgetChangeL( const TDesC& aSuiteName,
         THnSuiteWidgetType aType )
-    {   
+    {
     DEBUG(("_MM_:CMatrixMenuAppUi::HandleWidgetChangeL IN"));
     TInt ret( KErrGeneral );
-    
+
     CHnRepositoryManager* rep = CHnRepositoryManager::NewLC();
     THnSuiteWidgetType type( EUnspecified );
     TInt err( rep->ReadSuiteWidgetTypeL( aSuiteName, type ) );
-    
+
     if( ( !err || err == KErrNotFound ) && type != EUnspecified )
-        {  
+        {
         ret = rep->StoreSuiteWidgetTypeL( aSuiteName, aType );
         }
     CleanupStack::PopAndDestroy( rep );
@@ -445,7 +427,7 @@ TInt CHnEngine::HandleWidgetChangeL( const TDesC& aSuiteName,
 //
 // ---------------------------------------------------------------------------
 //
-TInt CHnEngine::HandleReevaluateEventL( 
+TInt CHnEngine::HandleReevaluateEventL(
         CLiwGenericParamList& aParams )
     {
     TInt ret(KErrNone);
@@ -454,21 +436,21 @@ TInt CHnEngine::HandleReevaluateEventL(
     _LIT8( KIdGlobalPath, "filter:id");
     _LIT8( KGenrePath, "filter:[%d]/genre");
     _LIT8( KItemPath, "filter:[%d]/item");
- 
+
     CHnFilter* filter = CHnFilter::NewLC();
-    
+
     TLiwGenericParam param;
     param.PushL();
     aParams.AtL(0, param);
     ASSERT( !param.Name().Compare( KFilterElementItem8 ) );
-    
+
     TLiwVariant suiteIdVariant;
     suiteIdVariant.PushL();
     TLiwVariant genreVariant;
     genreVariant.PushL();
-    TInt idFound = 
+    TInt idFound =
         HnLiwUtils::GetVariantL( aParams, KIdGlobalPath(), suiteIdVariant );
-    TInt found = 
+    TInt found =
         HnLiwUtils::GetVariantL(aParams, KGenreGlobalPath(), genreVariant );
     if (idFound != KErrNotFound)
         {
@@ -498,16 +480,16 @@ TInt CHnEngine::HandleReevaluateEventL(
             TLiwVariant itemVariant;
             HnLiwUtils::GetVariantL(aParams, path, itemVariant );
             CleanupStack::PopAndDestroy( &path );
-            
+
             TPtrC suiteName;
             TPtrC itemId;
             genreVariant.Get(suiteName);
             itemVariant.Get(itemId);
-            
+
             CHnItemId* itemIdObject = CHnItemId::NewLC(suiteName, itemId);
             filter->AppendItemIdL( itemIdObject );
             CleanupStack::Pop( itemIdObject );
-           
+
             genreVariant.Reset();
             itemVariant.Reset();
             }
@@ -539,7 +521,7 @@ TInt CHnEngine::HandleNewSuiteLoadedEventL(
     {
     DEBUG(("_MM_:CHnEngine::HandleNewSuiteLoadedEventL IN"));
     TInt err( KErrNone );
-    const TLiwGenericParam* param = 
+    const TLiwGenericParam* param =
         aParams.FindFirst( err, KNewSuiteParamNameEn );
     if( err != KErrNotFound )
         {
@@ -562,9 +544,9 @@ TInt CHnEngine::HandleNewSuiteLoadedEventL(
                 {
                 iMetaDataModel->SetModeL( EMdModeNormal );
                 }
-            
-            TRAP( err, iMetaDataModel->EvaluateL( *filter ) );          
-            
+
+            TRAP( err, iMetaDataModel->EvaluateL( *filter ) );
+
             CleanupStack::PopAndDestroy( filter );
             if ( err )
                 {
@@ -590,7 +572,7 @@ TInt CHnEngine::HandleNewSuiteLoadedEventL(
                     break;
                 default :
                     {
-                    message = HBufC::NewL( KDebugNoteOtherError().Length() + 
+                    message = HBufC::NewL( KDebugNoteOtherError().Length() +
                                             KMaxLength );
                     message->Des().AppendFormat( KDebugNoteOtherError, err );
                     }
@@ -602,7 +584,7 @@ TInt CHnEngine::HandleNewSuiteLoadedEventL(
         }
     DEBUG(("_MM_:\tReturned error code: %d",err));
     DEBUG(("_MM_:CHnEngine::HandleNewSuiteLoadedEventL OUT"));
-    
+
     return err;
     }
 
@@ -612,10 +594,10 @@ TInt CHnEngine::HandleNewSuiteLoadedEventL(
 //
 TInt CHnEngine::HandleSetFocusEventL( const CLiwGenericParamList& aParams  )
     {
-    // Triggering event in hierarchy navigator, specifying 
+    // Triggering event in hierarchy navigator, specifying
     // that suite given by the name genre has been
     DEBUG(("_MM_:CHnEngine::HandleSetFocusEventL IN"));
-    
+
     TInt posSuite( 0 );
     TInt posItem( 0 );
 	TInt64 suiteCustomId( KErrNotFound );
@@ -624,25 +606,25 @@ TInt CHnEngine::HandleSetFocusEventL( const CLiwGenericParamList& aParams  )
 	// Get suite's and item's custom ids.
 	const TLiwGenericParam* paramSuiteId = aParams.FindFirst( posSuite,  KSuiteCustomId8 );
 	const TLiwGenericParam* paramItemId = aParams.FindFirst( posItem,  KItemCustomId8 );
-	
-    
+
+
 	if ( posSuite >= 0 && posItem >= 0 )
     	{
     	suiteCustomId = paramSuiteId->Value().AsTInt64();
     	itemCustomId = paramItemId->Value().AsTInt64();
-    	
+
     	// Get matching suite.
     	CHnSuiteModel* suiteModel = iSuiteContainer->GetMatchingSuiteModel( suiteCustomId );
-    	
+
     	if ( suiteModel )
     		{
     		// If suite is not null, then find matching item model.
     		TInt index( KErrNotFound );
     		CHnItemModel* itemModel = suiteModel->GetMatchingItemModelL( itemCustomId, index );
-    		
+
     		if ( itemModel )
     			{
-    			// If itemModel is not null then set highlight and set highligh 
+    			// If itemModel is not null then set highlight and set highligh
     			// on matching item.
     			suiteModel->SetSuiteHighlightL( index );
         		iControllerInterface.HandleSuiteEventL( ESuiteHighlightChanged, suiteModel );
@@ -653,7 +635,7 @@ TInt CHnEngine::HandleSetFocusEventL( const CLiwGenericParamList& aParams  )
     			}
     		}
     	}
-    
+
     DEBUG(("_MM_:CHnEngine::HandleSetFocusEventL OUT"));
     return KErrNone;
     }
@@ -665,13 +647,13 @@ TInt CHnEngine::HandleSetFocusEventL( const CLiwGenericParamList& aParams  )
 TInt CHnEngine::HandleMoveFocusBeforeDeleteEventL(
         const CLiwGenericParamList& /* aParams */  )
     {
-    // Triggering event in hierarchy navigator, specifying 
+    // Triggering event in hierarchy navigator, specifying
     // that suite given by the name genre has been
     DEBUG(("_MM_:CHnEngine::HandleMoveFocusBeforeDeleteEventL IN"));
-    
+
     TInt currentHighlight( GetLastSuiteModelL()->GetSuiteHighlight() );
     TInt itemsCount( GetLastSuiteModelL()->GetItemModelsCount() );
-    
+
     TInt shift( 0 );
     if( AknLayoutUtils::PenEnabled() && iEditMode )
         {
@@ -688,7 +670,7 @@ TInt CHnEngine::HandleMoveFocusBeforeDeleteEventL(
         }
     iControllerInterface.HandleSuiteEventL(
             ESuiteHighlightChanged, GetLastSuiteModelL() );
-    
+
     DEBUG(("_MM_:CHnEngine::HandleMoveFocusBeforeDeleteEventL OUT"));
     return KErrNone;
     }
@@ -752,12 +734,12 @@ void CHnEngine::InstallChangeL( TInt aStatus )
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnEngine::InitializeL( CLiwGenericParamList& aParam )
-    {  
+    {
     DEBUG(("_MM_:CMatrixMenuAppUi::InitializeL IN"));
     User::LeaveIfError( HandleNewSuiteLoadedEventL( aParam ) );
     DEBUG(("_MM_:CMatrixMenuAppUi::InitializeL OUT"));
     // This is an interface method so some value has to be returned.
-    return KErrNone;    
+    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -835,7 +817,7 @@ void CHnEngine::ParseSuiteUriPathL( const TDesC8& aUriPath,
 EXPORT_C void CHnEngine::ResetModelsL()
     {
     MMPERF(("CHnEngine::ResetModelsL - START"));
-    
+
     iControllerInterface.NotifyUiRefreshL( ERemoveLiwObjects );
 
     if( iSuiteContainer )
@@ -863,12 +845,12 @@ CLiwGenericParamList* CHnEngine::UriQueryToLiwListLC(
         const TDesC8& aUriQuery, const TDesC8& aUriFragment, const TDesC8& aSuiteName )
     {
     CLiwGenericParamList* list = CLiwGenericParamList::NewLC();
-    
+
     CLiwDefaultMap* map = CLiwDefaultMap::NewL();
     map->PushL();
-        
+
     RPointerArray< HBufC8 > params = SplitL( aUriQuery, KAnd8 );
-    
+
     for( TInt i = 0; i < params.Count(); i++ )
         {
         RPointerArray< HBufC8 > paramValue = SplitL( *params[ i ], KEquals8 );
@@ -877,15 +859,15 @@ CLiwGenericParamList* CHnEngine::UriQueryToLiwListLC(
         map->InsertL( *paramValue[ 0 ], TLiwVariant( *paramValue[ 1 ] ) );
         CleanupStack::PopAndDestroy( &paramValue );
         }
-    
+
     if ( aUriFragment.Length() > 0 && aSuiteName.Length() > 0 )
         {
         map->InsertL( KUriHighlight, TLiwVariant( aUriFragment ) );
         map->InsertL( KUriHighlightSuite, TLiwVariant( aSuiteName ) );
         }
-    
+
     list->AppendL( TLiwGenericParam(  KParams8, TLiwVariant( map )));
-    
+
     params.ResetAndDestroy();
     CleanupStack::PopAndDestroy( map );
 
@@ -901,17 +883,17 @@ RPointerArray< HBufC8 > CHnEngine::SplitL( const TDesC8& aSource,
     {
     RPointerArray< HBufC8 > tokens;
     CleanupResetAndDestroyPushL( tokens );
-    
+
     if ( aSource.Length() > 0 && aSeparator.Length() > 0 )
         {
         TPtrC8 tmpSource = aSource;
 
         TPtrC8 token( KNullDesC8 );
-    
+
         while( ETrue )
             {
             TInt length = tmpSource.Find( aSeparator );
-    
+
             if ( length >= 0 )
                 {
                 token.Set( tmpSource.Mid( 0, length ) );
@@ -947,8 +929,8 @@ void CHnEngine::SetEditModeL( TBool aEditMode )
         }
     //The suite on top of the stack is probably displayed.
     //Switching to edit mode has some dramatic ui impact,
-    //thus when parts of the suite will get displayed 
-    //it may look awkward thus the suite on top of the stack 
+    //thus when parts of the suite will get displayed
+    //it may look awkward thus the suite on top of the stack
     //is marked as uninitialized, therefore ui will be able to
     //react only to the ready suite model.
     if (AknLayoutUtils::PenEnabled() || (!AknLayoutUtils::PenEnabled() && iEditMode))
@@ -973,7 +955,7 @@ TBool CHnEngine::IsOnlyRootConfLoaded()
 // ---------------------------------------------------------------------------
 //
 
-EXPORT_C void CHnEngine::HandleRequestL( const CLiwGenericParamList& aParam, 
+EXPORT_C void CHnEngine::HandleRequestL( const CLiwGenericParamList& aParam,
                                 CLiwGenericParamList* /*aOutput*/ )
     {
     TInt pos( 0 );
@@ -1013,22 +995,22 @@ void CHnEngine::LoadFromCrL( const TDesC8& aUri )
 	{
 	HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
 	uriBuf->Des().Copy( aUri );
-	
+
 	TUriParser8 parser;
 	parser.Parse( *uriBuf );
 	User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
-	
+
 	const TDesC8& query = parser.Extract( EUriQuery );
     RPointerArray< HBufC8 > params = SplitL( query, HnLogicalRelations::KLogicalAnd8);
-    
+
     TBuf8<KApaMaxAppGroupName + KTimeStampBufferLength + KUidStringLength + 2> item;
-    
+
     for( TInt i = 0; i < params.Count(); i++ )
         {
         RPointerArray< HBufC8 > paramValue = SplitL( *params[ i ], HnLogicalRelations::KLogicalEqual8 );
         CleanupResetAndDestroyPushL( paramValue );
         ASSERT( paramValue.Count() == 2 );
-        
+
         if ( !paramValue[0]->Compare(KMcsAppGroupName8) )
         	{
         	TBuf8<KApaMaxAppGroupName> appgrname;
@@ -1054,19 +1036,19 @@ void CHnEngine::LoadFromCrL( const TDesC8& aUri )
         	}
         CleanupStack::PopAndDestroy( &paramValue );
         }
-    
+
     TBuf<KApaMaxAppGroupName + KTimeStampBufferLength + KUidStringLength + 2> item1;
     item1.Copy(item);
 	CRepository *cenRep = CRepository::NewLC( KCRUidMenu );
 	cenRep->Set(KMenuShowFolder, item1);
 	CleanupStack::PopAndDestroy( cenRep );
-	
+
     params.ResetAndDestroy();
     CleanupStack::PopAndDestroy( uriBuf );
-	
+
 	}
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnEngine::LightStatusChanged(TInt aTarget,
@@ -1094,23 +1076,23 @@ void CHnEngine::LightStatusChanged(TInt aTarget,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CHnEngine::HandleActionL( const TDesC8& aUri )
 	{
 	TBool exitActionConsumed(EFalse);
-    
+
 	HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
 	uriBuf->Des().Copy( aUri );
-	
+
 	TUriParser8 parser;
     parser.Parse( *uriBuf );
     User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
-	
+
     const TDesC8& host8 = parser.Extract( EUriHost );
     const TDesC8& query = parser.Extract( EUriQuery );
-    
+
 	RBuf action;
     CleanupClosePushL( action );
     CLiwGenericParamList* paramsUri = UriQueryToLiwListLC( query, KNullDesC8, KNullDesC8 );
@@ -1128,7 +1110,7 @@ TBool CHnEngine::HandleActionL( const TDesC8& aUri )
     	    {
     	    exitHideHostNotFound = EFalse;
     	    }
-    	
+
 		if ( exitHideHostNotFound )
 			{
 			//send to foreground
@@ -1145,7 +1127,7 @@ TBool CHnEngine::HandleActionL( const TDesC8& aUri )
 			HandleModelEventL( KAppGainBackground, *pl );
 			CleanupStack::PopAndDestroy( pl );
 			}
-    	
+
     	if ( exitHideHostNotFound && iSuiteContainer->GetLastSuiteModel() == suiteModel  )
     		{
             HandleBackEventL( host,  1 );
@@ -1156,14 +1138,14 @@ TBool CHnEngine::HandleActionL( const TDesC8& aUri )
             CLiwGenericParamList* params = CLiwGenericParamList::NewLC();
             params->AppendL( iMetaDataModel->GetSuiteParameters( 0 ) );
         	ResetModelsL();
-            InitializeL( *params ); 
+            InitializeL( *params );
             CleanupStack::PopAndDestroy( params );
     		}
-    	
+
     	CleanupStack::PopAndDestroy( &host );
     	exitActionConsumed = ETrue;
     	}
-    
+
     CleanupStack::PopAndDestroy( paramsUri );
     CleanupStack::PopAndDestroy( &action );
     CleanupStack::PopAndDestroy( uriBuf );
@@ -1171,7 +1153,7 @@ TBool CHnEngine::HandleActionL( const TDesC8& aUri )
 	}
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnEngine::LoadSuitesL( const TDesC8& aUri )
@@ -1179,14 +1161,14 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 	TBool sendToForeground(EFalse);
 	HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
 	uriBuf->Des().Copy( aUri );
-	
+
 	TUriParser8 parser;
 	parser.Parse( *uriBuf );
 	User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
-	
+
 	CDesC8ArrayFlat* suiteNameArray = new( ELeave ) CDesC8ArrayFlat( KDefaultGranularity ) ;
 	CleanupStack::PushL( suiteNameArray );
-	
+
 	const TDesC8& host = parser.Extract( EUriHost );
     RBuf8 host8;
     CleanupClosePushL( host8 );
@@ -1207,18 +1189,18 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 		ParseSuiteUriPathL( *path8, *suiteNameArray );
 		CleanupStack::PopAndDestroy( path8 );
 		}
-	
+
 	TBool suiteExists( EFalse );
 	iMetaDataModel->IgnoreEvaluations( ETrue );
 	iMetaDataModel->QueueForeground( CHnMdModel::EWhenAnySuiteIsEvaluated );
-	
+
     if( host8.Length() == 0 || ( host8.Length() > 0 &&
             !iMetaDataModel->SuiteModelExistsL( host8 ) ) )
         {
         suiteNameArray->Reset();
         suiteNameArray->AppendL( KRoot8 );
         }
-	
+
 	for( TInt i = 0; i < suiteNameArray->Count(); ++i )
 		{
 		suiteExists = iMetaDataModel->SuiteModelExistsL(
@@ -1226,13 +1208,13 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 		TBool nextExists = i < suiteNameArray->Count() - 1 &&
 			iMetaDataModel->SuiteModelExistsL( ( *suiteNameArray )[i + 1] );
 		TBool isLast = ( i == ( suiteNameArray->Count() - 1 ) );
-		
+
 		TBool turnOnEvaluation = ( suiteExists && ( !nextExists || isLast ) );
 		if( turnOnEvaluation || !suiteExists )
 			{
 			iMetaDataModel->IgnoreEvaluations( EFalse );
 			}
-		
+
 		TInt err( KErrNone );
 
 		// Ignore loading new suite if the last suite in model is the same
@@ -1246,7 +1228,7 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 				continue;
 				}
 			}
-		
+
 		if( suiteExists )
 			{
 			if (!nextExists)
@@ -1261,7 +1243,7 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 			    {
 			    // Tricky: if foreground is still queued it means that the suite is evaluated
 			    // asynchronously. Override the previos foreground queue setting with one
-			    // that will be effective only if the last loaded suite is evaluated. 
+			    // that will be effective only if the last loaded suite is evaluated.
 			    iMetaDataModel->QueueForeground( CHnMdModel::EWhenCurrentTopSuiteIsEvaluated );
 			    }
 			if ( err != KErrNone )
@@ -1269,19 +1251,19 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 				sendToForeground = ETrue;
 				}
 			}
-		
+
 		if( !suiteExists || err != KErrNone || !nextExists )
 			{
 			CHnFilter* filter = CHnFilter::NewLC();
 
 			filter->SetSuiteId(
 				iSuiteContainer->GetLastSuiteModel()->CustomId() );
-			
+
 			filter->SetEvaluateSuiteL( ETrue );
 			iMetaDataModel->IgnoreEvaluations( EFalse );
-			
+
 			TRAPD( err, iMetaDataModel->EvaluateL( *filter ) );
-			
+
 			CleanupStack::PopAndDestroy( filter );
 			if( err )
 				{
@@ -1293,17 +1275,17 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
 			break;
 			}
 		}
-	
+
 	// set highlight only when path is valid!
 	if( suiteExists )
 		{
 		HighlightPlacementFromUriL( parser.Extract( EUriFragment ) );
 		}
-	
+
     CleanupStack::PopAndDestroy( &host8 );
 	CleanupStack::PopAndDestroy( suiteNameArray );
 	CleanupStack::PopAndDestroy( uriBuf );
-	
+
 //    send to foreground
 	if ( sendToForeground )
 		{

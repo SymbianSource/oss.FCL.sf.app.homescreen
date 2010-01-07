@@ -26,11 +26,11 @@
 #include <AknLayoutFont.h>
 #include <AknDef.hrh>
 
-  
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
-//  
+//
 TAknWindowComponentLayout MmLCTUtils::ItemLayout( const TDesC8& aLayout, TInt aVariety )
 	{
     if ( !aLayout.Compare(KListSingleLargeGraphicPane8))
@@ -79,7 +79,7 @@ TAknWindowComponentLayout MmLCTUtils::ItemLayout( const TDesC8& aLayout, TInt aV
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
-//           
+//
 TAknTextComponentLayout MmLCTUtils::TextLayout( const TDesC8& aLayout, TInt aVariety )
     {
     if ( aLayout.Compare(KUiaccelAalistSinglePaneT18) == 0 )
@@ -105,7 +105,7 @@ TAknTextComponentLayout MmLCTUtils::TextLayout( const TDesC8& aLayout, TInt aVar
     else if ( aLayout.Compare(KlistSingleLargeGraphicPaneT18) == 0 )
         {
         return AknLayoutScalable_Avkon::list_single_large_graphic_pane_t1(aVariety);
-        }       
+        }
     else if ( aLayout.Compare(KUiaccelAagridCellImagePaneT18) == 0 )
         {
         return AknLayoutScalable_UiAccel::aagrid_cell_image_pane_t1(aVariety);
@@ -154,7 +154,7 @@ TAknWindowComponentLayout MmLCTUtils::GraphicLayout( const TDesC8& aLayout, TInt
     else if ( aLayout.Compare(KUiaccelAalistDoubleGraphicPaneG38) == 0 )
         {
         return AknLayoutScalable_UiAccel::aalist_double_graphic_pane_g3(aVariety);
-        }        
+        }
     else if ( aLayout.Compare(KUiaccelAalistDoublePaneG18) == 0 )
         {
         return AknLayoutScalable_UiAccel::aalist_double_pane_g1(aVariety);
@@ -162,7 +162,7 @@ TAknWindowComponentLayout MmLCTUtils::GraphicLayout( const TDesC8& aLayout, TInt
     else if ( aLayout.Compare(KUiaccelAalistDoublePaneG28) == 0 )
         {
         return AknLayoutScalable_UiAccel::aalist_double_pane_g2(aVariety);
-        } 
+        }
     else if ( aLayout.Compare(KlistSingleLargeGraphicPane8) == 0 )
         {
         return AknLayoutScalable_Avkon::list_single_large_graphic_pane(aVariety, 0,0);
@@ -174,15 +174,15 @@ TAknWindowComponentLayout MmLCTUtils::GraphicLayout( const TDesC8& aLayout, TInt
     else if ( aLayout.Compare(KlistSingleLargeGraphicPaneG2Cp28) == 0 )
         {
         return AknLayoutScalable_Avkon::list_single_large_graphic_pane_g2_cp2(aVariety);
-        } 
+        }
     else if ( aLayout.Compare(KlistSingleLargeGraphicPaneG4Cp28) == 0 )
         {
         return AknLayoutScalable_Avkon::list_single_large_graphic_pane_g4_cp2(aVariety);
-        } 
+        }
     else if ( aLayout.Compare(KUiaccelAagridCellImagePaneG18) == 0 )
         {
         return AknLayoutScalable_UiAccel::aagrid_cell_image_pane_g1(aVariety);
-        } 
+        }
     else if ( aLayout.Compare(KUiaccelAagridCellImagePaneG28) == 0 )
         {
         return AknLayoutScalable_UiAccel::aagrid_cell_image_pane_g2(aVariety);
@@ -251,8 +251,8 @@ TAknWindowComponentLayout MmLCTUtils::GraphicLayout( const TDesC8& aLayout, TInt
         {
         User::Panic(KMLID, -1);
         }
-    return TAknWindowComponentLayout();        
-    }    
+    return TAknWindowComponentLayout();
+    }
 
 // ---------------------------------------------------------------------------
 //
@@ -278,10 +278,10 @@ TAknLayoutScalableParameterLimits MmLCTUtils::LCTParameterLimits( const TDesC8& 
 //
 // ---------------------------------------------------------------------------
 //
-void MmLCTUtils::SetupTextSubCellTemplate( TSize aItemSize, 
+void MmLCTUtils::SetupTextSubCellTemplate( TSize aItemSize,
                               TTemplateChild& aSubCellTemplate )
     {
-    TAknTextComponentLayout textLayout = TextLayout( aSubCellTemplate.iLct, aSubCellTemplate.iVariety);                
+    TAknTextComponentLayout textLayout = TextLayout( aSubCellTemplate.iLct, aSubCellTemplate.iVariety);
     TAknTextLineLayout textlineLayout = textLayout.LayoutLine();
     TAknLayoutText t;
     t.LayoutText( aItemSize, textlineLayout );
@@ -295,12 +295,12 @@ void MmLCTUtils::SetupTextSubCellTemplate( TSize aItemSize,
 //
 // ---------------------------------------------------------------------------
 //
-void MmLCTUtils::SetupGraphicSubCellTemplate( TSize aItemSize, 
+void MmLCTUtils::SetupGraphicSubCellTemplate( TSize aItemSize,
                               TTemplateChild& aSubCellTemplate )
     {
     TAknWindowComponentLayout graphicLayout = GraphicLayout (
 			aSubCellTemplate.iLct, aSubCellTemplate.iVariety);
-	TAknLayoutRect r;           
+	TAknLayoutRect r;
     r.LayoutRect( aItemSize, graphicLayout.LayoutLine() );
     aSubCellTemplate.iTextAlign = CGraphicsContext::ECenter ;
     aSubCellTemplate.iRectAccordingToParent = r.Rect();
@@ -331,11 +331,6 @@ TSize MmLCTUtils::GetLayoutSize( const TDesC8& aLCTTemplate, TInt aVariety )
     TInt rows(0);
     cols = MmLCTUtils::LCTParameterLimits( aLCTTemplate, aVariety ).LastColumn() + 1;
     rows = MmLCTUtils::LCTParameterLimits( aLCTTemplate, aVariety ).LastRow() + 1;
-    if ( aLCTTemplate.Compare(KCellAppPane8) == 0 && aVariety == 3 )
-    	{
-    	cols = 6;
-    	rows = 2;
-    	}
     return TSize( cols, rows);
 	}
 

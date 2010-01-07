@@ -12,14 +12,14 @@
 * Contributors:
 *
 * Description:  Constants for the matrixmenu
-*  Version     : %version: 33.1.8 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 33.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
 
 #ifndef MMWIDGETSCONSTANTS_H
 #define MMWIDGETSCONSTANTS_H
-	
+
 
 #include <e32keys.h>
 
@@ -32,106 +32,106 @@ namespace MmGrid
 	 * X component of the 4x3 layout.
 	 */
 	const TInt K4By3LayoutX = 4;
-	
+
 	/**
 	 * Y component of the 4x3 layout.
 	 */
 	const TInt K4By3LayoutY = 3;
-	
+
 	/**
 	 * X component of the 3x4 layout.
 	 */
-	
+
 	const TInt K3By4LayoutX = 3;
-	
+
 	/**
 	 * Y component of the 3x4 layout.
 	 */
 	const TInt K3By4LayoutY = 4;
-	
+
 	/**
 	 * X component of the 4x5 layout.
 	 */
 	const TInt K4By5LayoutX = 4;
-	
+
 	/**
 	 * Y component of the 5x4 layout.
 	 */
 	const TInt K4By5LayoutY = 5;
-	
+
 	/**
 	 * X component of the 5x4 layout.
 	 */
 	const TInt K5By4LayoutX = 5;
-	
+
 	/**
 	 * Y component of the 5x4 layout.
 	 */
 	const TInt K5By4LayoutY = 4;
-	
+
 	/**
 	 * Below this value, default highlight in 3x4 grid
 	 * is set up on the first item. Otherwize, on the default
 	 * highlight.
 	 */
 	const TInt K3By4Threshold(5);
-	
+
 	/**
 	 * Below this value, default highlight in 4x3 grid
 	 * is set up on the first item. Otherwize, on the default
 	 * highlight.
 	 */
 	const TInt K4By3Threshold(6);
-	
+
 	/**
 	 * Below this value, default highlight in 5x4 grid
 	 * is set up on the first item. Otherwize, on the default
 	 * highlight.
 	 */
 	const TInt K5By4Threshold(8);
-	
+
 	/**
 	 * Below this value, default highlight in 4x5 grid
 	 * is set up on the first item. Otherwize, on the default
 	 * highlight.
 	 */
 	const TInt K4By5Threshold(10);
-	
+
 	/**
 	 * Default highlight in 3x4 grid.
 	 */
 	const TInt K3By4DefaultHighlight(4);
-	
+
 	/**
 	 * Default highlight in 4x3 grid.
 	 */
 	const TInt K4By3DefaultHighlight(5);
-	
+
 	/**
 	 * Default highlight in 5x4 grid.
 	 */
 	const TInt K5By4DefaultHighlight(7);
-	
+
 	/**
 	 * Default highlight in 4x5 grid.
 	 */
 	const TInt K4By5DefaultHighlight(8);
-	
+
 	/**
 	 * Number of rows in portrait/non-zoom mode;
 	 */
 	const TInt KRowsPortraitZoomNormal(4);
-	
+
 	/**
 	 * Number of columns in landscape/non-zoom mode;
 	 */
 	const TInt KColsPortraitZoomNormal(3);
-	
+
 	/**
 	 * Number of rows in portrait/non-zoom mode;
 	 */
 	const TInt KRowsLandscapeZoomNormal(3);
-	
+
 	/**
 	 * Number of columns in landscape/non-zoom mode;
 	 */
@@ -165,67 +165,67 @@ namespace MmEffects
 	 * Threshold for items shift.
 	 */
 	const TReal KShiftRatio(0.25);
-	
+
 	/**
 	 * Drag and drop speed limit.
 	 */
 	const TInt KDragSpeedIgnoreThreshold(15 * 15);
-	
+
 	/**
 	 * Number of frames to animate.
 	 */
 	const TInt KMaximumAnimationFramesCount( 6 );
-	
+
 	/**
 	 * Number of frames to animate.
 	 */
 	const TInt KUsualAnimationFramesCount( 3 );
-	
+
 	/**
 	 * Number of frames to animate on non-touch devices.
 	 */
 	const TInt KUsualAnimationFramesCountNonTouch( 2 );
-	
+
 	/**
 	 * No animation frames count.
 	 */
 	const TInt KNoAnimationFramesCount( 1 );
-	
+
 	/**
 	 * Delay between redrawing frames.
 	 */
 	const TInt KAnimationFrameDelay( 40000 );
-	
+
 	/**
 	 * Text alpha during drag.
 	 */
 	const TInt KDragTextAlpha( 50 );
-	
+
 	/**
 	 * Focus based scrolling item threshold.
 	 */
 	const TReal KFocusScrollingThreshold( 0.55 );
-	
+
 	/**
 	 * Focus based scrolling item threshold for listbox landscape mode.
 	 */
 	const TReal KFocusScrollingThresholdListboxLanscape( 1.0 );
-	
+
 	/**
 	 * Value of drag ignore.
 	 */
 	const TInt KDragIgnoreRectValue(200);
-	
+
 	/**
 	 * Time between two butto repeat events.
 	 */
 	const TInt KDragRepeatRespawn(2);
-	
+
 	/**
 	 * Determines the speed of focus-based scrolling in edit mode.
 	 */
 	const TInt KEditModeScrollingDelayFactor = 4000;
-	}	
+	}
 
 /**
  * Templates' related constants.
@@ -237,15 +237,15 @@ namespace MmTemplateContants
 	 * its default scrollbar width.
 	 */
 	const TInt KCustomTemplateScrolbarWidth (25);
-	
+
 	const TInt KTemplateChildTextLength (64);
-	
+
 	const TInt KSubCellsCount (6);
-	
+
 	const TInt KItemSubCellsText (300);
-	
+
 	const TInt KMoveIndicatorStartingPos ( 32 );
-	
+
 	}
 
 /**
@@ -263,13 +263,13 @@ namespace MmShortcutConstants
         EStdKeyNkpAsterisk,
 #endif
 	    '0', EStdKeyHash };
-	
+
 	/**
 	 * Number of available scancodes.
 	 */
 	const TInt KScanCodeCount = 12;
 	}
-           
+
 namespace MmMarqueeConstants
 	{
 	const TInt KTextTrimmingThreshold (80);
@@ -282,7 +282,7 @@ namespace MmMarqueeConstants
  * Matrix Template Library panic notice.
  */
 _LIT( KMtlPanic,  "MTL" );
- 
+
 _LIT8( KMmTitle8,       	"mul_title"         );
 _LIT8( KMmDetail8,      	"mul_detail"        );
 _LIT8( KMmIcon8,        	"mul_icon"          );
@@ -290,9 +290,6 @@ _LIT8( KMmBackdropIcon8,    "mul_icon_backdrop" );
 _LIT8( KMmTemplate8,    	"mul_template"      );
 _LIT8( KGrid8,           	"grid"              );
 _LIT8( KListbox8,        	"listbox"           );
-_LIT8( KZoomLarge8,         "large_zoom"        );
-_LIT8( KZoomNormal8,        "normal_zoom"       );
-_LIT8( KZoomSmall8,        	"small_zoom"       	);
 
 _LIT8( KEmpty8,        			"empty"            );
 _LIT8( KOrientation8,        	"orientation"      );
@@ -310,7 +307,6 @@ _LIT8( KTextVisual8,        	"textvisual"           );
 _LIT8( KImageVisual8,        	"imagevisual"           );
 _LIT8( KImagePath8,        		"imagepath"           );
 _LIT8( KGridLayout8,        	"gridlayout"           );
-_LIT8( KVarietyZoom8,        	"variety_zoom"           );
 _LIT8( KEnabled8,        	"enabled"           );
 _LIT8( KRow8,        			"row"           );
 _LIT8( KCol8,        			"col"           );
@@ -323,7 +319,7 @@ _LIT8( KHorizontalAlign8,       "horizontalalign"           );
 _LIT8( KLct8, 					"lct");
 _LIT8( KHighlight8,      		"highlight"       );
 _LIT8( KNoHighlight8,   		"nohighlight"    );
-_LIT8( KLandscape8,        		"landscape"         );   
+_LIT8( KLandscape8,        		"landscape"         );
 
 _LIT8( KMmMoveIndicatorFrame8,    		"mul_move_indicator_frame"      	);
 _LIT8( KMmMoveIndicatorArrowTop8,  		"mul_move_indicator_arrow_top"   	);
@@ -410,7 +406,7 @@ enum TImageVisualId
     EImageVisualIdSwapMode = 0x00000001,
     EImageVisualIdEditMode = 0x00000002
     };
-    
+
 /**
  * Defines the type of a template.
  */

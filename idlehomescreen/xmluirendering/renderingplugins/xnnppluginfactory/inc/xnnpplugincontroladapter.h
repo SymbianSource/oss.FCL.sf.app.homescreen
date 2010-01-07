@@ -21,7 +21,7 @@
 #define CPLUGINCONTROLADAPTER_H
 
 //  INCLUDES
-#include <PluginAdapterInterface.h>
+#include <pluginadapterinterface.h>
 
 // CLASS DECLARATION
 

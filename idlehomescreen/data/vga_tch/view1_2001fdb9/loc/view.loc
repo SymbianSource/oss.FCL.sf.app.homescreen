@@ -69,6 +69,12 @@
 // r: TB9.2
 #define qtn_hs_add_widget "Add content"
 
+// d: Access the widget catalog
+// l: list_single_pane_t1_cp2
+// w: 
+// r: TB9.2
+#define qtn_hs_widget_catalog "Widget catalog"
+
 // d: Search
 // l: control_pane_t1/opt7
 // w:
@@ -247,4 +253,10 @@
 // l: control_pane_t1/opt7
 // w:
 // r: TB9.2
-#define qtn_hs_sk2_call "Call"
+#define text_softkey_call "Call"
+
+// d: Added new option menu item to Edit mode for opening the widget catalog,
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_edit_widget_catalog "Widget Catalog"

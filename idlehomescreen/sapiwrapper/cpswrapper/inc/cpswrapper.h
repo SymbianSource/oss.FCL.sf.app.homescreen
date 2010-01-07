@@ -20,7 +20,7 @@
 
 // System includes
 #include <e32base.h>
-#include <LiwCommon.h>      // for MLiwNotifyCallback
+#include <liwcommon.h>      // for MLiwNotifyCallback
 
 // Forward declarations
 class CLiwServiceHandler;

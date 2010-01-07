@@ -210,10 +210,7 @@ void CAiTitlePaneRenderer::KeylockEnabledL()
 
 void CAiTitlePaneRenderer::FocusObtainedL()
     {
-    // This scrolls the title pane text only if it has been changed
     iStatusPanel.RenderTitlePaneL();
-    // Force the scroll just to be safe
-    iStatusPanel.ScrollTitlePaneTextL();
     }
 
 void CAiTitlePaneRenderer::FocusLostL()

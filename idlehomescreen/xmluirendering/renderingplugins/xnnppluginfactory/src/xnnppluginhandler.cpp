@@ -20,7 +20,7 @@
 // INCLUDE FILES
 #include    "xnnppluginhandler.h"
 #include    <ecom/implementationinformation.h>
-#include    <CEcomBrowserPluginInterface.h>
+#include    <cecombrowserplugininterface.h>
 
 // ============================= LOCAL FUNCTIONS ===============================
 

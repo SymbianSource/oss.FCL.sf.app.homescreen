@@ -273,7 +273,7 @@ void COnlineOfflineHelper::InterpretNWMessageL( const TNWMessages aMessage,
                         // Show roaming notification
 						CAknGlobalNote* note = CAknGlobalNote::NewLC();
 						HBufC* msg( StringLoader::LoadLC( R_QTN_HS_AUTOMATIC_OFFLINE ) );
-						 
+						note->SetSoftkeys(R_AVKON_SOFTKEYS_OK_EMPTY); 
 						note->ShowNoteL( EAknGlobalInformationNote, *msg );
 						CleanupStack::PopAndDestroy( 2, note ); // msg    
                         }

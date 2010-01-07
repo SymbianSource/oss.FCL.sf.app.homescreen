@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:    
+* Description:
 *
 */
 
@@ -38,23 +38,23 @@ const TInt KMaxIconBitmapSize = 240;
  */
 const TInt KMaxLength = 12;
 
-/** 
+/**
  * Single character length.
  */
 const TInt KSingleChar( 1 );
 
-/** 
+/**
  * Default datagranularity.
  */
 const TInt KDefaultGranularity( 8 );
 
-/** 
+/**
  * Max digit number.
  */
 const TInt KMaxDigitNumber( 10 );
 
-/** 
- * A number of cached suites. 
+/**
+ * A number of cached suites.
  */
 const TInt KXmlModelCacheMaxLength( 10 );
 
@@ -67,77 +67,77 @@ const TInt KModelCountForRoot( 1 );
  * KErrNoMemory code from MenuService
  */
 const TInt KSErrNoMemory = 1007;
-/** 
+/**
  * Logical relations namespace
  */
 namespace HnLogicalRelations
-    { 
-    /** 
-     * Greater. 
+    {
+    /**
+     * Greater.
      */
     _LIT8( KLogicalGreater8,        ">"  );
-    
-    /** 
-     * Less. 
+
+    /**
+     * Less.
      */
     _LIT8( KLogicalLess8,           "<"  );
-    
-    /** 
-     * Equals. 
+
+    /**
+     * Equals.
      */
     _LIT8( KLogicalEqual8,          "="  );
-    
-    /** 
-     * Different. 
+
+    /**
+     * Different.
      */
     _LIT8( KLogicalDifferent8,      "!="  );
-    
-    /** 
-     * And. 
+
+    /**
+     * And.
      */
     _LIT8( KLogicalAnd8,            "&"  );
-    
-    /** 
-     * Or. 
+
+    /**
+     * Or.
      */
     _LIT8( KLogicalOr8,             "|"  );
-    
-    /** 
-     * Nas. 
+
+    /**
+     * Nas.
      */
     _LIT8( KLogicalHas8,            "HAS" );
-    
-    /** 
-     * Has not. 
+
+    /**
+     * Has not.
      */
 	_LIT8( KLogicalHasNot8,         "HASNOT" );
     }
 
-/** 
+/**
  * Event namespace
  */
 namespace HnEvent
     {
-    /** 
-     * Event data. 
+    /**
+     * Event data.
      */
     _LIT8( KEventArgNamespace8,     "event_data");
-    
-    /** 
-     * Dropped before custom id. 
+
+    /**
+     * Dropped before custom id.
      */
     _LIT8( KDroppedBefore8,         "dropped_before_custom_id" );
-    
-    /** 
-     * Dragged custom id. 
+
+    /**
+     * Dragged custom id.
      */
     _LIT8( KDragged8,               "dragged_custom_id" );
-    
-    /** 
-     * Highlight offset. 
+
+    /**
+     * Highlight offset.
      */
     _LIT8( KHighlightOffset8,       "highlight_offset" );
-    
+
     }
 
 
@@ -183,7 +183,7 @@ _LIT8( 	KPositionAttrName8,         "position" );
 _LIT8( 	KMenuConditionAttrName8,    "condition" );
 _LIT8(  KIndexAttrName8, 			"index" );
 _LIT8( 	KMenuDimmAttrName8,    	    "dimm" );
-_LIT8( 	KGenreAttrName8,            "genre" ); 
+_LIT8( 	KGenreAttrName8,            "genre" );
 _LIT8( 	KTitleAttrName8,            "title" );
 _LIT8(  KEmptyTextAttrName8,        "emptytext" );
 _LIT8( 	KNameAttrName8,             "name" );
@@ -315,7 +315,7 @@ _LIT8( 	KRefreshIcons,              "RefreshIcons" );
 _LIT8(  KEvaluateMdModel,           "EvaluateMdModel" );
 _LIT8(  KDisableActionsForItem,     "DisableActionsForItem" );
 
-_LIT( 	KSuiteName,                 "suite_name" ); 
+_LIT( 	KSuiteName,                 "suite_name" );
 _LIT8(  KSuiteName8, 				"suite_name" );
 
 //
@@ -351,7 +351,7 @@ _LIT8(  KTemplate8,                 "mul_template" );
 _LIT8(	KTitleName8, 				"suite" );
 _LIT8(	KItemName8, 				"item" );
 _LIT8(	KGenreName8, 				"genre" );
-_LIT8(	KLocalizationName8, 		"localization" ); 
+_LIT8(	KLocalizationName8, 		"localization" );
 
 _LIT8(	KEventName8, 				"event" );
 _LIT8(	KMenuItemName8, 			"menuitem" );
@@ -359,13 +359,13 @@ _LIT(	KMenuItemName,	 			"menuitem" );
 _LIT8(	KMenuItemSpecificName8, 			"menuitem_specific" );
 _LIT(	KMenuItemSpecificName,	 			"menuitem_specific" );
 
-_LIT( 	KRoot, 						"root" ); 
+_LIT( 	KRoot, 						"root" );
 _LIT8(   KRoot8,                    "root" );
 _LIT( 	KExtension, 				".r" ); // rsc, r01, r02, etc.
 _LIT( 	KExtensionRsc, 				".rsc" );
 
 
-_LIT8(	KHexStart8, 				"0x"); 
+_LIT8(	KHexStart8, 				"0x");
 _LIT( 	KDrive ,					"C:");
 _LIT( 	KEntriesSuffix, 			"suites\\");
 
@@ -394,9 +394,6 @@ _LIT(   KReevaluateMdEvent,         "reevaluate_model" );
 _LIT(   KSwitchWidgetMdEvent,       "switch_widget" );
 _LIT(   KStartEditModeMdEvent,      "start_edit_mode" );
 _LIT(   KStopEditModeMdEvent,       "stop_edit_mode" );
-_LIT(   KZoomLarge,       			"zoom_large" );
-_LIT(   KZoomNormal,       			"zoom_normal" );
-_LIT(   KZoomSmall,       			"zoom_small" );
 _LIT(   KAppGainForeground,         "gain_foreground" );
 _LIT(   KAppGainBackground,         "gain_background" );
 _LIT(   KSetFocusEvent,             "set_focus" );
@@ -423,11 +420,11 @@ _LIT( 	KSuiteLoadingLogFile, 		"c:\\logs\\menu" );
 #endif// _DEBUG
 
 // info notes for notifying lack of configuration files
-_LIT( KDebugNoteDirNotFound, 
+_LIT( KDebugNoteDirNotFound,
 	"Directory containing suite configuration not found!" );
-_LIT( KDebugNoteFileNotFound, 
+_LIT( KDebugNoteFileNotFound,
 	"File containing suite configuration not found!" );
-_LIT( KDebugNoteOtherError, 
+_LIT( KDebugNoteOtherError,
 	"Loading suite configuration returned error: %d" );
 
 _LIT8( KStar8, "*" );
@@ -446,7 +443,7 @@ _LIT(   KOnSuiteUnLoad,             "suite:unload" );
 _LIT( 	KOnFocusGain,               "item:focus" );
 _LIT(   KOnFocusLost,               "item:unfocus" );
 
-_LIT8(  KIndexWithBrackets8,        "[$index]");    
+_LIT8(  KIndexWithBrackets8,        "[$index]");
 _LIT8(  KIndex8,                    "$index" );
 _LIT(   KIndex,                     "$index" );
 _LIT8(  KCount,                     "/[$count]" );
@@ -507,9 +504,9 @@ const TUint32 KMenuShowFolder = 0x0000000c;
 
 const TInt KTimeStampBufferLength = 25;
 
-const TInt KUidStringLength = 10; 
+const TInt KUidStringLength = 10;
 
-const TInt KTimeStampCutOff = 5; 
+const TInt KTimeStampCutOff = 5;
 
 /**
  * Order in which drives are searched for suites.
@@ -550,7 +547,7 @@ enum TImageSource
     {
     EImageSourceUndefined = 0,
     EImageSourceFile,
-    EImageSourceResource, 
+    EImageSourceResource,
     EImageSourceApplicationUid,
     EImageSourceLiw
     };

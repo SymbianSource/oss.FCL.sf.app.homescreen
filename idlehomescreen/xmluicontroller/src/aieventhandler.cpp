@@ -15,9 +15,9 @@
 *
 */
 
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwCommon.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwcommon.h>
 #include <UikonInternalPSKeys.h>
 #include <e32property.h>
 

@@ -8,7 +8,7 @@
 <FileVersion    : >
 
 <Copyright:
-"Copyright © 2005 Nokia Corporation.
+"Copyright (c) 2005 Nokia Corporation.
 This material, including documentation and any related
 computer programs, is protected by copyright controlled by
 Nokia Corporation. All rights are reserved. Copying,
@@ -107,6 +107,16 @@ qtn_hs_add_widget.grammar "Add content"
 qtn_hs_add_widget.parents "list_single_pane_cp2"
 -->
 <!ENTITY qtn_hs_add_widget "Add content">
+
+<!--
+qtn_hs_widget_catalog.attributes
+qtn_hs_widget_catalog.layout "list_single_pane_t1_cp2"
+qtn_hs_widget_catalog.release "TB9.2"
+qtn_hs_widget_catalog.description "Widget catalog"
+qtn_hs_widget_catalog.grammar "Widget catalog"
+qtn_hs_widget_catalog.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_widget_catalog "Widget catalog">
 
 <!--
 text_softkey_search.attributes
@@ -389,3 +399,21 @@ qtn_hs_title_editing_view.parents ""
 -->
 <!ENTITY qtn_hs_title_editing_view "Editing view">
 
+<!--
+text_softkey_call.attributes
+text_softkey_call.layout "control_pane_t1/opt7"
+text_softkey_call.release "TB9.2"
+text_softkey_call.description "RSK caption call inactive"
+text_softkey_call.parents ""
+-->
+<!ENTITY text_softkey_call "Call">
+
+<!--
+qtn_hs_add_widget.attributes
+qtn_hs_add_widget.layout "list_single_pane_t1_cp2"
+qtn_hs_add_widget.release "TB9.2"
+qtn_hs_add_widget.description "Added new option menu item to Edit mode for opening the widget catalog"
+qtn_hs_add_widget.grammar "Widget Catalog"
+qtn_hs_add_widget.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_edit_widget_catalog "Widget Catalog">

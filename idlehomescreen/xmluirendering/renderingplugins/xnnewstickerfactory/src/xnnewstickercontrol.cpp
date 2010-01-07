@@ -422,7 +422,7 @@ TInt CXnNewstickerControl::CurrentTitleIndex()
 //
 const TDesC& CXnNewstickerControl::Title(TInt aIndex)
     {
-    if (aIndex < 0 || aIndex > iTitles.Count())
+    if (aIndex < 0 || aIndex >= iTitles.Count())
         {
         return KNullDesC;
         }
@@ -513,6 +513,11 @@ void CXnNewstickerControl::InsertSvgTitleL(const TDesC8& aByteData, TInt aIndex)
 //
 const TDesC8& CXnNewstickerControl::CurrentSvgTitle()
     {
+    if ( iFirstDrawingTitleIndex < 0 || iFirstDrawingTitleIndex >= iTitles.Count() )
+        {
+        return KNullDesC8;
+        }
+    
     CTitleData* title = iTitles[iFirstDrawingTitleIndex];
     //  Is it SVG title
     if (title->IsSvgTitle())
@@ -787,7 +792,7 @@ void CXnNewstickerControl::PrepareToDrawLtrL()
         return;
         }
     iFirstDrawingTitleIndex = GetNextTitleWithContent( iFirstDrawingTitleIndex );
-    if ( iFirstDrawingTitleIndex < 0 )
+    if ( iFirstDrawingTitleIndex < 0 || iFirstDrawingTitleIndex >= iTitles.Count() )
         {
         return;
         }
@@ -935,6 +940,10 @@ void CXnNewstickerControl::PrepareToDrawRtlL()
     CBitmapContext* gc = iAdapter->BufferGc();
     const CFbsBitmap* background = iAdapter->BackgroundBitmap();
     if(!gc || !background || !IsVisibleTitles() )
+        {
+        return;
+        }
+    if ( iFirstDrawingTitleIndex < 0 || iFirstDrawingTitleIndex >= iTitles.Count() )
         {
         return;
         }
@@ -1086,7 +1095,8 @@ void CXnNewstickerControl::PrepareToDrawRtlL()
 void CXnNewstickerControl::DoScrollL()
     {
     //  If there are no titles, don't do anything.
-    if( !IsVisibleTitles() || iFirstDrawingTitleIndex < 0 )
+    if( !IsVisibleTitles() || iFirstDrawingTitleIndex < 0 || 
+            iFirstDrawingTitleIndex >= iTitles.Count() )
         {
         return;
         }
@@ -1317,7 +1327,7 @@ TBool CXnNewstickerControl::CalculateCurrentTextFitInNewstickerRect()
         const TInt count = iTitles.Count();
         TInt textWidth=0;
         const TInt rectWidth = iContentRect.Width();
-        if( iCurrentTitleIndex < count )
+        if( iCurrentTitleIndex >= 0 && iCurrentTitleIndex < count )
             {
             textWidth = iTitles[iCurrentTitleIndex]->TitleTextLengthInPixels();
             }

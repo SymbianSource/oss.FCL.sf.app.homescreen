@@ -67,7 +67,7 @@ _LIT( KDummy16, "empty" );
 _LIT8( KDummy8, "empty" );
 
 // CPS constants
-_LIT( KTemplatedWidget, "ai3templatedwidget" );
+_LIT( KWRTTemplate, "ai3templatedwidget" );
 _LIT(  KPublisher16, "publisher" );
 _LIT8( KPublisher, "publisher" );
 _LIT8( KContentType, "content_type" );
@@ -93,6 +93,5 @@ _LIT8( KOpen8, "(" );
 
 _LIT8( KWallpaper, "wallpaper" );
 _LIT8( KPath, "path" );
-_LIT8( KWRTTemplate, "ai3templatedwidget");
 
 #endif /* _XNPLUGINDEFS_H_ */

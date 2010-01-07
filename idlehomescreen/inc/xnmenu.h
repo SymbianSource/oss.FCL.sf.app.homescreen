@@ -24,9 +24,7 @@
 #include "xncomponent.h"
 #include "mxncomponentinterface.h"
 
-#if 0 // MSK icon change
 class TAknsItemID;
-#endif // MSK icon change
 
 namespace XnMenuInterface
 {
@@ -99,7 +97,6 @@ public: // New functions
         TBool aPreserveAspectRatio = EFalse, TBool aInvertMask = EFalse,
         TBool aTransferOwnership = ETrue ) = 0;   
 
-#if 0 // MSK icon change
     /**
     * Sets soft key image.
     * @param aId icon bitmap IID 
@@ -115,8 +112,6 @@ public: // New functions
                                    const TInt32 aBmpM,
                                    XnMenuInterface::MXnMenuInterface::TSoftKeyPosition aPos, 
                                    TBool aEnable ) = 0;
-
-#endif // MSK icon change
 
     /**
     * Sets softkey text. 
@@ -198,7 +193,6 @@ class CXnMenu : public CXnComponent, public XnMenuInterface::MXnMenuInterface
         TBool aPreserveAspectRatio, TBool aInvertMask,
         TBool aTransferOwnership = ETrue );
 
-#if 0 // MSK icon change
        /**
         * @see MXnMenuInterface::SetSoftKeyImage
         */
@@ -208,7 +202,6 @@ class CXnMenu : public CXnComponent, public XnMenuInterface::MXnMenuInterface
                               const TInt32 aBmpM,
                               XnMenuInterface::MXnMenuInterface::TSoftKeyPosition aPos, 
                               TBool aEnable );
-#endif // MSK icon change
 
        /**
         * @see MXnMenuInterface::SetSoftkeyTextL

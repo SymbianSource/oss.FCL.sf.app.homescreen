@@ -24,10 +24,10 @@
       </item>
       <!-- Shortcut #4, Photos -->
       <item id="fourth" name="Shortcut4" >
-        <property  name="type" value="suite"/>
-        <property  name="uid" value=""/>
+        <property  name="type" value="application"/>
+        <property  name="uid" value="0x200104E4"/>
         <property  name="view" value=""/>
-        <property  name="param" value="photossuite"/>
+        <property  name="param" value=""/>
       </item>
     </settings>
   </control>

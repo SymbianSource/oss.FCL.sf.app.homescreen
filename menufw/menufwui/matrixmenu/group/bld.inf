@@ -33,9 +33,7 @@ PRJ_EXPORTS
 ../inc/mmguiuid.hrh             |../../../inc/mmguiuid.hrh
 
 // backup registration
-backup_registration.xml /epoc32/data/Z/private/101F4CD2/backup_registration.xml
-backup_registration.xml /epoc32/release/winscw/udeb/Z/private/101F4CD2/backup_registration.xml
-backup_registration.xml /epoc32/release/winscw/urel/Z/private/101F4CD2/backup_registration.xml
+backup_registration.xml Z:/private/101F4CD2/backup_registration.xml
 
 PRJ_MMPFILES
 matrixmenu.mmp

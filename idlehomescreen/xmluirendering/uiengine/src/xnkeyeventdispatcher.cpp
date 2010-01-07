@@ -596,28 +596,8 @@ void CXnKeyEventDispatcher::NotifyViewDeactivatedL(
 // -----------------------------------------------------------------------------
 //
 void CXnKeyEventDispatcher::NotifyWidgetAdditionL(
-    const CXnPluginData& aPluginData )
+    const CXnPluginData& /*aPluginData*/ )
     {
-    if ( aPluginData.Active() )
-        {               
-        iUiEngine.AppUiAdapter().ShowFocus();
-        
-        RPointerArray< CXnNode > initial;
-        CleanupClosePushL( initial );
-        
-        if ( iUiEngine.IsEditMode() )
-            {
-            initial.AppendL( aPluginData.Owner()->LayoutNode() );
-            }
-        else
-            {
-            aPluginData.InitialFocusNodesL( initial );
-            }
-        
-        SetInitialFocusL( initial );
-        
-        CleanupStack::PopAndDestroy( &initial );
-        }
     }
 
 // -----------------------------------------------------------------------------

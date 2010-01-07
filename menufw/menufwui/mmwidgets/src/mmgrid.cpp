@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_92 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_94 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -185,7 +185,7 @@ void CMmGrid::DrawView()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-//   
+//
 void CMmGrid::CreateItemDrawerL()
     {
     iItemDrawer = iMmDrawer;
@@ -235,7 +235,7 @@ void CMmGrid::HandleScrollEventL( CEikScrollBar* aScrollBar,
              DrawNow();
              }
 #endif
-         
+
          }
     }
 
@@ -284,7 +284,7 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
 void CMmGrid::HandlePointerEventInNormalModeL( const TPointerEvent& aPointerEvent )
     {
     CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
-    if ( aPointerEvent.iType == TPointerEvent::EButton1Down && !parent->FlipOpen() )
+    if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
 		{
         const TInt KIgnoreRectSize = 40;
         TRect ignoreDragRect(aPointerEvent.iPosition,
@@ -317,7 +317,7 @@ void CMmGrid::HandleButtonRepeatEventInNormalModeL(
     View()->ItemDrawer()->SetFlags( CListItemDrawer::EPressedDownState );
     CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
     TBool highlightWasVisible = parent->IsHighlightVisible();
-    
+
     if( itemUnderPointerIndex == View()->CurrentItemIndex() )
         {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
@@ -339,7 +339,7 @@ void CMmGrid::HandleButtonRepeatEventInNormalModeL(
 #else
          View()->DrawItem( itemUnderPointerIndex );
 #endif
-        }  
+        }
      else
         {
         TInt previouslyHighlightedItemIndex = View()->CurrentItemIndex();
@@ -350,7 +350,7 @@ void CMmGrid::HandleButtonRepeatEventInNormalModeL(
             }
         }
     }
-    
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -407,86 +407,87 @@ TBool CMmGrid::IsPointerInBottomScrollingThreshold(
 //
 // -----------------------------------------------------------------------------
 //
+void CMmGrid::ScrollWithoutRedraw( TInt distanceInPixels )
+    {
+    CAknGridView* view = static_cast<CAknGridView*>( iView );
+    const TInt rowHeight = ItemHeight();
+    const TInt numOfCols = view->NumberOfColsInView();
+    const TInt itemCount = iModel->NumberOfItems();
+    TInt totalNumberOfRows = itemCount / numOfCols;
+    if ( itemCount % numOfCols )
+        {
+        ++totalNumberOfRows;
+        }
+    const TInt topItemRowIndex = TopItemIndex() / numOfCols;
+    
+    // desired view position relative to the first item in grid (always positive)
+    TInt desiredViewPosition = rowHeight * topItemRowIndex - VerticalItemOffset();
+    
+    desiredViewPosition += distanceInPixels;
+    
+    const TInt viewPositionMin = 0;
+    const TInt viewPositionMax = 
+		Max( 0, ( totalNumberOfRows * rowHeight ) - view->ViewRect().Height() );
+    
+    desiredViewPosition = Min( desiredViewPosition, viewPositionMax );
+    desiredViewPosition = Max( desiredViewPosition, viewPositionMin );
+   
+    ASSERT( desiredViewPosition >= 0 );
+    
+    TInt newTopItemIndex = ( desiredViewPosition / rowHeight ) * numOfCols;
+    TInt newVerticalOffset = -( desiredViewPosition % rowHeight ); 
+    SetTopItemIndex( newTopItemIndex );
+    SetVerticalItemOffset( newVerticalOffset );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TInt CMmGrid::ScrollIfNeeded( const TPointerEvent& aPointerEvent )
     {
     CAknGridView* view = static_cast<CAknGridView*>( View() );
     TInt nextScrollDelay = 0;
 
-    TBool readyForScrolling = iMmDrawer->GetAnimator()->IsReadyForNewAnimation() 
+    TBool readyForScrolling = iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
 		&& iMmDrawer->GetFloatingItemCount() != 0;
-    
+
 	if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
 		{
 		// scroll up by one row
-		      TInt newCurrentItemIndex = CurrentItemIndex() - view->NumberOfColsInView();
+		TInt newCurrentItemIndex = CurrentItemIndex() - view->NumberOfColsInView();
         if ( newCurrentItemIndex < 0 )
             {
             newCurrentItemIndex = CurrentItemIndex();
             }
 
-        if ( !View()->ItemIsVisible( 0 ) )
-            {
-            nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-                Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
-            
-            if ( readyForScrolling )
-                {
-                TRAP_IGNORE( HandlePhysicsScrollEventL( -iItemHeight ) );
-                View()->SetCurrentItemIndex( newCurrentItemIndex );
-                }
-            }
-        else
-            {
-            if ( readyForScrolling )
-            	{
-				TBool redrawDisabledBefore = View()->RedrawDisabled();
-				View()->SetDisableRedraw( EFalse );
-				CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
-				parent->ResetWidgetPosition();
-				DrawNow();
-				View()->SetDisableRedraw( redrawDisabledBefore );
-            	}
-            }
+       nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+		   Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
+
+		if ( readyForScrolling )
+			{
+			ScrollWithoutRedraw( -iItemHeight );
+			View()->SetCurrentItemIndex( newCurrentItemIndex );
+			}
 		}
 	else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
 		{
-		// scroll down by one row
-		TInt lastItemIndex = iModel->NumberOfItems() - 1;
+		TInt newCurrentItemIndex = CurrentItemIndex() + view->NumberOfColsInView();
+		if ( newCurrentItemIndex > iModel->NumberOfItems() - 1 )
+			{
+			newCurrentItemIndex = CurrentItemIndex();
+			}
+	
+		nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+			Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
 
-		// maximum top item index that can be set (greater top item index value would
-		// cause an empty row at the bottom of the menu)
-		TInt maxTopItemIndex = View()->CalcNewTopItemIndexSoItemIsVisible( lastItemIndex );
-		TInt currentItemIndex = CurrentItemIndex();
-		TInt newCurrentItemIndex = currentItemIndex + view->NumberOfColsInView();
-		TInt distanceToScroll( iItemHeight );
-		if ( View()->ItemIsVisible( lastItemIndex ) )
+		if ( readyForScrolling )
 			{
-			TPoint lastItemPos( View()->ItemPos( lastItemIndex ) );
-			distanceToScroll = iItemHeight - ( Rect().iBr.iY - lastItemPos.iY )
-								+ Rect().Height() - iViewLayout.iHeight * iItemHeight;
-			}
-		
-		if ( newCurrentItemIndex <= lastItemIndex )
-			{
-			nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-				Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
-			
-		    if ( readyForScrolling )
-		    	{
-		    	TRAP_IGNORE( HandlePhysicsScrollEventL( distanceToScroll ) );
-		    	View()->SetCurrentItemIndex( newCurrentItemIndex );
-		    	}
-			}
-		else if ( TopItemIndex() < maxTopItemIndex )
-			{
-		    if ( readyForScrolling )
-		    	{
-		    	TRAP_IGNORE( HandlePhysicsScrollEventL( distanceToScroll ) );
-		    	View()->SetCurrentItemIndex( currentItemIndex );
-		    	}
+			ScrollWithoutRedraw( iItemHeight );
+			View()->SetCurrentItemIndex( newCurrentItemIndex );
 			}
 		}
-	
+
     return nextScrollDelay;
     }
 
@@ -687,7 +688,7 @@ void CMmGrid::HandleViewRectSizeChangeL()
         {
         CAknGrid::HandleViewRectSizeChangeL();
         }
-    else	
+    else
         {
         // for mirrored layout this function should do
         // exactly the same things as CAknGrid::HandleViewRectSizeChangeL
@@ -713,16 +714,16 @@ void CMmGrid::AdjustTopItemIndex() const
     const TInt numOfCols = view->NumberOfColsInView();
     const TInt numOfRows = view->NumberOfRowsInView();
     const TInt itemCount = iModel->NumberOfItems();
-    
+
     ASSERT( numOfCols > 0 );
-    
+
     TInt lastRow = 0;
     if ( itemCount > 0 )
         {
         lastRow = ( itemCount - 1 ) / numOfCols;
         }
     TInt maxPossibleTopRow = Max( 0, lastRow - numOfRows + 1 );
-    
+
     TInt topRow = TopItemIndex() / numOfCols;
 
     if ( !( TopItemIndex() % numOfCols == 0 &&

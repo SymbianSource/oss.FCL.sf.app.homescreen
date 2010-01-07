@@ -35,7 +35,6 @@ SOURCE          mmgui.cpp
 SOURCE          mmapplication.cpp
 SOURCE          mmappui.cpp
 SOURCE          mmdocument.cpp
-SOURCE          mmpropertysubscriber.cpp
 SOURCE          mmnomemory.cpp
 SOURCE          mmappkeyhandler.cpp
 

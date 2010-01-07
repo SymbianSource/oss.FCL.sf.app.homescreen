@@ -96,7 +96,6 @@ void CXnMenu::SetSoftKeyImageL( CFbsBitmap* aBitmap, CFbsBitmap* aMask,
     adapter->SetSoftKeyImageL( aBitmap, aMask, aPos, aNode, aPreserveAspectRatio, aInvertMask, aTransferOwnership );    
     }
 
-#if 0 // MSK icon
 // -----------------------------------------------------------------------------
 // CXnMenu::SetSoftKeyImageL
 // 
@@ -111,7 +110,6 @@ void CXnMenu::SetSoftKeyImageL( const TAknsItemID& aId,
     CXnMenuAdapter* adapter = static_cast< CXnMenuAdapter* >( ControlAdapter() );
     adapter->SetSoftKeyImageL( aId, aBmpFile, aBmp, aBmpM, aPos, aEnable );    
     }
-#endif // MSK icon
 
 // -----------------------------------------------------------------------------
 // CXnMenu::SetSoftKeyTextL

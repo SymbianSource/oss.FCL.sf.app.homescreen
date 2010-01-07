@@ -28,7 +28,7 @@
 #define CONTENTPUBLISHER_H
 
 #include <e32base.h>
-#include <LiwCommon.h>
+#include <liwcommon.h>
 
 // FORWARD DECLARATIONS
 class CLiwGenericParamList;

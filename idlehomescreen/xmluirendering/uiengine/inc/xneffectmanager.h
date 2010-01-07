@@ -94,14 +94,16 @@ private:
     /**
      * Starts fullscreen effect.
      * @param aEffect effect data
+     * @return ETrue if effect started, otherwise EFalse
      */
-    void DoBeginFullscreenEffect( TXnEffect& aEffect );
+    TBool DoBeginFullscreenEffect( TXnEffect& aEffect );
 
     /**
      * Starts control effect.
      * @param aEffect effect data
+     * @return ETrue if effect started, otherwise EFalse
      */
-    void DoBeginControlEffect( TXnEffect& aEffect );
+    TBool DoBeginControlEffect( TXnEffect& aEffect );
     
     /**
      * Removes and destroys effect from effect list.

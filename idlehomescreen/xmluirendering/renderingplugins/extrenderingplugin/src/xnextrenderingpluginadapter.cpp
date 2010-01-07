@@ -22,9 +22,6 @@
 
 // Local constants
 
-// TODO: Content controller ECom interface UID
-const TUid KInterfaceUidContentController = { 0x20026F51 };
-
 // ======== MEMBER FUNCTIONS ========
 
 // ----------------------------------------------------------------------------

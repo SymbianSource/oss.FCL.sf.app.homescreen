@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.52 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.52 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.54 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.54 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -42,7 +42,6 @@
 #include <matrixmenu.rsg>
 #include <akntabgrp.h>
 #include <apgcli.h>
-#include <hwrmdomainpskeys.h> //flip status enums
 #include <AknDef.hrh>
 #include <AknDlgShut.h>
 #include <mmenuinternalPSkeys.h>
@@ -66,7 +65,6 @@
 #include "mmwidgetcontainer.h"
 #include "mmtemplatelibrary.h"
 #include "mmextensionmanager.h"
-#include "mmpropertysubscriber.h"
 #include "hnitemsorder.h"
 
 #include "mmnomemory.h"
@@ -123,10 +121,6 @@ void CMmAppUi::ConstructL()
     InitializeL();
 
     iMmExtManager = CMMExtensionManager::NewL( *this );
-
-    iKeyboardFlipStatus = EPSHWRMFlipStatusUninitialized;
-    iSliderEventSubscriber = CMmPropertySubscriber::NewL(KPSUidHWRM,
-            KHWRMFlipStatus, *this);
 
     iScreenOn = ETrue;
     iSkinChangeNeeded = EFalse;
@@ -190,7 +184,6 @@ CMmAppUi::~CMmAppUi()
     delete iHNInterface;
     FeatureManager::UnInitializeLib();
     delete iMmExtManager;
-    delete iSliderEventSubscriber;
     delete iTemplateLibrary;
     delete iDummyTemplateLib;
     delete iAppkeyHandler;
@@ -315,9 +308,9 @@ void CMmAppUi::ProcessCommandL(TInt aCommand)
         CAknAppUi::ProcessCommandL( aCommand );
         }
 
-    if (iCurrentContainer && iCurrentContainer == TopFocusedControl() )
+    if ( iCurrentContainer )
     	{
-    	iCurrentContainer->HandleTopFocusL();
+    	iCurrentContainer->EndLongTapL();
     	}
     }
 
@@ -728,7 +721,8 @@ void CMmAppUi::ForwardEventToHNL( TInt aEvent )
         TBool idByContainer = iCurrentContainer->IsHighlightVisible() &&
                 iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1;
         TInt current = idByContainer ?
-             iCurrentContainer->GetHighlight() : KErrNotFound;
+             iCurrentContainer->GetHighlight():
+             iCurrentContainer->GetSuiteModelL()->GetSuiteHighlight();
         ForwardEventToHNL( aEvent, current );
         }
 
@@ -762,15 +756,6 @@ void CMmAppUi::NotifyUiRefreshL( const THnUiRefreshType aRefreshType )
             break;
         case EStopEditMode:
             SetEditModeL( EFalse );
-            break;
-        case EZoomLarge:
-            SetZoom( EAknUiZoomLarge );
-            break;
-        case EZoomSmall:
-            SetZoom( EAknUiZoomSmall );
-            break;
-        case EZoomNormal:
-            SetZoom( EAknUiZoomNormal );
             break;
         case EForegroundGain:
             {
@@ -1333,10 +1318,9 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
 		MMPERF(("CMmAppUi::DynInitMenuPaneL - STOP"));
 		}
 
-	if ( !popupMenuDisplayed && iCurrentContainer
-			&& iCurrentContainer == TopFocusedControl() )
+	if ( !popupMenuDisplayed && iCurrentContainer )
 		{
-		iCurrentContainer->HandleTopFocusL( EFalse );
+		iCurrentContainer->EndLongTapL( EFalse );
 		HandleHighlightItemSingleClickedL(
 				iCurrentContainer->Widget()->CurrentItemIndex() );
 		}
@@ -1356,10 +1340,6 @@ void CMmAppUi::HandleHighlightItemDoubleClickedL( TInt aIndex )
         {
         ForwardEventToHNL( KKeyIdSelect, aIndex );
         }
-    else if ( iCurrentSuiteModel->WidgetType() == EGridWidget && FlipOpen() )
-		{
-		ForwardEventToHNL( KKeyIdSelect, aIndex );
-		}
     else if ( iCurrentSuiteModel->WidgetType() == EGridWidget
             && IsEditMode() && iCurrentContainer->GetPreviousHighlight() == aIndex
             && !iCurrentContainer->IsDraggable())
@@ -1761,8 +1741,6 @@ void CMmAppUi::HandleWidgetChangeRefreshL(
     iCurrentContainer->Widget()->View()->SetDisableRedraw(ETrue);
     iDummyContainer->MakeVisible( ETrue );
     RefreshCbaL();
-    iCurrentContainer->SetZoom( iZoom );
-    iCurrentContainer->SetFlipOpenL( FlipOpen() );
     iCurrentContainer->SetEditModeL( IsEditMode() );
     iCurrentContainer->SetSuiteModelL( iCurrentSuiteModel );
     iCurrentContainer->HandleResourceChange( KAknsMessageSkinChange );
@@ -1796,8 +1774,6 @@ void CMmAppUi::HandleNoWidgetChangeRefreshL()
     if ( iCurrentSuiteModel )
         {
         iCurrentContainer->Widget()->View()->SetDisableRedraw(ETrue);
-        iCurrentContainer->SetZoom( iZoom );
-        iCurrentContainer->SetFlipOpenL( FlipOpen() );
         iCurrentContainer->SetEditModeL( IsEditMode() );
         iCurrentContainer->SetSuiteModelL( iCurrentSuiteModel );
         iCurrentContainer->SetEmptyTextL( iCurrentSuiteModel->EmptyText() );
@@ -2344,8 +2320,6 @@ void CMmAppUi::ResetToInitialStateL()
     iHNInterface = NULL;
     delete iMmExtManager;
     iMmExtManager = NULL;
-    delete iSliderEventSubscriber;
-    iSliderEventSubscriber = NULL;
     delete iTemplateLibrary;
     iTemplateLibrary = NULL;
 
@@ -2366,8 +2340,6 @@ void CMmAppUi::ResetToInitialStateL()
     InitializeL();
 
     iMmExtManager = CMMExtensionManager::NewL( *this );
-
-    iKeyboardFlipStatus = EPSHWRMFlipStatusUninitialized;
 
     iScreenOn = ETrue;
     iSkinChangeNeeded = EFalse;
@@ -2433,7 +2405,6 @@ void CMmAppUi::HandleSuiteModelInitializedL( CHnSuiteModel* aModel )
             if( created )
                 {
                 containerToLoad->Widget()->View()->SetDisableRedraw( ETrue );
-                containerToLoad->SetFlipOpenL( FlipOpen() );
                 containerToLoad->SetEditModeL( IsEditMode() );
                 containerToLoad->SetSuiteModelL( aModel );
                 containerToLoad->SetEmptyTextL( aModel->EmptyText() );
@@ -2776,57 +2747,6 @@ void CMmAppUi::HandleRequestL( const CLiwGenericParamList& aParam,
 //
 // ---------------------------------------------------------------------------
 //
-void CMmAppUi::PropertyChangedL(TInt aValue)
-    {
-    iKeyboardFlipStatus = (EPSHWRMFlipStatus)aValue;
-
-    if ( iCurrentContainer )
-        {
-        if( iKeyboardFlipStatus == EPSHWRMFlipOpen )
-            {
-            TBool wasHighlightVisible = iCurrentContainer->IsHighlightVisible();
-            iCurrentContainer->SetFlipOpenL( ETrue );
-            if ( IsForeground() && !IsEditMode() && !wasHighlightVisible )
-                {
-                iCurrentContainer->SetDefaultHighlightL( ETrue );
-                }
-            }
-        else if( iKeyboardFlipStatus == EPSHWRMFlipClosed )
-            {
-            iCurrentContainer->SetFlipOpenL( EFalse );
-            }
-        }
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-TBool CMmAppUi::FlipOpen()
-    {
-    return iKeyboardFlipStatus == EPSHWRMFlipOpen;
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CMmAppUi::SetZoom( TAknUiZoom aZoom )
-    {
-    if ( iZoom != aZoom)
-        {
-        if ( iCurrentContainer )
-            {
-            iCurrentContainer->HandleZoomChanged( aZoom );
-            }
-        }
-    iZoom = aZoom;
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
 TBool CMmAppUi::ResetToRootL()
     {
     TBool resetConsumed( EFalse );
@@ -2842,7 +2762,6 @@ TBool CMmAppUi::ResetToRootL()
         if( iCurrentContainer )
             {
             iCurrentContainer->ResetWidgetPosition();
-            iCurrentContainer->SetZoom( iZoom );
             AddToStackL( iCurrentContainer );
             }
         RefreshUiPanesL( ETrue );
@@ -3029,8 +2948,7 @@ void CMmAppUi::HandleFocusLostL()
 		//should be reset to normal then.
 		if( AknLayoutUtils::PenEnabled() )
 			{
-			if( iCurrentContainer->WidgetType() == EGridWidget
-				&& !FlipOpen() && !IsEditMode() )
+			if( iCurrentContainer->WidgetType() == EGridWidget && !IsEditMode() )
 				{
 				iCurrentContainer->Widget()->View()->ItemDrawer()->
 					SetFlags( CListItemDrawer::EDisableHighlight );

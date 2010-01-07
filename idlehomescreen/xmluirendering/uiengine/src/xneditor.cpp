@@ -28,6 +28,7 @@
 #include <xnuiengine.rsg>
 #include <hscontentcontrolui.h>
 #include <hscontentcontrol.h>
+#include <activeidle2domaincrkeys.h>
 
 // User includes
 #include "xnuiengine.h"
@@ -80,12 +81,14 @@ _LIT8( KDownload, "Editor/DownloadCaption" );
 _LIT8( KSingle, "single" );
 _LIT8( KMulti, "multi" );
 
-_LIT8( KWMUi, "WmContentControlUI" );
 
 const TInt32 KMultiInstanceUnlimitedValue = -1;
-const TInt32 KMultiInstanceHiddenValue = 0;
 
 const TUid KDummyUid = { 0x0000000 };
+
+const TUint32 KAICCPluginUIDKey = 0x00003010;
+const TInt32 KOpaQDataLen = 10;
+
 enum
     {
     ECanBeAdded = 0x01,
@@ -307,6 +310,7 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
     {
     iCpsWrapper = CCpsWrapper::NewL( *this );
     iHspsWrapper = CHspsWrapper::NewL( aUid, this );
+    iRepository= CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
     }
 
 // ---------------------------------------------------------------------------
@@ -320,6 +324,7 @@ CXnEditor::~CXnEditor()
     delete iCpsWrapper;
     delete iHspsWrapper;
     delete iPublisherMap;
+    delete iRepository;
     }
 
 // -----------------------------------------------------------------------------
@@ -617,14 +622,26 @@ void CXnEditor::ReplaceWidgetL( CHsContentInfo& aContentInfo, TBool aUseHsps )
     }
 
 // ---------------------------------------------------------------------------
+// CXnEditor::IdFromCrep
+// ---------------------------------------------------------------------------
+//
+TInt CXnEditor::IdFromCrep (TDes8& aUid) const
+    {
+    return iRepository->Get( KAICCPluginUIDKey, aUid );
+    }
+
 // CXnEditor::AddWidgetL
 // ---------------------------------------------------------------------------
 //
 void CXnEditor::AddWidgetL()
     {
-    MHsContentControlUi* ui( 
-        iViewManager.AppUiAdapter().HsContentController( KWMUi ) ); 
-                                                
+    TBuf8<KOpaQDataLen> oPaqDataStr;
+           
+    MHsContentControlUi* ui( NULL );
+    if ( IdFromCrep ( oPaqDataStr ) == KErrNone )
+        {
+        ui = iViewManager.AppUiAdapter().HsContentController( oPaqDataStr ); 
+        }
     if( ui )
         {
         ui->SetContentController( this );
@@ -1517,9 +1534,13 @@ TInt CXnEditor::HandleNotifyL(
 //
 void CXnEditor::WidgetListChanged()
     {
-    MHsContentControlUi* ui( 
-        iViewManager.AppUiAdapter().HsContentController( KWMUi ) );
-            
+    TBuf8<KOpaQDataLen> oPaqDataStr;
+              
+   MHsContentControlUi* ui( NULL );
+   if ( IdFromCrep ( oPaqDataStr ) == KErrNone )
+       {
+       ui = iViewManager.AppUiAdapter().HsContentController( oPaqDataStr ); 
+       }
     if( ui )
         {
         ui->NotifyWidgetListChanged();
@@ -1537,9 +1558,13 @@ void CXnEditor::WidgetListChanged()
 //
 void CXnEditor::ViewListChanged()
     {
-    MHsContentControlUi* ui( 
-        iViewManager.AppUiAdapter().HsContentController( KWMUi ) );
-            
+    TBuf8<KOpaQDataLen> oPaqDataStr;
+              
+   MHsContentControlUi* ui( NULL );
+   if ( IdFromCrep ( oPaqDataStr ) == KErrNone )
+       {
+       ui = iViewManager.AppUiAdapter().HsContentController( oPaqDataStr ); 
+       }
     if( ui )
         {
         ui->NotifyViewListChanged();

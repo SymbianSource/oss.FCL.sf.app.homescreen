@@ -18,24 +18,25 @@
 #ifndef __XNSCROLLABLECONTROLADAPTER_H__
 #define __XNSCROLLABLECONTROLADAPTER_H__
 
-//  INCLUDES
-#include "xncontroladapter.h"
+//  System includes
 #include <e32base.h>
-#include <aknphysicsobserveriface.h>
 #include <coeccntx.h>
+#include <aknphysicsobserveriface.h>
 
-// FORWARD DECLARATIONS
+// User includes
+#include "xncontroladapter.h"
+
+// Forward declarations
 class CXnNodePluginIf;
 class CXnUiEngine;
 class CXnNode;
 class CAknPhysics;
 
-
-// CLASS DECLARATION
+// Class declaration
 
 /**
 *  @ingroup group_xnlayoutengine
-*  Popup Control adapter interface class
+*  Scrollable Control adapter interface class
 *  @lib xnlayoutengine.lib
 *  @since Series 60 5.0
 */
@@ -224,6 +225,11 @@ NONSHARABLE_CLASS( CXnScrollableControlAdapter ) : public CXnControlAdapter,
          * True, if layout has been changed and engine needs to be reset.
          */          
         TBool               iLayoutChanged;
+
+        /**
+         * Direction
+         */                  
+        TInt                iDirection;
 	};
 
 #endif // __XNSCROLLABLECONTROLADAPTER_H__

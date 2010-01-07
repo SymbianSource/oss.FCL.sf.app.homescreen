@@ -385,7 +385,7 @@ void CAiStatusPanel::RenderNaviPaneL()
 
 void CAiStatusPanel::StopTitlePaneScrollingL()
     {
-    //stop scrolling
+    // stop scrolling
     if( iTitlePane->Text() )
         {
         iTitlePane->SetTextL( *iTitlePane->Text(), EFalse );
@@ -394,7 +394,7 @@ void CAiStatusPanel::StopTitlePaneScrollingL()
 
 void CAiStatusPanel::ScrollTitlePaneTextL()
     {
-// start scrolling
+    // start scrolling
     if( iTitlePane->Text() )
         {
         iTitlePane->SetTextL( *iTitlePane->Text(), ETrue );

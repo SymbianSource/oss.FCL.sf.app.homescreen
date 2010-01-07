@@ -401,9 +401,19 @@ qtn_hs_title_editing_view.parents ""
 
 <!--
 text_softkey_call.attributes
-text_softkey_call.layout "title_pane_t2"
+text_softkey_call.layout "control_pane_t1/opt7"
 text_softkey_call.release "TB9.2"
 text_softkey_call.description "RSK caption call inactive"
 text_softkey_call.parents ""
 -->
 <!ENTITY text_softkey_call "Call">
+
+<!--
+qtn_hs_widget_catalog.attributes
+qtn_hs_widget_catalog.layout "list_single_pane_t1_cp2"
+qtn_hs_widget_catalog.release "TB9.2"
+qtn_hs_widget_catalog.description "Added new option menu item to Edit mode for opening the widget catalog"
+qtn_hs_widget_catalog.grammar "Widget catalog"
+qtn_hs_widget_catalog.parents "list_single_pane_cp2"
+-->
+<!ENTITY qtn_hs_edit_widget_catalog "Widget Catalog">

@@ -21,56 +21,34 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
-// exports for HW
+// exports for HW & emulator
 // touch
-../data/suite.xml /epoc32/data/z/private/101F4CD2/import/suites/foldersuite_touch/suite.xml
-../data/items_touch.xml /epoc32/data/z/private/101F4CD2/import/suites/foldersuite_touch/items.xml
+../data/suite.xml z:/private/101F4CD2/import/suites/foldersuite_touch/suite.xml
+../data/items_touch.xml z:/private/101F4CD2/import/suites/foldersuite_touch/items.xml
 // non-touch
-../data/suite.xml /epoc32/data/z/private/101F4CD2/import/suites/foldersuite_nontouch/suite.xml
-../data/items_nontouch.xml /epoc32/data/z/private/101F4CD2/import/suites/foldersuite_nontouch/items.xml
+../data/suite.xml z:/private/101F4CD2/import/suites/foldersuite_nontouch/suite.xml
+../data/items_nontouch.xml z:/private/101F4CD2/import/suites/foldersuite_nontouch/items.xml
 
-// exports for emulator
-// touch
-../data/suite.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite_touch/suite.xml
-../data/suite.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite_touch/suite.xml
-../data/items_touch.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite_touch/items.xml
-../data/items_touch.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite_touch/items.xml
-// non-touch
-../data/suite.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite_nontouch/suite.xml
-../data/suite.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite_nontouch/suite.xml
-../data/items_nontouch.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite_nontouch/items.xml
-../data/items_nontouch.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite_nontouch/items.xml
 // default
-../data/suite.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite/suite.xml
-../data/suite.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite/suite.xml
+../data/suite.xml z:/private/101F4CD2/import/suites/foldersuite/suite.xml
 #ifdef __PEN_SUPPORT
-../data/items_touch.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite/items.xml
-../data/items_touch.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite/items.xml
+../data/items_touch.xml z:/private/101F4CD2/import/suites/foldersuite/items.xml
 #else 
-../data/items_nontouch.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/foldersuite/items.xml
-../data/items_nontouch.xml /epoc32/release/winscw/urel/z/private/101F4CD2/import/suites/foldersuite/items.xml
+../data/items_nontouch.xml z:/private/101F4CD2/import/suites/foldersuite/items.xml
 #endif
 
 ../loc/matrixmenudata.loc          APP_LAYER_LOC_EXPORT_PATH(matrixmenudata.loc)
 // MCS root folder configuration
 #ifdef _MATRIX_MENU_INCLUDE_TEST_CONTENT
-../data/matrixmenudatatestcontent.xml /epoc32/RELEASE/winscw/udeb/Z/private/200113DD/content/matrixmenudata.xml
-../data/matrixmenudatatestcontent.xml /epoc32/RELEASE/winscw/urel/Z/private/200113DD/content/matrixmenudata.xml
-../data/matrixmenudatatestcontent.xml /epoc32/data/Z/private/200113DD/content/matrixmenudata.xml
+../data/matrixmenudatatestcontent.xml Z:/private/200113DD/content/matrixmenudata.xml
 #else
-../data/matrixmenudata.xml /epoc32/RELEASE/winscw/udeb/Z/private/200113DD/content/matrixmenudata.xml
-../data/matrixmenudata.xml /epoc32/RELEASE/winscw/urel/Z/private/200113DD/content/matrixmenudata.xml
-../data/matrixmenudata.xml /epoc32/data/Z/private/200113DD/content/matrixmenudata.xml
+../data/matrixmenudata.xml Z:/private/200113DD/content/matrixmenudata.xml
 #endif
-../data/matrixmenudata.dtd /epoc32/RELEASE/winscw/udeb/Z/private/200113DD/content/01/matrixmenudata.dtd
-../data/matrixmenudata.dtd /epoc32/RELEASE/winscw/urel/Z/private/200113DD/content/01/matrixmenudata.dtd
-../data/matrixmenudata.dtd /epoc32/data/Z/private/200113DD/content/01/matrixmenudata.dtd
+../data/matrixmenudata.dtd Z:/private/200113DD/content/01/matrixmenudata.dtd
 
-#ifdef SBSV2
 ./copyheaderfile.xml                 /epoc32/tools/makefile_templates/general/copyheaderfile.xml
 ./copyheaderfile.flm                 /epoc32/tools/makefile_templates/general/copyheaderfile.flm
 ./copyheaderfile.meta                /epoc32/tools/makefile_templates/general/copyheaderfile.meta
-#endif
 
 PRJ_MMPFILES
 foldersuite.mmp

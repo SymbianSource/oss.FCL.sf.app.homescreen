@@ -15,7 +15,7 @@
 
     <layer name="unit_test_layer">
       <module name="homescreen_unit_tests">
-         <unit unitID="hsdo.wmunit.test" mrp="" bldFile="&layer_real_source_path;/widgetmanager/tsrc/wmunittest/group" name="wmunit.test" />
+         <unit unitID="hsdo.wmunit.test" mrp="" bldFile="&layer_real_source_path;/idlehomescreen/widgetmanager/tsrc/wmunittest/group" name="wmunit.test" />
       </module>
     </layer>
 

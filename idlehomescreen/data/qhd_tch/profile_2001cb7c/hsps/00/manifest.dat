@@ -23,7 +23,8 @@
     <filexml>widgetconfiguration.xml</filexml>
 
     <description>RnD description profile plugin</description>
-    <filelogo>skin(270501603 8433):mif(icon.mif 16384 16385)</filelogo>
+    
+    <filelogo>skin(270501603 9360):mif(icon.mif 16384 16385)</filelogo>
     <!-- Locale specific resources -->
     <localization>
     <fileresource tag="xuikon">profile.o0000</fileresource>

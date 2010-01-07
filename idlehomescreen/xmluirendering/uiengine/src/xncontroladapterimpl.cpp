@@ -3064,10 +3064,15 @@ static CFbsBitmap* InitializeBorderBitmapL(
     CFbsBitmap* returnValue = NULL;
     CFbsBitmap* bitmapMask = NULL;
 
+    if ( !pathProperty )
+        {
+        return NULL;
+        }
+    
     CXnDomList& propertyValueList = pathProperty->Property()->PropertyValueList();
     TInt count = propertyValueList.Length();
 
-    for ( TInt i = 0; i < propertyValueList.Length(); ++i )
+    for ( TInt i = 0; i < count; ++i )
         {
         CXnDomPropertyValue* value = static_cast< CXnDomPropertyValue* >(
             propertyValueList.Item( i ) );
@@ -3093,53 +3098,56 @@ static CFbsBitmap* InitializeBorderBitmapL(
             }
        else if ( value->PrimitiveValueType() == CXnDomPropertyValue::EPercentage )
             {
-            CXnDomPropertyValue* tmpValue = NULL;
-            tmpValue = value->CloneL();
-            CXnProperty* tmpProperty = NULL;
-            CleanupStack::PushL( tmpValue );
-            tmpProperty = CXnProperty::NewL(
-                KNullDesC8,
-                tmpValue,
-                aNode.UiEngine()->ODT()->DomDocument().StringPool() );
-            CleanupStack::Pop( tmpValue );
-            TSize imageSize = returnValue->SizeInPixels();
-            CleanupStack::PushL( tmpProperty );
-            TInt intValue = static_cast< TInt >( value->FloatValueL() );
-            TInt dividerValue = 0;
-
-            switch ( i )
+            if ( returnValue )
                 {
-                case 1:
+                CXnDomPropertyValue* tmpValue = NULL;
+                tmpValue = value->CloneL();
+                CXnProperty* tmpProperty = NULL;
+                CleanupStack::PushL( tmpValue );
+                tmpProperty = CXnProperty::NewL(
+                    KNullDesC8,
+                    tmpValue,
+                    aNode.UiEngine()->ODT()->DomDocument().StringPool() );
+                CleanupStack::Pop( tmpValue );
+                TSize imageSize = returnValue->SizeInPixels();
+                CleanupStack::PushL( tmpProperty );
+                TInt intValue = static_cast< TInt >( value->FloatValueL() );
+                TInt dividerValue = 0;
+    
+                switch ( i )
                     {
-                    dividerValue = aNode.UiEngine()->VerticalPixelValueL(
-                        tmpProperty, imageSize.iHeight );
-                    aBorderBitmapDividerTop = dividerValue;
-                    break;
+                    case 1:
+                        {
+                        dividerValue = aNode.UiEngine()->VerticalPixelValueL(
+                            tmpProperty, imageSize.iHeight );
+                        aBorderBitmapDividerTop = dividerValue;
+                        break;
+                        }
+                    case 2:
+                        {
+                        dividerValue = aNode.UiEngine()->HorizontalPixelValueL(
+                            tmpProperty, imageSize.iWidth );
+                        aBorderBitmapDividerRight = dividerValue;
+                        break;
+                        }
+                    case 3:
+                        {
+                        dividerValue = aNode.UiEngine()->VerticalPixelValueL(
+                            tmpProperty, imageSize.iHeight );
+                        aBorderBitmapDividerBottom = dividerValue;
+                        break;
+                        }
+                    case 4:
+                        {
+                        dividerValue = aNode.UiEngine()->HorizontalPixelValueL(
+                            tmpProperty, imageSize.iWidth );
+                        aBorderBitmapDividerLeft = dividerValue;
+                        break;
+                        }
                     }
-                case 2:
-                    {
-                    dividerValue = aNode.UiEngine()->HorizontalPixelValueL(
-                        tmpProperty, imageSize.iWidth );
-                    aBorderBitmapDividerRight = dividerValue;
-                    break;
-                    }
-                case 3:
-                    {
-                    dividerValue = aNode.UiEngine()->VerticalPixelValueL(
-                        tmpProperty, imageSize.iHeight );
-                    aBorderBitmapDividerBottom = dividerValue;
-                    break;
-                    }
-                case 4:
-                    {
-                    dividerValue = aNode.UiEngine()->HorizontalPixelValueL(
-                        tmpProperty, imageSize.iWidth );
-                    aBorderBitmapDividerLeft = dividerValue;
-                    break;
-                    }
+    
+                CleanupStack::PopAndDestroy( tmpProperty );
                 }
-
-            CleanupStack::PopAndDestroy( tmpProperty );
             }
        else if ( value->PrimitiveValueType() == CXnDomPropertyValue::EString ||
                  value->PrimitiveValueType() == CXnDomPropertyValue::EIdent )

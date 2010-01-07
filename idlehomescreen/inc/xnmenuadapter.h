@@ -107,7 +107,6 @@ class CXnMenuAdapter : public CXnControlAdapter, public MEikMenuObserver
             CXnNodeAppIf* aNode,
             TBool aPreserveAspectRatio, TBool aInvertMask,TBool aTransferOwnership);
 
-#if 0 // MSK icon change
         /**
         * Sets soft key image.
         * @param aId icon bitmap IID 
@@ -123,7 +122,6 @@ class CXnMenuAdapter : public CXnControlAdapter, public MEikMenuObserver
                                const TInt32 aBmpM,
                                XnMenuInterface::MXnMenuInterface::TSoftKeyPosition aPos, 
                                TBool aEnable );
-#endif // MSK icon change
 
         /**
         * Sets softkey text. 

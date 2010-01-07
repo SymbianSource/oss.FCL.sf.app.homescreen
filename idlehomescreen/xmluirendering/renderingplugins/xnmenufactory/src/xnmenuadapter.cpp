@@ -71,8 +71,6 @@ const TInt KCBACommandMiddle         = 6202;
 const TInt KXnMenuArrayGranularity   = 6;
 const TInt KWideScreenWidth          = 640;
 
-_LIT( KMskIconDialer, "#dialer");
-
 using namespace XnPropertyNames;
 
 static CXnNodePluginIf* FindChildL(CXnNodePluginIf& aNode, 
@@ -93,14 +91,11 @@ public:
       iPreserveAspectRatio( EFalse ),            
       iUpdateAppearance( ETrue ),
       iOwnBitmaps( ETrue ),
-      iDefault( EFalse )
-#if 0 // MSK icon change
-	  ,
+      iDefault( EFalse ),
       iId( KAknsIIDQsnIconColors ),
       iBmpFile( NULL ),
       iBmp( 0 ),
       iBmpM( 0 )
-#endif // MSK icon change
         {
         }  
                               
@@ -129,10 +124,8 @@ public:
         iImageOn = EFalse;        
         iInvertMask = EFalse;
         iPreserveAspectRatio = EFalse;
-#if 0 // MSK icon change
         delete iBmpFile;
         iBmpFile = NULL;
-#endif // MSK icon change
         }        
         
     CXnNodePluginIf* iNode;
@@ -147,12 +140,10 @@ public:
     TBool            iUpdateAppearance;
     TBool            iOwnBitmaps;
     TBool            iDefault;
-#if 0 // MSK icon change
     TAknsItemID      iId;
     HBufC*           iBmpFile;
     TInt32           iBmp;
     TInt32           iBmpM;
-#endif // MSK icon change
     };
 
 
@@ -1104,7 +1095,6 @@ CEikImage* CXnMenuAdapter::PrepareSoftkeyImageL( const CXnSoftkeyItem& aItem, co
 //
 void CXnMenuAdapter::SetSoftkeyAppearanceL( CXnSoftkeyItem& aItem )
     {
-#if 0 // MSK icon change
     if( IsNodeVisibleL( *aItem.iNode) )
         {
         if( aItem.iImageOn )
@@ -1129,54 +1119,6 @@ void CXnMenuAdapter::SetSoftkeyAppearanceL( CXnSoftkeyItem& aItem )
             }
         }
     }
-#else // MSK icon change
-    if( IsNodeVisibleL( *aItem.iNode) )
-        {
-        if( aItem.iPosition == CEikButtonGroupContainer::ELeftSoftkeyPosition 
-            || aItem.iPosition == CEikButtonGroupContainer::ERightSoftkeyPosition)
-            {
-            if(aItem.iImageOn)
-                {
-                ChangeSoftkeyImageL(aItem);
-                }
-            else if(aItem.iLabel)// change label
-                {
-                TBool left(EFalse);
-                if(aItem.iPosition == CEikButtonGroupContainer::ELeftSoftkeyPosition)
-                    {
-                    left = ETrue;
-                    }
-                EikSoftkeyImage::SetLabel( iContainer,left );
-                iContainer->SetCommandL( aItem.iPosition, aItem.iCommandId, *aItem.iLabel );
-                
-                }
-                                   
-            }
-        else if(aItem.iPosition == CEikButtonGroupContainer::EMiddleSoftkeyPosition)   
-            {
-            if( aItem.iLabel )
-                {
-                // Msk will have predefined image based on command id                                                            
-                if( *aItem.iLabel == menu::KMSKDotImage16 )
-                    {
-                    aItem.iCommandId = KCBACommandFirst;
-                    }                                           
-                else if(*aItem.iLabel == KMskIconDialer)
-                    {
-#ifndef _AVKON_CBA_LSC                    
-                    aItem.iCommandId = EAknSoftkeyDialler;
-#endif                    
-                    }
-                else
-                    {
-                    aItem.iCommandId = KCBACommandMiddle;
-                    }
-                iContainer->SetCommandL( aItem.iPosition, aItem.iCommandId, *aItem.iLabel );
-                }
-            }
-        }
-    }
-#endif // MSK icon change
 
 // -----------------------------------------------------------------------------
 // CXnMenuAdapter::InitSoftkeyItemsL
@@ -1220,13 +1162,11 @@ void CXnMenuAdapter::InitSoftkeyItemImageL( CXnSoftkeyItem& aItem)
     // No layout calulations needed
     node->SetLayoutCapable( EFalse );                                                                 
 
-#if 0 // MSK icon change
     if ( aItem.iPosition == CEikButtonGroupContainer::EMiddleSoftkeyPosition )
         {
         aItem.iImageOn = ETrue;
         return;
         }
-#endif // MSK icon change
 
     CXnProperty* pathProp( node->PathL() );
     if( pathProp )
@@ -1778,6 +1718,9 @@ void CXnMenuAdapter::ProcessCommandL( TInt aCommand )
 //
 void CXnMenuAdapter::SetContainerL( CEikButtonGroupContainer& aContainer )
     {
+    
+    User::LeaveIfNull( &aContainer );
+    
     TBool updateNeeded( EFalse );
     
     TInt statusPaneId( iAvkonAppUi->StatusPane()->CurrentLayoutResId() );
@@ -1985,7 +1928,6 @@ void CXnMenuAdapter::SetSoftKeyImageL(
         }
     }
 
-#if 0 // MSK icon change
 // -----------------------------------------------------------------------------
 // CXnMenuAdapter::SetSoftKeyImageL
 // 
@@ -2039,7 +1981,6 @@ void CXnMenuAdapter::SetSoftKeyImageL( const TAknsItemID& aId,
         softkey->iNode->SetDirtyL();
         }
     }
-#endif // MSK icon change
 
 // -----------------------------------------------------------------------------
 // CXnMenuAdapter::SetSoftKeyTextL
@@ -2422,11 +2363,9 @@ void CXnMenuAdapter::UpdateSoftkeyAppearancesL()
 //
 void CXnMenuAdapter::ChangeSoftkeyImageL(const CXnSoftkeyItem& aSoftkey)
     {
-#if 0 // MSK icon change
     if ( aSoftkey.iPosition == CEikButtonGroupContainer::ELeftSoftkeyPosition || 
             aSoftkey.iPosition == CEikButtonGroupContainer::ERightSoftkeyPosition )
         {
-#endif // MSK icon change
         TSize size;
         if(AknLayoutUtils::PenEnabled())
             {
@@ -2444,8 +2383,7 @@ void CXnMenuAdapter::ChangeSoftkeyImageL(const CXnSoftkeyItem& aSoftkey)
             {
             left = EFalse;
             }
-        EikSoftkeyImage::SetImage( iContainer, *image, left );                        
-#if 0 // MSK icon change
+        EikSoftkeyImage::SetImage( iContainer, *image, left );
         }
     else if ( aSoftkey.iBmpFile )
         {
@@ -2460,7 +2398,6 @@ void CXnMenuAdapter::ChangeSoftkeyImageL(const CXnSoftkeyItem& aSoftkey)
                 ETrue );
         cba->DrawNow();
         }
-#endif // MSK icon change
     }
 
 // ---------------------------------------------------------------------------
@@ -2626,17 +2563,11 @@ CXnSoftkeyItem* CXnMenuAdapter::AppendSoftkeyItemL(CXnNodePluginIf* aNode)
         softkey->iImageOn = EFalse;
         softkey->iLabel = FindSoftkeyLabelL(aNode);        
         }
-#if 0 // MSK icon change
     else
        {
        InitSoftkeyItemImageL( *softkey );
        }
-#else // MSK icon change
-    else if(softkey->iPosition != CEikButtonGroupContainer::EMiddleSoftkeyPosition)
-       { // we can't set own image to middle softkey
-       InitSoftkeyItemImageL( *softkey );
-       }
-#endif // MSK icon change
+
     softkey->iUpdateAppearance = ETrue;
     iSoftkeyItems.AppendL(softkey);
     CleanupStack::Pop(softkey);

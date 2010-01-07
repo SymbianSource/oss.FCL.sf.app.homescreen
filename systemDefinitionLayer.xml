@@ -1,7 +1,0 @@
-<layer name="homescreen">
-  <module name="group_homescreen">
-    <component name="group_homescreen">
-      <unit unitID="homescreen" mrp="" bldFile="&layer_real_source_path;\group" name="homescreen" />
-    </component>
-  </module>
-</layer>

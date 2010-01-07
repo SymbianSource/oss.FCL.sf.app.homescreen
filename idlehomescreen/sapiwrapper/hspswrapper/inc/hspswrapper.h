@@ -21,7 +21,7 @@
 #define C_CHSPSWRAPPER_H
 
 #include <e32base.h>
-#include <LiwCommon.h>      // for MLiwNotifyCallback
+#include <liwcommon.h>      // for MLiwNotifyCallback
 
 class CLiwServiceHandler;
 class MLiwInterface;

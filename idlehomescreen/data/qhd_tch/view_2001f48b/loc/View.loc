@@ -249,8 +249,14 @@
 // r: TB9.2
 #define qtn_hs_title_editing_view "Editing view"
 
-// d: right softkey caption in inactive call state
-// l: text_softkey call
+// d: Call
+// l: control_pane_t1/opt7
 // w:
 // r: TB9.2
 #define text_softkey_call "Call"
+
+// d: Added new option menu item to Edit mode for opening the widget catalog,
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_edit_widget_catalog "Widget Catalog"

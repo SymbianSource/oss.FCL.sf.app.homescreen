@@ -228,6 +228,11 @@
                             icon_skin_minor_id=""
                             icon_skin_major_id=""
                             param="logs:dialed"/>
+          <!-- Photos Suite launcher -->      
+		  <menu:application uid="0x200104E4"/>
+          <!-- Video Suite launcher -->      
+		  <menu:application uid="0x200211FA"/>			
+			
         </menu:folder>
     </menu:folder>
 </menu:data>

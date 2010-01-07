@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmGrid declaration
-*  Version     : %version: MM_32.1.19 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_32.1.20 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -357,6 +357,14 @@ private:
      *         or 0 if already at the beginning/end of the list
      */
     TInt ScrollIfNeeded( const TPointerEvent& aPointerEvent );
+    
+    /**
+     * Minimal scrolling (setting top item index and vertical offset) with 
+     * boundary checking and WITHOUT redrawing.
+     * 
+     * @param aDistanceInPixels Distance to scroll.
+     */
+    void ScrollWithoutRedraw( TInt aDistanceInPixels );
     
     /**
      * Updates the dispapearing highlight.

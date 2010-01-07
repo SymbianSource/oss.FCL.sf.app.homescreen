@@ -18,9 +18,9 @@
 #include "xntexteditorpublisher.h"
 
 #include "xntexteditoradapter.h"
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
 #include <eikedwin.h>
 #include <eikedwin.h>
 #include <utf.h> 

@@ -37,6 +37,7 @@ class CXnNode;
 class CAknListQueryDialog;
 class CXnViewManager;
 class CXnViewData;
+class CRepository;
 
 namespace hspswrapper
     {
@@ -185,6 +186,14 @@ public:
      */
     CHspsWrapper& HspsWrapper() const;
 
+    /**
+     * Retrives Id read from central repository.
+     * 
+     * @since S60 5.0
+	 * @return sucess or failure standard error code
+     */    
+    TInt IdFromCrep ( TDes8& aUid ) const;
+
 private:
     // from MHsContentController
     
@@ -296,6 +305,8 @@ private:
     CXnNode* iTargetPlugin;
     /** Widgets visibility state */
     TBool iWidgetsVisibilityState;    
+    /** Central repository , to choose plugin, owned*/
+    CRepository* iRepository;
     };
 
 #endif // C_XNEDITOR_H

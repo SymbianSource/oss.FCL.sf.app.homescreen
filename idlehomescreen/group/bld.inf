@@ -24,6 +24,7 @@
 #include "../sapiwrapper/hspswrapper/group/bld.inf"
 #include "../xmluirendering/group/bld.inf"
 #include "../xmluicontroller/group/bld.inf"
+#include "../widgetmanager/group/bld.inf"
 
 #ifdef FF_HOMESCREEN_COMMON_IDLEFW
 #include "../data/group/bld.inf"

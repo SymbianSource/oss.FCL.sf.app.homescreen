@@ -20,9 +20,14 @@
 
 // System includes
 #include <e32base.h>
+#include <hscontentcontrolui.h>
+
+// User includes
+#include "hscontentcontrolecomobserver.h"
 
 // Forward declarations
-#include <hscontentcontrolui.h>
+class CHsContentControlEComListener;
+
 /**
  *  Content control UI base class
  *
@@ -34,7 +39,8 @@
  *  @lib hscontentcontrol.lib
  *  @since S60 v5.0
  */
-NONSHARABLE_CLASS( CHsContentControlFactory ) : public CBase
+NONSHARABLE_CLASS( CHsContentControlFactory ) : public CBase,
+                                                public MHsContentControlEComObserver
     {
 public: // Constructor and destructor
     /**
@@ -47,6 +53,13 @@ public: // Constructor and destructor
      */
     IMPORT_C ~CHsContentControlFactory();
 
+public: // from MHsContentControlEComObserver
+    
+    /**
+     * Notification of Ecom registry change.
+     */
+     void HandleEComChangeEvent();
+    
 private: // Constructors
     /**
      * Constructor
@@ -65,20 +78,49 @@ public: // New functions
         const TDesC8& aControllerType );
 
 private:
-    /**
-     * 
+    /** 
+     * Finds and returns loaded ContentControlUi object from array.
      */
     MHsContentControlUi* FindHsContentController(
         const TDesC8& aControllerType );
     
+    /** 
+     * Checks if a plugin is removed/upgraded/downgraded.
+     */
+    void CheckPluginChangesL();
     
+    /**
+     * Finds plugin implementation info in the ECOM registry.
+     * @param aUid The plugin UID which is to be checked.
+     * @param aPluginArray The array of plugins which have been implemented.
+     * @return ImplementationInfo of plugin. 
+     */
+    CImplementationInformation* FindPluginImplInfo( 
+            const TUid& aUid, const RImplInfoPtrArray& aPlugInArray );
+
+    /**
+     * Checks if an upgrade or downgrade of the existing plugins happened.
+     * @param aPluginImplInfo ImplInfo of plugin to be checked for upgrade/downgrade.
+     * @return ETrue if upgrade/downgrade, EFalse otherwise. 
+     */
+    TBool PluginUpgradeDowngrade( const CImplementationInformation& aPluginImplInfo );
+
 private: // Data
 
     /**
-     *
+     * An array of type CHsContentControlUi ( Owned ).
      */
     RPointerArray< CHsContentControlUi > iHsContentControlUis;
+    
+    /**
+    * An array of type CImplementationInformation ( Owned ).
+    */
+    RImplInfoPtrArray               iImplArray;
 
+    /**
+     * An object of type CHsContentControlEComListener ( Owned ).
+     */
+    CHsContentControlEComListener*  iHsContentControlEComListener; 
     };
 
 

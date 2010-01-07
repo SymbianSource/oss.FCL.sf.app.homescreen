@@ -8,39 +8,36 @@ EXPORTS
 	_ZN18CMmWidgetContainer10SetIsFadedEi @ 7 NONAME
 	_ZN18CMmWidgetContainer10WidgetTypeEv @ 8 NONAME
 	_ZN18CMmWidgetContainer11CancelDragLEi @ 9 NONAME
-	_ZN18CMmWidgetContainer11IsDraggableEv @ 10 NONAME
-	_ZN18CMmWidgetContainer11SetObserverEP17MMmWidgetObserver @ 11 NONAME
-	_ZN18CMmWidgetContainer11StopMovingLEv @ 12 NONAME
-	_ZN18CMmWidgetContainer12GetHighlightEv @ 13 NONAME
-	_ZN18CMmWidgetContainer12GetItemRectLEi @ 14 NONAME
-	_ZN18CMmWidgetContainer12SetFlipOpenLEi @ 15 NONAME
+	_ZN18CMmWidgetContainer11EndLongTapLEi @ 10 NONAME
+	_ZN18CMmWidgetContainer11IsDraggableEv @ 11 NONAME
+	_ZN18CMmWidgetContainer11SetObserverEP17MMmWidgetObserver @ 12 NONAME
+	_ZN18CMmWidgetContainer11StopMovingLEv @ 13 NONAME
+	_ZN18CMmWidgetContainer12GetHighlightEv @ 14 NONAME
+	_ZN18CMmWidgetContainer12GetItemRectLEi @ 15 NONAME
 	_ZN18CMmWidgetContainer12SetHasFocusLEi @ 16 NONAME
 	_ZN18CMmWidgetContainer13ItemIconZoomLEi @ 17 NONAME
 	_ZN18CMmWidgetContainer13NumberOfItemsEv @ 18 NONAME
 	_ZN18CMmWidgetContainer13ScrollToItemLEi @ 19 NONAME
 	_ZN18CMmWidgetContainer14GetSuiteModelLEv @ 20 NONAME
-	_ZN18CMmWidgetContainer15HandleTopFocusLEi @ 21 NONAME
-	_ZN18CMmWidgetContainer17HandleZoomChangedE10TAknUiZoom @ 22 NONAME
-	_ZN18CMmWidgetContainer17NewGridContainerLERK5TRectP15MObjectProviderP18CMmTemplateLibrary @ 23 NONAME
-	_ZN18CMmWidgetContainer17PrepareForGarbageEv @ 24 NONAME
-	_ZN18CMmWidgetContainer18HandleItemRemovalLEv @ 25 NONAME
-	_ZN18CMmWidgetContainer18IsHighlightVisibleEv @ 26 NONAME
-	_ZN18CMmWidgetContainer18ItemIsFullyVisibleEi @ 27 NONAME
-	_ZN18CMmWidgetContainer18SetLongTapObserverEP18MMmLongTapObserver @ 28 NONAME
-	_ZN18CMmWidgetContainer19CacheWidgetPositionEv @ 29 NONAME
-	_ZN18CMmWidgetContainer19HandleItemAdditionLEv @ 30 NONAME
-	_ZN18CMmWidgetContainer19ResetWidgetPositionEv @ 31 NONAME
-	_ZN18CMmWidgetContainer20GetPreviousHighlightEv @ 32 NONAME
-	_ZN18CMmWidgetContainer20NewListBoxContainerLERK5TRectP15MObjectProviderP18CMmTemplateLibrary @ 33 NONAME
-	_ZN18CMmWidgetContainer21NumberOfItemsChangedLE16TItemsChangeType @ 34 NONAME
-	_ZN18CMmWidgetContainer21RestoreWidgetPositionEv @ 35 NONAME
-	_ZN18CMmWidgetContainer23HandleBackgroundGainedLEv @ 36 NONAME
-	_ZN18CMmWidgetContainer23HandleForegroundGainedLEv @ 37 NONAME
-	_ZN18CMmWidgetContainer23SetHighlightVisibilityLEi @ 38 NONAME
-	_ZN18CMmWidgetContainer34HandleOptionsMenuVisibilityChangeLEi @ 39 NONAME
-	_ZN18CMmWidgetContainer7SetZoomE10TAknUiZoom @ 40 NONAME
-	_ZN19CMmListBoxContainer13SetEmptyTextLERK7TDesC16 @ 41 NONAME
-	_ZN19CMmListBoxContainer20SetDefaultHighlightLEi @ 42 NONAME
-	_ZThn52_N18CMmWidgetContainer23HandleBackgroundGainedLEv @ 43 NONAME
-	_ZThn52_N18CMmWidgetContainer23HandleForegroundGainedLEv @ 44 NONAME
+	_ZN18CMmWidgetContainer17NewGridContainerLERK5TRectP15MObjectProviderP18CMmTemplateLibrary @ 21 NONAME
+	_ZN18CMmWidgetContainer17PrepareForGarbageEv @ 22 NONAME
+	_ZN18CMmWidgetContainer18HandleItemRemovalLEv @ 23 NONAME
+	_ZN18CMmWidgetContainer18IsHighlightVisibleEv @ 24 NONAME
+	_ZN18CMmWidgetContainer18ItemIsFullyVisibleEi @ 25 NONAME
+	_ZN18CMmWidgetContainer18SetLongTapObserverEP18MMmLongTapObserver @ 26 NONAME
+	_ZN18CMmWidgetContainer19CacheWidgetPositionEv @ 27 NONAME
+	_ZN18CMmWidgetContainer19HandleItemAdditionLEv @ 28 NONAME
+	_ZN18CMmWidgetContainer19ResetWidgetPositionEv @ 29 NONAME
+	_ZN18CMmWidgetContainer20GetPreviousHighlightEv @ 30 NONAME
+	_ZN18CMmWidgetContainer20NewListBoxContainerLERK5TRectP15MObjectProviderP18CMmTemplateLibrary @ 31 NONAME
+	_ZN18CMmWidgetContainer21NumberOfItemsChangedLE16TItemsChangeType @ 32 NONAME
+	_ZN18CMmWidgetContainer21RestoreWidgetPositionEv @ 33 NONAME
+	_ZN18CMmWidgetContainer23HandleBackgroundGainedLEv @ 34 NONAME
+	_ZN18CMmWidgetContainer23HandleForegroundGainedLEv @ 35 NONAME
+	_ZN18CMmWidgetContainer23SetHighlightVisibilityLEi @ 36 NONAME
+	_ZN18CMmWidgetContainer34HandleOptionsMenuVisibilityChangeLEi @ 37 NONAME
+	_ZN19CMmListBoxContainer13SetEmptyTextLERK7TDesC16 @ 38 NONAME
+	_ZN19CMmListBoxContainer20SetDefaultHighlightLEi @ 39 NONAME
+	_ZThn52_N18CMmWidgetContainer23HandleBackgroundGainedLEv @ 40 NONAME
+	_ZThn52_N18CMmWidgetContainer23HandleForegroundGainedLEv @ 41 NONAME
 

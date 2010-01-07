@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_83.1.2.1.23.1.18 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_83.1.2.1.23.1.19 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -28,14 +28,12 @@
 #include <aknappui.h>
 #include <akntoolbarobserver.h>
 #include <eiklbo.h>
-#include <hwrmdomainpskeys.h> //for flip change status
 #include <AknsSrvClient.h>
 
 #include "hncontrollerinterface.h"
 #include "mmwidgetobserver.h"
 #include "hnsuiteobserver.h"
 #include "mmactionrequest.h"
-#include "mmpropertysubscriber.h"
 #include "hnglobals.h"
 
 
@@ -76,7 +74,6 @@ NONSHARABLE_CLASS(CMmAppUi) : public CAknAppUi,
 							public MAknToolbarObserver,
                             public MMmWidgetObserver,
                             public MMmActionRequest,
-                            public MMmPropertyChangeObserver,
                             public MAknsSkinChangeObserver
 	{
 
@@ -307,23 +304,10 @@ public:
     TInt ExecuteExtensionActionL( const TUid aUid , const TDesC& aCommand,
                 CLiwGenericParamList* aEventParamList );
 
-// from MMmPropertyChangeObserver
-    /**
-     * Called when property changed
-     * @since S60 v3.0
-     */
-    void PropertyChangedL(TInt aValue);
-
-    /**
-     * Sets the zoom for the application.
-     */
-    void SetZoom( TAknUiZoom aZoom );
-
     /**
      * Reloads cascade menu map.
      */
     void ReloadCascadeMenuMapL();
-
 
     /**
      * Called by the skin server when skin content is changed and the
@@ -784,14 +768,6 @@ private:
      void ResetContainerMapToRootL();
 
      /**
-      * Called to retrive flip status.
-      *
-      * @since S60 v5.0
-      * @return Is flip open.
-      */
-     TBool FlipOpen();
-
-     /**
       * Resets view to root.
       *
       * @return ETrue if view was not displaying root suite already, EFalse otherwise
@@ -962,22 +938,6 @@ private: // Data
     CMMExtensionManager* iMmExtManager;
 
 	/**
-	 * Sliding keyboard (flip) status
-	 */
-    EPSHWRMFlipStatus iKeyboardFlipStatus;
-
-	/**
-	 * Slider event subscriber
-	 * own
-	 */
-    CMmPropertySubscriber* iSliderEventSubscriber;
-
-    /**
-     * Current zoom;
-     */
-    TAknUiZoom iZoom;
-
-    /**
      * Screen state.
      */
     TBool iScreenOn;

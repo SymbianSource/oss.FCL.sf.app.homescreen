@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  
-*  Version     : %version: MM_40 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_41 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -161,7 +161,6 @@ void CMmDrawerAnimator::RunL()
             iLastNotedHighlight = highlightedItemIndex;
     	    }
 
-    	iDrawer.Widget()->View()->SetDisableRedraw(EFalse);
     	
     	TInt currentVerticalOffset = static_cast<CMmWidgetContainer*>(
     	        iDrawer.Widget()->Parent() )->VerticalItemOffset();
@@ -191,7 +190,6 @@ void CMmDrawerAnimator::RunL()
 				}
     		}
 
-    	iDrawer.Widget()->View()->SetDisableRedraw(ETrue);
     	
 		iLastRedrawTime.HomeTime();
     	
@@ -204,7 +202,6 @@ void CMmDrawerAnimator::RunL()
 		else
 			{
 			Cancel();
-			iDrawer.Widget()->View()->SetDisableRedraw( EFalse );
 			
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
 			if ( iTransTfx && iTransTfxInternal->EffectsDisabled() )
@@ -275,7 +272,6 @@ TInt CMmDrawerAnimator::Trigger()
 			}
 #endif
     
-        iDrawer.Widget()->View()->SetDisableRedraw(ETrue);
         iTimer.After(iStatus, TTimeIntervalMicroSeconds32( 
         		MmEffects::KAnimationFrameDelay ) ); 
         SetActive();

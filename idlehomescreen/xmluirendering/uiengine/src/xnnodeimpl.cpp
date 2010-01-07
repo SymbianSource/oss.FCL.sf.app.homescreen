@@ -2331,6 +2331,10 @@ static TBool DoMatchTriggerForKeyEventL(
             attrs.FindByName( XnPropertyNames::action::KName ) );
         CXnDomAttribute* valueAttribute = static_cast< CXnDomAttribute* >(
             attrs.FindByName( XnPropertyNames::action::KValue ) );
+        if ( !nameAttribute || !valueAttribute )
+            {
+            continue;
+            }
         if ( nameAttribute->Value() ==
              XnPropertyNames::action::trigger::name::keyevent::KEventType )
             {
@@ -2522,6 +2526,10 @@ static TBool MatchStylusTriggerL(
             attrs.FindByName( XnPropertyNames::action::KName ) );
         CXnDomAttribute* valueAttribute = static_cast< CXnDomAttribute* >(
             attrs.FindByName( XnPropertyNames::action::KValue ) );
+        if ( !nameAttribute || !valueAttribute )
+            {
+            continue;
+            }
         if ( nameAttribute->Value() ==
              XnPropertyNames::action::trigger::name::stylus::KStylusState )
             {
@@ -2677,6 +2685,11 @@ static TBool MatchActivateTriggerPropertiesL(
                 CXnDomAttribute* valueAttribute = static_cast< CXnDomAttribute* >(
                     attrs.FindByName( XnPropertyNames::action::KValue ) );
 
+                if ( !nameAttribute || !valueAttribute )
+                    {
+                    return EFalse;
+                    }
+                
                 const TDesC8& name = nameAttribute->Value();
 
                 // check that eventype name matches
@@ -7520,17 +7533,7 @@ void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt aSource )
 
                 if ( popup )
                     {
-                    if ( aSource == XnEventSource::EStylus )
-                        {
-                        const TTimeIntervalMicroSeconds32 delay( 0 );                       
-                        const TTimeIntervalMicroSeconds32 display( 1000 * 1000 * 6 );                                                
-                        
-                        popup->ShowPopupL( aRect, delay, display );
-                        }
-                    else
-                        {
-                        popup->ShowPopupL( aRect );
-                        }                    
+                    popup->ShowPopupL( aRect );
                     }
                 }
             }

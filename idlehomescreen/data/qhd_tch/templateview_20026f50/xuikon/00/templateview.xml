@@ -146,15 +146,6 @@
                     </action>
                 </actions>
             </dynmenuitem>
-            <!-- Change wallpaper is always present -->
-            <menuitem id="hs_popup_change_wallpaper" label="&qtn_hs_change_longtap_wallpaper;">
-                <actions>
-                    <action>
-                        <trigger name="activate"/>
-                        <event name="system/setwallpaper"/>
-                    </action>
-                </actions>
-            </menuitem>
         </styluspopup>
         <menubar id="hs_menubar">
             <!-- menu item grouping table is traversed through in run-time always when options menu is launched. -->
@@ -170,11 +161,12 @@
                 </menuitemgroup>
                 <!-- These items are shown in edit mode, if not otherwise changed in the declaration -->
                 <menuitemgroup id="Menu/EditMode">
-                    <property name="hs_add_widget"/>
+                    <property name="hs_widget_catalog"/>
                     <property name="hs_remove_widget"/>
                     <property name="hs_widget_settings"/>
                     <property name="hs_widget_general_1"/>
                     <property name="hs_widget_general_2"/>
+                    <property name="hs_add_view"/>
                     <property name="hs_remove_view"/>
                     <property name="hs_change_wallpaper"/>
                 </menuitemgroup>

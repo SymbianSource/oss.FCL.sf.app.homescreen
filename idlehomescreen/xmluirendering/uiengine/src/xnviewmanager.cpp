@@ -23,10 +23,7 @@
 #include <xnuiengine.rsg>
 #include <aknnotewrappers.h>
 
-#if 0 // MSK icon change
 #include <AknsConstants.h>
-#include <avkon.mbg>
-#endif // MSK icon change
 
 // User includes
 #include "xnapplication.h"
@@ -56,9 +53,8 @@
 
 // Constants
 _LIT8( KEmptyWidgetUid, "0x2001f47f" );
-_LIT8( KViewSwitcherText, "switcher_text" );
 _LIT8( KStateError, "Error" );
-_LIT8( KMax, "max" );
+
 
 _LIT8( KTemplateViewUID, "0x20026f50" );
 
@@ -69,60 +65,9 @@ enum
     EViewIsValid,       
     };
 
-const TInt KMinPages = 1;
 
-
-#if 0 // MSK icon change
-
-const TInt KIconIds[] = {
-        EMbmAvkonQgnQgn_home_page_11,
-        EMbmAvkonQgnQgn_home_page_21,
-        EMbmAvkonQgnQgn_home_page_22,
-        EMbmAvkonQgnQgn_home_page_31,
-        EMbmAvkonQgnQgn_home_page_32,
-        EMbmAvkonQgnQgn_home_page_33,
-        EMbmAvkonQgnQgn_home_page_41,
-        EMbmAvkonQgnQgn_home_page_42,
-        EMbmAvkonQgnQgn_home_page_43,
-        EMbmAvkonQgnQgn_home_page_44,
-        EMbmAvkonQgnQgn_home_page_51,
-        EMbmAvkonQgnQgn_home_page_52,
-        EMbmAvkonQgnQgn_home_page_53,
-        EMbmAvkonQgnQgn_home_page_54,
-        EMbmAvkonQgnQgn_home_page_55,
-        EMbmAvkonQgnQgn_home_page_61,
-        EMbmAvkonQgnQgn_home_page_62,
-        EMbmAvkonQgnQgn_home_page_63,
-        EMbmAvkonQgnQgn_home_page_64,
-        EMbmAvkonQgnQgn_home_page_65,
-        EMbmAvkonQgnQgn_home_page_66
-        };
-
-const TInt KMaskIds[] = {
-        EMbmAvkonQgnQgn_home_page_11_mask,
-        EMbmAvkonQgnQgn_home_page_21_mask,
-        EMbmAvkonQgnQgn_home_page_22_mask,
-        EMbmAvkonQgnQgn_home_page_31_mask,
-        EMbmAvkonQgnQgn_home_page_32_mask,
-        EMbmAvkonQgnQgn_home_page_33_mask,
-        EMbmAvkonQgnQgn_home_page_41_mask,
-        EMbmAvkonQgnQgn_home_page_42_mask,
-        EMbmAvkonQgnQgn_home_page_43_mask,
-        EMbmAvkonQgnQgn_home_page_44_mask,
-        EMbmAvkonQgnQgn_home_page_51_mask,
-        EMbmAvkonQgnQgn_home_page_52_mask,
-        EMbmAvkonQgnQgn_home_page_53_mask,
-        EMbmAvkonQgnQgn_home_page_54_mask,
-        EMbmAvkonQgnQgn_home_page_55_mask,
-        EMbmAvkonQgnQgn_home_page_61_mask,
-        EMbmAvkonQgnQgn_home_page_62_mask,
-        EMbmAvkonQgnQgn_home_page_63_mask,
-        EMbmAvkonQgnQgn_home_page_64_mask,
-        EMbmAvkonQgnQgn_home_page_65_mask,
-        EMbmAvkonQgnQgn_home_page_66_mask
-        };
-
-const TAknsItemID KSkinIds[] = {            
+/*
+const TAknsItemID KSkinIds[] = {
         KAknsIIDQgnHomePage11,
         KAknsIIDQgnHomePage21,
         KAknsIIDQgnHomePage22,
@@ -144,10 +89,8 @@ const TAknsItemID KSkinIds[] = {
         KAknsIIDQgnHomePage64,
         KAknsIIDQgnHomePage65,
         KAknsIIDQgnHomePage66
-        };
-
-#endif // MSK icon change
-
+        }; 
+*/        
 
 // ============================ LOCAL FUNCTIONS ===============================
 
@@ -225,6 +168,129 @@ static void SetOnlineStateL( CXnAppUiAdapter& aAdapter,
     aAdapter.SetOnlineStateL( list );
 
     CleanupStack::PopAndDestroy( 2, &nodes ); // &list                                                 
+    }
+
+// -----------------------------------------------------------------------------
+// resolveIconId
+// -----------------------------------------------------------------------------
+//
+static TAknsItemID ResolveIconId( TInt aIndex )
+    {
+    TAknsItemID ret( KAknsIIDNone );
+    switch( aIndex )
+        {
+        case 0:
+            {
+            ret = KAknsIIDQgnHomePage11;
+            }
+            break;
+        case 1:
+            {
+            ret = KAknsIIDQgnHomePage21;
+            }
+            break;
+        case 2:
+            {
+            ret = KAknsIIDQgnHomePage22;
+            }
+            break;
+        case 3:
+            {
+            ret = KAknsIIDQgnHomePage31;
+            }
+            break;
+        case 4:
+            {
+            ret = KAknsIIDQgnHomePage32;
+            }     
+            break;
+        case 5:
+            {
+            ret = KAknsIIDQgnHomePage33;
+            }    
+            break;
+        case 6:
+            {
+            ret = KAknsIIDQgnHomePage41;
+            }
+            break;
+        case 7:
+            {
+            ret = KAknsIIDQgnHomePage42;
+            }   
+            break;
+        case 8:
+            {
+            ret = KAknsIIDQgnHomePage43;
+            }   
+            break;
+        case 9:
+            {
+            ret = KAknsIIDQgnHomePage44;
+            }     
+            break;
+        case 10:
+            {
+            ret = KAknsIIDQgnHomePage51;
+            }     
+            break;
+        case 11:
+            {
+            ret = KAknsIIDQgnHomePage52;
+            }     
+            break;
+        case 12:
+            {
+            ret = KAknsIIDQgnHomePage53;
+            } 
+            break;
+        case 13:
+            {
+            ret = KAknsIIDQgnHomePage54;
+            }     
+            break;
+        case 14:
+            {
+            ret = KAknsIIDQgnHomePage55;
+            }
+            break;
+        case 15:
+            {
+            ret = KAknsIIDQgnHomePage61;
+            }    
+            break;
+        case 16:
+            {
+            ret = KAknsIIDQgnHomePage62;
+            }   
+            break;
+        case 17:
+            {
+            ret = KAknsIIDQgnHomePage63;
+            }    
+            break;
+        case 18:
+            {
+            ret = KAknsIIDQgnHomePage64;
+            }
+            break;
+        case 19:
+            {
+            ret = KAknsIIDQgnHomePage65;
+            }
+            break;            
+        case 20:
+            {
+            ret = KAknsIIDQgnHomePage66;
+            }            
+            break;            
+        default:
+            {
+            }
+            break;
+        }
+    
+    return ret;
     }
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -1597,7 +1663,7 @@ CXnOomSysHandler& CXnViewManager::OomSysHandler() const
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::UpdatePageManagementInformationL()
-    { 
+    {
     // Update MSK info
     // Obtain menu bar
     CXnNode* menuBar( iUiEngine->MenuBarNode() );
@@ -1610,50 +1676,28 @@ void CXnViewManager::UpdatePageManagementInformationL()
         
         if ( menuIf )
             {
-#if 0 // MSK icon change
             // Get count of views in array and index of actual view
             TInt count( ViewAmount() );
             TInt current( ViewIndex() + 1 );
 
             // Update MSK icon
+            /*
             TInt index = ResolveIconIndex( count, current );
             menuIf->SetSoftKeyImageL( KSkinIds[index],
-                                      AknIconUtils::AvkonIconFileName(), 
-                                      KIconIds[index],
-                                      KMaskIds[index],
+                                      KNullDesC, 
+                                      0,
+                                      0,
                                       XnMenuInterface::MXnMenuInterface::ECenter, 
                                       ETrue );
-
-#else // MSK icon change
-            // Get array of views
-            RPointerArray< CXnPluginData >& views( iRootData->PluginData() );
-            // Get count of views in array and index of actual view
-            TInt count( views.Count() );
-            TInt actual( views.Find( &ActiveViewData() ) + 1 );
-            
-            // Construct a text info
-            _LIT( KSeparator, "/" );
-            TBuf< 32 >info( KNullDesC );
-            
-            if ( AknLayoutUtils::LayoutMirrored() )
-                {
-                info.AppendNum( actual );
-                info.Append( KSeparator );
-                info.AppendNum( count );
-                }
-            else
-                {
-                info.AppendNum( actual );
-                info.Append( KSeparator );
-                info.AppendNum( count );
-                }
-      
-            AknTextUtils::LanguageSpecificNumberConversion( info );
-
-            // Update info
-            menuIf->SetSoftKeyTextL( info, 
-                XnMenuInterface::MXnMenuInterface::ECenter );
-#endif // MSK icon change
+            */
+            TInt index = ResolveIconIndex( count, current );
+            TAknsItemID iconId = ResolveIconId( index );
+            menuIf->SetSoftKeyImageL( iconId,
+                                      KNullDesC, 
+                                      0,
+                                      0,
+                                      XnMenuInterface::MXnMenuInterface::ECenter, 
+                                      ETrue );            
             }
         }
     }
@@ -1692,10 +1736,6 @@ TInt32 CXnViewManager::MaxPages()
     return iRootData->MaxPages();
     }
 
-
-#if 0 // MSK icon change
-
-
 // -----------------------------------------------------------------------------
 // CXnViewManager::ResolveIconIndex
 // 
@@ -1714,6 +1754,4 @@ TInt CXnViewManager::ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const
 
     return index;
     }
-
-#endif // MSK icon change
 // End of file
