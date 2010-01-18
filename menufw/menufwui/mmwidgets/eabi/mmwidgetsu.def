@@ -32,12 +32,13 @@ EXPORTS
 	_ZN18CMmWidgetContainer20NewListBoxContainerLERK5TRectP15MObjectProviderP18CMmTemplateLibrary @ 31 NONAME
 	_ZN18CMmWidgetContainer21NumberOfItemsChangedLE16TItemsChangeType @ 32 NONAME
 	_ZN18CMmWidgetContainer21RestoreWidgetPositionEv @ 33 NONAME
-	_ZN18CMmWidgetContainer23HandleBackgroundGainedLEv @ 34 NONAME
-	_ZN18CMmWidgetContainer23HandleForegroundGainedLEv @ 35 NONAME
-	_ZN18CMmWidgetContainer23SetHighlightVisibilityLEi @ 36 NONAME
-	_ZN18CMmWidgetContainer34HandleOptionsMenuVisibilityChangeLEi @ 37 NONAME
-	_ZN19CMmListBoxContainer13SetEmptyTextLERK7TDesC16 @ 38 NONAME
-	_ZN19CMmListBoxContainer20SetDefaultHighlightLEi @ 39 NONAME
-	_ZThn52_N18CMmWidgetContainer23HandleBackgroundGainedLEv @ 40 NONAME
-	_ZThn52_N18CMmWidgetContainer23HandleForegroundGainedLEv @ 41 NONAME
+	_ZN18CMmWidgetContainer22EnableLongTapAnimationEi @ 34 NONAME
+	_ZN18CMmWidgetContainer23HandleBackgroundGainedLEv @ 35 NONAME
+	_ZN18CMmWidgetContainer23HandleForegroundGainedLEv @ 36 NONAME
+	_ZN18CMmWidgetContainer23SetHighlightVisibilityLEi @ 37 NONAME
+	_ZN18CMmWidgetContainer34HandleOptionsMenuVisibilityChangeLEi @ 38 NONAME
+	_ZN19CMmListBoxContainer13SetEmptyTextLERK7TDesC16 @ 39 NONAME
+	_ZN19CMmListBoxContainer20SetDefaultHighlightLEi @ 40 NONAME
+	_ZThn52_N18CMmWidgetContainer23HandleBackgroundGainedLEv @ 41 NONAME
+	_ZThn52_N18CMmWidgetContainer23HandleForegroundGainedLEv @ 42 NONAME
 

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_48.1.35 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_48.1.36 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -361,6 +361,18 @@ public:
      * Destructor.
      */
     ~CMmWidgetContainer();
+    
+    /**
+     * Enables/disables animation during long tap.
+     * Tactile feedback is also enabled and disabled with the animation.
+     * Changes made with this method will be effective on the next long
+     * tap, i.e. it is not possible to stop an already started animation
+     * by using this method.
+     * 
+     * @param aEnable ETrue - enable, EFalse - disable long tap animation
+     *                and long tap tactile feedback
+     */
+    IMPORT_C void EnableLongTapAnimation( TBool aEnable );
 
     /**
      * from CCoeControl.

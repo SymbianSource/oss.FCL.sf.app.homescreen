@@ -31,7 +31,6 @@ SOURCE          xnnewstickerfactory.cpp
 SOURCE          xnnewsticker.cpp
 SOURCE          xnnewstickeradapter.cpp
 SOURCE          xnnewstickercontrol.cpp
-SOURCE          xnnewstickersvgcontrol.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../../inc

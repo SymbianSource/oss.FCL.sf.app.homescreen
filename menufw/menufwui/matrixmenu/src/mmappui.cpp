@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.54 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.54 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.56 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.56 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -214,21 +214,14 @@ void CMmAppUi::HandleResourceChangeL( TInt aType )
         iIsKastorEffectStarted = ETrue;
         TInt lastItemIndex = iCurrentContainer->NumberOfItems() - 1;
 
-        TBool makeLastItemVisible = lastItemIndex >= 0 &&
-			iCurrentContainer->ItemIsFullyVisible( lastItemIndex );
-
+        if ( lastItemIndex >= 0 && iCurrentContainer->ItemIsFullyVisible( lastItemIndex ) && 
+        		!iCurrentContainer->IsHighlightVisible() )
+        	{
+        	iCurrentContainer->SetManualHighlightL( lastItemIndex, EFalse );
+        	}
+     
         iCurrentContainer->SetRect( ClientRect() );
         iDummyContainer->SetRect( ClientRect() );
-
-        // This fixes a problem (view scrolled one row up) that occurs when
-        // switching from portrait to landscape orientation with scrollbar
-        // in bottom position.
-        if ( makeLastItemVisible )
-        	{
-        	iCurrentContainer->Widget()->View()->SetTopItemIndex(
-        		iCurrentContainer->Widget()->View()->
-					CalcNewTopItemIndexSoItemIsVisible(	lastItemIndex ) );
-        	}
 
         THashMapIter< TInt, CMmWidgetContainer* > iterator( iContainerMap );
         while( iterator.NextKey() )
@@ -1527,12 +1520,19 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
                             aMenuPane->
                                 ItemData( aMenuPane->MenuItemCommandId( i ) ) );
                         }
+                    
+                    TInt itemSpecificMenuItemsCount = 0;
 
                     //get custom menu items and their positions
                     while ( menuIterator->HasNext() )
                         {
                         CHnMenuItemModel* menuItem = menuIterator->GetNext();
-                        if ( !menuItem->IsItemSpecific() || !ignoreItemSpecific )
+                        TBool isItemSpecific = menuItem->IsItemSpecific();
+                        if ( isItemSpecific )
+                            {
+                            ++itemSpecificMenuItemsCount;
+                            }
+                        if ( !isItemSpecific || !ignoreItemSpecific )
                         	{
                         	CEikMenuPaneItem::SData menuData;
 							menuData.iCommandId = menuItem->Command();
@@ -1570,6 +1570,11 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
 							menuItemMap.InsertL( menuItem->Position(), menuData );
                         	}
                         }
+                    
+                    // DynInitMenuPaneL always gets called immediately after an item is touched and
+                    // because of that it is possible to enable/disable settings that affect long
+                    // tap behavior here.
+                    iCurrentContainer->EnableLongTapAnimation( itemSpecificMenuItemsCount > 0 );
 
                     aMenuPane->Reset();
                     positionArray.Sort();

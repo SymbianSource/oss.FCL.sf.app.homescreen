@@ -34,6 +34,7 @@ SOURCE      xndompropertyvalue.cpp
 SOURCE      xndomlist.cpp
 SOURCE      xndomdepthiterator.cpp
 SOURCE      xndomstringpool.cpp
+SOURCE      xndomstringpooloptimizer.cpp
 
 USERINCLUDE . 
 USERINCLUDE ../inc

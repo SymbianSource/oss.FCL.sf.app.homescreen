@@ -239,7 +239,14 @@ void CWmDetailsDlg::InsertAndFormatContentL()
     TCharFormatMask charFormatMask;
     CParaFormat paraFormat;
     TParaFormatMask paraFormatMask;
-    paraFormat.iHorizontalAlignment = CParaFormat::EJustifiedAlign;
+    if ( Layout_Meta_Data::IsMirrored() )
+        {
+        paraFormat.iHorizontalAlignment = CParaFormat::ERightAlign;
+        }
+    else
+        {
+        paraFormat.iHorizontalAlignment = CParaFormat::ELeftAlign;
+        }
     charFormat.iFontPresentation.iTextColor = color;
     paraFormatMask.SetAttrib(EAttAlignment);
     charFormatMask.SetAttrib(EAttFontTypeface);

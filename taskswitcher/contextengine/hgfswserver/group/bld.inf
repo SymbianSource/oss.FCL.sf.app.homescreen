@@ -1,0 +1,29 @@
+/*
+ * ===========================================================================
+ *  Name        : bld.inf
+ *  Part of     : Huriganes / Fast Swap Server
+ *  Description : main build info file
+ *  Version     : %version: 7 %
+ *
+ *  Copyright © 2008 Nokia Corporation.
+ *  This material, including documentation and any related 
+ *  computer programs, is protected by copyright controlled by 
+ *  Nokia Corporation. All rights are reserved. Copying, 
+ *  including reproducing, storing, adapting or translating, any 
+ *  or all of this material requires the prior written consent of 
+ *  Nokia Corporation. This material also contains confidential 
+ *  information which may not be disclosed to others without the 
+ *  prior written consent of Nokia Corporation.
+ * ===========================================================================
+ */
+
+#include <platform_paths.hrh>
+
+PRJ_EXPORTS
+../rom/hgfswserver.iby    CORE_MW_LAYER_IBY_EXPORT_PATH(hgfswserver.iby)
+
+#include "../utils/group/bld.inf"
+#include "../engine/group/bld.inf"
+#include "../server/group/bld.inf"
+#include "../client/group/bld.inf"
+

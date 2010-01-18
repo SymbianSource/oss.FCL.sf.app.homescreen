@@ -182,9 +182,20 @@ void CXnFocusControl::Draw( const TRect& aRect, CWindowGc& aGc ) const
     if ( IsVisible() || iRefused ) 
         {                                       
         CXnNode* node( iAppUiAdapter.UiEngine().FocusedNode() );
-
+        
         if ( node )
-            {
+            {            
+            CXnProperty* prop( NULL );
+            
+            TRAP_IGNORE( prop = node->GetPropertyL( 
+                XnPropertyNames::common::KFocusAppearance ) );
+                                            
+            if ( prop && prop->StringValue() == XnPropertyNames::KNone )
+                {
+                // Current element refuses to draw focus appearance
+                return;
+                }
+            
             TRect innerRect( aRect );            
             
             innerRect.Shrink( 

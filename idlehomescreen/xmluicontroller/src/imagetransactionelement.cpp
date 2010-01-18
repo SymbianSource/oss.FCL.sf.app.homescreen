@@ -225,16 +225,6 @@ void CKamikazeImageDecoder::SetImageL()
         imageIntr->SetContentBitmaps( iIcon->Bitmap(), iIcon->Mask() );
       
         }
-    else if ( type == XnNewstickerInterface::MXnNewstickerInterface::Type() )
-        {
-        XnNewstickerInterface::MXnNewstickerInterface* newsTicker = NULL;
-        XnComponentInterface::MakeInterfaceL( newsTicker, *node );
-        LeaveIfNull( newsTicker, KErrNotSupported );
-        
-        User::LeaveIfError( newsTicker->SetSeparatorImageL( iIcon ) );
-        // Ownership of icon transferred to newsticker
-        iIcon = NULL;
-        }
     // Menu softkey icons
     else if ( ( ( type == KXnMenuItem || type == KXnMenu ) &&
                 IsNodeVisible( *node ) ) ||
@@ -374,18 +364,6 @@ void CImageTransactionElement::UpdateDataL()
             // Set new bitmaps. Ownership is transferred to MXnImageInterface
             iNewIcon->SetBitmapsOwnedExternally( ETrue );
             imageIntr->SetContentBitmaps( iNewIcon->Bitmap(), iNewIcon->Mask() );
-            }
-        else if ( type == XnNewstickerInterface::MXnNewstickerInterface::Type() )
-            {
-            XnNewstickerInterface::MXnNewstickerInterface* newsTicker = NULL;
-            XnComponentInterface::MakeInterfaceL( newsTicker, Target() );
-            LeaveIfNull( newsTicker, KErrNotSupported );
-            
-            User::LeaveIfError( newsTicker->SetSeparatorImageL( iNewIcon ) );
-            
-            // Ownership of icon transferred to newsticker
-            
-            iNewIcon = NULL;
             }
         // Menu softkey icons
         else if ( ( ( type == KXnMenuItem || type == KXnMenu ) &&

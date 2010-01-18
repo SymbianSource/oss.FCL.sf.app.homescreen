@@ -50,6 +50,7 @@
 #include "xncomponentnodeimpl.h"
 #include "xnnodepluginif.h"
 #include "xnoomsyshandler.h"
+#include "xnbackgroundmanager.h"
 
 // Constants
 _LIT8( KEmptyWidgetUid, "0x2001f47f" );
@@ -115,11 +116,11 @@ static CXnNode* BuildTriggerL( CXnUiEngine& aUiEngine,
     node->SetImpl( impl );
     node->SetUiEngine( aUiEngine );
 
-    CXnDomStringPool& sp( aUiEngine.ODT()->DomDocument().StringPool() );
+    CXnDomStringPool* sp( aUiEngine.ODT()->DomDocument().StringPool() );
 
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName, aStringValue,
-        CXnDomPropertyValue::EString, sp );
+        CXnDomPropertyValue::EString, *sp );
 
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -127,7 +128,7 @@ static CXnNode* BuildTriggerL( CXnUiEngine& aUiEngine,
 
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue,
-        KNullDesC8, CXnDomPropertyValue::EString, sp );
+        KNullDesC8, CXnDomPropertyValue::EString, *sp );
 
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -871,6 +872,7 @@ void CXnViewManager::ActivateNextViewL()
     if ( next.Occupied() )
         {            
         iAppUiAdapter.ViewAdapter().ActivateContainerL( next );                
+        UpdateWallpaperL( current, next );
         }
     }
 
@@ -893,6 +895,7 @@ void CXnViewManager::ActivatePreviousViewL()
     if ( prev.Occupied() )
         {   
         iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
+        UpdateWallpaperL( current, prev );
         }
     }
 
@@ -1630,6 +1633,15 @@ void CXnViewManager::ReportWidgetAmountL( const CXnViewData& aViewData )
         }
 
     node->ReportXuikonEventL( *iWidgetAmountTrigger );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::UpdateWallpaperL
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::UpdateWallpaperL( CXnViewData& aCurrent, CXnViewData& aNew )
+    {
+    iEditor->BgManager().WallpaperChanged( aCurrent, aNew );
     }
 
 // -----------------------------------------------------------------------------

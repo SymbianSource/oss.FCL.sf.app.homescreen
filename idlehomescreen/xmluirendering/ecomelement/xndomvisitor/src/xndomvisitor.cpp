@@ -94,7 +94,7 @@ LOCAL_C void SetPropertiesL(
     TAny* aData )
     {
     CXnDomList* propertyList = reinterpret_cast<CXnDomList*>( aData );
-    CXnDomStringPool& stringPool = propertyList->StringPool();
+    CXnDomStringPool* stringPool = propertyList->StringPool();
     
     for ( TInt i=0; i<aItemCount; i++ )
         {
@@ -270,3 +270,4 @@ void CXnDomVisitor::Release()
     }
 
 //  End of File  
+

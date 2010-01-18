@@ -24,12 +24,15 @@
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::NewL()
+//
 // ----------------------------------------------------------------------------
 //
 CXnExtRenderingPluginWrapper* CXnExtRenderingPluginWrapper::NewL( 
     CXnNodePluginIf& aNode, CXnExtRenderingPluginAdapter& aAdapter )
     {
-    CXnExtRenderingPluginWrapper* self = new ( ELeave ) CXnExtRenderingPluginWrapper( aAdapter );
+    CXnExtRenderingPluginWrapper* self = 
+        new ( ELeave ) CXnExtRenderingPluginWrapper( aAdapter );
+    
     CleanupStack::PushL( self );
     self->ConstructL( aNode );
     CleanupStack::Pop( self );
@@ -38,25 +41,30 @@ CXnExtRenderingPluginWrapper* CXnExtRenderingPluginWrapper::NewL(
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::ConstructL()
+//
 // ----------------------------------------------------------------------------
 //
 void CXnExtRenderingPluginWrapper::ConstructL( CXnNodePluginIf& aNode )
     {
     iNode = &aNode;
+    
     CXnControlAdapter::ConstructL( aNode );
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::CXnExtRenderingPluginWrapper()
+//
 // ----------------------------------------------------------------------------
 //
-CXnExtRenderingPluginWrapper::CXnExtRenderingPluginWrapper( CXnExtRenderingPluginAdapter& aAdapter )
+CXnExtRenderingPluginWrapper::CXnExtRenderingPluginWrapper( 
+    CXnExtRenderingPluginAdapter& aAdapter )
     {
     iAdapter = &aAdapter;
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::~CXnExtRenderingPluginWrapper()
+//
 // ----------------------------------------------------------------------------
 //
 CXnExtRenderingPluginWrapper::~CXnExtRenderingPluginWrapper()
@@ -66,6 +74,7 @@ CXnExtRenderingPluginWrapper::~CXnExtRenderingPluginWrapper()
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::CountComponentControls()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CXnExtRenderingPluginWrapper::CountComponentControls() const
@@ -75,31 +84,42 @@ TInt CXnExtRenderingPluginWrapper::CountComponentControls() const
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::ComponentControl()
+//
 // ----------------------------------------------------------------------------
 //
-CCoeControl* CXnExtRenderingPluginWrapper::ComponentControl( TInt aIndex ) const
+CCoeControl* CXnExtRenderingPluginWrapper::ComponentControl( 
+    TInt aIndex ) const
     {
     if( aIndex == 0 )
         {
         return iAdapter;
         }
-    else
-        {
-        return NULL;
-        }
+
+    return NULL;    
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::OfferKeyEventL()
+//
 // ----------------------------------------------------------------------------
 //
-TKeyResponse CXnExtRenderingPluginWrapper::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType)
+TKeyResponse CXnExtRenderingPluginWrapper::OfferKeyEventL(
+    const TKeyEvent& aKeyEvent, TEventCode aType )
     {
-    return iAdapter->OfferKeyEventL( aKeyEvent, aType );
+    TKeyResponse resp( iAdapter->OfferKeyEventL( aKeyEvent, aType ) );
+    
+    if ( resp == EKeyWasNotConsumed )
+        {
+        // iAdapter did't consume the event, pass it to base clsas
+        resp = CXnControlAdapter::OfferKeyEventL( aKeyEvent, aType );
+        }
+    
+    return resp;
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::SizeChanged()
+//
 // ----------------------------------------------------------------------------
 //    
 void CXnExtRenderingPluginWrapper::SizeChanged()
@@ -109,68 +129,84 @@ void CXnExtRenderingPluginWrapper::SizeChanged()
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::SkinChanged()
+//
 // ----------------------------------------------------------------------------
 //    
 void CXnExtRenderingPluginWrapper::SkinChanged()
     {
     CXnControlAdapter::SkinChanged();
+    
     iAdapter->SkinChanged();
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::SetContainerWindowL()
+//
 // ----------------------------------------------------------------------------
 //   
-void CXnExtRenderingPluginWrapper::SetContainerWindowL(const CCoeControl& aContainer)
+void CXnExtRenderingPluginWrapper::SetContainerWindowL(
+    const CCoeControl& aContainer )
     {
     CXnControlAdapter::SetContainerWindowL( aContainer );
+    
     iAdapter->SetContainerWindowL( *this );
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::MakeVisible()
+//
 // ----------------------------------------------------------------------------
 //
 void CXnExtRenderingPluginWrapper::MakeVisible( TBool aVisible )
     {
-    CXnControlAdapter::MakeVisible( aVisible );
-    iAdapter->MakeVisible( aVisible );
+    // Base class will call MakeVisible to component controls 
+    CXnControlAdapter::MakeVisible( aVisible );    
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::FocusChanged()
+//
 // ----------------------------------------------------------------------------
 //
 void CXnExtRenderingPluginWrapper::FocusChanged( TDrawNow aDrawNow )
     {
     CXnControlAdapter::FocusChanged( aDrawNow );    
-    iAdapter->FocusChanged( aDrawNow );
+    
+    TBool focused( IsFocused() ? ETrue : EFalse );
+    
+    iAdapter->SetFocus( focused, aDrawNow );    
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::HandleScreenDeviceChangedL()
+//
 // ----------------------------------------------------------------------------
 //
 void CXnExtRenderingPluginWrapper::HandleScreenDeviceChangedL()
     {
     CXnControlAdapter::HandleScreenDeviceChangedL();
+    
     iAdapter->HandleResourceChange( KEikDynamicLayoutVariantSwitch );
     }
 
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::DoEnterPowerSaveModeL()
+//
 // ----------------------------------------------------------------------------
 //
-void CXnExtRenderingPluginWrapper::DoEnterPowerSaveModeL( TModeEvent /*aEvent*/ )
+void CXnExtRenderingPluginWrapper::DoEnterPowerSaveModeL( 
+    TModeEvent /*aEvent*/ )
 	{
 	iAdapter->EnterPowerSaveModeL();
 	}
 	
 // ----------------------------------------------------------------------------
 // CXnExtRenderingPluginWrapper::DoExitPowerSaveModeL()
+//
 // ----------------------------------------------------------------------------
 //
-void CXnExtRenderingPluginWrapper::DoExitPowerSaveModeL( TModeEvent /*aEvent*/ )
+void CXnExtRenderingPluginWrapper::DoExitPowerSaveModeL( 
+    TModeEvent /*aEvent*/ )
 	{
 	iAdapter->ExitPowerSaveModeL();
 	}

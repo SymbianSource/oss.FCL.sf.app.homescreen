@@ -266,10 +266,10 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                     // we can close it
                     if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
                         {
-                        CXnDomStringPool& sp =
+                        CXnDomStringPool* sp =
                             iNode.Node().DomNode()->StringPool();
                         CXnProperty* prop = CXnProperty::NewL( KDisplay, KNone,
-                        CXnDomPropertyValue::EString, sp );
+                        CXnDomPropertyValue::EString, *sp );
                         CleanupStack::PushL( prop );
                         iNode.Node().SetPropertyL( prop );
                         CleanupStack::Pop( prop );

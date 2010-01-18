@@ -489,7 +489,7 @@ EXPORT_C void CXnNodePluginIf::ReportTriggerEventL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
         nameValue,
-        iNode->UiEngine()->ODT()->DomDocument().StringPool() );
+        *iNode->UiEngine()->ODT()->DomDocument().StringPool() );
 
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
@@ -504,7 +504,7 @@ EXPORT_C void CXnNodePluginIf::ReportTriggerEventL(
     CXnProperty* index = CXnProperty::NewL(
         aValueName,
         indexValue,
-        iNode->UiEngine()->ODT()->DomDocument().StringPool() );
+        *iNode->UiEngine()->ODT()->DomDocument().StringPool() );
 
     CleanupStack::Pop( indexValue );
     CleanupStack::PushL( index );

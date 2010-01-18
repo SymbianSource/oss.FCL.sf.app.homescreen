@@ -4,15 +4,15 @@ EXPORTS
 	_ZN10CXnDomList10FindByNameERK6TDesC8 @ 3 NONAME
 	_ZN10CXnDomList10RemoveItemEP14MXnDomListItem @ 4 NONAME
 	_ZN10CXnDomList10RemoveItemEi @ 5 NONAME
-	_ZN10CXnDomList4LastEv @ 6 NONAME
-	_ZN10CXnDomList5FirstEv @ 7 NONAME
-	_ZN10CXnDomList5ResetEv @ 8 NONAME
-	_ZN10CXnDomList8AddItemLEP14MXnDomListItem @ 9 NONAME
-	_ZN10CXnDomList8AddItemLEP14MXnDomListItemi @ 10 NONAME
-	_ZN10CXnDomNode10ChildNodesEv @ 11 NONAME
-	_ZN10CXnDomNode10LayoutNodeEv @ 12 NONAME
-	_ZN10CXnDomNode10SetPCDataLERK6TDesC8 @ 13 NONAME
-	_ZN10CXnDomNode10SetRefNodeEi @ 14 NONAME
+	_ZN10CXnDomList15SwapStringPoolLEP16CXnDomStringPool @ 6 NONAME
+	_ZN10CXnDomList4LastEv @ 7 NONAME
+	_ZN10CXnDomList5FirstEv @ 8 NONAME
+	_ZN10CXnDomList5ResetEv @ 9 NONAME
+	_ZN10CXnDomList8AddItemLEP14MXnDomListItem @ 10 NONAME
+	_ZN10CXnDomList8AddItemLEP14MXnDomListItemi @ 11 NONAME
+	_ZN10CXnDomNode10ChildNodesEv @ 12 NONAME
+	_ZN10CXnDomNode10LayoutNodeEv @ 13 NONAME
+	_ZN10CXnDomNode10SetPCDataLERK6TDesC8 @ 14 NONAME
 	_ZN10CXnDomNode11ContentTypeEv @ 15 NONAME
 	_ZN10CXnDomNode11DeleteChildEPS_ @ 16 NONAME
 	_ZN10CXnDomNode12PropertyListEv @ 17 NONAME
@@ -20,25 +20,25 @@ EXPORTS
 	_ZN10CXnDomNode13ReplaceChildLEPS_S0_ @ 19 NONAME
 	_ZN10CXnDomNode13SetLayoutNodeEP7CXnNode @ 20 NONAME
 	_ZN10CXnDomNode13SetNamespaceLERK6TDesC8 @ 21 NONAME
-	_ZN10CXnDomNode14CreateRefNodeLEv @ 22 NONAME
+	_ZN10CXnDomNode13SetOwnershipLERK6TDesC8 @ 22 NONAME
 	_ZN10CXnDomNode14SetContentTypeERK12TContentType @ 23 NONAME
-	_ZN10CXnDomNode17CloneWithoutKidsLER16CXnDomStringPool @ 24 NONAME
+	_ZN10CXnDomNode15SwapStringPoolLEP16CXnDomStringPool @ 24 NONAME
 	_ZN10CXnDomNode19DeleteAttributeListEv @ 25 NONAME
 	_ZN10CXnDomNode4NameEv @ 26 NONAME
 	_ZN10CXnDomNode6CloneLER16CXnDomStringPool @ 27 NONAME
-	_ZN10CXnDomNode6CloneLER16CXnDomStringPoolRK6TDesC8 @ 28 NONAME
-	_ZN10CXnDomNode6PCDataEv @ 29 NONAME
-	_ZN10CXnDomNode9AddChildLEPS_ @ 30 NONAME
-	_ZN10CXnDomNode9AddChildLEPS_i @ 31 NONAME
-	_ZN10CXnDomNode9NamespaceEv @ 32 NONAME
-	_ZN10CXnDomNode9SetNodeIdEi @ 33 NONAME
-	_ZN10CXnDomNode9SetParentEPS_ @ 34 NONAME
-	_ZN14CXnDomDocument11SetRootNodeEP10CXnDomNode @ 35 NONAME
-	_ZN14CXnDomDocument12InternalizeLER11RReadStream @ 36 NONAME
-	_ZN14CXnDomDocument16CreateElementNSLERK6TDesC8S2_ @ 37 NONAME
-	_ZN14CXnDomDocument4NewLEPK6HBufC8 @ 38 NONAME
-	_ZN14CXnDomDocument4NewLER11RReadStream @ 39 NONAME
-	_ZN14CXnDomDocument4NewLEv @ 40 NONAME
+	_ZN10CXnDomNode6PCDataEv @ 28 NONAME
+	_ZN10CXnDomNode9AddChildLEPS_ @ 29 NONAME
+	_ZN10CXnDomNode9AddChildLEPS_i @ 30 NONAME
+	_ZN10CXnDomNode9NamespaceEv @ 31 NONAME
+	_ZN10CXnDomNode9SetNodeIdEi @ 32 NONAME
+	_ZN10CXnDomNode9SetParentEPS_ @ 33 NONAME
+	_ZN14CXnDomDocument11SetRootNodeEP10CXnDomNode @ 34 NONAME
+	_ZN14CXnDomDocument12InternalizeLER11RReadStream @ 35 NONAME
+	_ZN14CXnDomDocument16CreateElementNSLERK6TDesC8S2_ @ 36 NONAME
+	_ZN14CXnDomDocument4NewLEPK6HBufC8 @ 37 NONAME
+	_ZN14CXnDomDocument4NewLER11RReadStream @ 38 NONAME
+	_ZN14CXnDomDocument4NewLEv @ 39 NONAME
+	_ZN14CXnDomDocument5ReadLER11RReadStream @ 40 NONAME
 	_ZN14CXnDomDocument6CloneLEv @ 41 NONAME
 	_ZN14CXnDomDocument9MarshallLEv @ 42 NONAME
 	_ZN14CXnDomDocumentD0Ev @ 43 NONAME
@@ -47,102 +47,101 @@ EXPORTS
 	_ZN14CXnDomProperty10IsValueSetEv @ 46 NONAME
 	_ZN14CXnDomProperty12SetInheritedEi @ 47 NONAME
 	_ZN14CXnDomProperty14SetPseudoClassENS_12TPseudoClassE @ 48 NONAME
-	_ZN14CXnDomProperty17PropertyValueListEv @ 49 NONAME
-	_ZN14CXnDomProperty4NameEv @ 50 NONAME
-	_ZN14CXnDomProperty4NewLERK6TDesC8R16CXnDomStringPool @ 51 NONAME
-	_ZN14CXnDomProperty4NewLEsR16CXnDomStringPool @ 52 NONAME
-	_ZN14CXnDomProperty6CloneLER16CXnDomStringPool @ 53 NONAME
-	_ZN14CXnDomProperty6CloneLEv @ 54 NONAME
-	_ZN14CXnDomProperty9InheritedEv @ 55 NONAME
-	_ZN14CXnDomPropertyD0Ev @ 56 NONAME
-	_ZN14CXnDomPropertyD1Ev @ 57 NONAME
-	_ZN14CXnDomPropertyD2Ev @ 58 NONAME
-	_ZN15CXnDomAttribute4NameEv @ 59 NONAME
-	_ZN15CXnDomAttribute4NewLERK6TDesC8R16CXnDomStringPool @ 60 NONAME
-	_ZN15CXnDomAttribute5ValueEv @ 61 NONAME
-	_ZN15CXnDomAttribute6CloneLEv @ 62 NONAME
-	_ZN15CXnDomAttribute9SetValueLERK6TDesC8 @ 63 NONAME
-	_ZN15CXnDomAttributeD0Ev @ 64 NONAME
-	_ZN15CXnDomAttributeD1Ev @ 65 NONAME
-	_ZN15CXnDomAttributeD2Ev @ 66 NONAME
-	_ZN16CXnDomStringPool10AddStringLERK6TDesC8 @ 67 NONAME
-	_ZN19CXnDomDepthIterator4NewLER10CXnDomNode @ 68 NONAME
-	_ZN19CXnDomDepthIterator5FirstEv @ 69 NONAME
-	_ZN19CXnDomDepthIterator5NextLEv @ 70 NONAME
-	_ZN19CXnDomDepthIteratorD0Ev @ 71 NONAME
-	_ZN19CXnDomDepthIteratorD1Ev @ 72 NONAME
-	_ZN19CXnDomDepthIteratorD2Ev @ 73 NONAME
-	_ZN19CXnDomPropertyValue11IsAutoIdentEv @ 74 NONAME
-	_ZN19CXnDomPropertyValue11IsNoneIdentEv @ 75 NONAME
-	_ZN19CXnDomPropertyValue11ReleaseDataEv @ 76 NONAME
-	_ZN19CXnDomPropertyValue11StringValueEv @ 77 NONAME
-	_ZN19CXnDomPropertyValue12SetRgbColorLERK4TRgb @ 78 NONAME
-	_ZN19CXnDomPropertyValue12StringValueLEv @ 79 NONAME
-	_ZN19CXnDomPropertyValue14IsInheritIdentEv @ 80 NONAME
-	_ZN19CXnDomPropertyValue14SetFloatValueLENS_19TPrimitiveValueTypeEd @ 81 NONAME
-	_ZN19CXnDomPropertyValue15SetStringValueLENS_19TPrimitiveValueTypeERK6TDesC8 @ 82 NONAME
-	_ZN19CXnDomPropertyValue19SetStringPoolIndexLENS_19TPrimitiveValueTypeEs @ 83 NONAME
-	_ZN19CXnDomPropertyValue4NewLER16CXnDomStringPool @ 84 NONAME
-	_ZN19CXnDomPropertyValue6CloneLEv @ 85 NONAME
-	_ZN19CXnDomPropertyValueD0Ev @ 86 NONAME
-	_ZN19CXnDomPropertyValueD1Ev @ 87 NONAME
-	_ZN19CXnDomPropertyValueD2Ev @ 88 NONAME
-	_ZNK10CXnDomList10StringPoolEv @ 89 NONAME
-	_ZNK10CXnDomList4ItemEi @ 90 NONAME
-	_ZNK10CXnDomList6LengthEv @ 91 NONAME
-	_ZNK10CXnDomList9ItemIndexERK14MXnDomListItem @ 92 NONAME
-	_ZNK10CXnDomNode10StringPoolEv @ 93 NONAME
-	_ZNK10CXnDomNode13AttributeListEv @ 94 NONAME
-	_ZNK10CXnDomNode14AttributeValueERK6TDesC8 @ 95 NONAME
-	_ZNK10CXnDomNode15DescendantCountEv @ 96 NONAME
-	_ZNK10CXnDomNode6NodeIdEv @ 97 NONAME
-	_ZNK10CXnDomNode6ParentEv @ 98 NONAME
-	_ZNK10CXnDomNode9IsRefNodeEv @ 99 NONAME
-	_ZNK10CXnDomNode9ItemIndexERK14MXnDomListItem @ 100 NONAME
-	_ZNK14CXnDomDocument10StringPoolEv @ 101 NONAME
-	_ZNK14CXnDomDocument12DomNodeCountEv @ 102 NONAME
-	_ZNK14CXnDomDocument12ExternalizeLER12RWriteStream @ 103 NONAME
-	_ZNK14CXnDomDocument4SizeEv @ 104 NONAME
-	_ZNK14CXnDomDocument8LastNodeEv @ 105 NONAME
-	_ZNK14CXnDomDocument8RootNodeEv @ 106 NONAME
-	_ZNK14CXnDomProperty10StringPoolEv @ 107 NONAME
-	_ZNK14CXnDomProperty11PseudoClassEv @ 108 NONAME
-	_ZNK14CXnDomProperty15StringPoolIndexEv @ 109 NONAME
-	_ZNK15CXnDomAttribute19NameStringPoolIndexEv @ 110 NONAME
-	_ZNK15CXnDomAttribute20ValueStringPoolIndexEv @ 111 NONAME
-	_ZNK19CXnDomPropertyValue11FloatValueLEv @ 112 NONAME
-	_ZNK19CXnDomPropertyValue14RgbColorValueLEv @ 113 NONAME
-	_ZNK19CXnDomPropertyValue16StringPoolIndexLEv @ 114 NONAME
-	_ZNK19CXnDomPropertyValue18PrimitiveValueTypeEv @ 115 NONAME
-	_ZTI10CXnDomList @ 116 NONAME ; #<TI>#
-	_ZTI10CXnDomNode @ 117 NONAME ; #<TI>#
-	_ZTI14CXnDomDocument @ 118 NONAME ; #<TI>#
-	_ZTI14CXnDomProperty @ 119 NONAME ; #<TI>#
-	_ZTI15CXnDomAttribute @ 120 NONAME ; #<TI>#
-	_ZTI16CXnDomStringPool @ 121 NONAME ; #<TI>#
-	_ZTI19CXnDomDepthIterator @ 122 NONAME ; #<TI>#
-	_ZTI19CXnDomPropertyValue @ 123 NONAME ; #<TI>#
-	_ZTV10CXnDomList @ 124 NONAME ; #<VT>#
-	_ZTV10CXnDomNode @ 125 NONAME ; #<VT>#
-	_ZTV14CXnDomDocument @ 126 NONAME ; #<VT>#
-	_ZTV14CXnDomProperty @ 127 NONAME ; #<VT>#
-	_ZTV15CXnDomAttribute @ 128 NONAME ; #<VT>#
-	_ZTV16CXnDomStringPool @ 129 NONAME ; #<VT>#
-	_ZTV19CXnDomDepthIterator @ 130 NONAME ; #<VT>#
-	_ZTV19CXnDomPropertyValue @ 131 NONAME ; #<VT>#
-	_ZThn4_N10CXnDomNode4NameEv @ 132 NONAME ; #<thunk>#
-	_ZThn4_N14CXnDomProperty4NameEv @ 133 NONAME ; #<thunk>#
-	_ZThn4_N14CXnDomPropertyD0Ev @ 134 NONAME ; #<thunk>#
-	_ZThn4_N14CXnDomPropertyD1Ev @ 135 NONAME ; #<thunk>#
-	_ZThn4_N15CXnDomAttribute4NameEv @ 136 NONAME ; #<thunk>#
-	_ZThn4_N15CXnDomAttributeD0Ev @ 137 NONAME ; #<thunk>#
-	_ZThn4_N15CXnDomAttributeD1Ev @ 138 NONAME ; #<thunk>#
-	_ZThn4_N19CXnDomDepthIterator5FirstEv @ 139 NONAME ; #<thunk>#
-	_ZThn4_N19CXnDomDepthIterator5NextLEv @ 140 NONAME ; #<thunk>#
-	_ZThn4_N19CXnDomDepthIteratorD0Ev @ 141 NONAME ; #<thunk>#
-	_ZThn4_N19CXnDomDepthIteratorD1Ev @ 142 NONAME ; #<thunk>#
-	_ZThn4_N19CXnDomPropertyValueD0Ev @ 143 NONAME ; #<thunk>#
-	_ZThn4_N19CXnDomPropertyValueD1Ev @ 144 NONAME ; #<thunk>#
-	_ZN10CXnDomNode13SetOwnershipLERK6TDesC8 @ 145 NONAME
-	_ZN14CXnDomDocument5ReadLER11RReadStream @ 146 NONAME
+	_ZN14CXnDomProperty15SwapStringPoolLEP16CXnDomStringPool @ 49 NONAME
+	_ZN14CXnDomProperty17PropertyValueListEv @ 50 NONAME
+	_ZN14CXnDomProperty4NameEv @ 51 NONAME
+	_ZN14CXnDomProperty4NewLERK6TDesC8P16CXnDomStringPool @ 52 NONAME
+	_ZN14CXnDomProperty4NewLEsP16CXnDomStringPool @ 53 NONAME
+	_ZN14CXnDomProperty6CloneLER16CXnDomStringPool @ 54 NONAME
+	_ZN14CXnDomProperty6CloneLEv @ 55 NONAME
+	_ZN14CXnDomProperty9InheritedEv @ 56 NONAME
+	_ZN14CXnDomPropertyD0Ev @ 57 NONAME
+	_ZN14CXnDomPropertyD1Ev @ 58 NONAME
+	_ZN14CXnDomPropertyD2Ev @ 59 NONAME
+	_ZN15CXnDomAttribute15SwapStringPoolLEP16CXnDomStringPool @ 60 NONAME
+	_ZN15CXnDomAttribute4NameEv @ 61 NONAME
+	_ZN15CXnDomAttribute4NewLERK6TDesC8P16CXnDomStringPool @ 62 NONAME
+	_ZN15CXnDomAttribute5ValueEv @ 63 NONAME
+	_ZN15CXnDomAttribute6CloneLEv @ 64 NONAME
+	_ZN15CXnDomAttribute9SetValueLERK6TDesC8 @ 65 NONAME
+	_ZN15CXnDomAttributeD0Ev @ 66 NONAME
+	_ZN15CXnDomAttributeD1Ev @ 67 NONAME
+	_ZN15CXnDomAttributeD2Ev @ 68 NONAME
+	_ZN19CXnDomDepthIterator4NewLER10CXnDomNode @ 69 NONAME
+	_ZN19CXnDomDepthIterator5FirstEv @ 70 NONAME
+	_ZN19CXnDomDepthIterator5NextLEv @ 71 NONAME
+	_ZN19CXnDomDepthIteratorD0Ev @ 72 NONAME
+	_ZN19CXnDomDepthIteratorD1Ev @ 73 NONAME
+	_ZN19CXnDomDepthIteratorD2Ev @ 74 NONAME
+	_ZN19CXnDomPropertyValue11IsAutoIdentEv @ 75 NONAME
+	_ZN19CXnDomPropertyValue11IsNoneIdentEv @ 76 NONAME
+	_ZN19CXnDomPropertyValue11ReleaseDataEv @ 77 NONAME
+	_ZN19CXnDomPropertyValue11StringValueEv @ 78 NONAME
+	_ZN19CXnDomPropertyValue12SetRgbColorLERK4TRgb @ 79 NONAME
+	_ZN19CXnDomPropertyValue12StringValueLEv @ 80 NONAME
+	_ZN19CXnDomPropertyValue14IsInheritIdentEv @ 81 NONAME
+	_ZN19CXnDomPropertyValue14SetFloatValueLENS_19TPrimitiveValueTypeEd @ 82 NONAME
+	_ZN19CXnDomPropertyValue15SetStringValueLENS_19TPrimitiveValueTypeERK6TDesC8 @ 83 NONAME
+	_ZN19CXnDomPropertyValue15SwapStringPoolLEP16CXnDomStringPool @ 84 NONAME
+	_ZN19CXnDomPropertyValue19SetStringPoolIndexLENS_19TPrimitiveValueTypeEs @ 85 NONAME
+	_ZN19CXnDomPropertyValue4NewLEP16CXnDomStringPool @ 86 NONAME
+	_ZN19CXnDomPropertyValue6CloneLEv @ 87 NONAME
+	_ZN19CXnDomPropertyValueD0Ev @ 88 NONAME
+	_ZN19CXnDomPropertyValueD1Ev @ 89 NONAME
+	_ZN19CXnDomPropertyValueD2Ev @ 90 NONAME
+	_ZNK10CXnDomList10StringPoolEv @ 91 NONAME
+	_ZNK10CXnDomList4ItemEi @ 92 NONAME
+	_ZNK10CXnDomList6LengthEv @ 93 NONAME
+	_ZNK10CXnDomList9ItemIndexERK14MXnDomListItem @ 94 NONAME
+	_ZNK10CXnDomNode10StringPoolEv @ 95 NONAME
+	_ZNK10CXnDomNode13AttributeListEv @ 96 NONAME
+	_ZNK10CXnDomNode14AttributeValueERK6TDesC8 @ 97 NONAME
+	_ZNK10CXnDomNode15DescendantCountEv @ 98 NONAME
+	_ZNK10CXnDomNode6NodeIdEv @ 99 NONAME
+	_ZNK10CXnDomNode6ParentEv @ 100 NONAME
+	_ZNK10CXnDomNode9ItemIndexERK14MXnDomListItem @ 101 NONAME
+	_ZNK14CXnDomDocument10StringPoolEv @ 102 NONAME
+	_ZNK14CXnDomDocument12DomNodeCountEv @ 103 NONAME
+	_ZNK14CXnDomDocument12ExternalizeLER12RWriteStream @ 104 NONAME
+	_ZNK14CXnDomDocument4SizeEv @ 105 NONAME
+	_ZNK14CXnDomDocument8LastNodeEv @ 106 NONAME
+	_ZNK14CXnDomDocument8RootNodeEv @ 107 NONAME
+	_ZNK14CXnDomProperty10StringPoolEv @ 108 NONAME
+	_ZNK14CXnDomProperty11PseudoClassEv @ 109 NONAME
+	_ZNK14CXnDomProperty15StringPoolIndexEv @ 110 NONAME
+	_ZNK15CXnDomAttribute19NameStringPoolIndexEv @ 111 NONAME
+	_ZNK15CXnDomAttribute20ValueStringPoolIndexEv @ 112 NONAME
+	_ZNK19CXnDomPropertyValue11FloatValueLEv @ 113 NONAME
+	_ZNK19CXnDomPropertyValue14RgbColorValueLEv @ 114 NONAME
+	_ZNK19CXnDomPropertyValue16StringPoolIndexLEv @ 115 NONAME
+	_ZNK19CXnDomPropertyValue18PrimitiveValueTypeEv @ 116 NONAME
+	_ZTI10CXnDomList @ 117 NONAME
+	_ZTI10CXnDomNode @ 118 NONAME
+	_ZTI14CXnDomDocument @ 119 NONAME
+	_ZTI14CXnDomProperty @ 120 NONAME
+	_ZTI15CXnDomAttribute @ 121 NONAME
+	_ZTI16CXnDomStringPool @ 122 NONAME
+	_ZTI19CXnDomDepthIterator @ 123 NONAME
+	_ZTI19CXnDomPropertyValue @ 124 NONAME
+	_ZTV10CXnDomList @ 125 NONAME
+	_ZTV10CXnDomNode @ 126 NONAME
+	_ZTV14CXnDomDocument @ 127 NONAME
+	_ZTV14CXnDomProperty @ 128 NONAME
+	_ZTV15CXnDomAttribute @ 129 NONAME
+	_ZTV16CXnDomStringPool @ 130 NONAME
+	_ZTV19CXnDomDepthIterator @ 131 NONAME
+	_ZTV19CXnDomPropertyValue @ 132 NONAME
+	_ZThn4_N10CXnDomNode4NameEv @ 133 NONAME
+	_ZThn4_N14CXnDomProperty4NameEv @ 134 NONAME
+	_ZThn4_N14CXnDomPropertyD0Ev @ 135 NONAME
+	_ZThn4_N14CXnDomPropertyD1Ev @ 136 NONAME
+	_ZThn4_N15CXnDomAttribute4NameEv @ 137 NONAME
+	_ZThn4_N15CXnDomAttributeD0Ev @ 138 NONAME
+	_ZThn4_N15CXnDomAttributeD1Ev @ 139 NONAME
+	_ZThn4_N19CXnDomDepthIterator5FirstEv @ 140 NONAME
+	_ZThn4_N19CXnDomDepthIterator5NextLEv @ 141 NONAME
+	_ZThn4_N19CXnDomDepthIteratorD0Ev @ 142 NONAME
+	_ZThn4_N19CXnDomDepthIteratorD1Ev @ 143 NONAME
+	_ZThn4_N19CXnDomPropertyValueD0Ev @ 144 NONAME
+	_ZThn4_N19CXnDomPropertyValueD1Ev @ 145 NONAME
 

@@ -19,6 +19,8 @@
 #include <utf.h>
 #include <AknsUtils.h>
 #include <AknUtils.h>
+#include <AknMarqueeControl.h>
+#include <AknBidiTextUtils.h>
 
 // User includes
 #include "xnviewnodeimpl.h"
@@ -32,8 +34,12 @@
 
 #include "xnnewstickeradapter.h"
 #include "xnnewstickercontrol.h"
-#include "xnnewstickersvgcontrol.h"
 #include "xncomponentnodeimpl.h"
+
+
+const TInt KThousandCoef = 1000;
+const TInt KByteLength = 8;
+
 
 // ============================= LOCAL FUNCTIONS ===============================
 
@@ -45,129 +51,29 @@
 //          return The value of the property. If not found, KErrNotFound returned.
 // -----------------------------------------------------------------------------
 // 
-static TInt GetIntPropertyL(
-    CXnNodePluginIf& aNode,
-    const TDesC8& aProperty)
+static TInt GetIntPropertyL( CXnNodePluginIf& aNode, const TDesC8& aProperty )
     {
     CXnProperty* prop = aNode.GetPropertyL(aProperty);
     if(prop)
         {        
         CXnDomPropertyValue* value = 
-            static_cast<CXnDomPropertyValue*>(prop->Property()->PropertyValueList().Item(0));
+            static_cast<CXnDomPropertyValue*>( 
+                    prop->Property()->PropertyValueList().Item(0) );
+        
         if(CXnDomPropertyValue::ENumber == value->PrimitiveValueType())
             {
-            TInt integer = static_cast<TInt>(prop->FloatValueL());
+            TInt integer = static_cast<TInt>( prop->FloatValueL() );
+            
             return integer;
             }
         }
+    
     return KErrNotFound;
-    }
+    }       
 
 // -----------------------------------------------------------------------------
-// CopyBitmapData
-// Copies a data from source bitmap to target bitmap.
-// -----------------------------------------------------------------------------
-//
-static TInt CopyBitmapData(
-    CFbsBitmap& aTarget,
-    const CFbsBitmap& aSource,
-    TPoint aSourcePoint)
-	{
-    TSize targetSize(aTarget.SizeInPixels());
-    TSize sourceSize(aSource.SizeInPixels());
-    TInt lineLength(targetSize.iWidth);
-    TInt maxSourceLineLength(sourceSize.iWidth - aSourcePoint.iX);
-    if(lineLength > maxSourceLineLength)
-        {
-        lineLength = maxSourceLineLength;
-        }
-    TInt rowCount(targetSize.iHeight);
-    TInt maxSourceRowCount(sourceSize.iHeight - aSourcePoint.iY);
-    if(rowCount > maxSourceRowCount)
-        {
-        rowCount = maxSourceRowCount;
-        }
-
-    // Get bitmap display mode
-	TDisplayMode displayMode(aSource.DisplayMode());
-
-    // Create buffer for a scan line
-	HBufC8* scanLine = HBufC8::New(
-        aSource.ScanLineLength(lineLength, displayMode));
-    if(!scanLine)
-    	{
-    	return KErrNoMemory;
-    	}
-     
-	TPtr8 scanPtr(scanLine->Des());
-
-    // Copy all rows to destination bitmap
-	for(TInt row(0); row < rowCount; row++)
-		{
-		aSource.GetScanLine(scanPtr,
-            TPoint(aSourcePoint.iX, aSourcePoint.iY + row),
-            lineLength, displayMode);
-		aTarget.SetScanLine(scanPtr, row);
-		}
-    delete scanLine;
-	return KErrNone;
-	}        
-
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::CheckDisplayL
-// ---------------------------------------------------------
-//
-TBool CXnNewstickerAdapter::CheckDisplayL( CXnNodePluginIf& aNode )
-    {
-    if( iPowerSaveMode )
-        {
-        iDisplay = EFalse;
-        
-        return iDisplay;
-        }
-        
-	CXnProperty* displayProp( aNode.DisplayL() );
-
-	if( displayProp )
-	    {
-	    const TDesC8& display( displayProp->StringValue() );
-	    
-	    if( display != XnPropertyNames::style::common::display::KBlock )
-	        {
-	        return EFalse;
-	        }
-	    }
-    
-	CXnProperty* visibilityProp( aNode.VisibilityL());
-
-	if( visibilityProp )
-	    {
-	    const TDesC8& visibility( visibilityProp->StringValue() );
-	    
-	    if( visibility != XnPropertyNames::style::common::visibility::KVisible )
-	        {
-	        return EFalse;
-	        }
-	    }
-    
-    
-    CXnNodePluginIf* parent( aNode.ParentL() );
-    
-    TBool ret( ETrue );
-    
-    if( parent )
-        {
-        ret = CheckDisplayL( *parent );
-        }
-        
-    iDisplay = ret;  
-    
-    return iDisplay;          
-    }
-
-// ---------------------------------------------------------
 // CXnNewstickerAdapter::SetNewstickerPropertiesL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 void CXnNewstickerAdapter::SetNewstickerPropertiesL()
     {
@@ -180,20 +86,19 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
         scrollamount = KXnNewstickerScrollAmount;
         }
 
-    CXnProperty* prop( iNode.GetPropertyL( XnPropertyNames::newsticker::KScrollBehaviour ) );
+    CXnProperty* prop( iNode.GetPropertyL(
+            XnPropertyNames::newsticker::KScrollBehaviour ) );
     
     if( prop )
         {
-        if ( prop->StringValue() == XnPropertyNames::newsticker::scroll_behaviour::KAlternate )
+        if ( prop->StringValue() == 
+                XnPropertyNames::newsticker::scroll_behaviour::KAlternate )
             {
             scrollamount = 0;
             iScrollBehaviour = EAlternate;
             }
-        else if ( prop->StringValue() == XnPropertyNames::newsticker::scroll_behaviour::KSlide )
-            {
-            iScrollBehaviour = ESlide;
-            }
-        else if ( prop->StringValue() == XnPropertyNames::newsticker::scroll_behaviour::KScrollAlternate )
+        else if ( prop->StringValue() == 
+                XnPropertyNames::newsticker::scroll_behaviour::KScrollAlternate )
             {
             iScrollBehaviour = EScrollAlternate;
             }
@@ -207,9 +112,9 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
         iScrollBehaviour = EScroll;
         }        
         
-    iControl->SetScrollAmount( scrollamount );
+    iMarqueeControl->SetSpeedInPixels( scrollamount );
     
-    if( iScrollBehaviour == EScroll || iScrollBehaviour == ESlide )
+    if( iScrollBehaviour == EScroll )
         {                    
         // scroll delay
         TInt scrolldelay = GetIntPropertyL( iNode, 
@@ -221,10 +126,11 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
             }
         else 
             {
-            scrolldelay *= 1000;    // change to microseconds
+            scrolldelay *= KThousandCoef;    // change to microseconds
             }
         
-        iInterval = scrolldelay;
+        iMarqueeControl->SetInterval( scrolldelay ); 
+        iAlternateInterval = scrolldelay;
             
         // start delay
         TInt startdelay = GetIntPropertyL( iNode, 
@@ -236,10 +142,11 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
             }
         else 
             {
-            startdelay *= 1000;    // change to microseconds
+            startdelay *= KThousandCoef;    // change to microseconds
             }
         
-        iDelay = startdelay;
+        iMarqueeControl->SetDelay( startdelay );
+        iAlternateDelay = startdelay;
         }
     else if( iScrollBehaviour == EScrollAlternate )
 		{
@@ -253,10 +160,11 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
             }
         else 
             {
-            scrolldelay *= 1000;    // change to microseconds
+            scrolldelay *= KThousandCoef;    // change to microseconds
             }
         
-        iInterval = scrolldelay;
+        iMarqueeControl->SetInterval( scrolldelay );
+        iAlternateInterval = scrolldelay;
 
         TInt alternateTime( GetIntPropertyL( iNode, XnPropertyNames::newsticker::KDisplayTime ) );
         
@@ -265,7 +173,7 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
             alternateTime = 0;
             }
 
-        alternateTime *= 1000; // change to ms                        
+        alternateTime *= KThousandCoef; // change to ms                        
 
         iAlternateInterval = alternateTime;
 
@@ -279,10 +187,11 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
             }
         else 
             {
-            startdelay *= 1000;    // change to microseconds
+            startdelay *= KThousandCoef;    // change to microseconds
             }
         
-        iDelay = startdelay;
+        iMarqueeControl->SetDelay( startdelay );
+        iAlternateDelay = startdelay;
         }
     else // TScrollBehaviour::EAlternate
         {
@@ -293,37 +202,31 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
             alternateTime = 0;
             }
 
-        alternateTime *= 1000; // change to ms                        
+        alternateTime *= KThousandCoef; // change to ms                        
 
-        iDelay = 0;
-        iInterval = alternateTime;
+        iMarqueeControl->SetDelay( 0 );
+        iMarqueeControl->SetInterval( alternateTime );
+        
+        iAlternateDelay = 0;
+        iAlternateInterval = alternateTime;
         }        
-
-    //  animation time
-    iAnimationTime = GetIntPropertyL( iNode, 
-        XnPropertyNames::newsticker::KXnNewstickerAnimationDelay );  // ms
-    
-    if( KErrNotFound == iAnimationTime )
-        {
-        iAnimationTime = KAnimationTime;
-        }
-    else 
-        {
-        iAnimationTime *= 1000;    // change to microseconds
-        }
     
     // _s60-scroll-loop property. True by default.
-    CXnProperty* loopProp( iNode.GetPropertyL( XnPropertyNames::newsticker::KScrollLoop ) );
+    CXnProperty* loopProp( iNode.GetPropertyL(
+            XnPropertyNames::newsticker::KScrollLoop ) );
     
     if( loopProp && loopProp->StringValue() == XnPropertyNames::KFalse )
         {
-        iControl->SetScrollLooping( EFalse );
+        iScrollLooping = EFalse;
         }
     else
         {
-        iControl->SetScrollLooping( ETrue );
-        }            
-    CXnProperty* restartProperty( iNode.GetPropertyL( XnPropertyNames::newsticker::KRestartAfterUpdate ) );
+        iScrollLooping = ETrue;
+        }    
+    
+    CXnProperty* restartProperty( iNode.GetPropertyL(
+            XnPropertyNames::newsticker::KRestartAfterUpdate ) );
+    
     if ( restartProperty && restartProperty->StringValue() == XnPropertyNames::KTrue )
         {
         iRestartAfterUpdate = ETrue;
@@ -337,13 +240,14 @@ void CXnNewstickerAdapter::SetNewstickerPropertiesL()
 // Symbian static 1st phase constructor
 // -----------------------------------------------------------------------------
 //
-CXnNewstickerAdapter* CXnNewstickerAdapter::NewL(CXnControlAdapter* aParent, 
-    CXnNodePluginIf& aNode)
+CXnNewstickerAdapter* CXnNewstickerAdapter::NewL( CXnControlAdapter* aParent, 
+    CXnNodePluginIf& aNode )
     {
 	CXnNewstickerAdapter* self = new( ELeave ) CXnNewstickerAdapter( aParent, aNode );
     CleanupStack::PushL( self );
-    self->ConstructL();
+    self->ConstructL( aParent );
     CleanupStack::Pop();
+    
     return self;	
     }
 
@@ -352,28 +256,32 @@ CXnNewstickerAdapter* CXnNewstickerAdapter::NewL(CXnControlAdapter* aParent,
 // Symbian 2nd phase constructor can leave.
 // -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::ConstructL()
+void CXnNewstickerAdapter::ConstructL( CXnControlAdapter* aParent )
     {
     CXnControlAdapter::ConstructL( iNode );
     
     iControl = CXnNewstickerControl::NewL( this );    
-    iSvgControl = CXnNewstickerSvgControl::NewL( this );
+    
+    iMarqueeControl = CAknMarqueeControl::NewL();
+    TCallBack callback( RedrawCallback, this );
+    iMarqueeControl->SetRedrawCallBack( callback );
+    iMarqueeControl->SetContainerWindowL( *aParent );
+    iMarqueeControl->ActivateL();
     
     iPeriodicTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     
-    iPowerSaveMode = ETrue;
-    
-    iRestartAfterUpdate = EFalse;
     SetTextPropertiesL();
     SetNewstickerPropertiesL();
     
     RPointerArray<CXnNodePluginIf> children = iNode.ChildrenL();
     CleanupClosePushL( children );
+    
     for( TInt i = 0; i < children.Count(); ++i )
         {
         CXnNodePluginIf* child( children[i] );
         
         CXnType* xnType = child->Type();
+        
         // We only care for <title> nodes
         if ( xnType && xnType->Type() == XnPropertyNames::title::KTitle )
             {
@@ -402,6 +310,9 @@ void CXnNewstickerAdapter::ConstructL()
             }
         }
     CleanupStack::PopAndDestroy( &children );
+    
+    iControl->SetCurrentTitle( ETrue );
+    
     }
 
 // -----------------------------------------------------------------------------
@@ -409,9 +320,18 @@ void CXnNewstickerAdapter::ConstructL()
 // C++ default constructor
 // -----------------------------------------------------------------------------
 //
-CXnNewstickerAdapter::CXnNewstickerAdapter(CXnControlAdapter* /*aParent*/, 
-    CXnNodePluginIf& aNode)
-    : iState(ENotStarted), iNode(aNode)
+CXnNewstickerAdapter::CXnNewstickerAdapter( CXnControlAdapter* /*aParent*/, 
+    CXnNodePluginIf& aNode )
+    : iNode( aNode ),
+      iPowerSaveMode( ETrue ),
+      iRestartAfterUpdate( EFalse ),
+      iTextColor( KRgbBlack ),
+      iTextAlignment( ELayoutAlignLeft ),
+      iTextBaseline( 0 ),
+      iUnderlining( EUnderlineOff ),
+      iStrikethrough( EStrikethroughOff ),
+      iScrollLooping( ETrue ),
+      iRedraw( ETrue )
     {
     }
 
@@ -422,31 +342,22 @@ CXnNewstickerAdapter::CXnNewstickerAdapter(CXnControlAdapter* /*aParent*/,
 //
 CXnNewstickerAdapter::~CXnNewstickerAdapter()
     {           
-    if( iPeriodicTimer )
+    if( iPeriodicTimer && iPeriodicTimer->IsActive() )
         {
         iPeriodicTimer->Cancel();
         }
         
     delete iPeriodicTimer;
 
-    if( iFont && iReleaseFont )
+    if( iFont && ( iReleaseFont == 1 ) )
         {
         CWsScreenDevice* dev = iCoeEnv->ScreenDevice();
         dev->ReleaseFont( iFont ); 
         }
-        
-    delete iControl;
     
-    if( iState == EAnimation )
-        {
-        TRAP_IGNORE( iSvgControl->StopL() );
-        }
-        
-    delete iSvgControl;
-    delete iBufferDevice;
-	delete iDrawingBuffer;
-	delete iBufferGc;
-    delete iBackgroundBitmap;
+    delete iMarqueeControl;
+    delete iControl;
+
     }
 
 // -----------------------------------------------------------------------------
@@ -456,35 +367,36 @@ CXnNewstickerAdapter::~CXnNewstickerAdapter()
 //
 void CXnNewstickerAdapter::SetTextPropertiesL()
     {
-    if (iFont && iReleaseFont)
+    if (iFont && ( iReleaseFont == 1 ) )
         {
         CWsScreenDevice* dev = iCoeEnv->ScreenDevice();
         dev->ReleaseFont(iFont); 
         iFont = NULL;
         }
+    
     CXnUtils::CreateFontL(iNode, iFont, iReleaseFont);
-    iControl->SetFont(iFont);
     
     TBool colorSet(EFalse);
     CXnProperty* colorProperty = iNode.GetPropertyL(XnPropertyNames::appearance::common::KColor);
-    if (colorProperty != NULL)
+    
+    if( colorProperty )
         {
         CXnDomProperty* domProperty = colorProperty->Property();
         if(domProperty)
             {
-            TRgb textColor;
             TInt error( KErrNotSupported );
             CXnDomPropertyValue* value = static_cast< CXnDomPropertyValue* >
                                             ( domProperty->PropertyValueList().Item( 0 ) );
+            
             if( value->IsAutoIdent() )
                 {
                 MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-                error = AknsUtils::GetCachedColor(skinInstance, textColor, KAknsIIDQsnTextColors,
-                EAknsCIQsnTextColorsCG6);
+                error = AknsUtils::GetCachedColor( skinInstance, iTextColor, KAknsIIDQsnTextColors,
+                EAknsCIQsnTextColorsCG6 );
                 }
             else if( value->PrimitiveValueType() == CXnDomPropertyValue::ERgbColor )
                 {
-                textColor = value->RgbColorValueL();
+                iTextColor = value->RgbColorValueL();
                 error = KErrNone;
                 }
             else
@@ -497,30 +409,32 @@ void CXnNewstickerAdapter::SetTextPropertiesL()
                 TInt index = 0;
                 TAknsItemID skinID;
                 
-                TBool idResolved = CXnUtils::ResolveSkinItemIDL( colorString->Des(), skinID, index );
+                TBool idResolved = CXnUtils::ResolveSkinItemIDL(
+                        colorString->Des(), skinID, index );
                 
                 if( idResolved )
                     {
                     MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-                    error = AknsUtils::GetCachedColor( skinInstance, textColor, skinID, index );
+                    error = AknsUtils::GetCachedColor(
+                            skinInstance, iTextColor, skinID, index );
                     }
                 else // use auto value if skin id is invalid.
                     {
                     MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-                    error = AknsUtils::GetCachedColor(skinInstance, textColor, KAknsIIDQsnTextColors,
-                    EAknsCIQsnTextColorsCG6);
+                    error = AknsUtils::GetCachedColor(skinInstance, iTextColor,
+                            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
                     }
                 CleanupStack::PopAndDestroy( colorString );                 
                 }
-            if (error == KErrNone)
+            
+            if ( error == KErrNone )
                 {
-                iControl->SetTextColor(textColor);
                 colorSet = ETrue;
                 }
             }
         }
 
-    if(!colorSet) // Use text skin color
+    if( !colorSet ) // Use text skin color
         {
         MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
         TRgb textColor;
@@ -528,471 +442,317 @@ void CXnNewstickerAdapter::SetTextPropertiesL()
             KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
         if (error == KErrNone)
             {
-            iControl->SetTextColor(textColor);
+            iTextColor = textColor;
             }
         }
     
     CXnProperty* textDecorationProp = 
         iNode.GetPropertyL(XnPropertyNames::appearance::common::KTextDecoration);
-    if(textDecorationProp)
+    
+    if( textDecorationProp )
         {
         CXnDomList& propertyValueList = textDecorationProp->Property()->PropertyValueList();
         TInt valueCount = propertyValueList.Length();
-        for (TInt i = 0; i < valueCount; ++i)
+        
+        for( TInt i = 0; i < valueCount; ++i )
             {
             CXnDomPropertyValue* value = 
                 static_cast<CXnDomPropertyValue*>(propertyValueList.Item(i));
             if (value->StringValueL() == 
                 XnPropertyNames::appearance::common::textdecoration::KUnderline)
                 {
-                iControl->SetTextUnderlineStyle(EUnderlineOn);
+                iUnderlining = EUnderlineOn;
                 }
             if (value->StringValueL() == 
                 XnPropertyNames::appearance::common::textdecoration::KLinethrough)
                 {
-                iControl->SetTextStrikethroughStyle(EStrikethroughOn);
+                iStrikethrough = EStrikethroughOn;
                 }
             }
         }
     
     TGulAlignmentValue alignment = CXnUtils::TextAlignment( iNode );
     
-    TInt textAlignment( ELayoutAlignLeft ); // all are vertically top aligned by default (avkon)
-    
     switch( alignment )
         {
         case EHCenterVCenter:            
-            textAlignment = ELayoutAlignCenter;                 
+            iTextAlignment = ELayoutAlignCenter;                 
             break;
+            
         case EHRightVCenter:            
-            textAlignment = ELayoutAlignRight;                
+            iTextAlignment = ELayoutAlignRight;                
             break;
+            
         default: 
+            iTextAlignment = ELayoutAlignLeft;
             break;    
-        }
-    
-    iControl->SetTextAlignment(textAlignment);
+        }   
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::AppendTitleL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::AppendTitleL(const TDesC& aTitle)
+void CXnNewstickerAdapter::AppendTitleL( const TDesC& aTitle )
     {
-    iControl->AppendTitleL(aTitle);
+    iControl->AppendTitleL( aTitle );
     iNode.SetDirtyL();
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::InsertTitleL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::InsertTitleL(const TDesC& aTitle, TInt aIndex)
+void CXnNewstickerAdapter::InsertTitleL( const TDesC& aTitle, TInt aIndex )
     {
-    iControl->InsertTitleL(aTitle, aIndex);
+    iControl->InsertTitleL( aTitle, aIndex );
     iNode.SetDirtyL();
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::UpdateTitleL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::UpdateTitleL(const TDesC& aTitle, TInt aIndex)
+void CXnNewstickerAdapter::UpdateTitleL( const TDesC& aTitle, TInt aIndex )
     {
-    iControl->UpdateTitleL(aTitle, aIndex);
+    iControl->UpdateTitleL( aTitle, aIndex );
     iNode.SetDirtyL();
+    
     if ( iRestartAfterUpdate )
         {
-        RestartL();
+        Stop();
+        Start();
         }
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::DeleteTitleL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::DeleteTitleL(TInt aIndex)
+void CXnNewstickerAdapter::DeleteTitleL( TInt aIndex )
     {
-    if( iState == EAnimation && iControl->CurrentTitleIndex() == aIndex )
-        {
-        //  About to delete the currently showing animation
-        iSvgControl->StopL();
-        iControl->DeleteTitleL( aIndex );
-
-        RestartL();
-        }
-    else
-        {
-        iControl->DeleteTitleL(aIndex);
-        }
-
+    iControl->DeleteTitleL( aIndex );
     iNode.SetDirtyL();
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::CurrentTitleIndex
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 TInt CXnNewstickerAdapter::CurrentTitleIndex()
     {
     return iControl->CurrentTitleIndex();
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::Title
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-const TDesC& CXnNewstickerAdapter::Title(TInt aIndex)
+const TDesC& CXnNewstickerAdapter::Title( TInt aIndex )
     {
-    return iControl->Title(aIndex);
+    return iControl->Title( aIndex );
     }
 
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::SetSeparatorImageL
-// ---------------------------------------------------------
-//
-TInt CXnNewstickerAdapter::SetSeparatorImageL(CGulIcon* aIcon)
-    {
-    return iControl->SetSeparatorImageL(aIcon);
-    }
-
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::ClearTitles
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 void CXnNewstickerAdapter::ClearTitles()
     {
     iControl->ClearTitles();
-    TRAP_IGNORE(iNode.SetDirtyL());
+    TRAP_IGNORE( iNode.SetDirtyL() );
     }
 
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::AppendSvgTitleL
-// ---------------------------------------------------------
-//
-void CXnNewstickerAdapter::AppendSvgTitleL(const TDesC8& aByteData)
-    {
-    iControl->AppendSvgTitleL(aByteData);
-    }
-
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::InsertSvgTitleL
-// ---------------------------------------------------------
-//
-void CXnNewstickerAdapter::InsertSvgTitleL(const TDesC8& aByteData, TInt aIndex)
-    {
-    iControl->InsertSvgTitleL(aByteData, aIndex);
-    }
-
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::SetCallbackInterfaceL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 void CXnNewstickerAdapter::SetCallbackInterfaceL(
-        XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback)
+        XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback )
     {
     iCallback = aCallback;
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::TitleScrolled
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::TitleScrolled(TInt aTitleIndex)
+void CXnNewstickerAdapter::TitleScrolled( TInt aTitleIndex )
     {
-    if (iCallback)
+    if( iCallback )
         {
-        iCallback->TitleScrolled(aTitleIndex);
-        }
-    // if not looping, see if the last item was scrolled...
-    if( !iControl->ScrollLooping() &&
-         aTitleIndex == iControl->TitleCount() - 1 )
-        {
-        iState = EScrollEnded;
-        TRAP_IGNORE( StopL() );
-        DrawNow();
+        iCallback->TitleScrolled( aTitleIndex );
         }
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::DrawBackground()
-// -----------------------------------------------------------------------------
-//
-void CXnNewstickerAdapter::DrawBackgroundL(const TRect& aRect, CWindowGc& aGc) const
-    {
-    RPointerArray<CXnControlAdapter> adapters;
-    
-    for ( CXnNodePluginIf* node = &iNode; node; ) 
-        {
-        CXnControlAdapter* adapter( node->Control() );
-        
-        if ( adapter )
-            {
-            adapters.Append( adapter );
-            }
-                        
-        node = node->ParentL();
-        }
-    
-    for ( TInt i = adapters.Count() - 1; i >= 0; --i )
-        {
-        adapters[i]->Draw( aRect, aGc );
-        }
-    
-    adapters.Reset();        
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::SetTimerToDisplaytime()
-// -----------------------------------------------------------------------------
-//
-void CXnNewstickerAdapter::SetTimerToDisplaytime()
-    {
-    if( iCurrentInterval != iAlternateInterval )
-        {
-        iPeriodicTimer->Cancel();
-        
-        iPeriodicTimer->Start(
-            TTimeIntervalMicroSeconds32( iAlternateInterval ),
-            TTimeIntervalMicroSeconds32( iAlternateInterval ), 
-            TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) );
-        iCurrentInterval = iAlternateInterval;
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::SetTimerToScrolltime()
-// -----------------------------------------------------------------------------
-//
-void CXnNewstickerAdapter::SetTimerToScrolltime()
-    {
-    if( iCurrentInterval != iInterval )
-        {
-        iPeriodicTimer->Cancel();
-        
-        iPeriodicTimer->Start(
-            TTimeIntervalMicroSeconds32( iInterval ),
-            TTimeIntervalMicroSeconds32( iInterval ), 
-            TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) );
-        iCurrentInterval = iInterval;
-        }
-    }
-// ---------------------------------------------------------
 // CXnNewstickerAdapter::StartL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::StartL()
+void CXnNewstickerAdapter::Start()
     {
-    if( iDisplay && !iPowerSaveMode )
+    if( IsVisible() && !iPowerSaveMode )
         {
-        if( iControl->TitleCount() == 0 )
+        if( iControl->TitleCount() < 1 )
             {
             // Nothing to show
             return;
             }
-
-        if( iPeriodicTimer && !iPeriodicTimer->IsActive() )
-            {
-            TInt startDelay( ( iState == ENotStarted ) ? iDelay : KNoDelay );
-
-            //  Start
-            if ( ScrollBehaviour() == CXnNewstickerAdapter::EScrollAlternate &&
-                 iControl->CalculateCurrentTextFitInNewstickerRect() )
-                {
-                iPeriodicTimer->Start(                
-                    TTimeIntervalMicroSeconds32( startDelay ),
-                    TTimeIntervalMicroSeconds32( iAlternateInterval ), 
-                    TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) );
-                iCurrentInterval = iAlternateInterval;
-                }
-            else
-                {
-                iPeriodicTimer->Start(                
-                    TTimeIntervalMicroSeconds32( startDelay ),
-                    TTimeIntervalMicroSeconds32( iInterval ), 
-                    TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) );
-                iCurrentInterval = iInterval;
-                }
         
-            iState = EText;                       
-            }            
+        switch( iScrollBehaviour )
+            {
+            case EScroll:
+                {
+                iMarqueeControl->EnableMarquee( ETrue );
+                iRedraw = ETrue;
+                }
+                break;
+                
+            case EAlternate:
+                {
+                iMarqueeControl->EnableMarquee( EFalse );
+                StartAlternateCounter();  
+                }
+                break;
+                
+            case EScrollAlternate:
+                {
+                iMarqueeControl->EnableMarquee( ETrue );
+                StartAlternateCounter(); 
+                iRedraw = ETrue;
+                }
+                break;
+                
+            default:
+                break;
+            }
         }
     }
 
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::StopL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::Stop
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::StopL()
-    {
-    if( iState == EAnimation )
-        {
-        iSvgControl->StopL();
-        }
-
-    //  Have we already been started
-    if( iPeriodicTimer->IsActive() )
-        {
-        //  Yes, cancel and set the state
-       iPeriodicTimer->Cancel();
-       
-       if ( iState == EScrollEnded )
-           {
-           iControl->MoveToLastL();
-           iControl->DrawStatic();
-           }
-       else if ( iState == EText || iState == EAnimation )
-           {
-           iState = EPaused;
-           }
-        }
-    // Entering power save mode => Move to last item and draw it
-    if ( ( iScrollBehaviour == EAlternate ||
-          iScrollBehaviour == EScrollAlternate )
-        && iPowerSaveMode )
-       {
-       iState = EPaused;
-       iControl->MoveToLastL();
-       iControl->DrawStatic();
-       }        
+void CXnNewstickerAdapter::Stop()
+    {  
+    StopAlternateCounter();
+    StopMarquee();
     }
 
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::ShowSvgL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::StopAlternateCounter
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::ShowSvgL()
+void CXnNewstickerAdapter::StopAlternateCounter()
     {
-    //  Get next animation from model and start it
-    iSvgControl->StartL( iControl->CurrentSvgTitle() );
-
-    //  Set the end timer
-    iState = EAnimation;
-    
-    iPeriodicTimer->Cancel();
-    
-    iPeriodicTimer->Start(
-        TTimeIntervalMicroSeconds32( iAnimationTime ),
-        TTimeIntervalMicroSeconds32( iAnimationTime ), 
-        TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) );
-    iCurrentInterval = iAnimationTime;
+    if( iPeriodicTimer && iPeriodicTimer->IsActive() )
+        {
+        iPeriodicTimer->Cancel();
+        }
     }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::StopMarquee
+// -----------------------------------------------------------------------------
+//
+void CXnNewstickerAdapter::StopMarquee()
+    {
+    iMarqueeControl->Reset();
+    iMarqueeControl->EnableMarquee( EFalse );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::StartCounter
+// -----------------------------------------------------------------------------
+//
+void CXnNewstickerAdapter::StartAlternateCounter()
+    {
+    if( iPeriodicTimer && iPeriodicTimer->IsActive() )
+        {
+        iPeriodicTimer->Cancel();
+        }
+
+    iPeriodicTimer->Start(                
+        TTimeIntervalMicroSeconds32( iAlternateDelay ),
+        TTimeIntervalMicroSeconds32( iAlternateInterval ), 
+        TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) ); 
+    }
+
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::PeriodicEventL
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 TInt CXnNewstickerAdapter::PeriodicEventL( TAny* aPtr )
     {
     CXnNewstickerAdapter* self = static_cast< CXnNewstickerAdapter* >( aPtr );
-    
-    if( self->iState == EText )
-        {
-        //  Do the text scroll
-        self->iControl->DoScrollL();
-        }
-    else if( self->iState == EAnimation )
-        {
-        self->iSvgControl->StopL();
-        self->TitleScrolled( self->iControl->CurrentTitleIndex() );
-        //  Animation scroll has been ended, start the next scroll
-        self->iState = ENotStarted;
-        self->iPeriodicTimer->Cancel();
-        self->StartL();
-        //  Do the first draw
-        self->iControl->SetBeginningState();
-        self->iControl->DoScrollL();
-        }
-
+    self->DoScroll();
+  
     return KErrNone;
     }
 
-void CXnNewstickerAdapter::RestartL()
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::MakeVisible()
+// -----------------------------------------------------------------------------
+//
+void CXnNewstickerAdapter::MakeVisible( TBool aVisible )
     {
-    if ( iPowerSaveMode )
+    if( aVisible )
         {
-        return;
+        Start();
         }
-    //  Restart
-     iState = ENotStarted;
-     iPeriodicTimer->Cancel();
-     
-     iControl->MoveToFirstL();
-     StartL();
-     
-     //  Do the first draw
-     iControl->SetBeginningState();
+    else
+        {
+        Stop();
+        }
+    
+    CCoeControl::MakeVisible( aVisible );
     }
-// ---------------------------------------------------------
+
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::SizeChanged()
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 void CXnNewstickerAdapter::SizeChanged()
     {
-    CXnControlAdapter::SizeChanged();
-    TRAP_IGNORE( SizeChangedL() );
+    CXnControlAdapter::SizeChanged();         
+    iMarqueeControl->SetExtent( iNode.Rect().iTl, iNode.Rect().Size() );
+    
+    iTextBaseline = iNode.Rect().Height() / 2 + iFont->AscentInPixels() / 2;
     }
 
-// ---------------------------------------------------------
-// CXnNewstickerAdapter::SizeChangedL()
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::CountComponentControls() const
+// -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::SizeChangedL()
-    {        
-    UpdateDoubleBufferL();
-
-    TRect rect( Rect() );            
-            
-    iControl->SetNewstickerRect( rect );
-    iSvgControl->SetSvgRectL( rect, *SystemGc().Device() );
+TInt CXnNewstickerAdapter::CountComponentControls() const
+    {
+    return 1; // return nbr of controls inside this container
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::HandlePointerEventL
+// CXnNewstickerAdapter::ComponentControl(TInt aIndex) const
 // -----------------------------------------------------------------------------
-// 
-void CXnNewstickerAdapter::HandlePointerEventL(const TPointerEvent& aPointerEvent)
+//
+CCoeControl* CXnNewstickerAdapter::ComponentControl( TInt aIndex ) const
     {
-	if ( AknLayoutUtils::PenEnabled() )
-	    {
-        CXnControlAdapter::HandlePointerEventL(aPointerEvent);
+    switch ( aIndex )
+        {
+        case 0:
+            return iMarqueeControl;
+            
+        default:
+            return NULL;
         }
     }
+
 // -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::DoHandlePropertyChangeL
 // -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
+void CXnNewstickerAdapter::DoHandlePropertyChangeL( CXnProperty* /*aProperty*/ )
     {
     SetTextPropertiesL();
     SetNewstickerPropertiesL();
-    //New code to check do we need Start or Stop Newsticker
-    if( aProperty )
-        {
-        const TDesC8& name( aProperty->Property()->Name() );
-               
-        if( name == XnPropertyNames::style::common::KDisplay ||
-        	name == XnPropertyNames::style::common::KVisibility )
-        	{               
-            if( CheckDisplayL( iNode ) )
-                {
-                StartL();
-                }
-            else
-                {
-                StopL();
-                }                   
-        	}
-        }
-    }
-    	
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::FocusChanged
-// -----------------------------------------------------------------------------
-// 
-void CXnNewstickerAdapter::FocusChanged(TDrawNow /*aDrawNow*/) 
-    {
     }
 
 // -----------------------------------------------------------------------------
@@ -1005,257 +765,183 @@ void CXnNewstickerAdapter::SkinChanged()
     TRAP_IGNORE( SetTextPropertiesL() );
     }
 
-void CXnNewstickerAdapter::ReportNewstickerEventL(const TDesC8& aEventName)
-    { 
-    TBuf8<8>index(KNullDesC8);
-    index.Num(CurrentTitleIndex());
-    
-    iNode.ReportTriggerEventL(aEventName,
-            XnPropertyNames::action::trigger::name::KTitleIndex, index);
-    }
 // -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::OfferKeyEventL
+// CXnNewstickerAdapter::ReportNewstickerEventL
 // -----------------------------------------------------------------------------
 // 
-TKeyResponse CXnNewstickerAdapter::OfferKeyEventL(
-        const TKeyEvent& aKeyEvent, TEventCode aType)
-    {
-    TKeyResponse    resp = EKeyWasNotConsumed;
-    TBool           restart = EFalse;
-
-    CXnControlAdapter::OfferKeyEventL(aKeyEvent, aType);
-
-    if(aType == EEventKey)
-        {
-        if (aKeyEvent.iScanCode == EStdKeyRightArrow)
-            {
-            restart = ETrue;
-            if(iControl->IsWestern())
-                {
-                iControl->MoveToNextL();
-                }
-            else
-                {
-                iControl->MoveToPrevL();
-                }
-            StopL();
-            }
-        else if (aKeyEvent.iScanCode == EStdKeyLeftArrow)
-            {
-            restart = ETrue;
-            if(iControl->IsWestern())
-                {
-                iControl->MoveToPrevL();
-                }
-            else
-                {
-                iControl->MoveToNextL();
-                }
-            StopL();
-            }
-        }
-    if(aType == EEventKeyUp)
-        {
-        if (aKeyEvent.iScanCode == EStdKeyDevice3) // rocker
-            {
-            restart = ETrue;
-            StopL();
-            iControl->MoveToCurrent();            
-            }
-        }
-        
-    if( restart )
-        {
-        //  Restart and do the first draw
-        iState = ENotStarted;
-        StartL();
-        iControl->DoScrollL();
-        }
-        
-    return resp;
+void CXnNewstickerAdapter::ReportNewstickerEvent( const TDesC8& aEventName )
+    { 
+    TBuf8<KByteLength>index( KNullDesC8 );
+    index.Num( CurrentTitleIndex() );
+    
+    TRAP_IGNORE( iNode.ReportTriggerEventL( aEventName,
+            XnPropertyNames::action::trigger::name::KTitleIndex, index ); )
     }
 
 // -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::Draw
 // Draws the text component
 // -----------------------------------------------------------------------------
-void CXnNewstickerAdapter::Draw(const TRect& aRect) const
-    {
-    CXnControlAdapter::Draw( aRect );
-            
-    TRAP_IGNORE( UpdateBackgroundL() );
-    // In powersave-/editmode only draw the last title. 
-    if ( iScrollBehaviour == EAlternate && iPowerSaveMode )
-        {
-        iControl->DrawStatic();
-        
-        // Blit double buffer
-        SystemGc().BitBlt( Rect().iTl, iDrawingBuffer );    
-        }
-    else if( iState == EText || iState == EPaused && 
-            iControl->CurrentTitleIndex() >= 0 )
-        {
-        iControl->Draw();
-
-        // Blit double buffer
-        SystemGc().BitBlt( Rect().iTl, iDrawingBuffer );                
-        }
-    else if( iState == EAnimation )
-        {                            
-        iSvgControl->Draw();
-        
-        // Blit double buffer
-        SystemGc().BitBlt( Rect().iTl, iDrawingBuffer );            
-        }
-    else if( iState == EScrollEnded )
-        {
-        iControl->DrawStatic();
-        SystemGc().BitBlt( Rect().iTl, iDrawingBuffer );
-        }
-    }
-    
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::UpdateDoubleBufferL
-// -----------------------------------------------------------------------------
-//
-void CXnNewstickerAdapter::UpdateDoubleBufferL()
-    {
-	TDisplayMode displayMode( SystemGc().Device()->DisplayMode() );
-	
-    // Create double buffer
-    if( iDrawingBuffer ) 
-        {
-        delete iDrawingBuffer;
-        iDrawingBuffer = NULL;
-        delete iBufferDevice;
-        iBufferDevice = NULL;
-        delete iBufferGc;
-        iBufferGc = NULL;        
-        }
-        
-	iDrawingBuffer = new ( ELeave ) CFbsBitmap();
-	iDrawingBuffer->Create( iNode.Rect().Size(), displayMode );
-    iBufferDevice = CFbsBitmapDevice::NewL( iDrawingBuffer );
-    iBufferDevice->CreateBitmapContext( iBufferGc );
-    iBufferGc->UseFont( iControl->Font() );
-    iBufferGc->SetPenColor( iControl->TextColor() );
-    iBufferGc->SetStrikethroughStyle( iControl->TextStrikethroughStyle() );
-    iBufferGc->SetUnderlineStyle( iControl->TextUnderlineStyle() );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::UpdateBackgroundL
-// -----------------------------------------------------------------------------
-//
-void CXnNewstickerAdapter::UpdateBackgroundL() const
-    {
-    TDisplayMode displayMode( SystemGc().Device()->DisplayMode() );
-    
-    // Create "screenshot" from the background appearance
-    if( iBackgroundBitmap )
-        {
-        delete iBackgroundBitmap;
-        iBackgroundBitmap = NULL;        
-        }
-    
-    iBackgroundBitmap = new ( ELeave ) CFbsBitmap();
-	iBackgroundBitmap->Create( iNode.Rect().Size(), displayMode );
-	
-	CFbsBitmap* tmpBitmap = new ( ELeave ) CFbsBitmap();
-	CleanupStack::PushL( tmpBitmap );
-	
-	CWsScreenDevice* scrDevice = static_cast< CWsScreenDevice* >( SystemGc().Device() );
-    
-    TSize tmpSize( scrDevice->SizeInPixels() );
-    
-	tmpBitmap->Create( tmpSize, displayMode );
-	
-    CFbsBitmapDevice* tmpDevice = CFbsBitmapDevice::NewL( tmpBitmap );
-	CleanupStack::PushL( tmpDevice );
-    
-    CBitmapContext* bc( NULL );
-    
-    tmpDevice->CreateBitmapContext( bc );    
-    CleanupStack::PushL( bc );
-    
-    DrawBackgroundL( iNode.Rect(), reinterpret_cast< CWindowGc& >( *bc ) );
-    
-    CopyBitmapData( *iBackgroundBitmap, *tmpBitmap, iNode.Rect().iTl );
-    
-    CleanupStack::PopAndDestroy( 3 );
+void CXnNewstickerAdapter::Draw( const TRect& aRect ) const
+    {    
+    const_cast<CXnNewstickerAdapter*>(this)->DrawText( iControl->SelectTitle(), aRect );
     }
     
 // -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::DoEnterPowerSaveModeL
 // Enter power save mode
 // -----------------------------------------------------------------------------
-void CXnNewstickerAdapter::DoEnterPowerSaveModeL(TModeEvent /*aEvent*/)
-    {
-    iDisplay = EFalse;        
+void CXnNewstickerAdapter::DoEnterPowerSaveModeL( TModeEvent /*aEvent*/ )
+    {     
     iPowerSaveMode = ETrue;
-        
-    StopL();
+    Stop();
     }
 
 // -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::DoExitPowerSaveModeL
 // Exit power save mode
 // -----------------------------------------------------------------------------
-void CXnNewstickerAdapter::DoExitPowerSaveModeL(TModeEvent /*aEvent*/)
+void CXnNewstickerAdapter::DoExitPowerSaveModeL( TModeEvent /*aEvent*/ )
     {
     iPowerSaveMode = EFalse;
+    
+    if( IsVisible() )
+        {
+        Start();
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::DrawText
+// Text drawing function is selected by scrolling behaviour
+// -----------------------------------------------------------------------------
+void CXnNewstickerAdapter::DrawText( const TDesC& aText, const TRect& aRect )
+    {    
+    CWindowGc& gc = SystemGc();
+    
+    TRect rect = iNode.Rect();
+           
+    CXnControlAdapter::Draw( aRect );
+    
+    gc.SetPenColor( iTextColor );
+    gc.UseFont( iFont );
+    gc.SetUnderlineStyle( iUnderlining );
+    gc.SetStrikethroughStyle( iStrikethrough );
+           
+    TInt textWidth = iFont->TextWidthInPixels( aText );
+    TInt rectWidth = rect.Width();
+    
+    switch( iScrollBehaviour )
+        {  
+        case EScroll:
+        case EScrollAlternate:
+            {
+            if( !iRedraw || textWidth < rectWidth )
+                {
+                iMarqueeControl->Stop();
+                DrawStaticText( gc, aText );
+                }
+            else
+                {
+                iMarqueeControl->Start();
+                TBool isLast = DrawMarqueeText( gc, aText );
+                
+                if( isLast )
+                    {
+                    if( !iScrollLooping )
+                        {
+                        iRedraw = EFalse;
+                        }
+                    
+                    iMarqueeControl->Reset();
+                    StartAlternateCounter();
+                    }
+                }
+            }
+            break;
             
-    if( CheckDisplayL( iNode ) )
-        {
-        RestartL();
-        
-        if( iDrawingBuffer )
+        case EAlternate:
             {
-            DrawNow(); 
+            DrawStaticText( gc, aText );
             }
+            break;
+            
+        default:
+            break;
+        }
+      }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::RedrawCallback
+// Callback function for marquee control
+// -----------------------------------------------------------------------------
+//
+TInt CXnNewstickerAdapter::RedrawCallback( TAny* aPtr )
+    {
+    CXnNewstickerAdapter* self = static_cast<CXnNewstickerAdapter*>( aPtr );
+    self->DrawNow();
+
+    return self->Redraw();
+ 
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::DoScroll
+// Scrolls alternative text. Function is called by periodic timer
+// -----------------------------------------------------------------------------
+//
+void CXnNewstickerAdapter::DoScroll()
+    {
+    ReportNewstickerEvent( XnPropertyNames::action::trigger::name::KTitleScrolled );
+    
+    if( iControl->SetCurrentTitle() )
+        {
+        // stop alternate scrolling if current index is last
+        StopAlternateCounter();
+        }
+    
+    DrawNow();
+ 
+    ReportNewstickerEvent( XnPropertyNames::action::trigger::name::KTitleToScroll );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerAdapter::DrawStatic
+// Draws text directly to screen when scrolling is not needed
+// -----------------------------------------------------------------------------
+//
+void CXnNewstickerAdapter::DrawStaticText( CWindowGc& aGc, const TDesC& aText ) const
+    { 
+    HBufC* text = HBufC::New( aText.Length() + KAknBidiExtraSpacePerLine );
+    
+    if( text )
+        {
+        TRect rect = iNode.Rect();
+        TInt maxLength = rect.Width();
+        TPtr ptr = text->Des();
+        AknBidiTextUtils::ConvertToVisualAndClip(
+                aText, ptr, *iFont, maxLength, maxLength );
+        
+        aGc.DrawText( *text, rect, iTextBaseline,
+                ( CGraphicsContext::TTextAlign )iTextAlignment );
+        
+        delete text;
         }
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::DrawNow
-// Draw
+// CXnNewstickerAdapter::DrawScrolling
+// Draws scrolling text to screen via marquee control
 // -----------------------------------------------------------------------------
-void CXnNewstickerAdapter::DrawNow() const
+//
+TBool CXnNewstickerAdapter::DrawMarqueeText( CWindowGc& aGc, const TDesC& aText ) const
     {
-    TBool parentDrawn = EFalse;
-    TRAP_IGNORE( parentDrawn = DrawFocusableParentL() );
-    if ( !parentDrawn )
-        {
-        CCoeControl::DrawNow();
-        }
+    TRect rect = iNode.Rect();
+    
+    // returns true when all loops have been executed
+    return iMarqueeControl->DrawText( aGc, rect, aText, iTextBaseline,
+            ( CGraphicsContext::TTextAlign )iTextAlignment, *iFont );
     }
 
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::DrawFocusableParentL
-// Draws focusable parent
-// -----------------------------------------------------------------------------
-TBool CXnNewstickerAdapter::DrawFocusableParentL() const
-    {
-    TBool parentDrawn = EFalse;
-    
-    if ( !iNode.IsFocusedState() )
-        {
-        // node is not focusable, find focusable and focused parent
-        CXnNodePluginIf* parent = iNode.ParentL();
-        while ( parent && !parent->IsFocusedState() )
-            {
-            parent = parent->ParentL();
-            }
-        
-        if (parent)
-            {
-            // focusable parent found, draw it
-            parent->Control()->DrawNow();
-            parentDrawn = ETrue;
-            }
-        }
-    
-    return parentDrawn;
-    }
 
 // End of file

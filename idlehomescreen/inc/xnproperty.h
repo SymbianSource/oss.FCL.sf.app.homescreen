@@ -46,28 +46,29 @@ namespace XnPropertyNames
         _LIT8(KPCData, "pcdata");
         _LIT8(KFocusable, "focusable");
         _LIT8(KInitialFocus, "_s60-initial-focus");
+        _LIT8(KFocusAppearance, "_s60-focus-appearance");                
         _LIT8(KDisabled, "disabled");
 //        _LIT8(KLocked, "locked");
 //        _LIT8(KStyleLocked, "stylelocked");
         _LIT8(KLongTap, "_s60-longtap");
         _LIT8(KSwipe, "swipe");
-        _LIT8(KSwipeDestination, "swipe_destination");
+        _LIT8(KSwipeDestination, "_s60-swipe-destination");
         _LIT8(KBackgroundMask, "backgroundmask" );
         _LIT8(KStylusStates, "stylusstates");
-        _LIT8(KTouchFeedbackDown, "touchfeedbackdown");
+        /*_LIT8(KTouchFeedbackDown, "touchfeedbackdown");
         _LIT8(KTouchFeedbackUp, "touchfeedbackup");
         _LIT8(KTouchFeedbackDrag, "touchfeedbackdrag");
-        _LIT8(KTouchFeedbackLongTap, "touchfeedbacklongtap");
-        _LIT8(KEventFilter, "eventfilter");        
+        _LIT8(KTouchFeedbackLongTap, "touchfeedbacklongtap");*/
+        _LIT8(KEventFilter, "eventfilter");
         _LIT8(KEffectId, "effectid");
         _LIT8(KKeyMoveMode, "keymovemode");
         _LIT8(KSizeAware, "sizeaware");
         _LIT8(KVisualisationAware, "visualisationaware");
-        namespace touchfeedback
+        /*namespace touchfeedback
             {
             _LIT8(KFeedbackBasic, "basic");
             _LIT8(KFeedbackSensitive, "sensitive");
-            }
+            }*/            
         }
     namespace tooltip
         {

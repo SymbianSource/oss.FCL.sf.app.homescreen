@@ -31,10 +31,6 @@
     inline const TDesC& CWmWidgetData::Name() const
         { return iHsContentInfo->Name(); }
 
-    /** widget description */
-    inline const TDesC& CWmWidgetData::Description() const
-        { return iHsContentInfo->Description(); }
-
     /** widget uid */
     inline TUid CWmWidgetData::Uid() const
         { return UidFromString( iHsContentInfo->Uid() ); };
@@ -46,10 +42,6 @@
     /** widget type */
     inline CWmWidgetData::TWidgetType CWmWidgetData::WidgetType() const
         { return iWidgetType; }
-
-    /** running install animation index */
-    inline TInt CWmWidgetData::InstallAnimationIndex() const
-        { return iInstallAnimationIndex; }
 
     /** the logo bitmap */
     inline const CFbsBitmap* CWmWidgetData::LogoImage()

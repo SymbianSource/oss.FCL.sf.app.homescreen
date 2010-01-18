@@ -145,7 +145,7 @@ void CDataBufferTransactionElement::SetDataL()
         
         // Create new new label attribute value
         CXnDomPropertyValue* propertyValue =
-            CXnDomPropertyValue::NewL( target.UiEngineL()->StringPool() );
+            CXnDomPropertyValue::NewL( &target.UiEngineL()->StringPool() );
     
         CleanupStack::PushL( propertyValue );
     
@@ -177,16 +177,6 @@ void CDataBufferTransactionElement::SetDataL()
         TInt32 volume = 0;
         User::LeaveIfError( AiUtility::ParseInt( volume, iNewData ) );
         volumeControl->SetValue( volume );
-        }
-    else if ( type == XnNewstickerInterface::MXnNewstickerInterface::Type() )
-        {
-        // Get newsticker interface
-        XnNewstickerInterface::MXnNewstickerInterface* newsTicker = NULL;
-        XnComponentInterface::MakeInterfaceL( newsTicker, Target() );
-        LeaveIfNull( newsTicker, KErrNotSupported );
-        
-        // Append new SVG title
-        newsTicker->AppendSvgTitleL( iNewData );
         }
     else
         {

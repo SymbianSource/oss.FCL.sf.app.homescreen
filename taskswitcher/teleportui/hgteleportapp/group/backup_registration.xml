@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="yes"?>
+<backup_registration version="1.0">
+
+  <passive_backup>
+    <!-- backup all private data -->
+    <include_directory name = "\" />
+  </passive_backup>
+  
+  <!-- backup executables and resources from SIS files -->
+  <system_backup />
+
+  <!-- backup cenrep data -->  
+  <proxy_data_manager sid = "0x10202BE9" />
+
+  <!-- backup sqlite data -->
+  <proxy_data_manager sid = "0x10281E17" />
+  
+  <restore requires_reboot = "no"/>
+
+</backup_registration>

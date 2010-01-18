@@ -90,17 +90,44 @@ CWmImageConverter::~CWmImageConverter()
     Cancel();
     delete iImageDecoder;
     iFs.Close(); 
-    if (iBitmap) 
+    if ( iBitmap ) 
         {
         delete iBitmap;
         iBitmap = NULL;
-        }    
-    if (iMask) 
+        }
+    if ( iMask )
         {
         delete iMask; 
         iMask = NULL;
-        }    
+        }
     delete iScaler;
+    }
+
+// ---------------------------------------------------------
+// CWmImageConverter::HandleIconString
+// ---------------------------------------------------------
+//
+TInt CWmImageConverter::HandleIconString( 
+                            TInt aWidth, TInt aHeight, 
+                            const TDesC& aIconStr )
+    {
+    TInt err( KErrNone );
+    TRAP( err, HandleIconStringL( aWidth, aHeight, aIconStr ); );
+    if ( KErrNone != err )
+        {
+        iState = EFailed;
+        if ( iBitmap ) 
+            {
+            delete iBitmap;
+            iBitmap = NULL;
+            }
+        if ( iMask )
+            {
+            delete iMask; 
+            iMask = NULL;
+            }
+        }
+    return err;
     }
 
 // ---------------------------------------------------------
@@ -111,6 +138,8 @@ void CWmImageConverter::HandleIconStringL(
                             TInt aWidth, TInt aHeight, 
                             const TDesC& aIconStr )
     {
+    iConversionMethod = EUnrecognized;
+    iState = EDecoding;
     if ( aIconStr.Length() )
         {
         TAknsItemID skinItemId;
@@ -120,7 +149,7 @@ void CWmImageConverter::HandleIconStringL(
         TInt maskId( KErrNotFound );
         TUid appUid;
         iFilename = KNullDesC;
-        iScaleNeeded = EFalse;    
+        iScaleNeeded = EFalse;
         iSize.SetSize( aWidth, aHeight );
         
         if ( ResolveSkinIdAndMifId( 
@@ -154,9 +183,12 @@ void CWmImageConverter::HandleIconStringL(
             }
         else
             {
-            iConversionMethod = EUnrecognized;
             User::Leave( KErrArgument );
             }
+        }
+    else
+        {            
+        User::Leave( KErrArgument );
         }
     }
 
@@ -193,7 +225,7 @@ void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
                     break;
                     }
                 }
-            }      
+            }
         CApaMaskedBitmap* maskedBmp = CApaMaskedBitmap::NewLC();
         User::LeaveIfError( lsSession.GetAppIcon( aUid, size, *maskedBmp ) );
         iBitmap = static_cast<CFbsBitmap*>( maskedBmp );  // ownership transfered
@@ -212,6 +244,7 @@ void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
         // scale or notify
         if ( size == iSize )
             {
+            iState = EIdle;
             iObserver->NotifyCompletion( KErrNone );
             }
         else
@@ -253,10 +286,12 @@ void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
             }
 
         // notify observer
+        iState = EIdle;
         iObserver->NotifyCompletion( err );
         }
     else
         {
+        iState = EIdle;
         User::Leave( KErrArgument );
         }
     }
@@ -315,6 +350,7 @@ void CWmImageConverter::CreateIconFromSvgL( const TDesC& aFileName )
     
     iBitmap = bitmap;
     iMask = mask;
+    iState = EIdle;
     iObserver->NotifyCompletion( KErrNone );
     }
 
@@ -336,7 +372,7 @@ void CWmImageConverter::CheckSvgErrorL( MSvgError* aError )
 //
 void CWmImageConverter::CreateIconFromOtherL( const TDesC& aFileName )
     {
-    if ( IsActive() || iState != EIdle )
+    if ( IsActive() )
         {
         User::Leave( KErrNotReady );
         }
@@ -364,8 +400,8 @@ void CWmImageConverter::CreateIconFromOtherL( const TDesC& aFileName )
         {
         iScaleNeeded = ETrue;
         }
+
     // start conversion to bitmap
-    iState = EDecoding;
     iImageDecoder->Convert( &iStatus, *iBitmap, *iMask );
     SetActive();
     }
@@ -376,11 +412,13 @@ void CWmImageConverter::CreateIconFromOtherL( const TDesC& aFileName )
 //
 void CWmImageConverter::DoCancel()
     {
-    if( iState == EDecoding )
+    if( iState == EDecoding && 
+       iConversionMethod == EImageIcon )
         {
-        iImageDecoder->Cancel();        
+        iImageDecoder->Cancel();
+        iState = EIdle;
         if ( iObserver )
-            {
+            {            
             iObserver->NotifyCompletion( KErrCancel );
             }
         }    
@@ -388,16 +426,16 @@ void CWmImageConverter::DoCancel()
         iState == EScalingMask )
         {
         iScaler->Cancel();
+        iState = EIdle;
         if ( iObserver )
-            {
+            {            
             iObserver->NotifyCompletion( KErrCancel );
             }
         }    
     else
         {
         // State is EIdle, do nothing
-        }
-    iState = EIdle;
+        }    
     iScaleNeeded = EFalse;
     }
 
@@ -529,9 +567,9 @@ void CWmImageConverter::ScaleBitmap( TInt aWidth, TInt aHeight )
          iBitmap &&
         ( iState == EDecoding || iState == EIdle ) )
         {
-        // the maintain aspect ratio is by default set to true
-        iScaler->Scale( &iStatus, *iBitmap, TSize( aWidth,aHeight ), EFalse );
         iState = EScalingBitmap;
+        // the maintain aspect ratio is by default set to true
+        iScaler->Scale( &iStatus, *iBitmap, TSize( aWidth,aHeight ), EFalse );        
         SetActive();
         }
     }
@@ -546,9 +584,9 @@ void CWmImageConverter::ScaleMask( TInt aWidth, TInt aHeight )
         iState == EScalingBitmap &&
         iMask )
         {
-        // the maintain aspect ratio is by default set to true
-        iScaler->Scale( &iStatus, *iMask, TSize(aWidth,aHeight), EFalse );
         iState = EScalingMask;
+        // the maintain aspect ratio is by default set to true
+        iScaler->Scale( &iStatus, *iMask, TSize(aWidth,aHeight), EFalse );        
         SetActive();
         }
     }
@@ -607,33 +645,17 @@ TBool CWmImageConverter::ResolveUid(
     TInt pos = aPath.FindF( KUid );
     if( pos == 0 )
         {
-        // Skip skin token
+        // Skip uid token
         pos += KUid().Length();
 
         // Initialize lexer
         TLex lex( aPath.Mid( pos ) );
-
+        lex.SkipSpaceAndMark();
+        
         // Check left parenthesis
         if ( lex.Get() == KLeftParenthesis )
             {
-            lex.SkipSpaceAndMark();
-            lex.SkipCharacters();
-            
-            TPtrC mtoken = lex.MarkedToken();
-            pos = mtoken.FindF( KHexPrefix );
-            if ( pos == 0 )
-                {
-                TLex lex( mtoken.Mid( KHexPrefix().Length() ) );
-                TUint id = 0;
-                error = lex.Val( id, EHex );
-                aUid = TUid::Uid( (TInt)id );
-                }
-            else
-                {
-                TInt id( 0 );
-                error = lex.Val( id );
-                aUid.iUid = id;
-                }
+            error = ParseNextUint( lex, (TUint&)aUid.iUid );
             }
         }
     
@@ -657,37 +679,16 @@ TBool CWmImageConverter::ResolveSkinId(
 
         // Initialize lexer
         TLex lex( aPath.Mid( pos ) );
-        
         lex.SkipSpaceAndMark();
+        
         // Check left parenthesis
         if ( lex.Get() == KLeftParenthesis )
            {
-           pos++;
-           TLex lex( aPath.Mid( pos ) );
-           lex.SkipSpaceAndMark();
-           
-           TPtrC mtoken = lex.MarkedToken();
-           pos = mtoken.FindF( KHexPrefix );
-           if ( pos == 0 )
-              {
-              TUint majorId( 0 );
-              TUint minorId( 0 );              
-              lex.Assign( mtoken.Mid( KHexPrefix().Length() ) );
-              error = lex.Val( majorId, EHex );
-              lex.SkipSpace();
-              lex.SkipAndMark( KHexPrefix().Length() );
-              error |= lex.Val( minorId, EHex );
-              aItemId.Set( majorId, minorId );
-              }
-          else
-              {
-              TInt majorId(0);
-              TInt minorId(0);
-              error = lex.Val( majorId );
-              lex.SkipSpace();
-              error |= lex.Val( minorId );                      
-              aItemId.Set( majorId, minorId );
-              }
+           TUint majorId = 0;
+           TUint minorId = 0;
+           error = ParseNextUint( lex, majorId );
+           error |= ParseNextUint( lex, minorId );
+           aItemId.Set( majorId, minorId );
            }        
         }
 
@@ -711,7 +712,8 @@ TBool CWmImageConverter::ResolveMifId(
         pos += KMif().Length();
         // Initialize lexer
         TLex lex( aPath.Mid( pos ) );
-
+        lex.SkipSpaceAndMark();
+        
         // Check left parenthesis
         if ( lex.Get() == KLeftParenthesis )
            {
@@ -721,22 +723,15 @@ TBool CWmImageConverter::ResolveMifId(
            aFileName.Copy(lex.MarkedToken());
            if( aFileName.Length()!= 0)
                {
-               // Resolve bitmap id  
-               lex.SkipSpace();
-               error = lex.Val( aBitmapId );
-               
-               // Resolve mask id
-               // dont return error if it is not found, that is ok
-               lex.SkipSpace();
-               lex.Val( aMaskId );
-               }
-           else
-               {
-               error = KErrNotFound;
+               TUint bitmap, mask;
+               error = ParseNextUint( lex, bitmap );
+               ParseNextUint( lex, mask ); // mask is not mandatory
+               aBitmapId = bitmap;
+               aMaskId = mask;
                }
            }        
         }    
-    return (error == KErrNone );
+    return ( error == KErrNone );
     }
 
 // ---------------------------------------------------------------------------
@@ -796,7 +791,7 @@ void CWmImageConverter::CreateSkinOrMifIconL(
             itemData->SetMask( NULL );
             CleanupStack::PopAndDestroy( itemData );
             }
-        else 
+        else
             {
             // look in imagetable
             CAknsImageTableItemData* iconData = NULL;
@@ -827,7 +822,8 @@ void CWmImageConverter::CreateSkinOrMifIconL(
                     }
                 iBitmap = bitmap;
                 iMask = mask;
-                // notify observer
+                iState = EIdle;
+                // notify observer                    
                 iObserver->NotifyCompletion( KErrNone );
                 return;
                 }
@@ -855,20 +851,48 @@ void CWmImageConverter::CreateSkinOrMifIconL(
         }
     else
         {
+        iState = EIdle;
         User::Leave( KErrArgument );
         }
     
     iBitmap = bitmap;
     iMask = mask;
-            
+
     TInt err = AknIconUtils::SetSize( iBitmap , iSize, EAspectRatioNotPreserved );
     if ( KErrNone == err )
         {
         err = AknIconUtils::SetSize( iMask , iSize, EAspectRatioNotPreserved );
         }
-
+    
+    iState = EIdle;
     // notify observer
     iObserver->NotifyCompletion( err );
+    }
+
+// ---------------------------------------------------------------------------
+// CWmImageConverter::ParseNextUint()
+// ---------------------------------------------------------------------------
+//
+TInt CWmImageConverter::ParseNextUint( TLex& aLex, TUint& aValue )
+    {
+    TInt error = KErrNone;
+    aLex.SkipSpaceAndMark();
+    aLex.SkipCharacters();
+
+    TPtrC mtoken = aLex.MarkedToken();
+    TInt pos = mtoken.FindF( KHexPrefix );
+    if ( pos == 0 )
+        {
+		TLex innerLex( mtoken.Mid( KHexPrefix().Length() ) );
+        error = innerLex.Val( aValue, EHex );
+        }
+    else
+        {
+        TLex innerLex( mtoken );
+        error = innerLex.Val( aValue, EDecimal );
+        }
+
+    return error;
     }
 
 // ---------------------------------------------------------------------------
@@ -896,7 +920,13 @@ CWmImageConverter::TConversionMethod CWmImageConverter::ConversionMethod()
 void CWmImageConverter::RetrieveIconFileHandleL( 
     RFile& aFile, const TIconFileType /*aType*/ )
     {
-	User::LeaveIfError( aFile.Open( iFs, iFilename, EFileShareAny ) );
+	TInt err = aFile.Open( iFs, iFilename, 
+	        EFileRead | EFileShareReadersOnly );
+	if ( KErrNone != err )
+	    {
+        iState = EIdle;
+        User::Leave( err );
+	    }
     }
 
 // ---------------------------------------------------------------------------
@@ -908,6 +938,15 @@ void CWmImageConverter::Finished()
     // finishes using the icon file. No actions needed here.
     }
 
+// ---------------------------------------------------------------------------
+// CWmImageConverter::IsProcessing
+// ---------------------------------------------------------------------------
+//
+TBool CWmImageConverter::IsProcessing()
+    {
+    return ( ( ( iState != EIdle && iState != EFailed ) ||
+            IsActive() ) ? ETrue : EFalse );
+    }
 
 // End of file
 

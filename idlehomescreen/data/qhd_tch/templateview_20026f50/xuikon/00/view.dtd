@@ -299,22 +299,22 @@ text_softkey_cancel.parents "control_pane"
 <!ENTITY text_softkey_cancel "Cancel">
 
 <!--
-qtn_hs_web_online.attributes
-qtn_hs_web_online.layout "list_single_pane_t1_cp2"
-qtn_hs_web_online.release "TB9.2"
-qtn_hs_web_online.description "Online"
-qtn_hs_web_online.grammar "Online"
-qtn_hs_web_online.parents "list_single_pane_cp2"
+qtn_hs_online.attributes
+qtn_hs_online.layout "list_single_pane_t1_cp2"
+qtn_hs_online.release "TB9.2"
+qtn_hs_online.description "Online"
+qtn_hs_online.grammar "Online"
+qtn_hs_online.parents "list_single_pane_cp2"
 -->
 <!ENTITY qtn_hs_online "Switch Home to online">
 
 <!--
-qtn_hs_web_offline.attributes
-qtn_hs_web_offline.layout "list_single_pane_t1_cp2"
-qtn_hs_web_offline.release "TB9.2"
-qtn_hs_web_offline.description "Offline"
-qtn_hs_web_offline.grammar "Offline"
-qtn_hs_web_offline.parents "list_single_pane_cp2"
+qtn_hs_offline.attributes
+qtn_hs_offline.layout "list_single_pane_t1_cp2"
+qtn_hs_offline.release "TB9.2"
+qtn_hs_offline.description "Offline"
+qtn_hs_offline.grammar "Offline"
+qtn_hs_offline.parents "list_single_pane_cp2"
 -->
 <!ENTITY qtn_hs_offline "Switch Home to offline">
 
@@ -373,20 +373,20 @@ qtn_hs_edit_replace.parents ""
 <!ENTITY qtn_hs_edit_replace "Replace">
 
 <!--
-qtn_hs_edit_replace.attributes
-qtn_hs_edit_replace.layout "list_single_pane_t1_cp2"
-qtn_hs_edit_replace.release "TB9.2"
-qtn_hs_edit_replace.description "deletes current home screen page"
-qtn_hs_edit_replace.parents ""
+qtn_hs_page_options_delete.attributes
+qtn_hs_page_options_delete.layout "list_single_pane_t1_cp2"
+qtn_hs_page_options_delete.release "TB9.2"
+qtn_hs_page_options_delete.description "deletes current home screen page"
+qtn_hs_page_options_delete.parents ""
 -->
 <!ENTITY qtn_hs_page_options_delete "Delete page">
 
 <!--
-qtn_hs_edit_replace.attributes
-qtn_hs_edit_replace.layout "list_single_pane_t1_cp2"
-qtn_hs_edit_replace.release "TB9.2"
-qtn_hs_edit_replace.description "creates new home screen page"
-qtn_hs_edit_replace.parents ""
+qtn_hs_page_options_new.attributes
+qtn_hs_page_options_new.layout "list_single_pane_t1_cp2"
+qtn_hs_page_options_new.release "TB9.2"
+qtn_hs_page_options_new.description "creates new home screen page"
+qtn_hs_page_options_new.parents ""
 -->
 <!ENTITY qtn_hs_page_options_new "New page">
 
@@ -409,11 +409,20 @@ text_softkey_call.parents ""
 <!ENTITY text_softkey_call "Call">
 
 <!--
-qtn_hs_add_widget.attributes
-qtn_hs_add_widget.layout "list_single_pane_t1_cp2"
-qtn_hs_add_widget.release "TB9.2"
-qtn_hs_add_widget.description "Added new option menu item to Edit mode for opening the widget catalog"
-qtn_hs_add_widget.grammar "Widget Catalog"
-qtn_hs_add_widget.parents "list_single_pane_cp2"
+qtn_hs_edit_widget_catalog.attributes
+qtn_hs_edit_widget_catalog.layout "list_single_pane_t1_cp2"
+qtn_hs_edit_widget_catalog.release "TB9.2"
+qtn_hs_edit_widget_catalog.description "Added new option menu item to Edit mode for opening the widget catalog"
+qtn_hs_edit_widget_catalog.grammar "Widget Catalog"
+qtn_hs_edit_widget_catalog.parents "list_single_pane_cp2"
 -->
 <!ENTITY qtn_hs_edit_widget_catalog "Widget Catalog">
+
+<!--
+qtn_hs_page_edit_options_delete.attributes
+qtn_hs_page_edit_options_delete.layout "list_single_pane_t1_cp2"
+qtn_hs_page_edit_options_delete.release "TB9.2"
+qtn_hs_page_edit_options_delete.description "Deletes the current Home screen page and focus goes to the next available Home screen page in Edit mode"
+qtn_hs_page_edit_options_delete.parents ""
+-->
+<!ENTITY qtn_hs_page_edit_options_delete "Delete page">

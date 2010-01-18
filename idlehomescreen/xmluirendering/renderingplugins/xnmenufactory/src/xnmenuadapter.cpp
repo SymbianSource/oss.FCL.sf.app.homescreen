@@ -33,6 +33,7 @@
 #include <eikspane.h>
 #include <AknSgcc.h>
 #include <aknview.h>
+#include <AknsConstants.h>
 
 // User includes
 #include "xnnodepluginif.h"
@@ -1740,7 +1741,10 @@ void CXnMenuAdapter::SetContainerL( CEikButtonGroupContainer& aContainer )
  	
 	iContainer = &aContainer;
 	
-	UpdateSoftkeyAppearancesL();
+    CEikCba* cba( static_cast< CEikCba* >( aContainer.ButtonGroup() ) );
+    cba->SetButtonGroupFlags( cba->ButtonGroupFlags() | EEikCbaFlagSemiTransparent );
+
+    UpdateSoftkeyAppearancesL();
 	    
 	if (iContainer)
 	    {
@@ -2125,7 +2129,7 @@ void CXnMenuAdapter::HandleScreenDeviceChangedL()
 //    
 void CXnMenuAdapter::HandleMenuPropertyChangeL(CXnNodePluginIf* aNode, CXnProperty* aProperty)
     {
-    if ( !aNode )
+    if ( !aNode || !aProperty )
         {
         return;
         }

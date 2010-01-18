@@ -1,0 +1,34 @@
+/*
+* ============================================================================
+*  Name        : bld.inf
+*  Part of     : Huriganes / Context Services
+*  Description : Build info file for Context Services.
+*  Version     : %version: sa1spcx1#55 %
+*
+*  Copyright © 2008 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_EXPORTS
+
+// stub sis files
+../sis/stubs/hgctxsrv_stub.sis                          /epoc32/release/winscw/udeb/z/system/install/hgctxsrv_stub.sis
+
+// iby files
+../rom/hgcontextservices.iby    CORE_MW_LAYER_IBY_EXPORT_PATH(hgcontextservices.iby)
+
+
+
+#include "../hgfswpreviewprovider/group/bld.inf"
+#include "../hgfswserver/group/bld.inf"
+
+#include "../hgctxutils/group/bld.inf"

@@ -306,7 +306,7 @@ TBool CWmMainContainerView::HandleOpenMenuItemSelectedL()
     {
     if ( iWmMainContainer && iWmMainContainer->PortalSelected() )
         {       
-        iWmMainContainer->OpenOviPortalL();
+        iWmMainContainer->OpenPortalL();
         }
     return ETrue;
     }

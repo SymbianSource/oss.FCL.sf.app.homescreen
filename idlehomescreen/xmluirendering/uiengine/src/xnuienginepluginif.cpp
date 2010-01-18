@@ -197,7 +197,7 @@ EXPORT_C void TXnUiEnginePluginIf::RestorePreviousFocusedNode()
 //
 EXPORT_C CXnDomStringPool& TXnUiEnginePluginIf::StringPool()
     {
-    return iUiEngine->ODT()->DomDocument().StringPool();
+    return *iUiEngine->ODT()->DomDocument().StringPool();
     }
 
 // -----------------------------------------------------------------------------

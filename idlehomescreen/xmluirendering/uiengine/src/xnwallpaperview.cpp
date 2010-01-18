@@ -21,6 +21,7 @@
 #include "xnwallpapercontainer.h"
 #include "xnuiengine.h"
 #include "xneditor.h"
+#include "xnbackgroundmanager.h"
 
 // SYSTEM INCLUDE FILES
 #include <aknappui.h>
@@ -93,7 +94,7 @@ TUid CXnWallpaperView::Id() const
 //
 void CXnWallpaperView::DoActivateL(
             const TVwsViewId& aPrevViewId,
-            TUid aCustomMessageId,
+            TUid /*aCustomMessageId*/,
             const TDesC8& aCustomMessage )
     {
     iAvkonAppUi->StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL );
@@ -124,19 +125,9 @@ void CXnWallpaperView::DoActivateL(
         // set wallpaper.
         if( files->MdcaCount() == 1 )
             {
-            AknsWallpaperUtils::SetIdleWallpaper(
-                    files->MdcaPoint( 0 ),
-                    NULL );
-            }
-        //set slideshow
-        else
-            {
-            AknsWallpaperUtils::SetSlidesetWallpaper(
-                    *files,
-                    NULL );
+            iEngine.Editor()->BgManager().AddWallpaperL( files->MdcaPoint( 0 ) );
             }
         }
-    
     CleanupStack::PopAndDestroy( files );
     
     iAvkonAppUi->ActivateViewL( aPrevViewId );

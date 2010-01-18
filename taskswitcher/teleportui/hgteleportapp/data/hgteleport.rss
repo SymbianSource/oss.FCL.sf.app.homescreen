@@ -1,0 +1,283 @@
+/*
+* ============================================================================
+*  Name        : hgteleport.rss
+*  Part of     : Hg Teleport
+*  Description : Resource files for teleport app
+*  Version     : %version: sa1spcx1#27 %
+*
+*  Copyright © 2008 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* 
+*/
+
+NAME HGTL
+
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <appinfo.rh>
+
+#include <avkon.loc>
+#include <taskswitcher.loc>
+
+#include "hgteleportcommands.hrh"
+
+// ---------------------------------------------------------
+//   
+//    Define the resource file signature 
+//    This resource should be empty.
+//
+// ---------------------------------------------------------
+//
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------
+//   
+//    Default Document Name
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_default_document_name { buf=""; }
+
+// ---------------------------------------------------------
+//   
+//    Define default menu and CBA key.
+//
+// ---------------------------------------------------------
+//
+RESOURCE EIK_APP_INFO
+    {
+    menubar = r_hgteleport_menubar;
+    cba = r_hgteleport_cba_nontouch;
+    }
+
+// ---------------------------------------------------------
+//   
+//    CBA for non-touch.
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_hgteleport_cba_nontouch
+	{
+	flags = 0;
+	buttons = 
+    	{
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_select;}, // left softkey
+    	CBA_BUTTON {id=EAknSoftkeyBack; txt=text_softkey_back;}, // right softkey
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_select;} // middle softkey, same as lsk, label is not shown in touch
+    	};
+	}
+
+// ---------------------------------------------------------
+//   
+//    CBA for touch.
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_hgteleport_cba_touch
+	{
+	flags = 0;
+	buttons = 
+    	{
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_empty;}, // left softkey, no label
+    	CBA_BUTTON {id=EAknSoftkeyBack; txt=text_softkey_back;}, // right softkey
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_select;} // middle softkey, same as lsk, label is not shown in touch
+    	};
+	}
+
+
+// ---------------------------------------------------------
+//   
+//   r_hgteleport_menubar
+//   Menubar for hgteleport
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_hgteleport_menubar
+    {
+    titles =
+        {
+        MENU_TITLE {menu_pane = r_hgteleport_menu;}
+        };
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_hgteleport_menu
+//   Menu for "Options"
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_hgteleport_menu
+    {
+    items = 
+        {
+        MENU_ITEM { command = EHgTeleportCmdHelp; 	 txt = qtn_options_help; },
+        MENU_ITEM { command = EAknSoftkeyExit;   	txt = text_softkey_exit; }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_hg_panel_teleport_name
+//   teleport panel name
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_hg_panel_teleport_name
+    {
+    buf="Task Switcher";
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_hg_teleport_message_dialog_okcancel
+//   message dialog with ok and cancel softkeys labels
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_hg_teleport_message_dialog_okcancel
+    {
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
+	items =
+	    {
+		DLG_LINE
+		    {
+			type = EAknCtPopupHeadingPane;
+			id = EAknMessageQueryHeaderId;
+			control = AVKON_HEADING
+			    {
+			    headinglayout = 0;			
+			    };
+		    },
+		DLG_LINE
+	    	{
+			type = EAknCtMessageQuery;
+			id = EAknMessageQueryContentId;
+			control = AVKON_MESSAGE_QUERY { };
+		    }
+	    };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_hg_teleport_message_dialog_yesno
+//   message dialog with yes and no softkeys labels
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_hg_teleport_message_dialog_yesno
+    {
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_YES_NO;
+	items =
+	    {
+		DLG_LINE
+		    {
+			type = EAknCtPopupHeadingPane;
+			id = EAknMessageQueryHeaderId;
+			control = AVKON_HEADING
+			    {
+			    headinglayout = 0;			
+			    };
+		    },
+		DLG_LINE
+	    	{
+			type = EAknCtMessageQuery;
+			id = EAknMessageQueryContentId;
+			control = AVKON_MESSAGE_QUERY { };
+		    }
+	    };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_hg_teleport_message_dialog_ok
+//   message dialog with ok softkey label
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_hg_teleport_message_dialog_ok
+    {
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+	items =
+	    {
+		DLG_LINE
+		    {
+			type = EAknCtPopupHeadingPane;
+			id = EAknMessageQueryHeaderId;
+			control = AVKON_HEADING
+			    {
+			    headinglayout = 0;			
+			    };
+		    },
+		DLG_LINE
+	    	{
+			type = EAknCtMessageQuery;
+			id = EAknMessageQueryContentId;
+			control = AVKON_MESSAGE_QUERY { };
+		    }
+	    };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_hg_teleport_fsw_confirm_close_query
+//   shown when Clear key is pressed in FSW
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_hg_teleport_fsw_confirm_close_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+
+
+RESOURCE LOCALISABLE_APP_INFO r_localisable_app_info
+	{
+	short_caption = "Task Switcher";
+	caption_and_icon =
+		{
+		CAPTION_AND_ICON_INFO 
+			{
+			caption="Task Switcher";
+			}
+		};
+	}
+
+
+RESOURCE TBUF r_teleport_title { buf = "Task Switcher"; }
+
+RESOURCE TBUF r_teleport_fsw_activate { buf = qtn_task_switcher_popup_open_app; }
+RESOURCE TBUF r_teleport_fsw_close { buf = qtn_task_switcher_popup_close_app; }
+RESOURCE TBUF r_teleport_fsw_close_all { buf = qtn_task_switcher_popup_close_all; }
+RESOURCE TBUF r_teleport_fsw_confirm_close { buf = qtn_memlo_confirm_close; }
+
+RESOURCE TBUF r_task_switcher_heading_applications { buf = qtn_task_switcher_heading_applications; }
+
+// end of file

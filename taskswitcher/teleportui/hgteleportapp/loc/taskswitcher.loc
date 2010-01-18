@@ -1,0 +1,51 @@
+/*
+* ============================================================================
+*  Name        : taskswitcher.loc
+*  Part of     : Task Switcher
+*  Description : Task Switcher application's localization texts
+*  Version     : %version: 2 %
+*
+*  Copyright © 2008 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* 
+*/
+
+//d:Popup menu item text
+//d:Activate selected application
+//l:list_single_touch_menu_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_popup_open_app "Activate"
+
+//d:Popup menu item text
+//d:Close selected application
+//l:list_single_touch_menu_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_popup_close_app "Close"
+
+//d:Popup menu item text
+//d:Close all application
+//l:list_single_touch_menu_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_popup_close_all "Close all"
+
+//d:Text for heading pane above the task swapper
+//l:heading_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_heading_applications "Open applications"
+
+//d:Text for appliactions that has no name
+//l:none
+//r:5.0
+//
+#define qtn_task_switcher_default_task_name "No name"

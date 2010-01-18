@@ -69,10 +69,10 @@ TInt CWmUnitTest::ImageConverterConvertL( CStifItemParser& aItem )
     User::LeaveIfError( aItem.GetNextString( inputStr ) );
     if ( inputStr.Length() == 0 ) User::Leave( KErrArgument );
 
-    TRAPD( err, iImageConverter->HandleIconStringL( 40, 40, inputStr ) );
+    TInt err = iImageConverter->HandleIconString( 40, 40, inputStr );
     if ( err != KErrNone )
         {
-        _LOG("ImageConverterConvertL:HandleIconStringL returns with leave");
+        _LOG("ImageConverterConvertL:HandleIconString returns Error!!!");
         iConversionReady = ETrue;
         iConversionError = err;
         }

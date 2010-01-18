@@ -54,7 +54,7 @@ class CXnDomList : public CBase
         * Two-phased constructor.
         */
         static CXnDomList* NewL( TListType aListType, 
-                CXnDomStringPool& aStringPool,
+                CXnDomStringPool* aStringPool,
                 TInt aGranularity=4);
         
         /**
@@ -62,7 +62,7 @@ class CXnDomList : public CBase
         */
         static CXnDomList* NewL( 
             RReadStream& aStream, 
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         
         /**
         * Destructor.
@@ -168,11 +168,19 @@ class CXnDomList : public CBase
         IMPORT_C TInt ItemIndex( const MXnDomListItem& aItem )const;
         
         /**
-        * Get reference to the dom's string pool.
+        * Get pointer to the dom's string pool.
         * @since Series 60 3.1
         * @return Reference to string pool
         */
-        IMPORT_C CXnDomStringPool& StringPool() const;
+        IMPORT_C CXnDomStringPool* StringPool() const;
+
+        /**
+         * Swap used string pool.
+         * 
+         * @param aStringPool   New string pool to be used.
+         *                      Ownership not transferred!
+         */
+        IMPORT_C void SwapStringPoolL( CXnDomStringPool* aStringPool );        
         
         /**
         * Count items in a list.
@@ -220,7 +228,7 @@ class CXnDomList : public CBase
         * C++ default constructor.
         */
         CXnDomList( TListType aListType, 
-                    CXnDomStringPool& aStringPool, 
+                    CXnDomStringPool* aStringPool, 
                     TInt aGranularity=4 );
         
         /**
@@ -237,7 +245,7 @@ class CXnDomList : public CBase
     
     private:    // Data
         // StringPool, not owned
-        CXnDomStringPool&   iStringPool;
+        CXnDomStringPool*   iStringPool;
         
         
     };

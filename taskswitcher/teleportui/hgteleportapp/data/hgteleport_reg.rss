@@ -1,0 +1,31 @@
+/*
+* ============================================================================
+*  Name        : hgteleport_reg.rss
+*  Part of     : Hg Teleport
+*  Description : hgteleport application's registration resource file 
+*  Version     : %version: 3 %
+*
+*  Copyright © 2008-2008 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+* Template version: 4.1.1
+*/
+
+#include <appinfo.rh>
+#include <hgteleport.rsg>
+
+UID2 KUidAppRegistrationResourceFile
+UID3 0x20016BF0
+
+RESOURCE APP_REGISTRATION_INFO 
+	{
+	app_file="hgteleport";
+	localisable_resource_file="\\resource\\apps\\hgteleport";
+	localisable_resource_id = R_LOCALISABLE_APP_INFO;
+	}

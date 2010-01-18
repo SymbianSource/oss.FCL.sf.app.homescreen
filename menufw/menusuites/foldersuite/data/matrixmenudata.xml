@@ -17,22 +17,6 @@
         <!-- </menu:folder> -->
         <!--Contacts application-->
         <menu:application uid="0x101F4CCE"/>
-        <!--music suite-->
-        <menu:suite title_name="&qtn_apps_music_title;" 
-                    long_name="&qtn_apps_music_list;" 
-                    short_name="&qtn_apps_music_grid;" 
-                    suite_name="musicsuite" 
-                    icon_file="z:\resource\apps\matrixmenudata.mif"
-                    icon_id="16384" 
-                    mask_id="16385" 
-                    icon_skin_minor_id="0x2176" 
-                    icon_skin_major_id="0x101F86E3"/>
-        <!-- application used in music suite should be hidden from menu -->
-        <menu:folder flags="hidden">
-            <menu:application uid="0x102072C3"/> <!-- Music Player (MusicPlayer)-->
-            <menu:application uid="0x10207A89"/> <!-- Radio -->
-            <menu:application uid="0x101FFB51"/> <!-- Music Store -->
-        </menu:folder>
         <!--Internet folder-->
         <!--  now using qgnmenugroupweb available in skin -->
         <menu:folder title_name="&qtn_apps_browserng_title;" 

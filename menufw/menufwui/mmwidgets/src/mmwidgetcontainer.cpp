@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.44 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.47 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -134,6 +134,18 @@ CMmWidgetContainer::~CMmWidgetContainer()
 //
 // -----------------------------------------------------------------------------
 //
+EXPORT_C void CMmWidgetContainer::EnableLongTapAnimation( TBool aEnable )
+    {
+    if ( iLongTapDetector )
+        {
+        iLongTapDetector->EnableLongTapAnimation( aEnable );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CMmWidgetContainer::SizeChanged()
     {
     if ( iWidget && iWidgetRect != Rect() )
@@ -222,9 +234,17 @@ void CMmWidgetContainer::HandleResourceChange( TInt aType )
             aType == KAknsMessageSkinChange )
         {
         static_cast<CMmListBoxItemDrawer*>( iDrawer )->InvalidateCache();
+        CMmTemplateLibrary * templateLibrary =
+        static_cast<CMmListBoxItemDrawer*>( iDrawer )->TemplateLibrary();
+        templateLibrary->CleanAndClearCache();
         }
 
     CCoeControl::HandleResourceChange( aType );
+
+	if ( aType == KEikDynamicLayoutVariantSwitch && !IsHighlightVisible() )
+		{
+		SetDefaultHighlightL( EFalse );
+		}
     }
 
 // -----------------------------------------------------------------------------
@@ -636,6 +656,10 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
 
     if ( iLongTapDetector )
     	{
+    	if ( !itemExists )
+    	    {
+    	    iLongTapDetector->EnableLongTapAnimation( EFalse );
+    	    }
     	TPointerEvent longTapPointerEvent = aPointerEvent;
         if ( aPointerEvent.iType == TPointerEvent::EButtonRepeat )
         	{

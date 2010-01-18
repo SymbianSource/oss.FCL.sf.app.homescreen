@@ -15,8 +15,6 @@
 *
 */
 
-//#include "../shortcut_2001f483/group/bld.inf"
-//#include "../shortcut2_2001f484/group/bld.inf"
 #include "../desktop_20026f4f/group/bld.inf"
 #include "../empty_2001f47f/group/bld.inf"
 #include "../onerow_2001f480/group/bld.inf"

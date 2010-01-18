@@ -20,6 +20,8 @@
 #include <bautils.h>
 #include <coemain.h>
 #include <aknViewAppUi.h>
+#include <e32property.h>
+#include <activeidle2domainpskeys.h>
 
 #include "wmcommon.h"
 #include "widgetmanager.hrh"
@@ -49,15 +51,35 @@ CWmPlugin* CWmPlugin::NewL()
 //
 CWmPlugin::~CWmPlugin()
     {
+    iPostponedCommand = ENone;
     if ( iViewAppUi )
         {
-        Deactivate();
-        iViewAppUi->RemoveView( TUid::Uid( EWmMainContainerViewId ) );
-        }
-    iWmMainContainer = NULL;
+        if ( iWmMainContainer && IsActive() )
+            {
+            iWmMainContainer->SetClosingDown( ETrue );
+            TRAPD( err, iViewAppUi->ActivateLocalViewL(
+                            iPreviousViewUid.iViewUid ); );
+            if ( KErrNone == err )
+                {
+                iWait->Start();
+                // remove view from appui
+                iViewAppUi->RemoveView( 
+                        TUid::Uid( EWmMainContainerViewId ) );
+                }
+            else
+                {
+                TRAP_IGNORE( iViewAppUi->DeactivateActiveViewL(); );
+                iViewAppUi->RemoveFromViewStack( 
+                        *iWmMainView, iWmMainContainer );
+                delete iWmMainContainer;
+                iWmMainContainer = NULL;
+                }
+            }
+        }    
     delete iResourceLoader;
     delete iEffectManager;
     delete iPostponedContent;
+    delete iWait;
     }
 
 // ---------------------------------------------------------
@@ -76,6 +98,7 @@ CWmPlugin::CWmPlugin()
 void CWmPlugin::ConstructL()
     {
     iWmMainContainer = NULL;
+    iWmMainView = NULL;
 
     // store static view app ui
     CEikonEnv* eikonEnv = CEikonEnv::Static();
@@ -88,12 +111,16 @@ void CWmPlugin::ConstructL()
     iResourceLoader = CWmResourceLoader::NewL( *eikonEnv );
     iEffectManager = CWmEffectManager::NewL( *eikonEnv );
     
+    // wait object
+    iWait = new (ELeave) CActiveSchedulerWait();
+    
     // main view
     CWmMainContainerView* mainView =
             CWmMainContainerView::NewL( *this );
     CleanupStack::PushL( mainView );
 	iViewAppUi->AddViewL( mainView );	
 	CleanupStack::Pop( mainView );
+	iWmMainView = mainView;
     }
 
 // ---------------------------------------------------------
@@ -152,6 +179,9 @@ void CWmPlugin::MainViewActivated(
     iWmMainContainer = aWmMainContainer;
     iEffectManager->UiRendered();
     iWmMainContainer->SetClosingDown( EFalse );
+    
+    // Don't forward numeric keys to phone
+    ForwardNumericKeysToPhone( EFalse );
     }
 
 // ---------------------------------------------------------
@@ -160,11 +190,35 @@ void CWmPlugin::MainViewActivated(
 //
 void CWmPlugin::MainViewDeactivated()
     {
+    // Forward numeric keys to phone
+    ForwardNumericKeysToPhone( ETrue );
+    
     iPreviousViewUid.iViewUid = KNullUid;
     iWmMainContainer = NULL;
-    iEffectManager->UiRendered();
+    if ( iEffectManager && !iWait->IsStarted() )
+        {
+        iEffectManager->UiRendered();
+        }
 
-    TRAP_IGNORE( ExecutePostponedCommandL(); );
+    TRAP_IGNORE( ExecuteCommandL(); );
+
+    if ( iWait->IsStarted() ) { iWait->AsyncStop(); }
+    }
+
+// ---------------------------------------------------------
+// CWmPlugin::ForwardNumericKeysToPhone
+// ---------------------------------------------------------
+//
+void CWmPlugin::ForwardNumericKeysToPhone( TBool aEnabled )
+    {
+    TInt value = aEnabled ? 
+        EPSAiForwardNumericKeysToPhone : 
+        EPSAiDontForwardNumericKeysToPhone;
+    
+    RProperty::Set(
+        KPSUidAiInformation,
+        KActiveIdleForwardNumericKeysToPhone,
+        value );
     }
 
 // ---------------------------------------------------------
@@ -181,10 +235,10 @@ void CWmPlugin::SetPostponedCommandL(
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::ExecutePostponedCommandL
+// CWmPlugin::ExecuteCommandL
 // ---------------------------------------------------------
 //
-void CWmPlugin::ExecutePostponedCommandL()
+void CWmPlugin::ExecuteCommandL()
     {
     if ( iPostponedCommand == EAddToHomescreen )
         {
@@ -257,7 +311,7 @@ RFs& CWmPlugin::FileServer()
 //
 void CWmPlugin::NotifyWidgetListChanged()
     {
-    if ( iWmMainContainer )
+    if ( iWmMainContainer && !iWmMainContainer->ClosingDown() )
         {
         iWmMainContainer->HandleWidgetListChanged();
         }

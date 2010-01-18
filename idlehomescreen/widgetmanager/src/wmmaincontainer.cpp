@@ -36,7 +36,6 @@
 #include <aknlayoutscalable_apps.cdl.h>
 #include <AknLayout.lag>
 #include <AknsSkinInstance.h>
-#include <apgicnfl.h>
 #include <AknIconUtils.h>
 #include <AknsDrawUtils.h>
 #include <aknenv.h>
@@ -49,16 +48,11 @@
 #include <avkon.rsg>
 #include <coecobs.h>
 #include <coecntrl.h>
-#include <SWInstApi.h> //installer
-#include <widgetregistryclient.h> // widgetreqistry
-#include <schemehandler.h> // for starting the OVI client
 #include <featmgr.h>     // FeatureManager
 #include <hlplch.h>      // HlpLauncher
 #include <csxhelp/hmsc.hlp.hrh>
 #include <aisystemuids.hrh>
-#include <centralrepository.h>
 
-#include "wmcrkeys.h"
 #include "wmcommon.h"
 #include "wmplugin.h"
 #include "wmmaincontainer.h"
@@ -70,12 +64,11 @@
 #include "wmdetailsdlg.h"
 #include "wmportalbutton.h"
 #include "wmwidgetloaderao.h"
+#include "wmconfiguration.h"
 
 // CONSTANTS
 const TInt KTextLimit = 40; // Text-limit for find-field
 const TInt KMinWidgets = 1; // minimum number of widgets to show findpane
-_LIT8( KWrtMime, "application/x-nokia-widget");
-_LIT( KBrowserPrefix, "4 ");
 
 // ---------------------------------------------------------
 // CWmMainContainer::CWmMainContainer()
@@ -98,17 +91,15 @@ CWmMainContainer::CWmMainContainer( CWmPlugin& aWmPlugin ) :
 //
 CWmMainContainer::~CWmMainContainer()
 	{
-    delete iOviStoreUrl;
-    delete iOviStoreClientBundleId;
-    delete iOviStoreClientParam;
-        
     RemoveCtrlsFromStack();
     Components().ResetAndDestroy();
     delete iWidgetLoader;
     iWidgetsList = NULL;
-    iOviPortal = NULL;
+    iPortalButtonOne = NULL;
+    iPortalButtonTwo = NULL;
     iFindbox = NULL;
 	delete iBgContext;
+	delete iConfiguration;
 	}
 
 // ---------------------------------------------------------
@@ -176,9 +167,9 @@ void CWmMainContainer::ConstructL(
 	iBgContext = CAknsBasicBackgroundControlContext::NewL( 
 	        KAknsIIDQsnBgScreen, ScreenRect() , ETrue);
 
-	// Read needed values from cenrep
-	TRAP_IGNORE( FetchRepositoryDataL(); );
-	
+    // load configuration
+    iConfiguration = CWmConfiguration::NewL( iWmPlugin.ResourceLoader() );
+    
 	// set up controls
 	InitializeControlsL( aRect );
 
@@ -188,68 +179,6 @@ void CWmMainContainer::ConstructL(
 	
 	}
 
-// ---------------------------------------------------------
-// CWmMainContainer::FetchRepositoryDataL
-// ---------------------------------------------------------
-//
-void CWmMainContainer::FetchRepositoryDataL()
-    {
-    iOviStoreUrl = NULL;
-    iOviStoreClientBundleId = NULL;
-    iOviStoreClientParam = NULL;
-    
-    CRepository *repository = CRepository::NewLC( 
-            TUid::Uid( KCrWidgetManagerm ) );
-    TInt err = KErrNone;
-    
-    //read localized data from cenrep
-    TLanguage sysLang = User::Language();
-    for( TUint32 i = KLangId0; i <= KLangId9; i+=4 )
-        {
-        TInt crLang = 0;
-        err = repository->Get( i, crLang );
-
-        if ( sysLang == crLang && err == KErrNone )
-            {
-            // system langauge matches langauge in cenrep
-            iOviStoreUrl = HBufC::NewL( 
-                    NCentralRepositoryConstants::KMaxUnicodeStringLength );
-            TPtr ptr( iOviStoreUrl->Des() );
-            
-            // get localized ovi store url
-            err = repository->Get( i + KOviStoreBrowserUrlOffset, ptr );
-            if ( err != KErrNone )
-                {
-                delete iOviStoreUrl;
-                iOviStoreUrl = NULL;
-                }
-            }
-        }
-    
-    //read other data from cenrep
-    iOviStoreClientBundleId = HBufC::NewL( 
-            NCentralRepositoryConstants::KMaxUnicodeStringLength );
-    TPtr ptr( iOviStoreClientBundleId->Des() );
-    err = repository->Get( KOviStoreBunbleId, ptr );
-    if ( err != KErrNone )
-        {
-        delete iOviStoreClientBundleId;
-        iOviStoreClientBundleId = NULL;
-        }
-    
-    iOviStoreClientParam = HBufC::NewL( 
-            NCentralRepositoryConstants::KMaxUnicodeStringLength );
-    ptr.Set( iOviStoreClientParam->Des() );
-    err = repository->Get( KOviStoreClientParam, ptr );
-    if ( err != KErrNone )
-        {
-        delete iOviStoreClientParam;
-        iOviStoreClientParam = NULL;
-        }
-        
-    CleanupStack::PopAndDestroy( repository );
-    }
-	
 // ---------------------------------------------------------
 // CWmMainContainer::SizeChanged
 // ---------------------------------------------------------
@@ -293,8 +222,9 @@ void CWmMainContainer::LayoutControls()
         iLayout = EPortrait;
 	    }
 	
-    // layout Ovi button
-    AknLayoutUtils::LayoutControl( iOviPortal, rect, btnPane );
+    // portal button layout
+	// todo: 2-button layout
+    AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, btnPane );
     
     if( iFindbox && iFindPaneIsVisible )
         {
@@ -316,80 +246,117 @@ void CWmMainContainer::LayoutControls()
 // ---------------------------------------------------------
 //
 TKeyResponse CWmMainContainer::OfferKeyEventL( 
-		const TKeyEvent& aKeyEvent, 
-		TEventCode aType )
-	{
+        const TKeyEvent& aKeyEvent, 
+        TEventCode aType )
+    {
+    TKeyResponse keyResponse( EKeyWasNotConsumed );
+
+    // This is a bug fix for ou1cimx1#217716 & ou1cimx1#217667.
+    // For some weird reason homescreen is genarating one extra EEventKey 
+    // when using Nokia SU-8W bluetooth keyboard & backspace key. This if is to 
+    // ignore that event. Extra event allways has iModifiers set to 
+    // EModifierAutorepeatable.
+    if ( aType == EEventKey && 
+             aKeyEvent.iScanCode == EStdKeyBackspace && 
+             aKeyEvent.iModifiers == EModifierAutorepeatable )
+        {
+        return EKeyWasNotConsumed;
+        }
+    
+    // Handle search keyevent
+    keyResponse = HandleSearchKeyEventL( aKeyEvent, aType );
+    
+    // Move focus between controls
+    if ( keyResponse == EKeyWasNotConsumed )
+        {
+        keyResponse = MoveFocusByKeys( aKeyEvent, aType );
+        }
+    
+    // Handle list keyevent
+    if ( keyResponse == EKeyWasNotConsumed )
+        {
+        keyResponse = HandleListKeyEventL( aKeyEvent, aType );
+        }
+    
+    // Handle buttons keyevent
+    if ( keyResponse == EKeyWasNotConsumed )
+        {
+        keyResponse = HandleButtonKeyEventL( aKeyEvent, aType );
+        }
+    
+    // Update ui if needed 
+    if ( keyResponse == EKeyWasConsumed )
+        {
+        DrawDeferred();
+        }
+    
+    // Do not let UI framework forward the keys to child controls as
+    // we have already done that.
+    return EKeyWasConsumed;
+    }
+
+TKeyResponse CWmMainContainer::HandleSearchKeyEventL( 
+        const TKeyEvent& aKeyEvent, 
+        TEventCode aType )
+    {
     TKeyResponse keyResponse( EKeyWasNotConsumed );
     
-    if ( iFindbox )
+    // open search field with alpha digit numbers
+    if ( aType == EEventKeyDown && !iFindPaneIsVisible && 
+            aKeyEvent.iScanCode < EStdKeyF1 &&
+        TChar( aKeyEvent.iScanCode ).IsAlphaDigit() )
         {
-        // open search field with alpha digit numbers
-        if ( aType == EEventKeyDown && !iFindPaneIsVisible && 
-        aKeyEvent.iScanCode < EStdKeyF1 &&
-            TChar(aKeyEvent.iScanCode).IsAlphaDigit() )
-            {
-            ActivateFindPaneL();
-            
-            if ( iFindPaneIsVisible )
-                {
-                return EKeyWasConsumed;
-                }
-            }
+        ActivateFindPaneL();
         
         if ( iFindPaneIsVisible )
             {
-            // deactive the FindPane when Back has been pressed
-            if ( aType == EEventKeyDown && 
-                aKeyEvent.iScanCode == EStdKeyBackspace )
-                {
-                TBuf<KTextLimit> searchText;
-                iFindbox->GetSearchText( searchText );
-                if ( searchText == KNullDesC )
-                    {
-                    DeactivateFindPaneL();
-                    return EKeyWasConsumed;
-                    }
-                }
-            
-            // Cancel-selected need to unfocus findbox 
-            // to receive event in ProcessCommand
-            if ( aType == EEventKeyDown 
-            && aKeyEvent.iScanCode == EStdKeyDevice1 )
-                {
-                iFindbox->SetFocus( EFalse );
-                UpdateFocusMode();
-                return EKeyWasConsumed;
-                }
-
-            if ( aKeyEvent.iScanCode == EStdKeyNo ||
-                aKeyEvent.iCode == EKeyNo )
-                {
-                DeactivateFindPaneL();
-                return EKeyWasConsumed;
-                }
-
-            // find items with all event codes (that's the reason why there is EEventKey instead of aType)
-            TBool needsRefresh( EFalse );
+            return EKeyWasConsumed;
+            }
+        }
+    
+    if ( iFindPaneIsVisible && aType == EEventKey )
+        {
+        if ( aKeyEvent.iScanCode == EStdKeyNo || aKeyEvent.iCode == EKeyNo )
+            {
+            DeactivateFindPaneL();
+            return EKeyWasConsumed;
+            }
+        
+        TBool needsRefresh( EFalse );
+       
+        if ( iFindbox->TextLength() == 0 
+                && aKeyEvent.iScanCode == EStdKeyBackspace )
+            {
+            // if lenght is 0 and backspace is pressed AknFind will deactivate
+            // searchbox so we don't want to pass this event to AknFind
+            keyResponse = EKeyWasConsumed;
+            }
+        else
+            {
             keyResponse = AknFind::HandleFindOfferKeyEventL( 
-                                                aKeyEvent, EEventKey, this, 
-                                iWidgetsList, iFindbox, ETrue, needsRefresh );            
-            if ( needsRefresh )
-                {
-                DrawNow();
-                }
+                    aKeyEvent, aType, this, 
+                    iWidgetsList, iFindbox, ETrue, needsRefresh );
+            }
+        if ( needsRefresh )
+            {
+            DrawNow();
             }
         }
 
-    // check special cases for movement between controls
-    if ( keyResponse == EKeyWasNotConsumed && !iFindPaneIsVisible )
-         {
-         keyResponse = MoveFocusByKeys( aKeyEvent, aType );
-         }
+    return keyResponse;
+    }
 
+TKeyResponse CWmMainContainer::HandleListKeyEventL( 
+        const TKeyEvent& aKeyEvent, 
+        TEventCode aType )
+    {
+    TKeyResponse keyResponse( EKeyWasNotConsumed );
+    
     // pass key event except backpace or delete key event to widgets list if focused
-    if ( keyResponse == EKeyWasNotConsumed && iWidgetsList->IsFocused() )
+    if ( iWidgetsList->IsFocused() )
         {
-        if ( (aType == EEventKey) && (aKeyEvent.iCode == EKeyBackspace || aKeyEvent.iCode == EKeyDelete))
+        if ( ( aType == EEventKey ) && ( aKeyEvent.iCode == EKeyBackspace 
+                || aKeyEvent.iCode == EKeyDelete ) )
             {
             if( CanDoUninstall() )
                 {
@@ -402,30 +369,41 @@ TKeyResponse CWmMainContainer::OfferKeyEventL(
                     iWmPlugin.ResourceLoader().InfoPopupL(
                          R_QTN_WM_UNINST_NOT_ALLOWED, data->Name() );
                 }
+            keyResponse = EKeyWasConsumed;
             }
         else 
             {
-			//passing to listbox handler
+            //passing to listbox handler
             keyResponse = iWidgetsList->OfferKeyEventL( 
                     aKeyEvent, aType );
             }
         }
+    
+    return keyResponse;
+    }
 
-    // pass key event to OVI portal if focused
-    if ( keyResponse == EKeyWasNotConsumed && iOviPortal->IsFocused() )
+TKeyResponse CWmMainContainer::HandleButtonKeyEventL( 
+        const TKeyEvent& aKeyEvent, 
+        TEventCode aType )
+    {
+    TKeyResponse keyResponse( EKeyWasNotConsumed );
+    
+    // pass key event to portal button if focused
+    if ( iPortalButtonOne->IsFocused() )
         {
-        keyResponse = iOviPortal->OfferKeyEventL( 
+        keyResponse = iPortalButtonOne->OfferKeyEventL(
                             aKeyEvent, aType );
         }
 
-    if ( keyResponse == EKeyWasConsumed )
-        DrawDeferred();
-
-	// Do not let UI framework forward the keys to child controls as
-	// we have already done that.
-    return EKeyWasConsumed;
-	}
-
+    // pass key event to the other portal button if exists and focused
+    if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+        {
+        keyResponse = iPortalButtonTwo->OfferKeyEventL(
+                            aKeyEvent, aType );
+        }
+    
+    return keyResponse;
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::MoveFocusByKeys
@@ -448,7 +426,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list top -> up -> ovi button (portrait)
             if ( aType == EEventKey )
-                SetFocusToOviButton();
+                SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLayout == EPortrait &&
@@ -458,7 +436,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list bottom -> down -> ovi button (portrait)
             if ( aType == EEventKey )
-                SetFocusToOviButton();
+                SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLayout == ELandscape &&
@@ -466,7 +444,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list -> right -> ovi button (landscape)
             if ( aType == EEventKey )
-                SetFocusToOviButton();
+                SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLayout == ELandscapeMirrored &&
@@ -474,19 +452,19 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list -> left -> ovi button (landscape mirrored)
             if ( aType == EEventKey )
-                SetFocusToOviButton();
+                SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
         }
-    else if ( iOviPortal->IsFocused() )
+    else if ( iPortalButtonOne->IsFocused() )
         {
         // ------------------------------------
-        // focus is in the OVI PORTAL BUTTON
+        // focus is in the FIRST PORTAL BUTTON
         // ------------------------------------
         if ( iLayout == EPortrait &&
                 aKeyEvent.iScanCode == EStdKeyDownArrow )
             {
-            // ovi button -> down -> widget list top (portrait)
+            // left portal -> down -> widget list top
             if ( aType == EEventKey )
                 SetFocusToWidgetList( 0 );
             keyResponse = EKeyWasConsumed;
@@ -494,15 +472,24 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         else if ( iLayout == EPortrait &&
                 aKeyEvent.iScanCode == EStdKeyUpArrow )
             {
-            // obi button -> up -> widget list bottom (portrait)
+            // left portal -> up -> widget list bottom
             if ( aType == EEventKey )
                 SetFocusToWidgetList( iWidgetsList->Model()->NumberOfItems()-1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLayout == EPortrait &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 )
+            {
+            // left portal -> right -> right portal
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLayout == ELandscape &&
                 aKeyEvent.iScanCode == EStdKeyLeftArrow )
             {
-            // ovi button -> left -> widget list (landscape)
+            // upper portal -> left -> widget list
             if ( aType == EEventKey )
                 SetFocusToWidgetList();
             keyResponse = EKeyWasConsumed;
@@ -510,9 +497,75 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         else if ( iLayout == ELandscapeMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow )
             {
-            // ovi button -> right -> widget list (landscape mirrored)
+            // upper portal -> right -> widget list (mirrored)
             if ( aType == EEventKey )
                 SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( ( iLayout == ELandscape ||
+                iLayout == ELandscapeMirrored ) &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow &&
+                iConfiguration->PortalButtonCount() > 1 )
+            {
+            // upper portal -> down -> lower portal
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        }
+    else if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+        {
+        // ------------------------------------
+        // focus is in the SECOND PORTAL BUTTON
+        // ------------------------------------
+        if ( iLayout == EPortrait &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow )
+            {
+            // right portal -> down -> widget list top
+            if ( aType == EEventKey )
+                SetFocusToWidgetList( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLayout == EPortrait &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow )
+            {
+            // right portal -> up -> widget list bottom
+            if ( aType == EEventKey )
+                SetFocusToWidgetList( iWidgetsList->Model()->NumberOfItems()-1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLayout == EPortrait &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 )
+            {
+            // right portal -> right -> left portal
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLayout == ELandscape &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow )
+            {
+            // lower portal -> left -> widget list
+            if ( aType == EEventKey )
+                SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLayout == ELandscapeMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow )
+            {
+            // lower portal -> right -> widget list (mirrored)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( ( iLayout == ELandscape ||
+                iLayout == ELandscapeMirrored ) &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow )
+            {
+            // lower portal -> up -> upper portal
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
         }
@@ -537,13 +590,24 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
     }
 
 // ---------------------------------------------------------
-// CWmMainContainer::SetFocusToOviButton
+// CWmMainContainer::SetFocusToPortalButton
 // ---------------------------------------------------------
 //
-void CWmMainContainer::SetFocusToOviButton()
+void CWmMainContainer::SetFocusToPortalButton( TInt aIndex )
     {
-    iWidgetsList->SetFocus(EFalse);
-    iOviPortal->SetFocus(ETrue);
+    if ( aIndex != 0 && iPortalButtonTwo )
+        {
+        iWidgetsList->SetFocus(EFalse);
+        iPortalButtonOne->SetFocus(EFalse);
+        iPortalButtonTwo->SetFocus(ETrue);
+        }
+    else
+        {
+        iWidgetsList->SetFocus(EFalse);
+        if ( iPortalButtonTwo )
+            iPortalButtonTwo->SetFocus(EFalse);
+        iPortalButtonOne->SetFocus(ETrue);
+        }
     DrawDeferred();
     UpdateFocusMode();
     }
@@ -554,12 +618,14 @@ void CWmMainContainer::SetFocusToOviButton()
 //
 void CWmMainContainer::SetFocusToWidgetList( TInt aIndex )
     {
-    iOviPortal->SetFocus(EFalse);
-    iWidgetsList->SetFocus(ETrue);
+    iPortalButtonOne->SetFocus(EFalse);
+    if ( iPortalButtonTwo )
+        iPortalButtonTwo->SetFocus(EFalse);
     if ( aIndex >= 0 && aIndex < iWidgetsList->Model()->NumberOfItems() )
         {
         iWidgetsList->SetCurrentItemIndex( aIndex );
         }
+    iWidgetsList->SetFocus(ETrue);
     DrawDeferred();
     UpdateFocusMode();
     }
@@ -570,10 +636,15 @@ void CWmMainContainer::SetFocusToWidgetList( TInt aIndex )
 //
 void CWmMainContainer::UpdateFocusMode()
     {
-    if ( iOviPortal->IsFocused() )
+    if ( iPortalButtonOne->IsFocused() )
         {
-        // OVI BUTTON is focused 
-        iFocusMode = EOvi;
+        // PORTAL BUTTON is focused
+        iFocusMode = EPortal;
+        }
+    else if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+        {
+        // SECOND PORTAL BUTTON is focused
+        iFocusMode = EPortal;
         }
     else if( ( iFindPaneIsVisible ) && 
         ( iFindbox->IsFocused() || iWidgetsList->IsFocused() ) )
@@ -669,13 +740,16 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 //
 void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
 	{
-	// Create OVI STORE button
-    HBufC* oviText = StringLoader::LoadLC( R_QTN_WM_GO_TO_OVI_STORE );    
-    iOviPortal = CWmPortalButton::NewL( this, *oviText );
-    CleanupStack::PopAndDestroy( oviText );
-    
-    iOviPortal->SetMopParent( this );    
-    AddControlL( iOviPortal, EOviPortal );
+	// Create portal buttons
+    iPortalButtonOne = CWmPortalButton::NewL( this, 0 );
+    iPortalButtonOne->SetMopParent( this );    
+    AddControlL( iPortalButtonOne, EPortalOne );
+    if ( iConfiguration->PortalButtonCount() > 1 )
+        {
+        iPortalButtonTwo = CWmPortalButton::NewL( this, 1 );
+        iPortalButtonTwo->SetMopParent( this );    
+        AddControlL( iPortalButtonTwo, EPortalTwo );
+        }
     
     // Create widget list box
     iWidgetsList = CWmListBox::NewL(
@@ -807,7 +881,7 @@ CWmPlugin& CWmMainContainer::WmPlugin()
 //
 TBool CWmMainContainer::PortalSelected()
     {    
-    return ( iFocusMode == EOvi );
+    return ( iFocusMode == EPortal );
     }
 
 // ---------------------------------------------------------
@@ -864,7 +938,7 @@ TBool CWmMainContainer::CanDoLaunch()
     if ( WidgetSelected() )
         {
         CWmWidgetData* data = iWidgetsList->WidgetData();        
-        if ( data->WidgetType() == CWmWidgetData::ECps &&
+        if ( data && data->WidgetType() == CWmWidgetData::ECps &&
             data->PublisherUid() != KNullUid )
             {
             retVal = ETrue;
@@ -930,12 +1004,36 @@ void CWmMainContainer::AddWidgetToHomeScreenL()
 
         // set add to homescreen to be executed later
         iWmPlugin.SetPostponedCommandL(
-                CWmPlugin::EAddToHomescreen, data->HsContentInfo() );
+            CWmPlugin::EAddToHomescreen,
+            data->HsContentInfo() );
 
-        iWmPlugin.Deactivate();
+        // check if we can add any widgets to hs. 
+        TBool hsContentFull = ETrue;
+        for ( TInt i=0; i<iWidgetsList->WidgetDataCount(); i++ )
+            {
+            CHsContentInfo& info = iWidgetsList->WidgetData(i).HsContentInfo();
+            if ( info.CanBeAdded() ) 
+                {
+                hsContentFull = EFalse;
+                break;
+                }
+            }
+        
+        // do not deactivate wm if wrt widget already exists on hs,
+        // instead of that show popup info note.
+        if ( CWmWidgetData::ECps == data->WidgetType() &&
+            !data->HsContentInfo().CanBeAdded() &&
+            !hsContentFull )
+            {
+            iWmPlugin.ExecuteCommandL();
+            }
+        else
+            {
+            iWmPlugin.Deactivate();
+            }
         }
     }
-	
+
 // ---------------------------------------------------------------------------
 // CWmMainContainer::LaunchWidgetL
 // ---------------------------------------------------------------------------
@@ -1076,90 +1174,25 @@ void CWmMainContainer::UninstallWidgetL()
     {
     if ( CanDoUninstall() )
         {
-        CWmWidgetData* data = iWidgetsList->WidgetData();
-        
-        SwiUI::RSWInstLauncher installer;
-        User::LeaveIfError( installer.Connect() );
-        
-        installer.Uninstall( data->PublisherUid(), KWrtMime );
-        installer.Close();
+        iWidgetsList->WidgetData()->UnInstallL();
         }
     }
 
 // ---------------------------------------------------------------------------
-// CWmMainContainer::OpenOviPortalL
+// CWmMainContainer::OpenPortalL
 // ---------------------------------------------------------------------------
 //
-void CWmMainContainer::OpenOviPortalL()
+void CWmMainContainer::OpenPortalL()
     {
     if ( !iClosingDown )
         {
-        RApaLsSession session;
-        User::LeaveIfError( session.Connect() );
-        CleanupClosePushL( session );
-        TApaAppInfo appInfo;
-        TUid launchUid;
-
-        // Get ovi store uid    
-        RWidgetRegistryClientSession widgetSession;
-        User::LeaveIfError( widgetSession.Connect() );    
-        CleanupClosePushL( widgetSession );
-        
-        launchUid.iUid = widgetSession.GetWidgetUidL( *iOviStoreClientBundleId );    
-        CleanupStack::PopAndDestroy( &widgetSession );
-
-        TInt err = session.GetAppInfo( appInfo, launchUid );
-        if ( err == KErrNone )
-            {
-            CApaCommandLine* commandLine = CApaCommandLine::NewLC();
-            commandLine->SetExecutableNameL(appInfo.iFullName); 
-            HBufC8* buf8 = HBufC8::NewLC( iOviStoreClientParam->Des().Length() );
-            buf8->Des().Copy( *iOviStoreClientParam );
-                    
-            //cmdLine->SetOpaqueDataL( *buf8 );
-            commandLine->SetTailEndL( *buf8 );
-            err = session.StartApp( *commandLine );
-            CleanupStack::PopAndDestroy( buf8 );
-            CleanupStack::PopAndDestroy( commandLine );
-            }
-        else
-            {
-            if( iOviStoreUrl )
-                {
-                // Ovi store not found start browser
-                const TUid KOSSBrowserUidValue = { 0x10008D39 };
-                HBufC* param = HBufC::NewLC( iOviStoreUrl->Length() + 
-                        KBrowserPrefix().Length() );
-                
-                param->Des().Copy( KBrowserPrefix );
-                param->Des().Append( *iOviStoreUrl );
-                
-                TUid id( KOSSBrowserUidValue );
-                
-                TApaTaskList taskList( CEikonEnv::Static()->WsSession() );
-                TApaTask task = taskList.FindApp(id);
-                if( task.Exists() )
-                    {
-                    task.BringToForeground();
-                    HBufC8* param8 = HBufC8::NewLC(param->Length());
-                    param8->Des().Append(*param);
-                    task.SendMessage(TUid::Uid(0), *param8); // UID not used
-                    CleanupStack::PopAndDestroy(param8);
-                    }
-                else
-                    {
-                    if( !session.Handle() )
-                        {
-                        User::LeaveIfError( session.Connect() );
-                        }
-                    TThreadId thread;
-                    User::LeaveIfError(session.StartDocument(*param, KOSSBrowserUidValue, thread));
-                      
-                    }
-                CleanupStack::PopAndDestroy( param );
-                }
-            }
-        CleanupStack::PopAndDestroy( &session );
+        // execute whichever of the portal buttons happens to be active
+        if ( iPortalButtonOne->IsFocused() )
+            iPortalButtonOne->ExecuteL();
+        else if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+            iPortalButtonTwo->ExecuteL();
+        else if ( !iPortalButtonTwo )
+            iPortalButtonOne->ExecuteL();
         }
     }
 
@@ -1172,7 +1205,7 @@ void CWmMainContainer::SelectL()
     if ( WidgetSelected() )
         AddWidgetToHomeScreenL();
     else if ( PortalSelected() )
-        OpenOviPortalL();
+        OpenPortalL();
     else
         SetFocusToWidgetList();
     }
@@ -1245,10 +1278,8 @@ void CWmMainContainer::LaunchDetailsDialogL()
         const CFbsBitmap* mask = ( data->LogoImageMask() ) ? 
                     data->LogoImageMask() : iWidgetsList->DefaultMask();
         
-        TPtrC description = ( data->Description().Length() > 0 ) ? 
-            data->Description() : iWmPlugin.ResourceLoader().NoDescriptionText();
         CWmDetailsDlg* dlg = CWmDetailsDlg::NewL(
-                data->Name(), description, 
+                data->Name(), data->Description(), 
                 data->HsContentInfo().CanBeAdded(),
                 logo, mask, iBgContext );
 
@@ -1275,6 +1306,15 @@ void CWmMainContainer::SetClosingDown( TBool aClosingDown )
 TBool CWmMainContainer::ClosingDown()
     {
     return iClosingDown;
+    }
+
+// ----------------------------------------------------
+// CWmMainContainer::Configuration
+// ----------------------------------------------------
+//
+CWmConfiguration& CWmMainContainer::Configuration()
+    {
+    return *iConfiguration;
     }
 
 // ----------------------------------------------------

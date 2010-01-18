@@ -32,6 +32,7 @@ SOURCEPATH        ../src
 SOURCE            hscontentcontrolfactory.cpp 
 SOURCE            hscontentcontrolui.cpp 
 SOURCE            hscontentcontrolecomlistener.cpp
+SOURCE            hscontentcontroluninstallmonitor.cpp
 
 //By default, the build tools look for the WINSCW def file in a BWINS directory
 //(at the same level as the directory containing the mmp file), 

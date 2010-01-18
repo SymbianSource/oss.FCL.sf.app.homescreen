@@ -52,6 +52,8 @@
 #include "xnnode.h"
 #include "xnpanic.h"
 #include "xneffectmanager.h"
+#include "xneditor.h"
+#include "xnbackgroundmanager.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -7779,7 +7781,7 @@ static CXnNode* BuildTriggerNodeLC( CXnUiEngine& aUiEngine,
 
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
-        nameValue, aUiEngine.ODT()->DomDocument().StringPool() );
+        nameValue, *aUiEngine.ODT()->DomDocument().StringPool() );
 
     CleanupStack::Pop( nameValue );
 
@@ -7838,7 +7840,7 @@ static void UpdateInternalUnits( TReal& aHorizontalUnitInPixels,
 //
 static CXnNode* BuildScreenDeviceChangeTriggerNodeLC( CXnUiEngine& aUiEngine )
     {
-    CXnDomStringPool& sp( aUiEngine.ODT()->DomDocument().StringPool() );
+    CXnDomStringPool* sp( aUiEngine.ODT()->DomDocument().StringPool() );
 
     CXnNode* node = CXnNode::NewL();
     CleanupStack::PushL( node );
@@ -7859,7 +7861,7 @@ static CXnNode* BuildScreenDeviceChangeTriggerNodeLC( CXnUiEngine& aUiEngine )
         XnPropertyNames::action::trigger::name::KScreenDeviceChange );
 
     CXnProperty* name = CXnProperty::NewL(
-        XnPropertyNames::action::trigger::KName, nameValue, sp );
+        XnPropertyNames::action::trigger::KName, nameValue, *sp );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
 
@@ -7885,7 +7887,7 @@ static CXnNode* BuildScreenDeviceChangeTriggerNodeLC( CXnUiEngine& aUiEngine )
     reasonValue->SetStringValueL( CXnDomPropertyValue::EString, *reasonString );
 
     CXnProperty* reason = CXnProperty::NewL( XnPropertyNames::action::trigger::
-        name::uidefinitionmodification::KReason, reasonValue, sp );
+        name::uidefinitionmodification::KReason, reasonValue, *sp );
 
     CleanupStack::Pop( reasonValue );
 
@@ -8934,6 +8936,12 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
         // Update client rect
         SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
 
+        // Update background rect
+        // Bg rect is always screen size.
+        TRect bgRect;
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, bgRect );
+        Editor()->BgManager().SetRect( bgRect );
+
         iEditMode->HandleScreenDeviceChangedL();
         
         // Force relayout
@@ -9373,7 +9381,7 @@ void CXnUiEngineImpl::SetClientRectL( TRect aRect, TBool aDrawNow )
             iClientRect );
         
         iAppUiAdapter.ViewAdapter().BgControl().SetRect( aRect );
-        
+
         if ( aDrawNow )
             {
             RootNode()->SetDirtyL();
@@ -9507,7 +9515,7 @@ CXnHitTest& CXnUiEngineImpl::HitTest() const
 void CXnUiEngineImpl::PositionStylusPopupL( CXnNode& aNode,
     CXnNode& aReference, const TPoint& aPosition )
     {
-    CXnDomStringPool& sp( aNode.DomNode()->StringPool() );
+    CXnDomStringPool* sp( aNode.DomNode()->StringPool() );
     TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
     RRegion region;
     region.Copy( dirtyRegion->iRegion );    
@@ -9516,14 +9524,14 @@ void CXnUiEngineImpl::PositionStylusPopupL( CXnNode& aNode,
     // Set initial position to (0, 0) to calculate popup metrics
     CXnProperty* top = CXnProperty::NewL(
         XnPropertyNames::style::common::KTop, 0,
-        CXnDomPropertyValue::EPx, sp );
+        CXnDomPropertyValue::EPx, *sp );
     CleanupStack::PushL( top );
     aNode.SetPropertyL( top );
     CleanupStack::Pop( top );
     top = NULL;
     CXnProperty* left = CXnProperty::NewL(
         XnPropertyNames::style::common::KLeft, 0,
-        CXnDomPropertyValue::EPx, sp );
+        CXnDomPropertyValue::EPx, *sp );
     CleanupStack::PushL( left );
     aNode.SetPropertyL( left );
     CleanupStack::Pop( left );
@@ -9533,7 +9541,7 @@ void CXnUiEngineImpl::PositionStylusPopupL( CXnNode& aNode,
     CXnProperty* display = CXnProperty::NewL(
         XnPropertyNames::style::common::KDisplay,
         XnPropertyNames::style::common::display::KBlock,
-        CXnDomPropertyValue::EString, sp );
+        CXnDomPropertyValue::EString, *sp );
     CleanupStack::PushL( display );
     aNode.SetPropertyL( display );
     CleanupStack::Pop( display );
@@ -9717,13 +9725,13 @@ void CXnUiEngineImpl::PositionStylusPopupL( CXnNode& aNode,
     // Set positions
     top = CXnProperty::NewL(
         XnPropertyNames::style::common::KTop, tl.iY,
-        CXnDomPropertyValue::EPx, sp );
+        CXnDomPropertyValue::EPx, *sp );
     CleanupStack::PushL( top );
     aNode.SetPropertyL( top );
     CleanupStack::Pop( top );
     left = CXnProperty::NewL(
         XnPropertyNames::style::common::KLeft, tl.iX,
-        CXnDomPropertyValue::EPx, sp );
+        CXnDomPropertyValue::EPx, *sp );
     CleanupStack::PushL( left );
     aNode.SetPropertyL( left );
     CleanupStack::Pop( left );

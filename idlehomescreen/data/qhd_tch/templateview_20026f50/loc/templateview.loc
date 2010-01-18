@@ -260,3 +260,9 @@
 // w:
 // r: TB9.2
 #define qtn_hs_edit_widget_catalog "Widget Catalog"
+
+// d: Deletes the current Home screen page and focus goes to the next available Home screen page in Edit mode
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_page_edit_options_delete "Delete page"

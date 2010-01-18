@@ -27,12 +27,20 @@
 #include <gulicon.h>
 #include <avkon.mbg>
 #include <widgetmanager.mbg>
+#include <apgcli.h>
+#include <apgtask.h>
+#include <widgetregistryclient.h> // widgetreqistry
+
 
 #include "wmportalbutton.h"
 #include "wmcommon.h"
 #include "wmplugin.h"
 #include "wmresourceloader.h"
 #include "wmmaincontainer.h"
+#include "wmconfiguration.h"
+
+// CONSTANTS
+_LIT( KBrowserPrefix, "4 ");
 
 // MEMBER FUNCTIONS
 
@@ -42,14 +50,21 @@
 //
 CWmPortalButton* CWmPortalButton::NewL( 
         const CCoeControl* aParent,
-        const TDesC& aText,
-        const TDesC& aUrl,
-        TWmUiControlIds aButtonCtrlId )
+        TInt aPortalButtonIndex )
 	{
  	CWmPortalButton* self = new (ELeave) CWmPortalButton( 
-                KAknButtonTextInsideFrame, aButtonCtrlId );
-    CleanupStack::PushL( self );
-    self->ConstructL( aParent,aText, aUrl );
+                KAknButtonTextInsideFrame, aPortalButtonIndex );
+
+ 	CleanupStack::PushL( self );
+    
+    CWmMainContainer* mainContainer =
+        static_cast <CWmMainContainer*>( 
+            const_cast <CCoeControl*>( aParent ) );
+
+    self->ConstructL( mainContainer,
+            mainContainer->Configuration().PortalButtonText( aPortalButtonIndex ),
+            mainContainer->Configuration().PortalButtonIcon( aPortalButtonIndex ) );
+    
     CleanupStack::Pop( self );
     return self;
 	}
@@ -59,9 +74,13 @@ CWmPortalButton* CWmPortalButton::NewL(
 // ---------------------------------------------------------
 //
 CWmPortalButton::~CWmPortalButton()
-    {
-    delete iText;
-    delete iUrl;
+    {    
+    delete iButtonIcon;
+    delete iButtonIconMask;
+    
+    // if MAknIconFileProvider was used to create image from icon string
+    // then it'll try accessing imageconverter after bitmap deletion
+    // for de-reference open file count, so it should be deleted last.
     delete iImageConverter;
     }
 
@@ -71,10 +90,12 @@ CWmPortalButton::~CWmPortalButton()
 //
 CWmPortalButton::CWmPortalButton( 
                         const TInt aFlags,
-                        TWmUiControlIds aButtonCtrlId )
+                        TInt aPortalButtonIndex )
     :CAknButton( aFlags ),
-    iButtonCtrlId( aButtonCtrlId )
+    iPortalButtonIndex( aPortalButtonIndex )
     {
+    iButtonIcon = NULL;
+    iButtonIconMask = NULL;
     }
 
 // ---------------------------------------------------------
@@ -82,14 +103,15 @@ CWmPortalButton::CWmPortalButton(
 // ---------------------------------------------------------
 //
 void CWmPortalButton::ConstructL( 
-        const CCoeControl* aParent,
-        const TDesC& aText, const TDesC& aUrl )
+        CWmMainContainer* aParent,
+        const TDesC& aText,
+        const TDesC& aIcon )
     {
     if (  !aParent )
         {
         User::Leave( KErrArgument );
         }
-    else if ( iButtonCtrlId != EOviPortal )
+    else if ( iPortalButtonIndex != 0 )
         {
         // operator button not supported until layout available.
         User::Leave( KErrNotSupported );
@@ -98,32 +120,15 @@ void CWmPortalButton::ConstructL(
     SetContainerWindowL( *aParent );
     
     // Obtain pointer to main container.
-    iWmMainContainer = 
-            static_cast <CWmMainContainer*>( 
-                const_cast <CCoeControl*>( aParent ) );
+    iWmMainContainer = aParent;
     
-    CGulIcon* icon = AknsUtils::CreateGulIconL(
-            AknsUtils::SkinInstance(), KAknsIIDQgnMenuOviStore,
-            iWmMainContainer->WmPlugin().ResourceLoader().IconFilePath(),
-            EMbmWidgetmanagerQgn_menu_ovistore,
-            EMbmWidgetmanagerQgn_menu_ovistore_mask );
-    
-    CleanupStack::PushL( icon );
-    CAknButton::ConstructL( icon, NULL, NULL, NULL,
-                            aText, KNullDesC, 0 );
-    CleanupStack::Pop( icon ); // ownership taken
-    
-    TAknsItemID frameId = ((iButtonCtrlId == EOviPortal) ? 
-        KAknsIIDQgnHomeWmButton : KAknsIIDQsnFrButtonNormal);
-    TAknsItemID frameCenterId = ((iButtonCtrlId == EOviPortal) ? 
-        KAknsIIDQgnHomeWmButtonCenter : KAknsIIDQsnFrButtonCenterNormal );
-    TAknsItemID framePressedId = ((iButtonCtrlId == EOviPortal) ? 
-        KAknsIIDQgnHomeWmButtonPressed : KAknsIIDQsnFrButtonPressed );
-    TAknsItemID framePressedCenterId = ((iButtonCtrlId == EOviPortal) ? 
-        KAknsIIDQgnHomeWmButtonPressedCenter : KAknsIIDQsnFrButtonCenterPressed );
+    // construct the button
+    CAknButton::ConstructL( NULL, NULL, NULL, NULL, aText, KNullDesC, 0 );
 
-    iText = aText.AllocL();
-    iUrl = aUrl.AllocL();
+    TAknsItemID frameId = KAknsIIDQgnHomeWmButton;
+    TAknsItemID frameCenterId = KAknsIIDQgnHomeWmButtonCenter;
+    TAknsItemID framePressedId = KAknsIIDQgnHomeWmButtonPressed;
+    TAknsItemID framePressedCenterId = KAknsIIDQgnHomeWmButtonPressedCenter;
 
     SetFocusing( ETrue );
     SetBackgroundIds( frameId,
@@ -143,67 +148,176 @@ void CWmPortalButton::ConstructL(
 						KAknsIIDDefault,
 						KAknsIIDDefault );
     
+    // start image converter for the icon
+    iImageConverter = CWmImageConverter::NewL( this );
+    TSize iconsize( LayoutIconSize() );
+    iImageConverter->HandleIconString(
+            iconsize.iWidth, iconsize.iHeight, aIcon );
+    // observe our own press events
+    SetObserver( this );
+    
     // ready to be drawn
     ActivateL();
     }
 
-// ---------------------------------------------------------
-// CWmPortalButton::HandlePointerEventL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Runs HTTP method: (starts browser or brongs browser to foreground)
+// ---------------------------------------------------------------------------
 //
-void CWmPortalButton::HandlePointerEventL( 
-        const TPointerEvent& aPointerEvent )
-	{
-	CAknButton::HandlePointerEventL( aPointerEvent);
-	
-	if ( AknLayoutUtils::PenEnabled() )
-		{
-        switch ( aPointerEvent.iType )
-            {
-            case TPointerEvent::EButton1Down:
-                {
-                break;	
-                }
-            case TPointerEvent::EButton1Up:
-                {
-                if ( iWmMainContainer && 
-                    iButtonCtrlId == EOviPortal )
-                    {
-                    iWmMainContainer->OpenOviPortalL();
-                    }
-                break;
-                }
-            default:
-                break;
-            }
-       }	
-	}
-	
-// ---------------------------------------------------------
-// CWmPortalButton::OfferKeyEventL
-// ---------------------------------------------------------
-//
-TKeyResponse CWmPortalButton::OfferKeyEventL( 
-		const TKeyEvent& aKeyEvent, 
-		TEventCode aType )
+void TryRunHttpL( const TDesC& aParam )
     {
-    TKeyResponse keyResponse( EKeyWasNotConsumed );    
-    keyResponse = CAknButton::OfferKeyEventL( aKeyEvent, aType );
+    RApaLsSession session;
+    User::LeaveIfError( session.Connect() );
+    CleanupClosePushL( session );
+
+    // browser start parameters
+    const TUid KOSSBrowserUidValue = { 0x10008D39 };
+    HBufC* param = HBufC::NewLC( aParam.Length() + 
+            KBrowserPrefix().Length() );
     
-    if ( ( aType == EEventKey ) &&
-       ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-        aKeyEvent.iScanCode == EStdKeyEnter ) )
+    param->Des().Copy( KBrowserPrefix );
+    param->Des().Append( aParam );
+    
+    TUid id( KOSSBrowserUidValue );
+    
+    TApaTaskList taskList( CEikonEnv::Static()->WsSession() );
+    TApaTask task = taskList.FindApp( id );
+    if( task.Exists() )
         {
-        if ( iWmMainContainer && 
-            iButtonCtrlId == EOviPortal )
-            {
-            iWmMainContainer->OpenOviPortalL();
-            }
-
-        keyResponse = EKeyWasConsumed;
+        task.BringToForeground();
+        HBufC8* param8 = HBufC8::NewLC(param->Length());
+        param8->Des().Append(*param);
+        task.SendMessage(TUid::Uid(0), *param8); // UID not used
+        CleanupStack::PopAndDestroy(param8);
         }
+    else
+        {
+        if( !session.Handle() )
+            {
+            User::LeaveIfError( session.Connect() );
+            }
+        TThreadId thread;
+        User::LeaveIfError(session.StartDocument(*param, KOSSBrowserUidValue, thread));
+        }
+    
+    CleanupStack::PopAndDestroy( param );
+    CleanupStack::PopAndDestroy( &session );
+    }
 
-    return keyResponse;
+// ---------------------------------------------------------------------------
+// Runs WIDGET method: (launches given widget with parameters)
+// ---------------------------------------------------------------------------
+//
+void TryRunWidgetL( const TDesC& aParam, const TDesC& aBundleId )
+    {
+    RApaLsSession session;
+    User::LeaveIfError( session.Connect() );
+    CleanupClosePushL( session );
+    TApaAppInfo appInfo;
+    TUid launchUid;
+    
+    // Get widget uid    
+    RWidgetRegistryClientSession widgetSession;
+    User::LeaveIfError( widgetSession.Connect() );    
+    CleanupClosePushL( widgetSession );
+    launchUid.iUid = widgetSession.GetWidgetUidL( aBundleId );
+    CleanupStack::PopAndDestroy( &widgetSession );
+
+    // prepare widget start params
+    User::LeaveIfError( session.GetAppInfo( appInfo, launchUid ) );
+    CApaCommandLine* commandLine = CApaCommandLine::NewLC();
+    commandLine->SetExecutableNameL( appInfo.iFullName );
+    HBufC8* buf8 = HBufC8::NewLC( aParam.Length() );
+    buf8->Des().Copy( aParam );
+
+    // do the launch
+    commandLine->SetTailEndL( *buf8 );
+    User::LeaveIfError( session.StartApp( *commandLine ) );
+    
+    CleanupStack::PopAndDestroy( buf8 );
+    CleanupStack::PopAndDestroy( commandLine );
+    CleanupStack::PopAndDestroy( &session );
+    }
+
+// ---------------------------------------------------------------------------
+// Tries to open a portal with given method and parameters.
+// this method may be called twice on a portal button, if a primary
+// method fails.
+// ---------------------------------------------------------------------------
+//
+void TryOpenPortalL(
+        CWmConfiguration::TMethod aMethod, const TDesC& aParam,
+        const TDesC& aBundleId )
+    {
+    // open portal according to the method.
+    if ( aMethod == CWmConfiguration::EHttp )
+        { TryRunHttpL( aParam ); }
+    else if ( aMethod == CWmConfiguration::EWidget )
+        { TryRunWidgetL( aParam, aBundleId ); }
+    else
+        { /* do nothing */ }
+    }
+
+// ---------------------------------------------------------------------------
+// Opens a portal. Called when user presses a portal button. tries the
+// primary method, and if if fails, tries the secondary. If it fails,
+// gives up.
+// ---------------------------------------------------------------------------
+//
+void OpenPortalL(
+        CWmConfiguration& aConfiguration, TInt aPortalIndex )
+    {
+    TRAPD( err,
+        TryOpenPortalL(
+            aConfiguration.PortalButtonPrimaryMethod( aPortalIndex ),
+            aConfiguration.PortalButtonPrimaryParams( aPortalIndex ),
+            aConfiguration.PortalButtonBundleId( aPortalIndex ) ); );
+    if ( err != KErrNone )
+        {
+        // if secondary method fails, leave will be propagated.
+        TryOpenPortalL(
+            aConfiguration.PortalButtonSecondaryMethod( aPortalIndex ),
+            aConfiguration.PortalButtonSecondaryParams( aPortalIndex ),
+            aConfiguration.PortalButtonBundleId( aPortalIndex ) );
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::ExecuteL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::ExecuteL()
+    {
+    OpenPortalL( iWmMainContainer->Configuration(), iPortalButtonIndex );
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::HandleControlEventL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::HandleControlEventL( CCoeControl* /*aControl*/,
+        TCoeEvent aEventType )
+    {
+    // execute portal action when button pressed (short or long press)
+    if ( aEventType == EEventStateChanged ||
+        aEventType == ELongPressEndedEvent )
+        {
+        ExecuteL();
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::LayoutIconSize
+// ---------------------------------------------------------
+//
+TSize CWmPortalButton::LayoutIconSize() const
+    {
+    TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
+    TAknLayoutRect imageLayout;
+    imageLayout.LayoutRect( Rect(),
+        AknLayoutScalable_Apps::wgtman_btn_pane_g1(
+            landscape ? 1 : 0).LayoutLine() );
+    return imageLayout.Rect().Size();
     }
 
 // ---------------------------------------------------------
@@ -214,17 +328,19 @@ void CWmPortalButton::SizeChanged()
     {    
     CAknButton::SizeChanged();
 
-    TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
-    TRect rect = Rect();
-    TAknLayoutRect imageLayout;
-    if ( iButtonCtrlId == EOviPortal )
-        {
-        imageLayout.LayoutRect( rect,
-                AknLayoutScalable_Apps::wgtman_btn_pane_g1(
-                                    landscape ? 1 : 0).LayoutLine() );
-        }
     SetTextVerticalAlignment( CAknButton::ECenter );
-    SetIconSize( imageLayout.Rect().Size() );
+    
+    // resize icon
+    if ( iButtonIcon && iButtonIconMask )
+        {
+        TSize size = LayoutIconSize();
+        AknIconUtils::SetSize( 
+            iButtonIcon, size, EAspectRatioPreserved );
+        AknIconUtils::SetSize( 
+            iButtonIconMask, size, EAspectRatioPreserved );
+        }
+        
+    TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
     SetTextAndIconAlignment( 
             landscape ? CAknButton::EIconOverText : CAknButton::EIconBeforeText );
     }
@@ -235,21 +351,28 @@ void CWmPortalButton::SizeChanged()
 //
 void CWmPortalButton::NotifyCompletion( TInt aError )
     {
-    if ( KErrNone != aError )
+    if ( KErrNone == aError )
         {
-        // no image available. Do nothing.
-        }
-    else
-        {        
-        CGulIcon* icon = NULL;
-        TRAPD( err, icon = CGulIcon::NewL( 
-                iImageConverter->Bitmap(), iImageConverter->Mask() ) );
-        if ( KErrNone == err && icon )
+        // take ownership of icon
+        delete iButtonIcon;
+        iButtonIcon = NULL;
+        iButtonIcon = iImageConverter->Bitmap();
+        delete iButtonIconMask;
+        iButtonIconMask = NULL;
+        iButtonIconMask = iImageConverter->Mask();
+        if ( iButtonIcon && iButtonIconMask )
             {
-            // Ownership transfered
-            State()->SetIcon( icon );
+            TSize size = LayoutIconSize();
+            AknIconUtils::SetSize( 
+                    iButtonIcon, size, EAspectRatioPreserved );
+            AknIconUtils::SetSize( 
+                    iButtonIconMask, size, EAspectRatioPreserved );
             DrawDeferred();            
             }
+        }
+    else
+        {
+        // no image available. Do nothing.
         }
     }
 
@@ -269,17 +392,13 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
     CWindowGc& gc = SystemGc();
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
 
- 	TAknsItemID frameId = ( ( iButtonCtrlId == EOviPortal) ? 
- 	    KAknsIIDQgnHomeWmButton : KAknsIIDQsnFrButtonNormal );
-    TAknsItemID frameCenterId = ( ( iButtonCtrlId == EOviPortal) ? 
-        KAknsIIDQgnHomeWmButtonCenter : KAknsIIDQsnFrButtonCenterNormal );
+ 	TAknsItemID frameId = ( KAknsIIDQgnHomeWmButton );
+    TAknsItemID frameCenterId = ( KAknsIIDQgnHomeWmButtonCenter );
  	
     if ( iButtonPressed )
     	{
-        frameId = ( ( iButtonCtrlId == EOviPortal) ? 
-            KAknsIIDQgnHomeWmButtonPressed : KAknsIIDQsnFrButtonPressed );
-        frameCenterId = ( ( iButtonCtrlId == EOviPortal) ? 
-            KAknsIIDQgnHomeWmButtonPressedCenter : KAknsIIDQsnFrButtonCenterPressed );
+        frameId = ( KAknsIIDQgnHomeWmButtonPressed );
+        frameCenterId = ( KAknsIIDQgnHomeWmButtonPressedCenter );
     	}
     else if ( IsDimmed() )
         {
@@ -310,27 +429,27 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
         {
         TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
         
-        const CGulIcon* icon = state->Icon();
-        CFbsBitmap* bitmap = const_cast<CFbsBitmap*>(icon->Bitmap());
-        CFbsBitmap* mask = const_cast<CFbsBitmap*>(icon->Mask());
-        // draw image
-        if ( state->Icon() && bitmap && mask )
+        
+        // draw image if one exists
+        if ( iButtonIcon && iButtonIconMask )
             {
             TAknLayoutRect imageLayout;
-            if ( iButtonCtrlId == EOviPortal )
+            // todo: 2-button layout
+            if ( iWmMainContainer->Configuration().PortalButtonCount() == 1 )
                 {
                 imageLayout.LayoutRect( rect,
                         AknLayoutScalable_Apps::wgtman_btn_pane_g1(
                                 landscape ? 1 : 0).LayoutLine() );
                 }
-            imageLayout.DrawImage( gc, bitmap, mask );
+            imageLayout.DrawImage( gc, iButtonIcon, iButtonIconMask );
             }
         
         // draw text if portrait        
         if ( !landscape )
             {
             TAknTextComponentLayout leftLayout;
-            if ( iButtonCtrlId == EOviPortal )
+            // todo: 2-button layout
+            if ( iWmMainContainer->Configuration().PortalButtonCount() == 1 )
                 {
                 leftLayout = AknLayoutScalable_Apps::wgtman_btn_pane_t1( 
                                                     landscape ? 1 : 0  );

@@ -131,18 +131,6 @@ const TDesC& CXnNewsticker::Title(TInt aIndex)
             (ControlAdapter()))->Title(aIndex);
     }
 
-
-// ---------------------------------------------------------
-// CXnNewsticker::SetSeparatorImageL
-// ---------------------------------------------------------
-//
-TInt CXnNewsticker::SetSeparatorImageL(CGulIcon* aIcon)
-    {
-    return (static_cast<CXnNewstickerAdapter*>
-            (ControlAdapter()))->SetSeparatorImageL(aIcon);
-    }
-
-
 // ---------------------------------------------------------
 // CXnNewsticker::ClearTitles
 // ---------------------------------------------------------
@@ -151,27 +139,6 @@ void CXnNewsticker::ClearTitles()
     {
     (static_cast<CXnNewstickerAdapter*>
             (ControlAdapter()))->ClearTitles();
-    }
-
-
-// ---------------------------------------------------------
-// CXnNewsticker::AppendSvgTitleL
-// ---------------------------------------------------------
-//
-void CXnNewsticker::AppendSvgTitleL(const TDesC8& aByteData)
-    {
-    (static_cast<CXnNewstickerAdapter*>
-            (ControlAdapter()))->AppendSvgTitleL(aByteData);
-    }
-
-// ---------------------------------------------------------
-// CXnNewsticker::InsertSvgTitleL
-// ---------------------------------------------------------
-//
-void CXnNewsticker::InsertSvgTitleL(const TDesC8& aByteData, TInt aIndex)
-    {
-    (static_cast<CXnNewstickerAdapter*>
-            (ControlAdapter()))->InsertSvgTitleL(aByteData, aIndex);
     }
 
 // ---------------------------------------------------------

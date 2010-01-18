@@ -349,12 +349,14 @@ void CXnListQueryDialogAdapter::ModifyDynamicEventL( TInt aIndex )
     HBufC8* nameStr( attribute->Value().AllocLC());
     TPtr8 namePtr = nameStr->Des();
     
-    //Find '(' char
-    TInt pos = namePtr.Locate('(');
-    TBuf8<4> index;
-    index.AppendNum( aIndex );
-    namePtr.Replace( pos+1, 1, index );
+    TInt startIndex = namePtr.Locate( '(' );
+    TInt endIndex = namePtr.Locate( ')' );
+    TInt dataLength = endIndex - startIndex - 1;
     
+    TBuf8<4> data;
+    data.AppendNum( aIndex );
+    namePtr.Replace( startIndex+1, dataLength, data );
+
     attribute->SetValueL( namePtr );
     CleanupStack::PopAndDestroy( nameStr );
     }

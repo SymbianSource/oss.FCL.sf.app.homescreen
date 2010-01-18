@@ -1,0 +1,20 @@
+; ------------------------------------------------------------------------------
+; HG Context Services stub SIS package file.
+; Used to enable HG Context Services to be updated from ROM with a SIS package.
+; When you add new files into this stub, please remember to update
+; SIS stub with "makesis -s" command.
+; ------------------------------------------------------------------------------
+;
+;Language - standard language definitions
+&EN
+
+; standard SIS file header
+#{"hgctxutils"},(0x20019569),1,0,0,TYPE=SA
+
+;Localized Vendor Name
+%{"Nokia"}
+
+;Unique Vendor name
+:"Nokia"
+
+""-"Z:\sys\bin\hgcontextservicesutils.dll"

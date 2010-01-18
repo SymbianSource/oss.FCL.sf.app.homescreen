@@ -162,7 +162,7 @@ void CXnProperty::ConstructL( CXnDomProperty* aProperty )
 void CXnProperty::ConstructL( const TDesC8& aName,
     CXnDomPropertyValue* aPropertyValue, CXnDomStringPool& aStringPool )
     {
-    iProperty = CXnDomProperty::NewL( aName, aStringPool );
+    iProperty = CXnDomProperty::NewL( aName, &aStringPool );
     iIsDomPropertyOwned = ETrue;
 
     CXnDomList& propertyValueList = iProperty->PropertyValueList();
@@ -179,10 +179,10 @@ void CXnProperty::ConstructL( const TDesC8& aPropertyName,
     CXnDomPropertyValue::TPrimitiveValueType aValueType,
     CXnDomStringPool& aStringPool )
     {
-    iProperty = CXnDomProperty::NewL( aPropertyName, aStringPool );
+    iProperty = CXnDomProperty::NewL( aPropertyName, &aStringPool );
     iIsDomPropertyOwned = ETrue;
 
-    CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL( aStringPool );
+    CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL( &aStringPool );
     CleanupStack::PushL( newValue );
 
     newValue->SetStringValueL( aValueType, aPropertyValue );
@@ -204,10 +204,10 @@ void CXnProperty::ConstructL( const TDesC8& aPropertyName,
     CXnDomPropertyValue::TPrimitiveValueType aValueType,
     CXnDomStringPool& aStringPool )
     {
-    iProperty = CXnDomProperty::NewL( aPropertyName, aStringPool );
+    iProperty = CXnDomProperty::NewL( aPropertyName, &aStringPool );
     iIsDomPropertyOwned = ETrue;
 
-    CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL( aStringPool );
+    CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL( &aStringPool );
     CleanupStack::PushL( newValue );
 
     newValue->SetFloatValueL( aValueType, aPropertyValue );

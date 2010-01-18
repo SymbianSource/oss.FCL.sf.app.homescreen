@@ -370,10 +370,10 @@ static void CopyDomAttributesFromDomNodeToNodeL(
             continue;
             }
          CXnDomProperty* clone =
-            CXnDomProperty::NewL( attribute->NameStringPoolIndex(), aStringPool );
+            CXnDomProperty::NewL( attribute->NameStringPoolIndex(), &aStringPool );
         CleanupStack::PushL( clone );
         CXnDomPropertyValue* propertyValue =
-            CXnDomPropertyValue::NewL( aStringPool );
+            CXnDomPropertyValue::NewL( &aStringPool );
         CleanupStack::PushL( propertyValue );
         propertyValue->SetStringPoolIndexL(
             CXnDomPropertyValue::EString, attribute->ValueStringPoolIndex() );
@@ -626,7 +626,7 @@ void CXnODTParser::LoadRootL( CXnRootData& aRootData, TUid /*aAppUid*/ )
     {    
     CXnDomNode* root( aRootData.Owner() );
     
-    CXnDomStringPool& sp( root->StringPool() );
+    CXnDomStringPool* sp( root->StringPool() );
     
     CXnAppUiAdapter& appui( iManager.AppUiAdapter() );
     
@@ -638,7 +638,7 @@ void CXnODTParser::LoadRootL( CXnRootData& aRootData, TUid /*aAppUid*/ )
     dom->SetLayoutNode( node );
     node->SetDomNode( dom );
         
-    CreateNodesL( root, sp, aRootData );
+    CreateNodesL( root, *sp, aRootData );
 
     // root doesn't have any controls   
     
@@ -654,10 +654,10 @@ void CXnODTParser::LoadViewL( CXnViewData& aViewData )
     // <view> element
     CXnDomNode* view( aViewData.Node() );
     
-    CXnDomStringPool& sp( view->StringPool() );
+    CXnDomStringPool* sp( view->StringPool() );
 
     // from <view> element
-    CreateNodesL( view, sp, aViewData );       
+    CreateNodesL( view, *sp, aViewData );       
     CreateControlsL( view, aViewData );
 
     // By default make controls invisible
@@ -713,10 +713,10 @@ void CXnODTParser::LoadWidgetL( CXnPluginData& aPluginData )
     // <widget> element
     CXnDomNode* widget( aPluginData.Node() );
     
-    CXnDomStringPool& sp( widget->StringPool() );
+    CXnDomStringPool* sp( widget->StringPool() );
 
     // from <widget> element 
-    CreateNodesL( widget, sp, aPluginData );           
+    CreateNodesL( widget, *sp, aPluginData );           
     CreateControlsL( widget, aPluginData );    
 
     HandleWidgetBackgroundL( widget->LayoutNode() );
@@ -1220,6 +1220,8 @@ TBool CXnODTParser::CreateBuiltInControlL( CXnNode& aNode,
             }
         }
 
+    __ASSERT_DEBUG( parentAdapter, User::Leave( KErrGeneral ) );
+    
     CXnControlAdapter* adapter( NULL );
     
     if( aName == KStylusPopupNodeName )
@@ -1236,7 +1238,7 @@ TBool CXnODTParser::CreateBuiltInControlL( CXnNode& aNode,
             XnPropertyNames::style::common::KPosition,
             XnPropertyNames::style::common::position::KFloating,
             CXnDomPropertyValue::EString, 
-            aNode.UiEngine()->ODT()->DomDocument().StringPool() );
+            *aNode.UiEngine()->ODT()->DomDocument().StringPool() );
         CleanupStack::PushL( prop );
         aNode.SetPropertyL( prop );                    
         CleanupStack::Pop( prop );                                                        
@@ -1304,7 +1306,7 @@ void CXnODTParser::HandleWidgetBackgroundL( CXnNode* aWidgetNode )
         
             CXnProperty* bgColor = CXnProperty::NewL(
                 XnPropertyNames::appearance::common::KBackGroundColor,
-                value, uiengine->ODT()->DomDocument().StringPool() );
+                value, *uiengine->ODT()->DomDocument().StringPool() );
         
             CleanupStack::Pop( value );
             CleanupStack::PushL( bgColor );

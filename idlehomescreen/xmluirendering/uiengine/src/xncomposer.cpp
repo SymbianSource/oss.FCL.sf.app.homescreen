@@ -32,6 +32,9 @@
 #include "xndomattribute.h"
 #include "xnpanic.h"
 #include "xnplugindefs.h"
+#include "xnviewmanager.h"
+#include "xneditor.h"
+#include "xnbackgroundmanager.h"
 
 // Constants
 _LIT8( KStateWaitConfirmation, "WaitForConfirmation" );
@@ -52,6 +55,48 @@ _LIT8( KTagXuikon, "xuikon" );
 using namespace hspswrapper;
 
 // ======== LOCAL FUNCTIONS ========
+// --------------------------------------------------------------------------
+// ItemValueL
+// Get property value from configuration.
+// --------------------------------------------------------------------------
+//
+static HBufC* ItemValueL( CHspsConfiguration& aConfiguration, const TDesC8& aItemId, const TDesC8& aName  )
+    {
+    HBufC* ret = NULL;
+
+    RPointerArray<CItemMap>& settingsList = aConfiguration.Settings();    
+    for( TInt i = 0; i < settingsList.Count(); i++ )
+        {
+        CItemMap* setting = settingsList[i];
+        if( !setting )
+            {
+            continue;
+            }
+        
+        if( setting->ItemId() == aItemId )
+            {
+            RPointerArray<CPropertyMap>& properties = setting->Properties();
+            for( TInt j = 0; j < properties.Count(); j++ )
+                {
+                CPropertyMap* property = properties[j];
+                if( !property )
+                    {
+                    continue;
+                    }
+                
+                if( property->Name() == aName )
+                    {
+                    ret = HBufC::NewL( property->Value().Length() );
+                    ret->Des().Copy( property->Value() );
+                    break;
+                    }
+                }            
+            break;
+            }    
+        }        
+    return ret;
+    }
+
 // ---------------------------------------------------------------------------
 // Finds recursively node by name
 // @return    returns pointer to desired node, NULL if nothing found 
@@ -164,7 +209,7 @@ static void UpdateSettingsL( const TDesC8& aElementId,
         return;
         }
 
-    CXnDomStringPool& sp( node->StringPool() );
+    CXnDomStringPool* sp( node->StringPool() );
 
     for ( TInt i = 0; i < aProperties.Count(); i++ )
         {
@@ -451,7 +496,7 @@ CXnODT* CXnComposer::ComposeRootL( CXnRootData& aRootData )
         
         return NULL;
         }
-    
+
     RPointerArray< CXnPluginData >& array( aRootData.PluginData() );
     
     TInt index( 0 );
@@ -561,7 +606,22 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
         UpdatePluginFromSettingsL( *configuration, *viewRoot );
                 
         aViewData.SetUseEmptyWidget( UseEmptyWidget( *viewRoot )  );   
+
+        // Read wallpaper image path from HSPS
+        CXnBackgroundManager& bgManager = aViewData.ViewManager().
+            Editor().BgManager();
         
+        // if page specific wallpaper feature is enabled
+        if( bgManager.ActivatedL() )
+            {
+            HBufC* bgImage = ItemValueL( *configuration, KWallpaper, KPath );
+            CleanupStack::PushL( bgImage );
+            if( bgImage && bgImage->Length() > 0 )
+                {
+                bgManager.CacheWallpaperL( bgImage->Des(), aViewData );
+                }
+            CleanupStack::PopAndDestroy( bgImage );
+            }
         if ( pluginNode )
             {            
             // This assumes all <plugin> elements are siblings

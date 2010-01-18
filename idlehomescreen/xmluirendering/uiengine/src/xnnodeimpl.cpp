@@ -50,6 +50,7 @@
 #include "xnlistquerydialogadapter.h"
 #include "xneffectmanager.h"
 #include "xnviewadapter.h"
+#include "xnbackgroundmanager.h"
 
 // Local constants
 _LIT8( KRef, "ref" );
@@ -1912,7 +1913,7 @@ static CXnNode* BuildEventTypeNodeL( TEventCode aType, CXnUiEngine& aUiEngine )
         XnPropertyNames::action::trigger::name::keyevent::KEventType );
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::KName,
-        nameValue, aUiEngine.ODT()->DomDocument().StringPool() );
+        nameValue, *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -1923,7 +1924,7 @@ static CXnNode* BuildEventTypeNodeL( TEventCode aType, CXnUiEngine& aUiEngine )
     valueValue->SetFloatValueL( CXnDomPropertyValue::ENumber, aType );
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue, valueValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( valueValue );
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -1957,7 +1958,7 @@ static CXnNode* BuildModifiersNodeL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -1970,7 +1971,7 @@ static CXnNode* BuildModifiersNodeL(
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue,
         valueValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( valueValue );
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -2004,7 +2005,7 @@ static CXnNode* BuildKeyCodeNodeL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -2016,7 +2017,7 @@ static CXnNode* BuildKeyCodeNodeL(
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue,
         valueValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( valueValue );
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -2050,7 +2051,7 @@ static CXnNode* BuildScanCodeNodeL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -2063,7 +2064,7 @@ static CXnNode* BuildScanCodeNodeL(
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue,
         valueValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( valueValue );
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -2097,7 +2098,7 @@ static CXnNode* BuildRepeatsNodeL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -2110,7 +2111,7 @@ static CXnNode* BuildRepeatsNodeL(
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue,
         valueValue,
-        aUiEngine.ODT()->DomDocument().StringPool()) ;
+        *aUiEngine.ODT()->DomDocument().StringPool()) ;
     CleanupStack::Pop( valueValue );
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -2141,7 +2142,7 @@ static CXnNode* BuildActivateTriggerNodeL( CXnUiEngine& aUiEngine )
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -2208,7 +2209,7 @@ static CXnNode* BuildKeyTriggerNodeL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -3290,7 +3291,7 @@ static void RunEditL(
     RPointerArray< CXnPluginData>& plugins( 
             aEngine.ViewManager()->ActiveViewData().PluginData() );
 
-    CXnDomStringPool& sp( aEventNode.StringPool() );
+    CXnDomStringPool* sp( aEventNode.StringPool() );
     
     CXnDomList& children( aEventNode.ChildNodes() );
 
@@ -3401,7 +3402,7 @@ static void RunEditL(
             if ( !plugins[i]->Occupied() && useEmpty )
                 {                               
                 // Make empty space visible
-                SetStringPropertyToNodeL( sp, *node,
+                SetStringPropertyToNodeL( *sp, *node,
                     XnPropertyNames::style::common::KVisibility,
                     XnPropertyNames::style::common::visibility::KVisible );                    
                 }                                              
@@ -3483,7 +3484,7 @@ static void RunResetEditL(
     RPointerArray< CXnPluginData>& plugins( 
             aEngine.ViewManager()->ActiveViewData().PluginData() );
 
-    CXnDomStringPool& sp( aEventNode.StringPool() );
+    CXnDomStringPool* sp( aEventNode.StringPool() );
 
     if ( keyEditMode )
         {
@@ -3510,7 +3511,7 @@ static void RunResetEditL(
             if ( !plugins[i]->Occupied() && useEmpty )
                 {                               
                 // Make empty space blank
-                SetStringPropertyToNodeL( sp, *node,
+                SetStringPropertyToNodeL( *sp, *node,
                     XnPropertyNames::style::common::KVisibility,
                     XnPropertyNames::style::common::visibility::KBlank );                    
                 }
@@ -3637,7 +3638,7 @@ static void RunSystemSetNumberL(
     {
     if ( aNode )
         {
-        CXnDomStringPool& sp = aEngine.ODT()->DomDocument().StringPool();
+        CXnDomStringPool* sp = aEngine.ODT()->DomDocument().StringPool();
         CXnDomProperty* prop = CXnDomProperty::NewL( aName, sp );
         CleanupStack::PushL( prop );
 
@@ -3681,7 +3682,7 @@ static void RunSystemSetRGBL(
     {
     if ( aNode )
         {
-        CXnDomStringPool& sp = aEngine.ODT()->DomDocument().StringPool();
+        CXnDomStringPool* sp = aEngine.ODT()->DomDocument().StringPool();
         CXnDomProperty* prop = CXnDomProperty::NewL( aName, sp );
         CleanupStack::PushL( prop );
 
@@ -3730,7 +3731,7 @@ static void RunSystemSetStringL(
     {
     if ( aNode )
         {
-        CXnDomStringPool& sp = aEngine.ODT()->DomDocument().StringPool();
+        CXnDomStringPool* sp = aEngine.ODT()->DomDocument().StringPool();
         CXnDomProperty* prop = CXnDomProperty::NewL( aName, sp );
         CleanupStack::PushL( prop );
 
@@ -4403,12 +4404,12 @@ static TBool RunEventL(
             XnPropertyNames::action::trigger::name::KEditMode ) );
         CleanupStack::PushL( trigger );
 
-        CXnDomStringPool& sp( aEngine.ODT()->DomDocument().StringPool() );
+        CXnDomStringPool* sp( aEngine.ODT()->DomDocument().StringPool() );
         
         CXnProperty* value( CXnProperty::NewL(
             XnPropertyNames::action::KValue,
             XnPropertyNames::action::trigger::name::editmode::KEnter, 
-            CXnDomPropertyValue::EString, sp ) );
+            CXnDomPropertyValue::EString, *sp ) );
         CleanupStack::PushL( value );
         
         trigger->SetPropertyL( value );
@@ -4426,12 +4427,12 @@ static TBool RunEventL(
             XnPropertyNames::action::trigger::name::KEditMode ) );
         CleanupStack::PushL( trigger );
         
-        CXnDomStringPool& sp( aEngine.ODT()->DomDocument().StringPool() );
+        CXnDomStringPool* sp( aEngine.ODT()->DomDocument().StringPool() );
         
         CXnProperty* value( CXnProperty::NewL(
             XnPropertyNames::action::KValue,
             XnPropertyNames::action::trigger::name::editmode::KExit, 
-            CXnDomPropertyValue::EString, sp ) );
+            CXnDomPropertyValue::EString, *sp ) );
         CleanupStack::PushL( value );
         
         trigger->SetPropertyL( value );
@@ -4468,7 +4469,7 @@ static TBool RunEventL(
         }
     else if ( nameString == XnPropertyNames::action::event::KSetWallpaper )
         {
-        aEngine.Editor()->SetWallpaperL();
+        aEngine.Editor()->BgManager().SetWallpaperL();
         return ETrue;
         }
            
@@ -6891,13 +6892,13 @@ static void ScrollBoxToBeginningL( RPointerArray< CXnNode >& aSiblingArray )
         node = aSiblingArray[i];
         if ( DisplayValueMatchL( *node, KBlock ) )
             {
-            CXnDomStringPool& sp = node->DomNode()->StringPool();
+            CXnDomStringPool* sp = node->DomNode()->StringPool();
             //Switch the display to 'none' to visible siblings.
-            SetStringPropertyToNodeL( sp, *node, KDisplay, KNone );
+            SetStringPropertyToNodeL( *sp, *node, KDisplay, KNone );
             node = aSiblingArray[toBeDisplayed];
             toBeDisplayed++;
             //Switch the display to 'block' to hidden siblings.
-            SetStringPropertyToNodeL( sp, *node, KDisplay, KBlock );
+            SetStringPropertyToNodeL( *sp, *node, KDisplay, KBlock );
             }
         }
     }
@@ -6917,13 +6918,13 @@ static void ScrollBoxToEndL( RPointerArray< CXnNode >& aSiblingArray )
         node = aSiblingArray[--i];
         if ( DisplayValueMatchL( *node, KBlock ) )
             {
-            CXnDomStringPool& sp = node->DomNode()->StringPool();
+            CXnDomStringPool* sp = node->DomNode()->StringPool();
             //Switch the display to 'none' to visible siblings.
-            SetStringPropertyToNodeL( sp, *node, KDisplay, KNone );
+            SetStringPropertyToNodeL( *sp, *node, KDisplay, KNone );
             node = aSiblingArray[toBeDisplayed];
             toBeDisplayed--;
             //Switch the display to 'block' to hidden siblings.
-            SetStringPropertyToNodeL( sp, *node, KDisplay, KBlock );
+            SetStringPropertyToNodeL( *sp, *node, KDisplay, KBlock );
             }
         }
     }
@@ -7021,14 +7022,14 @@ static void DoCompoundNodeBeginKeyL(
         if ( oldestIndex - 1 >= 0 )
             {
             node = aChildren[oldestIndex - 1];
-            CXnDomStringPool& sp = node->DomNode()->StringPool();
-            SetStringPropertyToNodeL( sp, *node, KDisplay, KBlock );
+            CXnDomStringPool* sp = node->DomNode()->StringPool();
+            SetStringPropertyToNodeL( *sp, *node, KDisplay, KBlock );
             // find youngest sibling with display block
             TInt index( 0 );
             node = FindYoungestSiblingWithDisplayL( aChildren, KBlock, index );
             if ( node )
                 {
-                SetStringPropertyToNodeL( sp, *node, KDisplay, KNone );
+                SetStringPropertyToNodeL( *sp, *node, KDisplay, KNone );
                 }
             }
         else
@@ -7069,14 +7070,14 @@ static void DoCompoundNodeEndKeyL(
         if ( index < siblingCount - 1 )
             {
             node = aChildren[index + 1];
-            CXnDomStringPool& sp = node->DomNode()->StringPool();
-            SetStringPropertyToNodeL( sp , *node, KDisplay, KBlock );
+            CXnDomStringPool* sp = node->DomNode()->StringPool();
+            SetStringPropertyToNodeL( *sp , *node, KDisplay, KBlock );
             // find oldest sibling with display block
             TInt oldestIndex( 0 );
             node = FindOldestSiblingWithDisplayL( aChildren, KBlock, oldestIndex );
             if ( node )
                 {
-                SetStringPropertyToNodeL( sp, *node, KDisplay, KNone );
+                SetStringPropertyToNodeL( *sp, *node, KDisplay, KNone );
                 }
             }
         else // we are end of list
@@ -7223,7 +7224,7 @@ static CXnNode* BuildTriggerNodeL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -7464,14 +7465,14 @@ void CXnNodeImpl::SetPCDataL( const TDesC8& aData )
 
     SetDirtyL( XnDirtyLevel::ERender );
 
-    CXnDomStringPool& sp( iDomNode->StringPool() );
+    CXnDomStringPool* sp( iDomNode->StringPool() );
 
     CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL( sp );
     CleanupStack::PushL( newValue );
     newValue->SetStringValueL( CXnDomPropertyValue::EString, KNullDesC8 );
     // create property
     CXnProperty* prop = CXnProperty::NewL(
-        XnPropertyNames::common::KPCData, newValue, sp );
+        XnPropertyNames::common::KPCData, newValue, *sp );
     CleanupStack::Pop( newValue );
     CleanupStack::PushL( prop );
 
@@ -7516,7 +7517,7 @@ void CXnNodeImpl::SetHandleTooltip( TBool aFlag )
 // Searchs and shoes tooltips
 // -----------------------------------------------------------------------------
 //
-void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt aSource )
+void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt /*aSource*/ )
     {
     if ( iHandleTooltip )
         {
@@ -10014,7 +10015,7 @@ void CXnNodeImpl::SetAdaptiveL( const TInt aAdaptive )
         iAdaptive |= XnAdaptive::EIgnoreDirty;
 
         SetStringPropertyToNodeL(
-            DomNode()->StringPool(), *Node(),
+            *DomNode()->StringPool(), *Node(),
             XnPropertyNames::style::common::KWidth,
             XnPropertyNames::style::common::KAuto );
 
@@ -10030,7 +10031,7 @@ void CXnNodeImpl::SetAdaptiveL( const TInt aAdaptive )
         iAdaptive |= XnAdaptive::EIgnoreDirty;
 
         SetStringPropertyToNodeL(
-            DomNode()->StringPool(), *Node(),
+            *DomNode()->StringPool(), *Node(),
             XnPropertyNames::style::common::KHeight,
             XnPropertyNames::style::common::KAuto );
 
@@ -10062,7 +10063,7 @@ void CXnNodeImpl::FixAdaptiveSizeL( const TSize& aFixedSize )
             iAdaptive |= XnAdaptive::EIgnoreDirty;
 
             SetFloatPropertyToNodeL(
-                DomNode()->StringPool(), *Node(),
+                *DomNode()->StringPool(), *Node(),
                 XnPropertyNames::style::common::KWidth,
                 aFixedSize.iWidth, CXnDomPropertyValue::EPx );
 
@@ -10074,7 +10075,7 @@ void CXnNodeImpl::FixAdaptiveSizeL( const TSize& aFixedSize )
             iAdaptive |= XnAdaptive::EIgnoreDirty;
 
             SetFloatPropertyToNodeL(
-                DomNode()->StringPool(), *Node(),
+                *DomNode()->StringPool(), *Node(),
                 XnPropertyNames::style::common::KHeight,
                 aFixedSize.iHeight, CXnDomPropertyValue::EPx );
 

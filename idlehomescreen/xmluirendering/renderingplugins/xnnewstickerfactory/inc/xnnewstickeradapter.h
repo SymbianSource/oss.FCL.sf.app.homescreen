@@ -26,7 +26,7 @@
 // FORWARD DECLARATIONS
 class CXnNodePluginIf;
 class CXnNewstickerControl;
-class CXnNewstickerSvgControl;
+class CAknMarqueeControl;
 
 // CONSTANTS
 // The default values for the newsticker control
@@ -51,25 +51,12 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
             XnNewstickerInterface::MXnNewstickerCallbackInterface
     {
     public:
-
-        /**
-        * State of the whole control.
-        */
-        enum TState
-            {
-            ENotStarted = 1,            //  No scrolling has been done
-            EPaused,                //  Text is shown, but not scrolled
-            EText,                  //  Text is shown and scrolled continuously
-            EAnimation,             //  SVG animation is shown
-            EScrollEnded            //  Looping is false and scrolling has ended
-            };
-            
+          
         enum TScrollBehaviour
             {
             EScroll,
-            ESlide,
             EAlternate,
-            EScrollAlternate
+            EScrollAlternate,
             };            
             
     public:
@@ -92,27 +79,27 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
          * Append new title to the end of the title list.
          * @param aTitle The new title to add.
          */
-        void AppendTitleL(const TDesC& aTitle);
+        void AppendTitleL( const TDesC& aTitle );
 
         /**
          * Insert new title to the end of the title list.
          * @param aTitle The new title to add.
          * @param aIndex The place to add the title.
          */
-        void InsertTitleL(const TDesC& aTitle, TInt aIndex);
+        void InsertTitleL( const TDesC& aTitle, TInt aIndex );
 
         /**
          * Update title text.
          * @param aTitle The new title to add.
          * @param aIndex The place to update the title.
          */
-        void UpdateTitleL(const TDesC& aTitle, TInt aIndex);
+        void UpdateTitleL( const TDesC& aTitle, TInt aIndex );
 
         /**
          * Delete the title.
          * @param aIndex The title index to delete.
          */
-        void DeleteTitleL(TInt aIndex);
+        void DeleteTitleL( TInt aIndex );
 
     	/**
     	 * Returns index of the currently selected title.
@@ -125,14 +112,7 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
     	 * @param aIndex The index to return the title.
     	 * @return The title of the given index.
     	 */
-        const TDesC& Title(TInt aIndex);
-
-    	/**
-    	 * Set the separator image for all titles.
-    	 * @param aIcon The separator image. This must be mif icon.
-    	 * @return KErrNone if successful, KErrArgument if the icon is not mif.
-    	 */
-        TInt SetSeparatorImageL(CGulIcon* aIcon);
+        const TDesC& Title( TInt aIndex );
 
         /**
          * Delete all titles.
@@ -140,88 +120,45 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         void ClearTitles();
 
         /**
-         * Append the SVG title to be shown.
-         * @param aByteData The SVG data.
-         */
-        void AppendSvgTitleL(const TDesC8& aByteData);
-
-        /**
-         * Insert the SVG title to be shown.
-         * @param aByteData The SVG data.
-         */
-        void InsertSvgTitleL(const TDesC8& aByteData, TInt aIndex);
-
-        /**
          * Set callback interface.
          * @param aCallback The callback interface pointer.
          */
         void SetCallbackInterfaceL(
-            XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback);
+            XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback );
 
         /**
          * Start showing the titles.
          */
-        void StartL();
+        void Start();
 
         /**
          * Stop showing the titles.
          */
-        void StopL();
-
+        void Stop();
+        
         /**
-         * Show SVG next.
+         * Stops alternate counter.
          */
-        void ShowSvgL();
+        void StopAlternateCounter();
+        
+        /**
+         * Resets and unenables narquee control.
+         */
+        void StopMarquee();
+        
+        /**
+         * Starts alternate counter.
+         */
+        void StartAlternateCounter();
 
         /**
          * Callback which will be called by the CPeriodic.
          * @param aPtr User defined pointer.
          * @return ETrue if the method should be called again.
          */
-        static TInt PeriodicEventL(TAny * aPtr);
-
-        /**
-         * Draw background for the newsticker control area.
-         * @param aRect The visivle area of newsticker component.
-         * @param aGc Window graphics context.
-         */
-        void DrawBackgroundL(const TRect& aRect, CWindowGc& aGc) const;
-
-        
-        /**
-        * Returns the bitmap context.
-        * @return Bitmap context.
-        */
-        inline CBitmapContext* BufferGc() const { return iBufferGc; };
-        
-        
-        /**
-        * Returns the background bitmap
-        * @return Background bitmap
-        */
-        inline const CFbsBitmap* BackgroundBitmap() const { return iBackgroundBitmap; };
-
-        /**
-        * Returns the state of the newsticker control.
-        * @return Current state.
-        */
-        inline TState CurrentState() const { return iState; };
-
-        /**
-        * Returns the current scroll behaviour
-        * @return current scroll behaviour
-        */        
-        inline TInt ScrollBehaviour() const { return iScrollBehaviour; };        
-        
-        /**
-        * Reset periodic timer to set display time.
-        */
-        void SetTimerToDisplaytime();
-        
-        /**
-        * Reset periodic timer to set scroll delay time.
-        */
-        void SetTimerToScrolltime();
+        static TInt PeriodicEventL( TAny * aPtr );
+     
+        void MakeVisible( TBool aVisible );
         
     public: // from base classes
 
@@ -230,7 +167,7 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
          * Called when the title has been shown and is now offscreen.
          * @param aTitleIndex The title that has been completely shown.
          */
-        void TitleScrolled(TInt aTitleIndex);
+        void TitleScrolled( TInt aTitleIndex );
 
         /**
         * See CCoeControl documentation
@@ -238,44 +175,28 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         void SizeChanged();
 
         /**
-        * See CCoeControl documentation
-        */    	
-        void HandlePointerEventL(const TPointerEvent& aPointerEvent);
-
-        /**
-        * See CCoeControl documentation
-        */    	    	
-        void FocusChanged(TDrawNow aDrawNow);
-
-        /**
-        * See CCoeControl documentation
-        */
-        TKeyResponse OfferKeyEventL(
-                const TKeyEvent& aKeyEvent, TEventCode aType);
-
-        /**
         * See CXnControlAdapter documentation
         */    	
-    	void Draw(const TRect& aRect) const;
+    	void Draw( const TRect& aRect ) const;
 
         /**
         * Enter power save mode. This is done when application goes to background or lights go off. 
         * Derived classes should override this function and stop animations, timers etc. when the function is called.
         */ 
-        void DoEnterPowerSaveModeL(TModeEvent aEvent);
+        void DoEnterPowerSaveModeL( TModeEvent aEvent );
 
 	   	/**
         * Exit power save mode. This is done when application comes to foreground or lights go on. 
         * Derived classes should override this function and restart animations, timers etc. when the function is called.
         */ 
-        void DoExitPowerSaveModeL(TModeEvent aEvent);
+        void DoExitPowerSaveModeL( TModeEvent aEvent );
 
         /**
         * From CXnControlAdapter Handles the property changes.
         * @since Series 60 3.1
         * @return void.
         */ 
-        void DoHandlePropertyChangeL(CXnProperty* aProperty = NULL);
+        void DoHandlePropertyChangeL( CXnProperty* aProperty = NULL );
 
 	    /**
         * Skin change notification.
@@ -283,23 +204,29 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         */        
         void SkinChanged();
         
-        void ReportNewstickerEventL(const TDesC8& aEventName);
+        /**
+        * Reports newsticker event
+        * 
+        */   
+        void ReportNewstickerEvent( const TDesC8& aEventName );
         
         /**
-        * See CCoeControl documentation
+        * Draws text
+        * Text drawing function is selected by scrolling behaviour
         */
-        void DrawNow() const;
+        void DrawText( const TDesC& aText, const TRect& aRect  );
         
         /**
-        * If newsticker is not focusable, finds and draws focusable parent
+        * ETrue if marquee control redrawing is needed. EFalse if truncated text is needed
         */
-        TBool DrawFocusableParentL() const;
+        TBool Redraw() { return iRedraw; }
+
 
     private:
 
-    	CXnNewstickerAdapter(CXnControlAdapter* aParent, CXnNodePluginIf& aNode);
+    	CXnNewstickerAdapter( CXnControlAdapter* aParent, CXnNodePluginIf& aNode );
 
-    	void ConstructL();
+    	void ConstructL( CXnControlAdapter* aParent );
     	
     	/**
     	* Sets text properties, such as color, font, etc.
@@ -310,34 +237,38 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
     	* Sets newsticker timing properties.
     	*/
         void SetNewstickerPropertiesL();
-
-    	/**
-    	* Creates a new doublebuffer for newsticker.
-    	*/        
-        void UpdateDoubleBufferL();
-
-    	/**
-    	* Draws a reconstructed background for newsticker.
-    	*/
-        void UpdateBackgroundL() const;
-
-    	/**
-    	* Same as SizeChanged(), but this is an L function.
-    	*/
-        void SizeChangedL();
-
-    	/**
-    	* Checks if feed can be started
-    	*/       
-        TBool CheckDisplayL( CXnNodePluginIf& aNode );
-
-        void RestartL();
-    private:
+        
+        /**
+         * From CoeControl,CountComponentControls.
+         */
+         TInt CountComponentControls() const;
 
         /**
-        * The state of the newsticker control.
-        */
-        TState                      iState;
+         * From CCoeControl,ComponentControl.
+         */
+         CCoeControl* ComponentControl( TInt aIndex ) const;
+        
+        /**
+        * Callback function for marquee control
+        */    
+        static TInt RedrawCallback( TAny* aPtr );
+        
+        /**
+        *  FScrolls alternative text. Function is called by periodic timer
+        */    
+        void DoScroll();
+        
+        /**
+        *  Draws text directly to screen if scrollins is not needed
+        */  
+        void DrawStaticText( CWindowGc& aGc, const TDesC& aText ) const;
+        
+        /**
+        *  Draws scrolling text to screen via marquee control
+        */ 
+        TBool DrawMarqueeText( CWindowGc& aGc, const TDesC& aText ) const;               
+        
+    private:
 
         /**
         * The timer to use for scrolling events.
@@ -356,42 +287,16 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         * Own.
         */
         CXnNewstickerControl*       iControl;
-        
+	    
         /**
-        * The control handling the svg title showing
-        * Own.
-        */
-        CXnNewstickerSvgControl*    iSvgControl;
-
-        /**
-         * Delay between loops in microseconds.
-         */
-	    TInt                        iDelay;
-
-        /**
-         * The interval between ticks.
-         */	    
-	    TInt                        iInterval;
+         * The delay before first event
+         */  
+	    TInt                        iAlternateDelay;
         
         /**
          * The alternate interval between ticks.
          */	    
 	    TInt                        iAlternateInterval;
-
-        /**
-         * The current interval between ticks.
-         */	    
-	    TInt                        iCurrentInterval;
-
-        /**
-         * Amount of loops executed
-         */	    
-        TInt                        iLoops;
-
-        /**
-        * The animation time in microseconds.
-        */
-        TInt                        iAnimationTime;
 
         /**
         * UI node
@@ -401,43 +306,14 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
 
         /**
         * Font for control.
-        * Own.
+        * Not own.
         */        
         CFont*                      iFont;
         
         /**
         * Whether the font needs to be released or not.
         */        
-        TBool                       iReleaseFont;
-                
-        /**
-        * Bitmap device. Used to draw on the drawing buffer
-        * Own.
-        */
-    	CFbsBitmapDevice*           iBufferDevice;
-	
-        /**
-        * Drawing buffer
-        * Own.
-        */
-    	CFbsBitmap*                 iDrawingBuffer;
-    	
-        /**
-        * Bitmap Graphic Context. Used to draw on the drawing buffer
-        * Own.
-        */
-        CBitmapContext*             iBufferGc;
-        
-        /**
-        * Pointer to background bitmap.
-        * Own.
-        */
-        mutable CFbsBitmap*         iBackgroundBitmap;
-
-        /**
-        * For the display property (content is either shown or not)
-        */
-        TBool                       iDisplay;
+        TInt                       iReleaseFont;
 
         /**
         * For keeping track of the current powersave mode state
@@ -447,12 +323,56 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         /**
         * Current scroll behaviour
         */               
-        TInt                        iScrollBehaviour;
+        TScrollBehaviour            iScrollBehaviour;
         
         /**
          * Restart animation after title has been updated
          */
         TBool                       iRestartAfterUpdate;
+        
+        /**
+        * marquee control for scrolling
+		* own
+        */ 
+       CAknMarqueeControl*         iMarqueeControl;
+       
+       /**
+       * Current text color
+       */ 
+       TRgb                        iTextColor;
+       
+       /**
+       * Current text alignment
+       */ 
+       TInt                        iTextAlignment;   
+       
+       /**
+       * Current baseline
+       */ 
+       TInt                        iTextBaseline;
+       
+       /**
+       * Current underlining behaviour
+       */ 
+       TFontUnderline              iUnderlining;       
+       
+       /**
+       * Current strikethrough behaviour
+       */ 
+       TFontStrikethrough          iStrikethrough;
+       
+       /**
+       * is scroll looping activated
+       */ 
+       TBool                    iScrollLooping;
+       
+       /**
+       * is marquee control redraw needed
+       */ 
+       TBool                    iRedraw;
+        
+        
+        
     };
 
 #endif // XNNEWSTICKERADAPTER_H

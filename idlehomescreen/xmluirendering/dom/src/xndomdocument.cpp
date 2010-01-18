@@ -53,7 +53,7 @@ EXPORT_C CXnDomNode* CXnDomDocument::CreateElementNSL(
     const TDesC8& aName, 
     const TDesC8& aNamespace )
     {
-    return CXnDomNode::NewL( aName, aNamespace, *iDomStringPool );
+    return CXnDomNode::NewL( aName, aNamespace, iDomStringPool );
     }
 // -----------------------------------------------------------------------------
 // CXnDomDocument::CXnDomDocument
@@ -73,6 +73,9 @@ CXnDomDocument::CXnDomDocument()
 void CXnDomDocument::ConstructL()
     {
     iDomStringPool = CXnDomStringPool::NewL();
+    // Add KNullDesC8 to string pool index 0 for safety reasons.
+    // Some components use 0 as initial value for their string references.
+    iDomStringPool->AddStringL( KNullDesC8 );
     }
 
 // -----------------------------------------------------------------------------
@@ -191,7 +194,7 @@ EXPORT_C void CXnDomDocument::InternalizeL( RReadStream& aStream )
     TBool rootNodeExist( aStream.ReadInt8L() );
     if ( rootNodeExist )
         {    
-        iRootNode = CXnDomNode::NewL( aStream, *iDomStringPool );
+        iRootNode = CXnDomNode::NewL( aStream, iDomStringPool );
         }
     }          
 
@@ -273,9 +276,9 @@ EXPORT_C HBufC8* CXnDomDocument::MarshallL()
 // CXnDomDocument::StringPool
 // -----------------------------------------------------------------------------
 //
-EXPORT_C CXnDomStringPool& CXnDomDocument::StringPool() const
+EXPORT_C CXnDomStringPool* CXnDomDocument::StringPool() const
     {
-    return *iDomStringPool;
+    return iDomStringPool;
     }
 
 // -----------------------------------------------------------------------------
@@ -285,16 +288,25 @@ EXPORT_C CXnDomStringPool& CXnDomDocument::StringPool() const
 //
 EXPORT_C CXnDomNode* CXnDomDocument::ReadL( 
     RReadStream& aStream )
-    { 
-    CXnDomNode* rootNode = NULL;
+    {    
+    CXnDomStringPool* localStringPool = CXnDomStringPool::NewL( ETrue );
+    CleanupStack::PushL( localStringPool );
+    aStream >> *localStringPool;
     
-    aStream >> *iDomStringPool;
+    iDomStringPool->AddAllL( *localStringPool );
+    
+    CXnDomNode* rootNode = NULL;    
     
     TBool rootNodeExist( aStream.ReadInt8L() );
     if ( rootNodeExist )
         {
-        rootNode = CXnDomNode::NewL( aStream, *iDomStringPool );
+        rootNode = CXnDomNode::NewL( aStream, localStringPool );
+        CleanupStack::PushL( rootNode );
+        rootNode->SwapStringPoolL( iDomStringPool );   
+        CleanupStack::Pop( rootNode );
         }
+        
+    CleanupStack::PopAndDestroy( localStringPool );
     
     return rootNode;
     }

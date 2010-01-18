@@ -39,6 +39,7 @@ class CAknSearchField;
 class CWmPortalButton;
 class CWmWidgetLoaderAo;
 class CWmMainContainerView;
+class CWmConfiguration;
 
 /**
  * Container class for WmMainContainer
@@ -170,9 +171,9 @@ public: // new functions
 	void UninstallWidgetL();
 
     /**
-     * opens OVI portal
+     * opens currently selected portal
      */
-    void OpenOviPortalL();
+    void OpenPortalL();
 
     /**
      * Selection key (middle soft key)
@@ -218,8 +219,9 @@ public:
 	
 	/**
 	 * Moves focus to the OVI button
+	 * @param aIndex 0=first button, 1=second (if it exists)
 	 */
-    void SetFocusToOviButton();
+    void SetFocusToPortalButton( TInt aIndex );
 
     /**
      * Moves focus to the widgets list, alternatively also setting the currently
@@ -240,6 +242,11 @@ public:
      * To set iClosingDown. See above.
      */
     void SetClosingDown( TBool aClosingDown );
+
+    /**
+     * access to WM configuration
+     */
+    CWmConfiguration& Configuration();
     
 protected: // from base class CCoeControl
     
@@ -283,14 +290,21 @@ private: // New functions
     void LayoutControls();
     void StartLoadingWidgetsL();
     void RemoveCtrlsFromStack();
-    TKeyResponse MoveFocusByKeys(
-            const TKeyEvent& aKeyEvent, 
-            TEventCode aType );
     void UpdateFocusMode();
     CCoeControl* FindChildControlByPoint( const TPoint& aPoint );
     void HandleFindSizeChanged();
-    void FetchRepositoryDataL();
-
+    TKeyResponse MoveFocusByKeys(
+            const TKeyEvent& aKeyEvent, 
+            TEventCode aType );
+    TKeyResponse HandleButtonKeyEventL( 
+            const TKeyEvent& aKeyEvent, 
+            TEventCode aType );
+    TKeyResponse HandleListKeyEventL( 
+            const TKeyEvent& aKeyEvent, 
+            TEventCode aType );
+    TKeyResponse HandleSearchKeyEventL( 
+            const TKeyEvent& aKeyEvent, 
+            TEventCode aType );
 private:
 
     /**
@@ -319,9 +333,16 @@ private:
     CAknsBasicBackgroundControlContext* iBgContext;
     
     /**
-     * Ovi portal
+     * portal button
+     * (if there is only one button, this is it)
      */
-    CWmPortalButton*             iOviPortal;
+    CWmPortalButton*             iPortalButtonOne;
+
+    /**
+     * portal button
+     * (if there is only one button, this is NULL)
+     */
+    CWmPortalButton*             iPortalButtonTwo;
 
     /** GUI layout modes */
     enum TWmLayout
@@ -340,7 +361,7 @@ private:
     enum TWmFocusMode
         {
         ENowhere,
-        EOvi,
+        EPortal,
         EList,
         EFind
         };
@@ -362,19 +383,9 @@ private:
     TBool                   iClosingDown;
     
     /**
-     * Localized Url to start browser
+     * The configuration
      */
-    HBufC*                  iOviStoreUrl;
-    
-    /**
-     * OviStore bundleId
-     */
-    HBufC*                  iOviStoreClientBundleId;
-    
-    /**
-     * OviStore client param
-     */
-    HBufC*                  iOviStoreClientParam;
+    CWmConfiguration*       iConfiguration;
     
     };
 

@@ -96,29 +96,10 @@ class MXnNewstickerInterface : public XnComponentInterface::MXnComponentInterfac
     	 */
         virtual const TDesC& Title(TInt aIndex) = 0;
 
-    	/**
-    	 * Set the separator image for all titles.
-    	 * @param aIcon The separator image. This must be mif icon.
-    	 * @return KErrNone if successful, KErrArgument if the icon is not mif.
-    	 */
-        virtual TInt SetSeparatorImageL(CGulIcon* aIcon) = 0;
-
         /**
          * Delete all titles.
          */
         virtual void ClearTitles() = 0;
-
-        /**
-         * Append the SVG title to be shown.
-         * @param aByteData The SVG data.
-         */
-        virtual void AppendSvgTitleL(const TDesC8& aByteData) = 0;
-
-        /**
-         * Insert the SVG title to be shown.
-         * @param aByteData The SVG data.
-         */
-        virtual void InsertSvgTitleL(const TDesC8& aByteData, TInt aIndex) = 0;
 
         /**
          * Set callback interface.
@@ -190,13 +171,6 @@ class CXnNewsticker : public CXnComponent, public XnNewstickerInterface::MXnNews
     	 * @return The title of the given index.
     	 */
         const TDesC& Title(TInt aIndex);
-
-    	/**
-    	 * Set the separator image for all titles.
-    	 * @param aIcon The separator image. This must be mif icon.
-    	 * @return KErrNone if successful, KErrArgument if the icon is not mif.
-    	 */
-        TInt SetSeparatorImageL(CGulIcon* aIcon);
 
         /**
          * Delete all titles.

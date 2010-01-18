@@ -116,7 +116,8 @@ void CXnNewstickerFactory::ConstructL()
 const TImplementationProxy ImplementationTable[] =
     {
 #ifdef __EABI__ 
-	IMPLEMENTATION_PROXY_ENTRY(AI3_UID_RENDERING_PLUGIN_NEWSTICKERFACTORY_IMPLEMENTATION, CXnNewstickerFactory::NewL) 
+	IMPLEMENTATION_PROXY_ENTRY(AI3_UID_RENDERING_PLUGIN_NEWSTICKERFACTORY_IMPLEMENTATION,
+	        CXnNewstickerFactory::NewL) 
 #else
     {{AI3_UID_RENDERING_PLUGIN_NEWSTICKERFACTORY_IMPLEMENTATION}, CXnNewstickerFactory::NewL}
 #endif

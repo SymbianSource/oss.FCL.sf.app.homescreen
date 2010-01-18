@@ -23,24 +23,34 @@
 #include <s32file.h>
 #include <hscontentinfo.h>
 #include <widgetregistryclient.h> // widgetreqistry
-#include <StringLoader.h>
 #include <eikenv.h>
+#include <avkon.mbg>
+#include <avkon.rsg>
+#include <AknsDrawUtils.h>
+#include <AknBitmapAnimation.h>
+#include <barsread.h>
 
 #include "wmwidgetdata.h"
 #include "wmwidgetdataobserver.h"
 #include "wmpersistentwidgetorder.h"
+#include "wmresourceloader.h"
 #include "wmcommon.h"
-#include <widgetmanagerview.rsg>
+
+// CONSTANTS
+_LIT8( KWrtMime, "application/x-nokia-widget");
 
 // ---------------------------------------------------------
 // CWmWidgetData::NewL
 // ---------------------------------------------------------
 //
-CWmWidgetData* CWmWidgetData::NewL( 
+CWmWidgetData* CWmWidgetData::NewL(
+        const TSize& aLogoSize,
+        CWmResourceLoader& aWmResourceLoader,
         CHsContentInfo* aHsContentInfo,
         RWidgetRegistryClientSession* aRegistryClientSession )
     {
     CWmWidgetData* self = CWmWidgetData::NewLC( 
+            aLogoSize, aWmResourceLoader,
             aHsContentInfo, aRegistryClientSession );
     CleanupStack::Pop(); // self;
     return self;
@@ -50,11 +60,14 @@ CWmWidgetData* CWmWidgetData::NewL(
 // CWmWidgetData::NewLC
 // ---------------------------------------------------------
 //
-CWmWidgetData* CWmWidgetData::NewLC( 
+CWmWidgetData* CWmWidgetData::NewLC(
+        const TSize& aLogoSize,
+        CWmResourceLoader& aWmResourceLoader,
         CHsContentInfo* aHsContentInfo,
         RWidgetRegistryClientSession* aRegistryClientSession )
     {
-    CWmWidgetData* self = new ( ELeave ) CWmWidgetData();
+    CWmWidgetData* self = new ( ELeave ) CWmWidgetData( 
+            aLogoSize, aWmResourceLoader );
     CleanupStack::PushL(self);
     self->ConstructL( aHsContentInfo, aRegistryClientSession );
     return self;
@@ -64,16 +77,23 @@ CWmWidgetData* CWmWidgetData::NewLC(
 // CWmWidgetData::CWmWidgetData
 // ---------------------------------------------------------
 //
-CWmWidgetData::CWmWidgetData()
+CWmWidgetData::CWmWidgetData( const TSize& aLogoSize, 
+        CWmResourceLoader& aWmResourceLoader )
+    : CActive( EPriorityStandard ),
+    iWmResourceLoader( aWmResourceLoader )
     {
     iIdle = NULL;
     iLogoImage = NULL;    
     iLogoImageMask = NULL;
     iHsContentInfo = NULL;
     iWidgetType = CWmWidgetData::EUnknown;
-    iInstallAnimationIndex = KErrNotFound;
     iPublisherUid = KNullUid;
-    iLogoSize = TSize( 0, 0 );
+    iLogoSize = aLogoSize;
+    iPeriodic = NULL;
+    iAnimationIndex = 0;
+    iAsyncUninstalling = EFalse;
+    iFireLogoChanged = EFalse;
+    CActiveScheduler::Add( this );
     }
 
 // ---------------------------------------------------------
@@ -88,8 +108,13 @@ void CWmWidgetData::ConstructL(
 
     // start decoding the icon
     iImageConverter = CWmImageConverter::NewL( this );
-    iIdle = CIdle::NewL( CActive::EPriorityLow );
-    iIdle->Start( TCallBack( HandleAsyncIconString, this ) );
+    iIdle = CIdle::NewL( CActive::EPriorityStandard );
+    iWait = new (ELeave) CActiveSchedulerWait();
+    iPeriodic = CPeriodic::NewL( CActive::EPriorityStandard );
+
+    // start logo handling
+    iImageConverter->SetLogoSize( iLogoSize );
+    HandleIconString( HsContentInfo().IconPath() );
     }
 
 // ---------------------------------------------------------
@@ -124,12 +149,20 @@ void CWmWidgetData::InitL(
 //
 CWmWidgetData::~CWmWidgetData()
     {
+    Cancel();
     if ( iIdle && iIdle->IsActive() )
         {
         iIdle->Cancel();
         }
     delete iIdle;
+    if ( iWait && iWait->IsStarted() )
+        {
+        iWait->AsyncStop();
+        }
+    delete iWait;
     SetObserver( NULL );
+    DestroyAnimData();
+    delete iPeriodic;
     delete iLogoImage;
     delete iLogoImageMask;
     delete iImageConverter;
@@ -219,15 +252,24 @@ void CWmWidgetData::NotifyCompletion( TInt aError )
         {
         iLogoImage = iImageConverter->Bitmap();
         iLogoImageMask = iImageConverter->Mask();
-        FireDataChanged();
+
+        if ( iWait && iWait->IsStarted() )
+            {
+            iWait->AsyncStop();
+            }
+        if ( iFireLogoChanged ) 
+            {
+            iFireLogoChanged = EFalse;
+            FireDataChanged(); 
+            }
         }
     }
 
 // ---------------------------------------------------------
-// CWmWidgetData::HandleIconStringL
+// CWmWidgetData::HandleIconString
 // ---------------------------------------------------------
 //
-void CWmWidgetData::HandleIconStringL( const TDesC& aIconStr )
+void CWmWidgetData::HandleIconString( const TDesC& aIconStr )
     {
     HBufC* iconStr = NULL;
     if ( aIconStr.Length() == 0 && 
@@ -236,12 +278,13 @@ void CWmWidgetData::HandleIconStringL( const TDesC& aIconStr )
         // workaround for wrt widgets icon
         _LIT( KUidTag, "uid(0x%x)" );
         const TInt KLength = 32;
-        iconStr = HBufC::NewLC( KLength );
-        iconStr->Des().Format( KUidTag, iPublisherUid.iUid );
+        TBuf<KLength> uidBuf;
+        uidBuf.Format( KUidTag, iPublisherUid.iUid );
+        iconStr = uidBuf.Alloc();
         }
     else
         {
-        iconStr = aIconStr.AllocLC();
+        iconStr = aIconStr.Alloc();
         }
 
     TSize size( iLogoSize );
@@ -251,10 +294,21 @@ void CWmWidgetData::HandleIconStringL( const TDesC& aIconStr )
         {
         size = iLogoSize;
         }
-    iImageConverter->HandleIconStringL( 
+    TInt err = iImageConverter->HandleIconString( 
             size.iWidth, size.iHeight, *iconStr );
     
-    CleanupStack::PopAndDestroy( iconStr );    
+    delete iconStr;
+    iconStr = NULL;
+    
+    // handle result
+    if ( KErrNone == err && IsPrepairingLogo() )
+        {
+        iWait->Start();
+        }
+    else if ( KErrNone != err && iFireLogoChanged )
+        {
+        FireDataChanged(); // draw default icon
+        }
     }
 
 // ---------------------------------------------------------
@@ -314,12 +368,7 @@ void CWmWidgetData::FetchPublisherUidL(
         if ( widgetUid != 0 )
             {
             // WRT widget
-            iPublisherUid = TUid::Uid( widgetUid );
-            
-            HBufC* desc = StringLoader::LoadLC( R_QTN_WM_WIDGET_DETAILS_WRT, 
-                    CEikonEnv::Static() );
-            iHsContentInfo->SetDescriptionL( *desc );
-            CleanupStack::PopAndDestroy( desc );
+            iPublisherUid = TUid::Uid( widgetUid );            
             }
         else
             {
@@ -327,33 +376,21 @@ void CWmWidgetData::FetchPublisherUidL(
             }
         }
     }
-// ----------------------------------------------------
-// CWmWidgetData::SetLogoSize
-// ----------------------------------------------------
-//
-void CWmWidgetData::SetLogoSize( const TSize& aSize )
-    {
-    iLogoSize = aSize;
-    if ( iImageConverter )
-        {
-        iImageConverter->SetLogoSize( aSize );
-        }
-    }
 
 // ---------------------------------------------------------
-// CWmWidgetData::HandleAsyncIconString
+// CWmWidgetData::Description
 // ---------------------------------------------------------
 //
-TInt CWmWidgetData::HandleAsyncIconString( TAny* aPtr )
+const TDesC& CWmWidgetData::Description() const
     {
-    CWmWidgetData* self = static_cast< CWmWidgetData* >( aPtr );    
-    if ( self->iIdle->IsActive() )
-      { 
-      self->iIdle->Cancel(); 
-      }
-    TRAP_IGNORE( self->HandleIconStringL( 
-            self->HsContentInfo().IconPath() ); );
-    return KErrNone;
+    if ( iHsContentInfo->Description().Length() <= 0 &&
+        &iWmResourceLoader )
+        {
+        return ( ( iPublisherUid != KNullUid ) ? 
+            iWmResourceLoader.WrtDescription() : 
+            iWmResourceLoader.NoDescription() );
+        }
+    return iHsContentInfo->Description(); 
     }
 
 // ---------------------------------------------------------
@@ -361,19 +398,20 @@ TInt CWmWidgetData::HandleAsyncIconString( TAny* aPtr )
 // ---------------------------------------------------------
 //
 void CWmWidgetData::ReCreateLogo( const TSize& aSize )
-    {
-    iLogoSize = aSize;
-    
+    {    
     delete iLogoImage;
     iLogoImage = NULL;
     delete iLogoImageMask;
     iLogoImageMask = NULL;
-
-    if ( iIdle && !iIdle->IsActive() )
+    
+    if ( iWait && iWait->IsStarted() )
         {
-        // start decoding the icon
-        iIdle->Start( TCallBack( HandleAsyncIconString, this ) );
+        iWait->AsyncStop();
         }
+    
+    iFireLogoChanged = ETrue;
+    iLogoSize = aSize;
+    HandleIconString( HsContentInfo().IconPath() );
     }
 
 // ---------------------------------------------------------
@@ -412,5 +450,274 @@ TBool CWmWidgetData::ReplaceContentInfoL(
 
     return !( sameAppearance && sameLogo );
     }
+
+// ---------------------------------------------------------
+// CWmWidgetData::IsPrepairingLogo
+// ---------------------------------------------------------
+//
+TBool CWmWidgetData::IsPrepairingLogo()
+    {
+    TBool prepairing( EFalse );            
+    if ( !iLogoImage )
+        {
+        prepairing = iImageConverter->IsProcessing();
+        }
+    return prepairing;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::UnInstallL
+// ---------------------------------------------------------
+//
+void CWmWidgetData::UnInstallL()
+    {
+    if ( IsUninstalling() || IsActive() )
+        {
+        User::Leave( KErrInUse );
+        }
+
+    DestroyAnimData();
+    
+    TInt err = iInstaller.Connect();
+    if ( KErrNone == err )
+        {
+        CleanupClosePushL( iInstaller );
+        PrepairAnimL();
+        CleanupStack::Pop( &iInstaller );
+        SwiUI::TUninstallOptions optionsUninstall;
+        optionsUninstall.iBreakDependency = SwiUI::EPolicyAllowed;
+        optionsUninstall.iKillApp = SwiUI::EPolicyAllowed;
+        SwiUI::TUninstallOptionsPckg uninstallOptionsPkg( optionsUninstall );
+        iInstaller.SilentUninstall( iStatus, iPublisherUid, 
+                                uninstallOptionsPkg, KWrtMime );
+        VisualizeUninstall();
+        SetActive();
+        }
+    else
+        {
+        // do normal uninstall
+        iAsyncUninstalling = EFalse;
+        SwiUI::RSWInstLauncher installer;
+        User::LeaveIfError( installer.Connect() );
+        CleanupClosePushL( installer );
+        User::LeaveIfError( installer.Uninstall( iPublisherUid, KWrtMime ) );
+        CleanupStack::PopAndDestroy( &installer );
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::VisualizeUninstall
+// ---------------------------------------------------------
+//
+void CWmWidgetData::VisualizeUninstall()
+    {
+    iAsyncUninstalling = ETrue;
+    iAnimationIndex = 0;
+    const TInt tickInterval = 400000;
+    iPeriodic->Start(
+            tickInterval,tickInterval,TCallBack(Tick, this));
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::PrepairAnimL
+// ---------------------------------------------------------
+//
+void CWmWidgetData::PrepairAnimL()
+    {
+    TInt resourceId = R_QGN_GRAF_WAIT_BAR_ANIM;
+    CAknBitmapAnimation* aknAnimation = CAknBitmapAnimation::NewL();
+    CleanupStack::PushL( aknAnimation );
+    aknAnimation->SetScaleModeForAnimationFrames(EAspectRatioNotPreserved);
+    TAknsItemID iid;
+    iid.Set(EAknsMajorAvkon, resourceId );
+    if ( !aknAnimation ->ConstructFromSkinL( iid ) )
+        {
+        TResourceReader readerForAnimation;
+        CCoeEnv::Static()->CreateResourceReaderLC( readerForAnimation,resourceId );
+        aknAnimation->ConstructFromResourceL( readerForAnimation );
+        CleanupStack::PopAndDestroy();
+        }
+    TInt endFrame = aknAnimation ->BitmapAnimData()->FrameArray().Count()-1;
+    for ( TInt i=0; i<=endFrame; i++ )
+        {
+        aknAnimation ->BitmapAnimData()->FrameArray().At(i)->SetBitmapsOwnedExternally( ETrue );
+        CFbsBitmap* bitmap  = aknAnimation ->BitmapAnimData()->FrameArray().At(i)->Bitmap();
+        CFbsBitmap* bitmapMask = aknAnimation ->BitmapAnimData()->FrameArray().At(i)->Mask();
+        if ( bitmap && bitmapMask )
+            {
+            iUninstallAnimIcons.AppendL( bitmap );
+            iUninstallAnimIcons.AppendL( bitmapMask );
+            }
+        }
+    CleanupStack::PopAndDestroy( aknAnimation );
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::DestroyAnimData
+// ---------------------------------------------------------
+//
+void CWmWidgetData::DestroyAnimData()
+    {
+    if ( iPeriodic && iPeriodic->IsActive() )
+        {
+        iPeriodic->Cancel();
+        }
+        
+    for( TInt i=0; i < iUninstallAnimIcons.Count(); i++ )
+        {
+        CFbsBitmap* bitmap = iUninstallAnimIcons[i];
+        delete bitmap; bitmap = NULL;
+        }
+    iUninstallAnimIcons.Close();    
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::Tick
+// ---------------------------------------------------------
+//
+TInt CWmWidgetData::Tick( TAny* aPtr )
+    {
+    CWmWidgetData* self = static_cast< CWmWidgetData* >( aPtr );
+    self->iAnimationIndex += 2;
+    if ( self->iAnimationIndex >= self->iUninstallAnimIcons.Count() -1 )
+        {
+        self->iAnimationIndex = 0; // restart from beginging
+        }
+    self->FireDataChanged();
+    return 1;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::CloseSwiSession
+// ---------------------------------------------------------
+//
+TInt CWmWidgetData::CloseSwiSession( TAny* aPtr )
+    {
+    CWmWidgetData* self = static_cast< CWmWidgetData* >( aPtr );
+    if ( self->iIdle->IsActive() )
+      {
+      self->iIdle->Cancel(); 
+      }
+
+    self->iInstaller.Close();
+    return KErrNone;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::AnimationBitmap
+// ---------------------------------------------------------
+//
+const CFbsBitmap* CWmWidgetData::AnimationBitmap( const TSize& aSize )
+    {
+    CFbsBitmap* bitmap = NULL;
+    if ( iUninstallAnimIcons.Count() )
+        {
+        TInt index = iAnimationIndex;
+        if ( index >= iUninstallAnimIcons.Count() - 1 )
+            {
+            index = 0;
+            }
+        bitmap = iUninstallAnimIcons[index];
+        if ( bitmap->SizeInPixels() != aSize )
+            {
+            AknIconUtils::SetSize( bitmap, aSize, 
+                    EAspectRatioNotPreserved );
+            }               
+        }
+    return bitmap;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::AnimationMask
+// ---------------------------------------------------------
+//
+const CFbsBitmap* CWmWidgetData::AnimationMask( const TSize& aSize )
+    {
+    CFbsBitmap* mask = NULL;
+    if ( iUninstallAnimIcons.Count() )
+        {
+        TInt index = iAnimationIndex+1;
+        if ( index >= iUninstallAnimIcons.Count() )
+            {
+            index = 1;
+            }
+        mask = iUninstallAnimIcons[index];
+        if ( mask && mask->SizeInPixels() != aSize )
+            {
+            AknIconUtils::SetSize( mask, aSize,
+                    EAspectRatioNotPreserved );
+            }
+        }    
+    return mask;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::IsUninstalling
+// ---------------------------------------------------------
+//
+TBool CWmWidgetData::IsUninstalling()
+    {
+    return iAsyncUninstalling;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::DoCancel
+// ---------------------------------------------------------
+//
+void CWmWidgetData::DoCancel()
+    {
+    if ( IsActive() && iAsyncUninstalling )
+        {
+        iInstaller.CancelAsyncRequest( 
+                SwiUI::ERequestSilentUninstall );
+
+		// close session
+		iInstaller.Close();
+        }
+    iAsyncUninstalling = EFalse;
+    iAnimationIndex = 0;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::RunL
+// ---------------------------------------------------------
+//
+void CWmWidgetData::RunL()
+    {
+    iAsyncUninstalling = EFalse;
+    iAnimationIndex = 0;
+
+    DestroyAnimData();
+    FireDataChanged();
+
+    // close SWI session
+    if ( iIdle && iIdle->IsActive() )
+        {
+        iIdle->Cancel();
+        }
+    iIdle->Start( TCallBack( CloseSwiSession, this ) );
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::RunError
+// ---------------------------------------------------------
+//
+TInt CWmWidgetData::RunError(TInt /*aError*/)
+    {
+    iAsyncUninstalling = EFalse;
+    iAnimationIndex = 0;
+    DestroyAnimData();
+    FireDataChanged();
+    
+    // close SWI session
+    if ( iIdle && iIdle->IsActive() )
+        {
+        iIdle->Cancel();
+        }
+    iIdle->Start( TCallBack( CloseSwiSession, this ) );
+
+    return KErrNone;
+    }
+
 // End of file
 

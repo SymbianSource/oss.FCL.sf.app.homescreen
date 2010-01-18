@@ -99,7 +99,7 @@ void CWmListItemDrawer::ConstructL()
             EMbmWidgetmanagerQgn_menu_hswidget,
             EMbmWidgetmanagerQgn_menu_hswidget_mask
             );
-	
+
     AknsUtils::CreateColorIconL(
             skin,
             KAknsIIDQgnIndiWmAdd,
@@ -232,11 +232,11 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     logoLayout.LayoutRect( itemRect,
              AknLayoutScalable_Apps::listrow_wgtman_pane_g1().LayoutLine() );
 
-    if ( !bitmap )
+    if ( !bitmap && !wData.IsPrepairingLogo() )
         {
         logoLayout.DrawImage( gc, iDefaultLogoImage, iDefaultLogoImageMask );
         }
-    else
+    else if( bitmap && mask )
         {
         logoLayout.DrawImage( gc, bitmap, mask );
         }
@@ -255,14 +255,13 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
 
     TAknTextLineLayout titleTextLayout = 
               AknLayoutScalable_Apps::listrow_wgtman_pane_t1().LayoutLine();
-    TAknTextLineLayout descTextLayout =
-            AknLayoutScalable_Apps::listrow_wgtman_pane_t2().LayoutLine();
 
     TAknLayoutText textLayout;
     textLayout.LayoutText( itemRect, titleTextLayout );
     textLayout.DrawText( gc, wData.Name(), ETrue, textColor );
     
-    if ( wData.HsContentInfo().CanBeAdded() )
+    if ( !wData.IsUninstalling() &&
+        wData.HsContentInfo().CanBeAdded() )
         {
         // DRAW ADD BUTTON
         TAknLayoutRect addButtonLayout;
@@ -280,11 +279,31 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
             }        
         }
 
-    gc.SetPenSize(TSize(1,1));
-
-    // DRAW DESCRIPTION TEXT
-    textLayout.LayoutText( itemRect, descTextLayout );
-    textLayout.DrawText( gc, wData.Description(), ETrue, textColor );
+    if ( !wData.IsUninstalling() )
+        {
+        TAknTextLineLayout descTextLayout =
+            AknLayoutScalable_Apps::listrow_wgtman_pane_t2().LayoutLine();
+        gc.SetPenSize(TSize(1,1));
+        // DRAW DESCRIPTION TEXT
+        textLayout.LayoutText( itemRect, descTextLayout );
+        textLayout.DrawText( gc, wData.Description(), ETrue, textColor );
+        }
+    else
+        {
+        // draw animation
+        TAknLayoutRect animationLayout;
+        animationLayout.LayoutRect( itemRect,
+             AknLayoutScalable_Apps::wait_bar_pane_cp09().LayoutLine() );
+        TSize size = animationLayout.Rect().Size();
+        CFbsBitmap* animBitmap = 
+                const_cast<CFbsBitmap*>(wData.AnimationBitmap( size ));
+        CFbsBitmap* animMask = 
+                const_cast<CFbsBitmap*>(wData.AnimationMask( size ));
+        if ( animBitmap && animMask )
+            {
+            animationLayout.DrawImage( gc, animBitmap, animMask );
+            }
+        }
     gc.DiscardFont();
     }
 
@@ -400,6 +419,7 @@ CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
     {
     iFindPaneIsVisible = EFalse;
 	iPressedDown = EFalse;
+	iLogoSize = TSize( 0, 0);
     }
 
 // ---------------------------------------------------------
@@ -409,6 +429,7 @@ CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
 CWmListBox::~CWmListBox()
     {
     iWidgetDatas.ResetAndDestroy();
+    iTrashedData.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------
@@ -456,13 +477,13 @@ CWmWidgetData& CWmListBox::WidgetData( TInt aItemIndex )
 // CWmListBox::AddWidgetDataL
 // ---------------------------------------------------------
 //
-void CWmListBox::AddWidgetDataL( CWmWidgetData* aWidgetData )
+void CWmListBox::AddWidgetDataL( CWmWidgetData* aWidgetData,
+        TBool aRedraw )
     {
     aWidgetData->SetObserver( this );
-    aWidgetData->SetLogoSize( LogoSize() );
     iWidgetDatas.InsertInOrderAllowRepeatsL( aWidgetData,
             SortOrder(EStoredOrder) );
-    HandleItemAdditionL();
+    if ( aRedraw ) { HandleItemAdditionL(); }
     }
 
 // ---------------------------------------------------------
@@ -476,12 +497,24 @@ void CWmListBox::RemoveWidgetData( TInt aItemIndex )
     // remove widget data
     CWmWidgetData* data = iWidgetDatas[realIndex];
     iWidgetDatas.Remove( realIndex );
-    delete data;
-
     // reorganise
     TRAP_IGNORE(
         AknListBoxUtils::HandleItemRemovalAndPositionHighlightL(
             this, realIndex, current ) );
+    
+    // widgetlist changed notification comes too early before even
+    // uninstall is completed. in wk04_2010 there is going to be fix 
+    // available for this issue. add data object to trashed array so
+    // that its not visible in list and is destroyed later.
+    if ( data->IsUninstalling() && data->IsActive() )
+        {
+        iTrashedData.Append( data );
+        }
+    else
+        {
+        // delete now
+        delete data;
+        }
     }
 
 // ---------------------------------------------------------
@@ -519,6 +552,9 @@ void CWmListBox::CreateItemDrawerL()
             cellData,
             this );
     CleanupStack::Pop(); // cellData
+
+    // enable extended drawing
+    EnableExtendedDrawingL();
     }
 
 // ---------------------------------------------------------
@@ -527,10 +563,11 @@ void CWmListBox::CreateItemDrawerL()
 //
 void CWmListBox::HandleLayoutChanged()
     {
-	TSize ls = LogoSize();
+    iLogoSize = TSize( 0, 0);
+	iLogoSize = LogoSize();
     for ( TInt i=0; i<iWidgetDatas.Count(); i++)
         {
-        iWidgetDatas[i]->ReCreateLogo( ls );
+        iWidgetDatas[i]->ReCreateLogo( iLogoSize );
         }
     }
 
@@ -561,7 +598,7 @@ void CWmListBox::HandleWidgetDataChanged( CWmWidgetData* aWidgetData )
         if ( index >= 0 )
             {
             // redraw item.
-            RedrawItem( RealIndex( index ) );			
+            RedrawItem( RealIndex( index ) );
             }
         }
     else
@@ -677,14 +714,21 @@ void CWmListBox::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 //
 TSize CWmListBox::LogoSize()
     {
-    TAknLayoutRect rowLayoutRect;
-    rowLayoutRect.LayoutRect( Rect(),
-            AknLayoutScalable_Apps::listrow_wgtman_pane().LayoutLine() );
-    TAknLayoutRect logoLayoutRect;
-    logoLayoutRect.LayoutRect( rowLayoutRect.Rect(),
-            AknLayoutScalable_Apps::listrow_wgtman_pane_g1().LayoutLine() );
-    return logoLayoutRect.Rect().Size();
+    TSize size( iLogoSize );    
+    if ( size.iWidth == 0 || size.iHeight == 0 )
+        {
+        TAknLayoutRect rowLayoutRect;
+        rowLayoutRect.LayoutRect( Rect(),
+                AknLayoutScalable_Apps::listrow_wgtman_pane().LayoutLine() );
+        TAknLayoutRect logoLayoutRect;
+        logoLayoutRect.LayoutRect( rowLayoutRect.Rect(),
+                AknLayoutScalable_Apps::listrow_wgtman_pane_g1().LayoutLine() );
+        size = logoLayoutRect.Rect().Size();
+        iLogoSize = size;
+        }
+    return size;
     }
+
 
 // ---------------------------------------------------------
 // CWmListBox::DefaultLogo

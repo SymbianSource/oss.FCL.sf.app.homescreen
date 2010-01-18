@@ -60,7 +60,7 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
     User::AllocSize( start );
 #endif //_XN_PERFORMANCE_TEST_
 
-    CAknViewAppUi::BaseConstructL( EAknEnableSkin | EAknEnableMSK );
+    CAknViewAppUi::BaseConstructL( EAknEnableSkin | EAknEnableMSK | EAknSingleClickCompatible );
 
     CAknToolbar* toolbar( CurrentFixedToolbar() );
 

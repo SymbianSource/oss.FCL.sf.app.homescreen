@@ -48,6 +48,7 @@ SOURCE  wmeffectmanager.cpp
 SOURCE  wmdetailsdlg.cpp
 SOURCE	wmportalbutton.cpp
 SOURCE  wmwidgetloaderao.cpp
+SOURCE  wmconfiguration.cpp
 
 SOURCEPATH		../data
 START RESOURCE  20026F53.rss
@@ -111,5 +112,5 @@ LIBRARY     sysutil.lib //  diskspace
 LIBRARY     featmgr.lib // FeatureManager
 LIBRARY     etext.lib 
 LIBRARY     centralrepository.lib
-
+LIBRARY     bmpanim.lib // AknBitmap animation
 // End of file

@@ -81,7 +81,7 @@ static CXnNode* BuildTriggerL(
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
         nameValue,
-        aUiEngine.ODT()->DomDocument().StringPool() );
+        *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -116,11 +116,11 @@ static CXnNode* BuildDeactivateTriggerL( CXnUiEngine& aUiEngine )
 //
 static CXnNode* BuildEditStateTriggerL( CXnUiEngine& aUiEngine )
     {
-    CXnDomStringPool& sp( aUiEngine.ODT()->DomDocument().StringPool() );
+    CXnDomStringPool* sp( aUiEngine.ODT()->DomDocument().StringPool() );
     
     CXnProperty* value = CXnProperty::NewL(
         XnPropertyNames::action::KValue,
-        KNullDesC8, CXnDomPropertyValue::EString, sp );
+        KNullDesC8, CXnDomPropertyValue::EString, *sp );
     CleanupStack::PushL( value );
     
     CXnNode* trigger( BuildTriggerL(

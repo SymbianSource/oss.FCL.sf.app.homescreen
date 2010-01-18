@@ -1,0 +1,8 @@
+EXPORTS
+	?FswDataL@CHgFswEngine@@QAEABV?$RPointerArray@VCHgFswEntry@@@@XZ @ 1 NONAME ; class RPointerArray<class CHgFswEntry> const & CHgFswEngine::FswDataL(void)
+	?ForegroundAppUidL@CHgFswEngine@@QAE?AVTUid@@H@Z @ 2 NONAME ; class TUid CHgFswEngine::ForegroundAppUidL(int)
+	?SwitchToAppL@CHgFswEngine@@QAEXH@Z @ 3 NONAME ; void CHgFswEngine::SwitchToAppL(int)
+	?NewL@CHgFswEngine@@SAPAV1@AAVMHgFswEngineObserver@@@Z @ 4 NONAME ; class CHgFswEngine * CHgFswEngine::NewL(class MHgFswEngineObserver &)
+	?CloseAppL@CHgFswEngine@@QAEXH@Z @ 5 NONAME ; void CHgFswEngine::CloseAppL(int)
+	?NewLC@CHgFswEngine@@SAPAV1@AAVMHgFswEngineObserver@@@Z @ 6 NONAME ; class CHgFswEngine * CHgFswEngine::NewLC(class MHgFswEngineObserver &)
+

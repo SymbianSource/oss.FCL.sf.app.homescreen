@@ -26,9 +26,6 @@ plugin.plugins
  
     _s60-longtap: true;
 
-    touchfeedbackdown: basic; 
-    touchfeedbackdrag: sensitive;
-
     nav-index: appearance;
 }
 

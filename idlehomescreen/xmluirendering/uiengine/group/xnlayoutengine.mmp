@@ -85,6 +85,7 @@ SOURCE    xnbgcontrol.cpp
 SOURCE    xninactivitymonitor.cpp 
 SOURCE    xnfocuscontrol.cpp
 SOURCE    xnextrenderingpluginwrapper.cpp
+SOURCE    xnbackgroundmanager.cpp
 
 START RESOURCE  xnuiengine.rss
 HEADER
@@ -147,6 +148,8 @@ LIBRARY    hscontentcontrol.lib
 LIBRARY    hscontentinfo.lib
 LIBRARY    hsccproviderclient.lib
 LIBRARY    extrenderingplugin.lib
+LIBRARY    disknotifyhandler.lib
+LIBRARY	   platformenv.lib
 
 #if defined(_XN3_DEBUG_) || defined(AI3_DEBUG_PERFORMANCE)
 LIBRARY    flogger.lib

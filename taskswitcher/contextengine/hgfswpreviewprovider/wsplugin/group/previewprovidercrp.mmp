@@ -1,0 +1,47 @@
+/*
+* ==============================================================================
+*  Name        : %name: previewprovidercrp.mmp %
+*  Part of     : Hg fast swap preview provider plugin
+*  Description : MMP file for preview provider ECOM plugin
+*  Version     : %version: sa1spcx1#4 %
+*
+*  Copyright (c) 2008 Nokia Corporation.
+*  This material, including documentation and any related
+*  computer programs, is protected by copyright controlled by
+*  Nokia Corporation. All rights are reserved. Copying,
+*  including reproducing, storing, adapting or translating, any
+*  or all of this material requires the prior written consent of
+*  Nokia Corporation. This material also contains confidential
+*  information which may not be disclosed to others without the
+*  prior written consent of Nokia Corporation.
+* ==============================================================================
+*/
+#include <platform_paths.hrh>
+#include <defaultcaps.hrh>
+
+TARGET          20016BEC.DLL
+TARGETTYPE      PLUGIN 
+UID             0x10009D8D 0x20016BEC
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+OPTION_REPLACE  ARMCC --arm -O3 --cpu 6
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../../trace
+
+MW_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../src
+SOURCE          previewprovidercrp.cpp
+
+RESOURCE        20016BEC.rss
+
+LIBRARY         ecom.lib
+LIBRARY         euser.lib
+LIBRARY         wsgraphicdrawer.lib
+LIBRARY         fbscli.lib
+LIBRARY         estor.lib 
+LIBRARY         gdi.lib 
+DEBUGLIBRARY    flogger.lib

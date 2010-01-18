@@ -116,7 +116,7 @@ CXnPluginData::~CXnPluginData()
 //
 void CXnPluginData::ConstructL()
     {    
-    iLoader = CPeriodic::NewL( CActive::EPriorityUserInput );    
+    iLoader = CPeriodic::NewL( CActive::EPriorityStandard );    
     }
 
 // -----------------------------------------------------------------------------

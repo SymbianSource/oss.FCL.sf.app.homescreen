@@ -30,7 +30,7 @@
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CXnDomProperty::CXnDomProperty( CXnDomStringPool& aStringPool ):
+CXnDomProperty::CXnDomProperty( CXnDomStringPool* aStringPool ):
     iStringPool( aStringPool )
     {
     }
@@ -42,7 +42,7 @@ CXnDomProperty::CXnDomProperty( CXnDomStringPool& aStringPool ):
 //
 CXnDomProperty::CXnDomProperty( 
     TInt16 aStringPoolIndex, 
-    CXnDomStringPool& aStringPool ):
+    CXnDomStringPool* aStringPool ):
     iStringPool( aStringPool ),
     iNameRef( aStringPoolIndex )
     {
@@ -54,7 +54,7 @@ CXnDomProperty::CXnDomProperty(
 //
 void CXnDomProperty::ConstructL( const TDesC8& aName )
     {
-    iNameRef = iStringPool.AddStringL( aName );
+    iNameRef = iStringPool->AddStringL( aName );
     iPropValList = CXnDomList::NewL( CXnDomList::EPropertyValueList, iStringPool );
     }
 // -----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ void CXnDomProperty::ConstructL()
 //
 EXPORT_C CXnDomProperty* CXnDomProperty::NewL( 
     const TDesC8& aName,
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomProperty* self = new( ELeave ) CXnDomProperty( aStringPool );
     
@@ -91,7 +91,7 @@ EXPORT_C CXnDomProperty* CXnDomProperty::NewL(
 //
 CXnDomProperty* CXnDomProperty::NewL( 
     RReadStream& aStream, 
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomProperty* self = 
         new( ELeave ) CXnDomProperty( aStringPool );
@@ -110,7 +110,7 @@ CXnDomProperty* CXnDomProperty::NewL(
 //
 EXPORT_C CXnDomProperty* CXnDomProperty::NewL( 
     TInt16 aStringPoolIndex,
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomProperty* self = 
         new (ELeave) CXnDomProperty( aStringPoolIndex, aStringPool );
@@ -157,8 +157,8 @@ EXPORT_C CXnDomProperty* CXnDomProperty::CloneL()
 //
 EXPORT_C CXnDomProperty* CXnDomProperty::CloneL( CXnDomStringPool& aStringPool )
     {
-    const TDesC8& name = iStringPool.String( iNameRef );
-    CXnDomProperty* clone = CXnDomProperty::NewL( name, aStringPool );
+    const TDesC8& name = iStringPool->String( iNameRef );
+    CXnDomProperty* clone = CXnDomProperty::NewL( name, &aStringPool );
     CleanupStack::PushL(clone);
     
     TInt count( iPropValList->Length() );
@@ -182,7 +182,7 @@ EXPORT_C CXnDomProperty* CXnDomProperty::CloneL( CXnDomStringPool& aStringPool )
 //
 EXPORT_C const TDesC8& CXnDomProperty::Name()
     {
-    return iStringPool.String( iNameRef );
+    return iStringPool->String( iNameRef );
     }
 
 // -----------------------------------------------------------------------------
@@ -225,7 +225,7 @@ EXPORT_C void CXnDomProperty::SetInherited( TBool aInherited )
 // CXnDomProperty::StringPool
 // -----------------------------------------------------------------------------
 //        
-EXPORT_C CXnDomStringPool& CXnDomProperty::StringPool() const
+EXPORT_C CXnDomStringPool* CXnDomProperty::StringPool() const
     {
     return iStringPool;
     }                      
@@ -237,6 +237,31 @@ EXPORT_C TInt16 CXnDomProperty::StringPoolIndex()const
     {
     return iNameRef;    
     }
+
+// -----------------------------------------------------------------------------
+// CXnDomProperty::SwapStringPoolL
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnDomProperty::SwapStringPoolL( CXnDomStringPool* aStringPool )
+    {
+    if( !aStringPool )
+        {
+        User::Leave( KErrArgument );
+        }
+    
+    iNameRef = aStringPool->AddStringL( iStringPool->String( iNameRef ) );
+
+    TInt count = iPropValList->Length();
+    for( TInt i = 0; i < count; i++ )
+        {
+        CXnDomPropertyValue* val =
+                static_cast<CXnDomPropertyValue*>( iPropValList->Item(i) );
+        val->SwapStringPoolL( aStringPool );
+        }
+
+    iStringPool = aStringPool;
+    }
+
 // -----------------------------------------------------------------------------
 // CXnDomProperty::PseudoClass
 // -----------------------------------------------------------------------------
@@ -288,7 +313,7 @@ void CXnDomProperty::ExternalizeL( RWriteStream& aStream ) const
 //
 void CXnDomProperty::InternalizeL( RReadStream& aStream )
     {
-    iNameRef = aStream.ReadInt16L() + iStringPool.Offset();
+    iNameRef = aStream.ReadInt16L();
     iPropValList = CXnDomList::NewL( aStream, iStringPool );
     
     iInherited =  TBool( aStream.ReadInt8L() );

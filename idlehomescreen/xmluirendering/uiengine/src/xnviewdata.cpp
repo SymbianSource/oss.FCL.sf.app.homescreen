@@ -196,8 +196,11 @@ void CXnViewData::Destroy()
         
         iManager.Parser().DestroyView( *this );
         }
-    
-    Flush();    
+    delete iBgImage;
+    iBgImage = NULL;
+    Flush();  
+    delete iBgImagePath;
+    iBgImagePath = NULL;
     }
 
 // -----------------------------------------------------------------------------
@@ -271,6 +274,51 @@ CXnPluginData* CXnViewData::Plugin( const TDesC8& aNamespace )
 CXnNode* CXnViewData::ViewNode() const
     {
     return iNode->LayoutNode();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewData::SetWallpaperImage
+// Store background image. Ownership is transferred.
+// -----------------------------------------------------------------------------
+//
+void CXnViewData::SetWallpaperImage( CFbsBitmap* aBitmap )
+    {
+    delete iBgImage;
+    iBgImage = aBitmap;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewData::WallpaperImage
+// Get wallpaper image.
+// -----------------------------------------------------------------------------
+//
+CFbsBitmap* CXnViewData::WallpaperImage() const
+    {
+    return iBgImage;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewData::SetWallpaperImagePathL
+// -----------------------------------------------------------------------------
+//
+void CXnViewData::SetWallpaperImagePathL( const TDesC& aFileName )
+    {
+    delete iBgImagePath;
+    iBgImagePath = NULL;
+    iBgImagePath = aFileName.AllocL();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewData::WallpaperImagePath
+// -----------------------------------------------------------------------------
+//
+const TDesC& CXnViewData::WallpaperImagePath() const
+    {
+    if( iBgImagePath )
+        {
+        return *iBgImagePath;        
+        }
+    return KNullDesC;
     }
 
 // -----------------------------------------------------------------------------

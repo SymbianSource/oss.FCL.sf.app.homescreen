@@ -36,7 +36,7 @@ _LIT8(KNone,    "none");
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CXnDomPropertyValue::CXnDomPropertyValue( CXnDomStringPool& aStringPool ):
+CXnDomPropertyValue::CXnDomPropertyValue( CXnDomStringPool* aStringPool ):
     iStringPool( aStringPool ),	
     iPrimitiveValueType( (TPrimitiveValueType)KErrNotFound )
     {
@@ -57,7 +57,7 @@ void CXnDomPropertyValue::ConstructL()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CXnDomPropertyValue* CXnDomPropertyValue::NewL( 
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomPropertyValue* self = new( ELeave ) CXnDomPropertyValue( aStringPool );
     
@@ -74,7 +74,7 @@ EXPORT_C CXnDomPropertyValue* CXnDomPropertyValue::NewL(
 //
 CXnDomPropertyValue* CXnDomPropertyValue::NewL( 
     RReadStream& aStream,
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomPropertyValue* self = new( ELeave ) CXnDomPropertyValue( aStringPool );
     
@@ -162,7 +162,7 @@ EXPORT_C CXnDomPropertyValue* CXnDomPropertyValue::CloneL()
 //
 CXnDomPropertyValue* CXnDomPropertyValue::CloneL( CXnDomStringPool& aStringPool )
     {
-    CXnDomPropertyValue* clone = CXnDomPropertyValue::NewL( aStringPool );
+    CXnDomPropertyValue* clone = CXnDomPropertyValue::NewL( &aStringPool );
     CleanupStack::PushL( clone );
     clone->iPrimitiveValueType = iPrimitiveValueType;
     
@@ -199,7 +199,7 @@ CXnDomPropertyValue* CXnDomPropertyValue::CloneL( CXnDomStringPool& aStringPool 
 	    case EAttr:
 	    case EUnknown:
 	        {
-	        const TDesC8& value = iStringPool.String( iData.iStringRef );
+	        const TDesC8& value = iStringPool->String( iData.iStringRef );
             clone->iData.iStringRef = aStringPool.AddStringL( value );
 	        clone->iIdent = iIdent;
 	        break;
@@ -327,7 +327,7 @@ EXPORT_C const TDesC8& CXnDomPropertyValue::StringValueL()
         }
     
     
-    return iStringPool.String( iData.iStringRef );
+    return iStringPool->String( iData.iStringRef );
     }
 // -----------------------------------------------------------------------------
 // const TDesC& CXnDomPropertyValue::StringValue
@@ -352,7 +352,7 @@ EXPORT_C const TDesC8& CXnDomPropertyValue::StringValue()
         }
     
     
-    return iStringPool.String( iData.iStringRef );
+    return iStringPool->String( iData.iStringRef );
     }
 // -----------------------------------------------------------------------------
 // TReal CXnDomPropertyValue::SetStringValueL
@@ -382,7 +382,7 @@ EXPORT_C void CXnDomPropertyValue::SetStringValueL(
     ReleaseData();
     
     iPrimitiveValueType = aValueType;
-    TInt stringRef = iStringPool.AddStringL( aStringValue );
+    TInt stringRef = iStringPool->AddStringL( aStringValue );
     iData.iStringRef = stringRef;
     
     if ( aStringValue.Compare( KAuto ) == 0 )
@@ -572,7 +572,35 @@ EXPORT_C TInt16 CXnDomPropertyValue::StringPoolIndexL()const
         }
     return iData.iStringRef;    
     }
+
+// -----------------------------------------------------------------------------
+// CXnDomPropertyValue::SwapStringPoolL
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnDomPropertyValue::SwapStringPoolL( CXnDomStringPool* aStringPool )
+    {
+    if( !aStringPool )
+        {
+        User::Leave( KErrArgument );
+        }
+
+    if( iPrimitiveValueType == EString ||
+        iPrimitiveValueType == EIdent ||
+        iPrimitiveValueType == EUri ||
+        iPrimitiveValueType == EAttr ||
+        iPrimitiveValueType == EUnknown )
+        {
+        if( iData.iStringRef != NULL &&
+            iData.iStringRef != -1 )
+            {
+            iData.iStringRef =
+                    aStringPool->AddStringL( iStringPool->String( iData.iStringRef ) );
+            }
+        }
     
+    iStringPool = aStringPool;
+    }
+
 // -----------------------------------------------------------------------------
 // CXnDomPropertyValue::Size()const
 // Count size of this object's data.
@@ -733,7 +761,6 @@ void CXnDomPropertyValue::InternalizeL( RReadStream& aStream )
 	    case EUnknown:
             {
             aStream >> iData.iStringRef;
-            iData.iStringRef += iStringPool.Offset();
             iIdent = static_cast<TIdentType>( aStream.ReadInt8L() );
             }
             break;

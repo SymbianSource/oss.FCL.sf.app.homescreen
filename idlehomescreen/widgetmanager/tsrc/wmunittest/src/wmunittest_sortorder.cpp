@@ -155,11 +155,15 @@ void CWmUnitTest::CreateWidgetDataArrayL( RWidgetDataValues& aArray, TInt aCount
     RWidgetRegistryClientSession registryClient;
     User::LeaveIfError( registryClient.Connect() );
     CleanupClosePushL( registryClient );
-
+    TSize dummySize(40,40);
+    CWmResourceLoader* resLoader = NULL; // not used in this case
     while( contentArray->Array().Count() > 0 )
-        {
+        {        
         CWmWidgetData* data = CWmWidgetData::NewL(
-                contentArray->Array()[0], &registryClient);
+                dummySize, *resLoader, 
+                contentArray->Array()[0],
+                &registryClient);
+
         contentArray->Array().Remove( 0 );
         CleanupStack::PushL( data );
         aArray.AppendL( data );

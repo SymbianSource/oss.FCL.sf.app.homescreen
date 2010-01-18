@@ -1152,7 +1152,7 @@ static TBool GetBackgroundPositionFromPropertyL(
                 TRAP( error, tmpProperty = CXnProperty::NewL(
                     KNullDesC8,
                     tmpValue,
-                    aNode.UiEngine()->ODT()->DomDocument().StringPool() ); );
+                    *aNode.UiEngine()->ODT()->DomDocument().StringPool() ); );
                 if ( error != KErrNone )
                     {
                     delete tmpValue;
@@ -1335,7 +1335,7 @@ static TBool GetBackgroundSizeFromPropertyL(
                 CXnProperty* tmpProperty = NULL;
                 TRAP( error, tmpProperty = CXnProperty::NewL(
                     KNullDesC8, tmpValue,
-                    aNode.UiEngine()->ODT()->DomDocument().StringPool() ); );
+                    *aNode.UiEngine()->ODT()->DomDocument().StringPool() ); );
                 if ( error != KErrNone )
                     {
                     delete tmpValue;
@@ -3107,7 +3107,7 @@ static CFbsBitmap* InitializeBorderBitmapL(
                 tmpProperty = CXnProperty::NewL(
                     KNullDesC8,
                     tmpValue,
-                    aNode.UiEngine()->ODT()->DomDocument().StringPool() );
+                *aNode.UiEngine()->ODT()->DomDocument().StringPool() );
                 CleanupStack::Pop( tmpValue );
                 TSize imageSize = returnValue->SizeInPixels();
                 CleanupStack::PushL( tmpProperty );
@@ -3206,7 +3206,7 @@ static CXnNode* BuildTriggerTypeNodeL( const TDesC8& aName,
     CleanupStack::PushL( nameValue );
     nameValue->SetStringValueL( CXnDomPropertyValue::EString, aName );
     CXnProperty* name = CXnProperty::NewL( XnPropertyNames::action::KName,
-        nameValue, aUiEngine.ODT()->DomDocument().StringPool() );
+        nameValue, *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -3216,7 +3216,7 @@ static CXnNode* BuildTriggerTypeNodeL( const TDesC8& aName,
     CleanupStack::PushL( valueValue );
     valueValue->SetStringValueL( CXnDomPropertyValue::EString, aValue );
     CXnProperty* value = CXnProperty::NewL( XnPropertyNames::action::KValue,
-        valueValue, aUiEngine.ODT()->DomDocument().StringPool() );
+        valueValue, *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( valueValue );
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
@@ -3249,7 +3249,7 @@ static CXnNode* BuildTriggerNodeL(
     CleanupStack::PushL( nameValue );
     nameValue->SetStringValueL( CXnDomPropertyValue::EString, aTriggerName );
     CXnProperty* name = CXnProperty::NewL( XnPropertyNames::action::trigger::KName,
-        nameValue, aUiEngine.ODT()->DomDocument().StringPool() );
+        nameValue, *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -3285,7 +3285,7 @@ static CXnNode* BuildTriggerNodeL(
     CleanupStack::PushL( nameValue );
     nameValue->SetStringValueL( CXnDomPropertyValue::EString, aTriggerName );
     CXnProperty* name = CXnProperty::NewL( XnPropertyNames::action::trigger::KName,
-        nameValue, aUiEngine.ODT()->DomDocument().StringPool() );
+        nameValue, *aUiEngine.ODT()->DomDocument().StringPool() );
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
     node->SetPropertyL( name );
@@ -3535,7 +3535,7 @@ CXnNode* CXnControlAdapterImpl::BuildSwipeTriggerNodeLC(
     CXnUiEngine& aUiEngine,
     const TDesC8& aDirection )
     {
-    CXnDomStringPool& sp( aUiEngine.ODT()->DomDocument().StringPool() );
+    CXnDomStringPool* sp( aUiEngine.ODT()->DomDocument().StringPool() );
 
     CXnNode* node = CXnNode::NewL();
     CleanupStack::PushL( node );
@@ -3558,7 +3558,7 @@ CXnNode* CXnControlAdapterImpl::BuildSwipeTriggerNodeLC(
 
     CXnProperty* name = CXnProperty::NewL(
         XnPropertyNames::action::trigger::KName,
-        nameValue, sp );
+        nameValue, *sp );
 
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );
@@ -3573,7 +3573,7 @@ CXnNode* CXnControlAdapterImpl::BuildSwipeTriggerNodeLC(
 
     CXnProperty* reason = CXnProperty::NewL(
         XnPropertyNames::action::trigger::name::swipe::KDirection,
-        reasonValue, sp );
+        reasonValue, *sp );
 
     CleanupStack::Pop( reasonValue );
 
@@ -4039,6 +4039,14 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
                node->IsStateSet( XnPropertyNames::style::common::KFocus ) &&
                node->IsStateSet( XnPropertyNames::style::common::KPressedDown ) ) )
                 {
+#ifdef RD_TACTILE_FEEDBACK            
+                MTouchFeedback* feedback( MTouchFeedback::Instance() );
+                
+                if ( feedback )
+                    {
+                    feedback->InstantFeedback( ETouchFeedbackBasic );
+                    }
+#endif
                 node->SetStateL( XnPropertyNames::style::common::KActive );
                 }                      
             }

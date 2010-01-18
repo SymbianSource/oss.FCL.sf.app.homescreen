@@ -124,14 +124,15 @@ EXPORT_C MXnComponentFactory::TXnComponentFactoryResponse MXnComponentFactory::C
     
     adapter->SetComponent( aTargetComponent );
     adapter->SetComponentsToInheritVisibility( ETrue );
-    adapter->MakeVisible( EFalse );
-    
+        
     if ( type != KToolTip )
         {
         // Don't activate tooltip yet
         adapter->ActivateL();
         }
-        
+    
+    adapter->MakeVisible( EFalse );
+    
     CleanupStack::Pop( aTargetComponent );
     
     return response;

@@ -133,6 +133,7 @@ void CMmListBox::HandlePointerEventInEditModeL(
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
+        iListBoxFlags &= ~ELeftDownInViewRect; // prevent kinetic scrolling
         CEikFormattedCellListBoxTypedef::HandlePointerEventL( aPointerEvent );
         }
     else if ( View()->XYPosToItemIndex(

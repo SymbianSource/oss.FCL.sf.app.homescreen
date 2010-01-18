@@ -1,0 +1,29 @@
+/*
+* ==============================================================================
+*  Name        : %name: hgfastswappreviewprovider.iby %
+*  Part of     : Hg fast swap previer provider plugin
+*  Description : IBY file
+*  Version     : %version: sa1spcx1#2 %
+*
+*  Copyright (c) 2008 Nokia Corporation.
+*  This material, including documentation and any related
+*  computer programs, is protected by copyright controlled by
+*  Nokia Corporation. All rights are reserved. Copying,
+*  including reproducing, storing, adapting or translating, any
+*  or all of this material requires the prior written consent of
+*  Nokia Corporation. This material also contains confidential
+*  information which may not be disclosed to others without the
+*  prior written consent of Nokia Corporation.
+* ==============================================================================
+*/
+
+#ifndef HGFASTSWAPPREVIEWPROVIDER_IBY
+#define HGFASTSWAPPREVIEWPROVIDER_IBY
+
+#include <data_caging_paths_for_iby.hrh>
+
+// fsw preview
+ECOM_PLUGIN( 20016BEC.DLL, 20016BEC.rsc )
+file=ABI_DIR/BUILD_DIR/hgpreviewprovider.dll    SHARED_LIB_DIR/hgpreviewprovider.dll
+
+#endif // HGFASTSWAPPREVIEWPROVIDER_IBY

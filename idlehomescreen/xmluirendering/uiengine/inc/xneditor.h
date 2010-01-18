@@ -38,6 +38,7 @@ class CAknListQueryDialog;
 class CXnViewManager;
 class CXnViewData;
 class CRepository;
+class CXnBackgroundManager;
 
 namespace hspswrapper
     {
@@ -194,6 +195,14 @@ public:
      */    
     TInt IdFromCrep ( TDes8& aUid ) const;
 
+    /**
+     * Returns the Background manager object owned by this.
+     * 
+     * @since S60 5.0
+     * @return BgManager
+     */
+    CXnBackgroundManager& BgManager() const;
+
 private:
     // from MHsContentController
     
@@ -214,7 +223,11 @@ private:
     TInt ActivateViewL( CHsContentInfo& aInfo );
     
     TInt ActivateAppL( CHsContentInfo& aInfo );
+
+    TInt ActiveViewL( CHsContentInfo& aInfo );
     
+    TInt ActiveAppL( CHsContentInfo& aInfo );
+
 private:
     // constructors
     
@@ -297,6 +310,8 @@ private:
     CHspsWrapper* iHspsWrapper;  
     /** CPS wrapper, owned */
     CCpsWrapper* iCpsWrapper;
+    /** Provides background services, owned */    
+    CXnBackgroundManager* iBgManager;
     /** Publisher map, owned */
     CPublisherMap* iPublisherMap;
     /** Add widget listquery, not owned */

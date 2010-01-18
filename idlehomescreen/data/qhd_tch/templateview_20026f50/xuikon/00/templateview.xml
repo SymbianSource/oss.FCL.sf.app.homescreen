@@ -276,8 +276,7 @@
                     </action>
                 </actions>
             </softkey>
-            <!-- <softkey id="rsk" type="right" mode="mode_callinactive" label="&text_softkey_call;"> -->
-            <softkey id="rsk" type="right" mode="mode_callinactive" label="#Call">
+            <softkey id="rsk" type="right" mode="mode_callinactive" label="&text_softkey_call;">
                 <actions>
                     <action>                        
                         <trigger name="activate"/>

@@ -19,8 +19,6 @@
 #include "../double_row_icon_widget_2001fdbd/group/bld.inf"
 #include "../double_row_widget_2001fdc2/group/bld.inf"
 #include "../root_2001f48f/group/bld.inf"
-//#include "../shortcut2_2001fdbb/group/bld.inf"
-//#include "../shortcut_2001f490/group/bld.inf"
 #include "../single_row_icon_widget_2001fdc0/group/bld.inf"
 #include "../single_row_widget_2001fdc1/group/bld.inf"
 #include "../triple_row_icon_widget_2001fdbe/group/bld.inf"

@@ -439,7 +439,7 @@ namespace
         {
         // Create new property value and property
         CXnDomPropertyValue* value = CXnDomPropertyValue::NewL(
-                                                aUiElement.UiEngineL()->StringPool() );
+                                                &aUiElement.UiEngineL()->StringPool() );
         CleanupStack::PushL( value );
         
         CXnProperty* property = CXnProperty::NewL(
@@ -1066,7 +1066,7 @@ void SetPropertyToNodeL(
     const TDesC8& aNewValueString )
 	{
 	// Set defined property to defined node.
-    CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL(aNode.UiEngineL()->StringPool());
+    CXnDomPropertyValue* newValue = CXnDomPropertyValue::NewL( &aNode.UiEngineL()->StringPool() );
     CleanupStack::PushL(newValue);
     newValue->SetStringValueL(CXnDomPropertyValue::EString, aNewValueString);
     CXnProperty* prop = CXnProperty::NewL(aPropertyName, newValue, aNode.UiEngineL()->StringPool());

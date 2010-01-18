@@ -106,8 +106,6 @@ box.profile_date
 
 box.profile_date:focus
 {
-    touchfeedbackdown: basic; 
-    touchfeedbackdrag: sensitive;
     background-color: "SKIN(268458534 5120 9)";
 }
 
@@ -353,8 +351,6 @@ text#datetext2_landscape
 
 box#profile_softindicator:focus
 {
-    touchfeedbackdown: basic; 
-    touchfeedbackdrag: sensitive;
     focus-background:"SKIN(268458534 5120 9)";
 }
 

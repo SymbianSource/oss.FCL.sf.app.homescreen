@@ -115,12 +115,12 @@ static void SetVisibilityL( CXnNode& aNode, const TDesC8& aVisibility )
     {
     CXnUiEngine* engine( aNode.UiEngine() );
     
-    CXnDomStringPool& sp( aNode.DomNode()->StringPool() );
+    CXnDomStringPool* sp( aNode.DomNode()->StringPool() );
     
     CXnProperty* prop = CXnProperty::NewL(
             XnPropertyNames::style::common::KVisibility,
             aVisibility,
-            CXnDomPropertyValue::EString, sp );
+            CXnDomPropertyValue::EString, *sp );
     CleanupStack::PushL( prop );
     
     aNode.SetPropertyL( prop );
@@ -303,7 +303,7 @@ void CXnEditMode::UpdateScreen()
             DrawNow( iLastDrawRect );
             }
         
-        iDrawPos = TPoint::EUninitialized;
+        iDrawPos.SetXY( 0, 0 );
         iLastDrawRect = TRect::EUninitialized;        
         }
     }
@@ -459,9 +459,9 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
                if ( iState == CXnEditMode::EDragging )
                    {
                    node->SetStateL( XnPropertyNames::style::common::KFocus );               
-    #ifdef RD_TACTILE_FEEDBACK               
-                    Feedback( ETouchFeedbackSensitive );
-    #endif                                   
+#ifdef RD_TACTILE_FEEDBACK               
+                   Feedback( ETouchFeedbackSensitive );
+#endif                                   
                    }
                else if ( iDraggingNode && 
                    !iDraggingNode->MarginRect().Contains( aPointerEvent.iPosition ) )
@@ -540,7 +540,10 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
             }
         }
     else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
-        {                                                                          
+        {
+#ifdef RD_TACTILE_FEEDBACK                
+        Feedback( ETouchFeedbackBasic );
+#endif
         // Cancel
         if ( !iTargetNode || !iDraggingNode ||                 
              iDraggingNode == iTargetNode ||
@@ -754,10 +757,12 @@ void CXnEditMode::StopDragL()
         iDraggingNode->Parent()->SetDirtyL( XnDirtyLevel::ELayoutAndRender );
         }
 
-    iDraggingNode = iTargetNode = NULL;
-     
-    iPreviousPos = iStylusDownPos = TPoint::EUninitialized;
-    
+    iDraggingNode = NULL;
+    iTargetNode = NULL;
+
+    iPreviousPos.SetXY( 0, 0 );
+    iStylusDownPos.SetXY( 0, 0 );
+
     iState = CXnEditMode::EDragAndDrop;
     }
 

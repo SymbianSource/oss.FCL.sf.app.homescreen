@@ -1,0 +1,106 @@
+/*
+* ============================================================================
+*  Name        : hgteleportapp.mmp
+*  Part of     : Hg Teleport
+*  Description : mmp file for teleport application
+*  Version     : %version: sa1spcx1#24 %
+*
+*  Copyright © 2008 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ============================================================================
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+#include "../inc/hgteleportuid.hrh"
+
+EPOCHEAPSIZE    0x100000 0xa00000  // 1 Mb - 10 Mb
+EPOCSTACKSIZE   0x5000 // 20KB
+
+TARGET          hgteleport.exe
+TARGETTYPE      exe
+UID             0x100039CE KHgTeleportAppUidValue
+CAPABILITY      CAP_APPLICATION NetworkControl PowerMgmt
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          hgteleportappui.cpp
+SOURCE          hgteleportapplication.cpp
+SOURCE          hgteleportdocument.cpp
+SOURCE          hgteleport.cpp
+SOURCE          hgteleportappview.cpp
+SOURCE          hgteleportfastswaparea.cpp
+SOURCE          hgteleportfastswapgrid.cpp
+SOURCE          hgteleportdevicestate.cpp
+SOURCE          hgteleporteventcontroler.cpp
+SOURCE          hgteleportphysicsengine.cpp
+SOURCE          hgteleportphysics.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../trace
+USERINCLUDE     ../../../contextengine/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib
+LIBRARY         avkon.lib
+LIBRARY         apgrfx.lib
+LIBRARY         ws32.lib
+LIBRARY         aknskins.lib
+LIBRARY         egul.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         fbscli.lib
+LIBRARY         aknskinsrv.lib
+LIBRARY		    commonengine.lib
+LIBRARY		    efsrv.lib
+LIBRARY		    estor.lib
+LIBRARY         aknnotify.lib
+LIBRARY         hlplch.lib
+LIBRARY         aknicon.lib
+LIBRARY         bitgdi.lib
+LIBRARY         gdi.lib
+LIBRARY         cdlengine.lib
+LIBRARY         aknlayout2.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         oommonitor.lib
+LIBRARY         hal.lib
+LIBRARY         gfxtrans.lib
+LIBRARY         akntransitionutils.lib
+LIBRARY         bafl.lib
+LIBRARY         akntouchgesturefw.lib
+LIBRARY         aknphysics.lib
+LIBRARY         touchfeedback.lib
+
+
+DEBUGLIBRARY    flogger.lib
+
+
+LIBRARY         hgcontextservicesutils.lib
+LIBRARY         hgfswclient.lib
+LIBRARY         hgfswutils.lib
+
+SOURCEPATH      ../data
+START RESOURCE  hgteleport.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
+
+SOURCEPATH      ../data
+START RESOURCE  hgteleport_reg.rss
+DEPENDS hgteleport.rsg
+TARGETPATH      /private/10003a3f/apps
+END

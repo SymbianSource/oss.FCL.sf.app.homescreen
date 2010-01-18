@@ -47,14 +47,14 @@ class CXnDomAttribute : public CBase, public MXnDomListItem
         */
         IMPORT_C static CXnDomAttribute* NewL( 
             const TDesC8& aName, 
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         
         /**
         * Two-phased stream constructor.
         */
         static CXnDomAttribute* NewL( 
             RReadStream& aStream, 
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         /**
         * Destructor.
         */
@@ -103,6 +103,14 @@ class CXnDomAttribute : public CBase, public MXnDomListItem
         * @return String pool index.
         */
         IMPORT_C TInt16 ValueStringPoolIndex()const;
+        
+        /**
+         * Swap used string pool.
+         * 
+         * @param aStringPool   New string pool to be used.
+         *                      Ownership not transferred!
+         */
+        IMPORT_C void SwapStringPoolL( CXnDomStringPool* aStringPool );        
          
     public: //From CXnDomListItem
         
@@ -133,7 +141,7 @@ class CXnDomAttribute : public CBase, public MXnDomListItem
         /**
         * C++ default constructor.
         */
-        CXnDomAttribute( CXnDomStringPool& aStringPool );
+        CXnDomAttribute( CXnDomStringPool* aStringPool );
             
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -143,7 +151,7 @@ class CXnDomAttribute : public CBase, public MXnDomListItem
      
     private:    // Data
         //String pool to get string for references, not owned
-        CXnDomStringPool& iStringPool;
+        CXnDomStringPool* iStringPool;
         
         //Attribute name reference
         TInt16         iNameRef;

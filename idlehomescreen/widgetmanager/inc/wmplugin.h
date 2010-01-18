@@ -137,14 +137,22 @@ public: // plugin services
      * the shared file server reference
      */
     RFs& FileServer();
+    
+    /** prestored action to be executed. */
+    void ExecuteCommandL();
 
 private:
     /** constructor */
     CWmPlugin();
     /** 2nd phase constructor */
     void ConstructL();
-    /** actions that are done when widget manager is closed */
-    void ExecutePostponedCommandL();
+    
+    /**
+     * Sets forwarding numeric keys to phone.
+     * 
+     * @param aEnabled ETrue if numeric keys are forwarded to phone
+     */
+    void ForwardNumericKeysToPhone( TBool aEnabled );
 
 private: // data members
 
@@ -157,7 +165,12 @@ private: // data members
      * main container (not owned)
      */
     CWmMainContainer*  iWmMainContainer;
-    
+
+    /**
+     * main view (not owned)
+     */
+    CWmMainContainerView* iWmMainView;
+
     /**
      * resource loader
      */
@@ -189,6 +202,11 @@ private: // data members
      */
     CHsContentInfo* iPostponedContent;
     
+    /**
+     * ActiveSchedulerWait used to wait while previous view is
+	 * being activated upon deletion.
+     */
+    CActiveSchedulerWait* iWait;
     };
 
 #endif // __WMPLUGIN_

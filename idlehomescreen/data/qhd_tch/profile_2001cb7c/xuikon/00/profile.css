@@ -81,7 +81,7 @@ box#profile_softindicator
 
 image#SatIdleModeIcon
 {
-    display: block;
+    display: none;
     width: 18px;
     height: 20px;
     position: static;

@@ -67,20 +67,20 @@ class CXnDomProperty : public CBase, public MXnDomListItem
         */
         IMPORT_C static CXnDomProperty* NewL( 
             const TDesC8& aName,
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         
         /**
         * Two-phased stream constructor.
         */
         static CXnDomProperty* NewL( 
             RReadStream& aStream, 
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         /**
         * Two-phased constructor.
         */
         IMPORT_C static CXnDomProperty* NewL( 
             TInt16 aStringPoolIndex,
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         /**
         * Destructor.
         */
@@ -131,11 +131,11 @@ class CXnDomProperty : public CBase, public MXnDomListItem
         IMPORT_C void SetInherited( TBool aInherited );
         
         /**
-        * Get reference to the dom's string pool.
+        * Get pointer to the dom's string pool.
         * @since Series 60 3.1
         * @return Reference to string pool
         */
-        IMPORT_C CXnDomStringPool& StringPool() const;
+        IMPORT_C CXnDomStringPool* StringPool() const;
         
         /**
         * Get the property's string pool index. 
@@ -143,6 +143,14 @@ class CXnDomProperty : public CBase, public MXnDomListItem
         * @return String pool index.
         */
         IMPORT_C TInt16 StringPoolIndex()const; 
+        
+        /**
+         * Swap used string pool.
+         * 
+         * @param aStringPool   New string pool to be used.
+         *                      Ownership not transferred!
+         */
+        IMPORT_C void SwapStringPoolL( CXnDomStringPool* aStringPool );        
         
      public:  //Pseudo class utility   
         /**
@@ -186,12 +194,12 @@ class CXnDomProperty : public CBase, public MXnDomListItem
         /**
         * C++ default constructor.
         */
-        CXnDomProperty( CXnDomStringPool& aStringPool);
+        CXnDomProperty( CXnDomStringPool* aStringPool);
         
         /**
         * C++ constructor with string pool index.
         */
-        CXnDomProperty( TInt16 aStringPoolIndex, CXnDomStringPool& aStringPool);
+        CXnDomProperty( TInt16 aStringPoolIndex, CXnDomStringPool* aStringPool);
         
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -205,7 +213,7 @@ class CXnDomProperty : public CBase, public MXnDomListItem
         
     private:    // Data
         //String pool to get string for references, not owned
-        CXnDomStringPool& iStringPool;
+        CXnDomStringPool* iStringPool;
         
         // Pseudo class type for value
         TPseudoClass    iPseudoClass;

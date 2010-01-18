@@ -155,7 +155,7 @@ void CXnVolumeControlAdapter::SetValueL( TInt aValue )
 	if( aValue >= minRange && aValue <= maxRange )
 		{		    	
 		CXnDomStringPool& sp = iNode.UiEngineL()->StringPool();		
-		CXnDomPropertyValue* value = CXnDomPropertyValue::NewL( sp );
+		CXnDomPropertyValue* value = CXnDomPropertyValue::NewL( &sp );
 		CleanupStack::PushL( value );
 		value->SetFloatValueL( CXnDomPropertyValue::ENumber, aValue );
 		CXnProperty* valueProperty = CXnProperty::NewL( XnPropertyNames::action::KValue, value, sp );
@@ -184,7 +184,7 @@ void CXnVolumeControlAdapter::SetRangeL( TInt aMinimumValue, TInt aMaximumValue 
 	CXnDomStringPool& sp = iNode.UiEngineL()->StringPool();
 	
 	// Set min value property
-	CXnDomPropertyValue* minValue = CXnDomPropertyValue::NewL( sp );
+	CXnDomPropertyValue* minValue = CXnDomPropertyValue::NewL( &sp );
 	CleanupStack::PushL( minValue );
 	minValue->SetFloatValueL( CXnDomPropertyValue::ENumber, aMinimumValue );
 	CXnProperty* minValueProperty = CXnProperty::NewL( XnPropertyNames::volumecontrol::KMinRange, minValue, sp );
@@ -194,7 +194,7 @@ void CXnVolumeControlAdapter::SetRangeL( TInt aMinimumValue, TInt aMaximumValue 
 	CleanupStack::Pop( minValueProperty );
 
 	// Set max value property
-	CXnDomPropertyValue* maxValue = CXnDomPropertyValue::NewL( sp );
+	CXnDomPropertyValue* maxValue = CXnDomPropertyValue::NewL( &sp );
 	CleanupStack::PushL( maxValue );
 	maxValue->SetFloatValueL( CXnDomPropertyValue::ENumber, aMaximumValue );
 	CXnProperty* maxValueProperty = CXnProperty::NewL( XnPropertyNames::volumecontrol::KMaxRange, maxValue, sp );
@@ -249,7 +249,7 @@ void CXnVolumeControlAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
     if( aProperty->Property()->Name() == XnPropertyNames::volumecontrol::KVolumeLevelAdjustment )
     	{
     	CXnDomStringPool& sp = iNode.UiEngineL()->StringPool();
-    	CXnDomPropertyValue* value = CXnDomPropertyValue::NewL( sp );
+    	CXnDomPropertyValue* value = CXnDomPropertyValue::NewL( &sp );
     	CleanupStack::PushL( value );
     	
     	const TDesC8& strValue = aProperty->StringValue();

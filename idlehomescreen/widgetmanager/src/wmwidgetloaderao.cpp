@@ -123,19 +123,22 @@ TInt CWmWidgetLoaderAo::RunError( TInt /*aError*/ )
 //
 void CWmWidgetLoaderAo::DoLoadWidgetsL()
     {
-    // 1. mark all the existing widgets initially non-valid
-    for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
-        iWidgetsList.WidgetData(i).SetValid( EFalse );
-
-    // 2. load the widgets array
+    // 1. load the widgets array
     MHsContentController& controller = iWmPlugin.ContentController();    
     CHsContentInfoArray* contentInfoArray = CHsContentInfoArray::NewL();
     CleanupStack::PushL( contentInfoArray );
     controller.WidgetListL( *contentInfoArray );
     
-    // 3. load the widget order
+    // 2. load the widget order
     iWidgetOrder = CWmPersistentWidgetOrder::NewL( iWmPlugin.FileServer() );
     TRAPD( loadError, iWidgetOrder->LoadL() );
+
+    // 3. prepare the widget data list
+    for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
+        {
+        iWidgetsList.WidgetData(i).SetPersistentWidgetOrder( iWidgetOrder );
+        iWidgetsList.WidgetData(i).SetValid( EFalse );
+        }
 
     // 4. loop through the content array and compare it against the existing
     // widget data.
@@ -178,7 +181,15 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
             ++widgetsRemoved;
             }
         }
-    if ( widgetsRemoved > 0 )
+    
+    // update listbox
+    if ( widgetsAdded > 0 )
+        {
+        iWidgetsList.HandleItemAdditionL();
+        }
+    
+    if ( widgetsRemoved > 0 || widgetsAdded > 0 ||
+        widgetsChanged > 0 )
         {
         iWidgetsList.DrawDeferred();
         }
@@ -203,7 +214,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
         {
         iWidgetOrder->StoreL( iWidgetsList.WidgetDataArray() );
         }
-    
+
     }
 
 // ---------------------------------------------------------
@@ -240,10 +251,12 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
     CleanupStack::Pop( aContentInfo );
     
     CWmWidgetData* widgetData = CWmWidgetData::NewLC( 
+            iWidgetsList.LogoSize(),
+            iWmPlugin.ResourceLoader(),
             aContentInfo, iWidgetRegistry );
     widgetData->SetPersistentWidgetOrder( iWidgetOrder );
     widgetData->SetValid( ETrue );
-    iWidgetsList.AddWidgetDataL( widgetData );
+    iWidgetsList.AddWidgetDataL( widgetData, EFalse );
     CleanupStack::Pop( widgetData );
     }
 
@@ -262,7 +275,11 @@ void CWmWidgetLoaderAo::Cleanup()
         iWidgetRegistry = NULL;
         }
     
-    // delete widget order
+    // delete widget order and references to it
+    for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
+        {
+        iWidgetsList.WidgetData(i).SetPersistentWidgetOrder( NULL );
+        }
     delete iWidgetOrder;
     iWidgetOrder = NULL;
     }

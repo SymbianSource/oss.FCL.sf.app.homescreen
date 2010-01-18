@@ -93,6 +93,7 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
 
     public: // from MHsContentController
 
+        
         TInt WidgetListL( CHsContentInfoArray& aArray );
         TInt ViewListL( CHsContentInfoArray& aArray );
         TInt AppListL( CHsContentInfoArray& aArray );
@@ -102,6 +103,8 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
         TInt RemoveViewL( CHsContentInfo& aInfo );
         TInt ActivateViewL( CHsContentInfo& aInfo );
         TInt ActivateAppL( CHsContentInfo& aInfo );
+        TInt ActiveViewL( CHsContentInfo& aInfo );
+        TInt ActiveAppL( CHsContentInfo& aInfo );
         
     private: // Test methods
 

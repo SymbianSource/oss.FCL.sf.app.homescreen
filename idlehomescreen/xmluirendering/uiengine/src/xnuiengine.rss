@@ -131,8 +131,7 @@ RESOURCE ARRAY r_array_change_wallpaper
     items =
         {
         LBUF {txt = qtn_hs_default; },
-        LBUF {txt = qtn_hs_image; },
-        LBUF {txt = qtn_hs_slideshow; }
+        LBUF {txt = qtn_hs_image; }
         };
     }
     

@@ -57,19 +57,19 @@ class CXnDomNode : public CBase, public MXnDomListItem
         static CXnDomNode* NewL( 
             const TDesC8& aName, 
             const TDesC8& aNS,
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
               
         /**
         * Two-phased stream constructor.
         */
-        static CXnDomNode* NewL( RReadStream& aStream, CXnDomStringPool& aStringPool );
+        static CXnDomNode* NewL( RReadStream& aStream, CXnDomStringPool* aStringPool );
         
         /**
         * Destructor.
         */
         virtual ~CXnDomNode();
       
-    public: // New functions
+    public: // New functions       
         /**
         * Makes a clone from this node and it's child nodes.
         * @since Series 60 3.1
@@ -78,21 +78,6 @@ class CXnDomNode : public CBase, public MXnDomListItem
         */
         IMPORT_C CXnDomNode* CloneL( CXnDomStringPool& aStringPool );
         
-        /**
-        * Makes a clone only from this node.
-        * @since Series 60 3.1
-        * @param aStringPool. A new string pool.
-        * @return Pointer to a clone node. Caller has the ownership.
-        */
-        IMPORT_C CXnDomNode* CloneWithoutKidsL( CXnDomStringPool& aStringPool );
-        
-        /**
-        * Contructs a ref node from this node and its child's.
-        * @since Series 60 3.1
-        * @return Pointer to a ref node. Caller has the ownership.
-        */
-        IMPORT_C CXnDomNode* CreateRefNodeL();
-         
         /**
         * Get the namespace of this node. 
         * @since Series 60 3.1
@@ -235,25 +220,11 @@ class CXnDomNode : public CBase, public MXnDomListItem
         IMPORT_C TInt DescendantCount() const;
         
         /**
-        * Get reference to the dom's string pool.
+        * Get pointer to the dom's string pool.
         * @since Series 60 3.1
         * @return Reference to string pool
         */
-        IMPORT_C CXnDomStringPool& StringPool() const;
-        
-        /**
-        * Mark this node as a reference node.
-        * @since Series 60 3.1
-        * @param aRefNode ETrue if node is a reference node
-        */
-        IMPORT_C void SetRefNode( TBool aRefNode=ETrue );
-        
-        /**
-        * Check if this node is referring to some global node.
-        * @since Series 60 3.1
-        * @return ETrue if this is a reference node.
-        */
-        IMPORT_C TBool IsRefNode() const;
+        IMPORT_C CXnDomStringPool* StringPool() const;
         
         /**
         * Deletes attributes when they are not needed anymore.
@@ -290,16 +261,9 @@ class CXnDomNode : public CBase, public MXnDomListItem
         void InternalizeL( RReadStream& aStream );
         
         /**
-        * Similar to InternalizeL, but does not expect dedicated odt document
-        */
-        void ReadL( RReadStream& aStream );
-        
-        
-        /**
         * Documented in CXnDomListItem::Name
         */
-        IMPORT_C const TDesC8& Name();       
-        
+        IMPORT_C const TDesC8& Name();        
     
     public:          
     
@@ -323,15 +287,6 @@ class CXnDomNode : public CBase, public MXnDomListItem
         * @param aNS New namespace
         */
         IMPORT_C void SetNamespaceL(const TDesC8& aNS);
-
-        /**
-        * Makes a clone from this node and it's child nodes. Sets new namespace.
-        * @since Series 60 3.1
-        * @param aStringPool. A new string pool.
-        * @param aNS. A new namespace.
-        * @return Pointer to a clone node. Caller has the ownership.
-        */
-        IMPORT_C CXnDomNode* CloneL( CXnDomStringPool& aStringPool, const TDesC8& aNS );
         
         /**
         * Set ownership of node and its children
@@ -339,13 +294,21 @@ class CXnDomNode : public CBase, public MXnDomListItem
         * @param aNS. A new namespace.
         * @return void
         */
-        IMPORT_C void SetOwnershipL( const TDesC8& aNS );
+        IMPORT_C void SetOwnershipL( const TDesC8& aNS );        
+
+        /**
+         * Swap used string pool.
+         * 
+         * @param aStringPool   New string pool to be used.
+         *                      Ownership not transferred!
+         */
+        IMPORT_C void SwapStringPoolL( CXnDomStringPool* aStringPool );
         
     private:
         /**
         * C++ default constructor.
         */
-        CXnDomNode( CXnDomStringPool& aStringPool );
+        CXnDomNode( CXnDomStringPool* aStringPool );
         
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -361,7 +324,7 @@ class CXnDomNode : public CBase, public MXnDomListItem
         TInt                iNSRef;
         
         //iStringPool is used to resolve strings based on references
-        CXnDomStringPool&   iStringPool;
+        CXnDomStringPool*   iStringPool;
         
         //Type of the elements content
         TContentType        iContentType;
@@ -384,9 +347,6 @@ class CXnDomNode : public CBase, public MXnDomListItem
         //Node is the owner of the properties
         CXnDomList*         iPropertyList;
         
-        //Flag is set if this node is reference node
-        TBool               iRefNode;
-         
         // Not owned
         CXnNode*            iLayoutNode;
     };

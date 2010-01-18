@@ -103,8 +103,6 @@ public:
 private:
     // data
     
-    /** Background control context, Owned */    
-    CAknsLayeredBackgroundControlContext* iBgContext;
     /** Compound Control, Not owned */
     CCoeControl* iControl;
     };

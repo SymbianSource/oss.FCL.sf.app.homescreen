@@ -159,5 +159,5 @@
 // w:
 // r: TB9.2
 //
-#define qtn_wm_widget_details_wrt "This widget uses web content. Only one instance of this widget can be in the Home screen at a time."
+#define qtn_wm_widget_details_wrt "HomeScreen application that uses internet connection to show dynamic updates from web"
 

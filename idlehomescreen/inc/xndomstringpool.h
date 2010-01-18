@@ -15,14 +15,13 @@
 *
 */
 
-
-
 #ifndef XN_DOM_STRING_POOL_H
 #define XN_DOM_STRING_POOL_H
 
 //  INCLUDES
 #include <e32base.h>
 #include <s32strm.h>
+#include "xndomstringpooloptimizer.h"
 
 // CLASS DECLARATION
 
@@ -40,17 +39,27 @@ class CXnDomStringPool : public CBase
         
         /**
         * Two-phased constructor.
+        * 
+        * @param    aAllowDuplicates        ETrue if duplicates are to be allowed.
+        *                                   Supported for legacy reasons. 
         */
-        static CXnDomStringPool* NewL();
+        static CXnDomStringPool* NewL( const TBool aAllowDuplicates = EFalse );
+
         /**
         * Two-phased stream constructor.
+        * 
+        * @param    aStream                 Stream where string pool is internalized.
+        * @param    aAllowDuplicates        ETrue if duplicates are to be allowed.
+        *                                   Supported for legacy reasons. 
         */
-        static CXnDomStringPool* NewL( RReadStream& aStream );
+        static CXnDomStringPool* NewL( RReadStream& aStream,
+                const TBool aAllowDuplicates = EFalse );
+        
         /**
         * Destructor.
         */
         virtual ~CXnDomStringPool();
-
+        
    public: 
         /**
         * Make a copy from original StringPool.
@@ -58,18 +67,36 @@ class CXnDomStringPool : public CBase
         * @return Pointer to a string pool. Ownership is transferred to a caller.
         */
         CXnDomStringPool* CloneL(); 
+        
    public: //Adding
         
         /**
         * Set dom string into string pool.
+        * 
         * @param aString String to add to string pool
         * @return Index (reference) to string pool
         */
-        IMPORT_C TInt AddStringL( const TDesC8& aString ); 
-   
+        TInt AddStringL( const TDesC8& aString ); 
+
+        /**
+        * Set dom string into string pool.
+        * 
+        * @param aString String to add to string pool. OWNERSHIP TRANSFERRED!
+        * @return Index (reference) to string pool
+        */
+        TInt AddStringL( HBufC8* aString );         
+
+        /**
+        * Add all string from another string pool.
+        * 
+        * @param aStringPool    Source string pool.
+        */
+        void AddAllL( CXnDomStringPool& aStringPool );        
+        
    public: //Accessing     
         /**
-        * Get pointer to the node element name.
+        * Get reference to string.
+        * 
         * @param aMap Map object which has index to name string
         * @return Pointer to the name
         */
@@ -77,46 +104,67 @@ class CXnDomStringPool : public CBase
         
         /**
         * Get object's data size in bytes.
+        * 
         * @return Data size in bytes
         */
         TInt Size() const;
+
+        /**
+        * Get amount of strings.
+        */
+        TInt Count() const;        
         
         /**
-        * Externalize object
+        * Externalize object.
+        * 
         * @param aStream Output stream
         */
         void ExternalizeL( RWriteStream& aStream ) const;
        
         /**
-        * Internalize object
+        * Internalize object.
+        * 
         * @param aStream Input stream
         */
         void InternalizeL( RReadStream& aStream );          
         
-        /**
-        * Get index offset to string array for shared resources
-        * @return An offset that caller must add to its indexes
-        */
-        TUint Offset() const;
-
    private:
 
         /**
         * C++ default constructor.
+        * 
+        * @param    aAllowDuplicates        ETrue if duplicates are to be allowed.
+        *                                   Supported for legacy reasons.
         */
-        CXnDomStringPool();
+        CXnDomStringPool( const TBool aAllowDuplicates );
 
         /**
-        * By default Symbian 2nd phase constructor is private.
+        * By default Symbian 2nd phase constructor is private. 
         */
-        void ConstructL();
-     
-    private:    
+        void ConstructL();    
+        
+        /**
+        * Add string to string pool and to optimizer also.
+        * 
+        * @param aNewString     String to be added. OWNERSHIP TRANSFERRED.
+        * @param TInt           Index to added string.
+        */
+        TInt DoAddStringL( HBufC8* aNewString ) ;
+        
+    private:            
         //String pool
         RPointerArray<HBufC8>       iStringPool;
-       
-        TUint iStringPoolOffsetCurrent; // Internalize uses 
-        TUint iStringPoolOffsetNext;
+        
+        /**
+         * String pool optimizer.
+         */
+        TXnDomStringPoolOptimizer iStringPoolOptimizer;
+        
+        /**
+         * ETrue if string pool can contain duplicate entries. Must
+         * be supported for legacy reasons while loading xuikon odts.
+         */
+        TBool iAllowDuplicates;
     };
 
 #endif      // XN_DOM_STRING_POOL_H  

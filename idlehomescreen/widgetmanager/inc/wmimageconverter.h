@@ -58,7 +58,8 @@ NONSHARABLE_CLASS ( CWmImageConverter ) : public CActive,
         EIdle = 0,
         EDecoding,
         EScalingBitmap,
-        EScalingMask
+        EScalingMask,
+        EFailed
         };
 
 public: //contructors/destructors
@@ -84,8 +85,10 @@ public: // interface methods
      * - mif(<path> <bitmapid> <maskid>)
      * - uid(<application uid>)
      * - <file name>.<png/svg>
+     * 
+     * @return Error code 
      */
-    void HandleIconStringL( TInt aWidth, TInt aHeight, const TDesC& aIconStr );
+    TInt HandleIconString( TInt aWidth, TInt aHeight, const TDesC& aIconStr );
 
     /**
      * Returns converted bitmap. Caller takes ownership
@@ -126,6 +129,13 @@ public: // interface methods
      */
     TConversionMethod ConversionMethod();
 
+    /**
+     * Image convertion status
+     * 
+     * @return ETrue if processing image, false otherwise.
+     */
+    TBool IsProcessing();
+
 protected: // implementation of CActive
     /**
      * Implements cancellation of an outstanding request.
@@ -152,9 +162,10 @@ private:
     CWmImageConverter(); 
     void ConstructL( MConverterObserver* aObserver );
     void CheckSvgErrorL( MSvgError* aError );
-    
-private:
+    void HandleIconStringL( TInt aWidth, TInt aHeight, 
+            const TDesC& aIconStr );
 
+private:
     void ScaleBitmap( TInt aWidth, TInt aHeight );
     void ScaleMask( TInt aWidth, TInt aHeight );
     void CreateIconFromUidL( const TUid& aUid );
@@ -172,6 +183,9 @@ private:
                         TInt& aBitmapId, TInt& aMaskId, TDes& aFileName );
     TBool EndsWith( const TDesC& aString, const TDesC& aPattern );
 
+    // helpers
+    TInt ParseNextUint( TLex& aLex, TUint& aValue );
+    
 private: // from MAknIconFileProvider
 
     /** Returns an open file handle to the icon file. */

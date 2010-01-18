@@ -269,9 +269,9 @@ void CAIEventHandler::ExecuteAppLauncherL( CLiwDefaultMap& aMap )
         TLiwGenericParam data( KData, TLiwVariant( &aMap ));
         inparam.AppendL( data );
 
-        TRAPD(err, msgInterface ->ExecuteCmdL(KExecute, inparam, outparam));
+        msgInterface ->ExecuteCmdL(KExecute, inparam, outparam);
         msgInterface->Close();
-        
+
         outparam.Reset();
         inparam.Reset();
         }

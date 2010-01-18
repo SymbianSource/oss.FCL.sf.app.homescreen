@@ -94,14 +94,14 @@ class CXnDomPropertyValue : public CBase, public MXnDomListItem
         /**
         * Two-phased constructor.
         */
-        IMPORT_C static CXnDomPropertyValue* NewL( CXnDomStringPool& aStringPool );
+        IMPORT_C static CXnDomPropertyValue* NewL( CXnDomStringPool* aStringPool );
         
         /**
         * Two-phased stream constructor.
         */
         static CXnDomPropertyValue* NewL( 
             RReadStream& aStream, 
-            CXnDomStringPool& aStringPool );
+            CXnDomStringPool* aStringPool );
         
         /**
         * Destructor.
@@ -225,6 +225,7 @@ class CXnDomPropertyValue : public CBase, public MXnDomListItem
         IMPORT_C void SetStringPoolIndexL( 
             TPrimitiveValueType aValueType,
             TInt16 aStringPoolIndex );
+
         /**
         * Get the property's string pool index. If type is not string,
         * function will leave with KErrNotSupported. 
@@ -232,6 +233,14 @@ class CXnDomPropertyValue : public CBase, public MXnDomListItem
         * @return String pool index.
         */
         IMPORT_C TInt16 StringPoolIndexL()const; 
+        
+        /**
+         * Swap used string pool.
+         * 
+         * @param aStringPool   New string pool to be used.
+         *                      Ownership not transferred!
+         */
+        IMPORT_C void SwapStringPoolL( CXnDomStringPool* aStringPool );         
     
     public: //From MXnDomListItem    
         /**
@@ -260,7 +269,7 @@ class CXnDomPropertyValue : public CBase, public MXnDomListItem
         /**
         * C++ default constructor.
         */
-        CXnDomPropertyValue( CXnDomStringPool& aStringPool );
+        CXnDomPropertyValue( CXnDomStringPool* aStringPool );
 
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -289,7 +298,7 @@ class CXnDomPropertyValue : public CBase, public MXnDomListItem
             } iData;    
        
        //String pool
-       CXnDomStringPool&    iStringPool;
+       CXnDomStringPool*    iStringPool;
        
        // primitive value type
        TPrimitiveValueType  iPrimitiveValueType;

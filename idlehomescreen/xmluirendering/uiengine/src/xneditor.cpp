@@ -56,6 +56,7 @@
 #include "xnrootdata.h"
 #include "xnviewdata.h"
 #include "xnwallpaperview.h"
+#include "xnbackgroundmanager.h"
 
 #include "xneditor.h"
 #include "xnpanic.h"
@@ -173,7 +174,7 @@ static void SetPropertyL( CXnNode& aNode,
     
     if ( node )
         {
-        CXnDomStringPool& sp( node->StringPool() );
+        CXnDomStringPool* sp( node->StringPool() );
 
         // create new property
         CXnDomPropertyValue* value = CXnDomPropertyValue::NewL( sp );
@@ -181,7 +182,7 @@ static void SetPropertyL( CXnNode& aNode,
 
         value->SetStringValueL( CXnDomPropertyValue::EString, aValue );
 
-        CXnProperty* prop = CXnProperty::NewL( aAttribute, value, sp );
+        CXnProperty* prop = CXnProperty::NewL( aAttribute, value, *sp );
                     
         CleanupStack::Pop( value );
         CleanupStack::PushL( prop );
@@ -311,6 +312,7 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
     iCpsWrapper = CCpsWrapper::NewL( *this );
     iHspsWrapper = CHspsWrapper::NewL( aUid, this );
     iRepository= CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
+    iBgManager = CXnBackgroundManager::NewL( iViewManager, *iHspsWrapper );
     }
 
 // ---------------------------------------------------------------------------
@@ -325,6 +327,7 @@ CXnEditor::~CXnEditor()
     delete iHspsWrapper;
     delete iPublisherMap;
     delete iRepository;
+    delete iBgManager;
     }
 
 // -----------------------------------------------------------------------------
@@ -1586,6 +1589,15 @@ CHspsWrapper& CXnEditor::HspsWrapper() const
     }
 
 // -----------------------------------------------------------------------------
+// CXnEditor::BgManager
+// -----------------------------------------------------------------------------
+//
+CXnBackgroundManager& CXnEditor::BgManager() const
+    {
+    return *iBgManager;
+    }
+
+// -----------------------------------------------------------------------------
 // from MHsContentController
 // -----------------------------------------------------------------------------
 //
@@ -1786,6 +1798,82 @@ TInt CXnEditor::ActivateAppL( CHsContentInfo& aInfo )
         }
     
     return iViewManager.ActivateAppL( aInfo.Uid() );     
+    }
+
+// -----------------------------------------------------------------------------
+// from MHsContentController
+// -----------------------------------------------------------------------------
+//
+TInt CXnEditor::ActiveViewL( CHsContentInfo& aInfo )
+    {
+
+    TInt err( KErrNone );
+    
+    // Get active application configuration
+    CHspsConfiguration* app( iHspsWrapper->GetAppConfigurationL() );
+    CleanupStack::PushL( app );
+
+    // Get list of views included in active application configuration
+    RPointerArray< CPluginMap >& plugins( app->PluginMaps() );
+    CPluginMap* plugin( NULL );
+    
+    // Find active view
+    for ( TInt i = 0; i < plugins.Count() && !plugin; i++ )
+        {
+        if ( plugins[ i ]->ActivationState() )
+            {
+            plugin = plugins[ i ];
+            }
+        }
+    
+    if ( plugin )
+        {
+        CHspsConfiguration* view( iHspsWrapper->GetPluginConfigurationL( plugin->PluginId() ) );
+        CleanupStack::PushL( view );
+        
+        aInfo.SetNameL( view->PluginInfo().Name() );
+        aInfo.SetUidL( view->PluginInfo().Uid() );
+        aInfo.SetTypeL( view->PluginInfo().Type() );
+        aInfo.SetDescriptionL( view->PluginInfo().Description() );
+        aInfo.SetIconPathL( view->PluginInfo().LogoIcon() );
+        
+        CleanupStack::PopAndDestroy( view );
+        }
+    else
+        {
+        err = KErrNotFound;
+        }
+    
+    CleanupStack::PopAndDestroy( app );
+    return err;     
+    }
+
+// -----------------------------------------------------------------------------
+// from MHsContentController
+// -----------------------------------------------------------------------------
+//
+TInt CXnEditor::ActiveAppL( CHsContentInfo& aInfo )
+    {
+
+    TInt err( KErrNone );
+    CHspsConfiguration* app = iHspsWrapper->GetAppConfigurationL();
+    CleanupStack::PushL( app );
+
+    if ( app->PluginInfo().Uid().Length() > 0 )
+        {
+        aInfo.SetNameL( app->PluginInfo().Name() );
+        aInfo.SetUidL( app->PluginInfo().Uid() );
+        aInfo.SetTypeL( app->PluginInfo().Type() );
+        aInfo.SetDescriptionL( app->PluginInfo().Description() );
+        aInfo.SetIconPathL( app->PluginInfo().LogoIcon() );
+        }
+    else
+        {
+        err = KErrNotFound;
+        }
+    
+    CleanupStack::PopAndDestroy( app );
+    return err;     
     }
 
 // End of file

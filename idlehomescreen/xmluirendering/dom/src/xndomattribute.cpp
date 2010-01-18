@@ -28,7 +28,7 @@
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CXnDomAttribute::CXnDomAttribute( CXnDomStringPool& aStringPool ):
+CXnDomAttribute::CXnDomAttribute( CXnDomStringPool* aStringPool ):
     iStringPool( aStringPool ),
     iNameRef( KErrNotFound ),
     iValueRef( KErrNotFound )
@@ -43,7 +43,7 @@ CXnDomAttribute::CXnDomAttribute( CXnDomStringPool& aStringPool ):
 //
 void CXnDomAttribute::ConstructL( const TDesC8& aName )
     {
-    iNameRef = iStringPool.AddStringL( aName );
+    iNameRef = iStringPool->AddStringL( aName );
     }
 // -----------------------------------------------------------------------------
 // CXnDomAttribute::NewL
@@ -52,7 +52,7 @@ void CXnDomAttribute::ConstructL( const TDesC8& aName )
 //
 EXPORT_C CXnDomAttribute* CXnDomAttribute::NewL( 
     const TDesC8& aName,
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomAttribute* self = new( ELeave ) CXnDomAttribute( aStringPool );
     
@@ -71,7 +71,7 @@ EXPORT_C CXnDomAttribute* CXnDomAttribute::NewL(
 //
 CXnDomAttribute* CXnDomAttribute::NewL( 
     RReadStream& aStream, 
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomAttribute* self = new( ELeave ) CXnDomAttribute( aStringPool );
     CleanupStack::PushL( self );
@@ -108,13 +108,13 @@ EXPORT_C CXnDomAttribute* CXnDomAttribute::CloneL()
 //
 CXnDomAttribute* CXnDomAttribute::CloneL( CXnDomStringPool& aStringPool )
     {
-    const TDesC8& name = iStringPool.String( iNameRef );
+    const TDesC8& name = iStringPool->String( iNameRef );
     
-    CXnDomAttribute* clone = CXnDomAttribute::NewL( name, aStringPool );
+    CXnDomAttribute* clone = CXnDomAttribute::NewL( name, &aStringPool );
     CleanupStack::PushL( clone );
     if ( iValueRef > KErrNotFound )
         {
-        const TDesC8& value = iStringPool.String( iValueRef );
+        const TDesC8& value = iStringPool->String( iValueRef );
         clone->SetValueL( value );
         }
     CleanupStack::Pop( clone );    
@@ -128,7 +128,7 @@ CXnDomAttribute* CXnDomAttribute::CloneL( CXnDomStringPool& aStringPool )
 //
 EXPORT_C const TDesC8& CXnDomAttribute::Name()
     {
-    return iStringPool.String( iNameRef );
+    return iStringPool->String( iNameRef );
     }
     
 // -----------------------------------------------------------------------------
@@ -147,7 +147,7 @@ EXPORT_C const TDesC8& CXnDomAttribute::Value()
     {
     if ( iValueRef > KErrNotFound )
         {
-        return iStringPool.String( iValueRef );
+        return iStringPool->String( iValueRef );
         }
     return KNullDesC8;
     }
@@ -160,15 +160,32 @@ EXPORT_C TInt16 CXnDomAttribute::ValueStringPoolIndex()const
     {
     return iValueRef;    
     }    
+
 // -----------------------------------------------------------------------------
 // CXnDomAttribute::SetValueL
 // -----------------------------------------------------------------------------
 //
 EXPORT_C void CXnDomAttribute::SetValueL( const TDesC8& aValue )
     {
-    iValueRef = iStringPool.AddStringL( aValue );
+    iValueRef = iStringPool->AddStringL( aValue );
     }
 
+// -----------------------------------------------------------------------------
+// CXnDomAttribute::SwapStringPoolL
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnDomAttribute::SwapStringPoolL( CXnDomStringPool* aStringPool )
+    {
+    if( !aStringPool )
+        {
+        User::Leave( KErrArgument );
+        }
+    
+    iNameRef = aStringPool->AddStringL( iStringPool->String( iNameRef ) );
+    iValueRef = aStringPool->AddStringL( iStringPool->String( iValueRef ) );
+    
+    iStringPool = aStringPool;
+    }
    
 // -----------------------------------------------------------------------------
 // CXnDomAttribute::Size
@@ -201,7 +218,7 @@ void CXnDomAttribute::ExternalizeL( RWriteStream& aStream ) const
 //
 void CXnDomAttribute::InternalizeL( RReadStream& aStream )
     {
-    iNameRef = aStream.ReadInt16L() + iStringPool.Offset();
-    iValueRef = aStream.ReadInt16L()  + iStringPool.Offset();
+    iNameRef = aStream.ReadInt16L();
+    iValueRef = aStream.ReadInt16L();
     }
 //  End of File  

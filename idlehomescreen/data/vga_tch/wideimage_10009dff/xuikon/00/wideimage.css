@@ -4,8 +4,6 @@ widget{
     }
 
 box#image_container:focus {
-    touchfeedbackdown: basic; 
-    touchfeedbackdrag: sensitive; 
     background-image: "SKIN(268458534 24576)";
     background-color: "SKIN(268458534 5120 9)";
 }

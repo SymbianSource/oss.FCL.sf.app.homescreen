@@ -19,7 +19,7 @@
 
 // INCLUDE FILES
 #include    "xndomstringpool.h"
-
+#include    "xndomstringpooloptimizer.h"
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -30,9 +30,9 @@
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CXnDomStringPool::CXnDomStringPool()
+CXnDomStringPool::CXnDomStringPool( const TBool aAllowDuplicates ) :
+    iAllowDuplicates( aAllowDuplicates )
     {
-    iStringPoolOffsetCurrent = iStringPoolOffsetNext = 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -49,9 +49,10 @@ void CXnDomStringPool::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CXnDomStringPool* CXnDomStringPool::NewL()
+CXnDomStringPool* CXnDomStringPool::NewL( const TBool aAllowDuplicates )
     {
-    CXnDomStringPool* self = new( ELeave ) CXnDomStringPool;
+    CXnDomStringPool* self =
+            new( ELeave ) CXnDomStringPool( aAllowDuplicates );
     
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -66,9 +67,10 @@ CXnDomStringPool* CXnDomStringPool::NewL()
 // Two-phased stream constructor.
 // -----------------------------------------------------------------------------
 //
-CXnDomStringPool* CXnDomStringPool::NewL( RReadStream& aStream )
+CXnDomStringPool* CXnDomStringPool::NewL( RReadStream& aStream,
+        const TBool aAllowDuplicates )
     {
-    CXnDomStringPool* self = new( ELeave ) CXnDomStringPool;
+    CXnDomStringPool* self = new( ELeave ) CXnDomStringPool( aAllowDuplicates );
     CleanupStack::PushL( self );
     aStream >> *self;
     CleanupStack::Pop(self);
@@ -84,6 +86,7 @@ CXnDomStringPool* CXnDomStringPool::NewL( RReadStream& aStream )
 CXnDomStringPool::~CXnDomStringPool()
     {
     iStringPool.ResetAndDestroy();
+    iStringPoolOptimizer.Close();
     }
 
 // -----------------------------------------------------------------------------
@@ -91,15 +94,23 @@ CXnDomStringPool::~CXnDomStringPool()
 // -----------------------------------------------------------------------------
 //
 CXnDomStringPool* CXnDomStringPool::CloneL()
-    {
-    CXnDomStringPool* clone = CXnDomStringPool::NewL();
+    {    
+    CXnDomStringPool* clone = NULL;    
+    if( iAllowDuplicates )
+        {
+        clone = CXnDomStringPool::NewL( ETrue );
+        }
+    else
+        {
+        clone = CXnDomStringPool::NewL( EFalse );
+        }    
     CleanupStack::PushL( clone );
     
     TInt count( iStringPool.Count() );
-    for ( TInt i=0; i<count; i++ )
-        {
+    for ( TInt i = 0; i < count; i++ )
+        {    
         HBufC8* tmp = iStringPool[i]->Des().AllocLC();
-        clone->iStringPool.AppendL( tmp );
+        clone->DoAddStringL( tmp );
         CleanupStack::Pop( tmp );
         }
     CleanupStack::Pop( clone );
@@ -110,32 +121,56 @@ CXnDomStringPool* CXnDomStringPool::CloneL()
 // CXnDomNode::AddStringL
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TInt CXnDomStringPool::AddStringL( const TDesC8& aString )
+TInt CXnDomStringPool::AddStringL( const TDesC8& aString )
+    {   
+    TInt index = iStringPoolOptimizer.GetIndex( aString );
+
+    if( index == KErrNotFound )
+        {
+        HBufC8* string = aString.AllocLC();
+        index = DoAddStringL( string );        
+        CleanupStack::Pop( string );        
+        }    
+    
+    return index;    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnDomNode::AddStringL
+// -----------------------------------------------------------------------------
+//
+TInt CXnDomStringPool::AddStringL( HBufC8* aString )
+    {   
+    if( !aString )
+        {
+        User::Leave( KErrArgument );
+        }
+    
+    TInt index = iStringPoolOptimizer.GetIndex( *aString );    
+    
+    if( index == KErrNotFound )
+        {
+        index = DoAddStringL( aString );       
+        }
+    else
+        {
+        delete aString;
+        }
+    
+    return index;    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnDomNode::AddStringL
+// -----------------------------------------------------------------------------
+//
+void CXnDomStringPool::AddAllL( CXnDomStringPool& aStringPool )
     {
-    TBool found( EFalse );
-    TInt index( 0 );
-     
-    TInt count( iStringPool.Count() );
-    for (; index < count && !found;  )
+    const TInt count = aStringPool.Count();
+    for( TInt i = 0; i < count; i++ )
         {
-        if ( iStringPool[ index ]->Des().Compare( aString ) == 0 )
-            {
-            found = ETrue;
-            }
-        else
-            {
-            index++;
-            }    
-        }
-    if ( !found )
-        {
-        HBufC8* tmp = aString.AllocLC();
-        iStringPool.AppendL( tmp );
-        CleanupStack::Pop( tmp );
-        index = iStringPool.Count()-1;    //Last item
-        iStringPoolOffsetNext++;
-        }
-    return index;
+        AddStringL( aStringPool.String( i ) );
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -143,10 +178,17 @@ EXPORT_C TInt CXnDomStringPool::AddStringL( const TDesC8& aString )
 // -----------------------------------------------------------------------------
 //
 const TDesC8& CXnDomStringPool::String( const TInt aStringRef )
-    {
-    return (*iStringPool[ aStringRef ]);
+    {       
+    if( aStringRef >= 0 && aStringRef < iStringPool.Count() )
+        {
+        return (*iStringPool[ aStringRef ]);
+        }
+    else
+        {
+        return KNullDesC8;
+        }
     }
-        
+
 // -----------------------------------------------------------------------------
 // CXnDomStringPool::Size
 // -----------------------------------------------------------------------------
@@ -164,6 +206,15 @@ TInt CXnDomStringPool::Size() const
         size += iStringPool[i]->Size();  //Buffer sixe in bytes     
         }
     return size;    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnDomStringPool::Count
+// -----------------------------------------------------------------------------
+//
+TInt CXnDomStringPool::Count() const
+    {
+    return iStringPool.Count();
     }
 
 // -----------------------------------------------------------------------------
@@ -189,27 +240,39 @@ void CXnDomStringPool::ExternalizeL( RWriteStream& aStream ) const
 void CXnDomStringPool::InternalizeL( RReadStream& aStream )
     {
     TInt len(0);
-    TInt16 count ( aStream.ReadInt16L() );
-    
-    iStringPoolOffsetCurrent = iStringPoolOffsetNext;
-    iStringPoolOffsetNext += count;
+    TInt16 count ( aStream.ReadInt16L() );    
 
     for ( TInt i=0; i<count; i++ )
         {
         len = aStream.ReadInt16L();
         HBufC8* tmp = HBufC8::NewLC( aStream, len );
-        iStringPool.AppendL( tmp );
+        AddStringL( tmp ); // OWNERSHIP TRANSFERRED!        
         CleanupStack::Pop( tmp );
         }
     }
 
 // -----------------------------------------------------------------------------
-// CXnDomStringPool::Offset
+// CXnDomStringPool::DoAddStringL
 // -----------------------------------------------------------------------------
 //
-TUint CXnDomStringPool::Offset() const
+TInt CXnDomStringPool::DoAddStringL( HBufC8* aNewString )
     {
-    return iStringPoolOffsetCurrent;
+    if( !aNewString )
+        {
+        User::Leave( KErrArgument );
+        }       
+    
+    TInt index = iStringPool.Count();
+    
+    if( !iAllowDuplicates )
+        {
+        TXnDomStringPoolOptimizerEntry tmp( index, *aNewString );
+        iStringPoolOptimizer.AddEntryL( tmp );
+        }
+    
+    iStringPool.AppendL( aNewString );       
+        
+    return index;
     }
 
 //  End of File  

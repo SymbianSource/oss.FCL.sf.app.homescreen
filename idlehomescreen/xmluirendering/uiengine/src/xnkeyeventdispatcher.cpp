@@ -91,7 +91,7 @@ static CXnNode* BuildTriggerNodeL(
 
     CXnProperty* name =
         CXnProperty::NewL( XnPropertyNames::action::trigger::KName, nameValue,
-                           aUiEngine.ODT()->DomDocument().StringPool() );
+                           *aUiEngine.ODT()->DomDocument().StringPool() );
 
     CleanupStack::Pop( nameValue );
     CleanupStack::PushL( name );

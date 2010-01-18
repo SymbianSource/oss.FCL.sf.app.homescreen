@@ -77,7 +77,10 @@ public: // services
     const TDesC& IconFilePath();
 
     /** default no description text */
-    const TDesC& NoDescriptionText();
+    const TDesC& NoDescription();
+
+    /** wrt specific description text */
+    const TDesC& WrtDescription();
     
 private: // internal methods
 
@@ -125,9 +128,15 @@ private: // members
     CAknInformationNote *iNote;
 
     /**
-     * Default description text
+     * Default no description text
      */    
-    HBufC*      iDescription;
+    HBufC*      iNoDescription;
+
+    /**
+     * Wrt specific description text
+     */    
+    HBufC*      iWrtDescription;
+    
     };
 
 #endif // WMRESOURCELOADER_H_

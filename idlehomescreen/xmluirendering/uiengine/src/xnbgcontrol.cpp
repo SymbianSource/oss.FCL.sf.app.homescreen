@@ -69,7 +69,6 @@ CXnBgControl* CXnBgControl::NewLC()
 //
 CXnBgControl::~CXnBgControl()
     {  
-    delete iBgContext;
     }
 
 // -----------------------------------------------------------------------------
@@ -89,13 +88,18 @@ CXnBgControl::CXnBgControl()
 void CXnBgControl::ConstructL()
     {   
     CreateWindowL();
+
+    TRgb backgroundColour = KRgbWhite;
+    if( KErrNone == Window().SetTransparencyAlphaChannel() )      
+        {       
+        backgroundColour.SetAlpha( 0 );       
+        }   
+    Window().SetBackgroundColor( backgroundColour );
     
     EnableDragEvents();
     
     Window().SetPointerGrab( ETrue );
-      
-    iBgContext = CAknsLayeredBackgroundControlContext::NewL(
-        KAknsIIDWallpaper, TRect(), ETrue, 1 );
+    
     
     ActivateL();
 
@@ -141,15 +145,6 @@ CCoeControl* CXnBgControl::ComponentControl( TInt aIndex ) const
 //
 void CXnBgControl::SizeChanged()
     {
-    TRect rect;
-    
-#ifdef RD_FULLSCREEN_WALLPAPER    
-    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, rect );
-#else
-    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );
-#endif
-       
-    iBgContext->SetRect( rect );    
     }
 
 // -----------------------------------------------------------------------------
@@ -171,10 +166,8 @@ void CXnBgControl::Draw( const TRect& aRect ) const
         // No background needed for dragging widget screenshot        
         }
     else
-        {
-        MAknsSkinInstance* skin( AknsUtils::SkinInstance() );
-               
-        AknsDrawUtils::Background( skin, iBgContext, this, gc, aRect );        
+        {        
+        gc.Clear( aRect );        
         }          
     }
 

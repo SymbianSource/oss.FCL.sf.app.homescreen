@@ -1,0 +1,8 @@
+EXPORTS
+	_ZN12CHgFswEngine12SwitchToAppLEi @ 1 NONAME
+	_ZN12CHgFswEngine17ForegroundAppUidLEi @ 2 NONAME
+	_ZN12CHgFswEngine4NewLER20MHgFswEngineObserver @ 3 NONAME
+	_ZN12CHgFswEngine5NewLCER20MHgFswEngineObserver @ 4 NONAME
+	_ZN12CHgFswEngine8FswDataLEv @ 5 NONAME
+	_ZN12CHgFswEngine9CloseAppLEi @ 6 NONAME
+

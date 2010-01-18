@@ -67,7 +67,8 @@ CWmResourceLoader::~CWmResourceLoader()
     {
     UnloadResources();
     delete iNote;
-    delete iDescription;
+    delete iNoDescription;
+    delete iWrtDescription;
     }
 
 // ---------------------------------------------------------
@@ -81,8 +82,11 @@ void CWmResourceLoader::ConstructL()
     LoadResourcesL();
     DetermineIconFilePath();
     
-    iDescription = StringLoader::LoadL( 
+    iNoDescription = StringLoader::LoadL( 
             R_QTN_WM_DETAILS_NO_DESCRIPTION, &iEnv  );
+    
+    iWrtDescription = StringLoader::LoadL( 
+            R_QTN_WM_WIDGET_DETAILS_WRT, &iEnv  );
     }
 
 // ---------------------------------------------------------
@@ -209,13 +213,22 @@ void CWmResourceLoader::ErrorPopup( TInt aErrorCode )
     }
 
 // ---------------------------------------------------------
-// CWmResourceLoader::NoDescriptionText
+// CWmResourceLoader::NoDescription
 // ---------------------------------------------------------
 //
-const TDesC& CWmResourceLoader::NoDescriptionText()
+const TDesC& CWmResourceLoader::NoDescription()
     {
-    return *iDescription;
+    return *iNoDescription;
     }
-    
+
+// ---------------------------------------------------------
+// CWmResourceLoader::WrtDescription
+// ---------------------------------------------------------
+//
+const TDesC& CWmResourceLoader::WrtDescription()
+    {
+    return *iWrtDescription;
+    }
+
 // end of file
 

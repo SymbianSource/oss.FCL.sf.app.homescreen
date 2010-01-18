@@ -237,7 +237,9 @@ public:
 
 private:
     TInt ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const;
-        
+
+    void UpdateWallpaperL( CXnViewData& aCurrent, CXnViewData& aNew );
+
 private:
     // data
 

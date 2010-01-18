@@ -136,10 +136,10 @@ class CXnDomDocument: public CBase
         IMPORT_C HBufC8* MarshallL();
         
         /**
-        * Get reference to string pool
+        * Get pointer to string pool
         * @return Reference to string pool implementation
         */
-        IMPORT_C CXnDomStringPool& StringPool() const;
+        IMPORT_C CXnDomStringPool* StringPool() const;
 
         /**
         * Read contents from a stream.

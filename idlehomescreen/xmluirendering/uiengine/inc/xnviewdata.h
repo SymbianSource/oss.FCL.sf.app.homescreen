@@ -24,6 +24,7 @@
 
 // Forward declarations
 class CXnViewManager;
+class CFbsBitmap;
 
 // Constants
 
@@ -201,18 +202,54 @@ public:
     CXnNode* ViewNode() const;
 
     /**
+     * Set wallpaper image. Ovnership is transferred.
+     * 
+     * @param aBitmap Background image file name.
+     */
+    void SetWallpaperImage( CFbsBitmap* aBitmap );
+
+    /**
+     * Get background image. Ovnership is NOT transferred. 
+     * 
+     * @return Pointer to background image. 
+     *         Returns NULL if image has not been set.
+     */
+    CFbsBitmap* WallpaperImage() const;
+
+    /**
+     * Set path of the wallpaper image.
+     * 
+     * @param aFileName Image path, including file name.
+     */
+    void SetWallpaperImagePathL( const TDesC& aFileName );
+    
+    /**
+     * Get the path of wallpaper image.
+     * 
+     * @return Image path, including file name. 
+     *         Returns KNullCDes if wallpaper has not been set.
+     */
+    const TDesC& WallpaperImagePath() const;
+
+    /**
      * Sets view's locking_status attribute (locked/none) to determine if view
      * is prevented from removing/deleting or not
      * 
      * @param aLockingStatusString attr. locking_status ("locked"/"none")
      */
     void SetLockingStatus( const TDesC8& aLockingStatusString );
+    
 private:
     // data                              
     
     /** Focused Node, Not owned */
     CXnNode* iFocusedNode;
 
+    /** Pointer to wallpaper image, Owned */    
+    CFbsBitmap* iBgImage;
+    
+    /** Path of the wallpaper image, including filename */    
+    HBufC* iBgImagePath;
     };
 
 #include "xnviewdata.inl"

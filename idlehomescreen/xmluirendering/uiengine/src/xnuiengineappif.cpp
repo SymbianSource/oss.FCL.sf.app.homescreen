@@ -198,7 +198,7 @@ EXPORT_C void TXnUiEngineAppIf::RenderUIL( CXnNodeAppIf* aNode )
 //
 EXPORT_C CXnDomStringPool& TXnUiEngineAppIf::StringPool()
     {
-    return iUiEngine->ODT()->DomDocument().StringPool();
+    return *iUiEngine->ODT()->DomDocument().StringPool();
     }
 
 // -----------------------------------------------------------------------------

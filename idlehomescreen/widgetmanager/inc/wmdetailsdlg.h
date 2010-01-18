@@ -139,7 +139,6 @@ private:
      * ETrue if widget can be added to HS 
      */
     TBool               iCanBeAdded;
-    
 	};
 
 #endif ___WMDETAILSDLG_H__

@@ -145,7 +145,7 @@ void CTextTransactionElement::SetTextL()
         CXnNodeAppIf& target = Target();
         // Set the label of the softkey
         CXnDomPropertyValue* propertyValue =
-            CXnDomPropertyValue::NewL( target.UiEngineL()->StringPool() );
+            CXnDomPropertyValue::NewL( &target.UiEngineL()->StringPool() );
     
         CleanupStack::PushL( propertyValue );
     

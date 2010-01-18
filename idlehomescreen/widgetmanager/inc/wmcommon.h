@@ -35,7 +35,8 @@ const TInt KWidgetHeight = 90;
 // UI component ID's
 enum TWmUiControlIds
     {
-    EOviPortal = 0x1,
+    EPortalOne = 0x1,
+    EPortalTwo,
     ELastPortal,
     EWidgetsList,
     EFindBox,

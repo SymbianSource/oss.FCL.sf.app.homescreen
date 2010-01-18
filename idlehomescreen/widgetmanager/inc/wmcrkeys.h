@@ -35,6 +35,7 @@ const TUint32 KCrWidgetManagerm = 0x20026F53;
  * OperatorButtonText_9     0x28 
  */
 
+const TUint32 KLangGroupSize = 4;
 const TUint32 KOviStoreBrowserUrlOffset = 1;
 const TUint32 OperatorUrlOffset = 2;
 const TUint32 KperatorButtonTextOffset = 3;

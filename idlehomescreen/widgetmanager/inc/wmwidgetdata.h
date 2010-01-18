@@ -26,6 +26,7 @@
 #include <f32file.h>
 #include <bamdesca.h>
 #include <hscontentinfo.h>
+#include <SWInstApi.h> //installer
 
 #include "wmimageconverter.h"
 
@@ -36,6 +37,7 @@ class CFbsBitmap;
 class CHsContentInfo;
 class CWmPersistentWidgetOrder;
 class RWidgetRegistryClientSession;
+class CWmResourceLoader;
 
 // CLASS DECLARATION
 /**
@@ -44,7 +46,7 @@ class RWidgetRegistryClientSession;
  * handling the list item.
  */
 NONSHARABLE_CLASS( CWmWidgetData )
-    : public CBase
+    : public CActive
     , public MConverterObserver
     {
 
@@ -61,28 +63,57 @@ public: // types
 public: // construction
     /**
      * static constructor
+     * @param aLogoSize size of logo image.
      * @param aHsContentInfo (takes ownership)
      * @param aRegistryClientSession (does not take ownership)
      */
-    static CWmWidgetData* NewL( 
+    static CWmWidgetData* NewL(
+            const TSize& aLogoSize,
+            CWmResourceLoader& aWmResourceLoader,
             CHsContentInfo* aHsContentInfo,
             RWidgetRegistryClientSession* aRegistryClientSession );
 
     /**
      * static constructor, leaves object in cleanup stack
+     * @param aLogoSize size of logo image.
      * @param aHsContentInfo (takes ownership)
      * @param aRegistryClientSession (does not take ownership)
      */
-    static CWmWidgetData* NewLC( 
+    static CWmWidgetData* NewLC(
+            const TSize& aLogoSize,
+            CWmResourceLoader& aWmResourceLoader,
             CHsContentInfo* aHsContentInfo,
             RWidgetRegistryClientSession* aRegistryClientSession );
         
     /** Destructor. */
     ~CWmWidgetData();
 
+protected: // implementation of CActive
+    /**
+     * Implements cancellation of an outstanding request.
+     * 
+     * @see CActive::DoCancel
+     */
+    void DoCancel();
+    
+    /**
+     * Handles an active object's request completion event.
+     * 
+     * @see CActive::RunL
+     */
+    void RunL();
+    
+    /**
+     * RunError
+     * 
+     * @see CActive::RunError
+     */
+    TInt RunError(TInt aError);
+
 private: // private construction
     /** Constructor for performing 1st stage construction */
-    CWmWidgetData();
+    CWmWidgetData( const TSize& aLogoSize, 
+            CWmResourceLoader& aWmResourceLoader );
 
     /** 2nd phase constructor */
     void ConstructL(
@@ -99,6 +130,27 @@ private: // private construction
 
 public: // external handles
 
+    /**
+     * Init uninstallation of widget.
+     */
+    void UnInstallL();
+
+    /** current uninstall animation bitmap */
+    const CFbsBitmap* AnimationBitmap( const TSize& aSize );
+
+    /** current uninstall animation mask */
+    const CFbsBitmap* AnimationMask( const TSize& aSize );
+    
+    /**
+     * @return ETrue if widget is being uninstalled.
+     */
+    TBool IsUninstalling();
+    
+    /**
+     * @return ETrue if logo is being created,false otherwise.
+     */
+    TBool IsPrepairingLogo();
+    
     /** 
      * sets an observer for callbacks 
      *
@@ -113,14 +165,14 @@ public: // external handles
             const CWmPersistentWidgetOrder* aPersistentWidgetOrder );
     
     /**
-     * set logo rect size
-     */
-    void SetLogoSize( const TSize& aSize );
-
-    /**
      * Init logo re-creation
      */
     void ReCreateLogo( const TSize& aSize );
+    
+    /**
+     * returns widget description
+     */
+    const TDesC& Description() const;
     
     /**
      * Replaces the content of this widget data. The method is called
@@ -160,9 +212,6 @@ public: // methods to read the content
     /** widget name */
     inline const TDesC& Name() const;
 
-    /** widget description */
-    inline const TDesC& Description() const;
-
     /** widget uid */
     inline TUid Uid() const;
     
@@ -196,7 +245,14 @@ protected: // from MConverterObserver
     void NotifyCompletion( TInt aError );
 
 private: // new functions
-
+    
+    /** uninstall animation related*/
+    void VisualizeUninstall();
+    void PrepairAnimL();
+    void DestroyAnimData();
+    static TInt Tick( TAny* aPtr );
+    static TInt CloseSwiSession( TAny* aPtr );
+    
     /** fetches publisher uid from widget registry*/
     void FetchPublisherUidL( 
             RWidgetRegistryClientSession* aRegistryClientSession );
@@ -205,11 +261,13 @@ private: // new functions
     TUid UidFromString( const TDesC8& aUidString ) const;
     
     /** Logo icon string handling */
-    static TInt HandleAsyncIconString( TAny* aPtr );
-    void HandleIconStringL( const TDesC& aIconStr );
+    void HandleIconString( const TDesC& aIconStr );
     void FireDataChanged();
 
 private: // data members
+    
+    /* reference to resource loader */
+    CWmResourceLoader& iWmResourceLoader;
     
     /* instance of the CIdle class for async iconStr handling*/
     CIdle*              iIdle;
@@ -220,15 +278,12 @@ private: // data members
     /* observes this widget representation (NOT OWNED) */
     MWmWidgetDataObserver* iObserver;
 
-    /* rotating animation index */
-    TInt                iInstallAnimationIndex;
-
     /** the widget logo bitmap */
     CFbsBitmap*         iLogoImage;
 
     /** the widget logo mask */
     CFbsBitmap*         iLogoImageMask;
-    
+
     /** The CHsContentInfo that corresponds to this list row */
     CHsContentInfo*     iHsContentInfo;
 
@@ -246,7 +301,32 @@ private: // data members
     
     /** validity of the widget - used during list refresh */
     TBool               iValid;
+
+    /* Array of uninstall animation bitmaps*/
+    RArray<CFbsBitmap*> iUninstallAnimIcons;
     
+    /** periodic timer for updating animation */
+    CPeriodic*          iPeriodic;
+    
+    /* uninstall animation index */
+    TInt                iAnimationIndex;
+
+    /** uninstallation switch */
+    TBool               iAsyncUninstalling;
+    
+    /** logo changed switch */
+    TBool               iFireLogoChanged;
+
+    /**
+     * silent install launcher.
+     */
+    SwiUI::RSWInstSilentLauncher iInstaller;
+
+    /**
+     * ActiveSchedulerWait used to wait while logo image
+     * is being prepaired.
+     */
+    CActiveSchedulerWait* iWait;
     };
 
 

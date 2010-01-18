@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_94 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_95 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -250,6 +250,7 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
+        iListBoxFlags &= ~ELeftDownInViewRect; // prevent kinetic scrolling
         CAknGrid::HandlePointerEventL( aPointerEvent );
         }
     else if ( View()->XYPosToItemIndex(

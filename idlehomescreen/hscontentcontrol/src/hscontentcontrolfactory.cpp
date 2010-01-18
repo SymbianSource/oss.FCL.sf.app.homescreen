@@ -22,6 +22,7 @@
 // User include files
 #include "hscontentcontrolfactory.h"
 #include "hscontentcontrolecomlistener.h"
+#include "hscontentcontroluninstallmonitor.h"
 
 // Local constants
 
@@ -78,6 +79,9 @@ void CHsContentControlFactory::ConstructL()
             CHsContentControlEComListener::NewL( *this );
     REComSession::ListImplementationsL( 
             KInterfaceUidContentController, iImplArray );
+    
+    iHsContentControlUninstallMonitor = 
+            CHsContentControlUninstallMonitor::NewL( *this );
     }
 
 // ----------------------------------------------------------------------------
@@ -97,7 +101,9 @@ EXPORT_C CHsContentControlFactory::~CHsContentControlFactory()
     iImplArray.ResetAndDestroy();
     iImplArray.Close();
     iHsContentControlUis.ResetAndDestroy();
+    
 	delete iHsContentControlEComListener;
+    delete iHsContentControlUninstallMonitor;
     }
 
 // ---------------------------------------------------------------------------------
@@ -157,7 +163,7 @@ MHsContentControlUi* CHsContentControlFactory::FindHsContentController(
         {
         CHsContentControlUi* cc( iHsContentControlUis[ i ] );
         
-        if ( cc->ContentControlType().CompareF( aControlType ) == 0 )                
+        if ( cc->ContentControlType().CompareF( aControlType ) == 0 )
             {
             return cc;
             } 
@@ -176,6 +182,30 @@ void CHsContentControlFactory::HandleEComChangeEvent()
     if ( iHsContentControlUis.Count() > 0 )
         {
         TRAP_IGNORE( CheckPluginChangesL(); );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CHsContentControlFactory::HandleUninstallEvent()
+// ----------------------------------------------------------------------------
+//
+void CHsContentControlFactory::HandleUninstallEvent( const TUid& aPkgUid )
+    {
+    // ignore event if no plugin loaded.
+    if ( iHsContentControlUis.Count() > 0 )
+        {
+        for( TInt index( iHsContentControlUis.Count() - 1 ); index >= 0; --index )
+            {
+            CHsContentControlUi* cc( iHsContentControlUis[ index ] );
+            // ImplUid of plugin must match Sis pkg uid
+            if ( cc && cc->ImplUid() == aPkgUid )
+                {
+                iHsContentControlUis.Remove( index );
+                delete cc;
+                cc = NULL;
+                break;
+                }
+            }
         }
     }
 

@@ -163,6 +163,15 @@ TInt CWmUnitTest::ActivateAppL( CHsContentInfo& /*aInfo*/ )
     return KErrNone;
     }
 
+TInt CWmUnitTest::ActiveViewL( CHsContentInfo& /*aInfo*/ )
+    {
+    return 0;
+    }
+
+TInt CWmUnitTest::ActiveAppL( CHsContentInfo& /*aInfo*/ )
+    {
+    return 0;
+    }
 
 
 // -----------------------------------------------------------------------------
@@ -201,9 +210,10 @@ void CWmUnitTest::CreateContentInfoArrayL( CHsContentInfoArray& aArray, TInt aCo
         name.Format( _L("Widget_%d"), i );
         info->SetNameL( name );
         TBuf8<20> id;
-        id.Num( i );
+        id.Format( _L8("0x%x"), i );
         info->SetUidL( id );
         info->SetTypeL( _L8("template") );
+        info->SetPublisherIdL( _L("teron.pub") );
         info->SetIconPathL( _L("uid(0x2000DAD2)") );
         info->SetCanBeAdded( ETrue );
         info->SetDescriptionL(_L("Default plaa plaa plaa plaa plaa plaa plaa"));

@@ -37,7 +37,7 @@
 //
 CXnDomList::CXnDomList( 
     TListType aListType, 
-    CXnDomStringPool& aStringPool,
+    CXnDomStringPool* aStringPool,
     TInt aGranularity ):
     iListType( aListType ),
     iList( aGranularity ), 
@@ -61,7 +61,7 @@ void CXnDomList::ConstructL()
 //
 CXnDomList* CXnDomList::NewL( 
     TListType aListType, 
-    CXnDomStringPool& aStringPool,
+    CXnDomStringPool* aStringPool,
     TInt aGranularity)
     {
     CXnDomList* self = 
@@ -80,7 +80,7 @@ CXnDomList* CXnDomList::NewL(
 //
 CXnDomList* CXnDomList::NewL( 
     RReadStream& aStream, 
-    CXnDomStringPool& aStringPool )
+    CXnDomStringPool* aStringPool )
     {
     CXnDomList* self = new( ELeave ) CXnDomList( ENodeList, aStringPool );
     
@@ -290,11 +290,25 @@ EXPORT_C TInt CXnDomList::ItemIndex( const MXnDomListItem& aItem ) const
 // CXnDomList::StringPool
 // -----------------------------------------------------------------------------
 //        
-EXPORT_C CXnDomStringPool& CXnDomList::StringPool() const
+EXPORT_C CXnDomStringPool* CXnDomList::StringPool() const
     {
     return iStringPool;
     }
+
+// -----------------------------------------------------------------------------
+// CXnDomAttribute::SwapStringPoolL
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnDomList::SwapStringPoolL( CXnDomStringPool* aStringPool )
+    {
+    if( !aStringPool )
+        {
+        User::Leave( KErrArgument );
+        }
     
+    iStringPool = aStringPool;
+    }
+
 // -----------------------------------------------------------------------------
 // CXnDomList::Size
 // -----------------------------------------------------------------------------

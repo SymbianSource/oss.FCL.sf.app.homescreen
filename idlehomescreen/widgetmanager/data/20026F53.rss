@@ -31,7 +31,10 @@ RESOURCE REGISTRY_INFO theInfo
             implementations = 
                 {
                 IMPLEMENTATION_INFO
-                    {
+                    {                    
+                    // implementation_uid MUST match sis pkg UID, hscontentcontrol uses to monitor 
+                    // uninstallation and releasing dll
+                    
                     implementation_uid = 0x20026F53;
                     version_no = 1;
                     display_name = "Widget Manager";

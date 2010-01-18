@@ -244,8 +244,9 @@ public: // API for manipulating list content
      * adding all widget datas to update the listbox correctly!
      * 
      * @param aWidget Data data to add
+     * @param aRedraw listbox update flag 
      */
-    void AddWidgetDataL( CWmWidgetData* aWidgetData );
+    void AddWidgetDataL( CWmWidgetData* aWidgetData, TBool aRedraw = ETrue );
     
     /** 
      * removes widget data from given index in the model
@@ -378,6 +379,11 @@ private:
     RWidgetDataValues   iWidgetDatas;
 
     /** 
+     * array of trashed widget data objects, not visible in list. 
+     */
+    RPointerArray<CWmWidgetData> iTrashedData;
+
+    /** 
      * the currently active item ADD button's rectangle, for push recognition 
      */
     TRect               iButtonRect;
@@ -392,6 +398,8 @@ private:
      */
     TBool               iPressedDown;
 	
+    /** size of logo rect in list item */
+    TSize               iLogoSize;    
 	};
 #include "wmlistbox.inl"
 

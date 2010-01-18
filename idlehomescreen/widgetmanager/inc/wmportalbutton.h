@@ -25,6 +25,7 @@
 
 // FORWARD DECLARATIONS
 class CWmMainContainer;
+class CFbsBitmap;
 
 /**
  * Portal button ( ovi, operator ) class for Wm
@@ -32,43 +33,25 @@ class CWmMainContainer;
  * @class   CWmPortalButton wmportalbutton.h
  */
 NONSHARABLE_CLASS( CWmPortalButton ) : public CAknButton,
-                                       public MConverterObserver 
+                                       public MConverterObserver,
+                                       public MCoeControlObserver
     {
 public:
     /*
      * Two-phased constructor.
      * 
      * @param aParent button title text
-     * @param aText button title text
-     * @param aUrl Url to open in browser when clicked.  
-     * @param aButtonCtrlId type of button 
+     * @param aPortalButtonIndex index of this button (0 or 1)
      */
     static CWmPortalButton* NewL(
             const CCoeControl* aParent,
-            const TDesC& aText = KNullDesC,
-            const TDesC& aUrl = KNullDesC, 
-            TWmUiControlIds aButtonCtrlId = EOviPortal );
+            TInt aPortalButtonIndex = 0 );
     
     /** Destructor */
     virtual ~CWmPortalButton();
                                       
 public: // Functions from base class
-    
-    /**
-     * Handles key events.
-     * 
-     * @see CCoeControl::OfferKeyEventL
-     */
-	TKeyResponse OfferKeyEventL( 
-	        const TKeyEvent& aKeyEvent, TEventCode aType );
-            
-    /**
-	 * Handles pointer events.
-	 * 
-	 * @see CCoeControl::HandlePointerEventL
-	 */
-    void HandlePointerEventL( const TPointerEvent& aPointerEvent );
-    
+
     /*
      * Draws the control.
      * 
@@ -83,43 +66,45 @@ public: // Functions from base class
      */
     void SizeChanged();
     
+    /**
+     * Executes action for button pressed
+     */
+    void ExecuteL();
+    
 protected: // from MConverterObserver
 
     /** image conversin completed */
     void NotifyCompletion( TInt aError );
-   
+
+protected: // from MCoeControlObserver
+
+    /** Observes the button's own activity  */
+    void HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType );
+    
 protected: // Constructors
     
     /** Constructor for performing 1st stage construction */
     CWmPortalButton( const TInt aFlags,
-            TWmUiControlIds aButtonCtrlId = EOviPortal );
+            TInt aPortalButtonIndex );
     
     /** 2nd phase constructor */
     void ConstructL( 
-            const CCoeControl* aParent,
+            CWmMainContainer* aParent,
             const TDesC& aText = KNullDesC,
-            const TDesC& aUrl = KNullDesC );
+            const TDesC& aIcon = KNullDesC );
     
 private:
 
-    /** 
-	 * Draws text over button
-	 */
+    /** size of button icon, defined in the layout */
+    TSize LayoutIconSize() const;
+    
+    /** Draws text over button */
     void DrawText( CWindowGc& aGc,
                    const TDesC& aText, 
                    TAknTextComponentLayout& aLayout,
                    TInt aMargin ) const;
 
 private: //data members
-    /**
-     * Button text
-     */ 
-    HBufC* iText;
-
-    /**
-     * Url assigned to button
-     */ 
-    HBufC* iUrl;
 
     /**
      * the image converter utility
@@ -132,9 +117,15 @@ private: //data members
     CWmMainContainer* iWmMainContainer;
 
     /** 
-     * Button ctrl id
+     * Button index
      */ 
-    TWmUiControlIds iButtonCtrlId;
+    TInt iPortalButtonIndex;
+
+    /** icon */
+    CFbsBitmap* iButtonIcon;
+    
+    /** icon mask */
+    CFbsBitmap* iButtonIconMask;
  	};
 
 #endif //___WMPORTALBUTTON_H__

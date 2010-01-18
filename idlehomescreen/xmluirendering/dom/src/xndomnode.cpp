@@ -24,8 +24,6 @@
 
 // LOCAL CONSTANTS AND MACROS
 const TInt KNotDefined = -1;
-_LIT8( KIdAttr, "id" );
-_LIT8( KRefAttr, "ref" );
 const TInt KPropertyListGranularity = 8;
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -35,8 +33,11 @@ const TInt KPropertyListGranularity = 8;
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CXnDomNode::CXnDomNode(CXnDomStringPool& aStringPool) :
-    iStringPool(aStringPool), iNodeId(KNotDefined)
+CXnDomNode::CXnDomNode(CXnDomStringPool* aStringPool) :
+    iNameRef( KNotDefined ),
+    iNSRef( KNotDefined ),
+    iStringPool( aStringPool ),
+    iNodeId( KNotDefined )    
     {
     }
 
@@ -47,8 +48,8 @@ CXnDomNode::CXnDomNode(CXnDomStringPool& aStringPool) :
 //
 void CXnDomNode::ConstructL(const TDesC8& aName, const TDesC8& aNS)
     {
-    iNameRef = iStringPool.AddStringL(aName);
-    iNSRef = iStringPool.AddStringL(aNS);
+    iNameRef = iStringPool->AddStringL(aName);
+    iNSRef = iStringPool->AddStringL(aNS);
 
     iChildList = CXnDomList::NewL(CXnDomList::ENodeList, iStringPool);
     iAttributeList
@@ -64,7 +65,7 @@ void CXnDomNode::ConstructL(const TDesC8& aName, const TDesC8& aNS)
 // -----------------------------------------------------------------------------
 //
 CXnDomNode* CXnDomNode::NewL(const TDesC8& aName, const TDesC8& aNS,
-        CXnDomStringPool& aStringPool)
+        CXnDomStringPool* aStringPool)
     {
     CXnDomNode* self = new (ELeave) CXnDomNode(aStringPool);
 
@@ -81,7 +82,7 @@ CXnDomNode* CXnDomNode::NewL(const TDesC8& aName, const TDesC8& aNS,
 // -----------------------------------------------------------------------------
 //
 CXnDomNode* CXnDomNode::NewL(RReadStream& aStream,
-        CXnDomStringPool& aStringPool)
+        CXnDomStringPool* aStringPool)
     {
     CXnDomNode* self = new (ELeave) CXnDomNode(aStringPool);
 
@@ -103,24 +104,23 @@ CXnDomNode::~CXnDomNode()
     delete iPCData;
     }
 
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------
 // CXnDomNode::CloneL
 // Clones this node and it's child nodes. This is a recursive function.
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CXnDomNode* CXnDomNode::CloneL(CXnDomStringPool& aStringPool)
     {
-    const TDesC8& name = iStringPool.String(iNameRef);
-    const TDesC8& ns = iStringPool.String(iNSRef);
+    const TDesC8& name = iStringPool->String(iNameRef);
+    const TDesC8& ns = iStringPool->String(iNSRef);
 
-    CXnDomNode* clone = CXnDomNode::NewL(name, ns, aStringPool);
+    CXnDomNode* clone = CXnDomNode::NewL(name, ns, &aStringPool);
     CleanupStack::PushL(clone);
     if (iPCData)
         {
         clone->AppendPCDataL(*iPCData);
         }
     clone->iNodeId = iNodeId;
-    clone->iRefNode = iRefNode;
 
     TInt childCount(iChildList->Length());
 
@@ -163,118 +163,19 @@ EXPORT_C CXnDomNode* CXnDomNode::CloneL(CXnDomStringPool& aStringPool)
     }
 
 // -----------------------------------------------------------------------------
-// CXnDomNode::CloneWithoutKidsL
-// Clones only this node. This is a recursive function.
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnDomNode* CXnDomNode::CloneWithoutKidsL(
-        CXnDomStringPool& aStringPool)
-    {
-    const TDesC8& name = iStringPool.String(iNameRef);
-    const TDesC8& ns = iStringPool.String(iNSRef);
-
-    CXnDomNode* clone = CXnDomNode::NewL(name, ns, aStringPool);
-    CleanupStack::PushL(clone);
-    if (iPCData)
-        {
-        clone->AppendPCDataL(*iPCData);
-        }
-    clone->iNodeId = iNodeId;
-    clone->iRefNode = iRefNode;
-
-    TInt attrCount(iAttributeList->Length());
-    for (TInt j = 0; j < attrCount; j++)
-        {
-        CXnDomAttribute
-                * attrClone =
-                        static_cast<CXnDomAttribute*> (iAttributeList->Item(j))->CloneL(
-                                aStringPool);
-        CleanupStack::PushL(attrClone);
-        clone->iAttributeList->AddItemL(attrClone);
-        CleanupStack::Pop(attrClone);
-        }
-
-    TInt propertyCount(iPropertyList->Length());
-    for (TInt k = 0; k < propertyCount; k++)
-        {
-        CXnDomProperty
-                * propClone =
-                        static_cast<CXnDomProperty*> (iPropertyList->Item(k))->CloneL(
-                                aStringPool);
-        CleanupStack::PushL(propClone);
-        clone->iPropertyList->AddItemL(propClone);
-        CleanupStack::Pop(propClone);
-        }
-    CleanupStack::Pop(clone);
-    return clone;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnDomNode::CreateRefNodeL
-// Recursive function to create referer nodes.
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnDomNode* CXnDomNode::CreateRefNodeL()
-    {
-    const TDesC8& name = iStringPool.String(iNameRef);
-    const TDesC8& ns = iStringPool.String(iNSRef);
-
-    CXnDomNode* ref = CXnDomNode::NewL(name, ns, iStringPool);
-    CleanupStack::PushL(ref);
-
-    ref->iRefNode = ETrue;
-
-    TInt childCount(iChildList->Length());
-
-    for (TInt i = 0; i < childCount; i++)
-        {
-        CXnDomNode
-                * childRef =
-                        static_cast<CXnDomNode*> (iChildList->Item(i))->CreateRefNodeL();
-        CleanupStack::PushL(childRef);
-        childRef->iParentNode = ref;
-        ref->iChildList->AddItemL(childRef);
-        CleanupStack::Pop(childRef);
-        }
-
-    CXnDomAttribute* attr = NULL;
-    if (!iRefNode)
-        {
-        attr = static_cast<CXnDomAttribute*> (iAttributeList->FindByName(
-                KIdAttr));
-        }
-    else
-        {
-        attr = static_cast<CXnDomAttribute*> (iAttributeList->FindByName(
-                KRefAttr));
-        }
-
-    if (attr)
-        {
-        CXnDomAttribute* newAttr = CXnDomAttribute::NewL(KRefAttr,
-                iStringPool);
-        CleanupStack::PushL(newAttr);
-        newAttr->SetValueL(attr->Value());
-        ref->iAttributeList->AddItemL(newAttr);
-        CleanupStack::Pop(newAttr);
-        }
-    else
-        {
-        //referred node don't have an id or ref, thats not ok.
-        User::Leave(KErrArgument);
-        }
-
-    CleanupStack::Pop(ref);
-    return ref;
-    }
-
-// -----------------------------------------------------------------------------
 // CXnDomNode::Name
 // -----------------------------------------------------------------------------
 //
 EXPORT_C const TDesC8& CXnDomNode::Name()
     {
-    return iStringPool.String(iNameRef);
+    if( iNameRef == KNotDefined )
+        {
+        return KNullDesC8();
+        }
+    else        
+        {
+        return iStringPool->String( iNameRef );
+        }       
     }
 
 // -----------------------------------------------------------------------------
@@ -283,7 +184,14 @@ EXPORT_C const TDesC8& CXnDomNode::Name()
 //
 EXPORT_C const TDesC8& CXnDomNode::Namespace()
     {
-    return iStringPool.String(iNSRef);
+    if( iNSRef == KNotDefined )
+        {
+        return KNullDesC8();
+        }
+    else        
+        {
+        return iStringPool->String( iNSRef );
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -469,28 +377,11 @@ EXPORT_C void CXnDomNode::SetContentType(const TContentType& aContentType)
 // CXnDomNode::StringPool
 // -----------------------------------------------------------------------------
 //        
-EXPORT_C CXnDomStringPool& CXnDomNode::StringPool() const
+EXPORT_C CXnDomStringPool* CXnDomNode::StringPool() const
     {
     return iStringPool;
     }
 
-// -----------------------------------------------------------------------------
-// CXnDomNode::SetRefNode
-// -----------------------------------------------------------------------------
-//        
-EXPORT_C void CXnDomNode::SetRefNode(TBool aRefNode)
-    {
-    iRefNode = aRefNode;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnDomNode::IsRefNode
-// -----------------------------------------------------------------------------
-//        
-EXPORT_C TBool CXnDomNode::IsRefNode() const
-    {
-    return iRefNode;
-    }
 // -----------------------------------------------------------------------------
 // CXnDomNode::Size
 // -----------------------------------------------------------------------------
@@ -529,10 +420,9 @@ TInt CXnDomNode::Size() const
 //
 void CXnDomNode::ExternalizeL(RWriteStream& aStream) const
     {
-
     aStream.WriteInt16L(iNameRef);
     aStream.WriteInt16L(iNSRef);
-    aStream.WriteInt8L(iRefNode);
+    aStream.WriteInt8L( 0 ); // ref node legacy.
 
     if (iPCData)
         {
@@ -555,11 +445,14 @@ void CXnDomNode::ExternalizeL(RWriteStream& aStream) const
 // CXnDomNode::InternalizeL
 // -----------------------------------------------------------------------------
 //
-void CXnDomNode::InternalizeL(RReadStream& aStream)
+void CXnDomNode::InternalizeL( RReadStream& aStream )
     {
-    iNameRef = aStream.ReadInt16L() + iStringPool.Offset();
-    iNSRef = aStream.ReadInt16L() + iStringPool.Offset();
-    iRefNode = aStream.ReadInt8L();
+    iNameRef = aStream.ReadInt16L();
+    
+    iNSRef = KNotDefined; // This is set later by call to setnamespace,    
+    aStream.ReadInt16L(); // so only consume legacy data from stream.
+    
+    aStream.ReadInt8L(); // Consume legacy ref node parameter.
 
     TInt len(0);
     TBool exist(aStream.ReadInt8L());
@@ -589,49 +482,6 @@ void CXnDomNode::InternalizeL(RReadStream& aStream)
         }
 
     iAttributeList = CXnDomList::NewL(aStream, iStringPool);
-
-    iPropertyList = CXnDomList::NewL(aStream, iStringPool);
-    }
-
-// -----------------------------------------------------------------------------
-// CXnDomNode::ReadL
-// -----------------------------------------------------------------------------
-//
-void CXnDomNode::ReadL(RReadStream& aStream)
-    {
-    iNameRef = aStream.ReadInt16L();
-    iNSRef = aStream.ReadInt16L();
-    iRefNode = aStream.ReadInt8L();
-
-    TBool exist(aStream.ReadInt8L());
-    if (exist)
-        {
-        TInt len(0);
-        len = aStream.ReadInt16L();
-        delete iPCData;
-        iPCData = NULL;
-        iPCData = HBufC8::NewL(aStream, len);
-        }
-
-    iNodeId = aStream.ReadInt32L();
-
-    iChildList = CXnDomList::NewL(aStream, iStringPool);
-    TInt count(iChildList->Length());
-    for (TInt i = 0; i < count; i++)
-        {
-        CXnDomNode* node = static_cast<CXnDomNode*> (iChildList->Item(i));
-        if (node)
-            {
-            node->SetParent(this);
-            }
-        else
-            {
-            User::Leave(KErrArgument);
-            }
-        }
-
-    iAttributeList = CXnDomList::NewL(aStream, iStringPool);
-
     iPropertyList = CXnDomList::NewL(aStream, iStringPool);
     }
 
@@ -712,67 +562,7 @@ EXPORT_C CXnNode* CXnDomNode::LayoutNode()
 //
 EXPORT_C void CXnDomNode::SetNamespaceL(const TDesC8& aNS)
     {
-    iNSRef = iStringPool.AddStringL(aNS);
-    }
-
-// -----------------------------------------------------------------------------
-// CXnDomNode::CloneL
-// Clones this node and it's child nodes and sets new namespace. This is a
-// recursive function.
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnDomNode* CXnDomNode::CloneL(CXnDomStringPool& aStringPool,
-        const TDesC8& aNS)
-    {
-    const TDesC8& name = iStringPool.String(iNameRef);
-
-    CXnDomNode* clone = CXnDomNode::NewL(name, aNS, aStringPool);
-    CleanupStack::PushL(clone);
-    if (iPCData)
-        {
-        clone->AppendPCDataL(*iPCData);
-        }
-    clone->iNodeId = iNodeId;
-    clone->iRefNode = iRefNode;
-
-    TInt childCount(iChildList->Length());
-
-    for (TInt i = 0; i < childCount; i++)
-        {
-        CXnDomNode* childClone =
-                static_cast<CXnDomNode*> (iChildList->Item(i))->CloneL(
-                        aStringPool, aNS);
-        CleanupStack::PushL(childClone);
-        childClone->iParentNode = clone;
-        clone->iChildList->AddItemL(childClone);
-        CleanupStack::Pop(childClone);
-        }
-
-    TInt attrCount(iAttributeList->Length());
-    for (TInt j = 0; j < attrCount; j++)
-        {
-        CXnDomAttribute
-                * attrClone =
-                        static_cast<CXnDomAttribute*> (iAttributeList->Item(j))->CloneL(
-                                aStringPool);
-        CleanupStack::PushL(attrClone);
-        clone->iAttributeList->AddItemL(attrClone);
-        CleanupStack::Pop(attrClone);
-        }
-
-    TInt propertyCount(iPropertyList->Length());
-    for (TInt k = 0; k < propertyCount; k++)
-        {
-        CXnDomProperty
-                * propClone =
-                        static_cast<CXnDomProperty*> (iPropertyList->Item(k))->CloneL(
-                                aStringPool);
-        CleanupStack::PushL(propClone);
-        clone->iPropertyList->AddItemL(propClone);
-        CleanupStack::Pop(propClone);
-        }
-    CleanupStack::Pop(clone);
-    return clone;
+    iNSRef = iStringPool->AddStringL(aNS);
     }
 
 // -----------------------------------------------------------------------------
@@ -791,6 +581,57 @@ EXPORT_C void CXnDomNode::SetOwnershipL(const TDesC8& aNS)
         CXnDomNode* child = static_cast<CXnDomNode*> (iChildList->Item(i));
         child->SetOwnershipL(aNS);
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnDomNode::SwapStringPoolL
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnDomNode::SwapStringPoolL( CXnDomStringPool* aStringPool )
+    {
+    if( !aStringPool )
+        {
+        User::Leave( KErrArgument );
+        }
+
+    if( iNameRef != KNotDefined )
+        {
+        iNameRef = aStringPool->AddStringL( iStringPool->String( iNameRef ) );
+        }
+
+    if( iNSRef != KNotDefined )
+        {
+        iNSRef = aStringPool->AddStringL( iStringPool->String( iNSRef ) );
+        }
+    
+    iChildList->SwapStringPoolL( aStringPool );
+    TInt count = iChildList->Length();    
+    for( TInt i = 0; i < count; i++ )
+        {
+        CXnDomNode* obj =
+                static_cast<CXnDomNode*> ( iChildList->Item( i ) );
+        obj->SwapStringPoolL( aStringPool );
+        }
+    
+    iAttributeList->SwapStringPoolL( aStringPool );
+    count = iAttributeList->Length();    
+    for( TInt i = 0; i < count; i++ )
+        {    
+        CXnDomAttribute* obj =
+                static_cast<CXnDomAttribute*> ( iAttributeList->Item( i ) );
+        obj->SwapStringPoolL( aStringPool );
+        }
+    
+    count = iPropertyList->Length();    
+    iPropertyList->SwapStringPoolL( aStringPool );
+    for( TInt i = 0; i < count; i++ )
+        {
+        CXnDomProperty* obj =
+                static_cast<CXnDomProperty*> ( iPropertyList->Item( i ) );
+        obj->SwapStringPoolL( aStringPool );
+        }
+    
+    iStringPool = aStringPool;
     }
 
 //  End of File  

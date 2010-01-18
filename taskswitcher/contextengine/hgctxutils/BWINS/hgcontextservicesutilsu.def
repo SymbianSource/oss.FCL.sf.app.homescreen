@@ -1,0 +1,8 @@
+EXPORTS
+	??1CHgPropertyListener@@UAE@XZ @ 1 NONAME ; CHgPropertyListener::~CHgPropertyListener(void)
+	?Value@CHgCenrepListener@@QAEHXZ @ 2 NONAME ; int CHgCenrepListener::Value(void)
+	?NewL@CHgCenrepListener@@SAPAV1@ABVTUid@@KAAVMHgCenrepChangeObserver@@@Z @ 3 NONAME ; class CHgCenrepListener * CHgCenrepListener::NewL(class TUid const &, unsigned long, class MHgCenrepChangeObserver &)
+	??1CHgCenrepListener@@UAE@XZ @ 4 NONAME ; CHgCenrepListener::~CHgCenrepListener(void)
+	??0CHgPropertyListener@@QAE@VTUid@@IAAVMHgPropertyChangeObserver@@@Z @ 5 NONAME ; CHgPropertyListener::CHgPropertyListener(class TUid, unsigned int, class MHgPropertyChangeObserver &)
+	?NewLC@CHgCenrepListener@@SAPAV1@ABVTUid@@KAAVMHgCenrepChangeObserver@@@Z @ 6 NONAME ; class CHgCenrepListener * CHgCenrepListener::NewLC(class TUid const &, unsigned long, class MHgCenrepChangeObserver &)
+

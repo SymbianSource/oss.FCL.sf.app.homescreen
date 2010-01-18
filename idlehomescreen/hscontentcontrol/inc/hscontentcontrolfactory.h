@@ -24,9 +24,11 @@
 
 // User includes
 #include "hscontentcontrolecomobserver.h"
+#include "hscontentcontroluninstallobserver.h"
 
 // Forward declarations
 class CHsContentControlEComListener;
+class CHsContentControlUninstallMonitor;
 
 /**
  *  Content control UI base class
@@ -40,7 +42,8 @@ class CHsContentControlEComListener;
  *  @since S60 v5.0
  */
 NONSHARABLE_CLASS( CHsContentControlFactory ) : public CBase,
-                                                public MHsContentControlEComObserver
+                                                public MHsContentControlEComObserver,
+                                                public MHsContentControlUninstallObserver
     {
 public: // Constructor and destructor
     /**
@@ -53,12 +56,20 @@ public: // Constructor and destructor
      */
     IMPORT_C ~CHsContentControlFactory();
 
-public: // from MHsContentControlEComObserver
+private: // from MHsContentControlEComObserver
     
     /**
      * Notification of Ecom registry change.
      */
      void HandleEComChangeEvent();
+
+private: // from MHsContentControlUninstallObserver
+    
+    /**
+     * Notification of Uninstall event from SWI.
+     * @param aPkgUid The package UID which is being uninstalled.
+     */
+     void HandleUninstallEvent( const TUid& aPkgUid );
     
 private: // Constructors
     /**
@@ -93,7 +104,7 @@ private:
      * Finds plugin implementation info in the ECOM registry.
      * @param aUid The plugin UID which is to be checked.
      * @param aPluginArray The array of plugins which have been implemented.
-     * @return ImplementationInfo of plugin. 
+     * @return ImplementationInfo of plugin.
      */
     CImplementationInformation* FindPluginImplInfo( 
             const TUid& aUid, const RImplInfoPtrArray& aPlugInArray );
@@ -120,7 +131,12 @@ private: // Data
     /**
      * An object of type CHsContentControlEComListener ( Owned ).
      */
-    CHsContentControlEComListener*  iHsContentControlEComListener; 
+    CHsContentControlEComListener*  iHsContentControlEComListener;
+
+    /**
+     * An object of type CHsContentControlUninstallMonitor ( Owned ).
+     */
+    CHsContentControlUninstallMonitor*  iHsContentControlUninstallMonitor;
     };
 
 
