@@ -62,6 +62,7 @@ _STLIT8(KImage,       "image");
 _STLIT8(KEditor,      "editor");
 _STLIT8(KMarquee,	"marquee");
 _STLIT8(KNewsticker, "newsticker");
+_STLIT8(KAnimation,  "animation");
 _STLIT8(KTooltip,	"tooltip");
 //XHTML
 _STLIT8(KObject,	"object");

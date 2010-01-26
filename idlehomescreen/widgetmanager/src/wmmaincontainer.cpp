@@ -196,36 +196,53 @@ void CWmMainContainer::SizeChanged()
 //
 void CWmMainContainer::LayoutControls()
 	{
-    TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
+    TRect rect( Rect() );
 
-    TAknWindowLineLayout listPane = 
-                AknLayoutScalable_Apps::listscroll_wgtman_pane(landscape ? 1 : 0).LayoutLine();
-
-    TAknWindowLineLayout btnPane = 
-                AknLayoutScalable_Apps::wgtman_btn_pane(landscape ? 1 : 0).LayoutLine();
-
-	TRect rect = Rect();	
+    // determine layout type
+    iLandscape = Layout_Meta_Data::IsLandscapeOrientation();
+    iMirrored = Layout_Meta_Data::IsMirrored();
     
-	if ( landscape )
+    // layout iPortalButtons
+	if ( iConfiguration->PortalButtonCount() == 1 )
 	    {
-        if ( Layout_Meta_Data::IsMirrored() )
-            {
-            iLayout = ELandscapeMirrored;
-            }
-        else
-            {
-            iLayout = ELandscape;
-            }
+	    // one button
+	    TAknWindowLineLayout btnPane = AknLayoutScalable_Apps
+	       ::wgtman_btn_pane( iLandscape ? 1 : 0 ).LayoutLine();
+	    AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, btnPane );
 	    }
 	else
 	    {
-        iLayout = EPortrait;
+	    // two buttons
+        // **********************************
+        // we do not have layouts for two buttons yet - layout manually
+        TAknWindowLineLayout btnPane = AknLayoutScalable_Apps
+            ::wgtman_btn_pane( iLandscape ? 1 : 0 ).LayoutLine();
+	    TAknLayoutRect layoutrect;
+	    layoutrect.LayoutRect( rect, btnPane );
+	    TRect r( layoutrect.Rect() );
+	    TRect r1, r2;
+	    const TInt gap = 3;
+	    if ( iLandscape )
+	        {
+	        r1 = TRect( r.iTl, TSize( r.Width(), r.Height() / 2 - gap ) );
+	        r2 = r1;
+            r2.Move( 0, r.Height() / 2 + gap );
+	        }
+	    else
+	        {
+            r1 = TRect( r.iTl, TSize( r.Width() / 2 - gap, r.Height() ) );
+            r2 = r1;
+            if (iMirrored) r1.Move( r.Width() / 2 + gap, 0 );
+            else r2.Move( r.Width() / 2 + gap, 0 );
+            }
+        iPortalButtonOne->SetRect( r1 );
+        iPortalButtonTwo->SetRect( r2 );
+        // *************************************
 	    }
-	
-    // portal button layout
-	// todo: 2-button layout
-    AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, btnPane );
     
+	// layout iWidgetsList
+    TAknWindowLineLayout listPane = AknLayoutScalable_Apps
+        ::listscroll_wgtman_pane( iLandscape ? 1 : 0 ).LayoutLine();
     if( iFindbox && iFindPaneIsVisible )
         {
 		TAknLayoutRect layoutRect;
@@ -420,7 +437,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         // ------------------------------------
         // focus is in the WIDGETS LIST
         // ------------------------------------
-        if ( iLayout == EPortrait &&
+        if ( !iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyUpArrow &&
                 iWidgetsList->CurrentItemIndex() == 0 )
             {
@@ -429,7 +446,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
                 SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == EPortrait &&
+        else if ( !iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyDownArrow &&
                 iWidgetsList->CurrentItemIndex() ==
                    iWidgetsList->Model()->NumberOfItems() - 1 )
@@ -439,15 +456,15 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
                 SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == ELandscape &&
+        else if ( iLandscape && !iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow )
             {
-            // widget list -> right -> ovi button (landscape)
+            // widget list -> right -> ovi button (landscape normal)
             if ( aType == EEventKey )
                 SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == ELandscapeMirrored &&
+        else if ( iLandscape && iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyLeftArrow )
             {
             // widget list -> left -> ovi button (landscape mirrored)
@@ -461,53 +478,61 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         // ------------------------------------
         // focus is in the FIRST PORTAL BUTTON
         // ------------------------------------
-        if ( iLayout == EPortrait &&
+        if ( !iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyDownArrow )
             {
-            // left portal -> down -> widget list top
+            // left portal -> down -> widget list top (portrait)
             if ( aType == EEventKey )
                 SetFocusToWidgetList( 0 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == EPortrait &&
+        else if ( !iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyUpArrow )
             {
-            // left portal -> up -> widget list bottom
+            // left portal -> up -> widget list bottom (portrait)
             if ( aType == EEventKey )
                 SetFocusToWidgetList( iWidgetsList->Model()->NumberOfItems()-1 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == EPortrait &&
+        else if ( !iLandscape && !iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow &&
                 iConfiguration->PortalButtonCount() > 1 )
             {
-            // left portal -> right -> right portal
+            // left portal -> right -> right portal (portrait normal)
             if ( aType == EEventKey )
                 SetFocusToPortalButton( 1 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == ELandscape &&
+        else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1 )
+            {
+            // right portal -> left -> left portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && !iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyLeftArrow )
             {
-            // upper portal -> left -> widget list
+            // upper portal -> left -> widget list (landscape normal)
             if ( aType == EEventKey )
                 SetFocusToWidgetList();
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == ELandscapeMirrored &&
+        else if ( iLandscape && iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow )
             {
-            // upper portal -> right -> widget list (mirrored)
+            // upper portal -> right -> widget list (landscape mirrored)
             if ( aType == EEventKey )
                 SetFocusToWidgetList();
             keyResponse = EKeyWasConsumed;
             }
-        else if ( ( iLayout == ELandscape ||
-                iLayout == ELandscapeMirrored ) &&
+        else if ( iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyDownArrow &&
                 iConfiguration->PortalButtonCount() > 1 )
             {
-            // upper portal -> down -> lower portal
+            // upper portal -> down -> lower portal (landscape)
             if ( aType == EEventKey )
                 SetFocusToPortalButton( 1 );
             keyResponse = EKeyWasConsumed;
@@ -518,52 +543,60 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         // ------------------------------------
         // focus is in the SECOND PORTAL BUTTON
         // ------------------------------------
-        if ( iLayout == EPortrait &&
+        if ( !iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyDownArrow )
             {
-            // right portal -> down -> widget list top
+            // right portal -> down -> widget list top (portrait)
             if ( aType == EEventKey )
                 SetFocusToWidgetList( 0 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == EPortrait &&
+        else if ( !iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyUpArrow )
             {
-            // right portal -> up -> widget list bottom
+            // right portal -> up -> widget list bottom (portrait)
             if ( aType == EEventKey )
                 SetFocusToWidgetList( iWidgetsList->Model()->NumberOfItems()-1 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == EPortrait &&
-                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+        else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
                 iConfiguration->PortalButtonCount() > 1 )
             {
-            // right portal -> right -> left portal
+            // right portal -> left -> left portal (portrait normal)
             if ( aType == EEventKey )
                 SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == ELandscape &&
+        else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 )
+            {
+            // left portal -> right -> right portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && !iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyLeftArrow )
             {
-            // lower portal -> left -> widget list
+            // lower portal -> left -> widget list (landscape normal)
             if ( aType == EEventKey )
                 SetFocusToWidgetList();
             keyResponse = EKeyWasConsumed;
             }
-        else if ( iLayout == ELandscapeMirrored &&
+        else if ( iLandscape && iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow )
             {
-            // lower portal -> right -> widget list (mirrored)
+            // lower portal -> right -> widget list (landscape mirrored)
             if ( aType == EEventKey )
                 SetFocusToWidgetList();
             keyResponse = EKeyWasConsumed;
             }
-        else if ( ( iLayout == ELandscape ||
-                iLayout == ELandscapeMirrored ) &&
+        else if ( iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyUpArrow )
             {
-            // lower portal -> up -> upper portal
+            // lower portal -> up -> upper portal (landscape)
             if ( aType == EEventKey )
                 SetFocusToPortalButton( 0 );
             keyResponse = EKeyWasConsumed;
@@ -705,16 +738,14 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
                     {
                     TInt itemIndex = iWidgetsList->CurrentListBoxItemIndex();
                     TBool itemPointed = iWidgetsList->View()->XYPosToItemIndex(
-                            aPointerEvent.iParentPosition,
+                            aPointerEvent.iPosition,
                             itemIndex );
-                    if ( itemIndex >= 1 && itemPointed )
+                    if ( itemIndex >= 0 && itemPointed )
                         {
-                        iWidgetsList->SetCurrentItemIndex( itemIndex - 1 );
+                        iWidgetsList->SetCurrentItemIndex( itemIndex );
                         }
                     }
-
-	            // Set focus to the control that was clicked
-	            control->SetFocus( ETrue );
+	            
 	            // remove focus from ALL other child controls.
 	            CCoeControlArray::TCursor cursor = Components().Begin();
 	            CCoeControl* c;
@@ -723,6 +754,10 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 	                if ( c != control && c->IsFocused() ) c->SetFocus( EFalse );
 	                cursor.Next();
 	                }
+	            
+	            // Set focus to the control that was clicked
+	            control->SetFocus( ETrue );
+	                            
 	            // update focus mode accordingly
 	            UpdateFocusMode();
 	            // repaint
@@ -867,15 +902,6 @@ void CWmMainContainer::AddControlL(
     }
 
 // ---------------------------------------------------------
-// CWmMainContainer::WmPlugin
-// ---------------------------------------------------------
-//
-CWmPlugin& CWmMainContainer::WmPlugin()
-    {    
-    return iWmPlugin;
-    }
-
-// ---------------------------------------------------------
 // CWmMainContainer::PortalSelected
 // ---------------------------------------------------------
 //
@@ -976,7 +1002,7 @@ TBool CWmMainContainer::CanDoSort()
 //
 TBool CWmMainContainer::CanDoDetails()
     {
-    return WidgetSelected();
+    return ( WidgetSelected() && iWidgetsList->WidgetData() );
     }
 
 // ---------------------------------------------------------
@@ -1257,10 +1283,17 @@ void CWmMainContainer::RemoveCtrlsFromStack()
 void CWmMainContainer::HandleListBoxEventL(
         CEikListBox* /*aListBox*/, TListBoxEvent aEventType )
     {
-    if ( !iClosingDown && ( aEventType == EEventEnterKeyPressed ||
-            aEventType == EEventItemSingleClicked ) )
+    if ( aEventType == EEventEnterKeyPressed ||
+        aEventType == EEventItemSingleClicked )
         {
-        AddWidgetToHomeScreenL();
+        if ( iFindPaneIsVisible )
+            {
+            DeactivateFindPaneL();
+            }
+        else if ( !iClosingDown )
+            {
+            AddWidgetToHomeScreenL();
+            }
         }
     }
 

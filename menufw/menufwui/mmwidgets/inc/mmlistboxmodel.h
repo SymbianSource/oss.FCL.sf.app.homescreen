@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxItemModel
-*  Version     : %version: MM_18.1.3 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_18.1.4 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -120,6 +120,15 @@ public:
 	 */
     void HandleSuiteEventL( THnCustomSuiteEvent aCustomSuiteEvent, 
             CHnSuiteModel* aModel );
+    
+    /**
+     * Determines the number of item-specific menu items for given item.
+     * 
+     * @since S60 v3.0
+     * @param aItemIndex Item index.
+     * @return Number of item-specific menu items.
+     */
+    TInt GetNumberOfSpecificMenuItemsL( TInt aItemIndex );
     
 private:
 

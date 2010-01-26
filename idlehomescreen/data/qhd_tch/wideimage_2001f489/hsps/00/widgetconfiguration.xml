@@ -9,9 +9,16 @@
                 <property name="value" value=""/> 
             </item>          
             <!-- Template designer choice -->
-            <item id="prop1" name="contentdata">
+             <item id="prop1" name="contentdata">
+                <property name="class" value="def_image"/>  
+            </item> 
+            <item id="prop2" name="contentdata">
+                <property name="class" value="def_text"/>  
+            </item> 
+            <item id="prop3" name="contentdata">
                 <property name="class" value="image1"/>  
-            </item>              
+            </item>  
+            
             <!-- Template designer choice -->
             <item id="p_trigger" name="pubtrigger">   
                 <property name="name" value="selected"/> 

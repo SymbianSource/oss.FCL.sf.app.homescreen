@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_49 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_50 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -596,10 +596,13 @@ void CMmListBoxView::SetPreviouslyDrawnCurrentItemIndex( TBool aIndex )
 //
 void CMmListBoxView::DrawSingleItem (TInt aItemIndex) const
 	{
-	CMmListBoxItemDrawer* itemDrawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
-	TSize size = itemDrawer->GetItemSize( aItemIndex, CurrentItemIndex ()
-			== aItemIndex);
-	itemDrawer->SetItemCellSize (size);
+	CMmListBoxItemDrawer* itemDrawer =
+            STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
+	TBool highlightVisible = !( itemDrawer->Flags()
+	        & CListItemDrawer::ESingleClickDisabledHighlight );
+	TSize size = itemDrawer->GetItemSize( aItemIndex, highlightVisible &&
+	        CurrentItemIndex() == aItemIndex );
+	itemDrawer->SetItemCellSize( size );
 	
 	// CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
 	// view->SetItemHeight( size.iHeight );

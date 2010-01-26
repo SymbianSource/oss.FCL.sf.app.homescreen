@@ -91,8 +91,6 @@ void CMmPostEvaluationProcessor::RunL()
     if ( mm_template.Compare( KNullDesC8 ) && mm_template.Compare( KEmpty8 ) )
     	{
         iDrawer.SetupSubCellsL( EFalse, iIndexToProcess );
-    	delete iDrawer.ColumnData()->IconArray();
-    	iDrawer.ColumnData()->SetIconArray( NULL );
     	}
     
     if ( ++iIndexToProcess < iDrawer.iMmModel->NumberOfItems() )

@@ -3161,12 +3161,15 @@ static void RunFullScreenEffectL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
 
     if ( attribute )
         {
+        
         const TDesC8& value( attribute->Value() );
         TLex8 lex( value );
         TInt effect;
         lex.Val( effect );
+        
         aEngine.AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
                 effect, aEngine.ViewManager()->ActiveViewData() );
+        
         }
     }
 
@@ -4321,7 +4324,12 @@ static TBool RunEventL(
         }
     else if ( nameString == XnPropertyNames::action::event::KRunFullScreenEffect )
         {
-        RunFullScreenEffectL( aEngine, aEventNode );
+        TInt viewCount( aEngine.ViewManager()->ViewAmount() );
+
+        if ( viewCount > KOneView )
+            {
+            RunFullScreenEffectL( aEngine, aEventNode );
+            }
         }
     else if ( nameString == XnPropertyNames::action::event::KActivateNextView )
         {

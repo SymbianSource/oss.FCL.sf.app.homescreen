@@ -21,9 +21,6 @@
 #include <eikappui.h>
 #include <aknapp.h>
 #include <bautils.h>
-#include <gdi.h>
-#include <aknbutton.h>
-#include <AknIconUtils.h>
 #include <StringLoader.h>
 #include <aknnotewrappers.h>
 #include <widgetmanagerview.rsg>
@@ -33,8 +30,8 @@
 // CONSTANTS
 _LIT( KZdrive, "Z:" );
 _LIT( KRelativeMifPath, "\\resource\\apps\\widgetmanager.mif" );
-_LIT( KRelativeResourcePathWithWildcard, "\\resource\\widgetmanagerview.r*" );
-_LIT( KRelativeResourcePath, "\\resource\\widgetmanagerview.rsc" );
+_LIT( KRelativeResourcePathWithWildcard, "\\resource\\apps\\widgetmanagerview.r*" );
+_LIT( KRelativeResourcePath, "\\resource\\apps\\widgetmanagerview.rsc" );
 
 // ---------------------------------------------------------
 // CWmResourceLoader::NewL
@@ -160,19 +157,6 @@ void CWmResourceLoader::DetermineIconFilePath()
 const TDesC& CWmResourceLoader::IconFilePath()
     {
     return iMifFile;
-    }
-
-// ---------------------------------------------------------
-// CWmResourceLoader::LoadButtonL
-// ---------------------------------------------------------
-void CWmResourceLoader::LoadButtonL(
-        CAknButton& aResource,
-        TInt aResourceId )
-    {
-    TResourceReader reader;
-    iEnv.CreateResourceReaderLC( reader, aResourceId );
-    aResource.ConstructFromResourceL( reader );
-    CleanupStack::PopAndDestroy(); // reader
     }
 
 // ---------------------------------------------------------

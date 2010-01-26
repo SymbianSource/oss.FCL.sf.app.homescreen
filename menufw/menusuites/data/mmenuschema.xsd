@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <xs:schema xmlns:mmenu="http://nokia.com/mmenu" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://nokia.com/mmenu" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="content">
     <xs:annotation>
@@ -318,6 +318,11 @@ asynchronous invocation
       <xs:element xmlns:q1="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="menuitem_specific" type="q1:menuItemType">
         <xs:annotation>
           <xs:documentation>This tag is the same as menuitem but describes menu items displayed only which have specific relation to the item</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element xmlns:q1="http://nokia.com/mmenu" minOccurs="0" maxOccurs="unbounded" name="menuitem_action" type="q1:menuItemType">
+        <xs:annotation>
+          <xs:documentation>This tag is the same as menuitem but describes action commands - such functions that happen via touch-down and release on the item (e.g. Open)</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" maxOccurs="1" name="toolbar" type="mmenu:toolbarType">

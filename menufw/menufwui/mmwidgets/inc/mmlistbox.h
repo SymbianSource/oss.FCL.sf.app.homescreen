@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBox
-*  Version     : %version: MM_22.1.14 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_22.1.16 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -275,6 +275,16 @@ public: // from base class CCoeControl.
      */
     void SetDisableChildComponentDrawing( TBool aDisable );
     
+    /**
+     * Handles scrolling event.
+     *
+     * @since S60 v3.0
+     * @param aScrollBar Scrollbar being scrolled.
+     * @param aEventType Type of scrollbar event.
+     */
+    void HandleScrollEventL( CEikScrollBar* aScrollBar, 
+            TEikScrollEvent aEventType );
+    
 private:
     /**
      * Default constructor.
@@ -363,6 +373,34 @@ private:
      */
     void RedrawScrollbarBackground() const;
     
+    /**
+     * Does actual handling of scroll events.
+     * 
+     * @param aScrollBar Scrollbar being scrolled.
+     * @param aEventType Type of scrollbar event.
+     */
+    void ProcessScrollEventL( CEikScrollBar* aScrollBar, 
+            TEikScrollEvent aEventType );
+    
+    /**
+     * Handles periodic events from @c iRedrawTimer.
+     * Such events are generated at equal time intervals while
+     * the view is being scrolled using the scrollbar.
+     * This function typically calls @c ProcessScrollEventL,
+     * which actually scrolls the view and causes a redraw. 
+     */
+    void HandleRedrawTimerEvent();
+    
+private:
+    /**
+     * Callback function for @c iRedrawTimer.
+     * It simply calls @c HandleRedrawTimerEvent and returns 0.
+     * 
+     * @param aPtr A pointer to CMmListBox object.
+     * @return 0 (always).
+     */
+    static TInt RedrawTimerCallback( TAny* aPtr );
+    
 private: // Data
     /**
      * Item drawer.
@@ -384,6 +422,33 @@ private: // Data
      * are blocked in the CountComponentControls() method;   
      */
 	TBool iDisableChildComponentDrawing;
+	
+	/**
+     * This member is only used in edit mode to store the position of the pointer
+     * during EButton1Down event.
+     */
+    TPoint iButton1DownPos;
+    
+    /**
+     * ETrue if the view is being scrolled with the scrollbar.
+     */
+    TBool iScrollbarThumbIsBeingDragged;
+    
+    /**
+     * Stores the number of scrollbar events that were ignored.
+     * It is only used while scrolling the view using scrollbar,
+     * in such situation the scroll events that this object receives
+     * are ignored, and actual scrolling is done only when
+     * iRedrawTimer completes.
+     */
+    TInt iSkippedScrollbarEventsCount;
+    
+    /**
+     * A timer that initiates redraws at certain time intervals.
+     * It is used to refresh the view while scrolling with
+     * the scrollbar.
+     */
+    CPeriodic* iRedrawTimer;
 	};
 	
 #endif // MMLISTBOX_H

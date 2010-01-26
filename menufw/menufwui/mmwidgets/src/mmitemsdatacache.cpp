@@ -110,7 +110,7 @@ void CMmItemsDataCache::Invalidate()
     const TInt count = iItemCacheArr.Count();
     for ( TInt i = 0; i < count; ++i )
         {
-        iItemCacheArr[i]->SetValid( EFalse );
+        iItemCacheArr[i]->SetValidL( EFalse );
         }
     }
 

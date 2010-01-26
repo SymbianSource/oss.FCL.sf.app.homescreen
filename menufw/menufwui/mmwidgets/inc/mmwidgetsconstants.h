@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Constants for the matrixmenu
-*  Version     : %version: 33.1.9 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 33.1.11 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -440,5 +440,18 @@ enum TManualAlign
     EManualAlignCenter,
     EManualAlignRight
     };
+
+/**
+ * The minimal drag vector y-length that can trigger kinetic scrolling.
+ * This is just a rough estimation of the actual trigger value used by AVKON,
+ * but it is sufficient for our purposes.  
+ */
+const TInt KDragTreshold = 18;
+
+/**
+ * The interval between redraws when scrolling using the scrollbar.
+ * This will give us nice ~30 fps.
+ */
+const TInt KScrollingRedrawInterval = 33333;
 
 #endif // MMWIDGETSCONSTANTS_H

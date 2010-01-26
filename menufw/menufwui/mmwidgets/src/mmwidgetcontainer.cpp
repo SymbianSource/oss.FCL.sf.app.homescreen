@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.47 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.49 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -33,7 +33,6 @@
 #include "mmlistboxmodel.h"
 #include "mmmarqueeadapter.h"
 #include "mmwidgetobserver.h"
-#include "mmhighlighttimer.h"
 #include "mmvisibilityobserver.h"
 #include "mmlistboxcontainer.h"
 #include "mmgridcontainer.h"
@@ -91,10 +90,6 @@ EXPORT_C CMmWidgetContainer* CMmWidgetContainer::NewListBoxContainerL( const TRe
 //
 void CMmWidgetContainer::ConstructL()
 	{
-    if ( AknLayoutUtils::PenEnabled() )
-    	{
-    	iTimer = CMmHighlightTimer::NewL( this );
-    	}
     iBgContext = CAknsBasicBackgroundControlContext::NewL(
     	KAknsIIDQsnBgAreaMainAppsGrid, Rect(), EFalse);
     iLongTapDetector = CAknLongTapDetector::NewL( this );
@@ -124,7 +119,6 @@ CMmWidgetContainer::~CMmWidgetContainer()
     {
     AknsUtils::DeregisterControlPosition( this );
     AknsUtils::DeregisterControlPosition( this->iWidget );
-    delete iTimer;
     delete iBgContext;
     delete iPostProcessor;
     delete iLongTapDetector;
@@ -441,8 +435,7 @@ EXPORT_C void CMmWidgetContainer::SetHasFocusL( TBool aHasFocus )
         }
     if ( !aHasFocus )
     	{
-    	ASSERT(iTimer);
-    	iTimer->StopL();
+    	SetHighlightVisibilityL( EFalse );
     	}
     }
 
@@ -457,6 +450,15 @@ EXPORT_C void CMmWidgetContainer::SetIsFaded( TBool aIsFaded )
         iIsFaded = aIsFaded;
         StartOrStopMarquee();
         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CMmWidgetContainer::LongTapInProgress() const
+    {
+    return iLongTapInProgress;
     }
 
 // -----------------------------------------------------------------------------
@@ -610,6 +612,21 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
 
     TInt index = KErrNotFound;
     TBool itemExists = iWidget->View()->XYPosToItemIndex( aPointerEvent.iPosition, index );
+    
+    if ( iLongTapDetector )
+        {
+        if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+            {
+            iLongTapDetector->EnableLongTapAnimation( itemExists &&
+                    GetMmModel()->GetNumberOfSpecificMenuItemsL( index ) > 0 );
+            }
+        TPointerEvent longTapPointerEvent = aPointerEvent;
+        if ( aPointerEvent.iType == TPointerEvent::EButtonRepeat )
+            {
+            longTapPointerEvent.iType = TPointerEvent::EDrag;
+            }
+        iLongTapDetector->PointerEventL( longTapPointerEvent );
+        }
 
     CCoeControl::HandlePointerEventL(aPointerEvent);
 
@@ -627,7 +644,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     		{
         	if ( GetHighlight() != index )
         	    {
-        	    iTimer->StopL();
+        	    SetHighlightVisibilityL( EFalse );
         	    if ( IsEditMode() )
         	    	{
         		    SetHighlightL( index );
@@ -636,7 +653,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     		}
     	else
     		{
-    		iTimer->StopL();
+    		SetHighlightVisibilityL( EFalse );
     		}
     	}
 
@@ -653,21 +670,6 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     	{
 		HandlePointerEventsInEditModeL(aPointerEvent, abortAnimation);
     	}
-
-    if ( iLongTapDetector )
-    	{
-    	if ( !itemExists )
-    	    {
-    	    iLongTapDetector->EnableLongTapAnimation( EFalse );
-    	    }
-    	TPointerEvent longTapPointerEvent = aPointerEvent;
-        if ( aPointerEvent.iType == TPointerEvent::EButtonRepeat )
-        	{
-        	longTapPointerEvent.iType = TPointerEvent::EDrag;
-        	}
-        iLongTapDetector->PointerEventL( longTapPointerEvent );
-    	}
-
     }
 
 // -----------------------------------------------------------------------------
@@ -743,7 +745,7 @@ EXPORT_C void CMmWidgetContainer::SetHighlightVisibilityL( TBool aEnable )
     if ( !aEnable )
         {
         iWidget->View()->ItemDrawer()->SetFlags(
-            CListItemDrawer::EDisableHighlight );
+            CListItemDrawer::ESingleClickDisabledHighlight );
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
 	    if ( transApi )
 	        {
@@ -754,17 +756,26 @@ EXPORT_C void CMmWidgetContainer::SetHighlightVisibilityL( TBool aEnable )
     else
         {
         iWidget->View()->ItemDrawer()->ClearFlags(
-            CListItemDrawer::EDisableHighlight );
+            CListItemDrawer::ESingleClickDisabledHighlight );
         }
-   }
+    
+    if ( IsVisible() )
+        {
+        TInt highlight = GetHighlight();
+        CListBoxView* view = Widget()->View();
+        Widget()->DrawNow( TRect( view->ItemPos( highlight ),
+                view->ItemSize( highlight ) ) );
+        }
+    }
 
 // -----------------------------------------------------------------------------
 //
-// -----------------------------------------------	------------------------------
+// ----------------------------------------------------------------------------
 //
 EXPORT_C TBool CMmWidgetContainer::IsHighlightVisible()
     {
-    return IsTimerActive();
+    return !( iWidget->View()->ItemDrawer()->Flags() & 
+    		CListItemDrawer::ESingleClickDisabledHighlight );
     }
 
 // -----------------------------------------------------------------------------
@@ -1014,11 +1025,7 @@ TKeyResponse CMmWidgetContainer::OfferKeyEventL(const TKeyEvent &aKeyEvent,
 
     if ( resp == EKeyWasNotConsumed )
         {
-//        here is a workaround for avkon to enable cursor movement we need to set highlight visibility
-//        to ETrue so that single click implementation in avkon will change the current item index.
-        SetHighlightVisibilityL(ETrue); //workaround
         resp = iWidget->OfferKeyEventL( aKeyEvent, aType );
-        SetHighlightVisibilityL(EFalse);//workaround
         }
 
     if ( iKeyEventObserver )
@@ -1040,78 +1047,11 @@ TKeyResponse CMmWidgetContainer::OfferKeyEventL(const TKeyEvent &aKeyEvent,
 
 			SetHighlightVisibilityL( ETrue );
 			SetDefaultHighlightL( ETrue );
-			if ( iTimer )
-				{
-				iTimer->StartL( KDelayInSeconds6, EFalse );
-				HandleForegroundGainedL();
-				}
+			HandleForegroundGainedL();
 			}
     	}
     return resp;
     }
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-//TBool CMmWidgetContainer::HighlightWouldLoop( const TKeyEvent& aKeyEvent,
-//		const TEventCode& aType )
-//	{
-//	TInt viewColCount ( ColumnsInCurrentView() );
-//
-//	if ( viewColCount == 0 )
-//		return ETrue;
-//
-//	// this allows to finish drag'n'drop operation
-//	if ( iDraggedIndex != KErrNotFound && aType == EEventKeyUp )
-//		return EFalse;
-//
-//	TBool wouldLoop = EFalse;
-//	TInt highlightIndex = GetHighlight();
-//
-//	TInt highlightRow = highlightIndex / viewColCount;
-//	TInt lastRowWithItems = ( NumberOfItems() - 1 ) / viewColCount;
-//	TInt highlightCol = highlightIndex % viewColCount;
-//	TInt lastItemCol = ( NumberOfItems() - 1 ) % viewColCount;
-//
-//	TInt keyScanCode = aKeyEvent.iScanCode;
-//
-//	if ( AknLayoutUtils::LayoutMirrored() )
-//		{
-//		if ( keyScanCode == EStdKeyLeftArrow )
-//			keyScanCode = EStdKeyRightArrow;
-//		else if ( keyScanCode == EStdKeyRightArrow )
-//			keyScanCode = EStdKeyLeftArrow;
-//		}
-//
-//	if ( keyScanCode == EStdKeyRightArrow )
-//		{
-//			if ( highlightIndex == NumberOfItems() - 1 )
-//				wouldLoop = ETrue;
-//			else if ( highlightCol == viewColCount - 1 )
-//				wouldLoop = ETrue;
-//		}
-//	else if ( keyScanCode == EStdKeyLeftArrow )
-//		{
-//			if ( highlightCol == 0 )
-//				wouldLoop = ETrue;
-//		}
-//	else if ( keyScanCode == EStdKeyUpArrow )
-//		{
-//			if ( highlightRow == 0 )
-//				wouldLoop = ETrue;
-//		}
-//	else if ( keyScanCode == EStdKeyDownArrow )
-//		{
-//			if ( highlightRow == lastRowWithItems )
-//				wouldLoop = ETrue;
-//			else if ( highlightRow == lastRowWithItems - 1 && highlightCol > lastItemCol)
-//				wouldLoop = ETrue;
-//		}
-//
-//	return wouldLoop;
-//	}
 
 // -----------------------------------------------------------------------------
 //
@@ -1172,19 +1112,18 @@ TKeyResponse CMmWidgetContainer::HandleKeyEventL( const TKeyEvent &aKeyEvent,
     // handle arrow: draw highlight when arrow used
     if ( arrowHasHandling )
         {
-        if ( !iTimer->IsActive() )
+        if ( !IsHighlightVisible() )
             {
             if ( aType == EEventKey  || aType == EEventKeyUp )
                 {
-                // if no highlight and key released - show highlight
-                SetDefaultHighlightL( EFalse );
+                SetHighlightVisibilityL( ETrue );
+                SetDefaultHighlightL( ETrue );
                 }
-           	// ignore all navigation events when highlight not visible
+           	// override avkon's default highlight setting
          	resp = EKeyWasConsumed;
             }
         else
             {
-
             // this block is used to set the highlight only once for each event
             if ( aKeyEvent.iRepeats > 0 )
                 {
@@ -1203,13 +1142,6 @@ TKeyResponse CMmWidgetContainer::HandleKeyEventL( const TKeyEvent &aKeyEvent,
                     }
                 }
             }
-
-    	// run timer in order to hide the highlight
-	    if ( aType == EEventKey && iTimer)
-	        {
-	        iTimer->StartL( KDelayInSeconds6, EFalse );
-	        HandleForegroundGainedL();
-	        }
     	}
     else if( arrowKeyPressed )
         {
@@ -1649,20 +1581,22 @@ EXPORT_C void CMmWidgetContainer::RestoreWidgetPosition()
 //
 void CMmWidgetContainer::MakeVisible(TBool aVisible)
 	{
-	if (!aVisible)
+	if ( !aVisible )
 		{
-		ASSERT(iTimer);
-		TRAP_IGNORE( iTimer->StopL( EFalse ) );
 		RestoreWidgetPosition();
 		CacheWidgetPosition();
 		iDrawer->RemoveFloatingItems();
 		}
-	else if (aVisible)
+	else if ( aVisible )
 		{
 		RestoreWidgetPosition();
 		}
 	CCoeControl::MakeVisible(aVisible);
 	iWidget->MakeVisible(aVisible);
+	if ( !aVisible )
+        {
+        SetHighlightVisibilityL( EFalse );
+        }
 	}
 
 // ---------------------------------------------------------------------------
@@ -1710,8 +1644,7 @@ EXPORT_C void CMmWidgetContainer::NumberOfItemsChangedL( TItemsChangeType aChang
 //
 void CMmWidgetContainer::HandleNumberOfItemsChangedL( TItemsChangeType aChange )
 	{
-	ASSERT(iTimer);
-	iTimer->StopL();
+	SetHighlightVisibilityL( EFalse );
 	if ( aChange == EItemsAdded )
 		{
 		HandleItemAdditionL();
@@ -1894,29 +1827,13 @@ EXPORT_C void CMmWidgetContainer::PrepareForGarbage()
 //
 // -----------------------------------------------------------------------------
 //
-TBool CMmWidgetContainer::IsTimerActive( TInt aItemIndex )
-	{
-	ASSERT(iTimer);
-	TBool timerActive = iTimer->IsActive();
-	if ( aItemIndex >= 0 && timerActive )
-		{
-		timerActive = ( aItemIndex == iTimer->TimerHighlightIndex() );
-		}
-	return timerActive;
-	}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
 void CMmWidgetContainer::HandleLongTapEventL( const TPoint& aPenEventLocation,
                                       const TPoint& aPenEventScreenLocation )
 	{
 	TInt index( KErrNotFound );
 	if ( iWidget->View()->XYPosToItemIndex( aPenEventLocation, index ) )
 		{
-		ASSERT( iTimer );
-		iTimer->ContinueL( KDelayInfinite );
+		SetHighlightVisibilityL( ETrue );
 	    iLongTapInProgress = ETrue;
 		if ( iLongTapObserver )
 			{
@@ -1945,8 +1862,7 @@ EXPORT_C void CMmWidgetContainer::EndLongTapL( TBool aStopTimer )
 		iLongTapInProgress = EFalse;
 		if( aStopTimer )
 			{
-			ASSERT( iTimer );
-			iTimer->StopL();
+			SetHighlightVisibilityL( EFalse );
 			}
 		}
 	}
@@ -1958,7 +1874,6 @@ EXPORT_C void CMmWidgetContainer::EndLongTapL( TBool aStopTimer )
 void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
         TListBoxEvent aEventType )
     {
-    ASSERT( iTimer );
 //    handle same behaviour in edit mode and normal mode
     switch ( aEventType )
 		{
@@ -1967,7 +1882,7 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 			iDragOccured = EFalse;
 			if ( !iLongTapInProgress )
 				{
-				iTimer->StartL( KDelayInfinite );
+				SetHighlightVisibilityL( ETrue );
 				}
 			break;
 			}
@@ -1976,14 +1891,14 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 			if ( !iDragOccured && !iLongTapInProgress )
 				{
 				SetHighlightL( Widget()->CurrentItemIndex() );
-				iTimer->StopL( ETrue );
+				SetHighlightVisibilityL( EFalse );
 				}
 			iDragOccured = EFalse;
 			break;
 			}
 		case MEikListBoxObserver::EEventItemDraggingActioned:
 			{
-			iTimer->StopL();
+			SetHighlightVisibilityL( EFalse );
 			iDragOccured = ETrue;
 			break;
 			}
@@ -1992,7 +1907,7 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 		case MEikListBoxObserver::EEventFlickStarted:
 		case MEikListBoxObserver::EEventFlickStopped:
 			{
-			iTimer->StopL( EFalse );
+			SetHighlightVisibilityL( EFalse );
 			break;
 			}
 		}
@@ -2040,17 +1955,4 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 
     }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CMmWidgetContainer::HandleOptionsMenuVisibilityChangeL(
-		TBool aOptionsMenuVisible )
-	{
-	if ( IsTimerActive() )
-		{
-		TInt delay = (aOptionsMenuVisible) ? KDelayInfinite : KDelayInSeconds6;
-		iTimer->StartL( delay, EFalse );
-		}
-	}
 //End of file

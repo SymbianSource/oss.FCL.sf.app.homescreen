@@ -194,8 +194,8 @@ EXPORTS
 	_ZThn4_N16CHnMenuItemModel7HasNextEv @ 193 NONAME
 	_ZN16CHnMenuItemModel15GetNextSpecificEv @ 194 NONAME
 	_ZN16CHnMenuItemModel15HasNextSpecificEv @ 195 NONAME
-	_ZN16CHnMenuItemModel15SetItemSpecificEi @ 196 NONAME
+	_ZN16CHnMenuItemModel15SetMenuItemTypeENS_15THnMenuItemTypeE @ 196 NONAME
 	_ZThn4_N16CHnMenuItemModel15GetNextSpecificEv @ 197 NONAME
 	_ZThn4_N16CHnMenuItemModel15HasNextSpecificEv @ 198 NONAME
-	_ZN16CHnMenuItemModel14IsItemSpecificEv @ 199 NONAME
+	_ZN16CHnMenuItemModel12MenuItemTypeEv @ 199 NONAME
 

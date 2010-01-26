@@ -27,7 +27,7 @@
 
     <multiinstance>2</multiinstance>
 
-    <description>RnD description desktop plugin</description>
+    <description>&amp;qtn_desktop_configuration_desc;</description>
     <filelogo>skin(270501603 9361):mif(icon.mif 16384 16385)</filelogo>
     
     <!-- Locale independent/common resources -->

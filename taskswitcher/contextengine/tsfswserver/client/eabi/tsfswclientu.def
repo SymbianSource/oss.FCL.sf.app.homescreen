@@ -1,0 +1,10 @@
+EXPORTS
+	_ZN12CTsFswClient11GetContentLER13RPointerArrayI11CTsFswEntryE @ 1 NONAME
+	_ZN12CTsFswClient11SwitchToAppEi @ 2 NONAME
+	_ZN12CTsFswClient15CancelSubscribeEv @ 3 NONAME
+	_ZN12CTsFswClient16ForegroundAppUidENS_15TTsFswFgAppTypeE @ 4 NONAME
+	_ZN12CTsFswClient4NewLEv @ 5 NONAME
+	_ZN12CTsFswClient5NewLCEv @ 6 NONAME
+	_ZN12CTsFswClient8CloseAppEi @ 7 NONAME
+	_ZN12CTsFswClient9SubscribeER14MTsFswObserver @ 8 NONAME
+

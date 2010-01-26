@@ -23,6 +23,9 @@ PRJ_EXPORTS
 //********************************************************
 ../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/profile_2001cb7c/hsps/manifest.dat
 ../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/profile_2001cb7c/hsps/widgetconfiguration.xml
+// waiting for localization from platform
+//../hsps/00/profileconfiguration.dtd /epoc32/data/Z/resource/homescreen/profile_2001cb7c/hsps/profileconfiguration.dtd
+
 ../xuikon/00/profile.dat /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profile_2001cb7c.dat
 ../xuikon/00/profile.css /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profile.css
 ../xuikon/00/profile.xml /epoc32/data/Z/resource/homescreen/profile_2001cb7c/xuikon/profile.xml
@@ -42,6 +45,8 @@ PRJ_EXPORTS
 //*****************************
 // export localizable loc files (engineering versions)
 ../loc/profilewidget.loc    APP_LAYER_LOC_EXPORT_PATH(profilewidget.loc)
+// waiting for localization from platform
+//../loc/profileconfiguration.loc    APP_LAYER_LOC_EXPORT_PATH(profileconfiguration.loc)
 
 // Support for S60 builds
 //***********************

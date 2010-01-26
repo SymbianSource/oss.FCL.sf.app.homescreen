@@ -27,8 +27,15 @@
 #include "wmresourceloader.h"
 #include "wmcrkeys.h"
 
-// CONSTANTS
-const TInt KMaxIconDescriptorLength = 256;
+// some constants regarging the central repository localised section.
+// these will ensure CR localisation section compatibility even if
+// new strings are added
+const TInt KLangOffsetOviStoreUrl = KOviStoreBrowserUrl0 - KLangId0;
+const TInt KLangOffsetOperatorUrl = KOperatorButtonUrl0 - KLangId0;
+const TInt KLangOffsetOperatorText = KOperatorButtonText0 - KLangId0;
+const TInt KLangGroupSize = KLangId1 - KLangId0;
+const TUint32 KLastLangId = KLangId9;
+
 
 // ---------------------------------------------------------
 // CWmConfiguration::NewL
@@ -52,12 +59,15 @@ CWmConfiguration::CWmConfiguration(
         CWmResourceLoader& aResourceLoader )
     : iResourceLoader( aResourceLoader )
 	{
-    iOviStoreText = NULL;
-    iOviStoreIcon = NULL;
-	iRepository = NULL;
-	iOviStoreBundleId = NULL;
-	iOviStoreClientParam = NULL;
-    iOviStoreUrl = NULL;
+    iRepository = NULL;
+    iOviStoreBundleId = NULL;
+    iOviStoreClientParam = NULL;
+    iOviButtonTitle = NULL;
+    iOviButtonIcon = NULL;
+    iOviButtonUrl = NULL;
+    iOperatorButtonTitle = NULL;
+    iOperatorButtonIcon = NULL;
+    iOperatorButtonUrl = NULL;
 	}
 
 // ---------------------------------------------------------
@@ -66,12 +76,15 @@ CWmConfiguration::CWmConfiguration(
 //
 CWmConfiguration::~CWmConfiguration()
 	{
-    delete iOviStoreText;
-    delete iOviStoreIcon;
-	delete iRepository;
+    delete iRepository;
     delete iOviStoreBundleId;
     delete iOviStoreClientParam;
-    delete iOviStoreUrl;
+    delete iOviButtonTitle;
+    delete iOviButtonIcon;
+    delete iOviButtonUrl;
+    delete iOperatorButtonTitle;
+    delete iOperatorButtonIcon;
+    delete iOperatorButtonUrl;
 	}
 
 // ---------------------------------------------------------
@@ -81,30 +94,52 @@ CWmConfiguration::~CWmConfiguration()
 void CWmConfiguration::ConstructL()
 	{
 	// localised ovistore button text
-    iOviStoreText = StringLoader::LoadL( R_QTN_WM_GO_TO_OVI_STORE );
+    iOviButtonTitle = StringLoader::LoadL( R_QTN_WM_GO_TO_OVI_STORE );
 
     // ovistore icon descriptor. It will look something like this:
     // skin( 0x101f86e3 0x23f6 ):mif( z:\resource\apps\widgetmanager.mif 16388 16389 )
-    TBuf<KMaxIconDescriptorLength> buf;
     _LIT( KSkinMifIconFormat, "skin( 0x%x 0x%x ):mif( %S %d %d )");
+    const TInt KMaxIconDescriptorLength = 256;
+    TBuf<KMaxIconDescriptorLength> buf;
     buf.Format( KSkinMifIconFormat(),
              EAknsMajorGeneric, EAknsMinorGenericQgnMenuOviStore,
              &iResourceLoader.IconFilePath(),
              EMbmWidgetmanagerQgn_menu_ovistore,
              EMbmWidgetmanagerQgn_menu_ovistore_mask );
-    iOviStoreIcon = buf.AllocL();
+    iOviButtonIcon = buf.AllocL();
 
     // read data from repository
-    TRAP_IGNORE(
-        iRepository = CRepository::NewL( 
-                TUid::Uid( KCrWidgetManagerm ) );
-    
-        iLanguageIndex = FindCorrectLanguageId();
-        iOviStoreBundleId = ReadParameterL( KOviStoreBunbleId );
-        iOviStoreClientParam = ReadParameterL( KOviStoreClientParam );
-        iOviStoreUrl = ReadLocalisedParameterL( KOviStoreBrowserUrlOffset );
-        );
+    TRAP_IGNORE( LoadConfigurationL(); );
+
 	}
+
+// ---------------------------------------------------------
+// CWmConfiguration::LoadConfigurationL
+// ---------------------------------------------------------
+//
+void CWmConfiguration::LoadConfigurationL()
+    {
+    iRepository = CRepository::NewL( 
+            TUid::Uid( KCrWidgetManagerm ) );
+
+    // read fixed parameters
+    iOviStoreBundleId = ReadParameterL( KOviStoreBundleId );
+    iOviStoreClientParam = ReadParameterL( KOviStoreClientParam );
+    // determine language and read localised parameters
+    iLanguageIndex = FindCorrectLanguageId();
+    iOviButtonUrl = ReadLocalisedParameterL( KLangOffsetOviStoreUrl );
+    iOperatorButtonTitle = ReadLocalisedParameterL( KLangOffsetOperatorText );
+    iOperatorButtonUrl = ReadLocalisedParameterL( KLangOffsetOperatorUrl );
+
+    if ( iOperatorButtonUrl && iOperatorButtonUrl->Length() > 0 )
+        {
+        // construct the operator button icon.
+        iOperatorButtonIcon = ReadParameterL( KOperatorButtonIcon );
+        }
+
+    delete iRepository;
+    iRepository = NULL;
+    }
 
 // ---------------------------------------------------------
 // CWmConfiguration::FindCorrectLanguageId
@@ -118,7 +153,7 @@ TInt CWmConfiguration::FindCorrectLanguageId()
     TLanguage sysLang = User::Language();
     
     //read language id's from cenrep, find a match
-    for( TUint32 i=KLangId0; i<=KLangId9 && languageIndex<0; i+=KLangGroupSize )
+    for( TUint32 i=KLangId0; i<=KLastLangId && languageIndex<0; i+=KLangGroupSize )
         {
         TInt crLang = 0;
         if ( iRepository->Get( i, crLang ) == KErrNone )
@@ -191,9 +226,11 @@ HBufC* CWmConfiguration::ReadLocalisedParameterL(
 // ---------------------------------------------------------
 //
 TInt CWmConfiguration::PortalButtonCount()
-	{
-	return 1;
-	}
+    {
+    if ( iOperatorButtonUrl && iOperatorButtonUrl->Length() > 0 )
+        return 2;
+    return 1;
+    }
 
 // ---------------------------------------------------------
 // CWmConfiguration::PortalButtonText
@@ -201,7 +238,11 @@ TInt CWmConfiguration::PortalButtonCount()
 //
 const TDesC& CWmConfiguration::PortalButtonText( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreText ) return *iOviStoreText;
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviButtonTitle )
+        return *iOviButtonTitle;
+    if ( aIndex == 1 && iOperatorButtonTitle )
+        return *iOperatorButtonTitle;
     return KNullDesC;
     }
 
@@ -211,21 +252,13 @@ const TDesC& CWmConfiguration::PortalButtonText( TInt aIndex )
 //
 const TDesC& CWmConfiguration::PortalButtonIcon( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreIcon ) return *iOviStoreIcon;
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviButtonIcon )
+        return *iOviButtonIcon;
+    if ( aIndex == 1 && iOperatorButtonIcon )
+        return *iOperatorButtonIcon;
     return KNullDesC;
     }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonBundleId
-// ---------------------------------------------------------
-//
-const TDesC&
-    CWmConfiguration::PortalButtonBundleId( TInt aIndex )
-    {
-    if ( aIndex == 0 && iOviStoreBundleId ) return *iOviStoreBundleId;
-    return KNullDesC;
-    }
-
 
 // ---------------------------------------------------------
 // CWmConfiguration::PortalButtonPrimaryMethod
@@ -234,8 +267,25 @@ const TDesC&
 CWmConfiguration::TMethod
     CWmConfiguration::PortalButtonPrimaryMethod( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreClientParam ) return EWidget;
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviStoreBundleId && iOviStoreBundleId->Length() > 0 )
+        return EWidget;
+    if ( aIndex == 1 && iOperatorButtonUrl && iOperatorButtonUrl->Length() > 0 )
+        return EHttp;
     return ENone;
+    }
+
+// ---------------------------------------------------------
+// CWmConfiguration::PortalButtonPrimaryService
+// ---------------------------------------------------------
+//
+const TDesC&
+    CWmConfiguration::PortalButtonPrimaryService( TInt aIndex )
+    {
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviStoreBundleId && iOviStoreBundleId->Length() > 0 )
+        return *iOviStoreBundleId;
+    return KNullDesC;
     }
 
 // ---------------------------------------------------------
@@ -245,7 +295,11 @@ CWmConfiguration::TMethod
 const TDesC&
     CWmConfiguration::PortalButtonPrimaryParams( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreClientParam ) return *iOviStoreClientParam;
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviStoreClientParam )
+        return *iOviStoreClientParam;
+    if ( aIndex == 1 && iOperatorButtonUrl )
+        return *iOperatorButtonUrl;
     return KNullDesC;
     }
 
@@ -257,8 +311,21 @@ const TDesC&
 CWmConfiguration::TMethod
     CWmConfiguration::PortalButtonSecondaryMethod( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreUrl ) return EHttp;
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviButtonUrl && iOviButtonUrl->Length() > 0 )
+        return EHttp;
     return ENone;
+    }
+
+// ---------------------------------------------------------
+// CWmConfiguration::PortalButtonSecondaryService
+// ---------------------------------------------------------
+//
+const TDesC&
+    CWmConfiguration::PortalButtonSecondaryService( TInt aIndex )
+    {
+    IndexConversion( aIndex );
+    return KNullDesC;
     }
 
 // ---------------------------------------------------------
@@ -268,8 +335,25 @@ CWmConfiguration::TMethod
 const TDesC&
     CWmConfiguration::PortalButtonSecondaryParams( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreUrl ) return *iOviStoreUrl;
+    IndexConversion( aIndex );
+    if ( aIndex == 0 && iOviButtonUrl )
+        return *iOviButtonUrl;
     return KNullDesC;
+    }
+
+// ---------------------------------------------------------
+// CWmConfiguration::IndexConversion
+// ---------------------------------------------------------
+//
+void CWmConfiguration::IndexConversion( TInt& /*aIndex*/ )
+    {
+    // if there is a need to configure switching button places
+    // (operator button left, then OVI button) then this method
+    // would have something like this:
+    
+    // if ( iSwitchButtons ) aIndex = 1 - aIndex;
+    
+    // but for now, this method is empty.
     }
 
 

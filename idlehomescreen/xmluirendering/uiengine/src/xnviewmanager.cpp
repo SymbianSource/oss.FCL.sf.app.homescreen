@@ -869,7 +869,7 @@ void CXnViewManager::ActivateNextViewL()
         }
         
     // Activate view
-    if ( next.Occupied() )
+    if ( next.Occupied() && !next.Active() )
         {            
         iAppUiAdapter.ViewAdapter().ActivateContainerL( next );                
         UpdateWallpaperL( current, next );
@@ -892,7 +892,7 @@ void CXnViewManager::ActivatePreviousViewL()
         }
         
     // Activate view
-    if ( prev.Occupied() )
+    if ( prev.Occupied() && !prev.Active() )
         {   
         iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
         UpdateWallpaperL( current, prev );

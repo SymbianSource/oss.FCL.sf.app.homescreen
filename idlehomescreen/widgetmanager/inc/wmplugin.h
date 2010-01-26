@@ -29,7 +29,6 @@
 
 class CAknViewAppUi;
 class CWmResourceLoader;
-class CWmMainContainerView;
 class CWmMainContainer;
 class CWmEffectManager;
 
@@ -166,10 +165,6 @@ private: // data members
      */
     CWmMainContainer*  iWmMainContainer;
 
-    /**
-     * main view (not owned)
-     */
-    CWmMainContainerView* iWmMainView;
 
     /**
      * resource loader

@@ -24,6 +24,7 @@
 #include "menudebug.h"
 #include "hnhelper.inl"
 #include "hnmdmodel.h"
+#include "hnmdmenuitem.h"
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -306,8 +307,8 @@ void CHnXmlModelProvider::ChangeEventsToIdsInChildrenL(
 		TXmlEngElement child = children.Next();
 		TPtrC8 childName = child.Name();
 
-		if (!childName.Compare(KEventName8) || !childName.Compare(
-				KMenuItemName8) ||!childName.Compare( KMenuItemSpecificName8 ) 
+		if (!childName.Compare(KEventName8) 
+				|| CHnMdMenuItem::IsMenuItemElementName( childName )
 				|| !child.Name().Compare(KMenuToolbar8))
 			{
 			ChangeEventNamesToIdsL(child);
@@ -591,8 +592,7 @@ void CHnXmlModelProvider::ChangeEventNamesToIdsL( TXmlEngElement& aElement )
         for( TInt i( 0 ); i < count; i++ )
             {
             TXmlEngElement element = children.Next();
-            if ( !element.Name().Compare( KMenuItemName8 ) ||
-            		!element.Name().Compare( KMenuItemSpecificName8 ) ||
+            if ( CHnMdMenuItem::IsMenuItemElementName( element.Name() ) ||
                     !element.Name().Compare( KMenuButton8 ) )
                 {
                 ChangeEventNamesToIdsL( element );

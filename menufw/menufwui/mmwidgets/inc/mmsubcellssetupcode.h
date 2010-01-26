@@ -38,10 +38,12 @@ const TInt KNumberOfBitsToStoreIsCurrentInfo = 1;
  *    and in the same order.
  * 3. AddTemplateInfo
  * 4. AddIsCurrentInfo
- * It was assumed that there would never be more than 6
- * MmTemplateContants::KSubCellsCount subcells. If that
- * should ever change, consider changing the type of iCode
- * member to TUint64.
+ * It is currently possible to store information about up to 21
+ * subcells (type of iCode is TUint64 and single subcell info
+ * takes 3 bits). It can be easily proven that CMmListBoxItemDrawer
+ * will never try to store more than
+ * (2 * MmTemplateContants::KSubCellsCount) subcell infos
+ * (2 * 6 = 12; 12 <= 21, so everything is fine).
  * Default assignment operator and copy constructor are ok
  * for this class.
  */
@@ -58,7 +60,8 @@ public:
         ENoSubcell = 0,
         EGraphicsSubcell = 1,
         ETextSubcell = 2,
-        EBackdropSubcell = 3
+        EBackdropSubcell = 3,
+        ESkippedSubcell = 4
         };
 public:
     /**
@@ -106,7 +109,7 @@ protected: // data
     /**
      * The subcells setup code.
      */
-    TUint32 iCode;
+    TUint64 iCode;
     };
 
 #include "mmsubcellssetupcode.inl"

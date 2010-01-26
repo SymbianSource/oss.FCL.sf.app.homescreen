@@ -67,6 +67,7 @@ EXPORT_C CPluginMap::~CPluginMap()
     delete iPluginId;
     delete iPluginUid;
     delete iActivationState;
+    delete iLockingStatus;
     }
 
 // ---------------------------------------------------------------------------

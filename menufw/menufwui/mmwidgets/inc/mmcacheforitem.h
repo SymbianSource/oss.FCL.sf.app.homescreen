@@ -81,7 +81,7 @@ public:
      * 
      * @param aValid (Self-explanatory).
      */
-    inline void SetValid( TBool aValid );
+    inline void SetValidL( TBool aValid );
     
     /**
      * Returns information whether at the moment of updating this cache object
@@ -190,6 +190,12 @@ protected:
      * 2nd phase constructor.
      */
     void ConstructL();
+    
+    /**
+     * Updates the iIconList so that it reflects the contents of
+     * iIconHolderList.
+     */
+    void UpdateIconListL();
 
 protected:
     /**
@@ -239,6 +245,14 @@ protected:
      * to single item cache represented by this object.
      */
     CMmItemsDataCache& iParent;
+
+    /**
+     * Array of icons stored in the icon holders which are in iIconHolderList.
+     * This member is only valid when this cache object is marked as valid
+     * using the SetValidL method.
+     * Own.
+     */
+    CArrayPtr<CGulIcon>* iIconList;
 
     };
 

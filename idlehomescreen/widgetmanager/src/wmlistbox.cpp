@@ -18,8 +18,6 @@
 
 // INCLUDE FILES
 #include <coemain.h>
-#include <StringLoader.h>
-#include <aknstyluspopupmenu.h> 
 #include <AknsDrawUtils.h>
 #include <AknsFrameBackgroundControlContext.h>
 #include <AknsListBoxBackgroundControlContext.h>
@@ -28,6 +26,8 @@
 #include <aknlayoutscalable_avkon.cdl.h>
 #include <aknlayoutscalable_apps.cdl.h>
 #include <AknLayout.lag>
+#include <AknIconArray.h>
+#include <gulicon.h>
 #include <widgetmanagerview.rsg>
 #include <widgetmanager.mbg>
 #include "wmcommon.h"
@@ -123,6 +123,20 @@ void CWmListItemDrawer::ConstructL()
             EMbmWidgetmanagerAdd_widget_button,
             EMbmWidgetmanagerAdd_widget_button_mask,
             KRgbWhite );
+    
+    // This is temporary fix for ou1cimx1#228810
+    // Can be removed when avkon provides real fix for this error.
+    // Currently forever loop in CFormattedCellListBoxData::DrawFormattedSimple
+    // never exits if there is no iconarray and name contains tab+digit which  
+    // confuses listbox e.g. considering name as icon index 
+    CArrayPtr<CGulIcon>* dummyArray = new( ELeave ) CAknIconArray(2);
+    CleanupStack::PushL(dummyArray);
+    CGulIcon* dummyIcon = CGulIcon::NewLC();
+    CGulIcon* dummyIcon2 = CGulIcon::NewLC();
+    dummyArray->AppendL(dummyIcon);
+    dummyArray->AppendL(dummyIcon2);
+    ColumnData()->SetIconArray(dummyArray);
+    CleanupStack::Pop(3);
     }
 
 // ---------------------------------------------------------
@@ -256,9 +270,9 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     TAknTextLineLayout titleTextLayout = 
               AknLayoutScalable_Apps::listrow_wgtman_pane_t1().LayoutLine();
 
-    TAknLayoutText textLayout;
-    textLayout.LayoutText( itemRect, titleTextLayout );
-    textLayout.DrawText( gc, wData.Name(), ETrue, textColor );
+    TAknLayoutText textLayoutTitle;
+    textLayoutTitle.LayoutText( itemRect, titleTextLayout );
+    textLayoutTitle.DrawText( gc, wData.Name(), ETrue, textColor );
     
     if ( !wData.IsUninstalling() &&
         wData.HsContentInfo().CanBeAdded() )
@@ -285,8 +299,9 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
             AknLayoutScalable_Apps::listrow_wgtman_pane_t2().LayoutLine();
         gc.SetPenSize(TSize(1,1));
         // DRAW DESCRIPTION TEXT
-        textLayout.LayoutText( itemRect, descTextLayout );
-        textLayout.DrawText( gc, wData.Description(), ETrue, textColor );
+        TAknLayoutText textLayoutDes;
+        textLayoutDes.LayoutText( itemRect, descTextLayout );
+        textLayoutDes.DrawText( gc, wData.Description(), ETrue, textColor );
         }
     else
         {
@@ -523,7 +538,11 @@ void CWmListBox::RemoveWidgetData( TInt aItemIndex )
 //
 void CWmListBox::RedrawItem( TInt aItemIndex )
     {
-    View()->DrawItem( aItemIndex );
+    if ( aItemIndex >= 0 &&
+        aItemIndex < Model()->NumberOfItems() )
+        {
+        View()->DrawItem( aItemIndex );
+        }
     }
 
 // ---------------------------------------------------------
@@ -552,9 +571,6 @@ void CWmListBox::CreateItemDrawerL()
             cellData,
             this );
     CleanupStack::Pop(); // cellData
-
-    // enable extended drawing
-    EnableExtendedDrawingL();
     }
 
 // ---------------------------------------------------------
@@ -690,22 +706,31 @@ void CWmListBox::Draw( const TRect& aRect ) const
 //
 void CWmListBox::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     {
-	// Check if pointer is down ( needed for drawing correct hightlight frame )
+    CAknDouble2LargeStyleListBox::HandlePointerEventL( aPointerEvent );
+
+    // Check if pointer is down ( needed for drawing correct hightlight frame )
 	if ( Rect().Contains( aPointerEvent.iPosition ) )
 		{
-		if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
-			{
-			iPressedDown = ETrue;
-			RedrawItem( CurrentListBoxItemIndex() );
-			}
-		else if( aPointerEvent.iType == TPointerEvent::EButton1Up )
-			{
-			iPressedDown = EFalse;
-			RedrawItem( CurrentListBoxItemIndex() );
-			}
+        TInt itemIndex = CurrentListBoxItemIndex();
+        TBool itemPointed = View()->XYPosToItemIndex(
+                                aPointerEvent.iPosition,
+                                itemIndex );
+        if ( itemIndex >= 0 && itemPointed )
+            {
+            if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+                {
+                iPressedDown = ETrue;
+                // redraw item
+                RedrawItem( itemIndex );
+                }
+            else if( aPointerEvent.iType == TPointerEvent::EButton1Up )
+                {
+                iPressedDown = EFalse;
+                // redraw item
+                RedrawItem( itemIndex );
+                }
+            }
 		}
-
-	CAknDouble2LargeStyleListBox::HandlePointerEventL( aPointerEvent );	
     }
 
 // ---------------------------------------------------------

@@ -83,7 +83,7 @@ EXPORT_C TBool CHnMenuItemModel::HasNextSpecific()
     	{
     	Reset();
     	}
-    else if ( iChildren[iNextMenu]->IsItemSpecific() )
+    else if ( iChildren[iNextMenu]->MenuItemType() == EItemSpecific )
     	{
     	hasNext = ETrue;
     	}
@@ -102,7 +102,7 @@ EXPORT_C TBool CHnMenuItemModel::HasNextSpecific()
 EXPORT_C CHnMenuItemModel* CHnMenuItemModel::GetNextSpecific()
     {
     ASSERT( iNextMenu < iChildren.Count() );
-    ASSERT( iChildren[iNextMenu]->IsItemSpecific() );
+    ASSERT( iChildren[iNextMenu]->MenuItemType() == EItemSpecific );
     CHnMenuItemModel* nextSpecific = iChildren[ iNextMenu ];
     iNextMenu++;
     return nextSpecific;
@@ -143,7 +143,7 @@ CHnMenuItemModel::CHnMenuItemModel()
 void CHnMenuItemModel::ConstructL( const TDesC& aName )
     {
     ASSERT( aName.Length() );
-    iItemSpecific = EFalse;
+    iMenuItemType = EItemApplication;
     iName.CreateL( aName );
     }
 
@@ -196,18 +196,18 @@ EXPORT_C void CHnMenuItemModel::SetPosition( TInt aPosition )
 // 
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CHnMenuItemModel::SetItemSpecific( TBool aItemSpecific )
+EXPORT_C void CHnMenuItemModel::SetMenuItemType( THnMenuItemType aMenuItemType )
     {
-    iItemSpecific = aItemSpecific;
+    iMenuItemType = aMenuItemType;
     }
 
 // ---------------------------------------------------------------------------
 // 
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TBool CHnMenuItemModel::IsItemSpecific()
+EXPORT_C CHnMenuItemModel::THnMenuItemType CHnMenuItemModel::MenuItemType()
     {
-    return iItemSpecific;
+    return iMenuItemType;
     }
 
 // ---------------------------------------------------------------------------

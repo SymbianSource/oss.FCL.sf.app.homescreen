@@ -8678,7 +8678,7 @@ TBool CXnUiEngineImpl::DynInitMenuItemL( CXnNodeAppIf& aMenuItem,
         {
         if ( *itemType == KAddWidget )
             {
-            if ( aPlugin )
+            if ( aPlugin && &aPlugin->Node() )
                 {
                 CXnPluginData& data( viewData.Plugin( &aPlugin->Node() ) );
                 

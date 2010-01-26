@@ -20,6 +20,8 @@
 #include <bautils.h>
 #include <coemain.h>
 #include <aknViewAppUi.h>
+#include <eikappui.h>
+#include <eikapp.h>
 #include <e32property.h>
 #include <activeidle2domainpskeys.h>
 
@@ -52,30 +54,47 @@ CWmPlugin* CWmPlugin::NewL()
 CWmPlugin::~CWmPlugin()
     {
     iPostponedCommand = ENone;
+
+    // delete WM UI resources
     if ( iViewAppUi )
         {
         if ( iWmMainContainer && IsActive() )
             {
+            // WM is showing. Hide first!
             iWmMainContainer->SetClosingDown( ETrue );
             TRAPD( err, iViewAppUi->ActivateLocalViewL(
                             iPreviousViewUid.iViewUid ); );
             if ( KErrNone == err )
                 {
+                // wait until previous view is switched on top
+                // then continue destruction.
                 iWait->Start();
-                // remove view from appui
-                iViewAppUi->RemoveView( 
-                        TUid::Uid( EWmMainContainerViewId ) );
                 }
             else
                 {
-                TRAP_IGNORE( iViewAppUi->DeactivateActiveViewL(); );
-                iViewAppUi->RemoveFromViewStack( 
-                        *iWmMainView, iWmMainContainer );
-                delete iWmMainContainer;
-                iWmMainContainer = NULL;
+                // try to activate default view
+                TVwsViewId viewId;
+                if ( iViewAppUi->GetDefaultViewId( viewId ) != KErrNone )
+                    {
+                    viewId.iAppUid = iViewAppUi->Application()->AppDllUid();
+                    viewId.iViewUid = TUid::Uid( 1 );
+                    }
+                
+                TRAPD( err, iViewAppUi->ActivateLocalViewL( viewId.iViewUid ); );
+                if ( KErrNone == err )
+                    {
+                    // wait until previous view is switched on top
+                    // then continue destruction.
+                    iWait->Start();
+                    }
                 }
             }
-        }    
+        // remove view from appui (also deletes it)
+        iViewAppUi->RemoveView( 
+                TUid::Uid( EWmMainContainerViewId ) );
+        }
+
+    // delete other members
     delete iResourceLoader;
     delete iEffectManager;
     delete iPostponedContent;
@@ -98,7 +117,6 @@ CWmPlugin::CWmPlugin()
 void CWmPlugin::ConstructL()
     {
     iWmMainContainer = NULL;
-    iWmMainView = NULL;
 
     // store static view app ui
     CEikonEnv* eikonEnv = CEikonEnv::Static();
@@ -120,7 +138,6 @@ void CWmPlugin::ConstructL()
     CleanupStack::PushL( mainView );
 	iViewAppUi->AddViewL( mainView );	
 	CleanupStack::Pop( mainView );
-	iWmMainView = mainView;
     }
 
 // ---------------------------------------------------------

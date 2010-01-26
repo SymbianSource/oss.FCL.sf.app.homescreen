@@ -21,6 +21,7 @@
 #include "hniconholder.h"
 
 const TInt KIconHolderListGranularity = 2;
+const TInt KIconListGranularity = 2;
 
 // -----------------------------------------------------------------------------
 //
@@ -54,6 +55,7 @@ CMmCacheForItem::~CMmCacheForItem()
     ClearIconArray();
     iIconHolderList.Close();
     iItemText.Close();
+    delete iIconList;
     }
 
 // -----------------------------------------------------------------------------
@@ -82,19 +84,7 @@ void CMmCacheForItem::SetTemplateL( const TDesC8& aItemTemplate )
 CArrayPtr<CGulIcon>* CMmCacheForItem::GetIconListL()
     {
     __ASSERT_DEBUG( iIsValid, User::Invariant() );
-
-    const TInt iconCount = iIconHolderList.Count();
-    CArrayPtr<CGulIcon>* iconList = new (ELeave) CArrayPtrFlat<CGulIcon>(
-             Max( iconCount, 1 ) );
-    CleanupStack::PushL( iconList );
-    
-    for ( TInt i = 0; i < iconCount; ++i )
-        {
-        iconList->AppendL( iIconHolderList[i]->GetGulIcon() );
-        }
-    
-    CleanupStack::Pop( iconList );
-    return iconList;
+    return iIconList;
     }
 
 // -----------------------------------------------------------------------------
@@ -121,6 +111,7 @@ TInt CMmCacheForItem::AppendIconL( CHnIconHolder* aIconHolder )
 //
 void CMmCacheForItem::ClearIconArray()
     {
+    iIconList->Reset();
     const TInt count = iIconHolderList.Count();
     for (TInt i = 0; i < count; ++i )
         {
@@ -142,7 +133,7 @@ void CMmCacheForItem::InvalidateIfCacheMayNotBeUsed( TBool aIsItemCurrent,
     if ( iSubcellsSetupCode != aSubcellsSetupCode ||
             (!!iIsCurrent) != (!!aIsItemCurrent) )
         {
-        iIsValid = EFalse;
+        SetValidL( EFalse );
         }
     }
 
@@ -160,5 +151,20 @@ CMmCacheForItem::CMmCacheForItem( CMmItemsDataCache& aParent )
 // -----------------------------------------------------------------------------
 //
 void CMmCacheForItem::ConstructL()
-    {    
+    {
+    iIconList = new ( ELeave ) CArrayPtrFlat<CGulIcon>( KIconListGranularity );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmCacheForItem::UpdateIconListL()
+    {
+    iIconList->Reset();
+    const TInt iconCount = iIconHolderList.Count();
+    for ( TInt i = 0; i < iconCount; ++i )
+        {
+        iIconList->AppendL( iIconHolderList[i]->GetGulIcon() );
+        }
     }

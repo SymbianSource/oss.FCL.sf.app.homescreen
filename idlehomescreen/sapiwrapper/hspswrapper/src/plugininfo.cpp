@@ -247,7 +247,7 @@ EXPORT_C CPluginInfo& CPluginInfo::SetMaxChild(
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CPluginInfo& CPluginInfo::SetDescriptionL( const TDesC& aDescription )
+EXPORT_C CPluginInfo& CPluginInfo::SetDescriptionL( const TDesC8& aDescription )
     {
     delete iDescription;
     iDescription = NULL;
@@ -256,25 +256,12 @@ EXPORT_C CPluginInfo& CPluginInfo::SetDescriptionL( const TDesC& aDescription )
     return *this;
     }
 
-    // ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
-EXPORT_C CPluginInfo& CPluginInfo::SetDescriptionL( const TDesC8& aDescription )
-    {
-    delete iDescription;
-    iDescription = NULL;
-
-    iDescription = HBufC::NewL( aDescription.Length() );
-    iDescription->Des().Copy( aDescription );
-    return *this;
-    }
-
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CPluginInfo::Description() const
+EXPORT_C const TDesC8& CPluginInfo::Description() const
     {
-    return iDescription ? *iDescription : KNullDesC();
+    return iDescription ? *iDescription : KNullDesC8();
     }
 
 // ---------------------------------------------------------------------------

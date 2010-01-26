@@ -18,8 +18,9 @@
 #ifndef WIDGETMANAGER_RESOURCES_IBY
 #define WIDGETMANAGER_RESOURCES_IBY
 
+
 // widgetmanager resources
-data=DATAZ_\resource\widgetmanagerview.rsc  \resource\widgetmanagerview.rsc
+data=DATAZ_\APP_RESOURCE_DIR\widgetmanagerview.rsc  APP_RESOURCE_DIR\widgetmanagerview.rsc
 
 #endif // WIDGETMANAGER_RESOURCES_IBY
 

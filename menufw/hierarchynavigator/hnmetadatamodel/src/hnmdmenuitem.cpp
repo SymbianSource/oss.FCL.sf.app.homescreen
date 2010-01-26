@@ -32,6 +32,17 @@
 // 
 // ---------------------------------------------------------------------------
 //
+TBool CHnMdMenuItem::IsMenuItemElementName( const TDesC8& aNameToCompare )    
+    {
+    return !aNameToCompare.Compare( KMenuItemElementName8 )
+        || !aNameToCompare.Compare( KMenuItemSpecificElementName8 )
+        || !aNameToCompare.Compare( KMenuItemActionElementName8 );
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
 void CHnMdMenuItem::AppendChildItemL( CHnMdMenuItem* aMenuItem )
     {
     iChildren.AppendL( aMenuItem );
@@ -56,7 +67,7 @@ void CHnMdMenuItem::EvaluateL( CHnMenuItemModel* aMenuModel,
       }
     aMenuModel->SetCommand( iEvent );
     aMenuModel->SetPosition( iPosition );
-    aMenuModel->SetItemSpecific( iSpecific );
+    aMenuModel->SetMenuItemType( iType );
     }
 
 // ---------------------------------------------------------------------------
@@ -67,7 +78,15 @@ void CHnMdMenuItem::EvaluateL( CHnMenuItemModel* aMenuModel,
 void CHnMdMenuItem::CreatePropertiesL( TXmlEngElement aElement,
                                  THnMdCommonPointers* /* aCmnPtrs */ )
     {
-    iSpecific = !aElement.Name().Compare( KMenuItemSpecificElementName8 );
+    iType = CHnMenuItemModel::EItemApplication;
+    if ( !aElement.Name().Compare( KMenuItemSpecificElementName8 ) )
+    	{
+    	iType = CHnMenuItemModel::EItemSpecific;
+    	}
+    else if ( !aElement.Name().Compare( KMenuItemActionElementName8 ) )
+    	{
+    	iType = CHnMenuItemModel::EItemAction;
+    	}
     
     // name
     HBufC* name = HnConvUtils::Str8ToStrLC(
@@ -112,8 +131,7 @@ void CHnMdMenuItem::CreateChildrenL( TXmlEngElement aElement,
     for ( TInt i = 0; i < count; i++ )
         {
         TXmlEngElement child = children.Next();
-        if ( !child.Name().Compare( KMenuItemElementName8 ) 
-        		|| !child.Name().Compare( KMenuItemSpecificElementName8 ) )
+        if ( IsMenuItemElementName( child.Name() ) )
             {
             AppendChildItemL( CHnMdMenuItem::NewL( child, aCmnPtrs ) );
             }
@@ -129,8 +147,7 @@ void CHnMdMenuItem::CreateChildrenL( TXmlEngElement aElement,
 void CHnMdMenuItem::ConstructL( TXmlEngElement aElement,
                                 THnMdCommonPointers* aCmnPtrs )
     {
-    if ( !aElement.Name().Compare( KMenuItemElementName8 )
-    		|| !aElement.Name().Compare( KMenuItemSpecificElementName8 ) )
+    if ( IsMenuItemElementName( aElement.Name() ) )
         { // this is an ordinary menu item
         CreatePropertiesL( aElement, aCmnPtrs );
         CreateChildrenL( aElement, aCmnPtrs ); // in case there are subitems

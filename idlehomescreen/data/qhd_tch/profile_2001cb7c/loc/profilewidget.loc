@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Localization strings for project Active Idle 3
+* Description:  Localization strings for project Active Idle 3 (xuikon)
 *
 */
 
@@ -20,5 +20,4 @@
 // l: list_single_pane_t1_cp2
 // w:
 // r: TB9.1
-#define qtn_hs_profile_edit "Edit active profile"
-#define qtn_hs_profile_desc  "localized RnD profilewidget description."
+#define qtn_hs_profile_edit  "Edit active profile"

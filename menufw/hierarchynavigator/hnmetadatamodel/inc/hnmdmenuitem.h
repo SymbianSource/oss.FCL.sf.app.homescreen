@@ -23,11 +23,11 @@
 #include <e32hashtab.h>
 #include <e32base.h>
 #include <xmlengelement.h> 
+#include <hnmenuitemmodel.h>
 
 struct THnMdCommonPointers;
 class CHnCondition;
 class CLiwGenericParamList;
-class CHnMenuItemModel;
 class CHnConditionInterface;
 
 /**
@@ -41,6 +41,18 @@ class CHnConditionInterface;
  */
 NONSHARABLE_CLASS(CHnMdMenuItem) : public CBase
     {
+public:
+    /**
+     * Checkes if argument descriptor is equal to one of 
+     * menu items elements names.
+     *
+     * @since S60 5.0
+     * @param aNameToCompare name to compare.
+     * @return ETrue if aNameToCompare is equal to one of 
+     *         menu items elements names.
+     */
+    static TBool IsMenuItemElementName(const TDesC8& aNameToCompare);
+    
 public:
 
     /**
@@ -184,10 +196,10 @@ private: // data
     CHnConditionInterface* iCondition;
     
     /**
-     * Is menu item "item specific".
+     * Is menu item "type".
      */
-    TBool iSpecific;
-
+    CHnMenuItemModel::THnMenuItemType iType;
+    
     };
 
 #endif // C_HNMULMENUITEM_H

@@ -51,6 +51,7 @@ ECOM_PLUGIN( xn3volumecontrolfactory.dll , xn3volumecontrolfactory.rsc )
 ECOM_PLUGIN( xn3clockfactory.dll , xn3clockfactory.rsc )
 ECOM_PLUGIN( xn3nppluginfactory.dll , xn3nppluginfactory.rsc )
 ECOM_PLUGIN( xn3texteditorfactory.dll , xn3texteditorfactory.rsc )
+ECOM_PLUGIN( xn3animationfactory.dll , xn3animationfactory.rsc )
 
 #endif // XMLUIRENDERING_IBY
 

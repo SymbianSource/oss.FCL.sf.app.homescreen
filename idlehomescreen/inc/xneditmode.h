@@ -119,7 +119,14 @@ public:
      * @since Series 60 5.0
      */
     void HandleScreenDeviceChangedL();
-        
+
+    /**
+     * Reset the dragging state and update screen
+     *
+     * @since Series 60 5.0
+     */
+    void StopDraggingL();
+
 private:
     // new functions
 

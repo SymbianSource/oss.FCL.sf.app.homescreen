@@ -14,16 +14,23 @@
 
     <configurationuid>0x2001cb7c</configurationuid>
 
+    <!-- Name of the localization files 
+    waiting for localization from platform
+    <filedtd>profileconfiguration.dtd</filedtd>
+    <fullname>&amp;qtn_profile_configuration_name;</fullname>
+    <description>&amp;qtn_profile_configuration_desc;</description>
+    -->
+    
     <!-- description -->
-    <fullname>&amp;qtn_hs_profile_edit;</fullname>
+    <fullname>profilename waits loc</fullname>
     <shortname>profile</shortname>
     <version>1.0</version>
 
     <!-- configuration -->
     <filexml>widgetconfiguration.xml</filexml>
 
-    <description>RnD description profile plugin</description>
-    
+    <description>profiledesc waits localization from platform</description>
+   
     <filelogo>skin(270501603 9360):mif(icon.mif 16384 16385)</filelogo>
     <!-- Locale specific resources -->
     <localization>

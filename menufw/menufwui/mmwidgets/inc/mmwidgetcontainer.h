@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_48.1.36 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_48.1.37 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -182,7 +182,7 @@ public: // Highlight related methods
      * @param aVisible Visibility status.
      */
 	IMPORT_C virtual void SetHighlightVisibilityL( TBool aVisible );
-
+	
     /**
      * Set highlight visibility.
      *
@@ -230,17 +230,6 @@ public: // Highlight related methods
 	virtual void RemoveLiwObjects();
 
 	/**
-	 * Checks if timer is active.
-	 * Calling this method without parameters will cause to return
-	 * timer activity state globally (without reference to a specific item index - which tells
-	 * if timer is active at all).
-     *
-     * @param aItemIndex Item index for which to check timer activity. Can be not defined.
-     * @return ETrue if timer is active which means highlight is visible.
-	 */
-	TBool IsTimerActive( TInt aItemIndex = KErrNotFound );
-
-	/**
 	 * Sets the long tap observer.
      *
      * @param aObserver Observer to receive long tap events.
@@ -255,12 +244,6 @@ public: // Highlight related methods
 	 */
 	IMPORT_C virtual void EndLongTapL( TBool aStopTimer = ETrue );
 
-	/**
-	 * Is called when options menu visibility changes (hides or pops up)
-	 * @param aOptionsMenuVisible ETrue when option menu pops up.
-	 */
-	IMPORT_C virtual void HandleOptionsMenuVisibilityChangeL(
-			TBool aOptionsMenuVisible );
 public:
 
 	/**
@@ -672,6 +655,13 @@ public:
      * if marquee animation can be enabled.
      */
     IMPORT_C void SetIsFaded( TBool aIsFaded );
+    
+    /**
+     * Determines if long tap is in progress.
+     * 
+     * @return ETrue if long tap is in progress.
+     */
+    TBool LongTapInProgress() const;
 
 public: // from MMmVisibilityObserver
 
@@ -883,13 +873,6 @@ protected:
       * List box observer.
       */
      MEikListBoxObserver* iListBoxObserver;
-
-     /**
-     * Notifies about time expiration.
-     *
-     * Owned by descendant.
-     */
-    CMmHighlightTimer* iTimer;
 
     /**
      * Marquee adapter.

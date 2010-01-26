@@ -48,9 +48,16 @@ inline TMmSubcellsSetupCode CMmCacheForItem::GetSubcellsSetupCode() const
 //
 // -----------------------------------------------------------------------------
 //
-inline void CMmCacheForItem::SetValid( TBool aValid )
+inline void CMmCacheForItem::SetValidL( TBool aValid )
     {
-    iIsValid = aValid;
+    if ( !!iIsValid != !!aValid ) // Ex-OR
+        {
+        iIsValid = aValid;
+        if ( iIsValid )
+            {
+            UpdateIconListL();
+            }
+        }
     }
 
 // -----------------------------------------------------------------------------

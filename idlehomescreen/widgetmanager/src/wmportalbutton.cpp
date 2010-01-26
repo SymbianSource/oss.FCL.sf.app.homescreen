@@ -111,12 +111,6 @@ void CWmPortalButton::ConstructL(
         {
         User::Leave( KErrArgument );
         }
-    else if ( iPortalButtonIndex != 0 )
-        {
-        // operator button not supported until layout available.
-        User::Leave( KErrNotSupported );
-        }
-
     SetContainerWindowL( *aParent );
     
     // Obtain pointer to main container.
@@ -208,7 +202,7 @@ void TryRunHttpL( const TDesC& aParam )
 // Runs WIDGET method: (launches given widget with parameters)
 // ---------------------------------------------------------------------------
 //
-void TryRunWidgetL( const TDesC& aParam, const TDesC& aBundleId )
+void TryRunWidgetL( const TDesC& aBundleId, const TDesC& aParam )
     {
     RApaLsSession session;
     User::LeaveIfError( session.Connect() );
@@ -240,22 +234,34 @@ void TryRunWidgetL( const TDesC& aParam, const TDesC& aBundleId )
     }
 
 // ---------------------------------------------------------------------------
+// Runs APPLICATION method: (launches given application with parameters)
+// ---------------------------------------------------------------------------
+//
+void TryRunApplicationL( const TDesC& /*aApplication*/, const TDesC& /*aParam*/ )
+    {
+    // This method has not been implemented
+    User::Leave( KErrNotSupported );
+    }
+
+// ---------------------------------------------------------------------------
 // Tries to open a portal with given method and parameters.
 // this method may be called twice on a portal button, if a primary
 // method fails.
 // ---------------------------------------------------------------------------
 //
 void TryOpenPortalL(
-        CWmConfiguration::TMethod aMethod, const TDesC& aParam,
-        const TDesC& aBundleId )
+        CWmConfiguration::TMethod aMethod, const TDesC& aService,
+        const TDesC& aParam )
     {
     // open portal according to the method.
     if ( aMethod == CWmConfiguration::EHttp )
         { TryRunHttpL( aParam ); }
     else if ( aMethod == CWmConfiguration::EWidget )
-        { TryRunWidgetL( aParam, aBundleId ); }
+        { TryRunWidgetL( aService, aParam ); }
+    else if ( aMethod == CWmConfiguration::EApplication )
+        { TryRunApplicationL( aService, aParam ); }
     else
-        { /* do nothing */ }
+        { User::Leave( KErrNotSupported ); }
     }
 
 // ---------------------------------------------------------------------------
@@ -270,15 +276,15 @@ void OpenPortalL(
     TRAPD( err,
         TryOpenPortalL(
             aConfiguration.PortalButtonPrimaryMethod( aPortalIndex ),
-            aConfiguration.PortalButtonPrimaryParams( aPortalIndex ),
-            aConfiguration.PortalButtonBundleId( aPortalIndex ) ); );
+            aConfiguration.PortalButtonPrimaryService( aPortalIndex ),
+            aConfiguration.PortalButtonPrimaryParams( aPortalIndex ) ); );
     if ( err != KErrNone )
         {
         // if secondary method fails, leave will be propagated.
         TryOpenPortalL(
             aConfiguration.PortalButtonSecondaryMethod( aPortalIndex ),
-            aConfiguration.PortalButtonSecondaryParams( aPortalIndex ),
-            aConfiguration.PortalButtonBundleId( aPortalIndex ) );
+            aConfiguration.PortalButtonSecondaryService( aPortalIndex ),
+            aConfiguration.PortalButtonSecondaryParams( aPortalIndex ) );
         }
     }
 
@@ -429,18 +435,13 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
         {
         TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
         
-        
         // draw image if one exists
         if ( iButtonIcon && iButtonIconMask )
             {
             TAknLayoutRect imageLayout;
-            // todo: 2-button layout
-            if ( iWmMainContainer->Configuration().PortalButtonCount() == 1 )
-                {
-                imageLayout.LayoutRect( rect,
-                        AknLayoutScalable_Apps::wgtman_btn_pane_g1(
-                                landscape ? 1 : 0).LayoutLine() );
-                }
+            imageLayout.LayoutRect( rect,
+                    AknLayoutScalable_Apps::wgtman_btn_pane_g1(
+                            landscape ? 1 : 0).LayoutLine() );
             imageLayout.DrawImage( gc, iButtonIcon, iButtonIconMask );
             }
         
@@ -448,12 +449,8 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
         if ( !landscape )
             {
             TAknTextComponentLayout leftLayout;
-            // todo: 2-button layout
-            if ( iWmMainContainer->Configuration().PortalButtonCount() == 1 )
-                {
-                leftLayout = AknLayoutScalable_Apps::wgtman_btn_pane_t1( 
-                                                    landscape ? 1 : 0  );
-                }
+            leftLayout = AknLayoutScalable_Apps::wgtman_btn_pane_t1( 
+                                                landscape ? 1 : 0  );
             DrawText( gc, state->Text(), leftLayout, 1 );
             }
         }

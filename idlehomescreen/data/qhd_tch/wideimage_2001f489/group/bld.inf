@@ -30,14 +30,7 @@ PRJ_EXPORTS
 ../xuikon/00/wideimage.dat /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage_2001f489.dat
 ../xuikon/00/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage.css
 ../xuikon/00/wideimage.xml /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage.xml
-../xuikon/00/wideimage.dtd /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage.dtd
 
-// Support for S60 localization
-//*****************************
-#ifndef __WIDEIMAGE_LOC__
-#define __WIDEIMAGE_LOC__
-../loc/wideimage.loc APP_LAYER_LOC_EXPORT_PATH(wideimage.loc)
-#endif // __WIDEIMAGE_LOC__
 
 // Support for S60 builds
 //***********************

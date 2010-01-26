@@ -37,7 +37,6 @@ SOURCE          mmgridview.cpp
 SOURCE          mmgridcontainer.cpp
 SOURCE          mmwidgetcontainer.cpp 
 SOURCE          mmmarqueeadapter.cpp
-SOURCE          mmhighlighttimer.cpp 
 SOURCE          mmfloatingitem.cpp 
 SOURCE          mmdraweranimator.cpp
 SOURCE          mmlctutils.cpp

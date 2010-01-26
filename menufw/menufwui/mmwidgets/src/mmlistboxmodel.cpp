@@ -25,6 +25,7 @@
 #include "hnitemmodel.h"
 #include "hnattributebase.h"
 #include "hnattributeimage.h"
+#include "hnmenuitemmodel.h"
 
 // -----------------------------------------------------------------------------
 //
@@ -193,6 +194,31 @@ void CMmListBoxModel::HandleSuiteEventL( THnCustomSuiteEvent aCustomSuiteEvent,
     	    	break;
     	    }
         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+// 
+TInt CMmListBoxModel::GetNumberOfSpecificMenuItemsL( TInt aItemIndex )
+    {
+    TInt itemSpecificMenuItemCount = KErrNotFound;
+    if ( iSuiteModel )
+        {
+        TInt itemId = iSuiteModel->IdByIndex( aItemIndex );
+        if ( itemId != KErrNotFound )
+            {
+            itemSpecificMenuItemCount = 0;
+            MHnMenuItemModelIterator* menuItemModelIter =
+                    iSuiteModel->GetMenuStructureL( itemId );
+            while ( menuItemModelIter && menuItemModelIter->HasNextSpecific() )
+                {
+                menuItemModelIter->GetNextSpecific();
+                ++itemSpecificMenuItemCount;
+                }
+            }
+        }
+    return itemSpecificMenuItemCount;
     }
 
 // End of file

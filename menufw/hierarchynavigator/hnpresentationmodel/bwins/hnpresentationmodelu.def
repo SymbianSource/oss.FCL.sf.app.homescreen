@@ -181,8 +181,8 @@ EXPORTS
 	?NewLC@CHnAttrImgProvLiwImage@@SAPAV1@AAPAVTLiwVariant@@0@Z @ 180 NONAME ; class CHnAttrImgProvLiwImage * CHnAttrImgProvLiwImage::NewLC(class TLiwVariant * &, class TLiwVariant * &)
 	?GetTemplate@CHnSuiteModel@@QBEABVTDesC8@@XZ @ 181 NONAME ; class TDesC8 const & CHnSuiteModel::GetTemplate(void) const
 	?GetActions@CHnItemModel@@QAEAAV?$RHashMap@HPAV?$CArrayPtr@VCHnActionModel@@@@@@XZ @ 182 NONAME ; class RHashMap<int, class CArrayPtr<class CHnActionModel> *> & CHnItemModel::GetActions(void)
-	?SetItemSpecific@CHnMenuItemModel@@QAEXH@Z @ 183 NONAME ; void CHnMenuItemModel::SetItemSpecific(int)
+	?SetMenuItemType@CHnMenuItemModel@@QAEXW4THnMenuItemType@1@@Z @ 183 NONAME ; void CHnMenuItemModel::SetMenuItemType(enum CHnMenuItemModel::THnMenuItemType)
 	?HasNextSpecific@CHnMenuItemModel@@UAEHXZ @ 184 NONAME ; int CHnMenuItemModel::HasNextSpecific(void)
 	?GetNextSpecific@CHnMenuItemModel@@UAEPAV1@XZ @ 185 NONAME ; class CHnMenuItemModel * CHnMenuItemModel::GetNextSpecific(void)
-	?IsItemSpecific@CHnMenuItemModel@@QAEHXZ @ 186 NONAME ; int CHnMenuItemModel::IsItemSpecific(void)
+	?MenuItemType@CHnMenuItemModel@@QAE?AW4THnMenuItemType@1@XZ @ 186 NONAME ; enum CHnMenuItemModel::THnMenuItemType CHnMenuItemModel::MenuItemType(void)
 

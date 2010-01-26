@@ -86,11 +86,6 @@ private:
 public: // new functions	
 
     /** 
-     * @return reference to WmPlugin 
-     */
-    CWmPlugin& WmPlugin();
-    
-    /** 
      * @return true, if portal button is currently selected 
      */
     TBool PortalSelected();
@@ -336,26 +331,19 @@ private:
      * portal button
      * (if there is only one button, this is it)
      */
-    CWmPortalButton*             iPortalButtonOne;
+    CWmPortalButton*         iPortalButtonOne;
 
     /**
      * portal button
      * (if there is only one button, this is NULL)
      */
-    CWmPortalButton*             iPortalButtonTwo;
+    CWmPortalButton*         iPortalButtonTwo;
 
-    /** GUI layout modes */
-    enum TWmLayout
-        {
-        EPortrait,
-        ELandscape,
-        ELandscapeMirrored
-        };
+    /** whether we are orientated in landscape */
+    TBool                   iLandscape;
 
-    /**
-     * current widget manager container layout
-     */
-    TWmLayout               iLayout;
+    /** whether we have mirrored layout */
+    TBool                   iMirrored;
 
     /** focus modes */
     enum TWmFocusMode

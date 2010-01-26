@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmGridView declaration
-*  Version     : %version: MM_24.1.7 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_24.1.8 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -64,14 +64,6 @@ public:
      * @param aClipRect Clipping rectangle.
      */
 	void Draw( const TRect* aClipRect ) const;
-	
-	/**
-     * Draws item definied by index.
-     *
-     * @since S60 v3.0
-     * @param aItemIndex Item index which should be draw.
-     */
-	void DrawItem(TInt aItemIndex) const;
 	
 	/**
      * Gets item position.

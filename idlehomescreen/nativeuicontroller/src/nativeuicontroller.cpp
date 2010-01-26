@@ -1040,6 +1040,32 @@ TBool CNativeUiController::RequiresSubscription(
     }
 
 // ----------------------------------------------------------------------------
+// CNativeUiController::SetProperty()
+// ----------------------------------------------------------------------------
+//
+TInt CNativeUiController::SetProperty( MAiPropertyExtension& /*aPlugin*/,
+        const TDesC8& /*aElementId*/,
+        const TDesC8& /*aPropertyName*/,
+        const TDesC8& /*aPropertyValue*/ ) 
+    {
+   
+    return KErrNotSupported;
+    }
+
+// ----------------------------------------------------------------------------
+// CNativeUiController::SetProperty()
+// ----------------------------------------------------------------------------
+//   
+TInt CNativeUiController::SetProperty(MAiPropertyExtension& /*aPlugin*/,
+        const TDesC8& /*aElementId*/,
+        const TDesC8& /*aPropertyName*/,
+        const TDesC8& /*aPropertyValue*/,
+        MAiContentObserver::TValueType /*aValueType*/) 
+    {
+    return KErrNotSupported;
+    }
+
+// ----------------------------------------------------------------------------
 // CNativeUiController::NewApplication()
 // ----------------------------------------------------------------------------
 //

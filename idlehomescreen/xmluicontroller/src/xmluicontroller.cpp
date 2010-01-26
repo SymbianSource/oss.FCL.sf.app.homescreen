@@ -637,7 +637,8 @@ void CXmlUiController::GetContentModelL( const TAiPublisherInfo& aPubInfo,
             // Get the content model and configuration for the supported elements
             else if( nodeType == AiUiDef::xml::element::KImage ||
                      nodeType == AiUiDef::xml::element::KText ||
-                     nodeType == AiUiDef::xml::element::KNewsTicker )
+                     nodeType == AiUiDef::xml::element::KNewsTicker ||
+                     nodeType == AiUiDef::xml::element::KAnimation )
                 {
                 // Is created in GetContenItem and used in GetConfigurationsL
                 HBufC* confOwner( NULL );

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   
-*  Version     : %version: MM_64 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_65 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -35,7 +35,7 @@
 #include "mmtemplatelibrary.h"
 #include "mmpostevaluationprocessor.h"
 #include "mmdraweranimator.h"
-#include "mmhighlighttimer.h"
+
 
 // ============================ MEMBER FUNCTIONS ===============================
 

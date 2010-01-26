@@ -41,6 +41,7 @@
 
 #include "xnviewadapter.h"
 #include "xnmenu.h"
+#include "xneditmode.h"
 
 // Constants
 const TUid KXmlViewUid = { 1 };
@@ -475,7 +476,13 @@ void CXnViewAdapter::NotifyForegroundChanged(
          aStatus == MXnUiStateObserver::EBackground )
         {
         iFlags.Clear( EIsForeground );
-        
+
+        CXnEditMode* editMode = iAppUiAdapter.UiEngine().EditMode();
+        if( editMode )
+            {
+            editMode->StopDraggingL();
+            }
+
         iFocusControl->MakeVisible( EFalse );
         
         TRAP_IGNORE( ChangeControlsStateL( EFalse ) );

@@ -58,6 +58,7 @@ CMmListBox::CMmListBox() : AKNDOUBLELISTBOXNAME(R_LIST_PANE_LINES_AB_COLUMN)
 //
 CMmListBox::~CMmListBox()
 	{
+	delete iRedrawTimer;
 	}
 
 // -----------------------------------------------------------------------------
@@ -116,24 +117,42 @@ void CMmListBox::ConstructL( const CCoeControl* aParent, TInt aFlags,
 
     EnableExtendedDrawingL();
 
-
     iItemDrawer->SetDrawMark(EFalse);
     CEikListBox::ConstructL(aParent,aFlags);
     iMmDrawer->SetView( this );
+    iRedrawTimer = CPeriodic::NewL( EPriorityRealTime );
 	}
 
 // -----------------------------------------------------------------------------
-//
+// Clearing ELeftDownInViewRect flag before invoking the base class
+// HandlePointerEventL method effectively prevents that method from doing most
+// of the things it would normally do in response to EButton1Down event.
+// This flag is explicitly cleared to achieve two things:
+// 1. Prevent kinetic scrolling (flick) in edit mode.
+// 2. Prevent highlight removal when popup menu is displayed.
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::HandlePointerEventInEditModeL(
         const TPointerEvent& aPointerEvent )
     {
+    if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+        {
+        iButton1DownPos = aPointerEvent.iPosition;
+        }
+    else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+        CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
+        TPoint dragDelta = iButton1DownPos - aPointerEvent.iPosition;
+        if ( Abs( dragDelta.iY ) > KDragTreshold || parent->LongTapInProgress() )
+            {
+            iListBoxFlags &= ~ELeftDownInViewRect;
+            }
+        }
+    
     TInt itemUnderPointerIndex = KErrNotFound;
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
-        iListBoxFlags &= ~ELeftDownInViewRect; // prevent kinetic scrolling
         CEikFormattedCellListBoxTypedef::HandlePointerEventL( aPointerEvent );
         }
     else if ( View()->XYPosToItemIndex(
@@ -348,6 +367,42 @@ void CMmListBox::RedrawScrollbarBackground() const
                 }
             }
         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmListBox::ProcessScrollEventL( CEikScrollBar* aScrollBar, 
+            TEikScrollEvent aEventType )
+    {
+    CEikFormattedCellListBoxTypedef::HandleScrollEventL(
+            aScrollBar, aEventType );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmListBox::HandleRedrawTimerEvent()
+    {
+    if ( iSkippedScrollbarEventsCount )
+        {
+        ProcessScrollEventL( ScrollBarFrame()->VerticalScrollBar(),
+                EEikScrollThumbDragVert );
+        }
+    iSkippedScrollbarEventsCount = 0;
+    }
+    
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TInt CMmListBox::RedrawTimerCallback( TAny* aPtr )
+    {
+    CMmListBox* self = static_cast<CMmListBox*>( aPtr );
+    self->HandleRedrawTimerEvent();
+    return 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -885,6 +940,43 @@ TInt CMmListBox::CountComponentControls() const
 void CMmListBox::SetDisableChildComponentDrawing( TBool aDisable )
     {
     iDisableChildComponentDrawing = aDisable;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmListBox::HandleScrollEventL( CEikScrollBar* aScrollBar, 
+            TEikScrollEvent aEventType )
+    {
+    if ( aEventType == EEikScrollThumbDragVert && !iScrollbarThumbIsBeingDragged )
+        {
+        iScrollbarThumbIsBeingDragged = ETrue;
+        static_cast<CMmListBoxItemDrawer*>(
+                View()->ItemDrawer() )->EnableCachedDataUse( ETrue );
+        iRedrawTimer->Start( KScrollingRedrawInterval, KScrollingRedrawInterval,
+                TCallBack( &CMmListBox::RedrawTimerCallback, static_cast<TAny*>( this ) ) );
+        }
+    else if ( aEventType == EEikScrollThumbReleaseVert )
+        {
+        iScrollbarThumbIsBeingDragged = EFalse;
+        static_cast<CMmListBoxItemDrawer*>(
+                View()->ItemDrawer() )->EnableCachedDataUse( EFalse );
+        // The view will be redrawn with cache disabled when ProcessScrollEventL
+        // calls the base class's HandleScrollEventL method -- no need to
+        // explicitly redraw the view.
+        iRedrawTimer->Cancel();
+        }
+
+    if ( !iScrollbarThumbIsBeingDragged )
+        {
+        ProcessScrollEventL( aScrollBar, aEventType );
+        }
+    else
+        {
+        __ASSERT_DEBUG( aEventType == EEikScrollThumbDragVert, User::Invariant() );
+        ++iSkippedScrollbarEventsCount;
+        }
     }
 
 // End of file

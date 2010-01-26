@@ -1,0 +1,32 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+#ifndef TASKSWITCHER_IBY
+#define TASKSWITCHER_IBY
+
+// AknCapServer alternate fast swap plugin
+ECOM_PLUGIN( tsappecom.dll, tsappecom.rsc )
+
+data=DATAZ_/private/10003a3f/apps/tstaskswitcher_reg.rsc                          private/10003a3f/import/apps/tstaskswitcher_reg.rsc
+file=ABI_DIR/BUILD_DIR/taskswitcher.exe                                           PROGRAMS_DIR/hgteleport.exe
+
+// backup registration
+data=DATAZ_/private/20016BF0/backup_registration.xml                            private/20016BF0/backup_registration.xml
+
+// stub sis
+data=ZSYSTEM/install/taskswitcher_stub.sis                  system/install/taskswitcher_stub.sis
+
+#endif 

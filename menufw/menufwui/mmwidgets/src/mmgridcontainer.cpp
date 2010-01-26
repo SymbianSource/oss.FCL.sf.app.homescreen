@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_73 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_73 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_74 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_74 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -25,7 +25,6 @@
 #include <AknsLayeredBackgroundControlContext.h>
 #include <AknsListBoxBackgroundControlContext.h>
 #include <layoutmetadata.cdl.h>
-#include "mmhighlighttimer.h"
 #include "hnsuitemodel.h"
 #include "mmgrid.h"
 #include "mmwidgetsconstants.h"

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxItemDrawer
-*  Version     : %version: MM_38.1.14 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_38.1.15 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -913,6 +913,22 @@ private: // Data
      * Set to ETrue if item has backdrop.
      */
     mutable TBool iItemHasBackdrop;
+    
+    /**
+     * Number of subcells in iData.
+     */
+    mutable TInt iCurrentNumberOfSubcellsSet;
+    
+    /**
+     * A structure that stores color information needed to draw an item.
+     */
+    mutable CFormattedCellListBoxData::TColors iColors;
+    
+    /**
+     * ETrue if the item that was last drawn was a floating item.
+     */
+    mutable TBool iLastDrawnItemWasFloating;
+
 	};
 
 #endif // MMLISTBOXITEMDRAWER_H

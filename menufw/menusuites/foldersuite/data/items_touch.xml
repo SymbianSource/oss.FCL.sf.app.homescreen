@@ -72,7 +72,7 @@
         <mm:menuitem name="foldersuite_rsc:R_SKINS_LIST_APPSHELL_GRID" event="custom:change_widget_to_grid" position="82" condition="mm:suite/type != grid &amp; mm:suite/allowed_types HAS grid"/>
 		
         <mm:edit_mode count="1" template="logical_template_3|list_single_hc_apps_pane" id="parent_item" type="custom:parent_folder" condition="params:folder_id != 1">
-            
+            <mm:menuitem_action name="foldersuite_rsc:R_MENU_OPEN" event="key:select" position="80" />
 			<mm:menuitem name="foldersuite_rsc:R_OPTIONS_ORG_NEW_FOLDER" event="custom:add_folder" position="82" condition="params:remove_locked != true" />
             <mm:menuitem name="foldersuite_rsc:R_OPTIONS_HELP" event="custom:help" position="91" />
        
@@ -129,6 +129,7 @@
     </mm:item>
    
     <mm:item count="folder_items:ReturnValue/[$count]" template="logical_template_3|list_single_hc_apps_pane" id="folder_suite_items" remove_locked="folder_items:ReturnValue/[$index]/delete_locked" type="folder_items:ReturnValue/[$index]/type" running="folder_items:ReturnValue/[$index]/running" custom_id="folder_items:ReturnValue/[$index]/id" drm_protection="folder_items:ReturnValue/[$index]/drm_protection" uid="folder_items:ReturnValue/[$index]/uid" >
+		<mm:menuitem_action name="foldersuite_rsc:R_MENU_OPEN" event="key:select" position="80" />
 	    <mm:menuitem name="foldersuite_rsc:R_SKINS_LIST_APPSHELL_LIST" event="custom:change_widget_to_list" position="81" condition="mm:suite/type != list &amp; mm:suite/allowed_types HAS list"/>
         <mm:menuitem name="foldersuite_rsc:R_SKINS_LIST_APPSHELL_GRID" event="custom:change_widget_to_grid" position="81" condition="mm:suite/type != grid &amp; mm:suite/allowed_types HAS grid"/> 
         <mm:menuitem name="foldersuite_rsc:R_MENU_FOLDER_EDIT" event="custom:edit_mode" position="82" condition="params:remove_locked != true" />
@@ -260,6 +261,7 @@
         </mm:event>
 
 		<mm:edit_mode count="folder_items:ReturnValue/[$count]"  template="logical_template_3|list_single_hc_apps_pane" id="folder_suite_items" remove_locked="folder_items:ReturnValue/[$index]/delete_locked" type="folder_items:ReturnValue/[$index]/type" custom_id="folder_items:ReturnValue/[$index]/id" uid="folder_items:ReturnValue/[$index]/uid">
+		    <mm:menuitem_action name="foldersuite_rsc:R_MENU_OPEN" event="key:select" position="80" condition="folder_items:ReturnValue/[$index]/type = menu:folder" />
             <mm:menuitem_specific name="foldersuite_rsc:R_OPTIONS_ORG_MOVE_TO_FOLDER" event="custom:move_to_folder" position="81" condition="params:remove_locked != true" />
 			<mm:menuitem name="foldersuite_rsc:R_OPTIONS_ORG_NEW_FOLDER" event="custom:add_folder" position="82" condition="params:remove_locked != true" />    
             <mm:menuitem_specific name="foldersuite_rsc:R_FLDR_DELETE" event="custom:delete_folder" position="83" condition="folder_items:ReturnValue/[$index]/type = menu:folder &amp; params:remove_locked != true &amp; folder_items:ReturnValue/[$index]/delete_locked != true &amp; folder_items:ReturnValue/[$index]/children_count = 0" />

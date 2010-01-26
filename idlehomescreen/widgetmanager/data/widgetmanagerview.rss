@@ -24,9 +24,10 @@
 #include <appinfo.rh>
 #include <avkon.mbg>
 #include <activeidle3.loc>
+#include <widgetmanagerview.loc>
 
 #include "widgetmanager.hrh"
-#include "widgetmanagerview.loc"
+
 
 //  RESOURCE IDENTIFIER
 NAME    WIGZ // 4 letter ID
@@ -136,11 +137,6 @@ RESOURCE AVKON_BUTTON r_wm_portal_button
             {
             flags = 0;
             txt = qtn_wm_ovi_store_title;
-            bmpfile = AVKON_BITMAP_FILE;
-            bmpid = EMbmAvkonQgn_graf_wml_wait_globe_04;
-            bmpmask = EMbmAvkonQgn_graf_wml_wait_globe_04_mask;
-            press_bmpid = EMbmAvkonQgn_graf_wml_wait_globe_04;
-            press_bmpmask = EMbmAvkonQgn_graf_wml_wait_globe_04_mask;
             }
         };
     }

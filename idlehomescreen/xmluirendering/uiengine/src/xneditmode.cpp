@@ -849,4 +849,17 @@ void CXnEditMode::SetStatusPaneTitleL()
         }
     }
 
+// -----------------------------------------------------------------------------
+// CXnEditMode::StopDraggingL()
+// -----------------------------------------------------------------------------
+//
+void CXnEditMode::StopDraggingL()
+    {
+    if( iState == CXnEditMode::EDragging )
+        {
+        StopDragL();
+        UpdateScreen();
+        }
+    }
+
 // End of file

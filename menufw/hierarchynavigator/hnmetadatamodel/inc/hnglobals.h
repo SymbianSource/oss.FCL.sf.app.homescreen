@@ -149,6 +149,7 @@ _LIT8( KActionElementName8,         "action" );
 _LIT8( KEventElementName8,          "event" );
 _LIT8( KMenuItemElementName8,       "menuitem" );
 _LIT8( KMenuItemSpecificElementName8,       "menuitem_specific" );
+_LIT8( KMenuItemActionElementName8,       "menuitem_action" );
 _LIT8( KLocalizationElementName8,   "localization" );
 _LIT8( KNotifyRequestElementName8,  "notify_request" );
 _LIT8( KMenuButton8,				"button" );

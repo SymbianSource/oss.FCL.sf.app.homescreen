@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.56 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.56 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.60 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.60 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -96,8 +96,6 @@ void CMmAppUi::ConstructL()
     	EAknEnableSkin | EAknSingleClickCompatible :
         EAknEnableSkin | EAknEnableMSK;
     BaseConstructL( appUiFlags );
-    iAppUiFactory = CEikonEnv::Static()->AppUiFactory( *this );
-    ASSERT( iAppUiFactory );
 
     FeatureManager::InitializeLibL();
     iIsKastorEffectStarted = EFalse;
@@ -129,7 +127,6 @@ void CMmAppUi::ConstructL()
 
     iSkinSrvSession.Connect(this);
     iAppkeyHandler = CMmAppkeyHandler::NewL();
-    iOptionsMenuIsOpen = EFalse;
 
     RProperty::Define( KMMenuPSCat, KMMenuLastViewKey, RProperty::EText );
 
@@ -214,12 +211,12 @@ void CMmAppUi::HandleResourceChangeL( TInt aType )
         iIsKastorEffectStarted = ETrue;
         TInt lastItemIndex = iCurrentContainer->NumberOfItems() - 1;
 
-        if ( lastItemIndex >= 0 && iCurrentContainer->ItemIsFullyVisible( lastItemIndex ) && 
+        if ( lastItemIndex >= 0 && iCurrentContainer->ItemIsFullyVisible( lastItemIndex ) &&
         		!iCurrentContainer->IsHighlightVisible() )
         	{
         	iCurrentContainer->SetManualHighlightL( lastItemIndex, EFalse );
         	}
-     
+
         iCurrentContainer->SetRect( ClientRect() );
         iDummyContainer->SetRect( ClientRect() );
 
@@ -324,6 +321,12 @@ void CMmAppUi::ProcessMessageL( TUid /*aUid*/, const TDesC8& aParams )
         {
         if ( !iAppkeyHandler->IsActive() )
         	{
+            //make dummy container visible when returning
+            //to menu by AppKey
+        	iDummyContainer->MakeVisible( ETrue );
+            RefreshUiPanesL( ETrue );
+            iCurrentContainer->MakeVisible( EFalse );
+            iDummyContainer->DrawNow();
             CleanupForExitL( EExitKeyApplication );
 			User::LeaveIfError( iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
 						CEikonEnv::Static()->RootWin().Identifier(), 0 ) );
@@ -796,10 +799,7 @@ void CMmAppUi::NotifyUiRefreshL( const THnUiRefreshType aRefreshType )
                 {
                 iCurrentSuiteModel->SetVisibleL(EFalse);
                 }
-            if( iMmExtManager )
-                {
-                iMmExtManager->ExecuteActionL(TUid::Null(), KCommandDeleteDialog, NULL );
-                }
+
             }
             break;
         case ERemoveLiwObjects:
@@ -1313,7 +1313,7 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
 
 	if ( !popupMenuDisplayed && iCurrentContainer )
 		{
-		iCurrentContainer->EndLongTapL( EFalse );
+		iCurrentContainer->EndLongTapL( ETrue );
 		HandleHighlightItemSingleClickedL(
 				iCurrentContainer->Widget()->CurrentItemIndex() );
 		}
@@ -1430,11 +1430,14 @@ void CMmAppUi::ResetContainerMapToRootL()
 //
 void CMmAppUi::HandleMessageL( const TDesC8& aMessage )
     {
+    if( iMmExtManager )
+        {
+        iMmExtManager->ExecuteActionL(TUid::Null(), KCommandDeleteDialog, NULL );
+        }
     if ( IsEditMode() )
         {
         SetEditModeL( EFalse );
         }
-
     if ( aMessage.Find( KRootWithPref ) != KErrNotFound )
         {
         RemoveFromStack( iCurrentContainer );
@@ -1520,19 +1523,13 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
                             aMenuPane->
                                 ItemData( aMenuPane->MenuItemCommandId( i ) ) );
                         }
-                    
-                    TInt itemSpecificMenuItemsCount = 0;
+
 
                     //get custom menu items and their positions
                     while ( menuIterator->HasNext() )
                         {
                         CHnMenuItemModel* menuItem = menuIterator->GetNext();
-                        TBool isItemSpecific = menuItem->IsItemSpecific();
-                        if ( isItemSpecific )
-                            {
-                            ++itemSpecificMenuItemsCount;
-                            }
-                        if ( !isItemSpecific || !ignoreItemSpecific )
+                        if ( (menuItem->MenuItemType() == CHnMenuItemModel::EItemApplication) || !ignoreItemSpecific )
                         	{
                         	CEikMenuPaneItem::SData menuData;
 							menuData.iCommandId = menuItem->Command();
@@ -1570,11 +1567,6 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
 							menuItemMap.InsertL( menuItem->Position(), menuData );
                         	}
                         }
-                    
-                    // DynInitMenuPaneL always gets called immediately after an item is touched and
-                    // because of that it is possible to enable/disable settings that affect long
-                    // tap behavior here.
-                    iCurrentContainer->EnableLongTapAnimation( itemSpecificMenuItemsCount > 0 );
 
                     aMenuPane->Reset();
                     positionArray.Sort();
@@ -1818,7 +1810,16 @@ void CMmAppUi::HandlePresentationChangeL(
             {
             StartLayoutSwitchFullScreen();
             }
+
+        TBool highlightVisibleBefore = iCurrentContainer != NULL &&
+			iCurrentContainer->IsHighlightVisible();
+
         HandleWidgetChangeRefreshL( aWidgetContainer );
+
+        if ( highlightVisibleBefore )
+        	{
+        	iCurrentContainer->SetHighlightVisibilityL( ETrue );
+        	}
         }
     else
         {
@@ -2147,9 +2148,8 @@ void CMmAppUi::HandleWsEventL( const TWsEvent& aEvent,
         {
         HandleFullOrPartialForegroundLostL();
         }
-
-    DetectOptionsMenuOpenDisplayChangeL();
     }
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -2165,8 +2165,6 @@ TErrorHandlerResponse CMmAppUi::HandleError(TInt aError,
         }
     return EErrorNotHandled;
     }
-
-
 
 // ---------------------------------------------------------------------------
 //
@@ -3010,19 +3008,9 @@ void CMmAppUi::HandleFullOrPartialForegroundLostL()
 	{
 	DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
 			"- KAknFullOrPartialForegroundLost"));
-	iMmExtManager->ExecuteActionL(
-			TUid::Null(), KCommandDeleteDialog, NULL );
 	if ( iCurrentContainer )
 		{
 		iCurrentContainer->HandleBackgroundGainedL();
-		if ( !IsRootdisplayedL() || IsEditMode() ||
-		        iEditModeStatus == ETransitionFromEditMode )
-			{
-			iDummyContainer->MakeVisible( ETrue );
-			RefreshUiPanesL( ETrue );
-			iCurrentContainer->MakeVisible( EFalse );
-			iDummyContainer->DrawNow();
-			}
 		if ( IsRootdisplayedL() )
 			{
 			iCurrentContainer->RestoreWidgetPosition();
@@ -3030,24 +3018,5 @@ void CMmAppUi::HandleFullOrPartialForegroundLostL()
 			}
 		}
 	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CMmAppUi::DetectOptionsMenuOpenDisplayChangeL()
-    {
-    CEikMenuBar* menuBar = iAppUiFactory->MenuBar();
-    TBool optionsMenuIsOpen = menuBar && menuBar->IsDisplayed();
-    if ( !!iOptionsMenuIsOpen != !!optionsMenuIsOpen )
-        {
-        iOptionsMenuIsOpen = optionsMenuIsOpen;
-        if ( iCurrentContainer )
-        	{
-            iCurrentContainer->HandleOptionsMenuVisibilityChangeL(
-            		iOptionsMenuIsOpen );
-        	}
-        }
-    }
 
 // End of File

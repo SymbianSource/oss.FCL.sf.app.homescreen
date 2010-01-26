@@ -95,6 +95,13 @@ NONSHARABLE_CLASS( CHnMenuItemModel ):
     public MHnMenuItemModelIterator
     {
 public:
+	enum THnMenuItemType {
+		EItemApplication,	//in options with & without focus
+		EItemAction,		//in options with focus
+		EItemSpecific		//in options with focus & in stylus popup
+	};
+    
+public:
         
     /**
      * Two-phased constructor.
@@ -185,12 +192,12 @@ public:
     IMPORT_C void SetPosition( TInt aPosition );
     
     /**
-     * Sets menu item specific flag.
+     * Sets menu item type.
      *
      * @since S60 5.0
-     * @param aItemSpecific Is menu element item specific.
+     * @param aMenuItemType type of menu element.
      */
-    IMPORT_C void SetItemSpecific( TBool aItemSpecific );
+    IMPORT_C void SetMenuItemType( THnMenuItemType aMenuItemType );
 
     /**
      * Appends child item.
@@ -201,12 +208,12 @@ public:
     IMPORT_C void AppendChildMenuL( CHnMenuItemModel* aMenuModel );
     
     /**
-     * Tells if menu item is item specific.
+     * Returns menu item type.
      * 
      * @since S60 5.0
-     * @return ETrue if menu item is item specific.
+     * @return menu item type.
      */
-    IMPORT_C TBool IsItemSpecific();
+    IMPORT_C THnMenuItemType MenuItemType();
     
 private:
     
@@ -253,9 +260,9 @@ private: // data
     RPointerArray< CHnMenuItemModel > iChildren;
     
     /**
-     * Is menu item item specific.
+     * Type of menu item.
      */
-    TBool iItemSpecific;
+    THnMenuItemType iMenuItemType;
     };
 
 #endif // HNMENUITEMMODEL_H_

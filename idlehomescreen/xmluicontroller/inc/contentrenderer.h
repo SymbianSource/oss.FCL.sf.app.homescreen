@@ -22,6 +22,7 @@
 #include <e32base.h>
 #include <e32hashtab.h>
 #include "xnnewsticker.h"
+#include "xnproperty.h"
 #include "aicontentobserver.h"
 
 class TXnUiEngineAppIf;
@@ -124,7 +125,21 @@ public:  // Constructors and destructor
     TAny* Extension( TUid aUid );
     
     TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const;
-	        
+    
+    TInt SetProperty(MAiPropertyExtension& aPlugin,
+            const TDesC8& aElementId,
+            const TDesC8& aPropertyName,
+            const TDesC8& aPropertyValue );
+       
+    TInt SetProperty(MAiPropertyExtension& aPlugin,
+            const TDesC8& aElementId,
+            const TDesC8& aPropertyName,
+            const TDesC8& aPropertyValue,  
+            MAiContentObserver::TValueType aValueType);  
+    
+    CXnDomPropertyValue::TPrimitiveValueType 
+        DomPropertyValueType(MAiContentObserver::TValueType aValueType);
+
 private:
 
     CContentRenderer( CAppUi& aAppUi );
@@ -204,6 +219,12 @@ private:
     
     void RegisterNewstickerCallbackInterfaceL( CXnNodeAppIf& aTarget );
     
+    TInt SetPropertyL(MAiPropertyExtension& aPlugin,
+               const TDesC8& aElementId,
+               const TDesC8& aPropertyName,
+               const TDesC8& aPropertyValue,  
+               MAiContentObserver::TValueType aValueType);
+
 // From XnNewstickerInterface::MXnNewstickerCallbackInterface    
 
     void TitleScrolled(TInt aTitleIndex);

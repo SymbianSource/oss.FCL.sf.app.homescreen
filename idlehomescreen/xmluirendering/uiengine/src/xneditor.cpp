@@ -820,8 +820,16 @@ void CXnEditor::RemoveWidgetL( CXnNode* aNode )
 
     if( plugin.Removable() )
         {
-        TRAP_IGNORE( iViewManager.UnloadWidgetFromPluginL( plugin ) );
-        }       
+        TRAPD( err, err = iViewManager.UnloadWidgetFromPluginL( plugin ) );
+        
+        if ( err != KErrNone )
+            {
+            HBufC* msg = StringLoader::LoadLC( 
+                    R_QTN_HS_OPERATION_FAILED_NO_DISK );    
+            ShowErrorNoteL( *msg );
+            CleanupStack::PopAndDestroy( msg );
+            }
+        }
     }
 
 // ---------------------------------------------------------------------------

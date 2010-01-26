@@ -54,13 +54,17 @@ private:
 public: // API
 
     /**
-     * portal button methods
+     * portal button methods. This - along with the parameter -
+     * represents the action that the portal button is configured
+     * to do when pressed. The portal button itself should contain
+     * the execution code itself.
      */
     enum TMethod
         {
         ENone = 0, // no method
         EHttp, // open browser to a certain page
-        EWidget // open given widget with params
+        EWidget, // open given widget with params
+        EApplication // launch an application
         };
 
     /**
@@ -76,17 +80,10 @@ public: // API
     
     /**
      * Icon to be displayed on a portal button
-     * Logo syntax follows the widget icon syntax in MHsContentInfo
+     * Logo syntax follows the widget icon syntax in CWmImageConverter
      * @param aIndex index of the button, starting at 0
      */
     const TDesC& PortalButtonIcon( TInt aIndex );
-    
-    /**
-     * Bundle ID related to this button
-     * parameter is valid if this button launches an application
-     * @param aIndex index of the button, starting at 0
-     */
-    const TDesC& PortalButtonBundleId( TInt aIndex );
     
     /**
      * Portal button action method.
@@ -96,9 +93,19 @@ public: // API
     TMethod PortalButtonPrimaryMethod( TInt aIndex );
     
     /**
+     * Service name for the primary method.
+     * For EHttp this is unused.
+     * For EWidget, this is the widget Bundle ID.
+     * For EApplication, this is the application name.
+     * @param aIndex index of the button, starting at 0
+     */
+    const TDesC& PortalButtonPrimaryService( TInt aIndex );
+    
+    /**
      * parameters related to the method.
      * For EHttp this is the HTTP address
-     * for EWidget the parameters passed to the widget
+     * For EWidget the parameters passed to the widget
+     * For EApplication the params passed to the app.
      * @param aIndex index of the button, starting at 0
      */
     const TDesC& PortalButtonPrimaryParams( TInt aIndex );
@@ -112,18 +119,28 @@ public: // API
     TMethod PortalButtonSecondaryMethod( TInt aIndex );
     
     /**
+     * Service name for the primary method.
+     * For EHttp this is unused.
+     * For EWidget, this is the widget Bundle ID.
+     * For EApplication, this is the application name.
+     * @param aIndex index of the button, starting at 0
+     */
+    const TDesC& PortalButtonSecondaryService( TInt aIndex );
+    
+    /**
      * Parameters for Secondary method. Like Primary method
      * Works like Primary params.
      * @param aIndex index of the button, starting at 0
      */
     const TDesC& PortalButtonSecondaryParams( TInt aIndex );
     
-    
 private: // New functions
     
+    void LoadConfigurationL();
     TInt FindCorrectLanguageId();
     HBufC* ReadParameterL( TInt aKey );
     HBufC* ReadLocalisedParameterL( TInt aOffset );
+    void IndexConversion( TInt& aIndex );
 
 private:
 
@@ -144,29 +161,45 @@ private:
     TInt                    iLanguageIndex;
 
     /**
-     * OviStore widget bundle ID
+     * OVI store button text
      */
-    HBufC*                  iOviStoreBundleId;
+    HBufC*                  iOviButtonTitle;
     
     /**
-     * OviStore widget client param
+     * OVI store button icon
+     */
+    HBufC*                  iOviButtonIcon;
+    
+    /**
+     * OVI store button browser Url
+     * (browser is used if OVI client is not working)
+     */
+    HBufC*                  iOviButtonUrl;
+    
+    /**
+     * OVI store button widget client param
      */
     HBufC*                  iOviStoreClientParam;
     
     /**
-     * Localized Url to start browser
+     * OVI store button widget bundle ID
      */
-    HBufC*                  iOviStoreUrl;
+    HBufC*                  iOviStoreBundleId;
     
     /**
-     * Localised OVI store text
+     * OPERATOR button text
      */
-    HBufC*                  iOviStoreText;
+    HBufC*                  iOperatorButtonTitle;
     
     /**
-     * OVI store icon
+     * OPERATOR store icon
      */
-    HBufC*                  iOviStoreIcon;
+    HBufC*                  iOperatorButtonIcon;
+    
+    /**
+     * OPERATOR store button browser Url
+     */
+    HBufC*                  iOperatorButtonUrl;
     
     };
 

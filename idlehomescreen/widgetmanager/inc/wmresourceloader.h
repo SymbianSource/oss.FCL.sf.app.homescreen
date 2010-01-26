@@ -24,9 +24,7 @@
 #include <e32base.h>
 
 // FORWARD DECLARATIONS
-class CAknStylusPopUpMenu;
 class CEikonEnv;
-class CAknButton;
 class CAknInformationNote;
 
 /**
@@ -48,17 +46,6 @@ public: // construction/destruction
 	~CWmResourceLoader();
 
 public: // services
-
-    /**
-     * Loads a button from the widgetmanager resource file
-     * using CAknButton::ConstructFromResourceL
-     * 
-     * @param aResource handle to the empty button instance
-     * @param aResourceId ID of the resource to use in loading
-     */
-    void LoadButtonL(
-            CAknButton& aResource,
-            TInt aResourceId );
 
     /**
      * shows a simple info popup with OK button

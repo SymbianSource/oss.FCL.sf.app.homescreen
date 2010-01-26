@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xmluiml SYSTEM "wideimage.dtd">
 <xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
     <widget id="wideimage_template" focusable="true" _s60-initial-focus="1">        
         
         <!-- Data plugin in this widget -->
         <contentsource id="wideimage_plugin" name="" value="0x200286DD" />
-        
         <configuration name="service" value="Service.ContentPublishing"/>
         <configuration name="interface" value="IContentPublishing"/>
         <configuration name="command" value="GetList"/>
@@ -17,22 +15,29 @@
                 <event id="p_trigger" name="" />            
             </action>
         </actions>
-        <box id="container" sizeaware="true">
-            <actions>
+        <box id="default_container" _s60-initial-focus="1">
+            <image id="default_image">
+	            <property id="prop1" class=""/>
+            </image>
+            <text id="default_text">
+            	<property id="prop2" class=""/>
+            </text>
+ 			 </box>            
+       <box id="image_container" sizeaware="true" _s60-initial-focus="1">   
+       	    <actions>
                 <action>
                     <trigger name="sizechanged"/>
                     <event name="ui/setelementsizetocps(container)"/>
                 </action>
             </actions>
             <image id="wide_image">
-                <property id="prop1" class=""/>
-                <property class="policy/emptyContent" name="wide_image" value="display: none;"/>
-                <property class="policy/Content" name="wide_image" value="display: block;"/>
-                <property class="policy/emptyContent" name="wide_text" value="display: block;"/>
-                <property class="policy/Content" name="wide_text" value="display: none;"/>            
+                <property id="prop3" class=""/>
+                <property class="policy/emptyContent" name="image_container" value="display: none;"/>
+                <property class="policy/Content" name="image_container" value="display: block;"/>
+                <property class="policy/Content" name="default_container" value="display: none;"/>
             </image>
-            <text id="wide_text">&qtn_ai_loading_content;</text>
-        </box>
+       </box>
+       <animation id="loading"/>
         <menuextension>
             <!-- dynmenuitems are mapped to HS view.xml menu based on target attribute.
                  HS view.xml provides localisation for predined items: "settings" and "refresh". -->                

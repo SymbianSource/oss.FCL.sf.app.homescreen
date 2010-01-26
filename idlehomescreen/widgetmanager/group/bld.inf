@@ -21,13 +21,15 @@ DEFAULT
 
 PRJ_EXPORTS
 ../rom/widgetmanager.iby               CORE_APP_LAYER_IBY_EXPORT_PATH(widgetmanager.iby)
-../rom/widgetmanager_resources.iby     CORE_APP_LAYER_IBY_EXPORT_PATH(widgetmanager_resources.iby)
+../rom/widgetmanager_resources.iby     LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(widgetmanager_resources.iby)
 
 ../sis/widgetmanager_stub.sis          /epoc32/data/z/system/install/widgetmanager_stub.sis
 
 // cenrep  
 ../conf/widgetmanager.confml          APP_LAYER_CONFML(widgetmanager.confml)
 ../conf/widgetmanager_20026F53.crml   APP_LAYER_CRML(widgetmanager_20026F53.crml)
+
+../loc/widgetmanagerview.loc         APP_LAYER_LOC_EXPORT_PATH(widgetmanagerview.loc)
 
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv

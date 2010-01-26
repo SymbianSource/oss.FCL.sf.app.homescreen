@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_95 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_97 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -51,6 +51,7 @@ CMmGrid::CMmGrid()
 //
 CMmGrid::~CMmGrid()
     {
+    delete iRedrawTimer;
     }
 
 // -----------------------------------------------------------------------------
@@ -215,42 +216,65 @@ void CMmGrid::CreateItemDrawerL( CMmTemplateLibrary* aTemplateLibrary )
 void CMmGrid::HandleScrollEventL( CEikScrollBar* aScrollBar,
         TEikScrollEvent aEventType )
     {
-    CAknGrid::HandleScrollEventL(aScrollBar, aEventType);
-    iCurrentTopItemIndex = TopItemIndex();
+    if ( aEventType == EEikScrollThumbDragVert && !iScrollbarThumbIsBeingDragged )
+        {
+        iScrollbarThumbIsBeingDragged = ETrue;
+        static_cast<CMmListBoxItemDrawer*>(
+                View()->ItemDrawer() )->EnableCachedDataUse( ETrue );
+        iRedrawTimer->Start( KScrollingRedrawInterval, KScrollingRedrawInterval,
+                TCallBack( &CMmGrid::RedrawTimerCallback, static_cast<TAny*>( this ) ) );
+        }
+    else if ( aEventType == EEikScrollThumbReleaseVert )
+        {
+        iScrollbarThumbIsBeingDragged = EFalse;
+        static_cast<CMmListBoxItemDrawer*>(
+                View()->ItemDrawer() )->EnableCachedDataUse( EFalse );
+        // The view will be redrawn with cache disabled when ProcessScrollEventL
+        // calls the base class's HandleScrollEventL method -- no need to
+        // explicitly redraw the view.
+        iRedrawTimer->Cancel();
+        }
 
-    // setting default highligh in order not to overwrite the top item index
-    // set before in the SetLayout method
-    CMmWidgetContainer* parent = static_cast< CMmWidgetContainer* > ( Parent() );
-    if (!parent->IsHighlightVisible())
-         {
-         parent->SetDefaultHighlightL( EFalse );
-
-#ifdef RD_UI_TRANSITION_EFFECTS_LIST
-         MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(
-                 static_cast<CMmGridView*>(iView)->Gc() );
-         TBool effects = transApi && !transApi->EffectsDisabled();
-         if ( effects && aEventType == EEikScrollPageUp ||
-                 aEventType == EEikScrollPageDown )
-             {
-             DrawNow();
-             }
-#endif
-
-         }
+    if ( !iScrollbarThumbIsBeingDragged )
+        {
+        ProcessScrollEventL( aScrollBar, aEventType );
+        }
+    else
+        {
+        __ASSERT_DEBUG( aEventType == EEikScrollThumbDragVert, User::Invariant() );
+        ++iSkippedScrollbarEventsCount;
+        }
     }
 
 // -----------------------------------------------------------------------------
-//
+// Clearing ELeftDownInViewRect flag before invoking the base class
+// HandlePointerEventL method effectively prevents that method from doing most
+// of the things it would normally do in response to EButton1Down event.
+// This flag is explicitly cleared to achieve two things:
+// 1. Prevent kinetic scrolling (flick) in edit mode.
+// 2. Prevent highlight removal when popup menu is displayed.
 // -----------------------------------------------------------------------------
 //
 void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent )
     {
-    TInt itemUnderPointerIndex = KErrNotFound;
+    if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+        {
+        iButton1DownPos = aPointerEvent.iPosition;
+        }
+    else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+        CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
+        TPoint dragDelta = iButton1DownPos - aPointerEvent.iPosition;
+        if ( Abs( dragDelta.iY ) > KDragTreshold || parent->LongTapInProgress() )
+            {
+            iListBoxFlags &= ~ELeftDownInViewRect;
+            }
+        }
 
+    TInt itemUnderPointerIndex = KErrNotFound;
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
-        iListBoxFlags &= ~ELeftDownInViewRect; // prevent kinetic scrolling
         CAknGrid::HandlePointerEventL( aPointerEvent );
         }
     else if ( View()->XYPosToItemIndex(
@@ -638,6 +662,7 @@ void CMmGrid::ConstructL( const CCoeControl* aParent, TInt aFlags,
         }
 
     DoSetupLayoutL();
+    iRedrawTimer = CPeriodic::NewL( EPriorityRealTime );
     }
 
 // -----------------------------------------------------------------------------
@@ -949,6 +974,62 @@ void CMmGrid::RedrawScrollbarBackground() const
                 }
             }
         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmGrid::ProcessScrollEventL( CEikScrollBar* aScrollBar, 
+            TEikScrollEvent aEventType )
+    {
+    CAknGrid::HandleScrollEventL( aScrollBar, aEventType );
+    iCurrentTopItemIndex = TopItemIndex();
+
+    // setting default highligh in order not to overwrite the top item index
+    // set before in the SetLayout method
+    CMmWidgetContainer* parent = static_cast< CMmWidgetContainer* > ( Parent() );
+    if (!parent->IsHighlightVisible())
+         {
+         parent->SetDefaultHighlightL( EFalse );
+
+#ifdef RD_UI_TRANSITION_EFFECTS_LIST
+         MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(
+                 static_cast<CMmGridView*>(iView)->Gc() );
+         TBool effects = transApi && !transApi->EffectsDisabled();
+         if ( effects && aEventType == EEikScrollPageUp ||
+                 aEventType == EEikScrollPageDown )
+             {
+             DrawNow();
+             }
+#endif
+
+         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmGrid::HandleRedrawTimerEvent()
+    {
+    if ( iSkippedScrollbarEventsCount )
+        {
+        ProcessScrollEventL( ScrollBarFrame()->VerticalScrollBar(),
+                EEikScrollThumbDragVert );
+        }
+    iSkippedScrollbarEventsCount = 0;
+    }
+    
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TInt CMmGrid::RedrawTimerCallback( TAny* aPtr )
+    {
+    CMmGrid* self = static_cast<CMmGrid*>( aPtr );
+    self->HandleRedrawTimerEvent();
+    return 0;
     }
 
 // -----------------------------------------------------------------------------

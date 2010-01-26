@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_83.1.2.1.23.1.19 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_83.1.2.1.23.1.20 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -844,11 +844,6 @@ private:
       */
      void HandleFocusLostL();
 
-     /**
-      * Detects when options menu pops up and hides.
-      */
-     void DetectOptionsMenuOpenDisplayChangeL();
-
 private: // Data
 
     /**
@@ -1010,16 +1005,6 @@ private: // Data
      * Popup menu displayed after long tap.
      */
     CAknStylusPopUpMenu* iPopupMenu;
-
-    /**
-     * Application UI factory for this app UI object.
-     */
-    MEikAppUiFactory* iAppUiFactory;
-
-    /**
-     * ETrue if Options menu is open.
-     */
-    TBool iOptionsMenuIsOpen;
 
     };
 

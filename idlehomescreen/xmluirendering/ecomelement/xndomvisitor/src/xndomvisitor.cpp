@@ -71,6 +71,7 @@ const TXnElementVisitor KXnElementVisitorTable[]=
         { (const void*)&KEditor,            &SetElementWithTextPropertiesL, EEmpty},
 	    { (const void*)&KMarquee,           &SetElementWithTextPropertiesL, EPCData},
 	    { (const void*)&KNewsticker,        &SetElementWithTextPropertiesL, EPCData},
+	    { (const void*)&KAnimation,         &SetCommonPropertiesL,          EPCData},
 
         { (const void*)&KObject,            NULL,          		            EPCData},
         { (const void*)&KParam,             NULL,          		            EEmpty},

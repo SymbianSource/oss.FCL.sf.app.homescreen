@@ -1,0 +1,10 @@
+EXPORTS
+	?SwitchToApp@CTsFswClient@@QAEXH@Z @ 1 NONAME ; void CTsFswClient::SwitchToApp(int)
+	?GetContentL@CTsFswClient@@QAEXAAV?$RPointerArray@VCTsFswEntry@@@@@Z @ 2 NONAME ; void CTsFswClient::GetContentL(class RPointerArray<class CTsFswEntry> &)
+	?ForegroundAppUid@CTsFswClient@@QAE?AVTUid@@W4TTsFswFgAppType@1@@Z @ 3 NONAME ; class TUid CTsFswClient::ForegroundAppUid(enum CTsFswClient::TTsFswFgAppType)
+	?Subscribe@CTsFswClient@@QAEXAAVMTsFswObserver@@@Z @ 4 NONAME ; void CTsFswClient::Subscribe(class MTsFswObserver &)
+	?NewLC@CTsFswClient@@SAPAV1@XZ @ 5 NONAME ; class CTsFswClient * CTsFswClient::NewLC(void)
+	?CloseApp@CTsFswClient@@QAEXH@Z @ 6 NONAME ; void CTsFswClient::CloseApp(int)
+	?NewL@CTsFswClient@@SAPAV1@XZ @ 7 NONAME ; class CTsFswClient * CTsFswClient::NewL(void)
+	?CancelSubscribe@CTsFswClient@@QAEXXZ @ 8 NONAME ; void CTsFswClient::CancelSubscribe(void)
+

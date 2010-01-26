@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  MMP file for preview provider ECOM plugin
+*
+*/
+
+#include <platform_paths.hrh>
+#include <defaultcaps.hrh>
+
+TARGET          20016BEC.DLL
+TARGETTYPE      PLUGIN 
+UID             0x10009D8D 0x20016BEC
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+OPTION_REPLACE  ARMCC --arm -O3 --cpu 6
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../../trace
+
+MW_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../src
+SOURCE          previewprovidercrp.cpp
+
+RESOURCE        20016BEC.rss
+
+LIBRARY         ecom.lib
+LIBRARY         euser.lib
+LIBRARY         wsgraphicdrawer.lib
+LIBRARY         fbscli.lib
+LIBRARY         estor.lib 
+LIBRARY         gdi.lib 
+DEBUGLIBRARY    flogger.lib

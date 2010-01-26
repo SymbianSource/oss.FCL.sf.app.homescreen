@@ -674,6 +674,114 @@ TBool CContentRenderer::RequiresSubscription(
     return ETrue;
     }
 
+TInt CContentRenderer::SetProperty( MAiPropertyExtension& aPlugin,
+        const TDesC8& aElementId,
+        const TDesC8& aPropertyName,
+        const TDesC8& aPropertyValue ) 
+    {
+   return ( SetProperty( aPlugin, aElementId, 
+               aPropertyName, aPropertyValue,
+               MAiContentObserver::EValueString ) );
+    }
+
+TInt CContentRenderer::SetProperty( MAiPropertyExtension& aPlugin,
+        const TDesC8& aElementId,
+        const TDesC8& aPropertyName,
+        const TDesC8& aPropertyValue,
+        MAiContentObserver::TValueType aValueType) 
+    {
+    TInt error( KErrNone );
+    TInt retval( KErrNone );
+
+    TRAP( error, retval = SetPropertyL( aPlugin, aElementId, aPropertyName,
+            aPropertyValue, aValueType ) );
+    
+    if( !error && retval )
+     {
+     error = retval;
+     }
+    
+    return error;
+    }
+
+TInt CContentRenderer::SetPropertyL( MAiPropertyExtension& aPlugin,
+        const TDesC8& aElementId,
+        const TDesC8& aPropertyName,
+        const TDesC8& aPropertyValue,
+        MAiContentObserver::TValueType aValueType) 
+    {
+    TInt err = KErrNone;
+    // Find node
+    CXnNodeAppIf* targetNode = FindNodeByIdL( aElementId, aPlugin.PublisherInfoL()->iNamespace );
+    if ( targetNode )
+       {
+       CXnDomStringPool& sp( targetNode->UiEngineL()->StringPool() );
+              
+       CXnProperty* prop = CXnProperty::NewL( 
+               aPropertyName,
+               aPropertyValue,
+               DomPropertyValueType(aValueType), sp );
+                      
+       CleanupStack::PushL( prop );
+    
+       targetNode->SetPropertyL( prop );
+      
+       CleanupStack::Pop( prop );
+       }
+    else
+       {
+       err = KErrNotFound;
+       }
+    return err;
+    }
+
+
+CXnDomPropertyValue::TPrimitiveValueType 
+    CContentRenderer::DomPropertyValueType(
+            MAiContentObserver::TValueType aValueType)
+    {
+    CXnDomPropertyValue::TPrimitiveValueType type = 
+            CXnDomPropertyValue::EUnknown;
+    switch ( aValueType )
+        {
+        case MAiContentObserver::EValueNumber :
+            {
+            type = CXnDomPropertyValue::ENumber;
+            }
+            break;
+        case MAiContentObserver::EValuePercentage :
+            {
+            type = CXnDomPropertyValue::EPercentage;
+            }
+            break;
+        case MAiContentObserver::EValuePx :
+            {
+            type = CXnDomPropertyValue::EPx;
+            }
+            break;
+        case MAiContentObserver::EValueString :
+            {
+            type = CXnDomPropertyValue::EString;
+            }
+            break;
+        case MAiContentObserver::EValueRgbColor :
+            {
+            type = CXnDomPropertyValue::ERgbColor;
+            }
+            break;
+        case MAiContentObserver::EValueUnitValue :
+            {
+            type = CXnDomPropertyValue::EUnitValue;
+            }
+            break;
+        default:
+            {
+            type = CXnDomPropertyValue::EUnknown;
+            }
+        }
+    return type;
+    }
+
 void CContentRenderer::DoStartTransactionL( TInt aTxId )
     {
     MTransaction* tr = iFactory->CreateTransactionL( aTxId );

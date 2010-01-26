@@ -41,6 +41,7 @@
 #include "../renderingplugins/xnvolumecontrolfactory/group/bld.inf"
 #include "../renderingplugins/xnnewstickerfactory/group/bld.inf"
 #include "../renderingplugins/xntexteditorfactory/group/bld.inf"
+#include "../renderingplugins/xnanimationfactory/group/bld.inf"
 #include "../ecomelement/group/bld.inf"
 
 PRJ_PLATFORMS

@@ -209,21 +209,19 @@ void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
         RApaLsSession lsSession;
         User::LeaveIfError( lsSession.Connect() );
         CleanupClosePushL( lsSession );
-    
-        CArrayFixFlat<TSize>* sizeArray = new (ELeave) CArrayFixFlat<TSize>(3);
+        
+        const TInt KAppSizeArraySize = 3;
+        CArrayFixFlat<TSize>* sizeArray = new (ELeave)
+            CArrayFixFlat<TSize>( KAppSizeArraySize );
         CleanupStack::PushL( sizeArray );
         User::LeaveIfError( lsSession.GetAppIconSizes( aUid, *sizeArray ) );
-        TInt sizeCount = sizeArray->Count();
         TSize size;
-        if ( sizeCount > 0 )
+        for( TInt i=0; i < sizeArray->Count(); i++ )
             {
-            for( TInt i=0; i < sizeArray->Count(); i++ )
+            size = (*sizeArray)[i];
+            if ( size == iSize )
                 {
-                size = (*sizeArray)[i];
-                if ( size == iSize )
-                    {
-                    break;
-                    }
+                break;
                 }
             }
         CApaMaskedBitmap* maskedBmp = CApaMaskedBitmap::NewLC();
@@ -314,6 +312,8 @@ void CWmImageConverter::CreateIconFromSvgL( const TDesC& aFileName )
         }
 
     TDisplayMode mode = CEikonEnv::Static()->ScreenDevice()->DisplayMode();
+    if ( mode >= ERgb ) // currently svg engine doesn't render correctly
+        { mode = EColor16M; } // in this or above mode ( ou1cimx1#229434 )
     TFontSpec fontspec;
     
     CFbsBitmap* frameBuffer = new ( ELeave ) CFbsBitmap;
@@ -322,18 +322,20 @@ void CWmImageConverter::CreateIconFromSvgL( const TDesC& aFileName )
     
     CSvgEngineInterfaceImpl* svgEngine = CSvgEngineInterfaceImpl::NewL( 
             frameBuffer, NULL, fontspec );
-    svgEngine->SetDRMMode( EFalse );  
+    CleanupStack::PushL( svgEngine );
+    
+    svgEngine->SetDRMMode( EFalse );
 
     TInt domHandle;
     CheckSvgErrorL( svgEngine->PrepareDom( aFileName, domHandle ) );
     
     CFbsBitmap* bitmap = new(ELeave) CFbsBitmap;    
-    User::LeaveIfError( bitmap->Create( iSize, mode) );
     CleanupStack::PushL( bitmap );
+    User::LeaveIfError( bitmap->Create( iSize, mode ) );
     
     CFbsBitmap* mask = new(ELeave) CFbsBitmap;    
-    User::LeaveIfError( mask->Create( iSize, EGray256 ) );
     CleanupStack::PushL( mask );
+    User::LeaveIfError( mask->Create( iSize, EGray256 ) );
     
     CheckSvgErrorL( svgEngine->UseDom( domHandle, bitmap, mask ) );
 
@@ -346,6 +348,7 @@ void CWmImageConverter::CreateIconFromSvgL( const TDesC& aFileName )
 
     CleanupStack::Pop( mask );
     CleanupStack::Pop( bitmap );
+    CleanupStack::PopAndDestroy( svgEngine );
     CleanupStack::PopAndDestroy( frameBuffer );
     
     iBitmap = bitmap;

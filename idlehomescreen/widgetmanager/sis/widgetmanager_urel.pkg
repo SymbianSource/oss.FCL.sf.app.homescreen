@@ -38,7 +38,12 @@
 "\epoc32\data\z\resource\plugins\widgetmanager.rsc"     -"C:\resource\plugins\widgetmanager.rsc"
 
 ; widgetmanager resource file
-"\epoc32\data\z\resource\widgetmanagerview.rsc"         -"C:\resource\widgetmanagerview.rsc"
+"\epoc32\data\z\resource\apps\widgetmanagerview.rsc"    -"C:\resource\apps\widgetmanagerview.rsc"
+
+; These two languages are added just for testing. If sis update is really used for providing
+; updates to end user these need to be fixed.
+"\epoc32\data\z\resource\apps\widgetmanagerview.r01"    -"C:\resource\apps\widgetmanagerview.r01"
+"\epoc32\data\z\resource\apps\widgetmanagerview.r02"    -"C:\resource\apps\widgetmanagerview.r02"
 
 ; widgetmanager icons
 "\epoc32\data\z\resource\apps\widgetmanager.mif"        -"C:\resource\apps\widgetmanager.mif"

@@ -149,13 +149,6 @@ public:
     IMPORT_C CPluginInfo& SetMaxChild( const TInt32 aMaxChild );    
     
     /**
-     * Set widget description
-     *
-     * @param aDescription widget description
-     */
-    IMPORT_C CPluginInfo& SetDescriptionL( const TDesC& aDescription );
-    
-    /**
      * Set widget description (TDesC8)
      *
      * @param aDescription widget description
@@ -167,7 +160,7 @@ public:
      *
      * @return Description widget description or KNullDesC
      */
-    IMPORT_C const TDesC& Description() const;
+    IMPORT_C const TDesC8& Description() const;
     
     /**
      * Set Logo icon
@@ -232,7 +225,7 @@ private: // data
     /**
      * Own. Plugin description
      */
-    HBufC* iDescription;
+    HBufC8* iDescription;
     
     /**
      * Own. Plugin logo icon
