@@ -25,7 +25,6 @@
 
 #include "xnanimationadapter.h"
 
-const TInt KPeriodicTimerInterval5Sec(100000); // 0.1 sec
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -53,7 +52,6 @@ void CXnAnimationAdapter::ConstructL(CXnNodePluginIf& aNode)
     {
     CXnControlAdapter::ConstructL( aNode );
     iSkinId = KAknsIIDNone;
-    iAnimationSarted = EFalse;
     }
     
 // -----------------------------------------------------------------------------
@@ -72,12 +70,7 @@ CXnAnimationAdapter::CXnAnimationAdapter(CXnNodePluginIf& aNode) : iNode( aNode 
 //
 CXnAnimationAdapter::~CXnAnimationAdapter()
     {
-    if (iPeriodicTimer)
-        {
-        iPeriodicTimer->Cancel();
-        delete iPeriodicTimer;
-        iPeriodicTimer = NULL;
-        }
+    StopAnimation();
     }
 
 
@@ -108,12 +101,10 @@ void CXnAnimationAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
  
            if( display == XnPropertyNames::style::common::display::KBlock )
                {
-               iDisplay = ETrue; 
                StartAnimation();
                }    
            else
                {
-               iDisplay = EFalse;
                StopAnimation();
                }
            }
@@ -126,7 +117,12 @@ void CXnAnimationAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
 //
 void CXnAnimationAdapter::MakeVisible( TBool aVisible )
     {
-    if( aVisible )
+    TBool visible( IsVisible() ? ETrue : EFalse );
+    if ( visible == aVisible ) { return; }
+    
+    CCoeControl::MakeVisible( aVisible );
+    
+    if ( aVisible )
         {
         StartAnimation();
         }
@@ -134,7 +130,6 @@ void CXnAnimationAdapter::MakeVisible( TBool aVisible )
         {
         StopAnimation();
         }
-    CCoeControl::MakeVisible( aVisible );
     }
 
 // -----------------------------------------------------------------------------
@@ -143,9 +138,9 @@ void CXnAnimationAdapter::MakeVisible( TBool aVisible )
 //
 void CXnAnimationAdapter::Update()
     {
-    if (iAnimationSarted )
+    if ( iPeriodicTimer && iPeriodicTimer->IsActive() )
         {
-        switch(iSkinId.iMinor )
+        switch( iSkinId.iMinor )
             {
             case EAknsMinorGenericQgnHomeRefreshing1:
                 {
@@ -183,7 +178,7 @@ TInt CXnAnimationAdapter::TimerCallBack(TAny* aAny)
     {
     CXnAnimationAdapter* self = static_cast<CXnAnimationAdapter*> (aAny);
 
-    // Update widget every 5 seconds
+    // Update widget
     self->Update();
 
     return KErrNone; // Return value ignored by CPeriodic
@@ -195,15 +190,15 @@ TInt CXnAnimationAdapter::TimerCallBack(TAny* aAny)
 //
 void CXnAnimationAdapter::StartAnimation()
     {
-    if ( !iAnimationSarted && iDisplay )
+    if ( !iPeriodicTimer && IsVisible() )
         {
        TRAPD(err, iPeriodicTimer = CPeriodic::NewL(CActive::EPriorityIdle) );
        if ( err == KErrNone )
            {
-           iPeriodicTimer->Start( KPeriodicTimerInterval5Sec,
-                   KPeriodicTimerInterval5Sec, TCallBack( TimerCallBack, this ) );
+		   const TInt KPeriodicTimerInterval = 100000; // 0.1 sec
+           iPeriodicTimer->Start( KPeriodicTimerInterval,
+                   KPeriodicTimerInterval, TCallBack( TimerCallBack, this ) );
            iSkinId = KAknsIIDQgnHomeRefreshing1;
-           iAnimationSarted = ETrue;
            }
         }
     }
@@ -214,14 +209,13 @@ void CXnAnimationAdapter::StartAnimation()
 //
 void CXnAnimationAdapter::StopAnimation()
     {
-    if ( iAnimationSarted )
+    if ( iPeriodicTimer && iPeriodicTimer->IsActive() )
         {
         iPeriodicTimer->Cancel();
-        delete iPeriodicTimer;
-        iPeriodicTimer = NULL;
-        iSkinId = KAknsIIDNone;
-        iAnimationSarted = EFalse;
         }
+    delete iPeriodicTimer;
+    iPeriodicTimer = NULL;
+    iSkinId = KAknsIIDNone;
     }
 
 // End of File

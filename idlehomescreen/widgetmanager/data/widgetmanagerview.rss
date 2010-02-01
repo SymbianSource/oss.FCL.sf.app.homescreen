@@ -179,6 +179,21 @@ RESOURCE TBUF r_qtn_wm_uninst_not_allowed
     {
     buf = qtn_wm_uninst_not_allowed;
     }
+    
+RESOURCE TBUF r_qtn_wm_uninstall_widget_query
+    {
+    buf = qtn_wm_uninstall_widget_query;
+    }
+
+RESOURCE TBUF r_qtn_wm_uninst_process_busy
+    {
+    buf = qtn_wm_uninst_process_busy;
+    }
+
+RESOURCE TBUF r_qtn_wm_uninstall_text
+    {
+    buf = qtn_wm_uninstall_text;
+    }
 
 // ----------------------------------------------------
 // Wm Details dialog

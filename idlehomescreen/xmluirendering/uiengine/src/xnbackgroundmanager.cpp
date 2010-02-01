@@ -55,8 +55,7 @@ const TUid KDummyUid = { 0x0000000 };
 //
 CXnBackgroundManager::CXnBackgroundManager( CXnViewManager& aViewManager, CHspsWrapper& aWrapper )
     : iViewManager( aViewManager ), 
-      iHspsWrapper( aWrapper ),
-      iTransparencyEnabled( ETrue )
+      iHspsWrapper( aWrapper )
     {
     }
 
@@ -65,10 +64,7 @@ CXnBackgroundManager::CXnBackgroundManager( CXnViewManager& aViewManager, CHspsW
 // -----------------------------------------------------------------------------
 //
 void CXnBackgroundManager::ConstructL()
-    {
-    // Register for view activation & deactivation
-    iViewManager.AppUiAdapter().AddViewActivationObserverL( this );
-    
+    {    
     CreateWindowL();
 
     iBgContext = CAknsLayeredBackgroundControlContext::NewL(
@@ -133,27 +129,23 @@ CXnBackgroundManager::~CXnBackgroundManager()
 //    
 void CXnBackgroundManager::Draw(const TRect& aRect) const
     {
-    if( iTransparencyEnabled )
+    if( iFeatureSuppoted )
         {
-        if( iFeatureSuppoted )
+        CXnViewData& viewData( iViewManager.ActiveViewData() );
+        CFbsBitmap* wallpaper = viewData.WallpaperImage();
+        if( wallpaper )
             {
-            CXnViewData& viewData( iViewManager.ActiveViewData() );
-            CFbsBitmap* wallpaper = viewData.WallpaperImage();
-            if( wallpaper )
-                {
-                SystemGc().BitBlt( TPoint(0, 0), wallpaper ); 
-                return;
-                }
-            }
-        else if( iBgImage )
-            {
-            SystemGc().BitBlt( TPoint(0, 0), iBgImage ); 
+            SystemGc().BitBlt( TPoint(0, 0), wallpaper ); 
             return;
-            }    
+            }
         }
+    else if( iBgImage )
+        {
+        SystemGc().BitBlt( TPoint(0, 0), iBgImage ); 
+        return;
+        }    
     MAknsSkinInstance* skin( AknsUtils::SkinInstance() );     
-    AknsDrawUtils::Background( skin, iBgContext, this, 
-        SystemGc(), aRect );
+    AknsDrawUtils::Background( skin, iBgContext, this, SystemGc(), aRect );
     }
 
 // -----------------------------------------------------------------------------
@@ -178,6 +170,21 @@ void CXnBackgroundManager::SizeChanged()
         }
     iBgContext->SetRect( iRect );
     }
+
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::MakeVisible
+// -----------------------------------------------------------------------------
+// 
+void CXnBackgroundManager::MakeVisible( TBool aVisible )
+    {    
+    CCoeControl::MakeVisible( aVisible );
+    if ( aVisible && iScreenUpdateNeeded )
+        {
+        iScreenUpdateNeeded = EFalse;
+        DrawNow();
+        }
+    }
+
 
 // -----------------------------------------------------------------------------
 // Handle disk drive notifications.
@@ -243,18 +250,49 @@ TInt CXnBackgroundManager::CacheWallpaperL( const TDesC& aFileName, CXnViewData&
 // CXnBackgroundManager::AddWallpaperL
 // ---------------------------------------------------------------------------
 //
-void CXnBackgroundManager::AddWallpaperL( const TDesC& aFileName )
+TInt CXnBackgroundManager::AddWallpaperL( const TDesC& aFileName )
     {
+    TInt retVal = KErrNone;
     if( iFeatureSuppoted )
         {
-        AddPageSpecificWallpaperL( aFileName );
+        retVal = AddPageSpecificWallpaperL( aFileName );
         }
     else
         {
-        AddCommonWallpaperL( aFileName );
+        retVal = AddCommonWallpaperL( aFileName );
         }
+    return retVal;
     }
 
+// ---------------------------------------------------------------------------
+// CXnBackgroundManager::DeleteWallpaper
+// ---------------------------------------------------------------------------
+//
+void CXnBackgroundManager::DeleteWallpaper( CXnViewData& aViewData )
+    {
+    if( iFeatureSuppoted )
+        {
+        const TDesC& path = aViewData.WallpaperImagePath();
+        if( path != KNullDesC )
+            {
+            RemoveWallpaperFromCache( path, &aViewData );
+            TRAP_IGNORE( aViewData.SetWallpaperImagePathL( KNullDesC ) );
+            aViewData.SetWallpaperImage( NULL );
+            }
+        }
+    else
+        {
+        if( iBgImagePath )
+            {
+            iSkinSrv.RemoveWallpaper( *iBgImagePath );          
+            delete iBgImagePath;
+            iBgImagePath = NULL;
+            }
+        delete iBgImage;
+        iBgImage = NULL;
+        }
+    }
+    
 // ---------------------------------------------------------------------------
 // CXnBackgroundManager::ActivatedL
 // ---------------------------------------------------------------------------
@@ -273,7 +311,7 @@ void CXnBackgroundManager::WallpaperChanged( CXnViewData& aOldView, CXnViewData&
     if( iFeatureSuppoted && 
         aOldView.WallpaperImagePath().Compare( aNewView.WallpaperImagePath() ) )
         {
-        DrawNow();
+        UpdateScreen();
         TInt err = AknsWallpaperUtils::SetIdleWallpaper( aNewView.WallpaperImagePath(), NULL );
         if( err == KErrNone )
             {
@@ -446,7 +484,7 @@ void CXnBackgroundManager::SkinConfigurationChanged(
         }
     else if ( aReason == EAknsSkinStatusConfigurationDeployed )
         {
-        DrawNow();
+        UpdateScreen();
         }
     }
     
@@ -457,27 +495,6 @@ void CXnBackgroundManager::SkinConfigurationChanged(
 void CXnBackgroundManager::SkinPackageChanged(
         const TAknsSkinStatusPackageChangeReason /*aReason*/ )
     {
-    }
-
-// ----------------------------------------------------------------------------
-// CXnBackgroundManager::HandleViewActivation()
-// ----------------------------------------------------------------------------
-//
-void CXnBackgroundManager::HandleViewActivation( 
-    const TVwsViewId& aNewlyActivatedViewId, 
-    const TVwsViewId& aViewIdToBeDeactivated )
-    {
-    TVwsViewId viewId( iViewManager.AppUiAdapter().View().ViewId() );
-    if ( viewId == aNewlyActivatedViewId && !iTransparencyEnabled )
-        {
-        iTransparencyEnabled = ETrue;
-        DrawNow();
-        }
-    else if ( viewId == aViewIdToBeDeactivated && iTransparencyEnabled )
-        {
-        iTransparencyEnabled = EFalse;
-        DrawNow();
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -493,16 +510,21 @@ void CXnBackgroundManager::CleanCache()
 // CXnBackgroundManager::RemoveWallpaper
 // -----------------------------------------------------------------------------
 //
-void CXnBackgroundManager::RemoveWallpaperFromCache( const TDesC& aFileName )
+void CXnBackgroundManager::RemoveWallpaperFromCache( const TDesC& aFileName,
+    CXnViewData* aViewData )
     {
-    CXnViewData& activeViewData( iViewManager.ActiveViewData() );
+    CXnViewData* currentViewData( aViewData );
+    if( !currentViewData )
+        {
+        currentViewData = &iViewManager.ActiveViewData();
+        }
     CXnRootData& rootData = iViewManager.ActiveAppData();
     RPointerArray<CXnPluginData>& rootDataArr = rootData.PluginData();
 
     for( TInt i = 0; i < rootDataArr.Count(); i++ )
         {
         CXnViewData* viewData = static_cast<CXnViewData*>( rootDataArr[i] );
-        if( viewData == &activeViewData )
+        if( currentViewData == viewData )
             {
             continue;
             }
@@ -587,7 +609,7 @@ void CXnBackgroundManager::RemovableDiskInsertedL()
             }
         if( drawingNeeded )
             {
-            DrawNow();
+            UpdateScreen();
             }    
         }
     else
@@ -634,8 +656,9 @@ void CXnBackgroundManager::CheckFeatureTypeL()
 // CXnBackgroundManager::AddPageSpecificWallpaperL
 // ---------------------------------------------------------------------------
 //
-void CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
+TInt CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
     {
+    TInt err = KErrNone;
     CXnViewData& viewData( iViewManager.ActiveViewData() );
     const TDesC& old = viewData.WallpaperImagePath();
 
@@ -656,10 +679,10 @@ void CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
                 }
             else
                 {
-                return;
+                // image is corrupted or format is not supported
+                return KErrCACorruptContent;
                 }
             }
-        
         // WallpaperImage changed back to default. Update view data.
         else
             {
@@ -668,27 +691,29 @@ void CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
             }
 
         // Update screen
-        DrawNow();        
-
-        TInt err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
+        UpdateScreen();
+        
+        err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
         if( err == KErrNone )
             {
-            iIntUpdate++;        
-            }                
+            iIntUpdate++;
+            }
         }
+    return err;
     }
-
+        
 // ---------------------------------------------------------------------------
 // CXnBackgroundManager::AddCommonWallpaperL
 // ---------------------------------------------------------------------------
 //
-void CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName, 
+TInt CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName, 
     TBool aSave )
     {
+    TInt err = KErrNone;      
     // Remove old from the cache
     if( iBgImagePath )
         {
-        iSkinSrv.RemoveWallpaper( aFileName );          
+        iSkinSrv.RemoveWallpaper( *iBgImagePath );          
         delete iBgImagePath;
         iBgImagePath = NULL;
         }
@@ -703,7 +728,8 @@ void CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
         TRAP( err, iSkinSrv.AddWallpaperL( aFileName, iRect.Size() ) );
         if( err )
             {
-            return;
+            // image is corrupted or format is not supported
+            return KErrCACorruptContent;
             }
         TRAP( err, iBgImage = iSkinSrv.WallpaperImageL( aFileName ) );
         if( err )
@@ -711,12 +737,13 @@ void CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
             iSkinSrv.RemoveWallpaper( aFileName );
             delete iBgImage;
             iBgImage = NULL;
-            return;
+            // image is corrupted or format is not supported
+            return KErrCACorruptContent;
             }
         }
     
     // Update screen
-    DrawNow();        
+    UpdateScreen();        
 
     // Save path to cenrep
     if( aSave )
@@ -724,11 +751,13 @@ void CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
         SaveWallpaperL();
         }
 
-    TInt err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
-    if( !err )
+    err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
+    if( err == KErrNone )
         {
-        iIntUpdate++;        
-        }                
+        iIntUpdate++;
+        }
+
+    return err;
     }
 
 // ---------------------------------------------------------------------------
@@ -784,11 +813,27 @@ void CXnBackgroundManager::ReadWallpaperFromCenrepL()
                         }
                     }                
                 }
-            DrawNow();
+            UpdateScreen();
             }
 
         CleanupStack::PopAndDestroy( repository );
         }    
+    }
+
+// ---------------------------------------------------------------------------
+// CXnBackgroundManager::UpdateScreen
+// ---------------------------------------------------------------------------
+//
+void CXnBackgroundManager::UpdateScreen()
+    {
+    if( !IsVisible() )
+        {
+        iScreenUpdateNeeded = ETrue;
+        }
+    else
+        {
+        DrawNow();  
+        }
     }
 
 //  End of File

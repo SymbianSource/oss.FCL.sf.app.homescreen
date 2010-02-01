@@ -106,19 +106,10 @@ void CXnWidgetExtensionAdapter::ConstructL()
     CXnType* typeInfo = iNode.Node().Type();
     const TDesC8& type = typeInfo->Type();
 
-    if ( type == KPopUpText )
+    if ( ( type != KPopUpText ) &&
+         ( Window().SetTransparencyAlphaChannel() == KErrNone ) )
         {
-        // popup element does not capture pointer events
-        SetPointerCapture( ETrue );      
-        }
-    else
-        {
-        // widget extension node
-        SetPointerCapture( ETrue );
-        if ( Window().SetTransparencyAlphaChannel() == KErrNone )
-            {
-            Window().SetBackgroundColor( ~0 );
-            }     
+        Window().SetBackgroundColor( ~0 );     
         }
     iUiEngine = iNode.Node().UiEngine();
     CXnControlAdapter::ConstructL( iNode );
@@ -142,78 +133,77 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
         return;
         }
 
+    SetPointerCapture( aVisible );
+    
     CXnPluginData& plugin( 
             iAppUiAdapter->ViewManager().ActiveViewData().Plugin( &iNode.Node() ) );
 
     plugin.SetIsDisplayingPopup( aVisible, &iNode.Node() );
     
-    if ( aVisible )
-        {
-        
-        CXnType* typeInfo = iNode.Node().Type();
-        const TDesC8& type = typeInfo->Type();
+    CXnType* typeInfo = iNode.Node().Type();
+    const TDesC8& type = typeInfo->Type();
 
-        if ( type == KPopUpText )
-            {            
-            // read position-hint property and set-up its variable
-            CXnProperty* positionHintProp = NULL;
-            TRAP_IGNORE( positionHintProp = iNode.Node().GetPropertyL( KPositionHint ) );
-                       
-            if ( positionHintProp )
-                {
-                const TDesC8& displayHintVal = positionHintProp->StringValue();
-                        
-                if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveLeft )
-                    {
-                    iPositionHint = EAboveLeft;
-                    }
-                else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveRight )
-                    {
-                    iPositionHint = EAboveRight;
-                    }
-                else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowLeft )
-                    {
-                    iPositionHint = EBelowLeft;
-                    }
-                else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowRight )
-                    {
-                    iPositionHint = EBelowRight;
-                    }
-                else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KRight )
-                    {
-                    iPositionHint = ERight;
-                    }
-                else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KLeft )
-                    {
-                    iPositionHint = ELeft;
-                    }
-                else 
-                    {
-                     // if the value if of unknown type, use default one
-                     if ( AknLayoutUtils::LayoutMirrored() )
-                         {
-                         iPositionHint = EAboveRight;
-                         }
-                         else
-                         {
-                         iPositionHint = EAboveLeft; 
-                         }
-                     }
-            
-                if ( iPositionHint != ENone )
-                    {    
-                    // the popup is going visible and position-hind is available
-                    // calculate its position
-                    CalculatePosition();
-                    }
-                }
-            }       
-        DrawableWindow()->FadeBehind( ETrue );
-        }
-    else
+    if ( type != KPopUpText )
         {
-        DrawableWindow()->FadeBehind( EFalse );
+        DrawableWindow()->FadeBehind( aVisible );
         }
+    
+    if ( aVisible && type == KPopUpText )
+        {        
+        // read position-hint property and set-up its variable
+        CXnProperty* positionHintProp = NULL;
+        TRAP_IGNORE( positionHintProp = iNode.Node().GetPropertyL( KPositionHint ) );
+                   
+        if ( positionHintProp )
+            {
+            const TDesC8& displayHintVal = positionHintProp->StringValue();
+                    
+            if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveLeft )
+                {
+                iPositionHint = EAboveLeft;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveRight )
+                {
+                iPositionHint = EAboveRight;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowLeft )
+                {
+                iPositionHint = EBelowLeft;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowRight )
+                {
+                iPositionHint = EBelowRight;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KRight )
+                {
+                iPositionHint = ERight;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KLeft )
+                {
+                iPositionHint = ELeft;
+                }
+            else 
+                {
+                 // if the value if of unknown type, use default one
+                 if ( AknLayoutUtils::LayoutMirrored() )
+                     {
+                     iPositionHint = EAboveRight;
+                     }
+                     else
+                     {
+                     iPositionHint = EAboveLeft; 
+                     }
+                 }
+        
+            if ( iPositionHint != ENone )
+                {    
+                // the popup is going visible and position-hind is available
+                // calculate its position
+                CalculatePosition();
+                }
+            }        
+        }
+
     CCoeControl::MakeVisible( aVisible );            
     }
 
@@ -255,38 +245,41 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                 CXnNode* parentN(iUiEngine->FindNodeByIdL( parentIdVal,
                         iNode.Node().Namespace() ) );
                 
-                TRect clientRect =
-                        static_cast<CEikAppUi&> ( *iAppUiAdapter ).ClientRect();
-                TRect parentRect = parentN->Rect();
-                parentRect.Move( clientRect.iTl );
-                
-                if ( !parentRect.Contains( aPointerEvent.iParentPosition ) )
+                if ( parentN )
                     {
-                    // tap was neither in popup nor in its parent -
-                    // we can close it
-                    if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+                    TRect clientRect =
+                            static_cast<CEikAppUi&> ( *iAppUiAdapter ).ClientRect();
+                    TRect parentRect = parentN->Rect();
+                    parentRect.Move( clientRect.iTl );
+                    
+                    if ( !parentRect.Contains( aPointerEvent.iParentPosition ) )
                         {
-                        CXnDomStringPool* sp =
-                            iNode.Node().DomNode()->StringPool();
-                        CXnProperty* prop = CXnProperty::NewL( KDisplay, KNone,
-                        CXnDomPropertyValue::EString, *sp );
-                        CleanupStack::PushL( prop );
-                        iNode.Node().SetPropertyL( prop );
-                        CleanupStack::Pop( prop );
+                        // tap was neither in popup nor in its parent -
+                        // we can close it
+                        if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+                            {
+                            CXnDomStringPool* sp =
+                                iNode.Node().DomNode()->StringPool();
+                            CXnProperty* prop = CXnProperty::NewL( KDisplay, KNone,
+                            CXnDomPropertyValue::EString, *sp );
+                            CleanupStack::PushL( prop );
+                            iNode.Node().SetPropertyL( prop );
+                            CleanupStack::Pop( prop );
+                            return;
+                            }
+                        }
+                    else
+                        {
+                        // tap was made inside of popup parent
+                        // we pass the event to it after
+                        // recalculating the taping point
+                        TPointerEvent newPointerEvent;
+                        newPointerEvent.Copy( aPointerEvent );
+                        newPointerEvent.iPosition = TPoint(
+                                 aPointerEvent.iParentPosition - clientRect.iTl );
+                        parentN->Control()->HandlePointerEventL( newPointerEvent );
                         return;
                         }
-                    }
-                else
-                    {
-                    // tap was made inside of popup parent
-                    // we pass the event to it after
-                    // recalculating the taping point
-                    TPointerEvent newPointerEvent;
-                    newPointerEvent.Copy( aPointerEvent );
-                    newPointerEvent.iPosition = TPoint(
-                             aPointerEvent.iParentPosition - clientRect.iTl );
-                    parentN->Control()->HandlePointerEventL( newPointerEvent );
-                    return;
                     }
                 }
             }

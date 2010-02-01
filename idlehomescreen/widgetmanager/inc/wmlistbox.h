@@ -379,11 +379,6 @@ private:
     RWidgetDataValues   iWidgetDatas;
 
     /** 
-     * array of trashed widget data objects, not visible in list. 
-     */
-    RPointerArray<CWmWidgetData> iTrashedData;
-
-    /** 
      * the currently active item ADD button's rectangle, for push recognition 
      */
     TRect               iButtonRect;

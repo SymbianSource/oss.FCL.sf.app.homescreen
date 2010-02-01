@@ -1096,7 +1096,7 @@ CEikImage* CXnMenuAdapter::PrepareSoftkeyImageL( const CXnSoftkeyItem& aItem, co
 //
 void CXnMenuAdapter::SetSoftkeyAppearanceL( CXnSoftkeyItem& aItem )
     {
-    if( IsNodeVisibleL( *aItem.iNode) )
+    if( iContainer && IsNodeVisibleL( *aItem.iNode) )
         {
         if( aItem.iImageOn )
             {
@@ -1104,16 +1104,13 @@ void CXnMenuAdapter::SetSoftkeyAppearanceL( CXnSoftkeyItem& aItem )
             }
         else if( aItem.iLabel )// change label
             {
-            TBool left( EFalse );
             if ( aItem.iPosition == CEikButtonGroupContainer::ELeftSoftkeyPosition )
                 {
-                left = ETrue;
-                EikSoftkeyImage::SetLabel( iContainer,left );
+                EikSoftkeyImage::SetLabel( iContainer, ETrue );
                 }
             else if ( aItem.iPosition == CEikButtonGroupContainer::ERightSoftkeyPosition )
                 {
-                left = EFalse;
-                EikSoftkeyImage::SetLabel( iContainer,left );
+                EikSoftkeyImage::SetLabel( iContainer, EFalse );
                 }
 
             iContainer->SetCommandL( aItem.iPosition, aItem.iCommandId, *aItem.iLabel );

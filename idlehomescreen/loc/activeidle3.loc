@@ -290,3 +290,10 @@
 // r: TB9.2
 //
 #define qtn_hs_slideshow "Slideshow"
+
+// d: Shown when user select corrupted image file as a wallpaper 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_corrupted_image_note "Unable to select. Image corrupted or format not supported."

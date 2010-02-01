@@ -65,6 +65,7 @@
 #include "wmportalbutton.h"
 #include "wmwidgetloaderao.h"
 #include "wmconfiguration.h"
+#include "wminstaller.h"
 
 // CONSTANTS
 const TInt KTextLimit = 40; // Text-limit for find-field
@@ -213,31 +214,13 @@ void CWmMainContainer::LayoutControls()
 	else
 	    {
 	    // two buttons
-        // **********************************
-        // we do not have layouts for two buttons yet - layout manually
-        TAknWindowLineLayout btnPane = AknLayoutScalable_Apps
-            ::wgtman_btn_pane( iLandscape ? 1 : 0 ).LayoutLine();
-	    TAknLayoutRect layoutrect;
-	    layoutrect.LayoutRect( rect, btnPane );
-	    TRect r( layoutrect.Rect() );
-	    TRect r1, r2;
-	    const TInt gap = 3;
-	    if ( iLandscape )
-	        {
-	        r1 = TRect( r.iTl, TSize( r.Width(), r.Height() / 2 - gap ) );
-	        r2 = r1;
-            r2.Move( 0, r.Height() / 2 + gap );
-	        }
-	    else
-	        {
-            r1 = TRect( r.iTl, TSize( r.Width() / 2 - gap, r.Height() ) );
-            r2 = r1;
-            if (iMirrored) r1.Move( r.Width() / 2 + gap, 0 );
-            else r2.Move( r.Width() / 2 + gap, 0 );
-            }
-        iPortalButtonOne->SetRect( r1 );
-        iPortalButtonTwo->SetRect( r2 );
-        // *************************************
+        TInt variety = (iLandscape ? 3 : 2);
+        TAknWindowLineLayout oviBtnLayout = AknLayoutScalable_Apps
+                ::wgtman_btn_pane( variety ).LayoutLine();
+        TAknWindowLineLayout operatorBtnLayout = AknLayoutScalable_Apps
+                ::wgtman_btn_pane_cp_01( variety ).LayoutLine();
+        AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, oviBtnLayout );
+        AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, operatorBtnLayout );
 	    }
     
 	// layout iWidgetsList
@@ -927,7 +910,7 @@ TBool CWmMainContainer::CanDoAdd()
     {
     TBool retVal = EFalse;
     CWmWidgetData* data = iWidgetsList->WidgetData();
-    if ( WidgetSelected() && data )
+    if ( WidgetSelected() && data && !data->IsUninstalling() )
         {
         if ( data->HsContentInfo().CanBeAdded() )
             retVal = ETrue;
@@ -943,7 +926,7 @@ TBool CWmMainContainer::CanDoUninstall()
     {
     TBool retVal( EFalse );
     CWmWidgetData* data = iWidgetsList->WidgetData();
-    if ( WidgetSelected() && data )
+    if ( WidgetSelected() && data && !data->IsUninstalling() )
         {
         if ( data->WidgetType() == CWmWidgetData::ECps &&
                 data->PublisherUid() != KNullUid )
@@ -961,13 +944,17 @@ TBool CWmMainContainer::CanDoUninstall()
 TBool CWmMainContainer::CanDoLaunch() 
     {
     TBool retVal(EFalse);
+    
     if ( WidgetSelected() )
         {
-        CWmWidgetData* data = iWidgetsList->WidgetData();        
-        if ( data && data->WidgetType() == CWmWidgetData::ECps &&
-            data->PublisherUid() != KNullUid )
+        CWmWidgetData* data = iWidgetsList->WidgetData();
+        if ( data && !data->IsUninstalling() )
             {
-            retVal = ETrue;
+            if ( data->WidgetType() == CWmWidgetData::ECps &&
+                data->PublisherUid() != KNullUid )
+                {
+                retVal = ETrue;
+                }
             }
         }
     return retVal;
@@ -1002,7 +989,8 @@ TBool CWmMainContainer::CanDoSort()
 //
 TBool CWmMainContainer::CanDoDetails()
     {
-    return ( WidgetSelected() && iWidgetsList->WidgetData() );
+    return ( WidgetSelected() && iWidgetsList->WidgetData() 
+            && !iWidgetsList->WidgetData()->IsUninstalling() );
     }
 
 // ---------------------------------------------------------
@@ -1021,7 +1009,7 @@ TBool CWmMainContainer::CanDoHelp()
 void CWmMainContainer::AddWidgetToHomeScreenL()
     {
     CWmWidgetData* data = iWidgetsList->WidgetData();
-    if ( !iClosingDown && data )
+    if ( !iClosingDown && data && !data->IsUninstalling() )
         {
         if ( iFindbox && iFindPaneIsVisible )
             {
@@ -1200,7 +1188,21 @@ void CWmMainContainer::UninstallWidgetL()
     {
     if ( CanDoUninstall() )
         {
-        iWidgetsList->WidgetData()->UnInstallL();
+        CWmWidgetData* data = iWidgetsList->WidgetData();
+        if ( data )
+            {
+            if ( iWmPlugin.ResourceLoader().QueryPopupL( 
+                    R_QTN_WM_UNINSTALL_WIDGET_QUERY, data->Name() ) )
+                {
+                
+                TRAPD( err, iWmPlugin.WmInstaller().UninstallL( data ) );
+                if ( err != KErrNone )
+                    {
+                    iWmPlugin.ResourceLoader().InfoPopupL( 
+                            R_QTN_WM_UNINST_PROCESS_BUSY, KNullDesC );
+                    }
+                }
+            }
         }
     }
 
@@ -1283,17 +1285,11 @@ void CWmMainContainer::RemoveCtrlsFromStack()
 void CWmMainContainer::HandleListBoxEventL(
         CEikListBox* /*aListBox*/, TListBoxEvent aEventType )
     {
-    if ( aEventType == EEventEnterKeyPressed ||
-        aEventType == EEventItemSingleClicked )
+    if ( ( aEventType == EEventEnterKeyPressed ||
+           aEventType == EEventItemSingleClicked ) 
+           && !iClosingDown )    
         {
-        if ( iFindPaneIsVisible )
-            {
-            DeactivateFindPaneL();
-            }
-        else if ( !iClosingDown )
-            {
-            AddWidgetToHomeScreenL();
-            }
+        AddWidgetToHomeScreenL();
         }
     }
 
@@ -1314,7 +1310,7 @@ void CWmMainContainer::LaunchDetailsDialogL()
         CWmDetailsDlg* dlg = CWmDetailsDlg::NewL(
                 data->Name(), data->Description(), 
                 data->HsContentInfo().CanBeAdded(),
-                logo, mask, iBgContext );
+                logo, mask );
 
         if ( dlg && dlg->ExecuteLD() == ECbaAddToHs )
             {

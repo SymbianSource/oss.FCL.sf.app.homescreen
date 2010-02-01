@@ -214,14 +214,7 @@ void CMmGridView::UpdateSelectionL( TSelectionMode aSelectionMode )
 //
 void CMmGridView::Draw(const TRect* aClipRect) const
     {
-    CMmListBoxItemDrawer* itemDrawer =
-            STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
-    TSize size = itemDrawer->GetItemSize( 0, EFalse );
-    if ( itemDrawer->ItemCellSize() != size  )
-        {
-        const_cast<CMmGridView*>( this )->SetItemHeight( size.iHeight );
-        const_cast<CMmGridView*>( this )->SetColumnWidth( size.iWidth );
-        }
+    const_cast<CMmGridView*>( this )->UpdateItemHeightAndWidth();
     DoDraw( aClipRect );
     }
 
@@ -298,5 +291,24 @@ void CMmGridView::SetItemHeight(TInt aItemHeight)
 	
 	CAknGridView::SetItemHeight(aItemHeight);
 	}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmGridView::UpdateItemHeightAndWidth()
+    {
+    if ( iModel && iModel->NumberOfItems() )
+        {
+        CMmListBoxItemDrawer* itemDrawer =
+                STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
+        TSize size = itemDrawer->GetItemSize( 0, EFalse );
+        if ( itemDrawer->ItemCellSize() != size  )
+            {
+            const_cast<CMmGridView*>( this )->SetItemHeight( size.iHeight );
+            const_cast<CMmGridView*>( this )->SetColumnWidth( size.iWidth );
+            }
+        }
+    }
 
 //End of file

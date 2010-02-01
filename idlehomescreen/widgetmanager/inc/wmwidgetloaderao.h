@@ -121,6 +121,8 @@ private: // data
     /** persistent widget order */
     CWmPersistentWidgetOrder* iWidgetOrder;
     
+	/** uid of currently unistalled widget */
+    TUid iUninstallUid;
     };
 
 #endif // WMWIDGETLOADERAO_H_

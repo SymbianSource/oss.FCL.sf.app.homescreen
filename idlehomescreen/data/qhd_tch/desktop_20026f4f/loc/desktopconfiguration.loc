@@ -19,10 +19,10 @@
 // l: listrow_wgtman_pane_t1
 // w:
 // r: TB9.2
-#define qtn_desktop_configuration_name  "Shortcut"
+#define qtn_desktop_configuration_name  "Shortcuts"
 
 // d: Shortcut widget description
 // l: listrow_wgtman_pane_t2
 // w:
 // r: TB9.2
-#define qtn_desktop_configuration_desc  "Provides quick access to your favorite applications from Home Screen."
+#define qtn_desktop_configuration_desc  "Quick access to your favorite applications from Home Screen."

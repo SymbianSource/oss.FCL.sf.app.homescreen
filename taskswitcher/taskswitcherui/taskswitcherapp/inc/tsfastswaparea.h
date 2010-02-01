@@ -117,11 +117,6 @@ public:
     void TryCloseAppL( TInt aIndex, TBool aSuppressRendering = EFalse );
     
     /**
-     * Sends close msg to given app if user confirms the query.
-     */
-    void TryCloseAppWithQueryL( TInt aIndex );
-    
-    /**
      * Tries to Close all applications that cn be closed
      */
     void TryCloseAllL();
@@ -284,13 +279,6 @@ private:
      * @param   aPoint  position for the popup
      */
     TBool ShowPopupL( TInt aIndex, const TPoint& aPoint );
-    
-    /**
-     * Shows the app close confirmation query.
-     * @param   aIndex  index of item in the grid
-     * @return ETrue if accepted EFalse if canceled
-     */
-    TBool ConfirmCloseL( TInt aIndex );
 
     /**
      * Sends the data-changed notification.
@@ -380,6 +368,12 @@ private:
      * Launches increasing pop-up feedback.
      */
     void LaunchPopupFeedback();
+    
+    /**
+     * Show highlight when disabled and 
+     * consume EEventKeyUp that follows after event that swiched on the highlight.
+     */
+    TKeyResponse ShowHighlightOnKeyEvent(const TKeyEvent& aKeyEvent, TEventCode aType);
 
 private: // Data
     
@@ -406,9 +400,6 @@ private: // Data
     CAknStylusPopUpMenu* iPopup;
     // the aIndex argument of ShowPopupL is stored here
     TInt iAppIndexForPopup;
-
-    // query shown when pressing Clear key in fsw, own
-    CAknQueryDialog* iConfirmCloseQuery;
 
     // Timestamp of the last application close operation
     TTime iTimeOfLastClose;

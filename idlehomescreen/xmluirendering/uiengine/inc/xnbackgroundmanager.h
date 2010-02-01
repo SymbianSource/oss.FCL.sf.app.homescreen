@@ -42,8 +42,7 @@ using namespace hspswrapper;
 *  @since S60 v5.0
 */
 NONSHARABLE_CLASS( CXnBackgroundManager ) : public CCoeControl,
-    public MAknsSkinChangeObserver, public MCoeViewActivationObserver,
-    public MDiskNotifyHandlerCallback
+    public MAknsSkinChangeObserver, public MDiskNotifyHandlerCallback
     {
 public:
 
@@ -64,6 +63,7 @@ public:
      * 
      * @since S60 5.0
      * @param aFileName WallpaperImage image path and filename to be cached
+     * @param aViewData Page that owns the given wallpaper.
      * @return Error code.
      */            
     TInt CacheWallpaperL( const TDesC& aFileName, CXnViewData& aViewData );
@@ -73,8 +73,17 @@ public:
      * 
      * @since S60 5.0
      * @param aFileName WallpaperImage image path and filename
+     * @return Error code.
      */            
-    void AddWallpaperL( const TDesC& aFileName );
+    TInt AddWallpaperL( const TDesC& aFileName );
+
+    /**
+     * Deletes wallpaper from the given page as well as from the cache.
+     * 
+     * @since S60 5.0
+     * @param aViewData Page where the wallpaper is to be destroyed.
+     */            
+    void DeleteWallpaper( CXnViewData& aViewData );
 
     /**
      * Checks whether page specific wallpaper feature is activated or not.
@@ -98,7 +107,14 @@ public:
      * @param aNewView         New view 
      */
     void WallpaperChanged( CXnViewData& aOldView, CXnViewData& aNewView );
-   
+
+public: // Functions from base classes    
+
+    /**
+     * @see CCoeControl
+     */    
+    void MakeVisible( TBool aVisible );
+
 private: // Functions from base classes    
 
     /**
@@ -110,7 +126,7 @@ private: // Functions from base classes
      * see CCoeControl 
      */
     void SizeChanged();
-
+    
     /**
      * see MAknsSkinChangeObserver 
      */
@@ -129,16 +145,10 @@ private: // Functions from base classes
         const TAknsSkinStatusPackageChangeReason aReason );
 
     /**
-     * @see MCoeViewActivationObserver
-     */
-    void HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId, 
-        const TVwsViewId& aViewIdToBeDeactivated );
-
-    /**
     * From MDiskNotifyHandlerCallback.
     */
     void HandleNotifyDisk( TInt aError, const TDiskEvent& aEvent );
-    
+
 private:
     
     /**
@@ -157,12 +167,13 @@ private:
     void UpdateWallpapersL();
     void CleanCache();
     void RemoveWallpaperL( CXnViewData& aViewData );
-    void RemoveWallpaperFromCache( const TDesC& aFileName );
+    void RemoveWallpaperFromCache( const TDesC& aFileName, CXnViewData* aViewData = NULL );
     void RemovableDiskInsertedL();
     void CheckFeatureTypeL();
-    void AddPageSpecificWallpaperL( const TDesC& aFileName );
-    void AddCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue );
+    TInt AddPageSpecificWallpaperL( const TDesC& aFileName );
+    TInt AddCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue );
     void ReadWallpaperFromCenrepL();
+    void UpdateScreen();
 
 private: // data
 
@@ -215,12 +226,11 @@ private: // data
      * Internal wallpaper update in progress
      */
     TInt iIntUpdate;
-        
+
     /** 
-     * States whether transparent CBA and status pane is used. 
-     * Homescreen uses transparency, but e.g. Widget catalog does not.
+     * True if screen needs to be drawn when view becomes visible.
      */
-    TBool iTransparencyEnabled;
+    TBool iScreenUpdateNeeded;
 
     /** 
      * Pointer to wallpaper image. This is used only if same wallpaper 

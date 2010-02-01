@@ -59,6 +59,11 @@
 #include "xntimemon.h"
 #endif
 
+#ifdef _XN3_DEBUG_
+#include "xndepthfirsttreeiterator.h" // for TraceTreeL
+#endif
+
+
 // CONSTANTS
 const TInt KXnBorderThin = 1;
 const TInt KXnBorderMedium = 3;
@@ -8940,7 +8945,7 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
         // Bg rect is always screen size.
         TRect bgRect;
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, bgRect );
-        Editor()->BgManager().SetRect( bgRect );
+        iAppUiAdapter.ViewAdapter().BgManager().SetRect( bgRect );
 
         iEditMode->HandleScreenDeviceChangedL();
         

@@ -111,9 +111,11 @@ template< class T > CXnDepthFirstTreeIterator< T >*
 // -----------------------------------------------------------------------------
 //
 template< class T > CXnDepthFirstTreeIterator< T >::CXnDepthFirstTreeIterator(
-    T* aStartNode ) : iStart( aStartNode ), iStack( KMemoryAlocS )
+    T* aStartNode ):
+    iStart( aStartNode ),
+    iCurrent( aStartNode ),
+    iStack( KMemoryAlocS )
     {
-
     }
 
 // -----------------------------------------------------------------------------

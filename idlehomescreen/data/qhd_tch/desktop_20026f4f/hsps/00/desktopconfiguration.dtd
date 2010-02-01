@@ -29,7 +29,7 @@ qtn_desktop_configuration_name.release "TB9.2"
 qtn_desktop_configuration_name.description "Shortcut widget name"
 qtn_desktop_configuration_name.parents ""
 -->
-<!ENTITY qtn_desktop_configuration_name  "Shortcut">
+<!ENTITY qtn_desktop_configuration_name  "Shortcuts">
 
 <!--
 qtn_desktop_configuration_desc.attributes
@@ -38,4 +38,4 @@ qtn_desktop_configuration_desc.release "TB9.2"
 qtn_desktop_configuration_desc.description "Shortcut widget description"
 qtn_desktop_configuration_desc.parents ""
 -->
-<!ENTITY qtn_desktop_configuration_desc  "Provides quick access to your favorite applications from Home Screen.">
+<!ENTITY qtn_desktop_configuration_desc  "Quick access to your favorite applications from Home Screen.">

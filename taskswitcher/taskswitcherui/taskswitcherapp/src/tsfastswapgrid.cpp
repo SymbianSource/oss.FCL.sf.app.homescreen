@@ -29,6 +29,8 @@
   * ================================================================================
   */
 
+const TInt KCloseIconRedrawTime = 300000; // 0.3 second
+
 // -----------------------------------------------------------------------------
 // CTsFastSwapGrid::CTsFastSwapGrid
 // -----------------------------------------------------------------------------
@@ -50,6 +52,7 @@ CTsFastSwapGrid::~CTsFastSwapGrid()
     {
     iCloseItems.Close();
     delete iBgContext;
+    delete iCloseIconRedrawTimer;
     iFullyVisibleItems.Close();
     iPartialVisibleItems.Close();
     }
@@ -71,6 +74,8 @@ void CTsFastSwapGrid::ConstructL( const CCoeControl* aParent )
                ETrue );
     iBgContext->SetCenter( KAknsIIDQsnFrPopupCenter );
     iVisibleViewRect = TRect( 0, 0, 0, 0 );
+    iCloseIconRedrawTimer = new (ELeave) CTsFastSwapTimer( *this );
+    iCloseIconRedrawTimer->ConstructL();
     }
 
 // -----------------------------------------------------------------------------
@@ -134,9 +139,9 @@ void CTsFastSwapGrid::HandlePointerEventL( const TPointerEvent &aPointerEvent )
                                                   ETouchFeedbackBasicButton, 
                                                   ETouchFeedbackVibra, 
                                                   aPointerEvent);
-                        iFastSwapGridObserver->HandleCloseEventL( hitDataIdx );
+                        iCloseIconRedrawTimer->Cancel();
+                        iCloseIconRedrawTimer->After(KCloseIconRedrawTime);
                         }
-                    ResetCloseHit();
                     if ( GridBehaviour() == EHybrid )
                         {
                         ShowHighlight();
@@ -253,6 +258,18 @@ void CTsFastSwapGrid::CreateItemDrawerL()
     LoadCloseIcon();
     }
 
+// -----------------------------------------------------------------------------
+// CTsFastSwapGrid::TimerCompletedL
+// -----------------------------------------------------------------------------
+//
+void CTsFastSwapGrid::TimerCompletedL( CTsFastSwapTimer* aSource )
+    {
+    if ( aSource == iCloseIconRedrawTimer )
+        {
+        iFastSwapGridObserver->HandleCloseEventL( iCloseIconHitIdx );
+        ResetCloseHit();
+        }
+    }
 
 // -----------------------------------------------------------------------------
 // CTsFastSwapGrid::SetCloseItemsL
@@ -410,13 +427,16 @@ void CTsFastSwapGrid::LoadCloseIcon()
     CFbsBitmap* icon = NULL;
     CFbsBitmap* mask = NULL;
 
-    TRAP_IGNORE(AknsUtils::CreateIconLC( AknsUtils::SkinInstance(),
+    TRAP_IGNORE(AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(),
                 KAknsIIDQgnIndiItutListCollapse,
+                KAknsIIDQsnTextColors,    // we use text color here, eventhough this is an icon
+                EAknsCIQsnTextColorsCG13, // softkey text color
                 icon,
                 mask,
                 KAvkonBitmapFile,
                 EMbmAvkonQgn_indi_button_preview_close,
-                EMbmAvkonQgn_indi_button_preview_close_mask
+                EMbmAvkonQgn_indi_button_preview_close_mask,
+                KRgbWhite
                 );
                 CleanupStack::Pop( 2 ); // codescanner::cleanup
                 );

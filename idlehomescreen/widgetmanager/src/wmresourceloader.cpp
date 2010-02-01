@@ -66,6 +66,7 @@ CWmResourceLoader::~CWmResourceLoader()
     delete iNote;
     delete iNoDescription;
     delete iWrtDescription;
+    delete iUninstalling;
     }
 
 // ---------------------------------------------------------
@@ -84,6 +85,9 @@ void CWmResourceLoader::ConstructL()
     
     iWrtDescription = StringLoader::LoadL( 
             R_QTN_WM_WIDGET_DETAILS_WRT, &iEnv  );
+    
+    iUninstalling = StringLoader::LoadL( 
+            R_QTN_WM_UNINSTALL_TEXT, &iEnv  );
     }
 
 // ---------------------------------------------------------
@@ -188,6 +192,18 @@ void CWmResourceLoader::InfoPopupL( TInt aResourceId, const TDesC& aString )
     }
 
 // ---------------------------------------------------------
+// CWmResourceLoader::QueryPopupL
+// ---------------------------------------------------------
+//
+TBool CWmResourceLoader::QueryPopupL( TInt aResourceId, const TDesC& aString )
+    {
+    HBufC* queryMsg = LoadStringLC( aResourceId, aString, &iEnv );
+    TBool resp = iEnv.QueryWinL( *queryMsg, KNullDesC );
+    CleanupStack::PopAndDestroy( queryMsg );
+    return resp;
+    }
+
+// ---------------------------------------------------------
 // CWmResourceLoader::ErrorPopup
 // ---------------------------------------------------------
 //
@@ -212,6 +228,15 @@ const TDesC& CWmResourceLoader::NoDescription()
 const TDesC& CWmResourceLoader::WrtDescription()
     {
     return *iWrtDescription;
+    }
+
+// ---------------------------------------------------------
+// CWmResourceLoader::Uninstalling
+// ---------------------------------------------------------
+//
+const TDesC& CWmResourceLoader::Uninstalling()
+    {
+    return *iUninstalling;
     }
 
 // end of file

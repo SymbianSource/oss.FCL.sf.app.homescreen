@@ -26,9 +26,24 @@
 
 class CXnWallpaperContainer;
 class CXnUiEngine;
+class TVwsViewId;
+class CPeriodic;
 
 // CONSTANTS
 const TUid KWallpaperViewUid = { 0x200286DB };
+
+/**
+*  Data structure to be used with timer callback.
+*
+*  @since S60 v5.0
+*/
+NONSHARABLE_STRUCT( TXnWallpaperViewData )
+    {
+    TBool iMultiple;
+    TUid iAppUid;
+    TUid iViewUid;
+    CPeriodic* iTimer; // Not own.
+    };
 
 // CLASS DECLARATION
 
@@ -81,6 +96,11 @@ private:
      */
     void ConstructL();
 
+    /**
+     * Callback function to be used with CPeriodic.
+     */
+    static TInt TimerCallbackL( TAny *aPtr );
+
 private: // data
 
     /**
@@ -93,6 +113,18 @@ private: // data
      * Reference to uiengine.
      */
     CXnUiEngine& iEngine;
+    
+    /**
+     * Data structure, that is transferred to TimerCallback.
+     */
+    TXnWallpaperViewData iData;
+    
+    /**
+     * Periodic timer.
+     * Own.
+     */
+    CPeriodic* iTimer;
+
     };
 
 #endif      // CXNWALLPAPERVIEW_H

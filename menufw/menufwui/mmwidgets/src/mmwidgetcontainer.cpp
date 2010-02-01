@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.49 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.51 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -1948,11 +1948,10 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 			}
 		}
 
-    if ( iListBoxObserver && !iLongTapInProgress )
+    if ( iListBoxObserver && !iLongTapInProgress && !iDrawer->IsDraggable() )
         {
         iListBoxObserver->HandleListBoxEventL( aListBox, aEventType );
         }
-
     }
 
 //End of file

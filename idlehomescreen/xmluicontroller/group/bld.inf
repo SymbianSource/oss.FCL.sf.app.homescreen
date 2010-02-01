@@ -49,7 +49,7 @@ OPTION SOURCES -c8,8 qgn_indi_tb_appsgrid \
 END
 
 START EXTENSION s60/mifconv
-OPTION TARGETFILE ailaunch_aif.mif
+OPTION TARGETFILE homescreen_aif.mif
 OPTION SOURCES -c8,8 qgn_menu_idlestate
 END
 

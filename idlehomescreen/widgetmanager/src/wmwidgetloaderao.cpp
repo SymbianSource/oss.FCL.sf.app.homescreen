@@ -23,6 +23,7 @@
 #include "wmpersistentwidgetorder.h"
 #include "wmlistbox.h"
 #include "wmwidgetloaderao.h"
+#include "wminstaller.h"
 
 #include <hscontentcontroller.h> // content control api
 #include <hscontentinfoarray.h> // content control api
@@ -123,6 +124,10 @@ TInt CWmWidgetLoaderAo::RunError( TInt /*aError*/ )
 //
 void CWmWidgetLoaderAo::DoLoadWidgetsL()
     {
+    // Check if unistallation is ongoing for for some widget
+	// iUninstallUid is null no uninstallation is ongoing
+    iUninstallUid = iWmPlugin.WmInstaller().UninstallUid();
+    
     // 1. load the widgets array
     MHsContentController& controller = iWmPlugin.ContentController();    
     CHsContentInfoArray* contentInfoArray = CHsContentInfoArray::NewL();
@@ -257,6 +262,12 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
     widgetData->SetPersistentWidgetOrder( iWidgetOrder );
     widgetData->SetValid( ETrue );
     iWidgetsList.AddWidgetDataL( widgetData, EFalse );
+    if ( iUninstallUid != KNullUid 
+            && iUninstallUid == widgetData->PublisherUid() )
+        {
+        widgetData->VisualizeUninstallL();
+        }
+    
     CleanupStack::Pop( widgetData );
     }
 

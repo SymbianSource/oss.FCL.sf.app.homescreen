@@ -38,7 +38,7 @@
 // w:
 // r: TB9.2
 //
-#define qtn_options_wm_add "Add To Homescreen"
+#define qtn_options_wm_add "Add To Home screen"
 
 // d: Launch-menuitem in Options-menu
 // d: 
@@ -92,8 +92,7 @@
 // w:
 // r: TB9.2
 //
-#define qtn_options_wm_show_details "Details"
-
+#define qtn_options_wm_details "Details"
 
 
 // MISC
@@ -105,7 +104,7 @@
 // w:
 // r: TB9.2
 //
-#define qtn_wm_ovi_store_title "Ovi Store"
+#define qtn_wm_ovi_store_title "Get more"
 
 // d: Info popup to indicate that an item can not be added to home screen
 // d: because current view is full
@@ -114,16 +113,16 @@
 // w:
 // r: TB9.2
 //
-#define qtn_hs_add_widget_no_space_note "Not enough space to add new widget to active page. Remove some content first"
+#define qtn_hs_add_widget_no_space_note "Not enough space to add new widget to active page. Remove some content first."
 
 // d: Info popup to indicate that an item can not be added to home screen
-// d: because maximum instance count of current widget would be exceeded
+// d: because maximum instance count of current widget would be exceeded in whole Home screen
 // d: 
 // l: popup_note_window
 // w:
 // r: TB9.2
 //
-#define qtn_hs_add_widget_max_count_note "Unable to add. Home screen does not allow more instances of this widget"
+#define qtn_hs_add_widget_max_count_note "Unable to add. Home screen does not allow more instances of this widget."
 
 // d: widget details dialog left softkey for adding widget to home screen
 // d: Note: widgets dialog is not necessarily full screen width, which may affect
@@ -150,7 +149,7 @@
 // w:
 // r: TB9.2
 //
-#define qtn_wm_uninst_not_allowed "%U can not be uninstalled "
+#define qtn_wm_uninst_not_allowed "%U can not be uninstalled"
 
 // d: widget details dialog default text for wrt widgets
 // d: 
@@ -159,5 +158,40 @@
 // w:
 // r: TB9.2
 //
-#define qtn_wm_widget_details_wrt "HomeScreen application that uses internet connection to show dynamic updates from web"
+#define qtn_wm_widget_details_wrt "Home Screen application that uses internet connection to show dynamic updates from web."
 
+// d: Query for unistallation
+// d: 
+// d: 
+// l: query
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninstall_widget_query "Uninstall %U?"
+
+// d: Note when installer allready inuse
+// d: 
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninst_process_busy "Installation process already ongoing. Try again later."
+
+// d: Note when trying to add widget hs and max number of allowed instances 
+// d: of that widget is already reached in active page
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_add_widget_max_reached "Unable to add. No more instances allowed of this item for active page."
+
+// d: Replace widget name when uninstalling
+// d: 
+// d: 
+// l: listrow_wgtman_pane_t1
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninstall_text "Uninstalling.."

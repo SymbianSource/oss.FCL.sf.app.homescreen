@@ -320,9 +320,18 @@ TSize CWmPortalButton::LayoutIconSize() const
     {
     TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
     TAknLayoutRect imageLayout;
-    imageLayout.LayoutRect( Rect(),
-        AknLayoutScalable_Apps::wgtman_btn_pane_g1(
-            landscape ? 1 : 0).LayoutLine() );
+    if ( iWmMainContainer->Configuration().PortalButtonCount() == 1 )
+        {
+        imageLayout.LayoutRect( Rect(), AknLayoutScalable_Apps::
+                wgtman_btn_pane_g1( landscape ? 1 : 0).LayoutLine() );
+        }
+    else
+        {
+        TInt variety = (landscape ? 5 : 4);
+        imageLayout.LayoutRect( Rect(), AknLayoutScalable_Apps
+                ::wgtman_btn_pane_g1( variety ).LayoutLine() );
+        }
+    
     return imageLayout.Rect().Size();
     }
 
@@ -439,9 +448,17 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
         if ( iButtonIcon && iButtonIconMask )
             {
             TAknLayoutRect imageLayout;
-            imageLayout.LayoutRect( rect,
-                    AknLayoutScalable_Apps::wgtman_btn_pane_g1(
-                            landscape ? 1 : 0).LayoutLine() );
+            if ( iWmMainContainer->Configuration().PortalButtonCount() == 1 )
+                {
+                imageLayout.LayoutRect( rect, AknLayoutScalable_Apps::
+                        wgtman_btn_pane_g1( landscape ? 3 : 0).LayoutLine() );
+                }
+            else
+                {
+                TInt variety = (landscape ? 7 : 4);
+                imageLayout.LayoutRect( rect, AknLayoutScalable_Apps
+                        ::wgtman_btn_pane_g1( variety ).LayoutLine() );
+                }
             imageLayout.DrawImage( gc, iButtonIcon, iButtonIconMask );
             }
         
@@ -449,8 +466,9 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
         if ( !landscape )
             {
             TAknTextComponentLayout leftLayout;
-            leftLayout = AknLayoutScalable_Apps::wgtman_btn_pane_t1( 
-                                                landscape ? 1 : 0  );
+            TInt variety = 
+                ((iWmMainContainer->Configuration().PortalButtonCount()== 2)? 4:0 );
+            leftLayout = AknLayoutScalable_Apps::wgtman_btn_pane_t1( variety  );
             DrawText( gc, state->Text(), leftLayout, 1 );
             }
         }

@@ -22,7 +22,7 @@ endif
 
 TARGETDIR=$(ZDIR)\resource\apps
 HEADERDIR=$(EPOCROOT)epoc32\include
-ICONTARGETFILENAME=$(TARGETDIR)\ailaunch_aif.mbm
+ICONTARGETFILENAME=$(TARGETDIR)\homescreen_aif.mbm
 
 MAKMAKE : 
 	mifconv $(ICONTARGETFILENAME) \

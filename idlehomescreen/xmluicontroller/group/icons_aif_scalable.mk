@@ -11,7 +11,7 @@
 #
 # Contributors:
 #
-# Description:  scalable icons makefile for project ailaunch
+# Description:  scalable icons makefile for project home screen
 #
 
 ifeq (WINS,$(findstring WINS,$(PLATFORM)))
@@ -22,7 +22,7 @@ endif
 
 TARGETDIR=$(ZDIR)\resource\apps
 HEADERDIR=$(EPOCROOT)epoc32\include
-ICONTARGETFILENAME=$(TARGETDIR)\ailaunch_aif.mif
+ICONTARGETFILENAME=$(TARGETDIR)\homescreen_aif.mif
 
 MAKMAKE : ;
 

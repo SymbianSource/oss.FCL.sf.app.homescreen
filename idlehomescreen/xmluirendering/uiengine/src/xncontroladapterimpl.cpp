@@ -60,6 +60,7 @@
 #include "xnscrollablecontroladapter.h"
 #include "xnfocuscontrol.h"
 #include "xneditmode.h"
+#include "xnbgcontrol.h"
 
 _LIT8(KScrollableBoxNodeName, "scrollablebox");
         
@@ -3900,8 +3901,9 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
             
             // Ignore events
             bg.IgnoreEventsUntilNextPointerUp();
-            
-            // Indicate long tap has taken plave
+            static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();
+
+          // Indicate long tap has taken plave
             iLongtap = ETrue;
             
             CXnNode* hold = BuildTriggerNodeL( *engine,
@@ -3926,16 +3928,20 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     {
     const TPointerEvent& event( aPointerEvent );
     
+    CXnNode* node( &iNode.Node() );
+    CXnUiEngine* engine( node->UiEngine() );
+ 
+    
     // Forward event to gesture helper
     if( PassEventToGestureHelperL( aPointerEvent ) )
-        {
+        { 
+        CXnAppUiAdapter& appui( engine->AppUiAdapter() );
+        CCoeControl& bg( appui.ViewAdapter().BgControl() );
+        static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();
+        
         // Swipe took place, consume this event
         return ETrue;
         }
-
-    CXnNode* node( &iNode.Node() );
-
-    CXnUiEngine* engine( node->UiEngine() );    
 
     TBool menuBar( node == engine->MenuBarNode() );
 

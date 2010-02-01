@@ -1094,29 +1094,37 @@ TBool CXnODTParser::CreateExternalControlL( CXnNode& aNode,
                 break;
                 }
             }
-
-        CXnExtRenderingPluginWrapper* wrapper = 
-        	CXnExtRenderingPluginWrapper::NewL( aNode.PluginIfL(), *adapter );
-        CleanupStack::PushL( wrapper );
-
-        parentAdapter->AppendChildL( *wrapper, aNode );
-        CleanupStack::Pop( wrapper );
         
-        component->SetControlAdapter( wrapper );
-
-        aNode.ComponentNodeImpl()->SetComponent( component );
-
-        component->SetNode( aNode.PluginIfL() );
-
-        wrapper->SetComponent( component );
-
-        wrapper->SetComponentsToInheritVisibility( ETrue );
-
-        wrapper->ActivateL();
-        
-        CleanupStack::Pop( component );
-
-        return ETrue;
+        if( parentAdapter )
+            {
+            CXnExtRenderingPluginWrapper* wrapper = 
+                CXnExtRenderingPluginWrapper::NewL( aNode.PluginIfL(), *adapter );
+            CleanupStack::PushL( wrapper );
+    
+            parentAdapter->AppendChildL( *wrapper, aNode );
+            CleanupStack::Pop( wrapper );
+            
+            component->SetControlAdapter( wrapper );
+    
+            aNode.ComponentNodeImpl()->SetComponent( component );
+    
+            component->SetNode( aNode.PluginIfL() );
+    
+            wrapper->SetComponent( component );
+    
+            wrapper->SetComponentsToInheritVisibility( ETrue );
+    
+            wrapper->ActivateL();
+            
+            CleanupStack::Pop( component );
+    
+            return ETrue;
+            }
+        else
+            {
+            CleanupStack::Pop( component );
+            return EFalse;
+            }
         }
     else
         {

@@ -444,7 +444,6 @@ CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
 CWmListBox::~CWmListBox()
     {
     iWidgetDatas.ResetAndDestroy();
-    iTrashedData.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------
@@ -517,19 +516,9 @@ void CWmListBox::RemoveWidgetData( TInt aItemIndex )
         AknListBoxUtils::HandleItemRemovalAndPositionHighlightL(
             this, realIndex, current ) );
     
-    // widgetlist changed notification comes too early before even
-    // uninstall is completed. in wk04_2010 there is going to be fix 
-    // available for this issue. add data object to trashed array so
-    // that its not visible in list and is destroyed later.
-    if ( data->IsUninstalling() && data->IsActive() )
-        {
-        iTrashedData.Append( data );
-        }
-    else
-        {
-        // delete now
-        delete data;
-        }
+    // delete now
+    delete data;
+    data = NULL;
     }
 
 // ---------------------------------------------------------

@@ -118,12 +118,6 @@ class CXnAnimationAdapter : public CXnControlAdapter
         
         // UI node, not owned
         CXnNodePluginIf& iNode;
-    
-        // display on(block) or off(none)
-        TBool iDisplay;
-        
-        // Whether the animation started or not
-        TBool iAnimationSarted;
        
         // Image Skind Id
         TAknsItemID iSkinId;

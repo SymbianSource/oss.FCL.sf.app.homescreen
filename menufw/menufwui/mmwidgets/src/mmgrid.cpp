@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_97 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_98 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -96,7 +96,7 @@ LOCAL_C CWindowGc* ReplaceGcWithCustomGc( const CEikListBox* aListBox )
             CListItemDrawer* itemDrawer = aListBox->View()->ItemDrawer();
             CWindowGc* originalGc = itemDrawer->Gc();
             if ( customGc == originalGc )
-            {
+                {
                 return NULL;
                 }
             else
@@ -867,7 +867,7 @@ TBool CMmGrid::AllItemsFitInViewRect()
 //
 void CMmGrid::UpdateScrollBarsL()
     {
-    TBool redrawNeeded = HandleScrollbarVisibilityChangeL();
+    TBool visibilityChanged = HandleScrollbarVisibilityChangeL();
     if (ScrollBarFrame()->VerticalScrollBar()->IsVisible())
         {
         CAknGrid::UpdateScrollBarsL();
@@ -876,6 +876,11 @@ void CMmGrid::UpdateScrollBarsL()
     iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
             ScrollBarFrame()->VerticalScrollBar()->Rect().Width() + ScrollBarOffset() );
     FixViewForMirroredLayout();
+    if ( visibilityChanged )
+        {
+        CMmGridView* view = static_cast<CMmGridView*>( iView );
+        view->UpdateItemHeightAndWidth();
+        }
     }
 
 // -----------------------------------------------------------------------------

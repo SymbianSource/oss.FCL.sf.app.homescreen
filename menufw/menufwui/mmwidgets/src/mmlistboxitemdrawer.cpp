@@ -128,6 +128,7 @@ void CMmListBoxItemDrawer::TrimCacheSize( TInt aItemCount )
 void CMmListBoxItemDrawer::InvalidateCache()
     {
     iItemsDataCache->Invalidate();
+    // this is needed to get iColors initialized on first use:
     }
 
 // -----------------------------------------------------------------------------
@@ -300,7 +301,7 @@ void CMmListBoxItemDrawer::DrawFloatingItems(TRect currentlyDrawnRect)
             TInt drawnItemIndex = iFloatingItems[i].GetDrawnItemIndex();
             TSize size = iWidget->View()->ItemSize( drawnItemIndex );
             TRect rect( iFloatingItems[i].GetItemPosition(), iFloatingItems[i].GetItemPosition() + size);
-            
+
             if (rect.Intersects(currentlyDrawnRect))
 				{
 				TInt tempZoomIconIndex = iZoomIconIndex;
@@ -314,7 +315,7 @@ void CMmListBoxItemDrawer::DrawFloatingItems(TRect currentlyDrawnRect)
 					{
 					ClearFlags( CListItemDrawer::EPressedDownState );
 					}
-				
+
 				DrawActualItem( drawnItemIndex, rect, ETrue, EFalse, EFalse, EFalse );
 				iIconAnimationZoomRatio = tempZoomRatio;
 				iZoomIconIndex = tempZoomIconIndex;
@@ -444,13 +445,13 @@ void CMmListBoxItemDrawer::DoDrawItemTextL( TInt aItemIndex, const TRect
         {
         DrawBackgroundAndSeparatorLines( aItemTextRect );
         }
-    
+
     if ( !iUseCache || !cache->IsValid() )
         {
         SetupSubCellsL( aItemIsCurrent, aItemIndex );
         }
     __ASSERT_DEBUG( cache->IsValid(), User::Invariant() );
-    
+
     FormattedCellData()->SetIconArray( cache->GetIconListL() );
 
 	TBool isFloating = !iUseCache && IsFloating( aItemIndex );
@@ -462,7 +463,7 @@ void CMmListBoxItemDrawer::DoDrawItemTextL( TInt aItemIndex, const TRect
 
 	CFormattedCellListBoxData* data = static_cast<CFormattedCellListBoxData*>(iData);
 	data->EnableMarqueeL( EFalse );
-	
+
     TBool highlightShown = ETrue;
 	if (FormattedCellData()->RespectFocus() && !aViewIsEmphasized)
 		{
@@ -668,22 +669,22 @@ CFormattedCellListBoxData::TColors CMmListBoxItemDrawer::SetupColors(  TBool aDr
 	if ( !aDragged )
 	    {
         AknsUtils::GetCachedColor( skin, colors.iText, KAknsIIDQsnTextColors,
-                EAknsCIQsnTextColorsCG6 );
+                EAknsCIQsnTextColorsCG9 );
         AknsUtils::GetCachedColor( skin, colors.iBack , KAknsIIDQsnTextColors,
-                EAknsCIQsnOtherColorsCG9 );
+                EAknsCIQsnOtherColorsCG6 );
         AknsUtils::GetCachedColor( skin, colors.iHighlightedText,
-                KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG10 );
+                KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG11 );
         AknsUtils::GetCachedColor( skin, colors.iHighlightedBack,
                 KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
 	    }
 	else
 	    {
         AknsUtils::GetCachedColor( skin, colors.iText, KAknsIIDQsnTextColors,
-                EAknsCIQsnTextColorsCG10 );
+                EAknsCIQsnTextColorsCG11 );
         AknsUtils::GetCachedColor( skin, colors.iBack , KAknsIIDQsnTextColors,
                 EAknsCIQsnTextColorsCG6 );
         AknsUtils::GetCachedColor( skin, colors.iHighlightedText,
-                KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG10 );
+                KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG11 );
         AknsUtils::GetCachedColor( skin, colors.iHighlightedBack,
                 KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
 	    }
@@ -778,7 +779,7 @@ TSize CMmListBoxItemDrawer::GetItemSize( TInt aItemIndex, TBool aItemIsCurrent )
         {
         return TSize( 1, 1 );
         }
-    
+
 	TSize size;
 
 	CMmCacheForItem* cache = NULL;
@@ -787,19 +788,19 @@ TSize CMmListBoxItemDrawer::GetItemSize( TInt aItemIndex, TBool aItemIsCurrent )
 	    {
 	    cache = NULL;
 	    }
-	
+
 	if ( cache )
 	    {
 	    cache->InvalidateIfCacheMayNotBeUsed(
 	            aItemIsCurrent, iLastSubcellsSetupCode );
 	    }
-	
+
     if ( !iUseCache || !cache || !cache->IsValid() )
         {
         const TDesC8& mm_template = iMmModel->GetAttributeAsText (aItemIndex,
                 KMmTemplate8);
         TRect viewRect = iWidget->View()->ViewRect();
-        
+
         TBool landscapeOrientation = viewRect.Width() > viewRect.Height();
         // Layout_Meta_Data::IsLandscapeOrientation cannot be used here because it
         // might happen that GetSize (this method) gets called immediately after
@@ -810,7 +811,7 @@ TSize CMmListBoxItemDrawer::GetItemSize( TInt aItemIndex, TBool aItemIsCurrent )
         // cause the template library to fill the internal cache for landscape mode
         // with parameters calculated according to the outdated ViewRect.
 
-        
+
         if ( iTemplateLibrary->GetSize( size, iWidgetType, mm_template,
                 landscapeOrientation, aItemIsCurrent, viewRect )
                 != KErrNone )
@@ -973,7 +974,7 @@ void CMmListBoxItemDrawer::SetDraggedIndexL(TInt aDraggedItemIndex,
 				MmEffects::KNoAnimationFramesCount, iWidget->View() );
 		floatingItem.SetManualDelete( ETrue );
 		AddFloatingItemL(floatingItem, 0);
-		
+
 	    ClearFlags( CListItemDrawer::EPressedDownState );
     	}
 
@@ -1044,7 +1045,7 @@ void CMmListBoxItemDrawer::DrawActualIndicatorItem( TInt aItemIndex, TRect /*act
 		{
 		iIsIndicatorItem = ETrue;
 		SetRedrawItemBackground( EFalse );
-		
+
 		DrawActualItem( aItemIndex, AdjustItemRect( aItemIndex ) , EFalse, EFalse, EFalse, EFalse);
 
 		SetRedrawItemBackground( ETrue );
@@ -1340,19 +1341,19 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
     {
     CMmCacheForItem* cache = iItemsDataCache->GetItemCacheL( aItemIndex );
     cache->SetValidL( EFalse );
-    
+
     const TDesC8& mmTemplate = iMmModel->GetAttributeAsText( aItemIndex, KMmTemplate8 );
     if ( !mmTemplate.Compare( KNullDesC8 ) || !mmTemplate.Compare( KEmpty8 ) )
         {
         User::Leave( KErrNotFound );
         }
     cache->SetTemplateL( mmTemplate );
-    
+
     cache->ClearIconArray();
     cache->SetCurrent( aItemIsCurrent );
-    
+
     TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
-    
+
     RBuf& itemText = cache->GetItemTextForModifications();
     itemText.Close();
     itemText.CreateL( MmTemplateContants::KItemSubCellsText );
@@ -1369,9 +1370,9 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
 		iTemplateLibrary->GetMoveIndicatorChildrenL( iWidgetType, templateChildArray,
 	    		mmTemplate, landscapeOrientation, aItemIsCurrent );
 		}
-    
+
     iLastSubcellsSetupCode.Clear();
-    
+
     //Backdrop icon as first element to draw
     TInt subcellIncrement( 0 );
     if ( GetBackdropVisibility( aItemIndex, aItemIsCurrent ) )
@@ -1379,7 +1380,7 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
         SetupBackdropSubcellL( templateChildArray, aItemIndex, itemText, subcellIncrement );
         iItemHasBackdrop = ETrue;
         }
-    else 
+    else
     	{
     	iItemHasBackdrop = EFalse;
     	}
@@ -1409,13 +1410,13 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
 	    {
 	    SetupSubNoCellL( i, aItemIndex );
 	    }
-	
+
 	iLastSubcellsSetupCode.AddTemplateInfo(
 	        iItemsDataCache->GetTemplateIdentifierL( mmTemplate ) );
 	iLastSubcellsSetupCode.AddIsCurrentInfo( aItemIsCurrent );
 
 	CleanupStack::PopAndDestroy( &templateChildArray );
-	
+
 	cache->SetSubcellsSetupCode( iLastSubcellsSetupCode );
 	// the line below is here only to make the cached information complete
 	GetItemSize( aItemIndex, aItemIsCurrent );
@@ -1471,14 +1472,14 @@ TBool CMmListBoxItemDrawer::IsFloating( TInt aItemIndex ) const
 //
 // -----------------------------------------------------------------------------
 //
-void CMmListBoxItemDrawer::DrawActualItem(TInt aItemIndex, 
-		const TRect& aActualItemRect, TBool aItemIsCurrent, 
+void CMmListBoxItemDrawer::DrawActualItem(TInt aItemIndex,
+		const TRect& aActualItemRect, TBool aItemIsCurrent,
 		TBool aViewIsEmphasized, TBool /*aViewIsDimmed*/,
 		TBool aItemIsSelected) const
 		{
-		if (Properties(aItemIndex).IsSelectionHidden()) 
-			{ 
-			aItemIsSelected = EFalse; 
+		if (Properties(aItemIndex).IsSelectionHidden())
+			{
+			aItemIsSelected = EFalse;
 			}
 		DrawItemText(aItemIndex,aActualItemRect,aItemIsCurrent,
 				aViewIsEmphasized,aItemIsSelected);
@@ -1488,7 +1489,7 @@ void CMmListBoxItemDrawer::DrawActualItem(TInt aItemIndex,
 //
 // -----------------------------------------------------------------------------
 //
-TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex, 
+TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex,
 		TBool aItemIsCurrent, TBool aAllowHighlightForNonDraggedItem ) const
 	{
 	TBool highlightVisibility(EFalse);
@@ -1497,7 +1498,7 @@ TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex,
 		TBool currentlyDraggedItem =
 			ItemHasFloatingType( aItemIndex, EDrag ) ||
 			ItemHasFloatingType( aItemIndex, EDragTransition );
-		
+
 		if ( ( STATIC_CAST(CMmWidgetContainer*,Widget()->Parent())->IsHighlightVisible()
 				&& aItemIsCurrent && aAllowHighlightForNonDraggedItem )
 				|| currentlyDraggedItem )
@@ -1512,18 +1513,18 @@ TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex,
 //
 // -----------------------------------------------------------------------------
 //
-TBool CMmListBoxItemDrawer::GetBackdropVisibility( TInt aItemIndex, 
+TBool CMmListBoxItemDrawer::GetBackdropVisibility( TInt aItemIndex,
 		TBool aItemIsCurrent ) const
 	{
 	TBool currentlyDraggedItem =
 		ItemHasFloatingType( aItemIndex, EDrag ) ||
 		ItemHasFloatingType( aItemIndex, EDragTransition );
-	
+
     return 	IsEditMode() /* draw the backdrop only in edit mode */
     		&& !currentlyDraggedItem /* backdrop is disabled for dragged items */
     		&& !iIsIndicatorItem /* in non-touch backdrop is not drawn, just "move indicators" */
     		&& !iLeftOverAreaUnderAnimatedItem /* is the currently drawn item the area left over behind dragged item*/
-    		&& !( STATIC_CAST( CMmWidgetContainer*,Widget()->Parent() )->IsHighlightVisible() 
+    		&& !( STATIC_CAST( CMmWidgetContainer*,Widget()->Parent() )->IsHighlightVisible()
     				&& aItemIsCurrent );/*if the timer is active then we want to draw highlight (not backdrop) on the current index*/
 	}
 
@@ -1531,7 +1532,7 @@ TBool CMmListBoxItemDrawer::GetBackdropVisibility( TInt aItemIndex,
 //
 // -----------------------------------------------------------------------------
 //
-TBool CMmListBoxItemDrawer::ItemHasFloatingType( TInt aItemIndex, 
+TBool CMmListBoxItemDrawer::ItemHasFloatingType( TInt aItemIndex,
 		TMmFloatingItemType aFloatingType) const
 	{
 	TBool hasFloatingType( EFalse );

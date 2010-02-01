@@ -57,7 +57,8 @@ public:
  */
 class CTsFastSwapGrid: 
     public CAknGrid,
-    public MTsDeviceStateObserver
+    public MTsDeviceStateObserver,
+    public MTsFastSwapTimerObserver
     {
 public: // enums
     enum TFastSwapGridBehaviour
@@ -200,6 +201,9 @@ public: // New functions
 private: // From CAknGrid
     virtual void CreateItemDrawerL();
 
+private: // From MTsFastSwapTimerObserver
+    void TimerCompletedL( CTsFastSwapTimer* aSource );
+    
 private: // New functions
     
     /**
@@ -224,6 +228,7 @@ private: // Data
     RArray<TInt> iCloseItems;
     TInt iCloseIconHitIdx;
     MTsFastSwapGridObserver* iFastSwapGridObserver;
+    CTsFastSwapTimer* iCloseIconRedrawTimer;
 
     // Highlight handling
     TFastSwapGridBehaviour iBehaviour;
@@ -232,6 +237,7 @@ private: // Data
     // Visible view rectangle (horizontal scrolling support)
     TRect iVisibleViewRect;
     
+    // Feedback support
     TBool iTactileFeedbackSupport;
     
     mutable RArray<TInt> iFullyVisibleItems;

@@ -38,6 +38,8 @@
 #include "xntype.h"
 #include "xnbgcontrol.h"
 #include "xnfocuscontrol.h"
+#include "xneditor.h"
+#include "xnbackgroundmanager.h"
 
 #include "xnviewadapter.h"
 #include "xnmenu.h"
@@ -158,6 +160,7 @@ CXnViewAdapter::~CXnViewAdapter()
     delete iDeactivate;
     delete iEditState;
     delete iBgControl;
+    delete iBgManager;
     delete iFocusControl;
     }
 
@@ -189,6 +192,9 @@ void CXnViewAdapter::ConstructL()
     
     iBgControl = CXnBgControl::NewL();
     iBgControl->SetMopParent( this );
+
+    iBgManager = CXnBackgroundManager::NewL( iAppUiAdapter.ViewManager(),
+        iAppUiAdapter.ViewManager().Editor().HspsWrapper() );
 
     iFocusControl = CXnFocusControl::NewL( iAppUiAdapter );   
     
@@ -241,6 +247,7 @@ void CXnViewAdapter::ReloadUiL()
 void CXnViewAdapter::PrepareDestroy()
     {
     iAppUiAdapter.UiStateListener().RemoveObserver( *this );
+    iBgControl->PrepareDestroy();
     
     TRAP_IGNORE( DeactivateContainerL() );
     
@@ -271,6 +278,16 @@ CXnKeyEventDispatcher* CXnViewAdapter::EventDispatcher() const
 CCoeControl& CXnViewAdapter::BgControl() const
     {
     return *iBgControl;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewAdapter::BgManager
+// Returns background manager.
+// -----------------------------------------------------------------------------
+//
+CXnBackgroundManager& CXnViewAdapter::BgManager() const
+    {
+    return *iBgManager;
     }
 
 // -----------------------------------------------------------------------------
@@ -323,6 +340,7 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
         }
     
     iBgControl->MakeVisible( ETrue );
+    iBgManager->MakeVisible( ETrue );
     
     // Set the active container
     ActivateContainerL( iAppUiAdapter.ViewManager().ActiveViewData() );             
@@ -345,6 +363,8 @@ void CXnViewAdapter::DoDeactivate()
     TRAP_IGNORE( DeactivateContainerL() );
     
     iBgControl->MakeVisible( EFalse );
+    iBgManager->MakeVisible( EFalse );
+    
     iFocusControl->MakeVisible( EFalse );
     
     iFlags.Clear( EIsActivated );
@@ -480,7 +500,7 @@ void CXnViewAdapter::NotifyForegroundChanged(
         CXnEditMode* editMode = iAppUiAdapter.UiEngine().EditMode();
         if( editMode )
             {
-            editMode->StopDraggingL();
+            TRAP_IGNORE( editMode->StopDraggingL() );
             }
 
         iFocusControl->MakeVisible( EFalse );

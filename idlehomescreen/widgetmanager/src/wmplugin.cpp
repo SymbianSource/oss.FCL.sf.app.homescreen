@@ -23,7 +23,9 @@
 #include <eikappui.h>
 #include <eikapp.h>
 #include <e32property.h>
+#include <e32base.h>
 #include <activeidle2domainpskeys.h>
+#include <widgetmanagerview.rsg>
 
 #include "wmcommon.h"
 #include "widgetmanager.hrh"
@@ -32,7 +34,9 @@
 #include "wmresourceloader.h"
 #include "wmplugin.h"
 #include "wmeffectmanager.h"
-#include <widgetmanagerview.rsg>
+#include "wmwidgetdata.h"
+#include "wminstaller.h"
+
 
 // ---------------------------------------------------------
 // CWmPlugin::NewL
@@ -40,8 +44,8 @@
 //
 CWmPlugin* CWmPlugin::NewL()
     {
-    CWmPlugin* self=new(ELeave) CWmPlugin();
-    CleanupStack::PushL(self);
+    CWmPlugin* self = new( ELeave ) CWmPlugin();
+    CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop(self);
     return self;
@@ -99,6 +103,7 @@ CWmPlugin::~CWmPlugin()
     delete iEffectManager;
     delete iPostponedContent;
     delete iWait;
+	delete iWmInstaller;
     }
 
 // ---------------------------------------------------------
@@ -117,7 +122,7 @@ CWmPlugin::CWmPlugin()
 void CWmPlugin::ConstructL()
     {
     iWmMainContainer = NULL;
-
+	
     // store static view app ui
     CEikonEnv* eikonEnv = CEikonEnv::Static();
     if ( !eikonEnv ) User::Leave( KErrUnknown );
@@ -138,6 +143,8 @@ void CWmPlugin::ConstructL()
     CleanupStack::PushL( mainView );
 	iViewAppUi->AddViewL( mainView );	
 	CleanupStack::Pop( mainView );
+	
+    iWmInstaller = CWmInstaller::NewL();
     }
 
 // ---------------------------------------------------------
@@ -199,7 +206,7 @@ void CWmPlugin::MainViewActivated(
     
     // Don't forward numeric keys to phone
     ForwardNumericKeysToPhone( EFalse );
-    }
+    }    
 
 // ---------------------------------------------------------
 // CWmPlugin::MainViewDeactivated
@@ -276,7 +283,7 @@ void CWmPlugin::ExecuteCommandL()
             ResourceLoader().InfoPopupL(
                 R_QTN_HS_HS_MEMORY_FULL, KNullDesC );
             }
-        else if ( err != KErrNone )
+        else if ( ( err != KErrNone ) && ( err != KErrDiskFull ) )
             {
             ResourceLoader().ErrorPopup( err );
             }
@@ -334,4 +341,14 @@ void CWmPlugin::NotifyWidgetListChanged()
         }
     }
 
+// ---------------------------------------------------------
+// CWmPlugin::WmInstaller
+// ---------------------------------------------------------
+//
+CWmInstaller& CWmPlugin::WmInstaller()
+    {
+    return *iWmInstaller;
+    }
+
 // End of file
+

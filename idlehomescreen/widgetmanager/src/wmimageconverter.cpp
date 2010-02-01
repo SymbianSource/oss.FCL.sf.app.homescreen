@@ -862,7 +862,7 @@ void CWmImageConverter::CreateSkinOrMifIconL(
     iMask = mask;
 
     TInt err = AknIconUtils::SetSize( iBitmap , iSize, EAspectRatioNotPreserved );
-    if ( KErrNone == err )
+    if ( KErrNone == err && iMask )
         {
         err = AknIconUtils::SetSize( iMask , iSize, EAspectRatioNotPreserved );
         }

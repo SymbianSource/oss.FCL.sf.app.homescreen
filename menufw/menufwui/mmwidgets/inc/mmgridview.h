@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmGridView declaration
-*  Version     : %version: MM_24.1.8 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_24.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -133,6 +133,12 @@ public:
 	* @param aItemHeight New height in pixels for this view’s items.
 	*/	
     void SetItemHeight(TInt aItemHeight);
+    
+    /**
+     * Updates various member variables in this grid view and related objects
+     * with item dimensions taken from the template library.
+     */
+    void UpdateItemHeightAndWidth();
 
 private:
 	

@@ -312,7 +312,6 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
     iCpsWrapper = CCpsWrapper::NewL( *this );
     iHspsWrapper = CHspsWrapper::NewL( aUid, this );
     iRepository= CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
-    iBgManager = CXnBackgroundManager::NewL( iViewManager, *iHspsWrapper );
     }
 
 // ---------------------------------------------------------------------------
@@ -327,7 +326,6 @@ CXnEditor::~CXnEditor()
     delete iHspsWrapper;
     delete iPublisherMap;
     delete iRepository;
-    delete iBgManager;
     }
 
 // -----------------------------------------------------------------------------
@@ -1594,15 +1592,6 @@ void CXnEditor::ViewListChanged()
 CHspsWrapper& CXnEditor::HspsWrapper() const
     {
     return *iHspsWrapper;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnEditor::BgManager
-// -----------------------------------------------------------------------------
-//
-CXnBackgroundManager& CXnEditor::BgManager() const
-    {
-    return *iBgManager;
     }
 
 // -----------------------------------------------------------------------------

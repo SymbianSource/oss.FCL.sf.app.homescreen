@@ -31,6 +31,8 @@ class CAknViewAppUi;
 class CWmResourceLoader;
 class CWmMainContainer;
 class CWmEffectManager;
+class CWmWidgetData;
+class CWmInstaller;
 
 /**
  * CWmPlugin 
@@ -139,7 +141,12 @@ public: // plugin services
     
     /** prestored action to be executed. */
     void ExecuteCommandL();
-
+    
+    /**
+     * reference to iWmInstaller
+     */
+    CWmInstaller& WmInstaller();
+    
 private:
     /** constructor */
     CWmPlugin();
@@ -164,7 +171,6 @@ private: // data members
      * main container (not owned)
      */
     CWmMainContainer*  iWmMainContainer;
-
 
     /**
      * resource loader
@@ -202,6 +208,11 @@ private: // data members
 	 * being activated upon deletion.
      */
     CActiveSchedulerWait* iWait;
+    
+    /*
+     * Handles installation
+     */
+    CWmInstaller* iWmInstaller;
     };
 
 #endif // __WMPLUGIN_

@@ -69,6 +69,12 @@ public: // services
     /** wrt specific description text */
     const TDesC& WrtDescription();
     
+    /** uninstalling text to replace widget name */
+    const TDesC& Uninstalling();
+    
+    /** query popup*/
+    TBool QueryPopupL( TInt aResourceId, const TDesC& aString );
+	
 private: // internal methods
 
     /** constructor */
@@ -124,6 +130,10 @@ private: // members
      */    
     HBufC*      iWrtDescription;
     
+    /**
+     * text to replace title
+     */    
+    HBufC*      iUninstalling;
     };
 
 #endif // WMRESOURCELOADER_H_

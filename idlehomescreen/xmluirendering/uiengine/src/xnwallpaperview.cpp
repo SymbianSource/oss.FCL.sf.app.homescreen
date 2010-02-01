@@ -20,8 +20,10 @@
 #include "xnwallpaperview.h"
 #include "xnwallpapercontainer.h"
 #include "xnuiengine.h"
-#include "xneditor.h"
+#include "xnappuiadapter.h"
+#include "xnviewadapter.h"
 #include "xnbackgroundmanager.h"
+#include <xnuiengine.rsg>
 
 // SYSTEM INCLUDE FILES
 #include <aknappui.h>
@@ -29,6 +31,9 @@
 #include <avkon.rsg>
 #include <AknsWallpaperUtils.h>
 #include <MGFetch.h>
+#include <aknnotewrappers.h>
+#include <StringLoader.h> 
+#include <caf/caf.h>
 
 _LIT8( KMulti, "multi" );
 const TInt KFileArrayGranularity = 6;
@@ -51,6 +56,7 @@ CXnWallpaperView::CXnWallpaperView( CXnUiEngine& aEngine ) :
 void CXnWallpaperView::ConstructL()
     {
     BaseConstructL();
+    iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
     }
 
 // -----------------------------------------------------------------------------
@@ -77,6 +83,7 @@ CXnWallpaperView::~CXnWallpaperView()
         delete iContainer;
         iContainer = NULL;
         }
+    delete iTimer;
     }
 
 // -----------------------------------------------------------------------------
@@ -97,7 +104,8 @@ void CXnWallpaperView::DoActivateL(
             TUid /*aCustomMessageId*/,
             const TDesC8& aCustomMessage )
     {
-    iAvkonAppUi->StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL );
+    iAvkonAppUi->StatusPane()->SwitchLayoutL(
+            R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
     iAvkonAppUi->StatusPane()->DrawNow();
     if ( !iContainer )
         {
@@ -107,31 +115,22 @@ void CXnWallpaperView::DoActivateL(
         iContainer->DrawNow();
         }
     
-    CDesCArrayFlat* files = 
-        new (ELeave) CDesCArrayFlat( KFileArrayGranularity );
-    CleanupStack::PushL( files );
-    TBool selected = EFalse;
+    iData.iAppUid = aPrevViewId.iAppUid;
+    iData.iViewUid = aPrevViewId.iViewUid; 
+    iData.iMultiple = EFalse;
+    iData.iTimer = iTimer;
     
-    TBool multiple=EFalse;
     if( aCustomMessage == KMulti )
         {
-        multiple = ETrue;
+        iData.iMultiple = ETrue;
         }
-    TRAPD( err, selected = MGFetch::RunL( *files, EImageFile, multiple ) );
-    if ( err == KErrNone &&
-         selected &&
-         files->MdcaCount() > 0 )
+
+    // Run image selection dialog asynchronously
+    if ( iTimer->IsActive() )
         {
-        // set wallpaper.
-        if( files->MdcaCount() == 1 )
-            {
-            iEngine.Editor()->BgManager().AddWallpaperL( files->MdcaPoint( 0 ) );
-            }
+        iTimer->Cancel();
         }
-    CleanupStack::PopAndDestroy( files );
-    
-    iAvkonAppUi->ActivateViewL( aPrevViewId );
-    
+    iTimer->Start( 0, 1000, TCallBack( TimerCallbackL, &iData ) );
     }
 
 // -----------------------------------------------------------------------------
@@ -147,5 +146,55 @@ void CXnWallpaperView::DoDeactivate()
         iContainer = NULL;
         }
     }
+
+// -----------------------------------------------------------------------------
+// CXnWallpaperView::TimerCallback
+// -----------------------------------------------------------------------------
+//
+TInt CXnWallpaperView::TimerCallbackL(TAny *aPtr)
+    {
+    TInt errAddWallpaper = KErrNone;
+    
+    TXnWallpaperViewData* data = reinterpret_cast<TXnWallpaperViewData*>( aPtr );
+    data->iTimer->Cancel();
+    
+    CDesCArrayFlat* files = 
+        new (ELeave) CDesCArrayFlat( KFileArrayGranularity );
+    CleanupStack::PushL( files );
+    TBool selected = EFalse;
+
+    TRAPD( err, selected = MGFetch::RunL( *files, EImageFile, data->iMultiple ) );
+    if ( err == KErrNone &&
+         selected &&
+         files->MdcaCount() > 0 )
+        {
+        // set wallpaper.
+        if( files->MdcaCount() == 1 )
+            {
+            CXnAppUiAdapter* appui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
+            CXnBackgroundManager& bgManager = appui->ViewAdapter().BgManager();
+            errAddWallpaper = bgManager.AddWallpaperL( files->MdcaPoint( 0 ) );
+            }
+        }
+    CleanupStack::PopAndDestroy( files );
+
+    if( errAddWallpaper == KErrCACorruptContent )
+        {
+        //load message text
+        HBufC* msg = StringLoader::LoadLC( R_QTN_HS_CORRUPTED_IMAGE_NOTE );
+        //ensure that dialog will not disappear immediatelly - by const. param
+        CAknErrorNote* dialog = new (ELeave) CAknErrorNote( true );
+        CleanupStack::PushL( dialog );
+        //show dialog to user and destroy it
+        dialog->ExecuteLD( *msg );
+        CleanupStack::Pop( dialog );
+        CleanupStack::PopAndDestroy( msg );
+        }
+    
+    iAvkonAppUi->ActivateViewL( TVwsViewId( data->iAppUid, data->iViewUid ) );
+
+    return EFalse;
+    }
+
 
 //  End of File

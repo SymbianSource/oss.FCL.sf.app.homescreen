@@ -33,6 +33,7 @@ class CXnAppUiAdapter;
 class CXnControlAdapter;
 class CXnKeyEventDispatcher;
 class CXnBgControl;
+class CXnBackgroundManager;
 class CXnFocusControl;
 
 // Class declaration
@@ -93,7 +94,15 @@ public:
      * return Bg control
      */        
     CCoeControl& BgControl() const;
-    
+
+    /**
+     * Gets background manager
+     * 
+     * @since S60 5.0
+     * return Background manager
+     */        
+    CXnBackgroundManager& BgManager() const;
+
     /**
      * Gets focus control
      * 
@@ -202,6 +211,8 @@ private:
     CXnAppUiAdapter& iAppUiAdapter;
     /** Bg control, Owned */
     CXnBgControl* iBgControl;
+    /** Background manager, Owned */
+    CXnBackgroundManager* iBgManager;
     /** Focus control, Owned */
     CXnFocusControl* iFocusControl;
     /* Event dispatcher, Owned */

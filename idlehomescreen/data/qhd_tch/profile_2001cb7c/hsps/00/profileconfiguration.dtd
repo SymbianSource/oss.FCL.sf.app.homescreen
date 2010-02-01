@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 ============================================================================
-<FileName: "desktopconfiguration.dtd">
-<PartOf  : "desktopconfiguration">
+<FileName: "profileconfiguration.dtd">
+<PartOf  : "profileconfiguration">
 
 <FileDescription: "Localization strings for the configuration">
 <FileVersion    : >
 
 <Copyright:
-"Copyright © 2007 Nokia Corporation.
+"Copyright ï¿½ 2007 Nokia Corporation.
 This material, including documentation and any related
 computer programs, is protected by copyright controlled by
 Nokia Corporation. All rights are reserved. Copying,
@@ -26,16 +26,16 @@ prior written consent of Nokia Corporation.">
 qtn_desktop_configuration_name.attributes
 qtn_desktop_configuration_name.layout "listrow_wgtman_pane_t1"
 qtn_desktop_configuration_name.release "TB9.2"
-qtn_desktop_configuration_name.description "Shortcut"
+qtn_desktop_configuration_name.description "profile"
 qtn_desktop_configuration_name.parents ""
 -->
-<!ENTITY qtn_profile_configuration_name  "Profile">
+<!ENTITY qtn_profile_configuration_name  "Time & profile">
 
 <!--
 qtn_desktop_configuration_desc.attributes
 qtn_desktop_configuration_desc.layout "listrow_wgtman_pane_t2"
 qtn_desktop_configuration_desc.release "TB9.2"
-qtn_desktop_configuration_desc.description "Shortcut widget description"
+qtn_desktop_configuration_desc.description "profile widget description"
 qtn_desktop_configuration_desc.parents ""
 -->
-<!ENTITY qtn_profile_configuration_desc  "Provides quick access to calendar, time&date and change profile.">
+<!ENTITY qtn_profile_configuration_desc  "Quick access to time, date and change profile.">

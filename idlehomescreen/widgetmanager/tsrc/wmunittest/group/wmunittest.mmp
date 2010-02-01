@@ -51,6 +51,7 @@ SOURCE          wmdetailsdlg.cpp
 SOURCE          wmportalbutton.cpp
 SOURCE          wmwidgetloaderao.cpp
 SOURCE          wmconfiguration.cpp
+SOURCE          wminstaller.cpp
 
 SOURCEPATH      ../src
 SOURCE          wmunittest.cpp

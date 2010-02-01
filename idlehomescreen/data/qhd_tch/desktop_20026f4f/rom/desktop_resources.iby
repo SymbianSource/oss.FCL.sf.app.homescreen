@@ -23,16 +23,16 @@
 
 // Enabled by DTD-localization tools, language specific
 #if defined (__LOCALES_37_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\37\desktop_20026f4f.o0037 \private\200159c0\install\desktop_20026f4f\xuikon\37\desktop_20026f4f.o0037
+data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\37\desktop.o0037 \private\200159c0\install\desktop_20026f4f\xuikon\37\desktop.o0037
 #endif
 #if defined  (__LOCALES_50_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\50\desktop_20026f4f.o0050 \private\200159c0\install\desktop_20026f4f\xuikon\50\desktop_20026f4f.o0050
+data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\50\desktop.o0050 \private\200159c0\install\desktop_20026f4f\xuikon\50\desktop.o0050
 #endif
 #if defined  (__LOCALES_57_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\57\desktop_20026f4f.o0057 \private\200159c0\install\desktop_20026f4f\xuikon\57\desktop_20026f4f.o0057
+data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\57\desktop.o0057 \private\200159c0\install\desktop_20026f4f\xuikon\57\desktop.o0057
 #endif
 #if defined  (__LOCALES_94_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\94\desktop_20026f4f.o0094 \private\200159c0\install\desktop_20026f4f\xuikon\94\desktop_20026f4f.o0094
+data=ZPRIVATE\200159c0\install\desktop_20026f4f\xuikon\94\desktop.o0094 \private\200159c0\install\desktop_20026f4f\xuikon\94\desktop.o0094
 #endif
 
 data=ZPRIVATE\200159c0\install\desktop_20026f4f\hsps\00\icon.mif \private\200159c0\install\desktop_20026f4f\hsps\00\icon.mif

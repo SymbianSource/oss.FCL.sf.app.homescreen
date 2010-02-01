@@ -105,7 +105,7 @@
         </mm:output>
 		
         <mm:output alias="mul_indicator_1" condition="folder_items:ReturnValue/[$index]/running = true">
-            <mm:image mif_file="gridroot.mif" bitmap_id="EMbmGridrootQgn_indi_app_open" mask_id="EMbmGridrootQgn_indi_app_open_mask" />
+		    <mm:image skinid_major="0x101F86E3" skinid_minor="0x1417" mif_file="gridroot.mif" bitmap_id="EMbmGridrootQgn_indi_app_open" mask_id="EMbmGridrootQgn_indi_app_open_mask" />
         </mm:output>
         
         <mm:output alias="mul_indicator_1" condition="folder_items:ReturnValue/[$index]/drm_protection = expired">

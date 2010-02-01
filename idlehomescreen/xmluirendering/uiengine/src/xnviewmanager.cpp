@@ -872,7 +872,6 @@ void CXnViewManager::ActivateNextViewL()
     if ( next.Occupied() && !next.Active() )
         {            
         iAppUiAdapter.ViewAdapter().ActivateContainerL( next );                
-        UpdateWallpaperL( current, next );
         }
     }
 
@@ -895,7 +894,6 @@ void CXnViewManager::ActivatePreviousViewL()
     if ( prev.Occupied() && !prev.Active() )
         {   
         iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
-        UpdateWallpaperL( current, prev );
         }
     }
 
@@ -1083,6 +1081,9 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
                 iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
                 }
 
+            // Remove wallpaper from cache
+            iAppUiAdapter.ViewAdapter().BgManager().DeleteWallpaper( *view );
+
             retval = iHspsWrapper->RemovePluginL( view->PluginId() );
             
             // Notify observers of view list change
@@ -1136,6 +1137,9 @@ void CXnViewManager::RemoveViewL()
         iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
                 
         CXnViewData* view( static_cast< CXnViewData* >( views[ index ] ) );
+
+        // Remove wallpaper from cache
+        iAppUiAdapter.ViewAdapter().BgManager().DeleteWallpaper( *view );
 
         // Remove plugin from HSPS
         iHspsWrapper->RemovePluginL( view->PluginId() );
@@ -1296,7 +1300,8 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
         iHspsWrapper->SetActivePluginL( aViewToActivate.PluginId() );
 
         // Cache update is needed after view activation
-        UpdateCachesL();        
+        UpdateCachesL();       
+        UpdateWallpaperL( viewToDeactivate, aViewToActivate );
         }
     else
         {
@@ -1310,7 +1315,7 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
     NotifyViewActivatedL( aViewToActivate );
     UpdatePageManagementInformationL();
     
-#ifdef _XN_PERFORMANCE_TEST_
+    #ifdef _XN_PERFORMANCE_TEST_
     RDebug::Print( _L( "CXnViewManager::NotifyContainerChangedL - end" ) );
 #endif //_XN_PERFORMANCE_TEST_
     }
@@ -1641,7 +1646,7 @@ void CXnViewManager::ReportWidgetAmountL( const CXnViewData& aViewData )
 //
 void CXnViewManager::UpdateWallpaperL( CXnViewData& aCurrent, CXnViewData& aNew )
     {
-    iEditor->BgManager().WallpaperChanged( aCurrent, aNew );
+    iAppUiAdapter.ViewAdapter().BgManager().WallpaperChanged( aCurrent, aNew );
     }
 
 // -----------------------------------------------------------------------------

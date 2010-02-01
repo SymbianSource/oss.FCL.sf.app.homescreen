@@ -20,10 +20,10 @@
 // l: listrow_wgtman_pane_t1
 // w:
 // r: TB9.2
-#define qtn_profile_configuration_name  "Profile"
+#define qtn_profile_configuration_name  "Time & profile"
 
 // d: profile widget description
 // l: listrow_wgtman_pane_t2
 // w:
 // r: TB9.2
-#define qtn_profile_configuration_desc  "Provides quick access to calendar, time&date and change profile."
+#define qtn_profile_configuration_desc  "Quick access to time, date and change profile."

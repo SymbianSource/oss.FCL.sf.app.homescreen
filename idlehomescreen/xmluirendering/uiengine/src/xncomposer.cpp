@@ -33,7 +33,8 @@
 #include "xnpanic.h"
 #include "xnplugindefs.h"
 #include "xnviewmanager.h"
-#include "xneditor.h"
+#include "xnappuiadapter.h"
+#include "xnviewadapter.h"
 #include "xnbackgroundmanager.h"
 
 // Constants
@@ -608,8 +609,8 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
         aViewData.SetUseEmptyWidget( UseEmptyWidget( *viewRoot )  );   
 
         // Read wallpaper image path from HSPS
-        CXnBackgroundManager& bgManager = aViewData.ViewManager().
-            Editor().BgManager();
+        CXnAppUiAdapter* appui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
+        CXnBackgroundManager& bgManager = appui->ViewAdapter().BgManager();
         
         // if page specific wallpaper feature is enabled
         if( bgManager.ActivatedL() )

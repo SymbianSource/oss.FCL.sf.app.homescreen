@@ -26,7 +26,6 @@
 #include <f32file.h>
 #include <bamdesca.h>
 #include <hscontentinfo.h>
-#include <SWInstApi.h> //installer
 
 #include "wmimageconverter.h"
 
@@ -46,7 +45,7 @@ class CWmResourceLoader;
  * handling the list item.
  */
 NONSHARABLE_CLASS( CWmWidgetData )
-    : public CActive
+    : public CBase
     , public MConverterObserver
     {
 
@@ -88,28 +87,6 @@ public: // construction
     /** Destructor. */
     ~CWmWidgetData();
 
-protected: // implementation of CActive
-    /**
-     * Implements cancellation of an outstanding request.
-     * 
-     * @see CActive::DoCancel
-     */
-    void DoCancel();
-    
-    /**
-     * Handles an active object's request completion event.
-     * 
-     * @see CActive::RunL
-     */
-    void RunL();
-    
-    /**
-     * RunError
-     * 
-     * @see CActive::RunError
-     */
-    TInt RunError(TInt aError);
-
 private: // private construction
     /** Constructor for performing 1st stage construction */
     CWmWidgetData( const TSize& aLogoSize, 
@@ -129,11 +106,6 @@ private: // private construction
             RWidgetRegistryClientSession* aRegistryClientSession );
 
 public: // external handles
-
-    /**
-     * Init uninstallation of widget.
-     */
-    void UnInstallL();
 
     /** current uninstall animation bitmap */
     const CFbsBitmap* AnimationBitmap( const TSize& aSize );
@@ -239,6 +211,9 @@ public: // methods to read the content
     /** sets the widget data validity */
     inline void SetValid( TBool aValid );
     
+	/** start animation for uninstallation*/
+    void VisualizeUninstallL();
+	
 protected: // from MConverterObserver
 
     /** image conversin completed */
@@ -247,11 +222,9 @@ protected: // from MConverterObserver
 private: // new functions
     
     /** uninstall animation related*/
-    void VisualizeUninstall();
     void PrepairAnimL();
     void DestroyAnimData();
     static TInt Tick( TAny* aPtr );
-    static TInt CloseSwiSession( TAny* aPtr );
     
     /** fetches publisher uid from widget registry*/
     void FetchPublisherUidL( 
@@ -269,9 +242,6 @@ private: // data members
     /* reference to resource loader */
     CWmResourceLoader& iWmResourceLoader;
     
-    /* instance of the CIdle class for async iconStr handling*/
-    CIdle*              iIdle;
-
     /* the image converter utility */
     CWmImageConverter*    iImageConverter;
 
@@ -318,11 +288,6 @@ private: // data members
     TBool               iFireLogoChanged;
 
     /**
-     * silent install launcher.
-     */
-    SwiUI::RSWInstSilentLauncher iInstaller;
-
-    /**
      * ActiveSchedulerWait used to wait while logo image
      * is being prepaired.
      */
@@ -344,7 +309,6 @@ NONSHARABLE_CLASS( RWidgetDataValues ) : public RPointerArray<CWmWidgetData>,
 
         /** returns the pointed widget name */
         inline TPtrC16 MdcaPoint(TInt aIndex) const;
-
     };
 
 #include "wmwidgetdata.inl"

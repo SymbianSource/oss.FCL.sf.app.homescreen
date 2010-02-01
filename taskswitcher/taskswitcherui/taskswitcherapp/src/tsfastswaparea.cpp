@@ -124,7 +124,6 @@ CTsFastSwapArea::~CTsFastSwapArea()
     delete iGrid;
     delete iFSClient;
     delete iPopup;
-    delete iConfirmCloseQuery;
     delete iHighlightTimer;
     delete iRedrawTimer;
     delete iUpdateGridTimer;
@@ -212,10 +211,6 @@ void CTsFastSwapArea::ReCreateGridL()
             empty, empty );
 
     // Setup text layout
-    TRgb textColor;
-    AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), textColor,
-            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG9 );
-    
     TAknLayoutText textLayout;
     textLayout.LayoutText(
             Rect(),
@@ -226,12 +221,25 @@ void CTsFastSwapArea::ReCreateGridL()
     TInt baselineOffset = textLayout.TextRect().iBr.iY - textLayout.TextRect().iTl.iY;
     AknListBoxLayouts::SetupFormTextCell( *iGrid, iGrid->ItemDrawer(), 1 /*Column index*/,
                                           textLayout.Font() /*Font type*/,
-                                          textColor.Color16() /*color*/,
+                                          NULL /*color*/,
                                           textLayout.TextRect().iTl.iX /*Left margin*/, 0 /*unused*/,
                                           baselineOffset /*Baseline*/, 0 /*Text width*/,
                                           textLayout.Align() /*Text alignment*/,
                                           TPoint(0,0) /*Start pos*/,
                                           TPoint(0,0) /*End pos*/);
+    // Text colors
+    TRgb textColor;
+    AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), textColor,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
+    TRgb highlightTextColor;
+    AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), highlightTextColor,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG11 );
+    CFormattedCellListBoxData::TColors colors;
+    colors.iText = textColor;
+    colors.iBack = iGrid->ItemDrawer()->BackColor();
+    colors.iHighlightedText = highlightTextColor;
+    colors.iHighlightedBack = iGrid->ItemDrawer()->HighlightedBackColor();
+    iGrid->ItemDrawer()->FormattedCellData()->SetSubCellColorsL(1, colors);
     
     // Setup grid observers
     if ( obs )
@@ -424,20 +432,6 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
         }
 
     TSLOG_OUT();
-    }
-
-// --------------------------------------------------------------------------
-// CTsFastSwapArea::TryCloseAppWithQueryL
-// --------------------------------------------------------------------------
-//
-void CTsFastSwapArea::TryCloseAppWithQueryL( TInt aIndex )
-    {
-    if ( aIndex >= 0 && aIndex < iArray.Count()
-            && CanClose( aIndex )
-            && ConfirmCloseL( aIndex ) )
-        {
-        TryCloseAppL( aIndex );
-        }
     }
 
 // --------------------------------------------------------------------------
@@ -732,9 +726,6 @@ void CTsFastSwapArea::HandleSwitchToBackgroundEvent()
     {
     // stop listening for changes in fsw content
     iFSClient->CancelSubscribe();
-    // get rid of the close confirmation query if shown
-    delete iConfirmCloseQuery; // this will cause ExecuteLD to return with 0
-    iConfirmCloseQuery = 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -812,33 +803,17 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
         TInt idx = SelectedIndex();
         if ( idx >= 0 )
             {
-            TryCloseAppWithQueryL( idx );
+            TryCloseAppL( idx );
             }
         return EKeyWasConsumed;
         }
     
     //do not forward the event until item is higlighted
-    if( aKeyEvent.iScanCode == EStdKeyLeftArrow ||
-        aKeyEvent.iScanCode == EStdKeyRightArrow )
-        {
-        if ( !iGrid->IsHighlightVisible() )
-            {
-            if ( aType == EEventKey )
-                {
-                ShowHighlight();
-                iConsumeEvent = ETrue;
-                }
-            return EKeyWasConsumed;
-            }
-        else if(iConsumeEvent)
-            {
-            if (aType == EEventKeyUp)
-                {
-                return EKeyWasConsumed;
-                }
-            iConsumeEvent = EFalse;
-            }
-        }
+    TKeyResponse response = ShowHighlightOnKeyEvent(aKeyEvent, aType);
+    if( response == EKeyWasConsumed )
+    	{
+    	return EKeyWasConsumed;
+    	}
     
     // pass the event to grid
     // do not pass down and up arrow key events
@@ -875,6 +850,43 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
     }
 
 // -----------------------------------------------------------------------------
+// CTsFastSwapArea::CatchKeyEvent
+// -----------------------------------------------------------------------------
+//
+TKeyResponse CTsFastSwapArea::ShowHighlightOnKeyEvent(
+		const TKeyEvent& aKeyEvent, TEventCode aType)
+	{
+	TKeyResponse retVal(EKeyWasNotConsumed);
+	
+	if (aKeyEvent.iScanCode == EStdKeyLeftArrow ||
+		aKeyEvent.iScanCode == EStdKeyRightArrow)
+		{
+		if (!iGrid->IsHighlightVisible())
+			{
+			if (aType == EEventKey)
+				{
+				ShowHighlight();
+				iConsumeEvent = ETrue;
+				}
+			retVal = EKeyWasConsumed;
+			}
+		else if (iConsumeEvent)
+			{
+			if (aType == EEventKeyUp)
+				{
+				retVal = EKeyWasConsumed;
+				}
+			else
+				{
+				iConsumeEvent = EFalse;
+				}
+			}
+		}
+	return retVal;
+	}
+
+
+// -----------------------------------------------------------------------------
 // CTsFastSwapArea::HandlePointerEventL
 // -----------------------------------------------------------------------------
 //
@@ -886,24 +898,6 @@ void CTsFastSwapArea::HandlePointerEventL( const TPointerEvent& aPointerEvent )
         {
         iTapEvent = aPointerEvent;
         }
-    }
-
-// -----------------------------------------------------------------------------
-// CTsFastSwapArea::ConfirmCloseL
-// -----------------------------------------------------------------------------
-//
-TBool CTsFastSwapArea::ConfirmCloseL( TInt aIndex )
-    {
-    HBufC* msg = StringLoader::LoadLC( R_TS_FSW_CONFIRM_CLOSE,
-        iArray[aIndex]->AppName() );
-    iConfirmCloseQuery = CAknQueryDialog::NewL(
-        CAknQueryDialog::EConfirmationTone );
-    iConfirmCloseQuery->SetPromptL( *msg );
-    CleanupStack::PopAndDestroy( msg );
-    TBool ok = iConfirmCloseQuery->ExecuteLD(
-        R_TS_FSW_CONFIRM_CLOSE_QUERY );
-    iConfirmCloseQuery = 0;
-    return ok;
     }
 
 // -----------------------------------------------------------------------------
@@ -978,7 +972,7 @@ void CTsFastSwapArea::ProcessCommandL( TInt aCommandId )
 //
 void CTsFastSwapArea::HandleCloseEventL(TInt aItemIdx)
     {
-    TryCloseAppWithQueryL( aItemIdx );
+    TryCloseAppL( aItemIdx );
     }
 
 

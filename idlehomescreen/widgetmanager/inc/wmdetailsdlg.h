@@ -24,6 +24,7 @@
 #include <AknDialog.h>
 
 // FORWARD DECLARATIONS
+class CAknMarqueeControl;
 class CEikRichTextEditor;
 class CAknsBasicBackgroundControlContext;
 
@@ -43,8 +44,7 @@ public:
 	        const TDesC& aDescription,
 	        TBool  aCanBeAdded,
             const CFbsBitmap* aLogoBmp,
-            const CFbsBitmap* aLogoMask,
-            CAknsBasicBackgroundControlContext* aBgContext );
+            const CFbsBitmap* aLogoMask );
 
     /** Destructor. */
     ~CWmDetailsDlg();
@@ -55,7 +55,6 @@ public: // New functions
     TInt ExecuteLD();
 
 private: // Functions from base classes
-
 	
 	/** From CEikDialog Initializes dialog before layout*/
 	void PreLayoutDynInitL();
@@ -65,7 +64,8 @@ private: // Functions from base classes
 	TBool OkToExitL(TInt aButtonId);
 	
 	/** From CCoeControl Handles key events */
-	TKeyResponse OfferKeyEventL( const TKeyEvent& aKeyEvent,TEventCode aType );
+	TKeyResponse OfferKeyEventL( 
+	        const TKeyEvent& aKeyEvent,TEventCode aType );
 
 	/** From CEikDialog Called by framework when dialog is activated */
 	void ActivateL();
@@ -83,13 +83,22 @@ private: // Functions from base classes
     TInt CountComponentControls() const;
     CCoeControl* ComponentControl(TInt aIndex) const;
     void Draw( const TRect& aRect ) const;
-    
-    /** Desired rect for dialog */
-    TRect WmDetailsDialogRect();
+    void FocusChanged( TDrawNow aDrawNow );
 
+private: // new functions
+    
     /** Insert and format content */
     void InsertAndFormatContentL();
     
+    /** Redraw call back for marque control */
+    static TInt RedrawCallback( TAny* aPtr );
+    
+    /** start marque control */
+    void StartMarquee();
+    
+    /** stop marque control */
+    void StopMarquee();
+
 private:
 
   	 /** Constructor for performing 1st stage construction */
@@ -100,8 +109,7 @@ private:
 	        const TDesC& aName,
 	        const TDesC& aDescription,
             const CFbsBitmap* aLogoBmp,
-            const CFbsBitmap* aLogoMask,
-            CAknsBasicBackgroundControlContext* aBgContext );
+            const CFbsBitmap* aLogoMask );
 
 private:
 	
@@ -114,6 +122,11 @@ private:
      * Richtext editor
      */
 	CEikRichTextEditor* iRtEditor;
+
+    /**
+     * Marquee control
+     */
+	CAknMarqueeControl* iMarquee;
 
 	/** 
      * Name of widget 
@@ -139,6 +152,11 @@ private:
      * ETrue if widget can be added to HS 
      */
     TBool               iCanBeAdded;
+
+    /** 
+     * ETrue if widget name needs to be scrolled. 
+     */
+    TBool               iNeedToScroll;
 	};
 
 #endif ___WMDETAILSDLG_H__

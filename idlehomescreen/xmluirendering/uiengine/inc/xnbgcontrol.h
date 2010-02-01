@@ -24,9 +24,9 @@
 #include <coecntrl.h>
 
 // User includes
+#include "xnuistatelistener.h"
 
 // Forward declarations
-class CAknsLayeredBackgroundControlContext;
 
 /**
  * Background appearance drawer
@@ -35,7 +35,7 @@ class CAknsLayeredBackgroundControlContext;
  * @lib xn3layoutengine.lib
  * @since S60 5.0
  */
-NONSHARABLE_CLASS( CXnBgControl ) : public CCoeControl 
+NONSHARABLE_CLASS( CXnBgControl ) : public CCoeControl , public MXnUiStateObserver
     {
 public:    
     // Constructors and destructor
@@ -100,11 +100,51 @@ public:
     // new functions
     void SetCompoundControl( CCoeControl* aControl );
     
+	/**
+     * Service for removing grabbing controls
+     */
+    void ResetGrabbingL();
+    
+    /**
+     * Prepares control for destroying
+     */
+    void PrepareDestroy();
+  
+private:  
+	// new functions
+    
+	/**
+     * Removes recursively grabbing controls
+     */
+    void RemoveGrabbingControL( const CCoeControl* aControl, const TPointerEvent& aEvent ) const;
+    
+private:
+    // from MXnUiStateObserver
+    
+    /**
+     * @see MXnUiStateObserver
+     */
+    void NotifyForegroundChanged( TForegroundStatus aStatus );
+    
+    /**
+     * @see MXnUiStateObserver
+     */
+    void NotifyLightStatusChanged( TBool aLightsOn );
+    
+    /**
+     * @see MXnUiStateObserver
+     */
+    void NotifyInCallStateChaged( TBool aInCall );   
+    
 private:
     // data
     
     /** Compound Control, Not owned */
     CCoeControl* iControl;
+    
+	/** stored point of EButton1Down */
+    TPoint iHitpoint;
+    
     };
 
 #endif // _XNBGCONTROL_H

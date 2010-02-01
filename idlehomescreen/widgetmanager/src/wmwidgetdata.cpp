@@ -29,15 +29,13 @@
 #include <AknsDrawUtils.h>
 #include <AknBitmapAnimation.h>
 #include <barsread.h>
+#include <widgetmanagerview.rsg>
 
 #include "wmwidgetdata.h"
 #include "wmwidgetdataobserver.h"
 #include "wmpersistentwidgetorder.h"
 #include "wmresourceloader.h"
 #include "wmcommon.h"
-
-// CONSTANTS
-_LIT8( KWrtMime, "application/x-nokia-widget");
 
 // ---------------------------------------------------------
 // CWmWidgetData::NewL
@@ -79,10 +77,8 @@ CWmWidgetData* CWmWidgetData::NewLC(
 //
 CWmWidgetData::CWmWidgetData( const TSize& aLogoSize, 
         CWmResourceLoader& aWmResourceLoader )
-    : CActive( EPriorityStandard ),
-    iWmResourceLoader( aWmResourceLoader )
+    : iWmResourceLoader( aWmResourceLoader )
     {
-    iIdle = NULL;
     iLogoImage = NULL;    
     iLogoImageMask = NULL;
     iHsContentInfo = NULL;
@@ -93,7 +89,6 @@ CWmWidgetData::CWmWidgetData( const TSize& aLogoSize,
     iAnimationIndex = 0;
     iAsyncUninstalling = EFalse;
     iFireLogoChanged = EFalse;
-    CActiveScheduler::Add( this );
     }
 
 // ---------------------------------------------------------
@@ -108,7 +103,6 @@ void CWmWidgetData::ConstructL(
 
     // start decoding the icon
     iImageConverter = CWmImageConverter::NewL( this );
-    iIdle = CIdle::NewL( CActive::EPriorityStandard );
     iWait = new (ELeave) CActiveSchedulerWait();
     iPeriodic = CPeriodic::NewL( CActive::EPriorityStandard );
 
@@ -149,12 +143,6 @@ void CWmWidgetData::InitL(
 //
 CWmWidgetData::~CWmWidgetData()
     {
-    Cancel();
-    if ( iIdle && iIdle->IsActive() )
-        {
-        iIdle->Cancel();
-        }
-    delete iIdle;
     if ( iWait && iWait->IsStarted() )
         {
         iWait->AsyncStop();
@@ -308,6 +296,7 @@ void CWmWidgetData::HandleIconString( const TDesC& aIconStr )
     else if ( KErrNone != err && iFireLogoChanged )
         {
         FireDataChanged(); // draw default icon
+        iFireLogoChanged = EFalse;
         }
     }
 
@@ -466,51 +455,15 @@ TBool CWmWidgetData::IsPrepairingLogo()
     }
 
 // ---------------------------------------------------------
-// CWmWidgetData::UnInstallL
-// ---------------------------------------------------------
-//
-void CWmWidgetData::UnInstallL()
-    {
-    if ( IsUninstalling() || IsActive() )
-        {
-        User::Leave( KErrInUse );
-        }
-
-    DestroyAnimData();
-    
-    TInt err = iInstaller.Connect();
-    if ( KErrNone == err )
-        {
-        CleanupClosePushL( iInstaller );
-        PrepairAnimL();
-        CleanupStack::Pop( &iInstaller );
-        SwiUI::TUninstallOptions optionsUninstall;
-        optionsUninstall.iBreakDependency = SwiUI::EPolicyAllowed;
-        optionsUninstall.iKillApp = SwiUI::EPolicyAllowed;
-        SwiUI::TUninstallOptionsPckg uninstallOptionsPkg( optionsUninstall );
-        iInstaller.SilentUninstall( iStatus, iPublisherUid, 
-                                uninstallOptionsPkg, KWrtMime );
-        VisualizeUninstall();
-        SetActive();
-        }
-    else
-        {
-        // do normal uninstall
-        iAsyncUninstalling = EFalse;
-        SwiUI::RSWInstLauncher installer;
-        User::LeaveIfError( installer.Connect() );
-        CleanupClosePushL( installer );
-        User::LeaveIfError( installer.Uninstall( iPublisherUid, KWrtMime ) );
-        CleanupStack::PopAndDestroy( &installer );
-        }
-    }
-
-// ---------------------------------------------------------
 // CWmWidgetData::VisualizeUninstall
 // ---------------------------------------------------------
 //
-void CWmWidgetData::VisualizeUninstall()
-    {
+void CWmWidgetData::VisualizeUninstallL()
+    {   
+    DestroyAnimData();
+    PrepairAnimL();
+    
+    iHsContentInfo->SetNameL( iWmResourceLoader.Uninstalling() );
     iAsyncUninstalling = ETrue;
     iAnimationIndex = 0;
     const TInt tickInterval = 400000;
@@ -588,22 +541,6 @@ TInt CWmWidgetData::Tick( TAny* aPtr )
     }
 
 // ---------------------------------------------------------
-// CWmWidgetData::CloseSwiSession
-// ---------------------------------------------------------
-//
-TInt CWmWidgetData::CloseSwiSession( TAny* aPtr )
-    {
-    CWmWidgetData* self = static_cast< CWmWidgetData* >( aPtr );
-    if ( self->iIdle->IsActive() )
-      {
-      self->iIdle->Cancel(); 
-      }
-
-    self->iInstaller.Close();
-    return KErrNone;
-    }
-
-// ---------------------------------------------------------
 // CWmWidgetData::AnimationBitmap
 // ---------------------------------------------------------
 //
@@ -658,65 +595,6 @@ const CFbsBitmap* CWmWidgetData::AnimationMask( const TSize& aSize )
 TBool CWmWidgetData::IsUninstalling()
     {
     return iAsyncUninstalling;
-    }
-
-// ---------------------------------------------------------
-// CWmWidgetData::DoCancel
-// ---------------------------------------------------------
-//
-void CWmWidgetData::DoCancel()
-    {
-    if ( IsActive() && iAsyncUninstalling )
-        {
-        iInstaller.CancelAsyncRequest( 
-                SwiUI::ERequestSilentUninstall );
-
-		// close session
-		iInstaller.Close();
-        }
-    iAsyncUninstalling = EFalse;
-    iAnimationIndex = 0;
-    }
-
-// ---------------------------------------------------------
-// CWmWidgetData::RunL
-// ---------------------------------------------------------
-//
-void CWmWidgetData::RunL()
-    {
-    iAsyncUninstalling = EFalse;
-    iAnimationIndex = 0;
-
-    DestroyAnimData();
-    FireDataChanged();
-
-    // close SWI session
-    if ( iIdle && iIdle->IsActive() )
-        {
-        iIdle->Cancel();
-        }
-    iIdle->Start( TCallBack( CloseSwiSession, this ) );
-    }
-
-// ---------------------------------------------------------
-// CWmWidgetData::RunError
-// ---------------------------------------------------------
-//
-TInt CWmWidgetData::RunError(TInt /*aError*/)
-    {
-    iAsyncUninstalling = EFalse;
-    iAnimationIndex = 0;
-    DestroyAnimData();
-    FireDataChanged();
-    
-    // close SWI session
-    if ( iIdle && iIdle->IsActive() )
-        {
-        iIdle->Cancel();
-        }
-    iIdle->Start( TCallBack( CloseSwiSession, this ) );
-
-    return KErrNone;
     }
 
 // End of file

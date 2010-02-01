@@ -17,18 +17,11 @@
 
 // System includes
 #include <aknappui.h>
-#include <AknUtils.h>
-#include <AknsUtils.h>
-#include <AknsDrawUtils.h>
-#include <AknsLayeredBackgroundControlContext.h>
-#include <gdi.h>
 
 // User includes
 #include "xnappuiadapter.h"
 #include "xnuiengine.h"
 #include "xneditmode.h"
-#include "xnviewadapter.h"
-#include "xnfocuscontrol.h"
 
 #include "xnbgcontrol.h"
 
@@ -77,6 +70,7 @@ CXnBgControl::~CXnBgControl()
 // -----------------------------------------------------------------------------
 //
 CXnBgControl::CXnBgControl()
+    :   iHitpoint( TPoint( -1,-1 ) )
     {  
     }
 
@@ -106,6 +100,10 @@ void CXnBgControl::ConstructL()
     MakeVisible( ETrue );
     
     SetComponentsToInheritVisibility( ETrue );
+    
+    static_cast< CXnAppUiAdapter* >( iAvkonAppUi )
+            ->UiStateListener().AddObserver( *this );
+    
     }
 
 // -----------------------------------------------------------------------------
@@ -178,6 +176,19 @@ void CXnBgControl::Draw( const TRect& aRect ) const
 //
 void CXnBgControl::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     {
+    switch( aPointerEvent.iType )
+        {
+        case TPointerEvent::EButton1Down:
+            iHitpoint = aPointerEvent.iPosition;
+            break;
+            
+        case TPointerEvent::EButton1Up:
+            break;
+            
+        default:
+            break;
+        }
+    
     CXnAppUiAdapter* appui( static_cast< CXnAppUiAdapter* >( iAvkonAppUi ) );
     
     appui->UiEngine().DisableRenderUiLC();
@@ -220,6 +231,95 @@ void CXnBgControl::SetCompoundControl( CCoeControl* aControl )
         }
     
     iControl = aControl;        
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBgControl::ResetGrabbingL()
+// Service for removing grabbing controls
+// -----------------------------------------------------------------------------
+//
+void CXnBgControl::ResetGrabbingL()
+    {
+    TPointerEvent event;
+    event.iType = TPointerEvent::EButton1Up;
+    
+    RemoveGrabbingControL( this, event );
+    
+    iHitpoint.SetXY( -1, -1 );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBgControl::PrepareDestroy()
+// Prepares control for destroying
+// -----------------------------------------------------------------------------
+//
+void CXnBgControl::PrepareDestroy()
+    {
+    static_cast< CXnAppUiAdapter* >( iAvkonAppUi )
+            ->UiStateListener().RemoveObserver( *this );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBgControl::RemoveGrabbingControL()
+// Removes recursively grabbing controls
+// -----------------------------------------------------------------------------
+//
+void CXnBgControl::RemoveGrabbingControL( const CCoeControl* aControl,
+        const TPointerEvent& aEvent ) const
+    {
+    TInt count = aControl->CountComponentControls();
+    
+    for( TInt i = 0; i < count; i++ )
+        {
+        CCoeControl* child = aControl->ComponentControl( i );
+        
+        if( child && child->Rect().Contains( iHitpoint ) )
+            {
+            child->CCoeControl::HandlePointerEventL( aEvent ); 
+            RemoveGrabbingControL( child, aEvent );
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBgControl::NotifyForegroundChanged()
+// Notifies foreground changes.
+// -----------------------------------------------------------------------------
+//
+void CXnBgControl::NotifyForegroundChanged( TForegroundStatus aStatus )
+    {
+    switch( aStatus )
+        {
+        case EForeground:
+            break;
+            
+        case EUnknown:
+        case EBackground:
+        case EPartialForeground:  
+        default:
+            TRAP_IGNORE( ResetGrabbingL(); )
+            break;
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBgControl::NotifyLightStatusChanged()
+// Notifies primary display light status is changed.
+// -----------------------------------------------------------------------------
+//
+void CXnBgControl::NotifyLightStatusChanged( TBool /*aLightsOn*/ )
+    {
+    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBgControl::NotifyInCallStateChaged()
+// Notifies in-call state is changed.
+// -----------------------------------------------------------------------------
+//
+void CXnBgControl::NotifyInCallStateChaged( TBool /*aInCall*/ )
+    {
+    
     }
 
 // End of file

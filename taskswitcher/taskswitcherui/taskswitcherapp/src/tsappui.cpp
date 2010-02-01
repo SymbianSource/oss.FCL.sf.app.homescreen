@@ -385,7 +385,10 @@ void CTsAppUi::HandleResourceChangeL( TInt aType )
         }
     // forward event
     iDeviceState->HandleResourceChange( aType );
-    iAppView->HandleResourceChange( aType );
+    if ( iAppView )
+        {
+        iAppView->HandleResourceChange( aType );
+        }
     }
 
 // -----------------------------------------------------------------------------

@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.60 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.60 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.61 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.61 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -1805,12 +1805,6 @@ void CMmAppUi::HandlePresentationChangeL(
 
     if( iCurrentContainer != aWidgetContainer )
         {
-        if( iCurrentContainer && aWidgetContainer &&
-                iCurrentContainer->WidgetType() != aWidgetContainer->WidgetType() )
-            {
-            StartLayoutSwitchFullScreen();
-            }
-
         TBool highlightVisibleBefore = iCurrentContainer != NULL &&
 			iCurrentContainer->IsHighlightVisible();
 

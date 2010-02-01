@@ -4477,7 +4477,7 @@ static TBool RunEventL(
         }
     else if ( nameString == XnPropertyNames::action::event::KSetWallpaper )
         {
-        aEngine.Editor()->BgManager().SetWallpaperL();
+        aEngine.AppUiAdapter().ViewAdapter().BgManager().SetWallpaperL();
         return ETrue;
         }
            
