@@ -135,13 +135,13 @@ void CMmListBox::ConstructL( const CCoeControl* aParent, TInt aFlags,
 void CMmListBox::HandlePointerEventInEditModeL(
         const TPointerEvent& aPointerEvent )
     {
+    CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
         iButton1DownPos = aPointerEvent.iPosition;
         }
     else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
         {
-        CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
         TPoint dragDelta = iButton1DownPos - aPointerEvent.iPosition;
         if ( Abs( dragDelta.iY ) > KDragTreshold || parent->LongTapInProgress() )
             {
@@ -153,7 +153,17 @@ void CMmListBox::HandlePointerEventInEditModeL(
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
+        TBool highlightWasVisible = parent->IsHighlightVisible();
         CEikFormattedCellListBoxTypedef::HandlePointerEventL( aPointerEvent );
+        // Tricky: Do not allow the base class implementation of HandlePointerEventL 
+        //         to remove the highlight on EButton1Up event when context menu
+        //         is displayed for an item
+        if ( aPointerEvent.iType == TPointerEvent::EButton1Up &&
+                highlightWasVisible && parent->LongTapInProgress()
+                && !parent->IsHighlightVisible() )
+            {
+            ItemDrawer()->ClearFlags( CListItemDrawer::ESingleClickDisabledHighlight );
+            }
         }
     else if ( View()->XYPosToItemIndex(
             aPointerEvent.iPosition, itemUnderPointerIndex ) )
@@ -200,7 +210,7 @@ TBool CMmListBox::IsPointerInTopScrollingThreshold(
             const TPointerEvent& aPointerEvent ) const
     {
     TInt topScrollingTreshold = Rect().iTl.iY
-        + ( MmEffects::KFocusScrollingThreshold
+        + ( MmListBox::KFocusScrollingThreshold
             * TReal( View()->ItemSize().iHeight ) );
 
     return ( aPointerEvent.iPosition.iY < topScrollingTreshold );
@@ -214,7 +224,7 @@ TBool CMmListBox::IsPointerInBottomScrollingThreshold(
             const TPointerEvent& aPointerEvent ) const
     {
     TInt bottomScrollingTreshold = Rect().iBr.iY
-        - ( MmEffects::KFocusScrollingThreshold
+        - ( MmListBox::KFocusScrollingThreshold
             * TReal( View()->ItemSize().iHeight ) );
 
     return ( aPointerEvent.iPosition.iY > bottomScrollingTreshold );
@@ -384,7 +394,7 @@ void CMmListBox::ProcessScrollEventL( CEikScrollBar* aScrollBar,
 //
 // -----------------------------------------------------------------------------
 //
-void CMmListBox::HandleRedrawTimerEvent()
+void CMmListBox::HandleRedrawTimerEventL()
     {
     if ( iSkippedScrollbarEventsCount )
         {
@@ -401,7 +411,9 @@ void CMmListBox::HandleRedrawTimerEvent()
 TInt CMmListBox::RedrawTimerCallback( TAny* aPtr )
     {
     CMmListBox* self = static_cast<CMmListBox*>( aPtr );
-    self->HandleRedrawTimerEvent();
+    TRAP_IGNORE( self->HandleRedrawTimerEventL() );
+    // Do not bother returning a meaningful error code, CPeriodic will ignore it
+    // anyway.
     return 0;
     }
 

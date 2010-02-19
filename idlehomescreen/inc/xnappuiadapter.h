@@ -61,6 +61,14 @@ public:
     // New functions
 
     /**
+     * Removes and deregisters view from AppUi
+     *
+     * @since S60 5.2
+     * @param aView view to deregister
+     */
+    IMPORT_C void RemoveViewL( CAknView& aView );
+
+    /**
      * Get the UI engine
      *
      * @since Series 60 3.1
@@ -90,20 +98,24 @@ public:
      * To be overriden by subclass.     
      *
      * @since S60 5.0
-     * @param aList list of plugins to load     
+     * @param aPublisher Publisher to load
+     * @param aReason Load reason
+     * @return KErrNone if succesful, system wide error code otherwise     
      */
-    IMPORT_C virtual void LoadDataPluginsL(
-        RPointerArray< CXnNodeAppIf >& aList );
+    IMPORT_C virtual TInt LoadPublisher(
+        CXnNodeAppIf& aPublisher, TInt aReason );
 
     /**
      * Handles data plugin destroying.
      * To be overriden by subclass.     
      *
      * @since S60 5.0
-     * @param aList list of plugins to destroy     
+     * @param aPublisher Publisher to destroy     
+     * @param aReason Destroy reason
+     * @return KErrNone if succesful, system wide error code otherwise
      */
-    IMPORT_C virtual void DestroyDataPluginsL(
-        RPointerArray< CXnNodeAppIf >& aList );
+    IMPORT_C virtual TInt DestroyPublisher(
+        CXnNodeAppIf& aPublisher, TInt aReason );
 
     /**
      * Handles dynamic menuitem element initialisation.
@@ -117,16 +129,6 @@ public:
     IMPORT_C virtual TBool DynInitMenuItemL( 
         const TDesC& aItemType, 
         RPointerArray< CXnNodeAppIf >* aList = NULL );
-
-    /**
-     * Determines and sets data plugins to online.
-     * To be overriden by subclass.     
-     *     
-     * @since S60 5.0
-     * @param aList List of data plugins     
-     */            
-    IMPORT_C virtual void SetOnlineStateL(     
-        RPointerArray< CXnNodeAppIf >& aList );
     
     /*
      * Returns the Xml Ui view as CAknView reference.
@@ -135,15 +137,7 @@ public:
      * @return Xml Ui View 
      */
     IMPORT_C CAknView& CXnAppUiAdapter::View() const;
-	
-    /**
-     * Handles page switch changes 
-     * To be overriden by subclass.     
-     *
-     * @since S60 5.0
-     */
-    IMPORT_C virtual void HandlePageSwitch();
-    
+	    
     /**
      * Handles changes when entering or exiting edit mode 
      * To be overriden by subclass.     
@@ -153,6 +147,16 @@ public:
      */
     IMPORT_C virtual void HandleEnterEditModeL( TBool aEnter );
 
+    /**
+     * Routes the events from external rendering plug-ins to content plug-ins.
+     *
+     * @since S60 5.2
+     * @param aEvent Event string
+     * @param aDestination Destination node for the event
+     */
+    IMPORT_C virtual void HandleEventL( const TDesC& aEvent, 
+        CXnNodeAppIf& aDestination );
+    
 public:
     /**
      * From CEikAppUi.
@@ -170,7 +174,14 @@ protected:
      * @since Series 60 3.1
      */
     IMPORT_C void HandleResourceChangeL( TInt aType );
-    
+
+    /**
+     * From CAknAppUi.
+     *
+     * @since Series 60 5.2
+     */
+    IMPORT_C void PrepareToExit();
+
 public:
     // new functions
         
@@ -260,6 +271,11 @@ public:
 
 private:
     // Data
+
+    /**
+     * flag for application exit
+     */
+    TBool iExitingApp;
 
     /**
      * application uid

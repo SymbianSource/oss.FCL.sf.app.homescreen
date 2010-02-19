@@ -190,6 +190,11 @@ RESOURCE TBUF r_qtn_wm_uninst_process_busy
     buf = qtn_wm_uninst_process_busy;
     }
 
+RESOURCE TBUF r_qtn_hs_add_widget_max_reached
+    {
+    buf = qtn_hs_add_widget_max_reached;
+    }
+    
 RESOURCE TBUF r_qtn_wm_uninstall_text
     {
     buf = qtn_wm_uninstall_text;

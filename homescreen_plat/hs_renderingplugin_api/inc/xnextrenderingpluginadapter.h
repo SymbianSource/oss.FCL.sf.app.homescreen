@@ -25,6 +25,8 @@
 
 // User includes
 
+class MXnExtEventHandler;
+
 /**
  *  CXnExtRenderingPluginAdapter class
  *
@@ -91,6 +93,24 @@ public: // New functions,
      * Informs size change.
      */
     IMPORT_C virtual void SizeChanged();
+    
+    /**
+     * Sets the external event handler interface.
+     *
+     * @since Series 60 5.2
+     * @param aEventHandler Event handler interface.
+     */
+    IMPORT_C virtual void SetEventHandler( MXnExtEventHandler* aEventHandler );
+    
+    /**
+     * Routes the data stream for the external rendering plugin.
+     *
+     * @since Series 60 5.2
+     * @param aData Data stream.
+     * @param aType Type of the stream.
+     * @param aIndex Index of the data.
+     */
+    IMPORT_C virtual void SetDataL( const TDesC8& aData, const TDesC& aType, TInt aIndex );
 
 private: // Data
 

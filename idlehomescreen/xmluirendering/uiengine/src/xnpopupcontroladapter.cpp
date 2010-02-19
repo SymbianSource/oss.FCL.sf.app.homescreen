@@ -24,8 +24,12 @@
 
 // User includes
 #include "xnappuiadapter.h"
+#include "xnviewmanager.h"
+#include "xnviewdata.h"
+#include "xnplugindata.h"
 #include "xnproperty.h"
 #include "xncontroladapter.h"
+#include "xndomnode.h"
 #include "xnnodepluginif.h"
 #include "xnnode.h"
 #include "xntype.h"
@@ -49,18 +53,20 @@ _LIT8( KTarget, "target" );
 
 // -----------------------------------------------------------------------------
 // FindWidgetMenuItemL
+//
 // -----------------------------------------------------------------------------
 //
-CXnNode* FindWidgetMenuItemL( const TDesC8& aSource, 
-    CXnNode& aPlugin )
-    {    
-    if( aPlugin.Children().Count() == 0 )
+static CXnNode* FindWidgetMenuItemL( CXnPluginData& aPlugin,
+    const TDesC8& aSource )     
+    {        
+    if ( !aPlugin.Occupied() )
         {
         return NULL;
         }
-    
-    // Get <widget> element from the <plugin> element
-    RPointerArray< CXnNode >& children( aPlugin.Children()[0]->Children() );
+
+    CXnNode* widget( aPlugin.Node()->LayoutNode() );
+
+    RPointerArray< CXnNode >& children( widget->Children() );
     
     for ( TInt i = children.Count() - 1; i >= 0; i-- )
         {
@@ -190,6 +196,10 @@ void CXnPopupControlAdapter::SetObserver(
 //
 void CXnPopupControlAdapter::TryDisplayingStylusPopupL( CXnNode& aPlugin )
     {
+    CXnViewManager* manager( iUiEngine->ViewManager() );
+            
+    CXnPluginData& plugin( manager->ActiveViewData().Plugin( &aPlugin ) );
+        
     HideMenuL();
     
     TPointerEvent event( iUiEngine->HitTest().PointerEvent() );
@@ -204,10 +214,10 @@ void CXnPopupControlAdapter::TryDisplayingStylusPopupL( CXnNode& aPlugin )
     
     for ( TInt i = 0; i < children.Count(); i++ )
         {      
-        PopulateMenuL( children[i], aPlugin );
+        PopulateMenuL( plugin, children[i] );
         }
     
-    ShowMenuL( aPlugin, event.iParentPosition );
+    ShowMenuL( plugin, event.iParentPosition );
     }
 
 // -----------------------------------------------------------------------------
@@ -223,7 +233,8 @@ void CXnPopupControlAdapter::HandleScreenDeviceChangedL()
 // CXnPopupControlAdapter::PopulateMenuL
 // -----------------------------------------------------------------------------
 //
-void CXnPopupControlAdapter::PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin )    
+void CXnPopupControlAdapter::PopulateMenuL( CXnPluginData& aPlugin, 
+    CXnNode* aItem )    
     {                     
     CXnNode* menuitem( NULL );    
     CXnProperty* prop( NULL );
@@ -240,7 +251,7 @@ void CXnPopupControlAdapter::PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin )
         if ( source )
             {                       
             CXnNode* widgetItem( 
-                    FindWidgetMenuItemL( source->StringValue(), aPlugin ) );
+                FindWidgetMenuItemL( aPlugin, source->StringValue() ) );
             
             if ( widgetItem )
                 {
@@ -248,11 +259,13 @@ void CXnPopupControlAdapter::PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin )
                 
                 // Get label from the view item
                 prop = aItem->LabelL();
+                
                 if ( !prop )
                     {
                     // no localization in view, check from widget
                     prop = widgetItem->LabelL();
                     }
+                
                 // Pretend the original item is this widget item
                 aItem = widgetItem;            
                 }                                               
@@ -268,8 +281,10 @@ void CXnPopupControlAdapter::PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin )
         }
     else if ( type == KDynMenuItem && iObserver )
         {
+        CXnNode* plugin( aPlugin.Owner()->LayoutNode() );
+        
         // Let observer decide whether dynmenuitem is visible or not
-        if ( iObserver->DynInitMenuItemL( aItem->AppIfL(), &aPlugin.AppIfL() ) )
+        if ( iObserver->DynInitMenuItemL( aItem->AppIfL(), &plugin->AppIfL() ) )
             {
             menuitem = aItem;                       
             }
@@ -277,8 +292,10 @@ void CXnPopupControlAdapter::PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin )
         
     if ( menuitem )
         {
-        CXnProperty* display = menuitem->DisplayL();
-        if ( display && display->StringValue() == XnPropertyNames::style::common::display::KNone )
+        CXnProperty* display( menuitem->DisplayL() );
+        
+        if ( display && display->StringValue() == 
+            XnPropertyNames::style::common::display::KNone )
             {
             return;
             }
@@ -305,23 +322,26 @@ void CXnPopupControlAdapter::PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin )
 // CXnPopupControlAdapter::ShowMenuL
 // -----------------------------------------------------------------------------
 //
-void CXnPopupControlAdapter::ShowMenuL( CXnNode& aPlugin, TPoint aPosition )
+void CXnPopupControlAdapter::ShowMenuL( CXnPluginData& aPlugin, 
+    TPoint aPosition )
     {
     if ( iMenuItems.Count() > 0 && !iMenuShown )
         {
         iUiEngine->AppUiAdapter().HideFocus();            
-                
-        iUiEngine->Editor()->SetTargetPlugin( &aPlugin );
+    
+        CXnNode* plugin( aPlugin.Owner()->LayoutNode() );
+        
+        iUiEngine->Editor()->SetTargetPlugin( plugin );
                        
         if ( AknLayoutUtils::LayoutMirrored() )
             {
             iStylusPopupMenu->SetPosition( aPosition, 
-                    CAknStylusPopUpMenu::EPositionTypeRightBottom );                        
+                CAknStylusPopUpMenu::EPositionTypeRightBottom );                        
             }
         else
             {
             iStylusPopupMenu->SetPosition( aPosition, 
-                    CAknStylusPopUpMenu::EPositionTypeLeftBottom );                        
+                CAknStylusPopUpMenu::EPositionTypeLeftBottom );                        
             }
         
         iStylusPopupMenu->ShowMenu();

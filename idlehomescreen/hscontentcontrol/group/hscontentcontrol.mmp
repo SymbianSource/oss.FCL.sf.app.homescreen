@@ -24,6 +24,7 @@ CAPABILITY        CAP_GENERAL_DLL
 VENDORID          VID_DEFAULT
 
 USERINCLUDE       ../inc
+USERINCLUDE       ../../inc
 
 APP_LAYER_SYSTEMINCLUDE
 
@@ -59,7 +60,7 @@ LIBRARY           euser.lib
 LIBRARY           estor.lib
 LIBRARY           ecom.lib
 LIBRARY           charconv.lib
-
+LIBRARY           xn3layoutengine.lib	
 
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE

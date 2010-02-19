@@ -51,6 +51,7 @@
 #include "xneffectmanager.h"
 #include "xnviewadapter.h"
 #include "xnbackgroundmanager.h"
+#include "xntexteditor.h"
 
 // Local constants
 _LIT8( KRef, "ref" );
@@ -58,6 +59,7 @@ _LIT8( KId, "id" );
 _LIT8( KName, "name" );
 _LIT8( KToolTip, "tooltip" );
 _LIT8( KMenuBar, "menubar" );
+_LIT8( KTextEditor, "texteditor" );
 
 _LIT8( KActionsHandler, "actionshandler" );
 
@@ -297,12 +299,14 @@ static void RunFullScreenEffectL(
     CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunActivateViewL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnDomNode& aEventNode );
-static void RunActivateNextViewL( CXnUiEngine& aEngine );
-static void RunActivatePreviousViewL( CXnUiEngine& aEngine );
-static void RunAddViewL( CXnUiEngine& aEngine );
-static void RunRemoveViewL( CXnUiEngine& aEngine );
+static void RunActivateNextViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
+static void RunActivatePreviousViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
+static void RunAddViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
+static void RunRemoveViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunActivateL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnDomNode& aEventNode );
+static void RunActivateEditorL( CXnNodeImpl* aThis, CXnNode& aLayoutNode,
+    CXnUiEngine& aEngine, CXnDomNode& aEventNode, TBool aActivate );
 static void RunDeactivateL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunSystemSetPCDataL(
@@ -459,6 +463,23 @@ static TBool MatchTitleScrollTriggerL(
     CXnNode& aEventData, CXnDomNode& aTriggerNode );
 
 // ============================= LOCAL FUNCTIONS ===============================
+
+// -----------------------------------------------------------------------------
+// ResolveEffectId
+// -----------------------------------------------------------------------------
+//
+static TInt ResolveEffectId( CXnDomNode& aEventNode )
+    {
+    TInt effect( 0 );
+    const TDesC8& value( aEventNode.AttributeValue( 
+        XnPropertyNames::common::KEffectId ) );
+    if( value != KNullDesC8 )
+        {
+        TLex8 lex( value );
+        lex.Val( effect );    
+        }
+    return effect;
+    }
 
 // -----------------------------------------------------------------------------
 // Checks whether trigger is runnable
@@ -3104,7 +3125,7 @@ static void RunPassiveFocusChangeL(
                     else if ( aString == XnPropertyNames::action::event::KSetActiveFocus )
                         {
                         CXnNode* previousNode = aEngine.FocusedNode();
-                        if ( previousNode != node )
+                        if ( previousNode && previousNode != node )
                             {
                             if ( IsNodeNavigableL( *node ) )
                                 {
@@ -3154,22 +3175,11 @@ static void RunAppExit( CXnUiEngine& aEngine )
 //
 static void RunFullScreenEffectL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
-    CXnDomList& list( aEventNode.AttributeList() );
-    const TDesC8& effectid( XnPropertyNames::common::KEffectId );
-    CXnDomAttribute* attribute( static_cast< CXnDomAttribute* >
-        ( list.FindByName( effectid ) ) );
-
-    if ( attribute )
+    TInt effectId = ResolveEffectId( aEventNode ); 
+    if( effectId )
         {
-        
-        const TDesC8& value( attribute->Value() );
-        TLex8 lex( value );
-        TInt effect;
-        lex.Val( effect );
-        
         aEngine.AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
-                effect, aEngine.ViewManager()->ActiveViewData() );
-        
+            effectId, aEngine.ViewManager()->ActiveViewData() );        
         }
     }
 
@@ -3210,36 +3220,40 @@ static void RunActivateViewL(
 // RunActivateNextViewL
 // -----------------------------------------------------------------------------
 //
-static void RunActivateNextViewL( CXnUiEngine& aEngine )
+static void RunActivateNextViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
-    aEngine.ViewManager()->ActivateNextViewL();
+    TInt effectid = ResolveEffectId( aEventNode );
+    aEngine.ViewManager()->ActivateNextViewL( effectid );
     }
 
 // -----------------------------------------------------------------------------
 // RunActivatePreviousViewL
 // -----------------------------------------------------------------------------
 //
-static void RunActivatePreviousViewL( CXnUiEngine& aEngine )
+static void RunActivatePreviousViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
-    aEngine.ViewManager()->ActivatePreviousViewL();
+    TInt effectid = ResolveEffectId( aEventNode );
+    aEngine.ViewManager()->ActivatePreviousViewL( effectid );
     }
 
 // -----------------------------------------------------------------------------
 // RunAddViewL
 // -----------------------------------------------------------------------------
 //
-static void RunAddViewL( CXnUiEngine& aEngine )
+static void RunAddViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
-    aEngine.ViewManager()->AddViewL();
+    TInt effectid = ResolveEffectId( aEventNode );
+    aEngine.ViewManager()->AddViewL( effectid );
     }
 
 // -----------------------------------------------------------------------------
 // RunRemoveViewL
 // -----------------------------------------------------------------------------
 //
-static void RunRemoveViewL( CXnUiEngine& aEngine )
+static void RunRemoveViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
-    aEngine.ViewManager()->RemoveViewL();
+    TInt effectid = ResolveEffectId( aEventNode );
+    aEngine.ViewManager()->RemoveViewL( effectid );
     }
 
 // -----------------------------------------------------------------------------
@@ -3274,6 +3288,60 @@ static void RunActivateL(
     if ( focused )
         {
         focused->SetStateL( XnPropertyNames::style::common::KActive );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// RunActivateEditorL
+// -----------------------------------------------------------------------------
+//
+static void RunActivateEditorL(
+    CXnNodeImpl* aThis,
+    CXnNode& aLayoutNode,
+    CXnUiEngine& aEngine,
+    CXnDomNode& aEventNode,
+    TBool aActivate )
+    {
+    CXnNode* editorNode( NULL );
+    CXnDomList& children = aEventNode.ChildNodes();
+    TInt count = children.Length();
+    for ( TInt i = 0; i < count; ++i )
+        {
+        CXnDomNode* dnode = static_cast< CXnDomNode* >( children.Item( i ) );
+        const TDesC8& type = dnode->Name();
+        if ( type == XnPropertyNames::action::KProperty )
+            {
+            const TDesC8& id = dnode->AttributeValue( KId );
+            CXnNode* node = aEngine.FindNodeByIdL( id, aThis->Namespace() );
+            if( node && node->Type()->Type() == KTextEditor )
+                {
+                editorNode = node;
+                break;
+                }
+            }
+        }
+
+    if( !editorNode && aLayoutNode.Type()->Type() == KTextEditor )
+        {
+        editorNode = &aLayoutNode;
+        }
+    
+    if( editorNode )
+        {
+        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;
+        
+        XnComponentInterface::MakeInterfaceL( editorControl, editorNode->AppIfL() );
+        if( editorControl )
+            {
+            if( aActivate )
+                {
+                editorControl->HandleEditorEvent(CXnTextEditor::KActivateTextEditor);
+                }
+            else
+                {
+                editorControl->HandleEditorEvent(CXnTextEditor::KDeactivateTextEditor);
+                }
+            }    
         }
     }
 
@@ -3412,6 +3480,7 @@ static void RunEditL(
             }
         
         aEngine.EditMode()->SetEditModeL( CXnEditMode::EDragAndDrop );        
+        aEngine.AppUiAdapter().ViewAdapter().BgManager().DrawNow();
         }
 
     CleanupStack::PopAndDestroy();
@@ -3521,7 +3590,8 @@ static void RunResetEditL(
             }                
         }
     
-    aEngine.EditMode()->SetEditModeL( CXnEditMode::ENone );    
+    aEngine.EditMode()->SetEditModeL( CXnEditMode::ENone );   
+    aEngine.AppUiAdapter().ViewAdapter().BgManager().DrawNow();
 
     aEngine.AppUiAdapter().ViewAdapter().UpdateRskByModeL();
     }
@@ -3870,6 +3940,37 @@ static void GetSystemSetDataL(
             else if ( name == XnPropertyNames::action::event::systemset::KClass )
                 {
                 *aClassId = &value;
+                }
+            else
+                {
+                // Everyting is within the same property tag
+                // e.g. <property name="display" value="block" type="string" id="my_id"/>
+
+                // Save name...
+                *aName = &name;
+
+                // ...and value
+                if ( aValues )
+                    {
+                    HBufC8* valueH = HBufC8::NewLC( value.Length() + KUnitMaxLen );
+                    TPtr8 ptr( valueH->Des() );
+                    ptr.Append( value );
+                    aValues->AppendL( valueH );     //take ownership
+                    CleanupStack::Pop( valueH );
+                    }
+                
+                // ...and type
+                const TDesC8& type = node->AttributeValue(
+                    XnPropertyNames::action::event::systemset::KType );
+                *aType = &type;
+
+                // ...and id
+                const TDesC8& id = node->AttributeValue(
+                    XnPropertyNames::action::event::systemset::KId );
+                HBufC8* utfName = HBufC8::NewL( id.Length() );
+                TPtr8 ptr = utfName->Des();
+                ptr = id;
+                aId = utfName;
                 }
             }
         }
@@ -4322,30 +4423,21 @@ static TBool RunEventL(
         {
         aEngine.Editor()->RemoveWidgetL( aEngine.FocusedNode() );               
         }
-    else if ( nameString == XnPropertyNames::action::event::KRunFullScreenEffect )
-        {
-        TInt viewCount( aEngine.ViewManager()->ViewAmount() );
-
-        if ( viewCount > KOneView )
-            {
-            RunFullScreenEffectL( aEngine, aEventNode );
-            }
-        }
     else if ( nameString == XnPropertyNames::action::event::KActivateNextView )
         {
-        RunActivateNextViewL( aEngine );
+        RunActivateNextViewL( aEngine, aEventNode );
         }
     else if ( nameString == XnPropertyNames::action::event::KActivatePreviousView )
         {
-        RunActivatePreviousViewL( aEngine );
+        RunActivatePreviousViewL( aEngine, aEventNode );
         }
     else if ( nameString == XnPropertyNames::action::event::KAddView )
         {
-        RunAddViewL( aEngine );
+        RunAddViewL( aEngine, aEventNode );
         }
     else if ( nameString == XnPropertyNames::action::event::KRemoveView )
         {
-        RunRemoveViewL( aEngine );
+        RunRemoveViewL( aEngine, aEventNode );
         }
     else if ( nameString == XnPropertyNames::action::event::KActivateView )
         {
@@ -4408,6 +4500,8 @@ static TBool RunEventL(
     else if ( nameString == XnPropertyNames::action::event::KReportEnterEditMode ) 
             
         {
+        RunFullScreenEffectL( aEngine, aEventNode );
+        
         CXnNode* trigger( BuildTriggerNodeL( aEngine,                    
             XnPropertyNames::action::trigger::name::KEditMode ) );
         CleanupStack::PushL( trigger );
@@ -4431,6 +4525,8 @@ static TBool RunEventL(
         }
     else if( nameString == XnPropertyNames::action::event::KReportExitEditMode )
         {
+        RunFullScreenEffectL( aEngine, aEventNode );
+
         CXnNode* trigger( BuildTriggerNodeL( aEngine,                    
             XnPropertyNames::action::trigger::name::KEditMode ) );
         CleanupStack::PushL( trigger );
@@ -4480,7 +4576,16 @@ static TBool RunEventL(
         aEngine.AppUiAdapter().ViewAdapter().BgManager().SetWallpaperL();
         return ETrue;
         }
-           
+    else if ( nameString == XnPropertyNames::action::event::KActivateTextEditor)
+        {
+        RunActivateEditorL( aThis, aNode, aEngine, aEventNode, ETrue );
+        return ETrue;
+        }
+    else if ( nameString == XnPropertyNames::action::event::KDeactivateTextEditor)
+        {
+        RunActivateEditorL( aThis, aNode, aEngine, aEventNode, EFalse );
+        return ETrue;
+        }    
     return EFalse;
     }
 

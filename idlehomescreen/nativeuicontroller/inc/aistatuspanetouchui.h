@@ -19,21 +19,23 @@
 #ifndef C_AISTATUSPANETOUCHUI_H
 #define C_AISTATUSPANETOUCHUI_H
 
+// System includes
 #include <e32base.h>
 #include <badesca.h>
 #include <AknNaviDecoratorObserver.h>
 #include <StringLoader.h>
 #include <eikmobs.h>
 
+// User includes
 #include "ainativerenderer.h"
 
+// Forward declarations
+class CHsContentPublisher;
 class MAiFwEventHandler;
-
 class CAknStylusPopUpMenu;
 
 namespace AiNativeUiController
 {
-
 // Stylus activated popup command ids
 enum TLinkCommandID
 	{
@@ -42,14 +44,11 @@ enum TLinkCommandID
     EAIProfileCmdLink
     };
 
-
 class CAiStatusPanel;
 
-class CAiStatusPaneTouchUi : public CAiNativeRenderer,
-							 public MAknNaviDecoratorObserver,
-					  	 	 public MEikMenuObserver
+NONSHARABLE_CLASS( CAiStatusPaneTouchUi ) : public CAiNativeRenderer,
+    public MAknNaviDecoratorObserver, public MEikMenuObserver					  	 	 
 	{
-
 public:
 
 // Construction and destructor
@@ -72,7 +71,7 @@ public:
 
 // from base class CAiNativeRenderer
 
-    void DoPublishL( MAiPropertyExtension& aPlugin,
+    void DoPublishL( CHsContentPublisher& aPlugin,
                         TInt aContent,
                         const TDesC16& aText,
                         TInt aIndex );

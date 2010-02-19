@@ -25,9 +25,9 @@
 ;Unique Vendor name
 :"Nokia"
 
-"/epoc32/release/armv5/urel/taskswitcher.exe" - "!:\sys\bin\hgteleport.exe"
-"/epoc32/data/z/resource/apps/tstaskswitcher.rsc" - "!:\resource\apps\hgteleport.rsc"
-"/epoc32/data/z/private/10003a3f/apps/tstaskswitcher_reg.rsc" - "!:\private\10003a3f\import\apps\tstaskswitcher_reg.rsc"
+"/epoc32/release/armv5/urel/taskswitcher.exe" - "!:\sys\bin\taskswitcher.exe"
+"/epoc32/data/z/resource/apps/taskswitcher.rsc" - "!:\resource\apps\taskswitcher.rsc"
+"/epoc32/data/z/private/10003a3f/apps/taskswitcher_reg.rsc" - "!:\private\10003a3f\import\apps\taskswitcher_reg.rsc"
 
 "/epoc32/release/armv5/urel/tsappecom.dll" - "!:\sys\bin\tsappecom.dll"
 "/epoc32/data/z/resource/plugins/tsappecom.rsc" - "!:\resource\plugins\tsappecom.rsc"

@@ -20,8 +20,8 @@
 // AknCapServer alternate fast swap plugin
 ECOM_PLUGIN( tsappecom.dll, tsappecom.rsc )
 
-data=DATAZ_/private/10003a3f/apps/tstaskswitcher_reg.rsc                          private/10003a3f/import/apps/tstaskswitcher_reg.rsc
-file=ABI_DIR/BUILD_DIR/taskswitcher.exe                                           PROGRAMS_DIR/hgteleport.exe
+data=DATAZ_/private/10003a3f/apps/taskswitcher_reg.rsc                          private/10003a3f/import/apps/taskswitcher_reg.rsc
+file=ABI_DIR/BUILD_DIR/taskswitcher.exe                                         PROGRAMS_DIR/taskswitcher.exe
 
 // backup registration
 data=DATAZ_/private/20016BF0/backup_registration.xml                            private/20016BF0/backup_registration.xml

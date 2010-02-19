@@ -71,6 +71,11 @@ using namespace XnGestureHelper;
 const TInt KSkinGfxInnerRectShrink = 5;
 const TInt KFocusGrowValue = 3;
 
+const TInt KLongTapStartShortDelay( 150000 ); // 0.15s for Sk
+const TInt KLongTapStartLongDelay( 500000 ); // 0.5s
+const TInt KLongTapTimeShortDelay( 600000 ); // 0.6s for SK
+const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s 
+_LIT( KWidgetBg, "SKIN(268458534 9916)" );
 
 // LOCAL FUNCTION PROTOTYPES
 static TRgb ConvertHslToRgb( TInt aHue, TInt aSaturation, TInt aLightness );
@@ -358,7 +363,7 @@ static void LoadSVGBitmapL(
     CXnResource& aResource,
     CFbsBitmap*& aBitmap,
     CFbsBitmap*& aBitmapMask,
-    TRect /*aRect*/,
+    TRect aRect,
     RFs& aFsSession )
     {
     RFile file;
@@ -371,7 +376,9 @@ static void LoadSVGBitmapL(
         CFbsBitmap* frameBuffer = new ( ELeave ) CFbsBitmap;
         CleanupStack::PushL( frameBuffer );
 
-        frameBuffer->Create( TSize( 0, 0 ), EColor16M );
+        TSize contentSize( aRect.Size() );
+
+        frameBuffer->Create( contentSize, EColor16M );
 
         TFontSpec fontSpec;
         CSvgEngineInterfaceImpl* svgEngine =
@@ -381,13 +388,8 @@ static void LoadSVGBitmapL(
 
         svgEngine->Load( file );
 
-        TSize contentSize = svgEngine->ContentDimensions();
-
         TInt domHandle;
         svgEngine->PrepareDom( file, domHandle );
-
-        svgEngine->SetSvgDimensionToFrameBuffer(
-            contentSize.iWidth, contentSize.iHeight );
 
         CFbsBitmap* target = new ( ELeave ) CFbsBitmap;
         target->Create( contentSize, EColor16M );
@@ -3931,18 +3933,20 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     CXnNode* node( &iNode.Node() );
     CXnUiEngine* engine( node->UiEngine() );
  
-    
-    // Forward event to gesture helper
-    if( PassEventToGestureHelperL( aPointerEvent ) )
-        { 
-        CXnAppUiAdapter& appui( engine->AppUiAdapter() );
-        CCoeControl& bg( appui.ViewAdapter().BgControl() );
-        static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();
-        
-        // Swipe took place, consume this event
-        return ETrue;
+    if(!engine->IsPartialInputActive())
+        {
+        // Forward event to gesture helper
+        if( PassEventToGestureHelperL( aPointerEvent ) )
+            { 
+            CXnAppUiAdapter& appui( engine->AppUiAdapter() );
+            CCoeControl& bg( appui.ViewAdapter().BgControl() );
+            static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();
+            
+            // Swipe took place, consume this event
+            return ETrue;
+            }
         }
-
+    
     TBool menuBar( node == engine->MenuBarNode() );
 
     if ( menuBar )
@@ -3959,7 +3963,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     
     CAknLongTapDetector* detector( iAdapter->LongTapDetector() );
     
-    if ( detector )
+    if ( detector && !engine->IsPartialInputActive())
         {
         if ( menuBar )
             {
@@ -3972,11 +3976,15 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
 
             if ( prop && prop->StringValue() == XnPropertyNames::KTrue )
                 {
+                iAdapter->SetLongTapDelays( KLongTapStartShortDelay,
+                                            KLongTapTimeShortDelay );
                 detector->PointerEventL( event );
                 }
             }
         else
             {
+            iAdapter->SetLongTapDelays( KLongTapStartLongDelay,
+                                        KLongTapTimeLongDelay );
             detector->PointerEventL( event );
             }
         }
@@ -4111,9 +4119,7 @@ void CXnControlAdapterImpl::DrawBackgroundDataL(
     {
     // For widgets and plugins, drawing is handled differently in edit mode
     const TDesC8& widgetType = aNode.DomNode()->Name();
-    if( ( widgetType == XnPropertyNames::KWidget || 
-        widgetType == XnPropertyNames::KPlugin ) &&
-        aNode.UiEngine()->EditMode()->EditState() )
+    if( aNode.UiEngine()->EditMode()->EditState() )
         {
         DrawEditModeBgData( aNode, aGc );
         return;
@@ -4287,6 +4293,14 @@ void CXnControlAdapterImpl::DrawBackgroundSkinL(CXnNode& aNode,
         {
         HBufC* skinID = colorProperty->StringValueL();
         CleanupStack::PushL( skinID );
+
+        // Widget background should not be drawn in edit mode
+        if( aNode.UiEngine()->EditMode()->EditState() && 
+                skinID->Des() == KWidgetBg )
+            {
+            CleanupStack::PopAndDestroy( skinID );
+            return;
+            }
 
         if ( skinID->Length() != 0 )
             {

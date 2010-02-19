@@ -46,12 +46,14 @@
 #include "xnnodepluginif.h"
 #include "xneditmode.h"
 #include "c_xnutils.h"
+#include "xntexteditor.h" 
 
 const TInt KMaxLength = 100;
 
 _LIT8( KCpsPublishing, "cpspublishing" );
 _LIT8( KMaxLineAmount, "max-line-amount" );
 _LIT8( KMaxCharAmount, "max-char-amount" );
+_LIT8( KEnablePartialInput, "splitinputenabled" );
 
 _LIT( KEnterChar, "\x2029" );
 
@@ -170,7 +172,19 @@ void CXnTextEditorAdapter::ConstructL()
     iEditor->SetAknEditorNumericKeymap( EAknEditorPlainNumberModeKeymap );
     
     iEditor->SetSuppressBackgroundDrawing( ETrue );
-                      
+
+    // Enable partial Screen
+    CXnProperty* enablepartialinput( iNode.GetPropertyL( KEnablePartialInput ) );
+    iPartialInputEnabled = EFalse;
+    iPartialInputOpen = EFalse;
+     
+    if ( enablepartialinput && 
+         enablepartialinput->StringValue() == XnPropertyNames::KTrue )
+        {
+        iEditor->SetAknEditorFlags( EAknEditorFlagEnablePartialScreen );
+        iPartialInputEnabled = ETrue;
+        }
+    
     iEditor->SetObserver( this );
                                         
     // Default not focused                                  
@@ -295,20 +309,38 @@ void CXnTextEditorAdapter::FocusChanged( TDrawNow aDrawNow )
     if ( isFocused )
         {      
         value = EPSAiDontForwardNumericKeysToPhone;
-                       
-        TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) );
-        
-        // AddToStackL calls iEditor->SetFocus( ETrue ); 
+
+        if( !iPartialInputEnabled )
+            {
+            TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) );            
+            // AddToStackL calls iEditor->SetFocus( ETrue ); 
+            }
+
         }
     else
         {
         value = EPSAiForwardNumericKeysToPhone;
                                       
-        appui->RemoveFromStack( iEditor );
-        
-        iEditor->SetFocus( EFalse, aDrawNow );
+        if( !iPartialInputEnabled )
+            {    
+            appui->RemoveFromStack( iEditor );            
+            iEditor->SetFocus( EFalse, aDrawNow );
+            }
+        else if(iPartialInputEnabled && iRemoveSplitInputFromStack )
+            {
+            appui->RemoveFromStack( iEditor );            
+            iEditor->SetFocus( EFalse, aDrawNow );
+            iPartialInputOpen = EFalse;
+            iRemoveSplitInputFromStack = EFalse;
+            }
+            
         }
-    
+
+    if(iPartialInputOpen)
+        {
+        value = EPSAiDontForwardNumericKeysToPhone;
+        }
+
     iRefusesFocusLoss = isFocused;
     
     RProperty::Set( KPSUidAiInformation,            
@@ -352,6 +384,7 @@ void CXnTextEditorAdapter::HandleControlEventL( CCoeControl* aControl,
 void CXnTextEditorAdapter::SetTextL( const TDesC& aText )
     {
     iEditor->SetTextL( &aText );
+    iNode.SetDirtyL();
     }
     
 // -----------------------------------------------------------------------------
@@ -367,6 +400,53 @@ HBufC* CXnTextEditorAdapter::Text() const
     
     // Ownership is transfered to the calller
     return text;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnTextEditorAdapter::HandleEditorEvent
+// -----------------------------------------------------------------------------
+//
+void CXnTextEditorAdapter::HandleEditorEvent( TInt aReason )
+    {
+    CXnAppUiAdapter* appui( 
+        static_cast< CXnAppUiAdapter* >( iAvkonAppUi ) );
+
+    switch( aReason )
+            {           
+            case CXnTextEditor::KActivateTextEditor:
+                {
+                if( !iPartialInputOpen )
+                     {
+                     iUiEngine->EnablePartialTouchInput(iNode , ETrue);
+                     TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) ); 
+                     iPartialInputOpen = ETrue;
+                     }  
+                break;
+                }
+            case CXnTextEditor::KDeactivateTextEditor:
+                {
+                if( iPartialInputOpen )
+                     {
+                     iUiEngine->EnablePartialTouchInput(iNode, EFalse);
+                     iPartialInputOpen = EFalse;
+                     appui->RemoveFromStack( iEditor );
+                     iEditor->SetFocus( EFalse );
+                     }              
+                break;
+                }
+            case CXnTextEditor::KRemoveSplitInputFromStack:
+                {
+                iRemoveSplitInputFromStack = ETrue;
+                break;
+                }
+            case CXnTextEditor::KKeepSplitInputInStack:
+                {
+                iRemoveSplitInputFromStack = EFalse;
+                break;
+                }
+            default:                    
+                break;    
+            }
     }
 
 // -----------------------------------------------------------------------------

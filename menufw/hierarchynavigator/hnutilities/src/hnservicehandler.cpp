@@ -119,12 +119,65 @@ EXPORT_C CHnServiceHandler::~CHnServiceHandler()
     delete iConstructor;
     delete iCommand;
     delete iOutputForAS;
-    
+
     if ( iServiceHandler )
         {
         iServiceHandler->Reset();
         delete iServiceHandler;
         }
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TBool CHnServiceHandler::ServiceHandlerMatchesModel(
+    const TDesC8& aService,
+    const TDesC8& aInterface,
+    const CLiwGenericParamList* aConstructor ) const
+    {
+    __ASSERT_DEBUG( aConstructor, User::Invariant() );
+    
+    TBool ret = ( aInterface == iInterfaceName && aService == iServiceName );
+
+    if ( ret )
+        {
+        const TInt count = iConstructor->Count();
+        ret = ( count == aConstructor->Count() );
+        for ( TInt i = 0; ret && i < count; ++i )
+            {
+            ret = ( ( *iConstructor )[i] == ( *aConstructor )[i] );
+            }
+        }
+
+    return ret;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CHnServiceHandler::PrepareForNextExecutionL(
+        const TDesC8& aCommand, TServiceMode aMode,
+        CLiwGenericParamList* aServiceCommand )
+    {
+    __ASSERT_DEBUG( aServiceCommand && aServiceCommand != iCommand,
+            User::Invariant() );
+    
+        { // braces for scope only
+        RBuf8 copy;
+        CleanupClosePushL( copy );
+        copy.CreateL( aCommand );
+        iCommandName.Swap( copy );
+        CleanupStack::PopAndDestroy( &copy );
+        }
+    
+    iMode = aMode;
+    
+    delete iCommand;
+    iCommand = aServiceCommand;
+    // Ownership of aServiceCommand has been taken. Do not add any piece of
+    // code that could leave after this line.
     }
 
 // ---------------------------------------------------------------------------
@@ -205,7 +258,7 @@ EXPORT_C TInt CHnServiceHandler::ExecuteL(
     else
     	{
     	// KErrNone ensures that CHnQueryResultCollector::HandleQueryResultsL()
-    	// is called, empty results are added to list, and 
+    	// is called, empty results are added to list, and
     	// CHnMdItem::ResultsCollectedL doesn't get confused
     	User::RequestComplete( iClientStatus, KErrNone );
     	}
@@ -227,7 +280,7 @@ EXPORT_C TInt CHnServiceHandler::HandleNotifyL(
         {
         iOutputForAO->Reset();
         iOutputForAO->AppendL( aEventParamList );
-        
+
         TLiwGenericParam param;
         TInt error(KErrNone);
         param.PushL();

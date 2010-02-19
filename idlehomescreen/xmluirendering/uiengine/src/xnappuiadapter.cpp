@@ -41,7 +41,7 @@
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CXnAppUiAdapter::CXnAppUiAdapter( TUid aApplicationUid )
-    : iApplicationUid( aApplicationUid )
+    : iExitingApp( EFalse ), iApplicationUid( aApplicationUid )
     {    
     }
 
@@ -97,7 +97,8 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CXnAppUiAdapter::~CXnAppUiAdapter()
-    {          
+    {
+    iExitingApp = ETrue;
     delete iUiEngineAppIf;
     
     delete iImpl;    
@@ -155,14 +156,15 @@ EXPORT_C void CXnAppUiAdapter::HandleXuikonEventL(
     }
 
 // -----------------------------------------------------------------------------
-// CXnAppUiAdapter::LoadDataPluginsL
+// CXnAppUiAdapter::LoadPublisher
 //
 // -----------------------------------------------------------------------------
 //
-EXPORT_C void CXnAppUiAdapter::LoadDataPluginsL(
-    RPointerArray< CXnNodeAppIf >& /*aList*/ )
+EXPORT_C TInt CXnAppUiAdapter::LoadPublisher( CXnNodeAppIf& /*aPublisher*/, 
+    TInt /*aReason*/ )
     {
     // Default empty implementation
+    return KErrNone;
     }
 
 // -----------------------------------------------------------------------------
@@ -170,10 +172,11 @@ EXPORT_C void CXnAppUiAdapter::LoadDataPluginsL(
 //
 // -----------------------------------------------------------------------------
 //
-EXPORT_C void CXnAppUiAdapter::DestroyDataPluginsL(
-    RPointerArray< CXnNodeAppIf >& /*aList*/ )
+EXPORT_C TInt CXnAppUiAdapter::DestroyPublisher( CXnNodeAppIf& /*aPublisher*/, 
+    TInt /*aReason*/ )
     {
     // Default empty implementation
+    return KErrNone;
     }
 
 // -----------------------------------------------------------------------------
@@ -189,17 +192,6 @@ EXPORT_C TBool CXnAppUiAdapter::DynInitMenuItemL( const TDesC& /*aItemType*/,
     }
 
 // -----------------------------------------------------------------------------
-// CXnAppUiAdapter::SetOnlineStateL
-//
-// -----------------------------------------------------------------------------
-//    
-EXPORT_C void CXnAppUiAdapter::SetOnlineStateL( 
-    RPointerArray< CXnNodeAppIf >& /*aList*/ )
-    {
-    // Default empty implementation
-    }
-
-// -----------------------------------------------------------------------------
 // CXnAppUiAdapter::View
 //
 // -----------------------------------------------------------------------------
@@ -207,16 +199,6 @@ EXPORT_C void CXnAppUiAdapter::SetOnlineStateL(
 EXPORT_C CAknView& CXnAppUiAdapter::View() const
     {
     return iImpl->ViewAdapter();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnAppUiAdapter::HandlePageSwitch
-//
-// -----------------------------------------------------------------------------
-//
-EXPORT_C void CXnAppUiAdapter::HandlePageSwitch()
-    {
-    // Default empty implementation
     }
 
 // -----------------------------------------------------------------------------
@@ -228,7 +210,84 @@ EXPORT_C void CXnAppUiAdapter::HandleEnterEditModeL( TBool /*aEnter*/ )
     {
     // Default empty implementation
     }
-       
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::HandleEventL
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnAppUiAdapter::HandleEventL( const TDesC& /*aEvent*/,
+    CXnNodeAppIf& /*aDestination*/ )
+    {
+    // Default empty implementation
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::RemoveViewL
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnAppUiAdapter::RemoveViewL( CAknView& aView )
+    {
+	if ( iExitingApp ) return; // framework will destroy view
+    TVwsViewId activeViewId(KNullUid,KNullUid);
+    TBool activateDefaultView( EFalse );
+    if ( GetActiveViewId( activeViewId ) == KErrNone &&
+        activeViewId.iViewUid == aView.Id() )
+        {
+        // currently active, deactivate        
+        activateDefaultView = ETrue;
+        DeactivateActiveViewIfOwnerMatchL();
+        }
+    
+    if ( iView == &aView ) { iView = NULL; }
+    CCoeAppUi::DeregisterView( aView );
+    
+    const TInt count( iViews->Count() );       
+    for ( TInt i = 0; i < count; ++i )
+        {
+        CAknView* view( iViews->At( i ) );       
+        if ( view == &aView && 
+            view->Id() == aView.Id() )
+            {
+            iViews->Delete( i );           
+            delete view;
+            view = NULL;
+            break;
+            }
+        }
+    
+    if ( activateDefaultView )
+        {
+        // check which view is active now.
+        activeViewId = TVwsViewId(KNullUid,KNullUid);
+        GetActiveViewId( activeViewId );
+    
+        TVwsViewId defaultViewId( KNullUid,KNullUid );    
+        // activate default if needed
+        if ( GetDefaultViewId( defaultViewId ) == KErrNone && 
+            activeViewId != defaultViewId )
+            {
+            ActivateViewL( defaultViewId );
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::PrepareToExit
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnAppUiAdapter::PrepareToExit()
+    {
+    iExitingApp = ETrue;
+    delete iUiEngineAppIf;
+    iUiEngineAppIf = NULL;
+    delete iImpl;
+    iImpl = NULL;
+    CAknViewAppUi::PrepareToExit();
+    }
+
 // -----------------------------------------------------------------------------
 // CXnAppUiAdapter::ReloadUiL
 //
@@ -335,7 +394,7 @@ void CXnAppUiAdapter::HideFocus()
 //
 // -----------------------------------------------------------------------------
 //
-void CXnAppUiAdapter::ShowFocus() 
+void CXnAppUiAdapter::ShowFocus()
     {
     return iImpl->ViewAdapter().FocusControl().MakeVisible( ETrue );
     }

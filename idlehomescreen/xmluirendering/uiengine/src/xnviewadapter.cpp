@@ -189,7 +189,8 @@ void CXnViewAdapter::ConstructL()
     
     // Base class CAknViewAppUi takes ownership of iViewAdapter
     iAppUiAdapter.AddViewL( this );    
-    
+    iAppUiAdapter.SetDefaultViewL( *this );
+
     iBgControl = CXnBgControl::NewL();
     iBgControl->SetMopParent( this );
 

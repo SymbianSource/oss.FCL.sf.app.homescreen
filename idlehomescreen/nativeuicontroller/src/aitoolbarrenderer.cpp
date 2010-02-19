@@ -15,17 +15,8 @@
 *
 */
 
-
-#include "aitoolbarrenderer.h"
-#include "aifweventhandler.h"
-#include "aicontentobserver.h"
-#include "activeidle2domaincrkeys.h"
-#include "activeidle2domainpskeys.h"
-#include "aiscutplugindomaincrkeys.h"
-#include <aipropertyextension.h>
-#include "ainativeuiplugins.h"
-
-#include <AiNativeUi.rsg>
+// System includes
+#include <centralrepository.h>
 #include <akntoolbar.h>
 #include <aknbutton.h>
 #include <AknsUtils.h>
@@ -33,13 +24,24 @@
 #include <e32property.h>
 #include <aknappui.h>
 
-#include "centralrepository.h"
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
+#include "aitoolbarrenderer.h"
+#include "aifweventhandler.h"
+#include "aicontentobserver.h"
+#include "activeidle2domaincrkeys.h"
+#include "activeidle2domainpskeys.h"
+#include "aiscutplugindomaincrkeys.h"
 
+#include "ainativeuiplugins.h"
 
+#include <AiNativeUi.rsg>
 #include "debug.h"
 
 using namespace AiNativeUiController;
 
+// Constants
 // Action to send to framework
 _LIT( KOpenAppByIndex,              "Shortcut/LaunchByIndex(%d)" );
 _LIT( KOpenAppByIndexAlternate,     "Shortcut/LaunchByIndexAlternate(%d)");
@@ -52,6 +54,12 @@ const TInt KThirdButton  = 2;
 
 const TInt KRadix = 10;
 
+// ======== LOCAL FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// IndexLength()
+//
+// ----------------------------------------------------------------------------
+//
 static TInt IndexLength( TInt aIndex )
     {
     TInt length = 0;
@@ -71,6 +79,11 @@ static TInt IndexLength( TInt aIndex )
     return length;
     }
 
+// ----------------------------------------------------------------------------
+// CreateEventStringL()
+//
+// ----------------------------------------------------------------------------
+//
 static HBufC* CreateEventStringL( const TDesC& aFrom, TInt aEventIndex )
     {
     HBufC* buffer = NULL;
@@ -87,16 +100,25 @@ static HBufC* CreateEventStringL( const TDesC& aFrom, TInt aEventIndex )
     return buffer;
     }
 
-// ========== MEMBER FUNCTIONS ================================================
-
-CAiToolbarRenderer::CAiToolbarRenderer( MAiFwEventHandler& aAiFwEventHandler, CAknToolbar& aToolbar )
+// ======== MEMBER FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::CAiToolbarRenderer()
+//
+// ----------------------------------------------------------------------------
+//
+CAiToolbarRenderer::CAiToolbarRenderer( MAiFwEventHandler& aAiFwEventHandler, 
+    CAknToolbar& aToolbar )
     : iToolbar( aToolbar ),
     iAiFwEventHandler( aAiFwEventHandler )
-
     {
     // no implementation required
     }
 
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::ConstructL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiToolbarRenderer::ConstructL( )
     {
     iToolbarEnabled = EFalse;
@@ -119,24 +141,42 @@ void CAiToolbarRenderer::ConstructL( )
         iToolbar.SetToolbarObserver( this );
         iToolbar.SetToolbarVisibility( ETrue, EFalse );
         }
-
     }
 
-CAiToolbarRenderer* CAiToolbarRenderer::NewLC( MAiFwEventHandler& aAiFwEventHandler, CAknToolbar& aToolbar )
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
+CAiToolbarRenderer* CAiToolbarRenderer::NewLC( 
+    MAiFwEventHandler& aAiFwEventHandler, CAknToolbar& aToolbar )
     {
-    CAiToolbarRenderer* self = new (ELeave) CAiToolbarRenderer( aAiFwEventHandler, aToolbar );
+    CAiToolbarRenderer* self = 
+        new ( ELeave ) CAiToolbarRenderer( aAiFwEventHandler, aToolbar );
     CleanupStack::PushL( self );
-    self->ConstructL( );
+    self->ConstructL();
     return self;
     }
 
-CAiToolbarRenderer* CAiToolbarRenderer::NewL( MAiFwEventHandler& aAiFwEventHandler, CAknToolbar& aToolbar )
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::NewL()
+//
+// ----------------------------------------------------------------------------
+//
+CAiToolbarRenderer* CAiToolbarRenderer::NewL( 
+    MAiFwEventHandler& aAiFwEventHandler, CAknToolbar& aToolbar )
     {
-    CAiToolbarRenderer* self = CAiToolbarRenderer::NewLC( aAiFwEventHandler, aToolbar );
+    CAiToolbarRenderer* self = 
+        CAiToolbarRenderer::NewLC( aAiFwEventHandler, aToolbar );
     CleanupStack::Pop(); // self
     return self;
     }
 
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::~CAiToolbarRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiToolbarRenderer::~CAiToolbarRenderer()
     {
     // We don't want anymore events from toolbar
@@ -144,46 +184,67 @@ CAiToolbarRenderer::~CAiToolbarRenderer()
     iButtons.ResetAndDestroy();
     }
 
-void CAiToolbarRenderer::DynInitToolbarL( TInt /*aResourceId*/, CAknToolbar* /*aToolbar*/ )
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::DynInitToolbarL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiToolbarRenderer::DynInitToolbarL( TInt /*aResourceId*/, 
+    CAknToolbar* /*aToolbar*/ )
     {
     // do nothing
     }
 
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::OfferToolbarEventL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiToolbarRenderer::OfferToolbarEventL( TInt aCommand )
     {
     TInt modifiers = iToolbar.EventModifiers();
 
-
     if ( aCommand >= 0 && aCommand < iButtons.Count())
         {
         CAiToolbarButton* button = iButtons[aCommand];
+        
         if ( button )
             {
-
             HBufC *event = NULL;
+            
             if ( modifiers == CAknToolbar::ELongPress )
                 {
-                event = CreateEventStringL( KOpenAppByIndexAlternate, button->ShortcutId() );
+                event = CreateEventStringL( 
+                    KOpenAppByIndexAlternate, button->ShortcutId() );
+                
                 CleanupStack::PushL( event );
                 }
             else
                 {
-                event = CreateEventStringL( KOpenAppByIndex, button->ShortcutId() );
+                event = CreateEventStringL( 
+                    KOpenAppByIndex, button->ShortcutId() );
+                
                 CleanupStack::PushL( event );
                 }
+            
             iAiFwEventHandler.HandlePluginEvent( *event );
             CleanupStack::PopAndDestroy( event );
             }
         }
     }
 
-void CAiToolbarRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                     TInt aContent,
-                                     const TDesC16& aText,
-                                     TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiToolbarRenderer::DoPublishL( CHsContentPublisher& aPlugin,
+    TInt aContent, const TDesC16& aText, TInt aIndex )                                                                        
     {
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
     // Only interested on certain publish events
-    if (  aPlugin.PublisherInfoL()->iUid == KShortcutPluginUid &&
+    if ( info.Uid() == KShortcutPluginUid &&
           aContent == EAiScutContentShortcutToolbarCaption &&
         ( aIndex == EAiScutToolbarFirst ||
           aIndex == EAiScutToolbarSecond ||
@@ -199,13 +260,18 @@ void CAiToolbarRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
         }
     }
 
-void CAiToolbarRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                     TInt aContent,
-                                     const TDesC8& aBuf,
-                                     TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiToolbarRenderer::DoPublishL( CHsContentPublisher& aPlugin,
+    TInt aContent, const TDesC8& aBuf, TInt aIndex )
     {
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
     // Only interested on certain publish events
-    if (  aPlugin.PublisherInfoL()->iUid == KShortcutPluginUid &&
+    if ( info.Uid() == KShortcutPluginUid &&
           aContent == EAiScutContentShortcutToolbarIcon &&
         ( aIndex == EAiScutToolbarFirst ||
           aIndex == EAiScutToolbarSecond ||
@@ -239,6 +305,11 @@ void CAiToolbarRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
         }
     }
 
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::ButtonL()
+//
+// ----------------------------------------------------------------------------
+//
 CAiToolbarButton* CAiToolbarRenderer::ButtonL( TInt aShortcutId )
     {
     TInt index = KErrNotFound;
@@ -279,12 +350,16 @@ CAiToolbarButton* CAiToolbarRenderer::ButtonL( TInt aShortcutId )
     return button;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiToolbarRenderer::TransactionCommittedL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiToolbarRenderer::TransactionCommittedL()
     {
     if ( !iCommitted )
         {
-        for(TInt i = 0; i < iButtons.Count(); i++)
+        for ( TInt i = 0; i < iButtons.Count(); i++ )
             {
             CAiToolbarButton *button = iButtons[i];
             if ( button && button->Icon())
@@ -299,6 +374,5 @@ void CAiToolbarRenderer::TransactionCommittedL()
          iCommitted = ETrue;
         }
     }
-
 
 // End of File.

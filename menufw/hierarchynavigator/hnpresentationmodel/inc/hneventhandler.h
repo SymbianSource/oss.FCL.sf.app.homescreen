@@ -184,6 +184,12 @@ private: // data
      * Reference to App UI - Event observer.
      */
     MHnControllerInterface& iControllerInterface;
+    
+    /**
+     * ETrue if a standard asynchroneous action is being executed by
+     * this event handler.
+     */
+    TBool iIsExecutingStandardAsyncAction;
 
 };
 

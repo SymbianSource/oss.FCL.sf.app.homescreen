@@ -15,11 +15,10 @@
 *
 */
 
-
+// System includes
 #include <eikbtgpc.h>
 #include <aknappui.h>
 #include <StringLoader.h>
-#include <AiNativeUi.rsg>
 #include <gulicon.h>
 #include <AknIconUtils.h>
 #include <AknsConstants.h>
@@ -29,21 +28,25 @@
 #include <AknUtils.h>
 #include <eiksoftkeyimage.h>
 #include <AknSgcc.h>
-#include <aiscutplugindomaincrkeys.h>
+
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
+
+#include <AiNativeUi.rsg>
 
 #include "ainativeui.hrh"
 #include "aisoftkeyrenderer.h"
 #include "ainativeuiplugins.h"
-#include "aiscutdefs.h"
-
 
 using namespace AiNativeUiController;
 
+// Constants
 // Index for left softkey; defined in avkon
-const TInt KNativeUiLeftSoftkeyId = 0;
+//const TInt KNativeUiLeftSoftkeyId = 0;
 
 // Index for right softkey; defined in avkon
-const TInt KNativeUiRightSoftkeyId = 2;
+//const TInt KNativeUiRightSoftkeyId = 2;
 
 const TInt KControlArrayCBAButton1Posn        =0;
 const TInt KControlArrayCBAButton2Posn        =2;
@@ -51,7 +54,7 @@ const TInt KControlArrayCBAButtonMiddlePosn   =3;
 
 const TInt KWideScreenWidth          = 640;
 
-
+// ======== LOCAL FUNCTIONS ========
 inline TAknWindowComponentLayout DoCompose( TAknWindowComponentLayout aLine1,
     TAknWindowComponentLayout aLine2 )
     {
@@ -420,14 +423,23 @@ static TSize SoftkeySizeL( CEikButtonGroupContainer& aContainer, TInt aPos, TBoo
     return size;
     }
 
-
+// ======== MEMBER FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::ConstructL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiSoftKeyRenderer::ConstructL()
     {
     // load default soft key labels from resource
     CreateDefaultSoftKeysL();
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
 CAiSoftKeyRenderer* CAiSoftKeyRenderer::NewLC()
     {
     CAiSoftKeyRenderer* self = new( ELeave ) CAiSoftKeyRenderer();
@@ -436,7 +448,11 @@ CAiSoftKeyRenderer* CAiSoftKeyRenderer::NewLC()
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::~CAiSoftKeyRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiSoftKeyRenderer::~CAiSoftKeyRenderer()
     {
     delete iText;
@@ -450,136 +466,54 @@ CAiSoftKeyRenderer::~CAiSoftKeyRenderer()
     delete iCba;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::CAiSoftKeyRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiSoftKeyRenderer::CAiSoftKeyRenderer()
     {
     iAppUi = iAvkonAppUi;
     }
 
-
-
-
-void CAiSoftKeyRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                        TInt aContent,
-                                        const TDesC16& aText,
-                                        TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiSoftKeyRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/,
+    TInt /*aContent*/, const TDesC16& /*aText*/, TInt /*aIndex*/ )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KShortcutPluginUid )
-        {
-        if( aContent == KAiScutContent[EAiScutContentShortcutShortCaption].id )
-            {
-            HBufC* temp = aText.AllocL();
-            delete iText;
-            iText = temp;
-
-            UpdateSoftKeyL( aIndex, NULL );
-            }
-        }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
+    User::Leave( KErrNotFound );
     }
 
-
-void CAiSoftKeyRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                        TInt aContent,
-                                        TInt aResource,
-                                        TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiSoftKeyRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/,
+    TInt /*aContent*/, TInt /*aResource*/, TInt /*aIndex*/ )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KShortcutPluginUid )
-        {
-        if( aContent == KAiScutContent[EAiScutContentShortcutShortCaption].id )
-            {
-            TInt internalId = KErrNotFound;
-            switch( aResource )
-                {
-                case EAiScutResourceBackCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_BACK;
-                    break;
-                    }
-                case EAiScutResourceNewMsgShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_NEWMSG;
-                    break;
-                    }
-                case EAiScutResourceNewEmailShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_EMAIL;
-                    break;
-                    }
-                case EAiScutResourceNewSyncMLMailShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_SYNCMLMAIL;
-                    break;
-                    }
-                case EAiScutResourceNewPostcardShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_MMSPOSTCARD;
-                    break;
-                    }
-                case EAiScutResourceSelectMsgTypeShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_MSGTYPE;
-                    break;
-                    }
-                case EAiScutResourceNewAudioMsgShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_AUDIOMSG;
-                    break;
-                    }
-                case EAiScutResourceChangeThemeShortCaption:
-                    {
-                    internalId = R_NATIVEUI_SK_CHANGETHEME;
-                    break;
-                    }
-                default:
-                    {
-                    User::Leave( KErrNotFound );
-                    }
-                }
-
-            HBufC* temp = StringLoader::LoadL( internalId );
-            delete iText;
-            iText = temp;
-
-            UpdateSoftKeyL( aIndex, NULL );
-            }
-        }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
+    User::Leave( KErrNotFound );    
     }
 
-
-void CAiSoftKeyRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                        TInt aContent,
-                                        const TDesC8& aBuf,
-                                        TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiSoftKeyRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/,
+    TInt /*aContent*/, const TDesC8& /*aBuf*/, TInt /*aIndex*/ )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KShortcutPluginUid )
-        {
-        if( aContent == KAiScutContent[EAiScutContentShortcutSkIcon].id )
-            {
-            CGulIcon* icon = NULL;
-            TPckg<CGulIcon*>( icon ).Copy( aBuf );
-            // icon ownership is transferred
-            UpdateSoftKeyL( aIndex, icon );
-            }
-        else
-            {
-            User::Leave( KErrNotSupported );
-            }
-        }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
+    User::Leave( KErrNotFound );    
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::CreateDefaultSoftKeysL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiSoftKeyRenderer::CreateDefaultSoftKeysL()
     {
     // If we already have cba, then do nothing.
@@ -611,8 +545,12 @@ void CAiSoftKeyRenderer::CreateDefaultSoftKeysL()
                     ECoeStackFlagRefusesFocus | ECoeStackFlagRefusesAllKeys );
     }
 
-
-void CAiSoftKeyRenderer::UpdateSoftKeyL( TInt aKey, CGulIcon* aIcon )
+// ----------------------------------------------------------------------------
+// CAiSoftKeyRenderer::UpdateSoftKeyL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiSoftKeyRenderer::UpdateSoftKeyL( TInt /*aKey*/, CGulIcon* /*aIcon*/ )
     {
     if( !iCba )
         {
@@ -620,9 +558,10 @@ void CAiSoftKeyRenderer::UpdateSoftKeyL( TInt aKey, CGulIcon* aIcon )
         }
 
     // remove the locked flag if any
-    aKey &= KScutBitMaskLocked;
+    // NOTE ai_shortcut_command_api has been removed!
+    //aKey &= KScutBitMaskLocked;
 
-    TInt buttonPosImage;
+    /*TInt buttonPosImage;
     TInt buttonPosText;
     TInt buttonCmd;
 
@@ -672,5 +611,7 @@ void CAiSoftKeyRenderer::UpdateSoftKeyL( TInt aKey, CGulIcon* aIcon )
                             *iText );
         }
 
-    iCba->DrawDeferred();
+    iCba->DrawDeferred();*/
     }
+
+// End of file

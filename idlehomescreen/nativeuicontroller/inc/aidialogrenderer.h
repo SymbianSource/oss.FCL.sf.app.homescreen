@@ -19,12 +19,15 @@
 #ifndef C_AIDIALOGRENDERER_H
 #define C_AIDIALOGRENDERER_H
 
-
+// System incldues
 #include <e32base.h>
+
+// User includes
 #include "ainativerenderer.h"
 
-
+// Forward declarations
 class CAknNoteDialog;
+class CHsContentPublisher;
 
 namespace AiNativeUiController
 {
@@ -36,7 +39,7 @@ namespace AiNativeUiController
  *
  *  @since S60 3.2
  */
-class CAiDialogRenderer : public CAiNativeRenderer
+NONSHARABLE_CLASS( CAiDialogRenderer ) : public CAiNativeRenderer
     {
 public:
 
@@ -46,9 +49,9 @@ public:
 
 // from base class CAiNativeRenderer
 
-    void DoPublishL( MAiPropertyExtension& aPlugin, TInt aContent, TInt aResource, TInt aIndex );
+    void DoPublishL( CHsContentPublisher& aPlugin, TInt aContent, TInt aResource, TInt aIndex );
 
-    void DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent );
+    void DoCleanL( CHsContentPublisher& aPlugin, TInt aContent );
 
     void FocusObtainedL();
 

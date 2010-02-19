@@ -16,16 +16,13 @@
 */
 
 #include "contentpublisher.h"
-#include "globalqueryhandler.h"
 
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <liwgenericparam.h>
-#include <AknQueryDialog.h>
-#include <ai3xmlui.rsg>
 #include "xmluicontroller.h"
-#include <AknGlobalConfirmationQuery.h>
-#include <StringLoader.h> // StringLoader
+#include "appui.h"
+#include "onlineofflinehelper.h"
 
 using namespace AiXmlUiController;
 
@@ -46,9 +43,6 @@ _LIT(KContentType,"wideimage");
 _LIT8( KAPStatus, "apstatus");
 _LIT(KNetwork, "network");
 
-_LIT( KDisConnected, "disconnected");
-_LIT( KConnected, "connected");
-
 _LIT(KPublisher16, "publisher");
 
 
@@ -62,6 +56,7 @@ _LIT8( KFilter,        "filter" );
 _LIT8( KWidth, "width");
 _LIT8( KHeight, "height");
 _LIT8( KChangeInfo,    "change_info" );
+
 // ============================ LOCAL FUNCTIONS ===============================
 
 
@@ -105,8 +100,6 @@ CContentPublisher::~CContentPublisher()
         delete iServiceHandler;
         iServiceHandler = NULL;
         }
-    delete iGlobalQueryHandler;
-    delete iGlobalConfirmationQuery;    
     }
 
 // -----------------------------------------------------------------------------
@@ -125,9 +118,6 @@ void CContentPublisher::ConstructL()
     {
     InitCpsInterfaceL();
     RegisterListenerL();
-    iGlobalQueryHandler = CGlobalQueryHandler::NewL(iUiController);
-    iGlobalConfirmationQuery = CAknGlobalConfirmationQuery::NewL();
-    
     }
 
 // -----------------------------------------------------------------------------
@@ -387,44 +377,21 @@ TInt CContentPublisher::HandleNotifyL(
    }
 
 void CContentPublisher::HandlePublisherInfoL( const TDesC& aPubInfo)
-	{
-	//Currently HS will handle only network status update form publisher
-	if ( aPubInfo == KNetwork )
-		{
-		CLiwDefaultMap *outDataMap = CLiwDefaultMap::NewLC();
-		GetDataL( KAI3HSPublisher(), KPublisher16, KNetwork(), outDataMap );
-		TLiwVariant variant;
-		variant.PushL();
-		if ( outDataMap->FindL(KAPStatus, variant))
-			{
-			HBufC16* netStatus = variant.AsDes().AllocLC();
-            if ( netStatus->Des() == KDisConnected() )
-                {
-                ShowGlobalQueryL(R_QTN_HS_DISABLE_NETWORK, EFalse );
-                }
-            else if ( netStatus->Des() == KConnected() )
-                {
-                ShowGlobalQueryL(R_QTN_HS_SWITCH_ONLINE, ETrue );
-                }
-			CleanupStack::PopAndDestroy( netStatus );
-			}
-		CleanupStack::PopAndDestroy( &variant );
-		CleanupStack::PopAndDestroy(outDataMap);
-		}
-    }
-
-
-void CContentPublisher::ShowGlobalQueryL( TInt aResourceId, TBool aSetOnline )
     {
-    if ( !iGlobalQueryHandler->IsActive() )
+    //Currently HS will handle only network status update form publisher
+    if ( aPubInfo == KNetwork )
         {
-        HBufC* confirmationText = StringLoader::LoadLC(aResourceId);
-        iGlobalConfirmationQuery->ShowConfirmationQueryL(
-                iGlobalQueryHandler->iStatus,
-            *confirmationText, 
-            R_AVKON_SOFTKEYS_YES_NO);
-        iGlobalQueryHandler->SetOnlineParamAndActivate(aSetOnline);
-        CleanupStack::PopAndDestroy(); //confirmationText
+        _LIT( KOffline, "hs_offline" );
+        CLiwDefaultMap *outDataMap = CLiwDefaultMap::NewLC();
+        GetDataL( KAI3HSPublisher(), KPublisher16, KNetwork(), outDataMap );
+        TLiwVariant variant;
+        variant.PushL();
+        if ( outDataMap->FindL(KAPStatus, variant))
+            {
+            iUiController.AppUi()->Helper()->HandleConnectionQueryL(variant.AsDes());
+            }
+        CleanupStack::PopAndDestroy( &variant );
+        CleanupStack::PopAndDestroy(outDataMap);
         }
     }
 // END OF FILE

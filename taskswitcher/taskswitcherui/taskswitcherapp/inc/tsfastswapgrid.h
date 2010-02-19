@@ -239,6 +239,7 @@ private: // Data
     
     // Feedback support
     TBool iTactileFeedbackSupport;
+    CTsFastSwapTimer* iFeedbackTimer;
     
     mutable RArray<TInt> iFullyVisibleItems;
     mutable RArray<TInt> iPartialVisibleItems;

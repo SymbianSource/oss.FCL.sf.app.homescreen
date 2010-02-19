@@ -30,6 +30,7 @@
 class CXnNodePluginIf;
 class CXnNode;
 class CXnUiEngine;
+class CXnPluginData;
 class CAknStylusPopUpMenu;
 
 // Class declaration
@@ -103,8 +104,8 @@ public:
     
 private:
     // New functions
-    void PopulateMenuL( CXnNode* aItem, CXnNode& aPlugin );                                  
-    void ShowMenuL( CXnNode& aPlugin, TPoint aPosition );
+    void PopulateMenuL( CXnPluginData& aPlugin, CXnNode* aItem );                                  
+    void ShowMenuL( CXnPluginData& aPlugin, TPoint aPosition );
     void HideMenuL();
                            
 private:

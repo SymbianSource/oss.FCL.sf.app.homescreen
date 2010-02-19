@@ -22,3 +22,4 @@ DEFAULT
 
 PRJ_EXPORTS
 ../inc/xnextrenderingpluginadapter.h     APP_LAYER_PLATFORM_EXPORT_PATH(xnextrenderingpluginadapter.h)
+../inc/xnexteventhandler.h     APP_LAYER_PLATFORM_EXPORT_PATH(xnexteventhandler.h)

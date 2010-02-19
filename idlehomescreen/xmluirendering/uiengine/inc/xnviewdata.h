@@ -62,7 +62,7 @@ public:
     /**
      * @see CXnPluginData           
      */    
-    void LoadL();
+    TInt Load();
 
     /**
      * @see CXnPluginData           
@@ -93,36 +93,16 @@ public:
      * @see CXnPluginData           
      */    
     void AppearanceNodesL( RPointerArray< CXnNode >& aList ) const;
-    
-    /*
-     * @see CXnPluginData
-     */        
-    void LoadDataPluginsL();    
-
-    /*
-     * @see CXnPluginData
-     */            
-    void DataPluginsLoadCompletedL( TInt aStatus );
-    
-    /*
-     * @see CXnPluginData
-     */    
-    void DestroyDataPluginsL();
-    
-    /*
-     * @see CXnPluginData
-     */
-    TBool DataPluginsLoaded() const;
-    
+            
 public:   
     // New functions
     
     /**
      * Sets viewdata to active/ not active
      * 
-     * @param aActive ETrue active, EFalse not active
+     * @param aActive ETrue active, EFalse not active    
      */
-    void SetActiveL( TBool aActive );
+    void SetActive( TBool aActive );
     
     /**
      * Returns if active or not
@@ -143,20 +123,6 @@ public:
      */
     inline TBool Initial() const;
     
-    /**
-     * Sets focused node
-     * 
-     * @param aNode Focused node
-     */
-    inline void SetFocusedNode( CXnNode* aNode );
-    
-    /**
-     * Returns focused node
-     * 
-     * @return focused node
-     */
-    inline CXnNode* FocusedNode() const;
-
     /**
      * Sets this view data to use empty widget
      * 
@@ -238,18 +204,29 @@ public:
      * @param aLockingStatusString attr. locking_status ("locked"/"none")
      */
     void SetLockingStatus( const TDesC8& aLockingStatusString );
+        
+private:
+    // new functions
+    
+    void LoadPublishers();    
+    
+    void DestroyPublishers( TInt aReason );
+    
+    static TInt DoLoadPublishersL( TAny* aAny );
+    
+    void DoDestroyPublishersL( TInt aReason );
     
 private:
     // data                              
     
-    /** Focused Node, Not owned */
-    CXnNode* iFocusedNode;
-
     /** Pointer to wallpaper image, Owned */    
-    CFbsBitmap* iBgImage;
-    
+    CFbsBitmap* iBgImage;    
     /** Path of the wallpaper image, including filename */    
-    HBufC* iBgImagePath;
+    HBufC* iBgImagePath;            
+    /** Publisher load index */
+    TInt iLoadIndex;    
+    /** Flag to indicate whether content removed error should be shown */
+    TBool iShowContentRemoved;    
     };
 
 #include "xnviewdata.inl"

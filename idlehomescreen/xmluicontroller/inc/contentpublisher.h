@@ -34,13 +34,10 @@
 class CLiwGenericParamList;
 class CLiwServiceHandler;
 class MLiwInterface;
-class CAknGlobalConfirmationQuery;
 
 namespace AiXmlUiController
 {
 class CXmlUiController;
-class CGlobalQueryHandler;
-
 
 /**
  *  @ingroup group_xmluicontroller
@@ -113,14 +110,6 @@ class CContentPublisher : public CBase, public MLiwNotifyCallback
         void RegisterListenerL();
         void UnRegisterListenerL();
         
-        /**
-         * Displayes global query for 'go online' or 'go offline' confirmations
-         * @param aResourceId resource id for the text string
-         * @param aSetOnline if ETrue then set widgets online if confirmation accepted,
-         *     if EFalse then set widgets offline if confirmation accepted 
-         */
-        void ShowGlobalQueryL( TInt aResourceId, TBool aSetOnline );
-        
     private:
 		MLiwInterface* iCpsInterface;
 		CLiwServiceHandler* iServiceHandler;
@@ -129,10 +118,6 @@ class CContentPublisher : public CBase, public MLiwNotifyCallback
 	     * Reference to XML ui controller.
 	     */
 	    CXmlUiController& iUiController;
-	    
-	    CGlobalQueryHandler* iGlobalQueryHandler;
-	    CAknGlobalConfirmationQuery* iGlobalConfirmationQuery;
-	    
     };
 
 }// namespace AiXmlUiController

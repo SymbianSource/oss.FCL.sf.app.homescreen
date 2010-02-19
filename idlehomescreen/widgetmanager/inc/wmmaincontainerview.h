@@ -73,6 +73,21 @@ public:
 	 */
 	CWmMainContainer* CreateContainerL();
 	
+   /**
+     * View deactivation function intended for overriding by sub classes.
+     * 
+     * @see CAknView::DoActivateL
+     */
+    void DoDeactivate();
+		
+public: // from MeikMenuObserver
+	
+    /** 
+     * Foreground event handling function.  
+     * @param aForeground Indicates the required focus state of the control.
+     */ 
+    void HandleForegroundEventL( TBool aForeground );
+	    
 private:
     CWmMainContainerView( CWmPlugin& aWmPlugin );    
     void ConstructL();    
@@ -87,13 +102,6 @@ protected: // from base class CAknView
 		const TVwsViewId& aPrevViewId,
 		TUid aCustomMessageId,
 		const TDesC8& aCustomMessage );
-	
-	/**
-	 * View deactivation function intended for overriding by sub classes.
-	 * 
-	 * @see CAknView::DoActivateL
-	 */
-	void DoDeactivate();
 	
    /**
      * Event handler for status pane size changes.
@@ -122,8 +130,8 @@ private:
     TBool HandleHelpMenuItemSelectedL();
 	TBool HandleDetailsMenuItemSelectedL();
 	TBool HandleDeactivateFindPaneL();
-	/** setup status pane */
-	void SetupStatusPaneL();
+	/** setup title in status pane */
+	void SetTitleL();
 
 private:
     /** 

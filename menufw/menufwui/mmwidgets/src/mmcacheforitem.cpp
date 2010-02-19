@@ -133,7 +133,7 @@ void CMmCacheForItem::InvalidateIfCacheMayNotBeUsed( TBool aIsItemCurrent,
     if ( iSubcellsSetupCode != aSubcellsSetupCode ||
             (!!iIsCurrent) != (!!aIsItemCurrent) )
         {
-        SetValidL( EFalse );
+        MarkAsInvalid();
         }
     }
 

@@ -78,7 +78,6 @@ CWmListItemDrawer::CWmListItemDrawer(
 	{    
     iCellData = aFormattedCellData;
     iListBox = aListBox;
-    iFont = aFont;
 	}
 
 // ---------------------------------------------------------
@@ -131,12 +130,27 @@ void CWmListItemDrawer::ConstructL()
     // confuses listbox e.g. considering name as icon index 
     CArrayPtr<CGulIcon>* dummyArray = new( ELeave ) CAknIconArray(2);
     CleanupStack::PushL(dummyArray);
-    CGulIcon* dummyIcon = CGulIcon::NewLC();
-    CGulIcon* dummyIcon2 = CGulIcon::NewLC();
+    
+    CFbsBitmap* dummyBmp = new(ELeave) CFbsBitmap;
+    CleanupStack::PushL( dummyBmp );
+    User::LeaveIfError( dummyBmp->Create( TSize(0,0), EColor256 ) );
+    CGulIcon* dummyIcon = CGulIcon::NewL( dummyBmp );
+    CleanupStack::Pop( dummyBmp ); //ownership transfered
+    CleanupStack::PushL( dummyIcon );
+
+    CFbsBitmap* dummyBmp2 = new(ELeave) CFbsBitmap;
+    CleanupStack::PushL( dummyBmp2 );
+    User::LeaveIfError( dummyBmp2->Create( TSize(0,0), EColor256 ) );
+    CGulIcon* dummyIcon2 = CGulIcon::NewL( dummyBmp2 );
+    CleanupStack::Pop( dummyBmp2 ); //ownership transfered
+    CleanupStack::PushL( dummyIcon2 );
+    
     dummyArray->AppendL(dummyIcon);
     dummyArray->AppendL(dummyIcon2);
     ColumnData()->SetIconArray(dummyArray);
-    CleanupStack::Pop(3);
+    CleanupStack::Pop( dummyIcon2 );
+    CleanupStack::Pop( dummyIcon );
+    CleanupStack::Pop( dummyArray );
     }
 
 // ---------------------------------------------------------
@@ -196,8 +210,8 @@ void CWmListItemDrawer::ResizeDefaultBitmaps()
 // ---------------------------------------------------------
 //
 void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos, 
-                            TBool aItemIsSelected, TBool aItemIsCurrent, 
-                            TBool aViewIsEmphasized, TBool aViewIsDimmed ) const
+                            TBool /*aItemIsSelected*/, TBool aItemIsCurrent, 
+                            TBool /*aViewIsEmphasized*/, TBool aViewIsDimmed ) const
     {
     TSize cellSize = ItemCellSize();
     
@@ -205,39 +219,28 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     // Get graphics context which is used for drawing.
     CWindowGc& gc = *Gc();
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    TInt selectedIndex = iListBox->CurrentItemIndex();
-    TBool isInFocus = ( selectedIndex == aItemIndex );
-    TBool listFocused = iListBox->IsFocused();
+    TBool highlightEnabled = !( iListBox->ItemDrawer()->Flags() & 
+            CListItemDrawer::ESingleClickDisabledHighlight );
+    TBool listFocused = ((iListBox->IsFocused() && !aViewIsDimmed) ? ETrue : EFalse);
     TRect itemRect = TRect( aItemRectPos, cellSize );
-
-    if ( isInFocus && listFocused )
+    
+    CFormattedCellListBoxItemDrawer::DrawEmptyItem( 
+                            aItemIndex, aItemRectPos, aViewIsDimmed );
+    
+    if ( aItemIsCurrent && listFocused && highlightEnabled )
         {
-        // force baseclass to draw highlight and animation for this item
-        CFormattedCellListBoxItemDrawer::DrawItemText( 
-                aItemIndex, itemRect,
-                aItemIsCurrent, aViewIsEmphasized,
-                ( isInFocus || aItemIsSelected ) );
+        TRect innerRect( itemRect );
+        const TInt highlightOffset = 2;
+        innerRect.Shrink( highlightOffset, highlightOffset );
 		
-		if ( iListBox->PressedDown() )
-			{
-			TRect innerRect( itemRect );
-    	    const TInt highlightOffset = 3;
-	        innerRect.Shrink( highlightOffset, highlightOffset );
-			AknsDrawUtils::DrawFrame( skin,
-                                      gc,
-                                      itemRect,
-                                      innerRect,
-                                      KAknsIIDQsnFrListPressed,
-                                      KAknsIIDQsnFrListCenterPressed );
-			}
+        AknsDrawUtils::DrawFrame( skin,
+                                  gc,
+                                  itemRect,
+                                  innerRect,
+                                  KAknsIIDQsnFrList,
+                                  KAknsIIDQsnFrListCenter );
+    
         }
-    else
-        {
-        // to prevent item staying highlighted when list isn't focused.
-        CFormattedCellListBoxItemDrawer::DrawEmptyItem( 
-                                aItemIndex, aItemRectPos, aViewIsDimmed );
-        }
-
     
     // DRAW LOGO
     CFbsBitmap* bitmap = const_cast<CFbsBitmap*>(wData.LogoImage());
@@ -256,16 +259,14 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
         }
 
     TRgb textColor;
-    TAknsQsnTextColorsIndex index = ( isInFocus && listFocused )? 
+    TAknsQsnTextColorsIndex index =
+        ( aItemIsCurrent && listFocused && highlightEnabled )? 
                 EAknsCIQsnTextColorsCG10 : EAknsCIQsnTextColorsCG6;
 
     AknsUtils::GetCachedColor( 
                     skin, textColor, KAknsIIDQsnTextColors, index );
 
     // DRAW TEXT
-    gc.UseFont( iFont );
-    gc.SetPenColor( textColor );
-    gc.SetPenSize( TSize(2,2) );
 
     TAknTextLineLayout titleTextLayout = 
               AknLayoutScalable_Apps::listrow_wgtman_pane_t1().LayoutLine();
@@ -281,7 +282,7 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
         TAknLayoutRect addButtonLayout;
         addButtonLayout.LayoutRect( itemRect,
                 AknLayoutScalable_Apps::listrow_wgtman_pane_g2().LayoutLine() );
-        if ( isInFocus && listFocused )
+        if ( aItemIsCurrent && listFocused && highlightEnabled )
             {
             addButtonLayout.DrawImage( gc,                    
                     iAddWidgetBtnHighlightImage, iAddWidgetBtnHighlightMask );
@@ -319,7 +320,6 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
             animationLayout.DrawImage( gc, animBitmap, animMask );
             }
         }
-    gc.DiscardFont();
     }
 
 // ---------------------------------------------------------
@@ -433,7 +433,6 @@ CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
     iWmPlugin( aWmPlugin )
     {
     iFindPaneIsVisible = EFalse;
-	iPressedDown = EFalse;
 	iLogoSize = TSize( 0, 0);
     }
 
@@ -494,10 +493,13 @@ CWmWidgetData& CWmListBox::WidgetData( TInt aItemIndex )
 void CWmListBox::AddWidgetDataL( CWmWidgetData* aWidgetData,
         TBool aRedraw )
     {
-    aWidgetData->SetObserver( this );
-    iWidgetDatas.InsertInOrderAllowRepeatsL( aWidgetData,
+    if ( aWidgetData )
+        {
+        aWidgetData->SetObserver( this );
+        iWidgetDatas.InsertInOrderAllowRepeatsL( aWidgetData,
             SortOrder(EStoredOrder) );
-    if ( aRedraw ) { HandleItemAdditionL(); }
+        if ( aRedraw ) { HandleItemAdditionL(); }
+        }
     }
 
 // ---------------------------------------------------------
@@ -695,9 +697,6 @@ void CWmListBox::Draw( const TRect& aRect ) const
 //
 void CWmListBox::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     {
-    CAknDouble2LargeStyleListBox::HandlePointerEventL( aPointerEvent );
-
-    // Check if pointer is down ( needed for drawing correct hightlight frame )
 	if ( Rect().Contains( aPointerEvent.iPosition ) )
 		{
         TInt itemIndex = CurrentListBoxItemIndex();
@@ -706,20 +705,10 @@ void CWmListBox::HandlePointerEventL( const TPointerEvent& aPointerEvent )
                                 itemIndex );
         if ( itemIndex >= 0 && itemPointed )
             {
-            if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
-                {
-                iPressedDown = ETrue;
-                // redraw item
-                RedrawItem( itemIndex );
-                }
-            else if( aPointerEvent.iType == TPointerEvent::EButton1Up )
-                {
-                iPressedDown = EFalse;
-                // redraw item
-                RedrawItem( itemIndex );
-                }
+            SetCurrentItemIndex( itemIndex ); //update index
             }
 		}
+	CAknDouble2LargeStyleListBox::HandlePointerEventL( aPointerEvent );
     }
 
 // ---------------------------------------------------------

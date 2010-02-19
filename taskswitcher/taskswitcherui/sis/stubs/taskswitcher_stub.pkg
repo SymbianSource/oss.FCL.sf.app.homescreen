@@ -32,9 +32,9 @@
 ;Unique Vendor name
 :"Nokia"
 
-""-"Z:\sys\bin\hgteleport.exe"
-""-"Z:\resource\apps\hgteleport.r??"
-""-"Z:\private\10003a3f\import\apps\tstaskswitcher_reg.rsc"
+""-"Z:\sys\bin\taskswitcher.exe"
+""-"Z:\resource\apps\taskswitcher.r??"
+""-"Z:\private\10003a3f\import\apps\taskswitcher_reg.rsc"
 
 ""-"Z:\sys\bin\tsappecom.dll"
 ""-"Z:\resource\plugins\tsappecom.rsc"

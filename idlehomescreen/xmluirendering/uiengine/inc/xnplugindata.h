@@ -30,9 +30,9 @@ class CXnResource;
 class CXnControlAdapter;
 class CXnViewData;
 class CXnODT;
-class CXnDataPluginLoader;
 class CXnViewManager;
 class CPeriodic;
+
 // Constants
 
 // Class declaration
@@ -56,8 +56,7 @@ public:
         EIsEmpty,
         EIsRemovable,
         EIsActive,             
-        EIsInitial,
-        EIsDataPluginsReady
+        EIsInitial        
         };
         
 public:    
@@ -112,9 +111,11 @@ public:
     // New functions
 
     /**
-     * Loads content to plugin          
+     * Loads content to plugin
+     * 
+     * @return KErrNone if succesful, error code otherwise          
      */    
-    virtual void LoadL();
+    virtual TInt Load();
 
     /**
      * Destroys content from plugin          
@@ -240,25 +241,6 @@ public:
      * @return Plugin type
      */    
     inline const TDesC8& Type() const;
-
-    /**
-     * Sets new plugin state
-     * 
-     * @param aConfigurationState Plugin state     
-     */    
-    void SetPluginStateL( const TDesC8& aPluginState );
-
-    /*
-     * Reverts plugin state back to confirmed from wait for confirmation
-     */
-    void RevertPluginState();
-        
-    /**
-     * Returns plugin state
-     * 
-     * @return Plugin state
-     */    
-    inline const TDesC8& PluginState() const;
 
     /**
 	 * void SetPublisherNameL( const TDesC8& aPublisherName )
@@ -405,14 +387,13 @@ public:
      * @param aVisible sets the popup visible or invisible
      * @param aNode a pointer to the popup node
      */
-    void SetIsDisplayingPopup ( TBool aVisible, CXnNode* aNode );
+    void SetIsDisplayingPopup( TBool aVisible, CXnNode* aNode );
 
     /**
      * Checks if the popup is displayed
      */
-    TBool IsDisplayingPopup () const;
-    
-    
+    TBool IsDisplayingPopup() const;
+        
     /**
      * Returns list of plugindata
      * 
@@ -421,45 +402,47 @@ public:
     inline RPointerArray< CXnPluginData >& PluginData() const;
 
     /**
-     * Loads data plugins associated to the plugin data
+     * Loads publishers, called by CXnViewData
      * 
+     * @param aReason Load reason
+     */    
+    TInt LoadPublishers( TInt aReason );
+        
+    /**
+     * Queries whether this plugins publishers are virgin
+     * 
+     * @return ETrue if virgin, EFalse otherwise
      */
-    virtual void LoadDataPluginsL();
+    TBool VirginPublishers() const;
+        
+    /**
+     * Show content removed error note
+     */
+    void ShowContentRemovedError();
 
     /**
-     * Deletes data plugins associated to the plugin data
-     */
-    virtual void DestroyDataPluginsL();
-    
-    /**
-     * Indicates that all data plugins are loaded by data plugin loader
-     * 
-     * @param aStatus Loading status
-     */
-    virtual void DataPluginsLoadCompletedL( TInt aStatus );
-
-    /**
-     * Returns data plugin loading status
-     * 
-     * @return ETrue if data plugins are loaded or there is no data
-     *               plugins associated to the plugin.
-     *         EFalse otherwise
-     */
-    virtual TBool DataPluginsLoaded() const;
-
-
+     * Show oom error note
+     */    
+    void ShowOutOfMemError();
+        
 private:
     // New functions
+            
+    void LoadPublishers();
     
-    static TInt RunL( TAny* aAny );
+    void DestroyPublishers();
+    
+    void DoDestroyPublishersL();
+    
+    void DoShowContentRemovedErrorL();
+    
+    static TInt PeriodicEventL( TAny* aAny );
     
 protected:
     // data
         
-    /** Data plugin loader, Owned */
+    /** Data publisher loader, Owned */
     CPeriodic* iLoader;
-    /** Data plugin load index */
-    TInt iLoadIndex;  
     /** Plugins data */
     mutable RPointerArray< CXnPluginData > iPluginsData;
     /** List of plugin resources, Owned */
@@ -474,7 +457,6 @@ protected:
     RPointerArray< CXnNode > iInitialFocusNodes;   
     /** List of popup focus nodes, Not owned */
     RPointerArray< CXnNode > iPopupNodes;
-
     /** Parent, Not owned */
     CXnPluginData* iParent;
     /** View manager, Not owned */
@@ -493,12 +475,12 @@ protected:
     HBufC8* iPluginName;    
     /** Plugin type, Owned */
     HBufC8* iPluginType;
-    /** Plugin state, Owned */
-    HBufC8* iPluginState;
     /** Publisher name, Owned */
     HBufC* iPublisherName;
     /** Flags to define this plugin's state */
     TBitFlags32 iFlags;
+    /** Flag to indicate whether this data's publishers are virgins */
+    TBool iVirginPublishers;    
     };
 
 // Inline functions

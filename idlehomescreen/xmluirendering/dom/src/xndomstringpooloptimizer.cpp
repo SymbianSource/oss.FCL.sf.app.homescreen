@@ -82,7 +82,7 @@ TInt TXnDomStringPoolOptimizer::GetIndex( const TDesC8& aString )
         }    
     
     TInt index = FindEntry( aString, 0, iEntries.Count() - 1 );
-    if( index > 0 && index < iEntries.Count() )
+    if( index >= 0 && index < iEntries.Count() )
         {
         return iEntries[index].iIndex;
         }

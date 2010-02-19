@@ -27,22 +27,24 @@ EXPORTS
 	_ZN14HnMdKeyFactory7CreateLERK6TDesC8S2_S2_ @ 26 NONAME
 	_ZN14HnMdKeyFactory8CreateLCE14TXmlEngElement @ 27 NONAME
 	_ZN17CHnServiceHandler13HandleNotifyLEiiR20CLiwGenericParamListRKS0_ @ 28 NONAME
-	_ZN17CHnServiceHandler4NewLERK6TDesC8S2_S2_12TServiceModeP20CLiwGenericParamListS5_ @ 29 NONAME
-	_ZN17CHnServiceHandler5NewLCERK6TDesC8S2_S2_12TServiceModeP20CLiwGenericParamListS5_ @ 30 NONAME
-	_ZN17CHnServiceHandler8ExecuteLEP18MLiwNotifyCallbacki @ 31 NONAME
-	_ZN17CHnServiceHandler8ExecuteLER20CLiwGenericParamListR14TRequestStatus @ 32 NONAME
-	_ZN17CHnServiceHandlerD0Ev @ 33 NONAME
-	_ZN17CHnServiceHandlerD1Ev @ 34 NONAME
-	_ZN17CHnServiceHandlerD2Ev @ 35 NONAME
-	_ZN20CHnRepositoryManager19DeleteSuiteRelatedLERK7TDesC16 @ 36 NONAME
-	_ZN20CHnRepositoryManager20ReadSuiteWidgetTypeLERK7TDesC16R18THnSuiteWidgetType @ 37 NONAME
-	_ZN20CHnRepositoryManager21StoreSuiteWidgetTypeLERK7TDesC1618THnSuiteWidgetType @ 38 NONAME
-	_ZN20CHnRepositoryManager4NewLEv @ 39 NONAME
-	_ZN20CHnRepositoryManager5NewLCEv @ 40 NONAME
-	_ZN20CHnRepositoryManagerD0Ev @ 41 NONAME
-	_ZN20CHnRepositoryManagerD1Ev @ 42 NONAME
-	_ZN20CHnRepositoryManagerD2Ev @ 43 NONAME
-	_ZNK12CHnMdBaseKey10ToVariantLER11TLiwVariant @ 44 NONAME
-	_ZNK12CHnMdBaseKey19ToGenericParamListLER20CLiwGenericParamList @ 45 NONAME
-	_ZThn4_N17CHnServiceHandler13HandleNotifyLEiiR20CLiwGenericParamListRKS0_ @ 46 NONAME
+	_ZN17CHnServiceHandler24PrepareForNextExecutionLERK6TDesC812TServiceModeP20CLiwGenericParamList @ 29 NONAME
+	_ZN17CHnServiceHandler4NewLERK6TDesC8S2_S2_12TServiceModeP20CLiwGenericParamListS5_ @ 30 NONAME
+	_ZN17CHnServiceHandler5NewLCERK6TDesC8S2_S2_12TServiceModeP20CLiwGenericParamListS5_ @ 31 NONAME
+	_ZN17CHnServiceHandler8ExecuteLEP18MLiwNotifyCallbacki @ 32 NONAME
+	_ZN17CHnServiceHandler8ExecuteLER20CLiwGenericParamListR14TRequestStatus @ 33 NONAME
+	_ZN17CHnServiceHandlerD0Ev @ 34 NONAME
+	_ZN17CHnServiceHandlerD1Ev @ 35 NONAME
+	_ZN17CHnServiceHandlerD2Ev @ 36 NONAME
+	_ZN20CHnRepositoryManager19DeleteSuiteRelatedLERK7TDesC16 @ 37 NONAME
+	_ZN20CHnRepositoryManager20ReadSuiteWidgetTypeLERK7TDesC16R18THnSuiteWidgetType @ 38 NONAME
+	_ZN20CHnRepositoryManager21StoreSuiteWidgetTypeLERK7TDesC1618THnSuiteWidgetType @ 39 NONAME
+	_ZN20CHnRepositoryManager4NewLEv @ 40 NONAME
+	_ZN20CHnRepositoryManager5NewLCEv @ 41 NONAME
+	_ZN20CHnRepositoryManagerD0Ev @ 42 NONAME
+	_ZN20CHnRepositoryManagerD1Ev @ 43 NONAME
+	_ZN20CHnRepositoryManagerD2Ev @ 44 NONAME
+	_ZNK12CHnMdBaseKey10ToVariantLER11TLiwVariant @ 45 NONAME
+	_ZNK12CHnMdBaseKey19ToGenericParamListLER20CLiwGenericParamList @ 46 NONAME
+	_ZNK17CHnServiceHandler26ServiceHandlerMatchesModelERK6TDesC8S2_PK20CLiwGenericParamList @ 47 NONAME
+	_ZThn4_N17CHnServiceHandler13HandleNotifyLEiiR20CLiwGenericParamListRKS0_ @ 48 NONAME
 

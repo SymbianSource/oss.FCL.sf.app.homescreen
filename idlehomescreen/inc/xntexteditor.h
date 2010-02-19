@@ -54,6 +54,14 @@ namespace XnTextEditorInterface
          */
         virtual const HBufC* Text() = 0;
 
+        /**
+         * Handles editor events
+         * 
+         * @since S60 5.2
+         * @param aReason, editor event       
+         */
+        virtual void HandleEditorEvent( TInt aReason ) = 0;
+
         private:
         };
     }   
@@ -65,6 +73,18 @@ namespace XnTextEditorInterface
 */
 class CXnTextEditor : public CXnComponent, public XnTextEditorInterface::MXnTextEditorInterface
     {
+public:
+
+/**
+ * Editor events
+ */
+    enum TEditorEvent
+                {
+                KActivateTextEditor,
+                KDeactivateTextEditor,
+                KRemoveSplitInputFromStack,
+                KKeepSplitInputInStack
+                };
 public:
 
 	/**
@@ -90,6 +110,14 @@ public: // New functions
      * @return HBufC* The text
      */
     const HBufC* Text();
+
+    /**
+     * Handles editor events
+     * 
+     * @since S60 5.2
+     * @param aReason, editor event       
+     */
+    void HandleEditorEvent( TInt aReason );
 
 public: // from CCoeControl
 

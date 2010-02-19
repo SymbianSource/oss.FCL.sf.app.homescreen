@@ -19,12 +19,15 @@
 #ifndef C_APPUI_H
 #define C_APPUI_H
 
+// System includes
 #include <coeview.h>
+
+// User includes
+#include <hspublisherinfo.h>
 #include "xnappuiadapter.h"
 
-
+// Forward declarations
 class CAiUiIdleIntegration;
-class MAiUiFrameworkObserver;
 
 namespace AiXmlUiController
 {        
@@ -40,7 +43,7 @@ class COnlineOfflineHelper;
  *
  *  @lib AiXmlUiMain
  */
-NONSHARABLE_CLASS( CAppUi ) : public CXnAppUiAdapter, 
+NONSHARABLE_CLASS( CAppUi ) : public CXnAppUiAdapter,
     public MCoeViewActivationObserver
     {    
 public:   // Constructors and destructor
@@ -55,37 +58,28 @@ public:
             
 private:  
     // from CXnAppUiAdapter
+    
     void PrepareToExit();
-    
-    void HandleForegroundEventL( TBool aForeground );
-    
+           
     void HandleCommandL( TInt aCommand );
-    
-    void HandleResourceChangeL( TInt aType );
 
     void HandleXuikonEventL( CXnNodeAppIf& aOrigin, CXnNodeAppIf& aTrigger,  
-         CXnDomNode& aTriggerDefinition, CXnDomNode& aEvent ); 
+         CXnDomNode& aTriggerDefinition, CXnDomNode& aEvent );
+    
+    void HandleEventL( const TDesC& aEvent, CXnNodeAppIf& aDestination );
                                                           
     void HandleWsEventL( const TWsEvent& aEvent, 
             CCoeControl* aDestination );
 
-    void LoadDataPluginsL( RPointerArray< CXnNodeAppIf >& aList );
-          
-    void DestroyDataPluginsL( RPointerArray< CXnNodeAppIf >& aList );
-           
-    void SetOnlineStateL( RPointerArray< CXnNodeAppIf >& aList );
-    
+    TInt LoadPublisher( CXnNodeAppIf& aPublisher, TInt aReason );
+                      
+    TInt DestroyPublisher( CXnNodeAppIf& aPublisher, TInt aReason );
+                           
     TBool DynInitMenuItemL( const TDesC& aItemType, 
         RPointerArray< CXnNodeAppIf >* aList = NULL );
-
-    void HandlePageSwitch();
     
     void HandleEnterEditModeL( TBool aEnter );
-	
-private:
-    // new functions
-    void LoadNativeDataPluginsL();
-    void DestroyNativeDataPluginsL();
+	    
     
 private:
     // from MCoeViewActivationObserver
@@ -95,7 +89,7 @@ private:
      */
     void HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId, 
         const TVwsViewId& aViewIdToBeDeactivated );
-           
+               
 public: 
     // new functions
     
@@ -115,6 +109,14 @@ public:
      * @return Ui Controller
      */
     CXmlUiController& UiController() const;
+    
+    /**
+     * Gets online/offline helper object
+     *
+     * @since S60 5.0
+     * @return online/offline helper
+     */
+    COnlineOfflineHelper* Helper() const;
                
 private: 
     // Constructors
@@ -126,45 +128,22 @@ private:
 private:     
     // data
 
-    /**
-     * UI Controller implementation. Not own.
-     */
+    /** UI Controller implementation, not owned */
     CXmlUiController& iUiCtl;
-
-    /**
-     * Event handler. Own.
-     */
-    CAIXuikonEventHandler* iEventHandler;
-    
-    /**
-     * Content renderer. Own.
-     */
-    CContentRenderer* iContentRenderer;
-    
-    /**
-     * Ui framework event observer. Not own.
-     */
-    MAiUiFrameworkObserver* iUiFwObserver;
-    
-    /**
-     * Idle Integration helper object. Own.
-     */
+    /** Event handler, owned */
+    CAIXuikonEventHandler* iEventHandler;    
+    /** Content renderer, owned */
+    CContentRenderer* iContentRenderer;              
+    /** Idle Integration helper object, owed */
     CAiUiIdleIntegration* iIdleIntegration;
-
-    /**
-     * Online/Offline helper object. Own.
-     */
-    COnlineOfflineHelper* iHelper;    
-    
-    /**
-     * Flag to indicate whether native plugins are loaded.
-     */
-    TBool iNativePluginsLoaded;
-    
-    /**
-     * Flag to indicate whether edit mode is active.
-     */
-    TBool iIsEditModeActive;
+    /** Online/Offline helper object, owned */
+    COnlineOfflineHelper* iHelper;
+    /** DeviceStatus publisher info */
+    THsPublisherInfo iDeviceStatusInfo;
+    /** Flag to indicate whether edit mode is active */
+    TBool iInEditMode;
+    /** Flag to indicate UI shutdown sequence is ongoing */
+    TBool iUiShutdown;
     };
     
 }  // namespace AiXmlUiController

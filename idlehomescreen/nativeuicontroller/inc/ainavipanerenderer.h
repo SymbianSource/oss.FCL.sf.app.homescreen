@@ -19,15 +19,16 @@
 #ifndef C_AINAVIPANERENDERER_H
 #define C_AINAVIPANERENDERER_H
 
-
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "ainativerenderer.h"
 #include "ainavipaneanimatorcallback.h"
 #include "ainativeuimodel.h"
 
 namespace AiNativeUiController
 {
-
 class CAiStatusPanel;
 class CAiNaviPaneAnimator;
 
@@ -40,9 +41,8 @@ class CAiNaviPaneAnimator;
  *  @since S60 3.2
  */
 // inheritance order must be this, despite codescanner warnings
-class CAiNaviPaneRenderer : public MAiNaviPaneAnimatorCallback,
-                            public CAiNativeRenderer
-                                   
+NONSHARABLE_CLASS( CAiNaviPaneRenderer ) : public MAiNaviPaneAnimatorCallback,
+    public CAiNativeRenderer                                  
     {
 public:
 
@@ -52,12 +52,12 @@ public:
 
 // from base class CAiNativeRenderer
 
-    void DoPublishL( MAiPropertyExtension& aPlugin, 
+    void DoPublishL( CHsContentPublisher& aPlugin, 
                         TInt aContent, 
                         const TDesC16& aText,
                         TInt aIndex );
 
-    void DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent );
+    void DoCleanL( CHsContentPublisher& aPlugin, TInt aContent );
 
     void FocusObtainedL();
 

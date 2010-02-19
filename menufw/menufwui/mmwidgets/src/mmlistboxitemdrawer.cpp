@@ -129,6 +129,7 @@ void CMmListBoxItemDrawer::InvalidateCache()
     {
     iItemsDataCache->Invalidate();
     // this is needed to get iColors initialized on first use:
+    iLastDrawnItemWasFloating = ETrue;
     }
 
 // -----------------------------------------------------------------------------
@@ -800,17 +801,7 @@ TSize CMmListBoxItemDrawer::GetItemSize( TInt aItemIndex, TBool aItemIsCurrent )
         const TDesC8& mm_template = iMmModel->GetAttributeAsText (aItemIndex,
                 KMmTemplate8);
         TRect viewRect = iWidget->View()->ViewRect();
-
-        TBool landscapeOrientation = viewRect.Width() > viewRect.Height();
-        // Layout_Meta_Data::IsLandscapeOrientation cannot be used here because it
-        // might happen that GetSize (this method) gets called immediately after
-        // layout change but before AppUi calls SetRect on the container of iWidget
-        // (Layout_Meta_Data::IsLandscapeOrientation always reflects the current state,
-        // whereas ViewRect might sometimes be out of date).
-        // In such situation iTemplateLibrary->GetSize (called just below) would
-        // cause the template library to fill the internal cache for landscape mode
-        // with parameters calculated according to the outdated ViewRect.
-
+        TBool landscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
 
         if ( iTemplateLibrary->GetSize( size, iWidgetType, mm_template,
                 landscapeOrientation, aItemIsCurrent, viewRect )
@@ -1340,7 +1331,7 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
         TInt aItemIndex ) const
     {
     CMmCacheForItem* cache = iItemsDataCache->GetItemCacheL( aItemIndex );
-    cache->SetValidL( EFalse );
+    cache->MarkAsInvalid();
 
     const TDesC8& mmTemplate = iMmModel->GetAttributeAsText( aItemIndex, KMmTemplate8 );
     if ( !mmTemplate.Compare( KNullDesC8 ) || !mmTemplate.Compare( KEmpty8 ) )
@@ -1420,7 +1411,7 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
 	cache->SetSubcellsSetupCode( iLastSubcellsSetupCode );
 	// the line below is here only to make the cached information complete
 	GetItemSize( aItemIndex, aItemIsCurrent );
-	cache->SetValidL( ETrue );
+	cache->MarkAsValidL();
 	}
 
 // -----------------------------------------------------------------------------

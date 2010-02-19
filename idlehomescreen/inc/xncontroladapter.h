@@ -420,6 +420,11 @@ public:
      * Remove all child adapters
      */
     void RemoveChildAdapters();
+    
+    /**
+     * Set Longtap delays 
+     */
+    void SetLongTapDelays( const TInt aStartDelay, const TInt aLongTapDelay );
 
     /**
      * Get child adapter list i.e which are not window owning controls
@@ -430,6 +435,16 @@ public:
      * Determines wheter control refuses focus loss
      */            
     virtual TBool RefusesFocusLoss() const { return EFalse; };
+    
+    /**
+     * Routes the data stream for the external rendering plugin.
+     *
+     * @since Series 60 5.2
+     * @param aData Data stream.
+     * @param aType Type of the stream.
+     * @param aIndex Index of the data.
+     */
+    IMPORT_C virtual void SetDataL( const TDesC8& aData, const TDesC& aType, TInt aIndex );
         
 private:
     // Data
@@ -445,6 +460,16 @@ private:
      * Own.
      */
     CAknLongTapDetector* iLongTapDetector;
+    
+    /**
+      * Long tap delay
+      */
+    TInt iCurrentLongTapTimeDelay;
+    
+    /**
+      * Start Long tap delay 
+      */
+    TInt iCurrentLongTapStartDelay;
     };
 
 // Inline functions

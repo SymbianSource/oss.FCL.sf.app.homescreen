@@ -73,7 +73,15 @@ public:
      * @return Text, ownership is transfered      
      */
     HBufC* Text() const;
-    
+
+    /**
+     * Handles editor events
+     * 
+     * @since S60 5.2
+     * @param aReason, editor event        
+     */
+    void HandleEditorEvent( TInt aReason );
+
 public: // from base classes
 
     /**
@@ -151,6 +159,12 @@ private:
     TInt                    iMaxLines; 
     /** Flag to indicate whether focus loss is refused */
     TBool                   iRefusesFocusLoss;
+    /** Flag to indicate is partial input supported*/
+    TBool                   iPartialInputEnabled;
+    /** Flag to indicate is partial input open*/
+    TBool                   iPartialInputOpen;
+    /** Flag to indicate whether split input should be remove or not*/
+    TBool                   iRemoveSplitInputFromStack;
     };
 
 #endif      // _XNTEXTEDITORADAPTER_H

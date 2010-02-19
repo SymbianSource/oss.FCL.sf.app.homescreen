@@ -51,7 +51,7 @@ public:
      * Declare drag gesture handling.
      * @param aEvent - drag event
      */
-    virtual void Drag(const AknTouchGestureFw::MAknTouchGestureFwDragEvent& aEvent) =0;
+    virtual void DragL(const AknTouchGestureFw::MAknTouchGestureFwDragEvent& aEvent) =0;
     
     /**
      * Declare animation stop handling

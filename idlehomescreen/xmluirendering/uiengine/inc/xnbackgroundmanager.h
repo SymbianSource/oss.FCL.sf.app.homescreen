@@ -20,7 +20,7 @@
 
 // System includes
 #include <coecntrl.h>
-#include <aknssrvclient.h>
+#include <AknsSrvClient.h>
 #include <coeview.h>
 #include <disknotifyhandler.h>
 
@@ -174,7 +174,8 @@ private:
     TInt AddCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue );
     void ReadWallpaperFromCenrepL();
     void UpdateScreen();
-
+    void DrawEditModeBackgroundSkin() const;
+    
 private: // data
 
     /**

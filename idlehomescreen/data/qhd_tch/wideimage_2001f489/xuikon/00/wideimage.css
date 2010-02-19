@@ -2,6 +2,7 @@ widget#wideimage_template
 {
     nav-index: appearance;
     block-progression:rl;
+    direction: ltr;
 }
 
 box#image_container
@@ -12,8 +13,6 @@ box#image_container
 box#default_container
 {
     /* Will be updated by content policy */
-   block-progression: rl;
-   direction:ltr; 
    display: block;
 }
 
@@ -27,6 +26,20 @@ image#default_image
     width: 64px;
 }
 
+text#default_text
+{
+    padding-left:9px;
+    padding-right:9px;
+    height : 10u;
+    font-line-space: 15;
+    direction: ltr;
+    text-align:left;
+    text-overflow-mode: wrap;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 4u;
+    color: "SKIN(268458534 13056 74)";
+}
+
 animation#loading
 {
 	position: absolute;
@@ -37,17 +50,4 @@ animation#loading
 	height:30px;
 	/* Will be updated by dataplugin */
 	display: none;
-}
-
-text
-{
-    padding-left:9px;
-    padding-right:9px;
-    height : 10u;
-    font-line-space: 15;
-    text-align:left;
-    text-overflow-mode: wrap;
-    font-family: EAknLogicalFontSecondaryFont;
-    font-size: 4u;
-    color: "SKIN(268458534 13056 74)";
 }

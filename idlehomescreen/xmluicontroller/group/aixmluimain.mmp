@@ -55,6 +55,7 @@ SOURCE          pmodtiterator.cpp
 SOURCE          contentpublisher.cpp
 SOURCE          globalqueryhandler.cpp
 SOURCE          onlineofflinehelper.cpp
+SOURCE          cenrepobserver.cpp
 
 
 START RESOURCE  ai3xmluimain.rss

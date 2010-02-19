@@ -18,8 +18,10 @@
 // System include files
 #include <ecom/ecom.h>
 #include <ecom/implementationinformation.h>
+#include <aknview.h>
 
 // User include files
+#include "xnappuiadapter.h"
 #include "hscontentcontrolfactory.h"
 #include "hscontentcontrolecomlistener.h"
 #include "hscontentcontroluninstallmonitor.h"
@@ -60,9 +62,11 @@ static void CleanupResetAndDestroyPushL(T& aArray)
 // CHsContentControlFactory::NewL()
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CHsContentControlFactory* CHsContentControlFactory::NewL()
+EXPORT_C CHsContentControlFactory* CHsContentControlFactory::NewL( 
+        CXnAppUiAdapter& aAdapter )
     {
-    CHsContentControlFactory* self = new ( ELeave ) CHsContentControlFactory();
+    CHsContentControlFactory* self = 
+            new ( ELeave ) CHsContentControlFactory( aAdapter );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -88,7 +92,8 @@ void CHsContentControlFactory::ConstructL()
 // CHsContentControlFactory::CHsContentControlFactory()
 // ----------------------------------------------------------------------------
 //
-CHsContentControlFactory::CHsContentControlFactory()
+CHsContentControlFactory::CHsContentControlFactory( CXnAppUiAdapter& aAdapter )
+    :iAdapter( aAdapter ) 
     {
     }
 
@@ -100,6 +105,16 @@ EXPORT_C CHsContentControlFactory::~CHsContentControlFactory()
     {
     iImplArray.ResetAndDestroy();
     iImplArray.Close();
+    
+    if ( iHsContentControlUis.Count() > 0 )
+        {
+        for( TInt index( iHsContentControlUis.Count() - 1 ); index >= 0; --index )
+            {
+            CHsContentControlUi* cc( iHsContentControlUis[ index ] );
+            ReleaseHsCcUi( cc );
+            }
+        }
+
     iHsContentControlUis.ResetAndDestroy();
     
 	delete iHsContentControlEComListener;
@@ -200,6 +215,7 @@ void CHsContentControlFactory::HandleUninstallEvent( const TUid& aPkgUid )
             // ImplUid of plugin must match Sis pkg uid
             if ( cc && cc->ImplUid() == aPkgUid )
                 {
+                ReleaseHsCcUi( cc );
                 iHsContentControlUis.Remove( index );
                 delete cc;
                 cc = NULL;
@@ -245,6 +261,7 @@ void CHsContentControlFactory::CheckPluginChangesL()
                 CHsContentControlUi* cc( iHsContentControlUis[ innerIndex ] );
                 if ( cc && cc->ImplUid() == uid )
                     {
+                    ReleaseHsCcUi( cc );
                     iHsContentControlUis.Remove( innerIndex );
                     delete cc;
                     cc = NULL;
@@ -310,6 +327,7 @@ TBool CHsContentControlFactory::PluginUpgradeDowngrade(
                     CHsContentControlUi* cc( iHsContentControlUis[ innerIndex ] );
                     if ( cc && cc->ImplUid() == uid )
                         {
+                        ReleaseHsCcUi( cc );
                         iHsContentControlUis.Remove( innerIndex );
                         delete cc;
                         cc = NULL;
@@ -321,6 +339,36 @@ TBool CHsContentControlFactory::PluginUpgradeDowngrade(
             }
         }
     return EFalse;
+    }
+
+// ----------------------------------------------------------------------------
+// CHsContentControlFactory::ReleaseHsCcUi
+// ----------------------------------------------------------------------------
+//
+void CHsContentControlFactory::ReleaseHsCcUi( 
+        CHsContentControlUi* aHsContentControlUi )
+    {
+    if ( &iAdapter && aHsContentControlUi )
+        {
+        RPointerArray<CAknView> views;
+
+        // notify plugin about deactivation
+        aHsContentControlUi->DeActivate();
+        
+        // get all views from HsContentControlUi
+        aHsContentControlUi->Views( views );
+
+        for ( TInt i=0; i<views.Count(); i++ )
+            {
+            CAknView* view = views[ i ];
+            views.Remove( i );
+            // remove/deregister/delete all views from appui
+            TRAP_IGNORE( iAdapter.RemoveViewL( *view ) );
+            }
+
+        // reset views array
+        views.Reset();
+        }
     }
 
 // End of file

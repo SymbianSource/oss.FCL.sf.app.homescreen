@@ -92,7 +92,7 @@
 // w:
 // r: TB9.2
 //
-#define qtn_options_wm_details "Details"
+#define qtn_options_wm_show_details "Details"
 
 
 // MISC
@@ -163,7 +163,7 @@
 // d: Query for unistallation
 // d: 
 // d: 
-// l: query
+// l: popup_note_window
 // w:
 // r: TB9.2
 //

@@ -13,14 +13,14 @@
 *
 */
 
-
+// System includes
 #include <e32base.h>
 #include <e32const.h>
 #include <coecntrl.h>
 #include <coemain.h>
-
 #include <AknUtils.h>
 
+// User includes
 #include "xnwidgetextensionadapter.h"
 #include "xncontroladapter.h"
 
@@ -46,13 +46,14 @@
 #include "xnviewdata.h"
 #include "xnplugindata.h"
 
-
-_LIT8( KPopUpText, "popup" );
+// Constants
+_LIT8( KPopup, "popup" );
 _LIT8( KPositionHint, "_s60-position-hint" );
 _LIT8( KWidgetNodeName, "widget" );
 _LIT8( KParentIdName, "parentid" );
 _LIT8( KDisplay, "display" );
 _LIT8( KNone, "none" );
+
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -78,6 +79,10 @@ CXnWidgetExtensionAdapter* CXnWidgetExtensionAdapter::NewL(
 //
 CXnWidgetExtensionAdapter::~CXnWidgetExtensionAdapter()
     {
+    if ( iAppUiAdapter )
+        {
+        iAppUiAdapter->UiStateListener().RemoveObserver( *this );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -97,7 +102,10 @@ CXnWidgetExtensionAdapter::CXnWidgetExtensionAdapter( CXnNodePluginIf& aNode )
 //    
 void CXnWidgetExtensionAdapter::ConstructL()
     {
+    iAppUiAdapter = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
+    
     CreateWindowL();
+    
     Window().SetRequiredDisplayMode( EColor16MA );
 
     // this adapter handles both widgetextension and popup nodes
@@ -106,17 +114,29 @@ void CXnWidgetExtensionAdapter::ConstructL()
     CXnType* typeInfo = iNode.Node().Type();
     const TDesC8& type = typeInfo->Type();
 
-    if ( ( type != KPopUpText ) &&
-         ( Window().SetTransparencyAlphaChannel() == KErrNone ) )
+    if ( type == KPopup )          
         {
-        Window().SetBackgroundColor( ~0 );     
+        CXnProperty* prop( iNode.Node().GetPropertyL( 
+            XnPropertyNames::popup::KPopupType ) );
+                       
+        if ( prop && prop->StringValue() == 
+            XnPropertyNames::popup::popuptype::KPermanent )
+            {
+            iPermanent = ETrue;
+            }        
         }
+    else
+        {
+        if ( Window().SetTransparencyAlphaChannel() == KErrNone )
+            {
+            Window().SetBackgroundColor( ~0 );
+            }                     
+        }
+    
     iUiEngine = iNode.Node().UiEngine();
     CXnControlAdapter::ConstructL( iNode );
-    EnableDragEvents();   
-
-    iAppUiAdapter = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
-
+    
+    EnableDragEvents();      
     }
 
 // -----------------------------------------------------------------------------
@@ -125,9 +145,9 @@ void CXnWidgetExtensionAdapter::ConstructL()
 // -----------------------------------------------------------------------------
 // 
 void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
-    {
-   
+    {   
     TBool visible( IsVisible() ? ETrue : EFalse );
+    
     if ( visible == aVisible )
         {
         return;
@@ -143,12 +163,28 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
     CXnType* typeInfo = iNode.Node().Type();
     const TDesC8& type = typeInfo->Type();
 
-    if ( type != KPopUpText )
+    TBool popup( type == KPopup );
+    
+    if ( !popup )
         {
         DrawableWindow()->FadeBehind( aVisible );
         }
+    else
+        {
+        if ( !iPermanent )
+            {
+            if ( aVisible )
+                {
+                iAppUiAdapter->UiStateListener().AddObserver( *this );
+                }
+            else
+                {
+                iAppUiAdapter->UiStateListener().RemoveObserver( *this );
+                }            
+            }
+        }
     
-    if ( aVisible && type == KPopUpText )
+    if ( aVisible && popup )
         {        
         // read position-hint property and set-up its variable
         CXnProperty* positionHintProp = NULL;
@@ -214,17 +250,15 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
 //    
 void CXnWidgetExtensionAdapter::HandlePointerEventL( 
     const TPointerEvent& aPointerEvent )
-    {    
-    
+    {        
     CXnType* typeInfo = iNode.Node().Type();
     const TDesC8& type = typeInfo->Type();
     
     // in case of popup, we have to make sure that 
     // it will be closed after tapping outside of the
     // area of itself and its parent
-    if ( type == KPopUpText )
-        {
-        
+    if ( type == KPopup )
+        {        
         // check if the tap was inside of popup
         TRect popupRect = this->Rect();
         popupRect.Move(this->Position() );
@@ -232,12 +266,11 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                 aPointerEvent.iParentPosition );
 
         if ( !isInPopupWindow )
-            {
-            
+            {            
             // if tap was outside of window, check if tap was 
             // inside of the parrent
-            CXnProperty* parentIdProp = iNode.Node().GetPropertyL(
-                    KParentIdName );
+            CXnProperty* parentIdProp( iNode.Node().GetPropertyL(
+                    KParentIdName ) );
             
             if ( parentIdProp )
                 {                
@@ -258,13 +291,7 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                         // we can close it
                         if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
                             {
-                            CXnDomStringPool* sp =
-                                iNode.Node().DomNode()->StringPool();
-                            CXnProperty* prop = CXnProperty::NewL( KDisplay, KNone,
-                            CXnDomPropertyValue::EString, *sp );
-                            CleanupStack::PushL( prop );
-                            iNode.Node().SetPropertyL( prop );
-                            CleanupStack::Pop( prop );
+                            HidePopupL();
                             return;
                             }
                         }
@@ -282,11 +309,14 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                         }
                     }
                 }
+            else
+                {
+                HidePopupL();
+                }
             }
         }
     
-    CXnControlAdapter::HandlePointerEventL( aPointerEvent );
-    
+    CXnControlAdapter::HandlePointerEventL( aPointerEvent );    
     }
 
 // -----------------------------------------------------------------------------
@@ -296,7 +326,7 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
 //    
 void CXnWidgetExtensionAdapter::Draw( const TRect& aRect ) const
     {
-        CXnControlAdapter::Draw( aRect );
+    CXnControlAdapter::Draw( aRect );
     }
 
 // -----------------------------------------------------------------------------
@@ -305,7 +335,6 @@ void CXnWidgetExtensionAdapter::Draw( const TRect& aRect ) const
 // -----------------------------------------------------------------------------
 void CXnWidgetExtensionAdapter::CalculatePosition() 
     {
-
     // widget's rectangle
     TRect controlRect;
 
@@ -513,7 +542,67 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
         {
         rect.Move( contentRect.iBr.iX - rect.iBr.iX, 0 );
         }
+    
     this->SetRect( rect );
+    }
+
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::NotifyForegroundChanged
+// 
+// -----------------------------------------------------------------------------
+//    
+void CXnWidgetExtensionAdapter::NotifyForegroundChanged( 
+    TForegroundStatus aStatus )
+    {
+    if ( aStatus != EForeground )
+        {
+        TRAP_IGNORE( HidePopupL() );
+        }    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::NotifyLightStatusChanged
+// 
+// -----------------------------------------------------------------------------
+//    
+void CXnWidgetExtensionAdapter::NotifyLightStatusChanged( TBool aLightsOn )
+    {
+    if ( !aLightsOn )
+        {
+        TRAP_IGNORE( HidePopupL() );
+        }    
+    }
+   
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::NotifyInCallStateChaged
+// 
+// -----------------------------------------------------------------------------
+//    
+void CXnWidgetExtensionAdapter::NotifyInCallStateChaged( TBool /*aInCall*/ )
+    {    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::HidePopupL
+// 
+// -----------------------------------------------------------------------------
+//    
+void CXnWidgetExtensionAdapter::HidePopupL()
+    {
+    if ( IsVisible() )
+        {
+        CXnDomStringPool* sp( iNode.Node().DomNode()->StringPool() );
+            
+        CXnProperty* prop = CXnProperty::NewL( 
+            KDisplay, KNone, CXnDomPropertyValue::EString, *sp );
+        
+        CleanupStack::PushL( prop );
+        
+        iNode.Node().SetPropertyL( prop );
+        
+        CleanupStack::Pop( prop );        
+        }
     }
 
 //  End of File  

@@ -55,7 +55,8 @@ CWmMainContainerView::~CWmMainContainerView()
 	{
     if ( iWmMainContainer != NULL )
         {
-        AppUi()->RemoveFromViewStack( *this, iWmMainContainer );
+        AppUi()->RemoveFromStack( iWmMainContainer );
+
         delete iWmMainContainer;
         iWmMainContainer = NULL;
         }
@@ -140,7 +141,7 @@ void CWmMainContainerView::HandleCommandL( TInt aCommand )
                 break;
             case EWmMainContainerViewBackMenuItemCommand: // flow through
             case EAknSoftkeyBack:
-                iWmPlugin.Deactivate();
+                iWmPlugin.CloseView();
                 break;
             case EWmMainContainerViewWiddetDetailsMenuItemCommand:
                 HandleDetailsMenuItemSelectedL();
@@ -170,29 +171,34 @@ void CWmMainContainerView::DoActivateL(
 		TUid /*aCustomMessageId*/,
 		const TDesC8& /*aCustomMessage*/ )
 	{
-	if ( iWmMainContainer == NULL )
-		{
-		iWmMainContainer = CreateContainerL();
-		iWmMainContainer->SetMopParent( this );
-		AppUi()->AddToStackL( *this, iWmMainContainer );
-		}
-	
-	SetupStatusPaneL();
-   
-    iWmPlugin.MainViewActivated( aPrevViewId, iWmMainContainer );
+    // setup status pane layout
     StatusPane()->SwitchLayoutL( 
             R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
     StatusPane()->ApplyCurrentSettingsL();
+    
+    // title in status pane
+    SetTitleL();
+    
     StatusPane()->DrawNow();
+    
+    // update cba
     CEikButtonGroupContainer* bgc( Cba() );
-        
     CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
     if ( cba ) 
-        {
-        
+        {       
         bgc->SetBoundingRect( TRect() );
         cba->DrawNow();
         }
+
+    // create container
+    if ( iWmMainContainer == NULL )
+        {
+        iWmMainContainer = CreateContainerL();
+        iWmMainContainer->SetMopParent( this );
+        AppUi()->AddToStackL( *this, iWmMainContainer );
+        }
+    
+    iWmPlugin.MainViewActivated( aPrevViewId, iWmMainContainer );
 	}
 
 // ---------------------------------------------------------
@@ -203,12 +209,11 @@ void CWmMainContainerView::DoDeactivate()
 	{
 	if ( iWmMainContainer != NULL )
 		{
-		AppUi()->RemoveFromViewStack( *this, iWmMainContainer );
+        AppUi()->RemoveFromStack( iWmMainContainer );
 		delete iWmMainContainer;
 		iWmMainContainer = NULL;
+		iWmPlugin.MainViewDeactivated();
 		}
-
-	iWmPlugin.MainViewDeactivated();
 	}
 
 // ---------------------------------------------------------
@@ -233,10 +238,10 @@ void CWmMainContainerView::HandleStatusPaneSizeChange()
 	}
 
 // ---------------------------------------------------------
-// CWmMainContainerView::SetupStatusPaneL
+// CWmMainContainerView::SetTitleL
 // ---------------------------------------------------------
 //
-void CWmMainContainerView::SetupStatusPaneL()
+void CWmMainContainerView::SetTitleL()
 	{	
 	// setup the title pane
 	TUid titlePaneUid = TUid::Uid( EEikStatusPaneUidTitle );
@@ -410,6 +415,19 @@ TBool CWmMainContainerView::HandleDeactivateFindPaneL()
         iWmMainContainer->DeactivateFindPaneL();
         }
     return ETrue;
+    }
+
+// ---------------------------------------------------------
+// CWmMainContainerView::HandleForegroundEventL
+// ---------------------------------------------------------
+//
+void CWmMainContainerView::HandleForegroundEventL( TBool aForeground )
+    {
+    CAknView::HandleForegroundEventL( aForeground );
+    if ( iWmMainContainer )
+        {
+        iWmMainContainer->ProcessForegroundEvent( aForeground );
+        }
     }
 
 // End of file

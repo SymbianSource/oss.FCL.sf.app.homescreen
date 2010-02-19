@@ -55,19 +55,16 @@
 
 #undef _AVKON_CBA_LSC
 
-_LIT8( KWidgetSpecific, "Menu/WidgetSpecific" );
-_LIT8( KViewSpecific, "Menu/ViewSpecific" );
-_LIT8( KWidgetsHidden, "Menu/WidgetsHidden" );
-_LIT8( KWidgetsShown, "Menu/WidgetsShown" );
 _LIT8( KEditMode, "Menu/EditMode" );
+_LIT8( KNormalMode, "Menu/NormalMode" );
 _LIT8( KAlwaysShown, "Menu/AlwaysShown" );
 _LIT8( KHsShowHelp, "hs_show_help" );
 
 const TInt KMenuCommandFirst         = 6000;
 const TInt KMenuCommandLast          = 6199;
-const TInt KCBACommandFirst          = 6200;
-const TInt KCBACommandSecond         = 6201;
-const TInt KCBACommandMiddle         = 6202; 
+const TInt KCBACommandFirst          = EAknSoftkeyOptions;
+const TInt KCBACommandSecond         = EAknSoftkeyBack;
+const TInt KCBACommandMiddle         = EAknSoftkeyDialler; 
 
 const TInt KXnMenuArrayGranularity   = 6;
 const TInt KWideScreenWidth          = 640;
@@ -809,6 +806,34 @@ static CXnNodePluginIf* FindChildL( CXnNodePluginIf& aNode,
     return retval;
     }
 
+// -----------------------------------------------------------------------------
+// FindWidgetElementL
+// 
+// -----------------------------------------------------------------------------
+//
+static CXnNodePluginIf* FindWidgetElementL( CXnNodePluginIf& aPluginNode )
+    {
+    CXnNodePluginIf* retval( NULL );
+    
+    RPointerArray< CXnNodePluginIf > children( aPluginNode.ChildrenL() );
+    CleanupClosePushL( children );
+  
+    for ( TInt i = 0; i < children.Count(); i++ )
+        {
+        CXnNodePluginIf* node( children[i] );
+        
+        if ( node->AppIfL().InternalDomNodeType() == XnPropertyNames::KWidget )
+            {
+            retval = node;
+            break;
+            }
+        }
+    
+    CleanupStack::PopAndDestroy( &children );
+    
+    return retval;
+    }
+
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -1449,24 +1474,7 @@ void CXnMenuAdapter::PopulateMenuL()
     iMenuItems.Reset();
 
     iIdCounter = KMenuCommandFirst;
-       
-    CXnNodePluginIf* focused( iUiEngine->FocusedNodeL() );
-    
-    const TDesC8& ns( iRootNode->Namespace() );
-    
-    TBool widgetSpecific( EFalse );
-    
-    for( ; focused ; focused = focused->ParentL() )
-        {
-        if( focused->AppIfL().InternalDomNodeType() == XnPropertyNames::KPlugin )
-            {
-            widgetSpecific = ETrue;
-            break;
-            }
-        }
-
-    TBool widgetsShown( iUiEngine->WidgetsVisible() );
-    
+               
     RPointerArray< const TDesC8 > groups;
     CleanupClosePushL( groups );
                
@@ -1476,8 +1484,7 @@ void CXnMenuAdapter::PopulateMenuL()
         }
     else
         {
-        groups.AppendL( widgetSpecific ? &KWidgetSpecific : &KViewSpecific );
-        groups.AppendL( widgetsShown ? &KWidgetsShown : &KWidgetsHidden );        
+        groups.Append( &KNormalMode );
         }
     
     groups.AppendL( &KAlwaysShown );
@@ -2736,15 +2743,13 @@ CXnNodePluginIf* CXnMenuAdapter::FindWidgetMenuItemL( CXnNodePluginIf* aNode )
         // Get <plugin> element
         CXnNodePluginIf& pluginNode( iUiEngine->PluginNodeL( focusedNode ) );
         
-        RPointerArray< CXnNodePluginIf > children( pluginNode.ChildrenL() );
-        CleanupClosePushL( children );
-        
+        CXnNodePluginIf* widget( FindWidgetElementL( pluginNode ) );
+                
         CXnNodePluginIf* widgetExtNode( NULL );
         
-        if( children.Count() > 0 )
-            {
-            // children[0] must be <widget> element
-            widgetExtNode = FindChildL( *children[0], KXnMenuExtension );
+        if( widget )
+            {            
+            widgetExtNode = FindChildL( *widget, KXnMenuExtension );
             }
                                                  
         if( !widgetExtNode )
@@ -2773,9 +2778,7 @@ CXnNodePluginIf* CXnMenuAdapter::FindWidgetMenuItemL( CXnNodePluginIf* aNode )
                                            source );
                     }
                 }
-            }
-        
-        CleanupStack::PopAndDestroy( &children );
+            }                
         }
     
     if( menuItem && IsNodeVisibleL( *menuItem ) )

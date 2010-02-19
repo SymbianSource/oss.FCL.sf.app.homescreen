@@ -26,7 +26,8 @@
 // User includes
 #include <activeidle2domainpskeys.h>
 #include <activeidle2domaincrkeys.h>
-#include <aiscutplugindomaincrkeys.h>
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
 #include <aisystemuids.hrh>
 #include <ai3xmlui.rsg>
 
@@ -56,15 +57,11 @@
 #include "xnplugindefs.h"
 #include "ainativeuiplugins.h"
 
+// Constants
+const TInt KOneSecondInMicroS = 1000*1000;
+_LIT8( KData, "data" );
 
 using namespace AiXmlUiController;
-
-const TInt KOneSecondInMicroS = 1000*1000;
-const TInt KAI2CrKeyIncrementBy2 = 2;
-
-typedef TBuf<32> TNamespace;
-
-_LIT( KSettingsDummyData, "" );
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
@@ -285,36 +282,7 @@ void CXmlUiController::NotifyAppEnvReadyL()
 // ----------------------------------------------------------------------------
 //
 void CXmlUiController::LoadUIDefinitionL()
-    {
-    // No implementation required
-    }
-
-// ----------------------------------------------------------------------------
-// CXmlUiController::GetPluginsL()
-// ----------------------------------------------------------------------------
-//
-void CXmlUiController::GetPluginsL( RAiPublisherInfoArray& /*aPlugins*/ )
-    {   
-    // No implementation required
-    }
-
-// ----------------------------------------------------------------------------
-// CXmlUiController::PublisherInfo()
-// ----------------------------------------------------------------------------
-//
-void CXmlUiController::PublisherInfoL( RAiPublisherInfoArray& aPlugins )
-    {
-    // This method returns plugins with namespace KNativeUiNamespace
-    if ( iRunningAsMain )
-        {
-        // This plugin is used to publish data on secondary ui controller side       
-        TAiPublisherInfo deviceStatus;
-        deviceStatus.iUid = KDeviceStatusPluginUid;
-        deviceStatus.iName.Copy( KDeviceStatusPluginName );
-        deviceStatus.iNamespace.Copy( KNativeUiNamespace );
-                
-        aPlugins.AppendL( deviceStatus );               
-        }        
+    {          
     }
 
 // ----------------------------------------------------------------------------
@@ -322,7 +290,7 @@ void CXmlUiController::PublisherInfoL( RAiPublisherInfoArray& aPlugins )
 // ----------------------------------------------------------------------------
 //
 void CXmlUiController::PublisherInfoL( CXnNodeAppIf& aSource,
-    TAiPublisherInfo& aInfo )
+    THsPublisherInfo& aInfo )
     {
     // Fetch uid from XML and convert it to TUid
     const TDesC8* uid( PropertyValue( aSource, 
@@ -332,62 +300,59 @@ void CXmlUiController::PublisherInfoL( CXnNodeAppIf& aSource,
         {
         return;
         }
-        
+       
     _LIT8( KPrefix, "0x" );
     
     const TInt pos( uid->FindF( KPrefix ) );
 
+    TInt32 uidValue( 0 );
+    
     if( pos != KErrNotFound )
          {
          TLex8 lex( uid->Mid( pos + KPrefix().Length() ) );
           
          // Hex parsing needs unsigned int
-         TUint32 value = 0;
-         const TInt parseResult = lex.Val( value, EHex );
+         TUint32 value( 0 );
+         TInt err( lex.Val( value, EHex ) );
          
-         if ( parseResult == KErrNone )
+         if ( err == KErrNone )
              {
-             TInt32 value32( value );
-             
-             aInfo.iUid = TUid::Uid( value32 );            
+             uidValue = value;
              }
          }
      
     // Fetch plug-in name from XML
-    HBufC* pluginName( PropertyValueL( aSource, 
-                AiUiDef::xml::property::KName ) ); 
-            
-    CleanupStack::PushL( pluginName );
-
-    if ( pluginName )
-        {
-        aInfo.iName.Copy( *pluginName );
-        }
+    HBufC* name( PropertyValueL( aSource, AiUiDef::xml::property::KName ) ); 
+                
+    TUid pluginuid( TUid::Uid( uidValue ) );
+           
+    aInfo = THsPublisherInfo( pluginuid, *name, aSource.Namespace() );
     
-    CleanupStack::PopAndDestroy( pluginName );
-        
-    aInfo.iNamespace.Copy( aSource.Namespace() );    
+    delete name;
+    name = NULL;
     }
 
 // ----------------------------------------------------------------------------
 // CXmlUiController::GetSettingsL()
+//
 // ----------------------------------------------------------------------------
 //
-void CXmlUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,     
+void CXmlUiController::GetSettingsL( const THsPublisherInfo& aPublisherInfo,     
     RAiSettingsItemArray& aSettings )
     {
-    if ( aPubInfo.iNamespace == KNativeUiNamespace )
+    if ( aPublisherInfo.Namespace() == KNativeUiNamespace )
         {
         // This controller doesn't provide settings for native ui namespace
         return;
         }
     
-    const TDesC& classId( iNodeIdGenerator->SettingsNodeIdL( aPubInfo ) );
+    const TDesC& classId( 
+        iNodeIdGenerator->SettingsNodeIdL( aPublisherInfo ) ); 
+               
+    TBuf< KHsPublisherNamespaceMaxLength > ns;
     
-    TNamespace ns;
+    ns.Copy( aPublisherInfo.Namespace() );
     
-    ns.Copy( aPubInfo.iNamespace );
-       
     // Find settings nodes
     RPointerArray< CXnNodeAppIf > nodes( 
         UiEngineL()->FindNodeByClassL( classId, ns ) );
@@ -405,10 +370,10 @@ void CXmlUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
         CXnNodeAppIf* node( nodes[i] );
         
         const TDesC8* name( 
-                PropertyValue( *node, AiUiDef::xml::property::KName ) );
+            PropertyValue( *node, AiUiDef::xml::property::KName ) );
         
         HBufC* value( 
-                PropertyValueL( *node, AiUiDef::xml::property::KValue ) );        
+            PropertyValueL( *node, AiUiDef::xml::property::KValue ) );        
         
         CleanupStack::PushL( value );
         
@@ -418,7 +383,7 @@ void CXmlUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
             CleanupDeletePushL( settings );
             
             MAiPluginSettingsItem& item( settings->AiPluginSettingsItem() ); 
-            item.SetPublisherId( aPubInfo.iUid );
+            item.SetPublisherId( aPublisherInfo.Uid() );
             
             TInt32 key( 0 );
             
@@ -438,148 +403,7 @@ void CXmlUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
     
     CleanupStack::PopAndDestroy( &nodes );
     
-    GetSettingsFromCRL( aPubInfo, aSettings );
-    GetContentModelL( aPubInfo, aSettings );
-    }
-
-// ----------------------------------------------------------------------------
-// CXmlUiController::GetSettingsFromCRL()
-// ----------------------------------------------------------------------------
-//
-void CXmlUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo, 
-    RAiSettingsItemArray &aPluginSettings )                            
-    {
-    if ( aPubInfo.iNamespace == KNativeUiNamespace )
-        {
-        // This controller doesn't provide settings for native ui namespace
-        return;
-        }
-    
-    /*
-    * The settings are stored in the cenrep starting from 0x1000. 
-    * 0x1000 is the name of the plugin which this setting belongs to (for example Settings/Shortcut)
-    * 0x1001 is the id of the setting (for example 1)
-    * 0x1002 is the value of the setting (for example localapp:0x012345678)
-    * 
-    * So three keys per setting.
-    * 
-    * Settings from cenrep override those from XML
-    */
-    
-    TUint32 crKey( KAIPluginSettingsKeyRangeStart );
-
-    TBool moreSettings( ETrue );
-    
-    HBufC* pluginId = HBufC::NewLC(
-            NCentralRepositoryConstants::KMaxUnicodeStringLength );
-    
-    HBufC* settingValue = HBufC::NewLC(
-            NCentralRepositoryConstants::KMaxUnicodeStringLength );
-    
-    HBufC* settingKey = HBufC::NewLC(
-            NCentralRepositoryConstants::KMaxUnicodeStringLength );
-    
-    TPtr pluginIdPtr( pluginId->Des() );
-    TPtr settingValuePtr( settingValue->Des() );
-    TPtr settingKeyPtr( settingKey->Des() );
-    
-    TInt32 settingId( 0 );
-
-    TInt err( KErrNone );
-    TBool settingFound( EFalse );
-    
-    while( moreSettings )
-        {
-        settingFound = EFalse;
-        
-        pluginIdPtr.Zero();
-        settingValuePtr.Zero();
-        settingKeyPtr.Zero();
-        
-        //Get the name of plugin with the Settings/ prefix
-        err = iAISettingsRepository->Get( crKey++, pluginIdPtr );       
-   
-        // remove the Settings/ prefix if it is located at the start of the string
-        if( pluginIdPtr.FindC( AiUiDef::xml::propertyClass::KSettings ) == 0 )
-            {   
-            pluginIdPtr.Delete( 0, 
-                    AiUiDef::xml::id::KSettingsIdSeparator().Length() +
-                    AiUiDef::xml::propertyClass::KSettings().Length() );               
-            }
-            
-        // does the setting belong to this plugin
-        if( err == KErrNone && pluginIdPtr == aPubInfo.iName )
-            {
-            // Get the settings id 
-            err = iAISettingsRepository->Get( crKey++, settingKeyPtr );
-            
-            if( err == KErrNone )
-                {
-                err = AiUtility::ParseInt( settingId,settingKeyPtr );
-                }
-            
-            if( err == KErrNone )
-                {                
-                // Get the actual value of the setting
-                err = iAISettingsRepository->Get( crKey++, settingValuePtr );    
-                
-                // Ignore possible placeholder data in cenrep                                
-                if( err == KErrNone && settingValuePtr.Compare( KSettingsDummyData ) != 0 )
-                    {
-                    // Try to find an existing setting for this
-                    for( TInt j = 0; j < aPluginSettings.Count(); j++  )
-                        {
-                        MAiPluginSettings* setting( aPluginSettings[j] );                         
-                        MAiPluginSettingsItem& item( setting->AiPluginSettingsItem() );                       
-                        
-                        // Existing setting found => replace it
-                        if( item.Key() == settingId && item.PublisherId() == aPubInfo.iUid )
-                            {
-                            item.SetValueL( settingValuePtr, EFalse );
-                            settingFound = ETrue;
-                            break;
-                            }
-                        }
-                    
-                    // Existing setting not found => append new one ONLY if we
-                    // are dealing with the icon overrides or toolbar shortcuts
-                    if( !settingFound && 
-                       ( ( settingId & KScutFlagBitToolbarShortcut ) || 
-                         ( settingId & KScutFlagBitIconOverride ) ) )
-                        {
-                        MAiPluginSettings* settings( AiUtility::CreatePluginSettingsL() );
-                        CleanupDeletePushL( settings );
-                        
-                        MAiPluginSettingsItem& item( settings->AiPluginSettingsItem() );
-                        
-                        item.SetPublisherId( aPubInfo.iUid );
-                        item.SetKey( settingId );                
-                        item.SetValueL( settingValuePtr, EFalse );                                            
-                        
-                        aPluginSettings.Append( settings );                        
-                        CleanupStack::Pop( settings );
-                        }
-                    }
-                }                                 
-            else
-                {
-                // no settings id found => invalid settings in cenrep
-                __PRINT8( __DBG_FORMAT8("CXmlUiController::GetSettingsFromCRL: ERROR: invalid settings. key: %d pluginname: %S id: %d value: %S"), crKey, pluginId, settingId, settingValue );                    
-                }            
-            }               
-        else if( err != KErrNone )
-            {
-            // name of the plugin not found => no more settings
-            moreSettings = EFalse;            
-            }                          
-        else
-            {
-            // not the correct setting for this plugin
-            crKey += KAI2CrKeyIncrementBy2;
-            }
-        }
-
-    CleanupStack::PopAndDestroy( 3, pluginId ); // settingValue, settingKey
+    GetContentModelL( aPublisherInfo, aSettings );
     }
 
 // ----------------------------------------------------------------------------
@@ -587,10 +411,10 @@ void CXmlUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,
 // ----------------------------------------------------------------------------
 //
 // ContentModelL()
-void CXmlUiController::GetContentModelL( const TAiPublisherInfo& aPubInfo,         
+void CXmlUiController::GetContentModelL( const THsPublisherInfo& aPublisherInfo,         
     RAiSettingsItemArray& aSettings )
     {
-    if ( aPubInfo.iNamespace == KNativeUiNamespace )
+    if ( aPublisherInfo.Namespace() == KNativeUiNamespace )
         {
         // This controller doesn't provide content model for native ui namespace
         return;
@@ -599,7 +423,8 @@ void CXmlUiController::GetContentModelL( const TAiPublisherInfo& aPubInfo,
     // Find the node for the publisher
 	// TODO Does not work if widget is in view  
     RPointerArray<CXnNodeAppIf> list( 
-        UiEngineL()->FindContentSourceNodesL( aPubInfo.iNamespace ) );
+        UiEngineL()->FindContentSourceNodesL( aPublisherInfo.Namespace() ) );
+    
     CleanupClosePushL( list );
     
     CXnNodeAppIf* publisherNode( NULL );
@@ -638,7 +463,9 @@ void CXmlUiController::GetContentModelL( const TAiPublisherInfo& aPubInfo,
             else if( nodeType == AiUiDef::xml::element::KImage ||
                      nodeType == AiUiDef::xml::element::KText ||
                      nodeType == AiUiDef::xml::element::KNewsTicker ||
-                     nodeType == AiUiDef::xml::element::KAnimation )
+                     nodeType == AiUiDef::xml::element::KAnimation ||
+					 nodeType == AiUiDef::xml::element::KTextEditor || 
+                     nodeType == KData )
                 {
                 // Is created in GetContenItem and used in GetConfigurationsL
                 HBufC* confOwner( NULL );
@@ -793,18 +620,12 @@ void CXmlUiController::SetEventHandler( MAiFwEventHandler& aFwEventHandler )
     }
 
 // ----------------------------------------------------------------------------
-// CXmlUiController::RemovePluginFromUI()
+// CXmlUiController::SetStateHandler()
 // ----------------------------------------------------------------------------
 //
-void CXmlUiController::RemovePluginFromUI( MAiPropertyExtension& aPlugin )
+void CXmlUiController::SetStateHandler( MAiFwStateHandler& aFwStateHandler )
     {
-    CContentRenderer* contentRenderer = 
-        static_cast< CContentRenderer* >( iObserver );
-    
-    if ( contentRenderer )
-        {
-        contentRenderer->CleanPluginFromUi( aPlugin );
-        }
+    iFwStateHandler = &aFwStateHandler;
     }
 
 // ----------------------------------------------------------------------------
@@ -814,6 +635,15 @@ void CXmlUiController::RemovePluginFromUI( MAiPropertyExtension& aPlugin )
 MAiFwEventHandler* CXmlUiController::FwEventHandler() const
     {
     return iFwEventHandler;
+    }
+
+// ----------------------------------------------------------------------------
+// CXmlUiController::FwStateHandler()
+// ----------------------------------------------------------------------------
+//
+MAiFwStateHandler* CXmlUiController::FwStateHandler() const
+    {
+    return iFwStateHandler;
     }
 
 // ----------------------------------------------------------------------------
@@ -857,33 +687,12 @@ CCoeEnv& CXmlUiController::CoeEnv()
     }
 
 // ----------------------------------------------------------------------------
-// CXmlUiController::SetUiFrameworkObserver()
-// ----------------------------------------------------------------------------
-//
-void CXmlUiController::SetUiFrameworkObserver( 
-    MAiUiFrameworkObserver& aObserver )
-    {
-    iUiFrameworkObserver = &aObserver;
-    }
-
-// ----------------------------------------------------------------------------
 // CXmlUiController::IsMenuOpen()
 // ----------------------------------------------------------------------------
 //
 TBool CXmlUiController::IsMenuOpen()
     {
-    TBool menuOpen( EFalse );
-    TRAP_IGNORE( menuOpen = UiEngineL()->IsMenuDisplaying() );
-    return menuOpen;
-    }
-
-// ----------------------------------------------------------------------------
-// CXmlUiController::UiFrameworkObserver()
-// ----------------------------------------------------------------------------
-//
-MAiUiFrameworkObserver* CXmlUiController::UiFrameworkObserver() const
-    {
-    return iUiFrameworkObserver;
+    return iAppUi->IsDisplayingMenuOrDialog();
     }
 
 // ----------------------------------------------------------------------------

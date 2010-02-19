@@ -112,7 +112,8 @@ void CWmPersistentWidgetOrder::StoreL( const RWidgetDataValues& aArray )
     // 1. create stream for storing the data to a file
     TFileName storeFileName;
     GetStoreFileNameL( storeFileName );
-    CPermanentFileStore* fileStore = CPermanentFileStore::ReplaceLC(
+    CPermanentFileStore* fileStore = NULL;
+    fileStore = CPermanentFileStore::ReplaceLC(
             iFs, storeFileName, EFileWrite );
     fileStore->SetTypeL( KPermanentFileStoreLayoutUid );
     RStoreWriteStream writer;
@@ -121,8 +122,13 @@ void CWmPersistentWidgetOrder::StoreL( const RWidgetDataValues& aArray )
     writer.WriteInt32L( aArray.Count() );
     for( TInt i=0; i<aArray.Count(); ++i )
         {
-        TInt32 uid = aArray[i]->Uid().iUid;
-        const TDesC16& publisherId = aArray[i]->HsContentInfo().PublisherId();
+        CWmWidgetData* data = aArray[i];
+        if ( !data || !data->IsValid() )
+            {
+            User::Leave( KErrArgument ); 
+            }
+        TInt32 uid = data->Uid().iUid;
+        const TDesC16& publisherId = data->HsContentInfo().PublisherId();
         writer.WriteInt32L( uid );
         writer.WriteInt32L( publisherId.Length() );
         writer.WriteL( publisherId, publisherId.Length() );

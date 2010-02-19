@@ -235,7 +235,22 @@ public:
      * @return Operation status. KErrNone (success), KErrNotFound
      */
     IMPORT_C TInt SetActivePluginL(const TDesC8& aPluginId);	
-	
+
+    /**
+      * Restore active view. Will remove all plugins in active view.
+      *
+      * @return Operation status. KErrNone (success), KErrNotFound
+      */
+     IMPORT_C TInt RestoreActiveViewL();        
+
+     /**
+       * Restore whole root configuration. Will remove
+       * everything except one view.
+       *
+       * @return Operation status. KErrNone (success), KErrNotFound
+       */
+      IMPORT_C TInt RestoreRootL();      
+     
     /**
      * Replace plugin in the active configuration.
      *

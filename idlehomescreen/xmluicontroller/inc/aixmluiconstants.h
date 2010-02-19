@@ -112,6 +112,7 @@ namespace AiUiDef
             _LIT8( KConfiguration, "configuration" );
             _LIT8( KNewsTicker, "newsticker" );            
             _LIT8( KAnimation, "animation" ); 
+            _LIT8( KTextEditor, "texteditor" );
             }
         
          }   // End of namespace xml
@@ -120,6 +121,7 @@ namespace AiUiDef
 
 #define KContentTypeText TPtrC8( reinterpret_cast< const TText8* >( KAiContentTypeText ) )
 #define KContentTypeBitmap TPtrC8( reinterpret_cast< const TText8* >( KAiContentTypeBitmap ) )
+#define KContentTypeData TPtrC8( reinterpret_cast< const TText8* >( KAiContentTypeData ))
 _LIT8( KContentTypeImage, "image/" );
 _LIT8( KContentTypeImageSvg, "image/svg+xml" );
 _LIT( KTargetSliderVolumeValue, "slider::volume" );

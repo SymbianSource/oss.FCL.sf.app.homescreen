@@ -30,6 +30,7 @@
   */
 
 const TInt KCloseIconRedrawTime = 300000; // 0.3 second
+const TInt KFeedbackTime = 0;
 
 // -----------------------------------------------------------------------------
 // CTsFastSwapGrid::CTsFastSwapGrid
@@ -53,6 +54,7 @@ CTsFastSwapGrid::~CTsFastSwapGrid()
     iCloseItems.Close();
     delete iBgContext;
     delete iCloseIconRedrawTimer;
+    delete iFeedbackTimer;
     iFullyVisibleItems.Close();
     iPartialVisibleItems.Close();
     }
@@ -73,9 +75,10 @@ void CTsFastSwapGrid::ConstructL( const CCoeControl* aParent )
                TRect(),
                ETrue );
     iBgContext->SetCenter( KAknsIIDQsnFrPopupCenter );
-    iVisibleViewRect = TRect( 0, 0, 0, 0 );
     iCloseIconRedrawTimer = new (ELeave) CTsFastSwapTimer( *this );
     iCloseIconRedrawTimer->ConstructL();
+    iFeedbackTimer = new (ELeave) CTsFastSwapTimer( *this );
+    iFeedbackTimer->ConstructL();
     }
 
 // -----------------------------------------------------------------------------
@@ -205,7 +208,8 @@ TTypeUid::Ptr CTsFastSwapGrid::MopSupplyObject( TTypeUid aId )
 //
 void CTsFastSwapGrid::HandleResourceChange( TInt aType )
     {
-    if ( aType != KEikDynamicLayoutVariantSwitch )
+    if ( aType != KEikDynamicLayoutVariantSwitch &&
+         Model()->ItemTextArray()->MdcaCount() )
         {
         CAknGrid::HandleResourceChange( aType );
         }
@@ -245,6 +249,7 @@ void CTsFastSwapGrid::CreateItemDrawerL()
             AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
     const TInt leftOffset = fastSwapAreaPane.Rect().iTl.iX;
     const TInt rightOffset = availableRect.Width() - fastSwapAreaPane.Rect().iBr.iX;
+    SetVisibleViewRect(fastSwapAreaPane.Rect());
     
     CFormattedCellGridData* data = CFormattedCellGridData::NewL();
     CleanupStack::PushL( data );
@@ -266,8 +271,17 @@ void CTsFastSwapGrid::TimerCompletedL( CTsFastSwapTimer* aSource )
     {
     if ( aSource == iCloseIconRedrawTimer )
         {
-        iFastSwapGridObserver->HandleCloseEventL( iCloseIconHitIdx );
+        TInt itemToClose = iCloseIconHitIdx;
         ResetCloseHit();
+        iFastSwapGridObserver->HandleCloseEventL( itemToClose );
+        }
+    else if ( aSource == iFeedbackTimer )
+        {
+        MTouchFeedback* feedback = MTouchFeedback::Instance();
+        if (feedback)
+            {
+            feedback->InstantFeedback(ETouchFeedbackSensitive);
+            }
         }
     }
 
@@ -500,11 +514,8 @@ void CTsFastSwapGrid::LaunchTactileFeedback()
         return;
         }
     
-    MTouchFeedback* feedback = MTouchFeedback::Instance();
-    if (feedback)
-        {
-        feedback->InstantFeedback(ETouchFeedbackSensitive);
-        }
+    iFeedbackTimer->Cancel();
+    iFeedbackTimer->After(KFeedbackTime);
     }
 
 // -----------------------------------------------------------------------------
@@ -665,7 +676,7 @@ void CTsGridItemDrawer::SetEdgeOffset( TInt aLeftOffset, TInt aRightOffset )
 
 
 // -----------------------------------------------------------------------------
-// CTsTeleportGridItemDrawer::SetRedrawBackground
+// CTsGridItemDrawer::SetRedrawBackground
 // -----------------------------------------------------------------------------
 //
 void CTsGridItemDrawer::SetRedrawBackground( TBool aEnable )
@@ -770,11 +781,7 @@ TBool CTsGridItemDrawer::IsItemRectVisible( const TRect& aItemRect ) const
     {
     TBool retVal( EFalse );
     TRect viewRect = iGrid->VisibleViewRect();
-    if ( // left edge of item rectangle on screen
-         ( aItemRect.iTl.iX >= viewRect.iTl.iX && aItemRect.iTl.iX <= viewRect.iBr.iX ) ||
-         // right edge of item rectangle on screen
-         ( aItemRect.iBr.iX >= viewRect.iTl.iX && aItemRect.iBr.iX <= viewRect.iBr.iX )
-        )
+    if ( viewRect.Intersects( aItemRect ) )
         {
         retVal = ETrue;
         }

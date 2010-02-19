@@ -85,7 +85,7 @@ void CXnAppUiAdapterImpl::ConstructL()
     
     iResourceOffset = CCoeEnv::Static()->AddResourceFileL( resFile );
         
-    iContentControlFactory = CHsContentControlFactory::NewL();    
+    iContentControlFactory = CHsContentControlFactory::NewL( iAdapter );    
     
     iUiStateListener = CXnUiStateListener::NewL( iAdapter );
             
@@ -139,13 +139,13 @@ void CXnAppUiAdapterImpl::ReloadUiL()
 //
 CXnAppUiAdapterImpl::~CXnAppUiAdapterImpl()
     {  
+    delete iContentControlFactory;  
+    
     if ( iViewAdapter )
         {
         iViewAdapter->PrepareDestroy();
         }
     
-    delete iContentControlFactory;    
-            
     delete iUiEngine;
     
     delete iUiStateListener;

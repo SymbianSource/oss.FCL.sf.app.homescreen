@@ -19,12 +19,16 @@
 #ifndef C_AISOFTKEYRENDERER_H
 #define C_AISOFTKEYRENDERER_H
 
-
+// System includes
 #include <e32base.h>
 #include <coeaui.h> //ECoeStackPriorityDefault
+
+// User includes
 #include "ainativerenderer.h"
 #include "ainativeuimodel.h"
 
+// Forward declarations
+class CHsContentPublisher;
 
 namespace AiNativeUiController
 {
@@ -48,7 +52,7 @@ const TInt KNativeUiCbaPriority = ECoeStackPriorityDefault +
  *
  *  @since S60 3.2
  */
-class CAiSoftKeyRenderer : public CAiNativeRenderer
+NONSHARABLE_CLASS( CAiSoftKeyRenderer ) : public CAiNativeRenderer
     {
 public:
 
@@ -58,15 +62,15 @@ public:
 
 // from base class CAiNativeRenderer
 
-    void DoPublishL( MAiPropertyExtension& aPlugin,
+    void DoPublishL( CHsContentPublisher& aPlugin,
                         TInt aContent,
                         const TDesC16& aText,
                         TInt aIndex );
-    void DoPublishL( MAiPropertyExtension& aPlugin,
+    void DoPublishL( CHsContentPublisher& aPlugin,
                         TInt aContent,
                         TInt aResource,
                         TInt aIndex );
-    void DoPublishL( MAiPropertyExtension& aPlugin,
+    void DoPublishL( CHsContentPublisher& aPlugin,
                         TInt aContent,
                         const TDesC8& aBuf,
                         TInt aIndex );

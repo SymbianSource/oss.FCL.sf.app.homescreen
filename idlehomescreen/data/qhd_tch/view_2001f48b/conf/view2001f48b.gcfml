@@ -1,5 +1,14 @@
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_2001f48b\hsps\00\">
 	<setting ref="HomescreenPlugins/MaxWidgets"/>
+	<setting ref="HomescreenPlugins/UseEmptyWidgets"/>
+  <setting ref="HomescreenPlugins/ItemIdEmptyWidgets"/>
+  <setting ref="HomescreenPlugins/PropertyEmptyWidgets"/>
+	<setting ref="HomescreenPlugins/Background"/>
+  <setting ref="HomescreenPlugins/BackGroundPath"/>
+  <setting ref="HomescreenPlugins/ItemIdWallpaper"/>
+  <setting ref="HomescreenPlugins/ItemIdSlideshow"/>
+  <setting ref="HomescreenPlugins/WallpaperPropertyName"/>
+  <setting ref="HomescreenPlugins/SlideshowPropertyName"/>
 	<setting ref="HomescreenPlugins/Shortcut1ItemId"/>
   <setting ref="HomescreenPlugins/Shortcut1ItemName"/>
   <setting ref="HomescreenPlugins/Shortcut2ItemId"/>
@@ -19,6 +28,37 @@
 			<configuration>
 			 <xsl:attribute name="max_child"><xsl:value-of select="HomescreenPlugins/MaxWidgets"/></xsl:attribute>
 				<control>
+				  <settings>
+				    <item>
+					    <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins/ItemIdEmptyWidgets"/></xsl:attribute>
+						    <property>
+								  <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins/PropertyEmptyWidgets"/></xsl:attribute>								             
+  							  <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins/UseEmptyWidgets"/></xsl:attribute>
+								</property>
+						</item> 
+					  <xsl:choose>
+						  <xsl:when test="HomescreenPlugins/Background = 1">
+							  <item>
+								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins/ItemIdWallpaper"/></xsl:attribute>
+								    <property>
+								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins/WallpaperPropertyName"/></xsl:attribute>								             
+  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins/BackGroundPath"/></xsl:attribute>
+								    </property>
+								</item>     
+				      </xsl:when>
+				      <xsl:when test="HomescreenPlugins/Background = 2">
+						    <item>
+								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins/ItemIdSlideshow"/></xsl:attribute>
+								    <property>
+								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins/SlideshowPropertyName"/></xsl:attribute>								             
+  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins/BackGroundPath"/></xsl:attribute>
+								    </property>
+								</item>     
+				      </xsl:when>
+				      <xsl:otherwise>
+				      </xsl:otherwise>
+				    </xsl:choose>
+				  </settings>
 					<plugins>
 						<xsl:for-each select="HomescreenPlugins/Plugins">
 							<plugin>
@@ -91,7 +131,6 @@
 							</plugin>
 						</xsl:for-each>
 					</plugins>
-					<settings/>
 				</control>
 			</configuration>
 		</xsl:template>

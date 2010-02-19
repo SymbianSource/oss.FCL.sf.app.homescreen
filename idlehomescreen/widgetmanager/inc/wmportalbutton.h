@@ -26,6 +26,8 @@
 // FORWARD DECLARATIONS
 class CWmMainContainer;
 class CFbsBitmap;
+class CWmConfiguration;
+class CWmProcessMonitor;
 
 /**
  * Portal button ( ovi, operator ) class for Wm
@@ -103,7 +105,15 @@ private:
                    const TDesC& aText, 
                    TAknTextComponentLayout& aLayout,
                    TInt aMargin ) const;
-
+    /** Runs operator button action */
+    void RunOperatorL( CWmConfiguration& aConf );
+    
+    /** Runs ovi store launcher */
+    void RunOviL( CWmConfiguration& aConf );
+    
+    /**  Starts browser */ 
+    void StartBrowserL( CWmConfiguration& aConf  );
+    
 private: //data members
 
     /**
@@ -126,6 +136,9 @@ private: //data members
     
     /** icon mask */
     CFbsBitmap* iButtonIconMask;
+	
+    /** Monitors process */
+    CWmProcessMonitor* iProcessMonitor; 
  	};
 
 #endif //___WMPORTALBUTTON_H__

@@ -412,19 +412,6 @@ public:
     CXnHitTest& HitTest() const;
 
     /**
-     * Positions stylus popup according given position
-     *
-     * @since S60 5.1
-     * @param aNode stylus popup node
-     * @param aReference a reference node where popup should fit
-     * @param aPosition stylus popup position to set.
-     */
-    void PositionStylusPopupL(
-        CXnNode& aNode,
-        CXnNode& aReference,
-        const TPoint& aPosition );
-
-    /**
      * Gets theme resource file
      *
      * @since S60 5.1
@@ -457,6 +444,23 @@ public:
      */                    
     void SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher );
     
+    /**
+      * Enables partial touch input
+      * 
+      * @since Series 60 5.2
+      * @param aNode Editor Node
+      * @param TBool True if partial input is open      
+      */ 
+    void EnablePartialTouchInput( CXnNode& aNode, TBool aEnable );
+    
+    /**
+      * Is partial input active
+      * 
+      * @since Series 60 5.2
+      * @return TBool is partial input active      
+      */      
+    TBool IsPartialInputActive();
+
 private:
     /**
      * C++ default constructor.

@@ -19,30 +19,31 @@
 #ifndef C_AITOOLBARRENDERER_H
 #define C_AITOOLBARRENDERER_H
 
+// System includes
 #include <e32std.h>
 #include <akntoolbarobserver.h>
+
+// User includes
 #include "ainativerenderer.h"
 #include "ainativeuimodel.h"
 #include "aitoolbarbutton.h"
 
+// Forward declarations
+class CHsContentPublisher;
 class MAiFwEventHandler;
 class CAknToolbar;
 
 namespace AiNativeUiController
 {
-
-    
 /**
  *  Toolbar class of Native UI Controller application
  *
  *  @lib AiNatiUi
  */
 // inheritance order must be this, despite codescanner warnings
-class CAiToolbarRenderer : public MAknToolbarObserver,
-                           public CAiNativeRenderer
-    {
-
-    
+NONSHARABLE_CLASS( CAiToolbarRenderer ) : public MAknToolbarObserver,
+   public CAiNativeRenderer
+    {  
 public:   // Constructors and destructor
 
     static CAiToolbarRenderer* NewLC( MAiFwEventHandler& aAiFwEventHandler, CAknToolbar& aToolbar);
@@ -53,12 +54,12 @@ public:   // Constructors and destructor
     
 public:   // from CAiNativeRenderer    
     
-    void DoPublishL( MAiPropertyExtension& aPlugin,
+    void DoPublishL( CHsContentPublisher& aPlugin,
 					 TInt aContent,
 					 const TDesC16& aText,
 					 TInt aIndex );
     
-    void DoPublishL( MAiPropertyExtension& aPlugin,
+    void DoPublishL( CHsContentPublisher& aPlugin,
                      TInt aContent,
                      const TDesC8& aBuf,
                      TInt aIndex );

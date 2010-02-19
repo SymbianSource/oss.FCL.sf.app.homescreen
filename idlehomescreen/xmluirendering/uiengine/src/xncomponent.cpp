@@ -150,3 +150,16 @@ EXPORT_C XnComponentInterface::MXnComponentInterface* CXnComponent::MakeInterfac
     {
     return NULL;
     }
+
+// -----------------------------------------------------------------------------
+// CXnComponent::SetDataL
+// Set data stream
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnComponent::SetDataL( const TDesC8& aData, const TDesC& aType, TInt aIndex )
+    {
+    if ( iAdapter )
+        {
+        iAdapter->SetDataL( aData, aType, aIndex );
+        }
+    }

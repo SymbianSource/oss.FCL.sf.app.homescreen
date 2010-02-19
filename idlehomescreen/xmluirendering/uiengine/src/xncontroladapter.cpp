@@ -127,6 +127,8 @@ EXPORT_C void CXnControlAdapter::ConstructL( CXnNodePluginIf& aNode )
                        
         iLongTapDetector->SetTimeDelayBeforeAnimation( KLongTapStartDelay );
         iLongTapDetector->SetLongTapDelay( KLongTapTimeDelay );
+        iCurrentLongTapStartDelay = KLongTapStartDelay;
+        iCurrentLongTapTimeDelay = KLongTapTimeDelay;
         }    
     }
 
@@ -581,4 +583,33 @@ void CXnControlAdapter::RemoveChildAdapters()
 RPointerArray<CXnControlAdapter>& CXnControlAdapter::ChildAdapters()
     {
     return iImpl->ChildAdapters();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnControlAdapter::SetLongTapDelay
+// -----------------------------------------------------------------------------
+//
+void CXnControlAdapter::SetLongTapDelays( const TInt aStartDelay,
+                                          const TInt aLongTapDelay )
+    {
+    if ( iCurrentLongTapTimeDelay != aLongTapDelay)
+        {
+        iLongTapDetector->SetLongTapDelay( aLongTapDelay );
+        iCurrentLongTapTimeDelay = aLongTapDelay;
+        }
+    if ( iCurrentLongTapStartDelay != aStartDelay )
+        {
+        iLongTapDetector->SetTimeDelayBeforeAnimation( aStartDelay );
+        iCurrentLongTapStartDelay = aStartDelay;
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnControlAdapter::SetDataL
+// Empty default implemenatation for setting the data stream.
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnControlAdapter::SetDataL( const TDesC8& /*aData*/, const TDesC& /*aType*/, TInt /*aIndex*/ )
+    {
+    
     }

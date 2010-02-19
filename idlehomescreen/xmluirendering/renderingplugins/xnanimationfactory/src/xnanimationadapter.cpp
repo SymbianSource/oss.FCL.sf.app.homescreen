@@ -15,8 +15,8 @@
 *
 */
 #include <AknsUtils.h>
-#include <aknsdrawutils.h>
-#include <aknsconstants.h>
+#include <AknsDrawUtils.h>
+#include <AknsConstants.h>
 #include <barsread.h>
 #include "xnnodepluginif.h"
 #include "xndomproperty.h"

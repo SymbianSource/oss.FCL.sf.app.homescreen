@@ -23,13 +23,13 @@ clock
     _s60-ampm-font-size: 16px;
     _s60-digital-font-size: 56px;
     color: "SKIN(268458534 13056 74)";
-    background-color: "SKIN(268458534 9886)";
+    background-color: "SKIN(268458534 9916)";
     nav-index: appearance;
 }
 
 box.clock_profile
 {
-    background-color: "SKIN(268458534 9886)";
+    background-color: "SKIN(268458534 9916)";
         
     nav-index: appearance;
 }

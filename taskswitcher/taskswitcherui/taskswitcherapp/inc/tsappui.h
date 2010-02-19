@@ -44,6 +44,16 @@ class CTsAppUi : public CAknAppUi,
     {
 
 public:
+    enum {
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //TODO make maping to NGA transition id
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ENoneTransition = 0,
+    EForegroundTransition = 3,
+    EBackgroundTransition = 4,
+    EActivationTransition = 5
+    
+    };
     /**
      * Perform the second phase construction of a CTsAppUi object
      * this needs to be public due to the way the framework constructs the AppUi
@@ -79,6 +89,12 @@ public: //effects
     
     void MoveAppToForeground( TUint aTransitionType );
     void MoveAppToBackground( TUint aTransitionType );
+    
+    /**
+     * Functions for showing/hiding popups.
+     */
+    void RequestPopUpL();
+    void DisablePopUpL();
     
 public:
     /**
@@ -139,6 +155,9 @@ private:
     // Listener for app key long press P&S, owned
     CTsPropertyListener* iPropListener;
     
+    // Listener for orientation layout changes
+    CTsPropertyListener* iLayoutListener;
+    
     // Tells if Taskswitcher is in foreground or in background
     TBool iForeground;
     
@@ -159,6 +178,13 @@ private:
      * Cenrep listener for the tfxserver enabled/disabled key.
      */    
     CTsCenrepListener* iThemeEffectsEnabledWatcher;
+    
+    // Owned window for showing controls
+    RWindowGroup iWg;
+    
+    // Monitors popup mode
+    TBool iIsPopUpShown;
+    
     };
 
 #endif // TSAPPUI_H

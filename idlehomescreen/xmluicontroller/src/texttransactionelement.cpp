@@ -22,6 +22,7 @@
 #include    "xntype.h"
 #include    "xnproperty.h"
 #include    "xntext.h"
+#include    "xntexteditor.h"
 #include    "xnmenuadapter.h"
 #include    "xnnewsticker.h"
 //#include    <xnmarquee.h>
@@ -32,6 +33,8 @@
 #include    "xndompropertyvalue.h"
 #include    "xnvolumecontrol.h"
 #include    "aistrcnv.h"
+
+_LIT8( KTextEditor, "texteditor" );
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -109,9 +112,8 @@ TBool CTextTransactionElement::IsSupported( CXnNodeAppIf& aTarget )
              type == KXnMenuItem ||
              type == KXnMenu ||
              type == XnPropertyNames::softkey::KNodeName || 
-             type == XnPropertyNames::volumecontrol::KSlider /*||
-             type == XnNewstickerInterface::MXnNewstickerInterface::Type() ||
-             type == XnMarqueeInterface::MXnMarqueeInterface::Type() */);
+             type == XnPropertyNames::volumecontrol::KSlider ||
+             type == KTextEditor );
     }
 
 void CTextTransactionElement::CheckTypeL( CXnNodeAppIf& aTarget )
@@ -134,9 +136,17 @@ void CTextTransactionElement::SetTextL()
         XnComponentInterface::MakeInterfaceL( textControl, Target() );
         LeaveIfNull( textControl, KErrNotSupported );
         
-        // Set text
-        
+        // set text
         textControl->SetTextL( *iNewText );
+        }
+    else if( type == XnTextEditorInterface::MXnTextEditorInterface::Type() )
+        {
+        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;
+        XnComponentInterface::MakeInterfaceL( editorControl, Target() );
+        LeaveIfNull( editorControl, KErrNotSupported );
+        
+        // set text
+        editorControl->SetTextL( *iNewText );
         }
        
  // Menu softkey texts

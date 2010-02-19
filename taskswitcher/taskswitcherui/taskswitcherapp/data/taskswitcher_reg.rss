@@ -17,14 +17,15 @@
 
 
 #include <appinfo.rh>
-#include <tstaskswitcher.rsg>
+#include <taskswitcher.rsg>
 
 UID2 KUidAppRegistrationResourceFile
 UID3 0x20016BF0
 
 RESOURCE APP_REGISTRATION_INFO 
 	{
-	app_file="hgteleport";
-	localisable_resource_file="\\resource\\apps\\hgteleport";
+	app_file="taskswitcher";
+	localisable_resource_file="\\resource\\apps\\taskswitcher";
 	localisable_resource_id = R_LOCALISABLE_APP_INFO;
+	hidden=KAppIsHidden;
 	}

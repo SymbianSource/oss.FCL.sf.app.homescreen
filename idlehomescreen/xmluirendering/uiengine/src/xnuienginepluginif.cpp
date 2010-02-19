@@ -437,5 +437,18 @@ EXPORT_C void TXnUiEnginePluginIf::DisableRenderUiLC()
     iUiEngine->DisableRenderUiLC();
     }
 
+// -----------------------------------------------------------------------------
+// TXnUiEnginePluginIf::EnablePartialTouchInput
+// 
+// -----------------------------------------------------------------------------
+//               
+EXPORT_C void TXnUiEnginePluginIf::EnablePartialTouchInput( 
+    CXnNodePluginIf& aNode, TBool aEnable )
+    {
+    iUiEngine->EnablePartialTouchInput(aNode.Node(), aEnable);
+    }
+
+
+
 // End of file
 

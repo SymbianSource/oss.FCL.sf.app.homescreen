@@ -26,11 +26,16 @@ PRJ_EXPORTS
 //********************************************************
 ../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/wideimage_2001f489/hsps/manifest.dat
 ../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/wideimage_2001f489/hsps/widgetconfiguration.xml
-
 ../xuikon/00/wideimage.dat /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage_2001f489.dat
 ../xuikon/00/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage.css
 ../xuikon/00/wideimage.xml /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/wideimage.xml
 
+// Arabic languages
+//*****************
+../xuikon/37/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/37/wideimage.css
+../xuikon/50/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/50/wideimage.css
+../xuikon/57/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/57/wideimage.css
+../xuikon/94/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_2001f489/xuikon/94/wideimage.css
 
 // Support for S60 builds
 //***********************

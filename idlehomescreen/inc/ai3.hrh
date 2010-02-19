@@ -22,6 +22,7 @@
 #include <bldvariant.hrh>
 //Enable performance logs
 //#define AI3_DEBUG_PERFORMANCE
+//#define HS_NETWORK_MONITOR
 
 //Run AI3 on startup
 #define FF_HOMESCREEN_COMMON_IDLEFW

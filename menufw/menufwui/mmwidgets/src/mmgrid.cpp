@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_98 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_101 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -257,13 +257,13 @@ void CMmGrid::HandleScrollEventL( CEikScrollBar* aScrollBar,
 //
 void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent )
     {
+    CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
         iButton1DownPos = aPointerEvent.iPosition;
         }
     else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
         {
-        CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
         TPoint dragDelta = iButton1DownPos - aPointerEvent.iPosition;
         if ( Abs( dragDelta.iY ) > KDragTreshold || parent->LongTapInProgress() )
             {
@@ -275,7 +275,17 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
+        TBool highlightWasVisible = parent->IsHighlightVisible();
         CAknGrid::HandlePointerEventL( aPointerEvent );
+        // Tricky: Do not allow the base class implementation of HandlePointerEventL 
+        //         to remove the highlight on EButton1Up event when context menu
+        //         is displayed for an item
+        if ( aPointerEvent.iType == TPointerEvent::EButton1Up &&
+                highlightWasVisible && parent->LongTapInProgress()
+                && !parent->IsHighlightVisible() )
+            {
+            ItemDrawer()->ClearFlags( CListItemDrawer::ESingleClickDisabledHighlight );
+            }
         }
     else if ( View()->XYPosToItemIndex(
             aPointerEvent.iPosition, itemUnderPointerIndex ) )
@@ -408,7 +418,7 @@ TBool CMmGrid::IsPointerInTopScrollingThreshold(
             const TPointerEvent& aPointerEvent ) const
     {
     TInt topScrollingTreshold = Rect().iTl.iY
-        + ( MmEffects::KFocusScrollingThreshold
+        + ( MmGrid::KFocusScrollingThreshold
             * TReal( View()->ItemSize().iHeight ) );
 
     return ( aPointerEvent.iPosition.iY < topScrollingTreshold );
@@ -422,7 +432,7 @@ TBool CMmGrid::IsPointerInBottomScrollingThreshold(
             const TPointerEvent& aPointerEvent ) const
     {
     TInt bottomScrollingTreshold = Rect().iBr.iY
-        - ( MmEffects::KFocusScrollingThreshold
+        - ( MmGrid::KFocusScrollingThreshold
             * TReal( View()->ItemSize().iHeight ) );
 
     return ( aPointerEvent.iPosition.iY > bottomScrollingTreshold );
@@ -1016,7 +1026,7 @@ void CMmGrid::ProcessScrollEventL( CEikScrollBar* aScrollBar,
 //
 // -----------------------------------------------------------------------------
 //
-void CMmGrid::HandleRedrawTimerEvent()
+void CMmGrid::HandleRedrawTimerEventL()
     {
     if ( iSkippedScrollbarEventsCount )
         {
@@ -1033,7 +1043,9 @@ void CMmGrid::HandleRedrawTimerEvent()
 TInt CMmGrid::RedrawTimerCallback( TAny* aPtr )
     {
     CMmGrid* self = static_cast<CMmGrid*>( aPtr );
-    self->HandleRedrawTimerEvent();
+    TRAP_IGNORE( self->HandleRedrawTimerEventL() );
+    // Do not bother returning a meaningful error code, CPeriodic will ignore it
+    // anyway.
     return 0;
     }
 

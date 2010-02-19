@@ -19,15 +19,18 @@
 #ifndef C_XMLNODEIDGENERATOR_H
 #define C_XMLNODEIDGENERATOR_H
 
+// System includes
 #include <e32base.h>
 
-class MAiPropertyExtension;
-struct TAiPublisherInfo;
+// User includes
+
+// Forward declarations
+class CHsContentPublisher;
+class THsPublisherInfo;
 struct TAiContentItem;
 
 namespace AiXmlUiController
 {
-
 /**
 *  @ingroup group_xmluicontroller
 * 
@@ -36,25 +39,27 @@ namespace AiXmlUiController
 *
 *  @lib AiXmlUiMain
 */
-class CXmlNodeIdGenerator : public CBase
+NONSHARABLE_CLASS( CXmlNodeIdGenerator ) : public CBase
     {
-public: // Construction
+public: 
+    // Constructor and destructor
 
     static CXmlNodeIdGenerator* NewL();
     
     ~CXmlNodeIdGenerator();
 
-// New methods
+public:    
+    // New functions
 
     /**
      * Generates an identifier that is used to look up settings node from 
      * XML UI model.
      *
-     * @param aPubInfo      Active Idle publisher info to use in the 
-     *                      identifier generation.
+     * @param aPublisherInfo Active Idle publisher info to use in the 
+     *                       identifier generation.
      * @return content node identifier.
      */
-    TPtrC SettingsNodeIdL( const TAiPublisherInfo& aPubInfo);
+    TPtrC SettingsNodeIdL( const THsPublisherInfo& aPublisherInfo );
     
     /**
      * Generates an identifier that is used to look up content node from 
@@ -66,19 +71,21 @@ public: // Construction
      *                      identifier generation.
      * @return content node identifier.
      */
-    TPtrC ContentNodeIdL(MAiPropertyExtension& aPlugin, const TAiContentItem& aContentItem);
+    TPtrC ContentNodeIdL( CHsContentPublisher& aPlugin, 
+        const TAiContentItem& aContentItem );
     
     /**
      * Generates an identifier that is used to look up content node from 
      * XML UI model.
      *
-     * @param aPubInfo      Active Idle publisher info to use in the 
-     *                      identifier generation.
-     * @param aContentItem  Active Idle content item to use in the 
-     *                      identifier generation.
+     * @param aPublisherInfo Active Idle publisher info to use in the 
+     *                       identifier generation.
+     * @param aContentItem   Active Idle content item to use in the 
+     *                       identifier generation.
      * @return content node identifier.
      */
-    TPtrC ContentNodeIdL(const TAiPublisherInfo& aPubInfo, const TAiContentItem& aContentItem);
+    TPtrC ContentNodeIdL( const THsPublisherInfo& aPublisherInfo, 
+        const TAiContentItem& aContentItem );
     
     /**
      * Generates an identifier that is used to look up resource node from 
@@ -90,32 +97,39 @@ public: // Construction
      *                      identifier generation.
      * @return resource node identifier.
      */
-    TPtrC ResourceNodeIdL(MAiPropertyExtension& aPlugin, const TAiContentItem& aContentItem);
+    TPtrC ResourceNodeIdL( CHsContentPublisher& aPlugin, 
+        const TAiContentItem& aContentItem );
     
     /**
      * Generates an identifier that is used to look up resource node from 
      * XML UI model.
      *
-     * @param aPubInfo      Active Idle publisher info to use in the 
-     *                      identifier generation.
-     * @param aContentItem  Active Idle content item to use in the 
-     *                      identifier generation.
+     * @param aPublisherInfo Active Idle publisher info to use in the 
+     *                       identifier generation.
+     * @param aContentItem   Active Idle content item to use in the 
+     *                       identifier generation.
      * @return resource node identifier.
      */
-    TPtrC ResourceNodeIdL(const TAiPublisherInfo& aPubInfo, const TAiContentItem& aContentItem);
+    TPtrC ResourceNodeIdL( const THsPublisherInfo& aPublisherInfo, 
+        const TAiContentItem& aContentItem );
     
-private: // Construction
-
+private: 
+    // Constructors
+    
+    /**
+     * C++ default constructor
+     */
     CXmlNodeIdGenerator();
-    
-    void ConstructL();
-    
-private: // Data
+        
+private: 
+    // data
 
-    HBufC* iContentNodeIdBuf;
-    
+    /** Content node id buffer, Owned */
+    HBufC* iContentNodeIdBuf;    
     };
         
 }  // namespace AiXmlUiController
 
 #endif // C_XMLNODEIDGENERATOR_H
+
+// End of file

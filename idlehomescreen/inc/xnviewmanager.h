@@ -11,8 +11,7 @@
 *
 * Contributors:
 *
-* Description:
-* Management of views in UiEngine
+* Description: View Manager 
 *
 */
 
@@ -21,7 +20,6 @@
 
 // System includes
 #include <e32base.h>
-#include <babitflags.h>
 
 // Forward declarations
 class CXnUiEngine;
@@ -86,23 +84,35 @@ public:
  */
 NONSHARABLE_CLASS( CXnViewManager ) : public CBase
     {
-    // Friend classes
-    friend class CXnViewAdapter;
-    
 public:
     /**
      * Two-phased constructor.
      */
     static CXnViewManager* NewL(
         CXnAppUiAdapter& aAdapter );
-        
+
+    /**
+     * Two-phased constructor.
+     */    
     static CXnViewManager* NewLC(
         CXnAppUiAdapter& aAdapter );        
 
+    /**
+     * Destructor
+     */
     ~CXnViewManager();
 
 private:
+    // constructors
+  
+    /** 
+     * C++ constructor
+     */
     CXnViewManager( CXnAppUiAdapter& aAdapter );
+    
+    /**
+     * 2nd phase constructor
+     */
     void ConstructL();
 
 public:
@@ -148,24 +158,24 @@ public:
         CXnPluginData& aPluginData );
 
     TInt UnloadWidgetFromPluginL(
-        CXnPluginData& aPluginData );
+        CXnPluginData& aPluginData, TBool aForce = EFalse );
         
     TInt ReplaceWidgetToPluginL(
         CHsContentInfo& aContentInfo,
         CXnPluginData& aPluginData,
         TBool aUseHsps = ETrue );
 
-    void ActivateNextViewL();
+    void ActivateNextViewL( TInt aEffectId = 0 );
 
-    void ActivatePreviousViewL();
+    void ActivatePreviousViewL( TInt aEffectId = 0 );
 
     TInt AddViewL( CHsContentInfo& aInfo );
     
-    void AddViewL();
+    void AddViewL( TInt aEffectId = 0 );
     
     TInt RemoveViewL( const CHsContentInfo& aInfo );
 
-    void RemoveViewL();
+    void RemoveViewL( TInt aEffectId = 0 );
     
     void AddObserver( const MXnViewObserver& aObserver );
 
@@ -174,13 +184,7 @@ public:
     CXnRootData& ActiveAppData() const;
     
     CXnViewData& ActiveViewData() const;
-
-    void SetFirstPassDrawCompleteL();
-
-    void SetDataPluginLoadCompleteL( const CXnPluginData& aPluginData );
-
-    void UpdatePluginStateL( CXnPluginData& aPluginData );
-       
+             
     TInt ActivateAppL( const TDesC8& aPluginUid );
     TInt ActivateViewL( const TDesC8& aPluginId );    
     
@@ -188,16 +192,15 @@ public:
 
     TInt ViewIndex() const;
 
+    TInt MaxPages() const;
+    
     CXnOomSysHandler& OomSysHandler() const;
     
-    /**
-     * Get maximum pages allowed
-     * 
-     * @return number of pages allowed
-     */
-    TInt32 MaxPages();    
-
+    void UpdatePageManagementInformationL();
+            
 private:
+    // new functions
+    
     void NotifyContainerChangedL( CXnViewData& aViewToActivate );       
 
     void NotifyViewActivatedL( const CXnViewData& aViewData );
@@ -223,23 +226,36 @@ private:
     CXnViewData& NextViewData() const;
 
     void UpdateCachesL();
-
-    void ValidateActiveViewL();
-    
-    void InvalidateActiveView();
-
+          
     void ReportWidgetAmountL( const CXnViewData& aViewData );
     
     void ShowDiskFullMessageL() const;
-       
-public:
-    void UpdatePageManagementInformationL();
+          
 
-private:
     TInt ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const;
 
     void UpdateWallpaperL( CXnViewData& aCurrent, CXnViewData& aNew );
+    
+    /**
+     * Callback for stability timer
+     * 
+     * @param   aAny    Pointer to CViewManager object
+     * @return  TInt    System wide error code.
+     */
+    static TInt SystemStabileTimerCallback( TAny* aAny );
 
+    /**
+     * Reset crash count
+     */
+    void ResetCrashCount();    
+
+    /**
+     * Show error note
+     * 
+     * @param aResourceId   Resource id for string to be displayed.
+     */
+    void ShowErrorNoteL( const TInt aResourceId );        
+    
 private:
     // data
 
@@ -314,22 +330,21 @@ private:
      * Own.
      */
     RPointerArray< MXnViewObserver > iObservers;
-
-    /**
-     * Failed plugins.
-     * Own.
-     */    
-    RPointerArray< CXnPluginData > iFailedPlugins;
     
-    /**
-     * Flags
-     */
-    TBitFlags32 iFlags;
-
     /**
      * OOM system handler. Owned.
      */
-    CXnOomSysHandler* iOomSysHandler;    
+    CXnOomSysHandler* iOomSysHandler;
+    
+private:   
+    // Friend classes
+    
+    friend class CXnViewAdapter;       
+    
+    /**
+     * Timer for system stability.
+     */
+    CPeriodic* iStabilityTimer;
     };
 
 // Inline functions

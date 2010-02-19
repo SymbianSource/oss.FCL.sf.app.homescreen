@@ -77,11 +77,14 @@ public:
     inline TBool IsValid() const;
     
     /**
-     * Marks this cache as valid or invalid.
-     * 
-     * @param aValid (Self-explanatory).
-     */
-    inline void SetValidL( TBool aValid );
+	 * Marks this cache object as valid.
+	 */
+    inline void MarkAsValidL();
+    
+    /**
+	 * Marks this cache object as invalid.
+	 */
+    inline void MarkAsInvalid();
     
     /**
      * Returns information whether at the moment of updating this cache object
@@ -249,7 +252,7 @@ protected:
     /**
      * Array of icons stored in the icon holders which are in iIconHolderList.
      * This member is only valid when this cache object is marked as valid
-     * using the SetValidL method.
+     * using the MarkAsValidL method.
      * Own.
      */
     CArrayPtr<CGulIcon>* iIconList;

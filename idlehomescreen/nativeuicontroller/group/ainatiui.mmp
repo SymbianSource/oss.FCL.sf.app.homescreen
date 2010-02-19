@@ -41,8 +41,6 @@ SOURCE          aidialogrenderer.cpp
 SOURCE          aisoftkeyrenderer.cpp
 SOURCE          ainativeuimodel.cpp
 SOURCE      	  aistatuspanetouchui.cpp
-SOURCE			    aitoolbarrenderer.cpp
-SOURCE			    aitoolbarbutton.cpp 
 SOURCE			    ainotifierrenderer.cpp
 
 

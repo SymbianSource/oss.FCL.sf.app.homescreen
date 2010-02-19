@@ -22,7 +22,6 @@
 #include <StringLoader.h>
 #include <xnuiengine.rsg>
 #include <aknnotewrappers.h>
-
 #include <AknsConstants.h>
 
 // User includes
@@ -51,51 +50,17 @@
 #include "xnnodepluginif.h"
 #include "xnoomsyshandler.h"
 #include "xnbackgroundmanager.h"
+#include "xneffectmanager.h"
 
 // Constants
 _LIT8( KEmptyWidgetUid, "0x2001f47f" );
-_LIT8( KStateError, "Error" );
-
-
 _LIT8( KTemplateViewUID, "0x20026f50" );
 
-enum
-    {
-    EFirstPassDrawComplete,
-    EDataPluginsComplete,
-    EViewIsValid,       
-    };
-
-
-/*
-const TAknsItemID KSkinIds[] = {
-        KAknsIIDQgnHomePage11,
-        KAknsIIDQgnHomePage21,
-        KAknsIIDQgnHomePage22,
-        KAknsIIDQgnHomePage31,
-        KAknsIIDQgnHomePage32,
-        KAknsIIDQgnHomePage33,
-        KAknsIIDQgnHomePage41,
-        KAknsIIDQgnHomePage42,
-        KAknsIIDQgnHomePage43,
-        KAknsIIDQgnHomePage44,
-        KAknsIIDQgnHomePage51,
-        KAknsIIDQgnHomePage52,
-        KAknsIIDQgnHomePage53,
-        KAknsIIDQgnHomePage54,
-        KAknsIIDQgnHomePage55,
-        KAknsIIDQgnHomePage61,
-        KAknsIIDQgnHomePage62,
-        KAknsIIDQgnHomePage63,
-        KAknsIIDQgnHomePage64,
-        KAknsIIDQgnHomePage65,
-        KAknsIIDQgnHomePage66
-        }; 
-*/        
-
+const TInt KPSCategoryUid = 0x200286E3;
+const TInt KPSCrashCountKey = 1;     
+const TInt KStabilityInterval = 60000000; // 1 minute
+const TInt KCrashRestoreThreshold = 3;
 // ============================ LOCAL FUNCTIONS ===============================
-
-
 // -----------------------------------------------------------------------------
 // BuildTriggerL
 // Builds a trigger node
@@ -137,38 +102,6 @@ static CXnNode* BuildTriggerL( CXnUiEngine& aUiEngine,
     CleanupStack::Pop( node ); 
 
     return node;
-    }
-
-// -----------------------------------------------------------------------------
-// SetOnlineStateL
-// 
-// -----------------------------------------------------------------------------
-//
-static void SetOnlineStateL( CXnAppUiAdapter& aAdapter, 
-    CXnViewData& aViewData )
-    {
-    if( !aViewData.Active() )
-        {
-        // Only active view can change online/offline state
-        return;
-        }
-    
-    RPointerArray< CXnNode > nodes;
-    CleanupClosePushL( nodes );
-
-    RPointerArray< CXnNodeAppIf > list;
-    CleanupClosePushL( list );
-
-    aViewData.ContentSourceNodesL( nodes );
-
-    for ( TInt i = 0; i < nodes.Count(); i++ )
-        {
-        list.AppendL( &nodes[i]->AppIfL() );
-        }
-
-    aAdapter.SetOnlineStateL( list );
-
-    CleanupStack::PopAndDestroy( 2, &nodes ); // &list                                                 
     }
 
 // -----------------------------------------------------------------------------
@@ -339,6 +272,13 @@ CXnViewManager::CXnViewManager( CXnAppUiAdapter& aAdapter )
 //
 CXnViewManager::~CXnViewManager()
     {
+    if( iStabilityTimer )
+        {
+        iStabilityTimer->Cancel();
+        delete iStabilityTimer;
+        iStabilityTimer = NULL;
+        }
+    
     iObservers.Reset();
     
     delete iRootData;
@@ -354,9 +294,7 @@ CXnViewManager::~CXnViewManager()
 
     iControls.Reset();
     iAppearanceNodes.Reset();
-       
-    iFailedPlugins.Reset();
-    
+              
     delete iComposer;
     delete iEditor;
     delete iOomSysHandler;
@@ -385,6 +323,29 @@ void CXnViewManager::ConstructL()
     iHspsWrapper = &iEditor->HspsWrapper();
     
     iComposer = CXnComposer::NewL( *iHspsWrapper );
+    
+    // Robustness checks.
+    TInt crashCount = 0;
+    RProperty::Get( TUid::Uid( KPSCategoryUid ),
+                    KPSCrashCountKey,
+                    crashCount );    
+    
+    if( crashCount >= KCrashRestoreThreshold )
+        {
+        iHspsWrapper->RestoreRootL();
+        ResetCrashCount();        
+        ShowErrorNoteL( R_QTN_HS_ERROR_WIDGETS_REMOVED );        
+        }
+    else if( crashCount > 0 )
+        {
+        // Start stability timer to ensure that
+        // if system is stabile at least KStabilityInterval
+        // then crash count is reset to 0. 
+        iStabilityTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+        iStabilityTimer->Start( KStabilityInterval,
+                                KStabilityInterval,
+                                TCallBack( SystemStabileTimerCallback, this ) );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -400,8 +361,8 @@ void CXnViewManager::LoadUiL()
     iRootData = CXnRootData::NewL( *this, iApplicationUid );
            
     // Load root configuration and initial view.
-    iRootData->LoadL();
-    
+    iRootData->Load();
+           
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
     }
 
@@ -426,9 +387,7 @@ void CXnViewManager::ReloadUiL()
     // Schedule application configuration destroyal
     iRootData->Destroy();
     iRootData = NULL;
-    
-    iFlags.ClearAll();
-    
+       
     User::Heap().Compress();
     
     LoadUiL();
@@ -502,14 +461,25 @@ TInt CXnViewManager::LoadWidgetToPluginL( CHsContentInfo& aContentInfo,
                                      
         NotifyConfigureWidgetL( aContentInfo, aPluginData );
     
-        aPluginData.LoadL();
-                   
-        UpdateCachesL();
-    
-        NotifyWidgetAdditionL( aPluginData );
+        retval = aPluginData.Load();
+        
+        if ( retval == KErrNone )
+            {
+            UpdateCachesL();
+        
+            NotifyWidgetAdditionL( aPluginData );
 
-        // Report widget amount in the view
-        ReportWidgetAmountL( viewData );
+            // Report widget amount in the view
+            ReportWidgetAmountL( viewData );           
+            }  
+        else if ( retval == KErrNoMemory )
+            {
+            aPluginData.ShowOutOfMemError();
+            }
+        else if ( retval == KXnErrPluginFailure )
+            {            
+            aPluginData.ShowContentRemovedError();
+            }
         
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC
         }
@@ -521,12 +491,10 @@ TInt CXnViewManager::LoadWidgetToPluginL( CHsContentInfo& aContentInfo,
 // CXnViewManager::UnloadWidgetFromPluginL()
 // -----------------------------------------------------------------------------
 //
-TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData )    
-    {          
-    TBool error( aPluginData.PluginState().CompareF( KStateError ) == 0 );
-    
-    // Plugins in error state are always removed
-    if ( !error && !aPluginData.Occupied() )
+TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData, 
+    TBool aForce )    
+    {                  
+    if ( !aForce && !aPluginData.Occupied() )
         {
         // Plugin must have widget when about to remove
         return KErrNotFound;            
@@ -585,8 +553,7 @@ TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData )
         
         if ( active )
             {            
-            iUiEngine->RenderUIL();
-            SetOnlineStateL( iAppUiAdapter, ActiveViewData() );
+            iUiEngine->RenderUIL();            
             }
                
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC               
@@ -602,17 +569,17 @@ TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData )
 TInt CXnViewManager::ReplaceWidgetToPluginL( CHsContentInfo& aContentInfo,
     CXnPluginData& aPluginData, TBool aUseHsps )
     {
-    TInt ret = KErrNone;
+    TInt retval( KErrNone );
     
     // if aUseHsps is false, the plugin was already replaced by
     // another process
     if( aUseHsps )
         {
-        ret = iHspsWrapper->ReplacePluginL( aPluginData.PluginId(),
+        retval = iHspsWrapper->ReplacePluginL( aPluginData.PluginId(),
                                            aContentInfo.Uid() );
         }
 
-    if ( ret == KErrNone )
+    if ( retval == KErrNone )
         {
         iUiEngine->DisableRenderUiLC();
         
@@ -628,28 +595,39 @@ TInt CXnViewManager::ReplaceWidgetToPluginL( CHsContentInfo& aContentInfo,
         
         NotifyConfigureWidgetL( aContentInfo, aPluginData );
         
-        aPluginData.LoadL();
-                                                                  
-        UpdateCachesL();
+        retval = aPluginData.Load();
         
-        // notify addition if not replaced with empty widget
-        // NotifyWidgetAdditionL will call RenderUIL()
-        if( uid != KEmptyWidgetUid )
+        if ( retval == KErrNone )
             {
-            NotifyWidgetAdditionL( aPluginData );
-            }
-        else
-            {
-            if( aPluginData.Active() )
+            UpdateCachesL();
+            
+            // notify addition if not replaced with empty widget
+            // NotifyWidgetAdditionL will call RenderUIL()
+            if( uid != KEmptyWidgetUid )
                 {
-                iUiEngine->RenderUIL();
+                NotifyWidgetAdditionL( aPluginData );
                 }
+            else
+                {
+                if( aPluginData.Active() )
+                    {
+                    iUiEngine->RenderUIL();
+                    }
+                }            
             }
-        
+        else if ( retval == KErrNoMemory )
+            {
+            aPluginData.ShowOutOfMemError();
+            }
+        else if ( retval == KXnErrPluginFailure )
+            {            
+            aPluginData.ShowContentRemovedError();
+            }
+                        
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC
         }
     
-    return ret;
+    return retval;
     }
 
 // -----------------------------------------------------------------------------
@@ -858,19 +836,26 @@ CXnViewData& CXnViewManager::NextViewData() const
 // Activates the next view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ActivateNextViewL()
-    {
-    CXnViewData& current( ActiveViewData() );
+void CXnViewManager::ActivateNextViewL( TInt aEffectId )
+    {    
     CXnViewData& next( NextViewData() );
-
+    
     if ( !next.Occupied() )
-        {
-        next.LoadL();
+        {                
+        if ( next.Load() == KErrNoMemory )
+            {
+            next.ShowOutOfMemError();
+            }
         }
         
     // Activate view
     if ( next.Occupied() && !next.Active() )
-        {            
+        {       
+        if( aEffectId )
+            {
+            iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
+                    aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
+            }
         iAppUiAdapter.ViewAdapter().ActivateContainerL( next );                
         }
     }
@@ -880,19 +865,26 @@ void CXnViewManager::ActivateNextViewL()
 // Activates the previous view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ActivatePreviousViewL()
-    {
-    CXnViewData& current( ActiveViewData() );
+void CXnViewManager::ActivatePreviousViewL( TInt aEffectId )
+    {    
     CXnViewData& prev( PreviousViewData() );
 
     if ( !prev.Occupied() )
         {
-        prev.LoadL();
+        if ( prev.Load() == KErrNoMemory )
+            {
+            prev.ShowOutOfMemError();
+            }
         }
         
     // Activate view
     if ( prev.Occupied() && !prev.Active() )
-        {   
+        {
+        if( aEffectId  )
+            {
+            iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
+                    aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
+            }
         iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
         }
     }
@@ -930,8 +922,13 @@ TInt CXnViewManager::AddViewL( CHsContentInfo& aInfo )
         
         newView->SetOwner( iRootData->Node() );
         
-        newView->LoadL();
+        retval = newView->Load();
                 
+        if ( retval == KErrNoMemory )
+            {
+            newView->ShowOutOfMemError();
+            }
+        
         if ( newView->Occupied() )
             {
             // Load succeed, add the new view behind the current view               
@@ -974,7 +971,7 @@ TInt CXnViewManager::AddViewL( CHsContentInfo& aInfo )
 // Adds a new view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::AddViewL()
+void CXnViewManager::AddViewL( TInt aEffectId )
     {
     if ( iRootData->PluginData().Count() >= iRootData->MaxPages() ) 
         { 
@@ -1013,10 +1010,22 @@ void CXnViewManager::AddViewL()
         
         newView->SetOwner( iRootData->Node() );
         
-        newView->LoadL();
-                
+        status = newView->Load();
+        
+        if ( status == KErrNoMemory )
+            {
+            newView->ShowOutOfMemError();
+            }
+        
         if ( newView->Occupied() )
             {
+            // Start transition effect
+            if( aEffectId )
+                {
+                iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
+                        aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
+                }
+
             // Load succeed, add the new view behind the current view               
             RPointerArray< CXnPluginData >& views( iRootData->PluginData() );
             
@@ -1106,7 +1115,7 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
 // Removes active view if more than one view.
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::RemoveViewL()
+void CXnViewManager::RemoveViewL( TInt aEffectId )
     {   
     if ( iRootData->PluginData().Count() <= 1 || 
         !ActiveViewData().Removable() )
@@ -1131,8 +1140,20 @@ void CXnViewManager::RemoveViewL()
 
     if ( query->RunLD() )
         { 
+        // Start transition effect
+        if( aEffectId )
+            {
+            iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
+                    aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
+            }
+
         // Activate the next view, or first if in the last view 
         CXnViewData& next( NextViewData() );
+
+        if ( !next.Occupied() )
+            {
+            next.Load();
+            }
 
         iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
                 
@@ -1251,7 +1272,6 @@ TInt CXnViewManager::ViewAmount() const
     return iRootData->PluginData().Count();
     }
 
-
 // -----------------------------------------------------------------------------
 // CXnViewManager::ViewIndex()
 // Gets index of current view
@@ -1266,6 +1286,16 @@ TInt CXnViewManager::ViewIndex() const
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewManager::MaxPages()
+// Gets the maximum allowed page count for this app configuration
+// -----------------------------------------------------------------------------
+//
+TInt CXnViewManager::MaxPages() const
+    {
+    return iRootData->MaxPages();
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewManager::NotifyContainerChangedL()
 // Notifies container is changed, this is called always by CXnViewAdapter
 // -----------------------------------------------------------------------------
@@ -1274,28 +1304,15 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
 #ifdef _XN_PERFORMANCE_TEST_
     RDebug::Print( _L( "CXnViewManager::NotifyContainerChangedL - start" ) );
 #endif //_XN_PERFORMANCE_TEST_        
-              
-    InvalidateActiveView();
-    
+                     
     CXnViewData& viewToDeactivate( ActiveViewData() );
     
     if ( &aViewToActivate != &viewToDeactivate )
-        {
-        // Store focus
-        CXnNode* focused( iUiEngine->FocusedNode() );
-        
-        if ( focused )
-            {
-            viewToDeactivate.SetFocusedNode( focused );
-            }
-        
+        {        
         NotifyViewDeactivatedL( viewToDeactivate );
-
-        // Switch active view data
-        iAppUiAdapter.HandlePageSwitch();
-        
-        viewToDeactivate.SetActiveL( EFalse );
-        aViewToActivate.SetActiveL( ETrue );
+                      
+        viewToDeactivate.SetActive( EFalse );
+        aViewToActivate.SetActive( ETrue );
         
         iHspsWrapper->SetActivePluginL( aViewToActivate.PluginId() );
 
@@ -1306,10 +1323,13 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
     else
         {
         // Activate first view
-        aViewToActivate.SetActiveL( ETrue );
+        aViewToActivate.SetActive( ETrue );
 
         // Cache update is needed after view activation
         UpdateCachesL();
+        
+        // Schedule remainngs views load
+        iRootData->LoadRemainingViews();
         }
     
     NotifyViewActivatedL( aViewToActivate );
@@ -1386,12 +1406,6 @@ void CXnViewManager::NotifyConfigureWidgetL( const CHsContentInfo& aContentInfo,
     for ( TInt i = 0; i < iObservers.Count(); i++ )
         {
         iObservers[i]->NotifyConfigureWidgetL( aContentInfo, aPluginData );
-        }
-    
-    if ( aPluginData.Active() )
-        {
-        // Active view configuration is about to change
-        InvalidateActiveView();
         }    
     }
 
@@ -1442,136 +1456,6 @@ void CXnViewManager::UpdateCachesL()
     activeViewData.AppearanceNodesL( iAppearanceNodes );
     iResources->Reset();
     activeViewData.ResourcesL( *iResources );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::SetFirstPassDrawCompleteL()
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::SetFirstPassDrawCompleteL()
-    {
-    if ( iFlags.IsClear( EFirstPassDrawComplete ) )
-        {
-        iFlags.Set( EFirstPassDrawComplete );
-        
-        ValidateActiveViewL();
-        }    
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::SetDataPluginLoadCompleteL()
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::SetDataPluginLoadCompleteL( 
-    const CXnPluginData& aPluginData )
-    {                             
-    if ( !aPluginData.Active() )
-        {
-        // Not interested
-        return;
-        }
-    
-    if ( ActiveViewData().DataPluginsLoaded() )
-        {
-        if ( iFlags.IsClear( EDataPluginsComplete ) )
-            {
-            iFlags.Set( EDataPluginsComplete );
-            
-            ValidateActiveViewL();
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::ValidateActiveViewL()
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::ValidateActiveViewL()
-    {
-    if ( iFlags.IsSet( EViewIsValid ) )
-        {
-        // Already ok
-        return;
-        }
-    
-    if ( iFlags.IsClear( EFirstPassDrawComplete ) || 
-         iFlags.IsClear( EDataPluginsComplete ) )
-        {
-        // Not able to confirm yet
-        return;        
-        }
-
-    RPointerArray< CXnPluginData >& plugins( ActiveViewData().PluginData() );
-
-    TInt count( iFailedPlugins.Count() );
-        
-    for ( TInt i = 0; i < plugins.Count(); i++ )
-        {
-        CXnPluginData* plugin( plugins[i] );
-                
-        const TDesC8& state( plugin->PluginState() );
-        
-        if ( state.CompareF( KStateError ) == 0 && plugin->Removable() )
-            {
-            if ( iFailedPlugins.Find( plugin ) == KErrNotFound )
-                {
-                iFailedPlugins.AppendL( plugin );
-                }
-            }            
-        }
-
-    // This condition prevents recursion
-    if ( iFailedPlugins.Count() > 0 && count == 0 )
-        {
-        // Disable layout and redraw until all plugins are removed
-        iUiEngine->DisableRenderUiLC();
-        
-        for ( TInt i = 0; i < iFailedPlugins.Count(); i++ )
-            {
-            UnloadWidgetFromPluginL( *iFailedPlugins[i] );
-            }        
-        
-        HBufC* msg( StringLoader::LoadLC( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-            
-        CAknErrorNote* note = new ( ELeave ) CAknErrorNote;
-        CleanupStack::PushL( note );
-        
-        note->ExecuteLD( *msg );
-        
-        CleanupStack::Pop( note );
-        CleanupStack::PopAndDestroy( msg );
-        
-        iUiEngine->RenderUIL();
-
-        CleanupStack::PopAndDestroy(); // DisableRenderUiLC()
-        
-        iFailedPlugins.Reset();               
-        }
-    
-    // All failed plugins are handled
-    if( iFailedPlugins.Count() == 0 )
-        {
-        iFlags.Set( EViewIsValid );
-        
-        SetOnlineStateL( iAppUiAdapter, ActiveViewData() );
-        
-        // Remaining views can be now loaded
-        iRootData->LoadRemainingViews();        
-        }       
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::InvalidateActiveView()
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::InvalidateActiveView()
-    {
-    // Need to cancel async activities while view is invalidated
-    iRootData->CancelLoadRemainingViews();
-
-    iFlags.Clear( EFirstPassDrawComplete );
-    iFlags.Clear( EDataPluginsComplete );
-    iFlags.Clear( EViewIsValid );
     }
 
 // -----------------------------------------------------------------------------
@@ -1676,7 +1560,7 @@ CXnOomSysHandler& CXnViewManager::OomSysHandler() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewManager::UpdateViewSwitcherInformationL()
+// CXnViewManager::UpdatePageManagementInformationL()
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::UpdatePageManagementInformationL()
@@ -1720,40 +1604,6 @@ void CXnViewManager::UpdatePageManagementInformationL()
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewManager::UpdatePluginStateL()
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::UpdatePluginStateL( CXnPluginData& aPluginData )
-    {
-    if ( aPluginData.ConfigurationId().Length() == 0 && 
-         aPluginData.PluginId().Length() )
-        {
-        CHspsConfiguration* configuration( 
-            iHspsWrapper->GetPluginConfigurationL( aPluginData.PluginId() ) );
-        CleanupStack::PushL( configuration );
-        aPluginData.SetConfigurationIdL( configuration->ConfId() );
-        CleanupStack::PopAndDestroy( configuration );
-        }
-
-    if ( aPluginData.ConfigurationId().Length() && 
-         aPluginData.PluginId().Length() )
-        {
-        iHspsWrapper->SetConfStateL( 
-                aPluginData.ConfigurationId(), aPluginData.PluginState() );        
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::MaxPages()
-// 
-// -----------------------------------------------------------------------------
-//
-TInt32 CXnViewManager::MaxPages()
-    {
-    return iRootData->MaxPages();
-    }
-
-// -----------------------------------------------------------------------------
 // CXnViewManager::ResolveIconIndex
 // 
 // -----------------------------------------------------------------------------
@@ -1771,4 +1621,46 @@ TInt CXnViewManager::ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const
 
     return index;
     }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::SystemStabileTimerCallback 
+// -----------------------------------------------------------------------------
+TInt CXnViewManager::SystemStabileTimerCallback( TAny* aAny )
+    {
+    CXnViewManager* self = static_cast<CXnViewManager*>( aAny );
+    
+    self->ResetCrashCount();
+
+    if( self->iStabilityTimer )
+        {
+        self->iStabilityTimer->Cancel();
+        }    
+    
+    return KErrNone;    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::ResetCrashCount 
+// -----------------------------------------------------------------------------
+void CXnViewManager::ResetCrashCount()
+    {
+    RProperty::Set( TUid::Uid( KPSCategoryUid ), KPSCrashCountKey, 0 );    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::ShowErrorNoteL 
+// -----------------------------------------------------------------------------
+void CXnViewManager::ShowErrorNoteL( const TInt aResourceId )
+    {        
+    HBufC* msg( StringLoader::LoadLC( aResourceId ) );
+        
+    CAknErrorNote* note = new ( ELeave ) CAknErrorNote;
+    CleanupStack::PushL( note );
+    
+    note->ExecuteLD( *msg );
+    
+    CleanupStack::Pop( note );
+    CleanupStack::PopAndDestroy( msg );    
+    }
+
 // End of file

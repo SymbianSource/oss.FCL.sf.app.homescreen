@@ -52,6 +52,7 @@ SOURCE	wmportalbutton.cpp
 SOURCE  wmwidgetloaderao.cpp
 SOURCE  wmconfiguration.cpp
 SOURCE  wminstaller.cpp
+SOURCE  wmprocessmonitor.cpp
 
 SOURCEPATH		../data
 START RESOURCE  20026F53.rss
@@ -115,4 +116,5 @@ LIBRARY     featmgr.lib // FeatureManager
 LIBRARY     etext.lib 
 LIBRARY     centralrepository.lib
 LIBRARY     bmpanim.lib // AknBitmap animation
+LIBRARY     inetprotutil.lib 
 // End of file

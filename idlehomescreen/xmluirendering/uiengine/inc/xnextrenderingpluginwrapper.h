@@ -21,6 +21,7 @@
 // System includes
 #include <e32base.h>
 #include <xnextrenderingpluginadapter.h>
+#include <xnexteventhandler.h>
 
 // User includes
 #include "xncontroladapter.h"
@@ -39,7 +40,7 @@
  *  @lib extrenderingplugin.lib
  *  @since S60 v5.0
  */
-NONSHARABLE_CLASS( CXnExtRenderingPluginWrapper ) : public CXnControlAdapter
+NONSHARABLE_CLASS( CXnExtRenderingPluginWrapper ) : public CXnControlAdapter, public MXnExtEventHandler
     {
 public: // Constructor and destructor
     /**
@@ -83,6 +84,16 @@ private:
     
     TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);
     
+    /**
+     * Routes the data stream for the external rendering plugin.
+     *
+     * @since Series 60 5.2
+     * @param aData Data stream.
+     * @param aType Type of the stream.
+     * @param aIndex Index of the data.
+     */
+    void SetDataL( const TDesC8& aData, const TDesC& aType, TInt aIndex );
+    
 public: // New functions
     
     /**
@@ -93,8 +104,16 @@ public: // New functions
     /**
      * @see CXnControlAdapter
      */
-    void DoExitPowerSaveModeL( TModeEvent aEvent );  
-
+    void DoExitPowerSaveModeL( TModeEvent aEvent );
+    
+    /**
+     * Routes the events from the external rendering plug-ins to content plug-ins
+     * @since Series 60 5.2
+     * @param aEvent Event string
+     * @param aDestination Destination content plug-in.
+     */
+    void HandleEventL( const TDesC& aEvent, const TDesC8& aDestination  );
+    
 private: // Data
 
     /**
