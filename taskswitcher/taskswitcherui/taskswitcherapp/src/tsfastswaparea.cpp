@@ -68,7 +68,7 @@ const TInt KLayoutItemCount = 4;
 const TInt KRedrawTime = 250000; // 0.25 sec
 const TInt KRedrawTimeForLayoutSwitch = 700000; // 0.7 sec
 const TInt KHighlighActivationTime = 100000; // 100 ms
-const TInt KUpdateGridTime = 1000000; // 1 s
+const TInt KUpdateGridTime = 0; // imediately
 
 const TInt KMaxGranularity = 4;
 
@@ -206,27 +206,16 @@ void CTsFastSwapArea::ReCreateGridL()
         AknLayoutScalable_Apps::cell_tport_appsw_pane_ParamLimits( variety );
     TPoint empty( ELayoutEmpty, ELayoutEmpty );
     
+    // Setup bitmap layout
     AknListBoxLayouts::SetupFormGfxCell( *iGrid, iGrid->ItemDrawer(), 0,
             AknLayoutScalable_Apps::cell_tport_appsw_pane_g1( variety ).LayoutLine(),
             empty, empty );
 
     // Setup text layout
-    TAknLayoutText textLayout;
-    textLayout.LayoutText(
-            Rect(),
-            AknLayoutScalable_Apps::cell_tport_appsw_pane_t1( variety ).LayoutLine() );
+    AknListBoxLayouts::SetupFormTextCell(*iGrid, iGrid->ItemDrawer(), 1,
+            AknLayoutScalable_Apps::cell_tport_appsw_pane_t1( variety ).LayoutLine(),
+            empty, empty);
     
-    // Because textLayout.BaselineOffset() does not work (missing lib entry),
-    // we need to calculate offset ourselves
-    TInt baselineOffset = textLayout.TextRect().iBr.iY - textLayout.TextRect().iTl.iY;
-    AknListBoxLayouts::SetupFormTextCell( *iGrid, iGrid->ItemDrawer(), 1 /*Column index*/,
-                                          textLayout.Font() /*Font type*/,
-                                          NULL /*color*/,
-                                          textLayout.TextRect().iTl.iX /*Left margin*/, 0 /*unused*/,
-                                          baselineOffset /*Baseline*/, 0 /*Text width*/,
-                                          textLayout.Align() /*Text alignment*/,
-                                          TPoint(0,0) /*Start pos*/,
-                                          TPoint(0,0) /*End pos*/);
     // Text colors
     TRgb textColor;
     AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), textColor,
@@ -748,6 +737,9 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     TSLOG_CONTEXT( CTsFastSwapArea::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
     TSLOG_IN();
     
+    // Reset grid
+    TRAP_IGNORE( ReCreateGridL() );
+    
     // get the current task list
     HandleFswContentChanged();
     // and then start listening for changes
@@ -1253,12 +1245,21 @@ void CTsFastSwapArea::CenterItem(TInt aRedrawDelay)
         if(visibleItem != SelectedIndex())
             {
             iGrid->SetCurrentDataIndex( visibleItem );
-            DrawNow();
+            DrawDeferred();
             }
         }
 
-    iUpdateGridTimer->Cancel();
-    iUpdateGridTimer->After(aRedrawDelay);
+    // Check if view is outside of grid world
+    TPoint absViewPos = ViewPos();
+    absViewPos.iX -= Rect().Width() / 2;
+    if( !iEvtHandler.IsPhysicsRunning() &&
+        ( absViewPos.iX < 0 || absViewPos.iX + Rect().Width() > GridWorldSize().iWidth )
+      )
+        {
+        // View is outside of grid world - update view
+        iUpdateGridTimer->Cancel();
+        iUpdateGridTimer->After(aRedrawDelay);
+        }
     }
 
 // --------------------------------------------------------------------------
@@ -1363,7 +1364,7 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint)
 //
 void CTsFastSwapArea::TapL(const TPoint& aPoint)
     {
-    if(iGrid->Rect().Contains(aPoint))
+    if(Rect().Contains(aPoint))
         {
         //provide tap pointer event to grid
         iGrid->HandlePointerEventL(iTapEvent);
@@ -1620,6 +1621,22 @@ void CTsFastSwapArea::LaunchPopupFeedback()
                                        ETouchFeedbackVibra,
                                        TPointerEvent() );
             }
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::UpdateComponentVisibility
+// -----------------------------------------------------------------------------
+//
+void CTsFastSwapArea::UpdateComponentVisibility()
+    {
+    // Switch off scrollbars
+    CEikScrollBarFrame* scrollBar = iGrid->ScrollBarFrame();
+    if(scrollBar)
+        {
+        TRAP_IGNORE( scrollBar->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, 
+                                                        CEikScrollBarFrame::EOff));
         }
     }
 

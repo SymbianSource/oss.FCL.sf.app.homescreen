@@ -195,7 +195,7 @@ void CXnKeyEventDispatcher::MonitorWsMessage( const TWsEvent& aEvent )
             {
             CEikCba* cba = 
                 static_cast< CEikCba* >( iCbaContainer->ButtonGroup() ); 
-                    
+                
             if ( destination == cba && iCbaContainer->IsVisible() )
                 {
                 CXnMenuAdapter* adapter( MenuAdapter( iMenuNode ) );
@@ -204,6 +204,18 @@ void CXnKeyEventDispatcher::MonitorWsMessage( const TWsEvent& aEvent )
                     {
                     TRAP_IGNORE( 
                         adapter->HandlePointerEventL( *aEvent.Pointer() ) );
+                    }
+
+                // if focus was lost due to longtap & button not being released
+                // appui will set flag to ignorekeyevent for this control as it has
+                // lost focus ( voice command become active ) after longtap detected.
+                // this causes cba button to stay in pressed state. send this buttonup
+                // event manually so that cba can draw itself correctly 
+                // case id: ou1cimx1#265200
+                if ( event.iType == TPointerEvent::EButton1Up &&
+                    !cba->IsFocused() )
+                    {
+                    TRAP_IGNORE( cba->HandlePointerEventL( event ) );
                     }
                 }
             }
@@ -480,7 +492,10 @@ void CXnKeyEventDispatcher::SetMenuNodeL( CXnNode* aNode )
             }
         else
             {
-            iCbaContainer->MakeVisible( ETrue );
+            if ( !iCbaContainer->IsVisible() )
+                {
+                iCbaContainer->MakeVisible( ETrue );
+                }            
             }
         }
     else
@@ -616,10 +631,10 @@ void CXnKeyEventDispatcher::NotifyWidgetRemovalL(
             CXnViewData& activeViewData(
                 iUiEngine.ViewManager()->ActiveViewData() );
     
-            const CXnPluginData& pluginData(
+            const CXnPluginData* pluginData(
                 activeViewData.Plugin( iNode ) );
     
-            if ( &pluginData == &aPluginData )
+            if ( pluginData == &aPluginData )
                 {
                 // The plugin is removed which was holding focus
                 ClearStateL();
@@ -661,10 +676,10 @@ void CXnKeyEventDispatcher::ResolveAndSetFocusL()
         // first, search only in plugins which have popup window open
         for ( TInt i = 0; i < list.Count(); i++ )
             {
-            CXnPluginData& plugin( activeView.Plugin( list[i] ) );
-            if ( plugin.IsDisplayingPopup() )
+            CXnPluginData* plugin( activeView.Plugin( list[i] ) );
+            if ( plugin && plugin->IsDisplayingPopup() )
                 {
-                plugin.InitialFocusNodesL( initial );
+                plugin->InitialFocusNodesL( initial );
                 }
             }
         
@@ -674,8 +689,11 @@ void CXnKeyEventDispatcher::ResolveAndSetFocusL()
             {        
             for ( TInt i = 0; i < list.Count(); i++ )
                 {
-                CXnPluginData& plugin( activeView.Plugin( list[i] ) );
-                plugin.InitialFocusNodesL( initial );
+                CXnPluginData* plugin( activeView.Plugin( list[i] ) );
+                if ( plugin )
+                    {
+                    plugin->InitialFocusNodesL( initial );
+                    }
                 }
             }
         

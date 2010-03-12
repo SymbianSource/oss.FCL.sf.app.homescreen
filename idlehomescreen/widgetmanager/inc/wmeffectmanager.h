@@ -25,8 +25,8 @@
 class CCoeEnv;
 // CONSTANTS
 // Effects
-const TInt KAppStartCommonDefaultStyle = 3;
-const TInt KAppExitCommonDefaultStyle = 5;
+const TInt KAppStartEffectStyle = 1007;
+const TInt KAppExitEffectStyle = 1008;
 
 /**
  *  Struct which holds needed info of effect.

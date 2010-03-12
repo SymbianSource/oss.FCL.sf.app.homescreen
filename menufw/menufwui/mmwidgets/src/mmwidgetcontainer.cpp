@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.55 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.56 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -233,7 +233,12 @@ void CMmWidgetContainer::HandleResourceChange( TInt aType )
         templateLibrary->CleanAndClearCache();
         }
 
+    TBool highlightVisibleBefore = iWidget->IsVisible() && IsHighlightVisible();
     CCoeControl::HandleResourceChange( aType );
+    if ( highlightVisibleBefore )
+        {
+        SetHighlightVisibilityL( ETrue );
+        }
 
 	if ( aType == KEikDynamicLayoutVariantSwitch && !IsHighlightVisible() )
 		{
@@ -1185,6 +1190,8 @@ void CMmWidgetContainer::SetSuiteModelL(CHnSuiteModel* aModel)
     numberOfItemsBefore = GetMmModel()->NumberOfItems();
 
     GetMmModel()->SetSuiteModelL( aModel );
+    
+    TBool highlightVisibleBefore = iWidget->IsVisible() && IsHighlightVisible();
 
     // This needs to be in place (disabling redraw)
     // to udpate widget internal state, however to wait for
@@ -1203,6 +1210,11 @@ void CMmWidgetContainer::SetSuiteModelL(CHnSuiteModel* aModel)
         SetupWidgetLayoutL();
         }
     iWidget->MakeVisible(ETrue);
+    
+    if ( highlightVisibleBefore )
+        {
+        SetHighlightVisibilityL( ETrue );
+        }
 
     Widget()->View()->ItemDrawer()->ClearFlags(
     		CListItemDrawer::EPressedDownState );

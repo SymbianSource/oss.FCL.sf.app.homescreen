@@ -200,12 +200,11 @@ void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
     {
     CFbsBitmap* bitmap = NULL;
     CFbsBitmap* mask = NULL;
-    
+   
+   
     if ( aUid.iUid >= KWidgetUidLowerBound &&
        aUid.iUid < KWidgetUidUpperBound  )
         {
-        // AknsUtils::CreateAppIconLC panics incase of WRT
-
         RApaLsSession lsSession;
         User::LeaveIfError( lsSession.Connect() );
         CleanupClosePushL( lsSession );
@@ -214,42 +213,53 @@ void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
         CArrayFixFlat<TSize>* sizeArray = new (ELeave)
             CArrayFixFlat<TSize>( KAppSizeArraySize );
         CleanupStack::PushL( sizeArray );
+
         User::LeaveIfError( lsSession.GetAppIconSizes( aUid, *sizeArray ) );
-        TSize size;
+        
+        // there should be atleast one size available
+        if ( sizeArray->Count() == 0 ){ User::Leave( KErrNotReady ); };
+        
+        TSize size(0,0);
         for( TInt i=0; i < sizeArray->Count(); i++ )
             {
-            size = (*sizeArray)[i];
-            if ( size == iSize )
-                {
-                break;
-                }
+            TSize s = (*sizeArray)[i];
+            if ( size.iWidth < s.iWidth || size.iHeight < s.iHeight )
+                { size = s; }
+            if ( size == iSize ) { break; }
             }
+
         CApaMaskedBitmap* maskedBmp = CApaMaskedBitmap::NewLC();
         User::LeaveIfError( lsSession.GetAppIcon( aUid, size, *maskedBmp ) );
-        iBitmap = static_cast<CFbsBitmap*>( maskedBmp );  // ownership transfered
         
-        iMask = new ( ELeave ) CFbsBitmap;
-        User::LeaveIfError( iMask->Create( 
-                                    maskedBmp->Mask()->SizeInPixels(), 
-                                    maskedBmp->Mask()->DisplayMode() ) );
-        // duplicate mask, origional is owned by maskedBmp
-        iMask->Duplicate( maskedBmp->Mask()->Handle() );
-        CleanupStack::Pop( maskedBmp );
-        maskedBmp = NULL;
-        CleanupStack::PopAndDestroy(sizeArray); 
-        CleanupStack::PopAndDestroy( &lsSession );
+        // handle bitmap
+        iBitmap = new ( ELeave ) CFbsBitmap;
+        User::LeaveIfError( iBitmap->Create( 
+                maskedBmp->SizeInPixels(), 
+                maskedBmp->DisplayMode() ) );
 
-        // scale or notify
-        if ( size == iSize )
+        // scale bitmap
+        ScaleBitmapL( iSize, iBitmap, maskedBmp );  
+
+        // handle mask
+        if ( maskedBmp->Mask() )
             {
-            iState = EIdle;
-            iObserver->NotifyCompletion( KErrNone );
+            iMask = new ( ELeave ) CFbsBitmap;
+            User::LeaveIfError( iMask->Create( 
+                    maskedBmp->Mask()->SizeInPixels(), 
+                    maskedBmp->Mask()->DisplayMode() ) );
+            
+            // scale mask
+            ScaleBitmapL( iSize, iMask, maskedBmp->Mask() );
             }
-        else
-            {
-            iScaleNeeded = ETrue;
-            ScaleBitmap( iSize.iWidth, iSize.iHeight );
-            }
+        
+        // cleanup
+        CleanupStack::PopAndDestroy( maskedBmp );
+        CleanupStack::PopAndDestroy( sizeArray ); 
+        CleanupStack::PopAndDestroy( &lsSession );
+        
+        // notify
+        iState = EIdle;
+        iObserver->NotifyCompletion( KErrNone );
         }
     else if ( aUid.iUid != KNullUid.iUid )
         {
@@ -398,7 +408,7 @@ void CWmImageConverter::CreateIconFromOtherL( const TDesC& aFileName )
     
     iMask = new (ELeave) CFbsBitmap();
     iMask->Create( size, EGray256 ); 
-    
+
     if ( size != iSize )
         {
         iScaleNeeded = ETrue;
@@ -930,6 +940,283 @@ void CWmImageConverter::RetrieveIconFileHandleL(
         iState = EIdle;
         User::Leave( err );
 	    }
+    }
+
+// ---------------------------------------------------------------------------
+// CWmImageConverter::DoesScaleBitmapUseFallBack
+// ---------------------------------------------------------------------------
+//
+TBool CWmImageConverter::DoesScaleBitmapUseFallBack( CFbsBitmap* aSrcBitmap )
+    {
+    if ( !aSrcBitmap )
+        {
+        return EFalse;
+        }
+
+    TDisplayMode displayMode = aSrcBitmap->DisplayMode();
+    TBool fallbackOnly = EFalse;
+
+    switch ( displayMode )
+        {
+        case EGray2:
+        case EGray4:
+        case EGray16:
+        case EColor16:
+        case EColor16M:
+        case ERgb:
+        case EColor16MA:
+            fallbackOnly = ETrue;
+            break;
+        case EGray256:
+        case EColor4K:
+        case EColor64K:
+        case EColor256:
+        case EColor16MU:
+            // These are the supported modes
+            break;
+        default:
+            fallbackOnly = ETrue;
+        }
+
+    return fallbackOnly;
+    }
+
+
+// ---------------------------------------------------------------------------
+// CWmImageConverter::ScaleBitmapL
+// ---------------------------------------------------------------------------
+//
+void CWmImageConverter::ScaleBitmapL( 
+                            const TSize& aSize,
+                            CFbsBitmap* aTrgBitmap,
+                            CFbsBitmap* aSrcBitmap )
+    {
+    if ( !aSrcBitmap ) User::Leave( KErrArgument );
+    if ( !aTrgBitmap ) User::Leave( KErrArgument );
+    if ( aSrcBitmap->DisplayMode() != aTrgBitmap->DisplayMode() )
+        {
+        User::Leave( KErrArgument );
+        }
+    
+    TRect targetRect( aSize );
+
+    // calculate aspect ratio
+    TInt srcHeight = aSrcBitmap->SizeInPixels().iHeight;
+    TInt srcWidth = aSrcBitmap->SizeInPixels().iWidth;
+    TReal scaleRatio( 1 ); //no scale as defaul
+    
+    //If any dimension is 0, then we do not bother to scale
+    if ( targetRect.Width() > 0 && targetRect.Height() > 0 )
+        {
+        TReal xRatio = ( ( TReal )srcWidth / ( TReal )targetRect.Width() );
+        TReal yRatio = ( ( TReal )srcHeight / ( TReal )targetRect.Height() );
+        //Find out appropriate scaling factor
+        xRatio > yRatio ? ( scaleRatio = xRatio ) : ( scaleRatio = yRatio );
+        }
+
+    //Scale the size for target bitmap
+    targetRect.SetHeight( srcHeight / scaleRatio );
+    targetRect.SetWidth( srcWidth / scaleRatio );    
+    
+    TSize trgBitmapSize = aTrgBitmap->SizeInPixels();
+    
+    // calculate the valid drawing area
+    TRect drawRect = targetRect;
+    drawRect.Intersection( TRect( TPoint( 0, 0 ), trgBitmapSize ) );
+
+    if( drawRect.IsEmpty() || 
+        aSrcBitmap->SizeInPixels().iHeight <= 0 || 
+        aSrcBitmap->SizeInPixels().iWidth <= 0 )
+        {
+        User::Leave( KErrArgument );
+        }
+
+    TSize srcSize = aSrcBitmap->SizeInPixels();
+
+    TBool srcTemporary = EFalse;
+    if ( aSrcBitmap->IsRomBitmap() )
+        {
+        srcTemporary = ETrue;
+        }
+
+    TDisplayMode displayMode = aSrcBitmap->DisplayMode();
+    TBool fallbackOnly = DoesScaleBitmapUseFallBack( aSrcBitmap );
+
+    if ( fallbackOnly )
+        {
+        CFbsBitmapDevice* dev = CFbsBitmapDevice::NewL( aTrgBitmap );
+        CleanupStack::PushL( dev );
+        CFbsBitGc* gc = NULL;
+        User::LeaveIfError( dev->CreateContext( gc ) );
+        CleanupStack::PushL( gc );
+
+        // write alpha information if it exists
+        if ( aSrcBitmap->DisplayMode() == EColor16MA )
+            {
+            gc->SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            }
+
+        // targetRect is used because DrawBitmap handles clipping automatically
+        gc->DrawBitmap( targetRect, aSrcBitmap );
+        CleanupStack::PopAndDestroy( 2 ); // dev, gc
+        return;
+        }
+
+    // Heap lock for FBServ large chunk to prevent background
+    // compression of aSrcBitmap after if IsCompressedInRAM returns EFalse
+    aSrcBitmap->LockHeapLC( ETrue ); // fbsheaplock
+    TBool fbsHeapLock = ETrue;
+    if ( aSrcBitmap->IsCompressedInRAM() )
+        {
+        srcTemporary = ETrue;
+        }
+
+    CFbsBitmap* realSource = aSrcBitmap;
+    if ( srcTemporary )
+        {
+        CleanupStack::PopAndDestroy(); // fbsheaplock
+        fbsHeapLock = EFalse;
+
+        realSource = new ( ELeave ) CFbsBitmap();
+        CleanupStack::PushL( realSource );
+        User::LeaveIfError(
+            realSource->Create( srcSize, aSrcBitmap->DisplayMode() ) );
+        CFbsBitmapDevice* dev = CFbsBitmapDevice::NewL( realSource );
+        CleanupStack::PushL( dev );
+        CFbsBitGc* gc = NULL;
+        User::LeaveIfError( dev->CreateContext( gc ) );
+        CleanupStack::PushL( gc );
+        gc->BitBlt( TPoint( 0, 0 ), aSrcBitmap );
+        CleanupStack::PopAndDestroy( 2 ); // dev, gc
+        }
+
+    if ( !fbsHeapLock )
+        {
+        // Heap lock for FBServ large chunk is only needed with large bitmaps.
+        if ( realSource->IsLargeBitmap() || aTrgBitmap->IsLargeBitmap() )
+            {
+            aTrgBitmap->LockHeapLC( ETrue ); // fbsheaplock
+            }
+        else
+            {
+            CleanupStack::PushL( ( TAny* )NULL );
+            }
+        }
+
+    TUint32* srcAddress = realSource->DataAddress();
+    TUint32* trgAddress = aTrgBitmap->DataAddress();
+
+    const TInt xSkip = ( srcSize.iWidth << 8 ) / targetRect.Width();
+    const TInt ySkip = ( srcSize.iHeight << 8 ) / targetRect.Height();
+
+    const TInt drawWidth  = drawRect.Width();
+    const TInt drawHeight = drawRect.Height();
+
+    TRect offsetRect( targetRect.iTl, drawRect.iTl );
+    const TInt yPosOffset = ySkip * offsetRect.Height();
+    const TInt xPosOffset = xSkip * offsetRect.Width();
+
+    if ( ( displayMode == EGray256 ) || ( displayMode == EColor256 ) )
+        {
+        TInt srcScanLen8 = CFbsBitmap::ScanLineLength(
+            srcSize.iWidth, displayMode );
+        TInt trgScanLen8 = CFbsBitmap::ScanLineLength(
+            trgBitmapSize.iWidth, displayMode );
+
+        TUint8* trgAddress8 = reinterpret_cast< TUint8* >( trgAddress );
+
+        TInt yPos = yPosOffset;
+        // skip left and top margins in the beginning
+        trgAddress8 += trgScanLen8 * drawRect.iTl.iY + drawRect.iTl.iX;
+
+        for ( TInt y = 0; y < drawHeight; y++ )
+            {
+            TUint8* srcAddress8 = reinterpret_cast< TUint8* >( srcAddress ) +
+                ( srcScanLen8 * ( yPos >> 8 ) );
+
+            TInt xPos = xPosOffset;
+            for ( TInt x = 0; x < drawWidth; x++ )
+                {
+                *( trgAddress8++ ) = srcAddress8[xPos >> 8];
+                xPos += xSkip;
+                }
+
+            yPos += ySkip;
+
+            trgAddress8 += trgScanLen8 - drawWidth;
+            }
+        }
+    else if ( displayMode == EColor4K || displayMode == EColor64K )
+        {
+        TInt srcScanLen16 = CFbsBitmap::ScanLineLength(
+            srcSize.iWidth, displayMode ) /2;
+        TInt trgScanLen16 = CFbsBitmap::ScanLineLength(
+            trgBitmapSize.iWidth, displayMode ) /2;
+
+        TUint16* trgAddress16 = reinterpret_cast< TUint16* >( trgAddress );
+
+        TInt yPos = yPosOffset;
+        // skip left and top margins in the beginning
+        trgAddress16 += trgScanLen16 * drawRect.iTl.iY + drawRect.iTl.iX;
+
+        for ( TInt y = 0; y < drawHeight; y++ )
+            {
+            TUint16* srcAddress16 = reinterpret_cast< TUint16* >( srcAddress ) +
+                ( srcScanLen16 * ( yPos >> 8 ) );
+
+            TInt xPos = xPosOffset;
+            for ( TInt x = 0; x < drawWidth; x++ )
+                {
+                *( trgAddress16++ ) = srcAddress16[xPos >> 8];
+                xPos += xSkip;
+                }
+
+            yPos += ySkip;
+
+            trgAddress16 += trgScanLen16 - drawWidth;
+            }
+        }
+    else if ( displayMode == EColor16MU )
+        {
+        TInt srcScanLen32 = CFbsBitmap::ScanLineLength(
+            srcSize.iWidth, displayMode ) /4;
+        TInt trgScanLen32 = CFbsBitmap::ScanLineLength(
+            trgBitmapSize.iWidth, displayMode ) /4;
+
+        TUint32* trgAddress32 = reinterpret_cast< TUint32* >( trgAddress );
+
+        TInt yPos = yPosOffset;
+        // skip left and top margins in the beginning
+        trgAddress32 += trgScanLen32 * drawRect.iTl.iY + drawRect.iTl.iX;
+
+        for ( TInt y = 0; y < drawHeight; y++ )
+            {
+            TUint32* srcAddress32 = reinterpret_cast< TUint32* >( srcAddress ) +
+                ( srcScanLen32 * ( yPos >> 8 ) );
+
+            TInt xPos = xPosOffset;
+            for ( TInt x = 0; x < drawWidth; x++ )
+                {
+                *( trgAddress32++ ) = srcAddress32[xPos >> 8];
+                xPos += xSkip;
+                }
+
+            yPos += ySkip;
+
+            trgAddress32 += trgScanLen32 - drawWidth;
+            }
+        }
+    else
+        {
+        User::Leave( KErrUnknown );
+        }
+
+    CleanupStack::PopAndDestroy(); // fbsheaplock
+
+    if ( srcTemporary )
+        {
+        CleanupStack::PopAndDestroy(); // realSource
+        }
     }
 
 // ---------------------------------------------------------------------------

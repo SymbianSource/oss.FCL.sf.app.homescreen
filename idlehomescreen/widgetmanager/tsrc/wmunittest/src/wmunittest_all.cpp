@@ -79,6 +79,14 @@ TInt CWmUnitTest::RunMethodL(
         ENTRY( "ImageConverterConversionMethod", CWmUnitTest::ImageConverterConversionMethodL ),
         ENTRY( "CancelConvert", CWmUnitTest::CancelConvertL ),
         
+        // uninstall
+        ENTRY( "Uninstall", CWmUnitTest::UninstallL ),
+        ENTRY( "UninstallUid", CWmUnitTest::UninstallUidL ),
+        ENTRY( "WaitUninstallToFinnish", CWmUnitTest::WaitUninstallToFinnishL ),
+        ENTRY( "CleanUninstall", CWmUnitTest::CleanUninstall ),
+        ENTRY( "WasUnistalled", CWmUnitTest::WasUnistalledL ),
+        ENTRY( "CancelUninstall", CWmUnitTest::CancelUninstall ),
+        
         };
 
     const TInt count = sizeof( KFunctions ) / 

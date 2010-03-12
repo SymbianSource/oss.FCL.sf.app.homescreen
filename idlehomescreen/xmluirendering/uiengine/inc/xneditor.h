@@ -139,7 +139,7 @@ public:
      * @since S60 5.0
      * @param aContentInfo content info 
      */
-    void ReplaceWidgetL( CHsContentInfo& aContentInfo, TBool aUseHsps = ETrue );
+    void ReplaceWidgetL( CHsContentInfo& aContentInfo );
     /**
      * Commit a new order of plugins to the HSPS.
      * 
@@ -199,7 +199,9 @@ private:
     // from MHsContentController
     
     TInt WidgetListL( CHsContentInfoArray& aArray );
-    
+
+    TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
+
     TInt ViewListL( CHsContentInfoArray& aArray );
     
     TInt AppListL( CHsContentInfoArray& aArray );
@@ -260,7 +262,13 @@ private:
      * Notifies the MHsContentControl and the MHsContentControlUi if view list was changed.
      */
     void ViewListChanged();
-
+    
+    /**
+     * Creates content info for defined plugin
+     */
+    CHsContentInfo* CreateContentInfoLC( CXnPluginData& aPlugin, 
+        RPointerArray< CHsContentInfo >& aInfos );
+    
 private:
     // from MXnViewObserver    
     

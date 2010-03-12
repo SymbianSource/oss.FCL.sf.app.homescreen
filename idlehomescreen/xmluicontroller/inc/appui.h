@@ -79,8 +79,46 @@ private:
         RPointerArray< CXnNodeAppIf >* aList = NULL );
     
     void HandleEnterEditModeL( TBool aEnter );
-	    
+       
+private:
+    // new functions
     
+    /**
+     * Starts long press recognizer of Send key.
+     * 
+     * @since S60 5.2
+     */
+    void StartKeyTimerL();
+    
+    /**
+     * Stops Send key long press recognizer.
+     * 
+     * @since S60 5.2
+     */
+    void StopKeyTimer();
+    
+    /**
+     * Launches Voice command application after long Send key is pressed.
+     * 
+     * @since S60 5.2
+     */
+    void LaunchVoiceCommandL();
+    
+    /**
+     * Callback function for long press timer of the Send key.
+     * 
+     * @since S60 5.2
+     */
+    static TInt ReportLongPressL( TAny* aThis );
+    
+    /**
+     * Sets title pane text
+     * 
+     * @since S60 5.2
+     * @param aText Text to set
+     */
+    void SetTitlePaneTextL( const TDesC& aText );
+       
 private:
     // from MCoeViewActivationObserver
     
@@ -94,9 +132,16 @@ public:
     // new functions
     
     /**
+     * Activates UI. Called by UI controller during bootup sequence.
+     * 
+     * @since S60 5.2
+     */
+    void ActivateUi();
+    
+    /**
      * Sets plugins online state
      * 
-     * @since S60 5.0
+     * @since S60 5.2
      * @param aOnline ETrue to enter online, EFalse to offline
      * 
      */
@@ -113,7 +158,7 @@ public:
     /**
      * Gets online/offline helper object
      *
-     * @since S60 5.0
+     * @since S60 5.2
      * @return online/offline helper
      */
     COnlineOfflineHelper* Helper() const;
@@ -138,12 +183,14 @@ private:
     CAiUiIdleIntegration* iIdleIntegration;
     /** Online/Offline helper object, owned */
     COnlineOfflineHelper* iHelper;
+    /** Timer for Send key long press recognition, owned */
+    CPeriodic* iKeyTimer;
+    /** Edit mode title pane text, owned */
+    HBufC* iEditModeTitle;
     /** DeviceStatus publisher info */
     THsPublisherInfo iDeviceStatusInfo;
     /** Flag to indicate whether edit mode is active */
-    TBool iInEditMode;
-    /** Flag to indicate UI shutdown sequence is ongoing */
-    TBool iUiShutdown;
+    TBool iInEditMode;    
     };
     
 }  // namespace AiXmlUiController

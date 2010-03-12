@@ -22,7 +22,11 @@
 #include <e32base.h>
 #include <widgetregistryclient.h>
 
+_LIT(KWidgetAppName, "widgetlauncher.exe");
+
 const TUint32 KWidgetAppUidValue = 0x10282822;
+
+const TInt KCloseWidgetCmd(2);
 
 /**
  * class handling the list of running wrt widgets

@@ -22,6 +22,7 @@
 #include <stiftestinterface.h>
 #include <bautils.h>
 #include <aknsskininstance.h>
+#include <utf.h>
 #include "wmunittest.h"
 // components to test
 #include "wmplugin.h"
@@ -47,7 +48,8 @@ const TInt KDescription = 101;
 const TInt KLogoPath = 102;
 const TInt KCanBeAdded = 103;
 const TInt KCanBeRemoved = 104;
-
+const TInt KPublisherId = 105;
+const TInt KType = 106;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -98,7 +100,7 @@ TInt CWmUnitTest::PluginActivateL( CStifItemParser& /*aItem*/ )
 TInt CWmUnitTest::PluginDeactivateL( CStifItemParser& /*aItem*/ )
     {
     if ( iWmPlugin == 0 ) User::Leave( KErrArgument );
-    iWmPlugin->CloseView();
+    iWmPlugin->DeActivate();
     _RETURN("PluginActivateL End", KErrNone);
     }
 
@@ -120,6 +122,11 @@ TInt CWmUnitTest::PluginWidgetsChangedL( CStifItemParser& /*aItem*/ )
 TInt CWmUnitTest::WidgetListL( CHsContentInfoArray& aArray )
     {
     CreateContentInfoArrayL( aArray, iMass );
+    return KErrNone;
+    }
+
+TInt CWmUnitTest::WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray )
+    {
     return KErrNone;
     }
 
@@ -165,12 +172,12 @@ TInt CWmUnitTest::ActivateAppL( CHsContentInfo& /*aInfo*/ )
 
 TInt CWmUnitTest::ActiveViewL( CHsContentInfo& /*aInfo*/ )
     {
-    return 0;
+    return KErrNone;
     }
 
 TInt CWmUnitTest::ActiveAppL( CHsContentInfo& /*aInfo*/ )
     {
-    return 0;
+    return KErrNone;
     }
 
 
@@ -236,6 +243,14 @@ void CWmUnitTest::CreateContentInfoArrayL( CHsContentInfoArray& aArray, TInt aCo
             { info->SetCanBeAdded( s2b(*iChangeValue) ); }
         else if ( iChangeType == KCanBeRemoved )
             { info->SetCanBeRemoved( s2b(*iChangeValue) ); }
+        else if ( iChangeType == KPublisherId )
+            { info->SetPublisherIdL( *iChangeValue ); }
+        else if ( iChangeType == KType )
+            {
+            TBuf8<128> buf;
+            CnvUtfConverter::ConvertFromUnicodeToUtf8( buf, *iChangeValue );
+            info->SetTypeL( buf ); 
+            }
         }
     }
 

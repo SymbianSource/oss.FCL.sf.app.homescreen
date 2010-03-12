@@ -88,6 +88,11 @@ public: // New functions
     IMPORT_C MHsContentControlUi* GetHsContentController(
         const TDesC8& aControllerType );
 
+    /**
+     * 
+     */
+    IMPORT_C void PrepareToExit();
+
 private:
 
     /** 

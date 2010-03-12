@@ -39,7 +39,8 @@ class CXnUiEngine;
 *  @since Series 60 5.0
 */
 NONSHARABLE_CLASS( CXnWidgetExtensionAdapter ) : public CXnControlAdapter, 
-    public MXnUiStateObserver
+    public MXnUiStateObserver,
+    public MXnUiResourceChangeObserver
     {
 public: // Constructors and destructor
 
@@ -96,7 +97,20 @@ private:
     /**
      * @see MXnUiStateObserver
      */    
-    void NotifyInCallStateChaged( TBool aInCall );    
+    void NotifyInCallStateChaged( TBool aInCall );
+
+private:
+    // from MXnUiResourceChangeObserver
+    
+    /**
+     * @see MXnUiResourceChangeObserver
+     */
+    void NotifyStatusPaneSizeChanged();
+
+    /**
+     * @see MXnUiResourceChangeObserver
+     */
+    void NotifyResourceChanged( TInt aType );
     
 private: 
     // Constructors
@@ -129,7 +143,9 @@ private:
     /** AppUi, not owned */
     CXnAppUiAdapter* iAppUiAdapter;
     /** Flag to indicate whether <popup> is permanent */
-    TBool iPermanent;    
+    TBool iPermanent;
+    /** Is popup element */
+    TBool iPopup;
 	};
 
 #endif // __XNWIDGETEXTENSIONADAPTER_H__

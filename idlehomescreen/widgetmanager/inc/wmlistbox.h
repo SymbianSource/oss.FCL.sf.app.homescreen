@@ -32,6 +32,7 @@
 #include <aknlongtapdetector.h> 
 #include "wmwidgetdataobserver.h"
 #include "wmwidgetdata.h"
+#include "wmwidgetorderdata.h"
 
 // FORWARD DECLARATIONS
 class CWmListBox;
@@ -117,27 +118,6 @@ private: // data members
      * pointer to the listbox (not owned) 
      */
     CWmListBox* iListBox;
-
-
-    /**
-     * add-button colored bitmap (default color)
-     */
-    CFbsBitmap*         iAddWidgetBtnImage;
-    
-    /** 
-     * add-button mask 
-     */
-    CFbsBitmap*         iAddWidgetBtnMask;
-
-    /**
-     * add-button colored bitmap (highlighted color)
-     */
-    CFbsBitmap*         iAddWidgetBtnHighlightImage;
-    
-    /** 
-     * add-button mask 
-     */
-    CFbsBitmap*         iAddWidgetBtnHighlightMask;
     
     /** 
      * default logo (when widget does not have one) bitmap 
@@ -272,11 +252,11 @@ public: // API for manipulating list content
         };
 
     /** 
-     * sets the list sort order 
+     * Sorts the listbox's visible array 
      * 
      * @param aOrder sort order
      */
-    void SetSortOrderL( TSortOrder aOrder );
+    void DoSortToVisibleArray( TSortOrder aOrder );
     
     /**
      * Responds to layout switched.
@@ -295,6 +275,28 @@ public: // API for manipulating list content
      */
     TSize LogoSize();
 
+    /**
+     * gets the constant widget order data array
+     */
+    inline const ROrderArray& OrderDataArray();
+    
+    /** 
+     * Sorts the order array
+     * 
+     * @param aOrder sort order
+     */
+    void DoSortToOrderData( TSortOrder aOrder );
+    
+    /**
+     * Adds order data to array
+     */
+    void AddOrderDataL( CWmWidgetOrderData* aOrderData );
+    
+    /*
+     * Returns orderdata object by index
+     */
+    CWmWidgetOrderData* OrderData( TInt aItemIndex );
+    
 private: // from CEikTextListBox
     /**
      * Creates the item drawer.
@@ -338,7 +340,17 @@ private:
             const CCoeControl* aParent,
             TInt aFlags );
     
-
+private:
+    /** 
+     * linear order for sorting, depending on the sort type being used 
+     */
+    TLinearOrder<CWmWidgetData> SortOrder( TSortOrder aOrder );
+    
+    /** 
+     * linear order for sorting, depending on the sort type being used 
+     */
+    TLinearOrder<CWmWidgetOrderData> SortOrderToOrderData( TSortOrder aOrder );
+    
 protected: // from MWmWidgetDataObserver
 
     /** 
@@ -347,13 +359,6 @@ protected: // from MWmWidgetDataObserver
      * @param aWidgetData item to redraw
      */
     void HandleWidgetDataChanged( CWmWidgetData* aWidgetData );
-
-private: // own methods
-
-    /** 
-     * linear order for sorting, depending on the sort type being used 
-     */
-    TLinearOrder<CWmWidgetData> SortOrder( TSortOrder aOrder );
 
 private:
 
@@ -365,7 +370,7 @@ private:
     /** 
      * array of widget data objects (the list model) 
      */
-    RWidgetDataValues   iWidgetDatas;
+    RWidgetDataValues   iVisibleWidgetArray;
 
     /** 
      * the currently active item ADD button's rectangle, for push recognition 
@@ -378,7 +383,12 @@ private:
     TBool               iFindPaneIsVisible;
 	
     /** size of logo rect in list item */
-    TSize               iLogoSize;    
+    TSize               iLogoSize;
+    
+    /** 
+     * array of widget order objects
+     */
+    ROrderArray         iOrderDataArray;
 	};
 #include "wmlistbox.inl"
 

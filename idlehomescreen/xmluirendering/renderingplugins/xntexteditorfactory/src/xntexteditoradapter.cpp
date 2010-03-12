@@ -50,6 +50,14 @@
 
 const TInt KMaxLength = 100;
 
+enum TSplitInputState
+    {
+    ESplitInputDisabled = 0,   
+    ESplitInputClosed,
+    ESplitInputOpen,
+    ESplitInputRemoveFromStack         
+    };
+
 _LIT8( KCpsPublishing, "cpspublishing" );
 _LIT8( KMaxLineAmount, "max-line-amount" );
 _LIT8( KMaxCharAmount, "max-char-amount" );
@@ -175,14 +183,13 @@ void CXnTextEditorAdapter::ConstructL()
 
     // Enable partial Screen
     CXnProperty* enablepartialinput( iNode.GetPropertyL( KEnablePartialInput ) );
-    iPartialInputEnabled = EFalse;
-    iPartialInputOpen = EFalse;
+    iSplitInputState = ESplitInputDisabled;
      
     if ( enablepartialinput && 
          enablepartialinput->StringValue() == XnPropertyNames::KTrue )
         {
         iEditor->SetAknEditorFlags( EAknEditorFlagEnablePartialScreen );
-        iPartialInputEnabled = ETrue;
+        iSplitInputState = ESplitInputClosed;
         }
     
     iEditor->SetObserver( this );
@@ -310,33 +317,36 @@ void CXnTextEditorAdapter::FocusChanged( TDrawNow aDrawNow )
         {      
         value = EPSAiDontForwardNumericKeysToPhone;
 
-        if( !iPartialInputEnabled )
+        if( iSplitInputState == ESplitInputDisabled )
             {
             TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) );            
             // AddToStackL calls iEditor->SetFocus( ETrue ); 
             }
-
+        else if( iSplitInputState == ESplitInputClosed )
+            {
+            iUiEngine->EnablePartialTouchInput(iNode , ETrue);
+            TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) ); 
+            iSplitInputState = ESplitInputOpen;
+            }
         }
     else
         {
         value = EPSAiForwardNumericKeysToPhone;
                                       
-        if( !iPartialInputEnabled )
+        if( iSplitInputState == ESplitInputDisabled )
             {    
             appui->RemoveFromStack( iEditor );            
             iEditor->SetFocus( EFalse, aDrawNow );
             }
-        else if(iPartialInputEnabled && iRemoveSplitInputFromStack )
+        else if( iSplitInputState == ESplitInputRemoveFromStack )
             {
             appui->RemoveFromStack( iEditor );            
             iEditor->SetFocus( EFalse, aDrawNow );
-            iPartialInputOpen = EFalse;
-            iRemoveSplitInputFromStack = EFalse;
-            }
-            
+            iSplitInputState = ESplitInputClosed;
+            }            
         }
 
-    if(iPartialInputOpen)
+    if( iSplitInputState == ESplitInputOpen )
         {
         value = EPSAiDontForwardNumericKeysToPhone;
         }
@@ -410,25 +420,15 @@ void CXnTextEditorAdapter::HandleEditorEvent( TInt aReason )
     {
     CXnAppUiAdapter* appui( 
         static_cast< CXnAppUiAdapter* >( iAvkonAppUi ) );
-
+ 
     switch( aReason )
             {           
-            case CXnTextEditor::KActivateTextEditor:
-                {
-                if( !iPartialInputOpen )
-                     {
-                     iUiEngine->EnablePartialTouchInput(iNode , ETrue);
-                     TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) ); 
-                     iPartialInputOpen = ETrue;
-                     }  
-                break;
-                }
             case CXnTextEditor::KDeactivateTextEditor:
                 {
-                if( iPartialInputOpen )
+                if( iSplitInputState == ESplitInputOpen )
                      {
                      iUiEngine->EnablePartialTouchInput(iNode, EFalse);
-                     iPartialInputOpen = EFalse;
+                     iSplitInputState = ESplitInputClosed;
                      appui->RemoveFromStack( iEditor );
                      iEditor->SetFocus( EFalse );
                      }              
@@ -436,12 +436,12 @@ void CXnTextEditorAdapter::HandleEditorEvent( TInt aReason )
                 }
             case CXnTextEditor::KRemoveSplitInputFromStack:
                 {
-                iRemoveSplitInputFromStack = ETrue;
+                iSplitInputState = ESplitInputRemoveFromStack;
                 break;
                 }
             case CXnTextEditor::KKeepSplitInputInStack:
                 {
-                iRemoveSplitInputFromStack = EFalse;
+                iSplitInputState = ESplitInputOpen;
                 break;
                 }
             default:                    

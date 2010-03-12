@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<package version="1.0">
+
+
+
+  <family>qhd_tch</family>
+
+
+
+  <type>view</type>
+
+
+
+  <!-- interface uid -->
+
+	<interfaceuid>0x2001f48a</interfaceuid>
+
+
+
+	<!-- vendor uid -->
+
+	<provideruid>0x101fb657</provideruid>
+
+
+
+	<!-- configuration uid -->
+
+	<configurationuid>0x200286e4</configurationuid>
+
+
+
+	<!-- description -->
+
+	<fullname>&amp;qtn_view_200286e4_name;</fullname>
+
+	<shortname>ai3_view2</shortname>
+
+	<version>1.0</version>
+
+
+
+	<!-- configuration -->
+
+	<filexml>viewconfiguration.xml</filexml>
+
+	
+
+  <!-- Locale specific resources -->
+
+  <localization>
+
+    <fileresource>view.o0000</fileresource>
+
+  </localization>
+
+
+
+</package>

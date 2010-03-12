@@ -50,12 +50,15 @@ class CXnAnimationAdapter : public CXnControlAdapter
         virtual ~CXnAnimationAdapter();
     
     public: // From Base classes 
-        /**
-        * From CXnControlAdapter Handles the property changes.
-        * @since Series 60 3.1
-        * @return void.
-        */    
+        
+        // From CXnControlAdapter
         void DoHandlePropertyChangeL(CXnProperty* aProperty = NULL);
+        
+        // From CXnControlAdapter
+        void DoEnterPowerSaveModeL( TModeEvent aEvent );
+        
+        // From CXnControlAdapter
+        void DoExitPowerSaveModeL( TModeEvent aEvent );
         
     protected:
         /**
@@ -124,6 +127,9 @@ class CXnAnimationAdapter : public CXnControlAdapter
        
         // Timer for animation, owned  
         CPeriodic* iPeriodicTimer;
+        
+        // Whether the renderer is in power save mode or not
+        TBool iInPowerSaveMode;
    };
 
 #endif      // _XNANIMATIONAPADAPTER_H

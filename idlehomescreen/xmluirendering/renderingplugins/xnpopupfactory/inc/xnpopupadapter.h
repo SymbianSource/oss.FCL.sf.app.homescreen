@@ -86,7 +86,13 @@ public: // New functions
 	/**
 	* @see CXnControlAdapter
 	*/
-    void DoHandlePropertyChangeL(CXnProperty* aProperty = NULL); 
+    void DoHandlePropertyChangeL(CXnProperty* aProperty = NULL);
+
+private: // from base class
+    /**
+    * @see CCoeControl documentation        
+    */         
+    void MakeVisible( TBool aVisible );
    
 private:
     void Draw(const TRect& aRect) const;

@@ -26,6 +26,8 @@
 #include "xncomponent.h"
 
 #include <AknUtils.h>
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntransitionutils.h>
 
 const TInt KStartDelay = 1000000;
 const TInt KDisplayTime = 0;
@@ -295,6 +297,8 @@ void CXnPopupAdapter::ConstructL(CXnNodePluginIf& aNode, CXnControlAdapter* /*aP
     CXnControlAdapter::ConstructL(aNode);
     iNode = &aNode;
     iAppUi = CCoeEnv::Static()->AppUi();
+    
+    GfxTransEffect::Register( this, KGfxPreviewPopupControlUid );
     }
     
 // -----------------------------------------------------------------------------
@@ -314,6 +318,7 @@ CXnPopupAdapter::CXnPopupAdapter(): iPositionHint( ENone )
 CXnPopupAdapter::~CXnPopupAdapter()
     {
     delete iActiveObject;
+    GfxTransEffect::Deregister( this );
     }
 
 // -----------------------------------------------------------------------------
@@ -539,6 +544,33 @@ void CXnPopupAdapter::CalculatePosition( TRect aPopupRect )
         rect.Move(contentRect.iBr.iX - rect.iBr.iX, 0);
         } 
     this->SetRect( rect );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnPopupAdapter::MakeVisible
+// 
+// -----------------------------------------------------------------------------
+// 
+void CXnPopupAdapter::MakeVisible( TBool aVisible )
+    {
+    if ( aVisible == IsVisible() )
+        {
+        return;
+        }
+    
+    if ( aVisible )
+        {
+        GfxTransEffect::Begin( this, KGfxControlAppearAction );
+        }
+    else
+        {
+        GfxTransEffect::Begin( this, KGfxControlDisappearAction );
+        }
+
+    CCoeControl::MakeVisible( aVisible );
+
+    GfxTransEffect::SetDemarcation( this, iPosition );
+    GfxTransEffect::End( this );
     }
 
 // End of File

@@ -34,6 +34,7 @@ class CXnViewAdapter;
 class MHsContentControlUi;
 class CXnEffectManager;
 class MHsContentControl;
+
 // Class declaration
 /**
  * Avkon adapter for Xuikon.
@@ -149,6 +150,7 @@ public:
 
     /**
      * Routes the events from external rendering plug-ins to content plug-ins.
+     * To be overriden by subclass.
      *
      * @since S60 5.2
      * @param aEvent Event string
@@ -157,31 +159,45 @@ public:
     IMPORT_C virtual void HandleEventL( const TDesC& aEvent, 
         CXnNodeAppIf& aDestination );
     
-public:
     /**
-     * From CEikAppUi.
+     * This is called when initial view is activated
+     * To be overriden by subclass.
+     * 
+     * @since S60 5.2
+     */
+    IMPORT_C virtual void UiActivated();
+    
+    /**     
      * Second-phase constructor
      *
      * @since Series 60 3.1
      */
     IMPORT_C void ConstructL();
 
-protected:
-
     /**
-     * From CAknAppUi.
+     * From CEikAppUi.
+     *
+     * @since Series 60 3.1
+     */
+    IMPORT_C void ProcessMessageL( TUid aUid, const TDesC8& aParams );
+
+protected:
+    // from CAknViewAppUi
+    
+    /**
+     * @see CAknViewAppUi
      *
      * @since Series 60 3.1
      */
     IMPORT_C void HandleResourceChangeL( TInt aType );
 
     /**
-     * From CAknAppUi.
+     * @see CAknViewAppUi
      *
-     * @since Series 60 5.2
+     * @since S60 5.2
      */
     IMPORT_C void PrepareToExit();
-
+        
 public:
     // new functions
         
@@ -266,7 +282,7 @@ public:
      * Makes focus control visible
      *
      * @since S60 5.0     
-     */        
+     */
     void ShowFocus();
 
 private:

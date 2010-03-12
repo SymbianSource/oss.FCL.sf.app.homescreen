@@ -30,7 +30,6 @@
 // some constants regarging the central repository localised section.
 // these will ensure CR localisation section compatibility even if
 // new strings are added
-const TInt KLangOffsetOviStoreUrl = KOviStoreBrowserUrl0 - KLangId0;
 const TInt KLangOffsetOperatorUrl = KOperatorButtonUrl0 - KLangId0;
 const TInt KLangOffsetOperatorText = KOperatorButtonText0 - KLangId0;
 const TInt KLangGroupSize = KLangId1 - KLangId0;
@@ -60,11 +59,10 @@ CWmConfiguration::CWmConfiguration(
     : iResourceLoader( aResourceLoader )
 	{
     iRepository = NULL;
-    iOviStoreBundleId = NULL;
+    iOviStoreUid = KNullUid;
     iOviStoreClientParam = NULL;
     iOviButtonTitle = NULL;
     iOviButtonIcon = NULL;
-    iOviButtonUrl = NULL;
     iOperatorButtonTitle = NULL;
     iOperatorButtonIcon = NULL;
     iOperatorButtonUrl = NULL;
@@ -77,11 +75,9 @@ CWmConfiguration::CWmConfiguration(
 CWmConfiguration::~CWmConfiguration()
 	{
     delete iRepository;
-    delete iOviStoreBundleId;
     delete iOviStoreClientParam;
     delete iOviButtonTitle;
     delete iOviButtonIcon;
-    delete iOviButtonUrl;
     delete iOperatorButtonTitle;
     delete iOperatorButtonIcon;
     delete iOperatorButtonUrl;
@@ -123,18 +119,17 @@ void CWmConfiguration::LoadConfigurationL()
             TUid::Uid( KCrWidgetManagerm ) );
 
     // read fixed parameters
-    iOviStoreBundleId = ReadParameterL( KOviStoreBundleId );
-    iOviStoreClientParam = ReadParameterL( KOviStoreClientParam );
+    ReadIntParameter( KOviStoreUid, iOviStoreUid.iUid );
+    iOviStoreClientParam = ReadDescParameterL( KOviStoreClientParam ); 
     // determine language and read localised parameters
     iLanguageIndex = FindCorrectLanguageId();
-    iOviButtonUrl = ReadLocalisedParameterL( KLangOffsetOviStoreUrl );
     iOperatorButtonTitle = ReadLocalisedParameterL( KLangOffsetOperatorText );
     iOperatorButtonUrl = ReadLocalisedParameterL( KLangOffsetOperatorUrl );
 
     if ( iOperatorButtonUrl && iOperatorButtonUrl->Length() > 0 )
         {
         // construct the operator button icon.
-        iOperatorButtonIcon = ReadParameterL( KOperatorButtonIcon );
+        iOperatorButtonIcon = ReadDescParameterL( KOperatorButtonIcon );
         }
 
     delete iRepository;
@@ -178,10 +173,10 @@ TInt CWmConfiguration::FindCorrectLanguageId()
     }
 
 // ---------------------------------------------------------
-// CWmConfiguration::ReadParameterL
+// CWmConfiguration::ReadDescParameterL
 // ---------------------------------------------------------
 //
-HBufC* CWmConfiguration::ReadParameterL( TInt aKey )
+HBufC* CWmConfiguration::ReadDescParameterL( TInt aKey )
     {
     TBuf<NCentralRepositoryConstants::KMaxUnicodeStringLength> buf;
     TInt err = iRepository->Get( aKey, buf );
@@ -193,6 +188,20 @@ HBufC* CWmConfiguration::ReadParameterL( TInt aKey )
         heapBuffer->Des().Copy( buf );
         }
     return heapBuffer;
+    }
+
+// ---------------------------------------------------------
+// CWmConfiguration::ReadIntParameterIntL
+// ---------------------------------------------------------
+//
+void CWmConfiguration::ReadIntParameter( TInt aKey, TInt32& aValue )
+    {
+    TInt read = KErrNone;
+    TInt err = iRepository->Get( aKey, read );
+    if( err == KErrNone )
+        {
+        aValue = read;
+        }
     }
 
 // ---------------------------------------------------------
@@ -266,11 +275,8 @@ const TDesC& CWmConfiguration::PortalButtonIcon( TInt aIndex )
 //
 const TDesC& CWmConfiguration::PortalButtonBrowserUrl( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviButtonUrl )
-        return *iOviButtonUrl;
-    else if ( aIndex == 1 && iOperatorButtonUrl )
+    if ( aIndex == 1 && iOperatorButtonUrl )
         return *iOperatorButtonUrl;
-
     return KNullDesC;
     }
 
@@ -280,14 +286,14 @@ const TDesC& CWmConfiguration::PortalButtonBrowserUrl( TInt aIndex )
 //
 TUid CWmConfiguration::PortalButtonClientUid( TInt aIndex )
     {
-    if ( aIndex == 0 && iOviStoreBundleId )
+    if ( aIndex == 0 )
         {
-        // idea: change iOviStoreBundleId to UID of laucher in cenrep
-        return TUid::Uid( 0x2002D07F );
-        }
+        return iOviStoreUid;
+        } 
     // Operator client uid not supported. 
     // If operator client is a widget we can use widget registry 
     // to fetch uid of operator widget save it to member and return that here
+    
     return KNullUid;
     }
 

@@ -162,22 +162,6 @@ inline TBool CXnPluginData::Occupied() const
     };
 
 // ---------------------------------------------------------------------------
-// Sets removable
-// ---------------------------------------------------------------------------
-//
-inline void CXnPluginData::SetRemovable( TBool aRemovable )
-    {    
-    if( aRemovable )
-        {
-        iFlags.Set( EIsRemovable );        
-        }
-    else        
-        {
-        iFlags.Clear( EIsRemovable );        
-        }
-    };
-
-// ---------------------------------------------------------------------------
 // Returns removable
 // ---------------------------------------------------------------------------
 //

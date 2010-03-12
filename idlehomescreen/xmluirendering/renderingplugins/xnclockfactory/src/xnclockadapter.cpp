@@ -275,6 +275,7 @@ void CXnClockAdapter::MonitorWsMessage( const TWsEvent& aEvent )
         if( iForeground )
             {
             UpdateDisplay(); // starts timer after update
+            iClockControl->StartTimer();
             }
         else
             {

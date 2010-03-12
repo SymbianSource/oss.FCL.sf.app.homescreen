@@ -23,9 +23,9 @@ call \ext\tools\toolsextensions\ConfigurationTool\cli_build.cmd -master_conf s60
 
 rem Create wm sis&sisx files
 makesis widgetmanager_udeb.pkg
-signsis widgetmanager_udeb.SIS widgetmanager_udeb.SISX Nokia_RnDCert_02.der Nokia_RnDCert_02.key
+signsis widgetmanager_udeb.SIS widgetmanager_udeb.SISX ..\internal\cert\Nokia_RnDCert_02.der ..\internal\cert\Nokia_RnDCert_02.key
 makesis widgetmanager_urel.pkg
-signsis widgetmanager_urel.SIS widgetmanager_urel.SISX Nokia_RnDCert_02.der Nokia_RnDCert_02.key
+signsis widgetmanager_urel.SIS widgetmanager_urel.SISX ..\internal\cert\Nokia_RnDCert_02.der ..\internal\cert\Nokia_RnDCert_02.key
 
 rem Create wm stubsis file
 makesis -s widgetmanager_stub.pkg

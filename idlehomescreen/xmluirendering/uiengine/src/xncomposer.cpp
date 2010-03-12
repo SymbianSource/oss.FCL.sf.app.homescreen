@@ -45,7 +45,6 @@ _LIT8( KApp, "application" );
 _LIT8( KViews, "views" );
 _LIT8( KWidget, "widget" );
 _LIT8( KUseEmptyWidget, "use_empty_widget" );
-_LIT8( KRemovable, "removable" );
 
 _LIT8( KEmptyWidgetUid, "0x2001F47F" );
 
@@ -347,25 +346,6 @@ static TBool UseEmptyWidget( CXnDomNode& aView )
     return EFalse;
     }
 
-// --------------------------------------------------------------------------
-// Removable
-// Determines whether this plugin is removable
-// --------------------------------------------------------------------------
-//
-static TBool Removable( CXnDomNode& aPlugin )
-    {    
-    CXnDomAttribute* attribute(
-        static_cast< CXnDomAttribute* >( 
-                aPlugin.AttributeList().FindByName( KRemovable ) ) );
-
-    if ( attribute && attribute->Value() == XnPropertyNames::KFalse )
-        {
-        return EFalse;
-        }
-    
-    return ETrue;
-    }
-
 // ======== MEMBER FUNCTIONS ========
 // --------------------------------------------------------------------------
 // CXnComposer::NewL
@@ -655,8 +635,12 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
                     widget->SetOwner( node );
                     
                     if ( count < plugins.Count() )
-                        {                        
-                        widget->SetPluginIdL( plugins[ count ]->PluginId() );
+                        { 
+                        CPluginMap* plugin( plugins[count] );
+                        
+                        widget->SetPluginIdL( plugin->PluginId() );
+                        
+                        widget->SetLockingStatus( plugin->LockingStatus() );
                         }
                     
                     count++;
@@ -767,9 +751,7 @@ TInt CXnComposer::ComposeWidgetL( CXnPluginData& aPluginData )
                     }
                 }
             }
-        
-        aPluginData.SetRemovable( Removable( *widgetRoot ) );
-
+                
         retval = KErrNone;                       
         }
     

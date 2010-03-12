@@ -35,7 +35,6 @@ NONSHARABLE_STRUCT( TXnEffect )
     {
     CXnNode* iNode;
     TInt iState;
-    TInt iType;
     TInt iId;
     };
 
@@ -58,20 +57,6 @@ public:
      * Destructor.
      */
     ~CXnEffectManager();
-    
-    /**
-     * Begin handling of control effect.
-     * @param aId effect id
-     * @aPlugin Plugin data
-     */
-    void BeginControlEffectL( TInt aId, CXnPluginData& aPlugin );
-    
-    /**
-     * Begin handling of control effect.
-     * @param aId effect id
-     * @aPlugins Array of plugin datas
-     */
-    void BeginControlEffectL( TInt aId, RPointerArray<CXnPluginData>& aPlugins );
     
     /**
      * Begin handling of fullscreen effect.
@@ -97,27 +82,12 @@ private:
      * @return ETrue if effect started, otherwise EFalse
      */
     TBool DoBeginFullscreenEffect( TXnEffect& aEffect );
-
-    /**
-     * Starts control effect.
-     * @param aEffect effect data
-     * @return ETrue if effect started, otherwise EFalse
-     */
-    TBool DoBeginControlEffect( TXnEffect& aEffect );
     
     /**
      * Removes and destroys effect from effect list.
      * @param aEffect effect data
      */
     void RemoveEffect( TXnEffect* aEffect );
-
-    /**
-     * Return number of ongoing effects of given type.
-     * @param aType effect type, fullscreen or control
-     * 
-     * @return Number of ongoing effects of given type
-     */
-    TInt EffectCount( TInt aType );
     
     /**
      * C++ default constructor.

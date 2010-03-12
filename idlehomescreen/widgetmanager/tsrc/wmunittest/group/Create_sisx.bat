@@ -16,4 +16,4 @@ rem
 
 rem Create wm sis&sisx files
 makesis wmunittest.pkg
-signsis wmunittest.SIS wmunittest.SISX Nokia_RnDCert_02.der Nokia_RnDCert_02.key
+signsis wmunittest.SIS wmunittest.SISX ..\..\..\internal\cert\Nokia_RnDCert_02.der ..\..\..\internal\cert\Nokia_RnDCert_02.key

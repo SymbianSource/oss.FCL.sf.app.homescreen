@@ -30,11 +30,13 @@
 #include <gulicon.h>
 #include <widgetmanagerview.rsg>
 #include <widgetmanager.mbg>
+
 #include "wmcommon.h"
 #include "wmplugin.h"
 #include "wmresourceloader.h"
 #include "wmlistbox.h"
 #include "wmwidgetdata.h"
+#include "wmwidgetorderdata.h"
 
 // CONSTANTS
 
@@ -98,30 +100,6 @@ void CWmListItemDrawer::ConstructL()
             EMbmWidgetmanagerQgn_menu_hswidget,
             EMbmWidgetmanagerQgn_menu_hswidget_mask
             );
-
-    AknsUtils::CreateColorIconL(
-            skin,
-            KAknsIIDQgnIndiWmAdd,
-            KAknsIIDQsnTextColors,
-            EAknsCIQsnTextColorsCG6,
-            iAddWidgetBtnImage,
-            iAddWidgetBtnMask,
-            iWmPlugin.ResourceLoader().IconFilePath(),
-            EMbmWidgetmanagerAdd_widget_button,
-            EMbmWidgetmanagerAdd_widget_button_mask,
-            KRgbBlack );
-
-    AknsUtils::CreateColorIconL(
-            skin,
-            KAknsIIDQgnIndiWmAdd,
-            KAknsIIDQsnTextColors,
-            EAknsCIQsnTextColorsCG10,
-            iAddWidgetBtnHighlightImage,
-            iAddWidgetBtnHighlightMask,
-            iWmPlugin.ResourceLoader().IconFilePath(),
-            EMbmWidgetmanagerAdd_widget_button,
-            EMbmWidgetmanagerAdd_widget_button_mask,
-            KRgbWhite );
     
     // This is temporary fix for ou1cimx1#228810
     // Can be removed when avkon provides real fix for this error.
@@ -165,10 +143,6 @@ CWmListItemDrawer::~CWmListItemDrawer()
     // dispose icons
     delete iDefaultLogoImage;
     delete iDefaultLogoImageMask;
-    delete iAddWidgetBtnImage;
-    delete iAddWidgetBtnMask;
-    delete iAddWidgetBtnHighlightImage;
-    delete iAddWidgetBtnHighlightMask;
 	}
 
 // ---------------------------------------------------------
@@ -179,8 +153,7 @@ void CWmListItemDrawer::ResizeDefaultBitmaps()
     {
 	TAknWindowLineLayout logoPane = 
 	          AknLayoutScalable_Apps::listrow_wgtman_pane_g1().LayoutLine();
-    TAknWindowLineLayout addPane = 
-              AknLayoutScalable_Apps::listrow_wgtman_pane_g2().LayoutLine();
+
     TAknLayoutRect layoutRect;
     TRect rect = TRect( ItemCellSize() );
     layoutRect.LayoutRect( rect, logoPane );
@@ -191,18 +164,6 @@ void CWmListItemDrawer::ResizeDefaultBitmaps()
         iDefaultLogoImage, size, EAspectRatioPreserved );
     AknIconUtils::SetSize( 
         iDefaultLogoImageMask, size, EAspectRatioPreserved );
-    
-    // RESIZE ADD BTN BITMAPS ACCORDING TO LAYOUT
-    layoutRect.LayoutRect( rect, addPane );
-    size = layoutRect.Rect().Size();
-    AknIconUtils::SetSize( 
-        iAddWidgetBtnImage, size, EAspectRatioPreserved );
-    AknIconUtils::SetSize( 
-        iAddWidgetBtnMask, size, EAspectRatioPreserved );
-    AknIconUtils::SetSize( 
-        iAddWidgetBtnHighlightImage, size, EAspectRatioPreserved );
-    AknIconUtils::SetSize( 
-        iAddWidgetBtnHighlightMask, size, EAspectRatioPreserved );
     }
 	
 // ---------------------------------------------------------
@@ -239,7 +200,6 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
                                   innerRect,
                                   KAknsIIDQsnFrList,
                                   KAknsIIDQsnFrListCenter );
-    
         }
     
     // DRAW LOGO
@@ -258,6 +218,7 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
         logoLayout.DrawImage( gc, bitmap, mask );
         }
 
+    // DRAW NAME
     TRgb textColor;
     TAknsQsnTextColorsIndex index =
         ( aItemIsCurrent && listFocused && highlightEnabled )? 
@@ -265,9 +226,6 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
 
     AknsUtils::GetCachedColor( 
                     skin, textColor, KAknsIIDQsnTextColors, index );
-
-    // DRAW TEXT
-
     TAknTextLineLayout titleTextLayout = 
               AknLayoutScalable_Apps::listrow_wgtman_pane_t1().LayoutLine();
 
@@ -275,38 +233,9 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     textLayoutTitle.LayoutText( itemRect, titleTextLayout );
     textLayoutTitle.DrawText( gc, wData.Name(), ETrue, textColor );
     
-    if ( !wData.IsUninstalling() &&
-        wData.HsContentInfo().CanBeAdded() )
+    if ( wData.IsUninstalling() )
         {
-        // DRAW ADD BUTTON
-        TAknLayoutRect addButtonLayout;
-        addButtonLayout.LayoutRect( itemRect,
-                AknLayoutScalable_Apps::listrow_wgtman_pane_g2().LayoutLine() );
-        if ( aItemIsCurrent && listFocused && highlightEnabled )
-            {
-            addButtonLayout.DrawImage( gc,                    
-                    iAddWidgetBtnHighlightImage, iAddWidgetBtnHighlightMask );
-            }
-        else
-            {
-            addButtonLayout.DrawImage( gc, 
-                    iAddWidgetBtnImage, iAddWidgetBtnMask );
-            }        
-        }
-
-    if ( !wData.IsUninstalling() )
-        {
-        TAknTextLineLayout descTextLayout =
-            AknLayoutScalable_Apps::listrow_wgtman_pane_t2().LayoutLine();
-        gc.SetPenSize(TSize(1,1));
-        // DRAW DESCRIPTION TEXT
-        TAknLayoutText textLayoutDes;
-        textLayoutDes.LayoutText( itemRect, descTextLayout );
-        textLayoutDes.DrawText( gc, wData.Description(), ETrue, textColor );
-        }
-    else
-        {
-        // draw animation
+        // DRAW UNINSTALL ANIMATION
         TAknLayoutRect animationLayout;
         animationLayout.LayoutRect( itemRect,
              AknLayoutScalable_Apps::wait_bar_pane_cp09().LayoutLine() );
@@ -346,65 +275,7 @@ const CFbsBitmap* CWmListItemDrawer::DefaultLogoMask()
 //
 void CWmListItemDrawer::HandleSkinChanged()
     {
-    CFbsBitmap* addWidgetBtnImage( NULL );
-    CFbsBitmap* addWidgetBtnMask( NULL );
-    CFbsBitmap* addWidgetBtnHighlightImage( NULL );
-    CFbsBitmap* addWidgetBtnHighlightMask( NULL );
-    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    
-    TRAPD( err, 
-        AknsUtils::CreateColorIconLC(
-                skin,
-                KAknsIIDQgnIndiWmAdd,
-                KAknsIIDQsnTextColors,
-                EAknsCIQsnTextColorsCG6,
-                addWidgetBtnImage,
-                addWidgetBtnMask,
-                iWmPlugin.ResourceLoader().IconFilePath(),
-                EMbmWidgetmanagerAdd_widget_button,
-                EMbmWidgetmanagerAdd_widget_button_mask,
-                KRgbBlack );
-        
-        AknsUtils::CreateColorIconLC(
-                skin,
-                KAknsIIDQgnIndiWmAdd,
-                KAknsIIDQsnTextColors,
-                EAknsCIQsnTextColorsCG10,
-                addWidgetBtnHighlightImage,
-                addWidgetBtnHighlightMask,
-                iWmPlugin.ResourceLoader().IconFilePath(),
-                EMbmWidgetmanagerAdd_widget_button,
-                EMbmWidgetmanagerAdd_widget_button_mask,
-                KRgbWhite );
-        
-        CleanupStack::Pop( 4 ); // pop icons
-        );
-    
-    if ( KErrNone == err )
-        {
-        // delete old icons
-        delete iAddWidgetBtnImage;
-        iAddWidgetBtnImage = NULL;
-        delete iAddWidgetBtnMask;
-        iAddWidgetBtnMask = NULL;
-        delete iAddWidgetBtnHighlightImage;
-        iAddWidgetBtnHighlightImage = NULL;
-        delete iAddWidgetBtnHighlightMask;
-        iAddWidgetBtnHighlightMask = NULL;
-        
-        // transfer ownership
-        iAddWidgetBtnImage = addWidgetBtnImage;
-        addWidgetBtnImage = NULL;
-        iAddWidgetBtnMask = addWidgetBtnMask;
-        addWidgetBtnMask = NULL;
-        iAddWidgetBtnHighlightImage = addWidgetBtnHighlightImage;
-        addWidgetBtnHighlightImage = NULL;
-        iAddWidgetBtnHighlightMask = addWidgetBtnHighlightMask;
-        addWidgetBtnHighlightMask = NULL;
-        
-        // resize new created icons
-        ResizeDefaultBitmaps();
-        }
+    ResizeDefaultBitmaps();
     }
 
 // ---------------------------------------------------------
@@ -442,7 +313,8 @@ CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
 //
 CWmListBox::~CWmListBox()
     {
-    iWidgetDatas.ResetAndDestroy();
+    iVisibleWidgetArray.ResetAndDestroy();
+    iOrderDataArray.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------
@@ -458,7 +330,7 @@ void CWmListBox::ConstructL(
     SetContainerWindowL( *aParent );    
 
     // set model point to the widgets array
-    Model()->SetItemTextArray( &iWidgetDatas );
+    Model()->SetItemTextArray( &iVisibleWidgetArray );
     Model()->SetOwnershipType( ELbmDoesNotOwnItemArray );
 
     // set empty-text to null
@@ -474,7 +346,7 @@ void CWmListBox::ConstructL(
 CWmWidgetData* CWmListBox::WidgetData()
     {
     TInt index = CurrentListBoxItemIndex();
-    return (index>=0 ? iWidgetDatas[index] : NULL);
+    return (index>=0 ? iVisibleWidgetArray[index] : NULL);
     }
 
 // ---------------------------------------------------------
@@ -483,7 +355,7 @@ CWmWidgetData* CWmListBox::WidgetData()
 //
 CWmWidgetData& CWmListBox::WidgetData( TInt aItemIndex )
     {
-    return *iWidgetDatas[ RealIndex( aItemIndex ) ];
+    return *iVisibleWidgetArray[ RealIndex( aItemIndex ) ];
     }
 
 // ---------------------------------------------------------
@@ -496,7 +368,7 @@ void CWmListBox::AddWidgetDataL( CWmWidgetData* aWidgetData,
     if ( aWidgetData )
         {
         aWidgetData->SetObserver( this );
-        iWidgetDatas.InsertInOrderAllowRepeatsL( aWidgetData,
+        iVisibleWidgetArray.InsertInOrderAllowRepeatsL( aWidgetData,
             SortOrder(EStoredOrder) );
         if ( aRedraw ) { HandleItemAdditionL(); }
         }
@@ -511,12 +383,25 @@ void CWmListBox::RemoveWidgetData( TInt aItemIndex )
     TInt realIndex = RealIndex( aItemIndex );
     TBool current = ( aItemIndex == CurrentItemIndex() );
     // remove widget data
-    CWmWidgetData* data = iWidgetDatas[realIndex];
-    iWidgetDatas.Remove( realIndex );
+    CWmWidgetData* data = iVisibleWidgetArray[realIndex];
+    iVisibleWidgetArray.Remove( realIndex );
     // reorganise
     TRAP_IGNORE(
         AknListBoxUtils::HandleItemRemovalAndPositionHighlightL(
             this, realIndex, current ) );
+
+    // Remove item from order array
+    for ( TInt i = 0; i < iOrderDataArray.Count(); i++ )
+        {
+        CWmWidgetOrderData* order = iOrderDataArray[i];
+        if ( order->EqualsTo( data->Uid(), data->PublisherId() ) )
+            {
+            iOrderDataArray.Remove( i );
+            delete order;
+            order = NULL;
+            break;
+            }
+        }
     
     // delete now
     delete data;
@@ -540,10 +425,10 @@ void CWmListBox::RedrawItem( TInt aItemIndex )
 // CWmListBox::SetSortOrderL
 // ---------------------------------------------------------
 //
-void CWmListBox::SetSortOrderL( TSortOrder aOrder )
+void CWmListBox::DoSortToVisibleArray( TSortOrder aOrder )
     {
     // now sort the existing data
-    iWidgetDatas.Sort( SortOrder( aOrder ) );
+    iVisibleWidgetArray.Sort( SortOrder( aOrder ) );
     DrawNow();
     }
 
@@ -572,9 +457,9 @@ void CWmListBox::HandleLayoutChanged()
     {
     iLogoSize = TSize( 0, 0);
 	iLogoSize = LogoSize();
-    for ( TInt i=0; i<iWidgetDatas.Count(); i++)
+    for ( TInt i=0; i<iVisibleWidgetArray.Count(); i++)
         {
-        iWidgetDatas[i]->ReCreateLogo( iLogoSize );
+        iVisibleWidgetArray[i]->ReCreateLogo( iLogoSize );
         }
     }
 
@@ -601,7 +486,7 @@ void CWmListBox::HandleWidgetDataChanged( CWmWidgetData* aWidgetData )
     if ( !iFindPaneIsVisible )
         {
         // spontaneous change in the model. Cause table to redraw
-        TInt index = iWidgetDatas.Find( aWidgetData );
+        TInt index = iVisibleWidgetArray.Find( aWidgetData );
         if ( index >= 0 )
             {
             // redraw item.
@@ -763,5 +648,53 @@ const CFbsBitmap* CWmListBox::DefaultMask()
     return NULL;
     }
 
+// ---------------------------------------------------------
+// CWmListBox::SortOrderToOrderData
+// ---------------------------------------------------------
+//
+TLinearOrder<CWmWidgetOrderData> CWmListBox::SortOrderToOrderData( TSortOrder aOrder )
+    {
+    if ( aOrder == EStoredOrder )
+        {
+        return TLinearOrder<CWmWidgetOrderData>(
+                CWmWidgetOrderData::CompareByPersistentWidgetOrder );
+        }
+    else
+        {
+        return TLinearOrder<CWmWidgetOrderData>(
+                CWmWidgetOrderData::CompareByName );
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmListBox::SetSortOrderToOrderDataL
+// ---------------------------------------------------------
+//
+void CWmListBox::DoSortToOrderData( TSortOrder aOrder )
+    {
+    iOrderDataArray.Sort( SortOrderToOrderData( aOrder ) );
+    }
+
+// ---------------------------------------------------------
+// CWmListBox::AddWidgetDataL
+// ---------------------------------------------------------
+//
+void CWmListBox::AddOrderDataL( CWmWidgetOrderData* aOrderData )
+    {
+    if ( aOrderData )
+        {
+        iOrderDataArray.InsertInOrderAllowRepeatsL( aOrderData,
+                SortOrderToOrderData( EStoredOrder ) );
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmListBox::OrderData
+// ---------------------------------------------------------
+//
+CWmWidgetOrderData* CWmListBox::OrderData( TInt aItemIndex )
+    {
+    return iOrderDataArray[ aItemIndex ];
+    }
 // End of File
 

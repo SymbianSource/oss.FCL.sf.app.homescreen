@@ -205,6 +205,20 @@ void CTsFastSwapPreviewProviderClient::DoHandleMessageL( const TDesC8& aData )
             SetProperties( handle, id, EOperationUnregister );
             }
             break;
+        case NPreviewMsg::EBitmapRotationNeeded90:
+            {
+            const TInt id = in.ReadInt32L();
+            const TInt handle = in.ReadInt32L();
+            SetProperties( handle, id, EOperationBitmapRotation90 );
+            }
+            break;
+        case NPreviewMsg::EBitmapRotationNeeded270:
+            {
+            const TInt id = in.ReadInt32L();
+            const TInt handle = in.ReadInt32L();
+            SetProperties( handle, id, EOperationBitmapRotation270 );
+            }
+            break;
         }
 
     TSLOG_OUT();

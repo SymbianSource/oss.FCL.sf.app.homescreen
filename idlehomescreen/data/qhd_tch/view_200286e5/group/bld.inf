@@ -1,0 +1,77 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* The information required for building
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/view_200286e5/hsps/manifest.dat
+../hsps/00/viewconfiguration.xml /epoc32/data/Z/resource/homescreen/view_200286e5/hsps/viewconfiguration.xml
+
+../xuikon/00/View.dat /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/view_200286e5.dat
+../xuikon/00/View.css /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/view.css
+../xuikon/00/View.xml /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/view.xml
+../xuikon/00/View.dtd /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/view.dtd
+
+// Arabic languages
+//*****************
+../xuikon/37/View.css /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/37/view.css
+../xuikon/50/View.css /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/50/view.css
+../xuikon/57/View.css /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/57/view.css
+../xuikon/94/View.css /epoc32/data/Z/resource/homescreen/view_200286e5/xuikon/94/view.css
+
+
+//Confml and cfgml files for the customization
+// starting use confml it is need to remove root_configuration.xml direct exporting (view_200286e5_variant.iby)
+//***********************************
+//../conf/view2001f486.confml   APP_LAYER_CONFML(view200286e5.confml)
+//../conf/view2001f486.gcfml    APP_LAYER_GCFML(view200286e5.gcfml)
+
+// Support for S60 localization
+//*****************************
+#ifndef __VIEW_LOC__
+#define __VIEW_LOC__
+../loc/view.loc APP_LAYER_LOC_EXPORT_PATH(view.loc)
+#endif // __VIEW_LOC__
+
+// Support for S60 builds
+//***********************
+../rom/view_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(view_200286e5_resources.iby)
+../rom/view_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view_200286e5_customer.iby)
+../rom/view_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view_200286e5_variant.iby)
+../rom/view.iby CORE_APP_LAYER_IBY_EXPORT_PATH(view_200286e5.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME view_200286e5
+OPTION DTD_TYPE widget
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  

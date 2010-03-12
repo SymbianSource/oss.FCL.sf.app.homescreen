@@ -22,9 +22,6 @@
 // System includes
 #include <e32base.h>
 
-// User includes
-#include "xninactivitymonitor.h"
-
 // Forward declarations
 class CXnAppUiAdapter;
 class CWindowGc;
@@ -36,8 +33,7 @@ class CWindowGc;
  * @lib xn3layoutengine.lib
  * @since S60 5.0
  */
-NONSHARABLE_CLASS( CXnFocusControl ) : public CBase,
-    public MXnInactivityObserver
+NONSHARABLE_CLASS( CXnFocusControl ) : public CBase
     {
 public:    
     // Constructors and destructor
@@ -70,14 +66,6 @@ private:
      */
     CXnFocusControl( CXnAppUiAdapter& aAppUiAdapter );
     
-private:
-    // from MXnInactivityObserver
-    
-    /**
-     * @see MXnInactivityObserver
-     */
-    void InactivityTimerExpired();
-
 public: 
     // new functions
     
@@ -116,8 +104,6 @@ private:
     
     /** AppUiAdapter, Not owned */
     CXnAppUiAdapter& iAppUiAdapter;
-    /** Inactivity monitor, Owned */
-    CXnInactivityMonitor* iMonitor;
     /** Flag to indicate whether it is allowed to show focus */
     TBool iVisible;
     /** Flag to indicate refusal */

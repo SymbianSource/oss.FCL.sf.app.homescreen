@@ -100,12 +100,15 @@ private:
      * adds a widget data entry to iWidgetsList
      * takes ownership of aContentInfo
      */
-    void AddWidgetDataL( CHsContentInfo* aContentInfo );
+    void AddWidgetDataL( CHsContentInfo* aContentInfo, TInt& aCount );
     
     /**
      * cleanup resources allocated runing one single run
      */
     void Cleanup();
+    
+    /** Converts uid to TUid from TDesC8 */
+    TUid UidFromString( const TDesC8& aUidString ) const;
     
 private: // data
 

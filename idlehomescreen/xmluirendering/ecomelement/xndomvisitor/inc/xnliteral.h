@@ -47,13 +47,6 @@ _STLIT8(KDesc,        "desc");
 
 //Control
 _STLIT8(KButton,      "button");
-_STLIT8(KGrid,        "grid");
-_STLIT8(KListItem,    "listitem");
-_STLIT8(KDataGrid,    "datagrid");
-_STLIT8(KGridCellTemplate,    "gridcelltemplate");
-_STLIT8(KList,        "list");
-_STLIT8(KDataList,    "datalist");
-_STLIT8(KListRowTemplate, "listrowtemplate");
 _STLIT8(KMenuBar,     "menubar");
 _STLIT8(KMenu,        "menu");
 _STLIT8(KMenuItem,    "menuitem");
@@ -143,18 +136,6 @@ _STLIT8(KTextDecoration,   "text-decoration");
 
 //For text,list,datalist, grid, datagrid elements
 _STLIT8(KOverflow,          "overflow");
-
-//List And grid properties
-_STLIT8(KVisibleRows,      "_s60-visible-list-rows");
-_STLIT8(KInitialSelection, "_s60-initial-list-selection");
-_STLIT8(KFocusHorLooping,  "_s60-list-focus-horizontal-looping");
-_STLIT8(KFocusVerLooping,  "_s60-list-focus-vertical-looping");
-
-//Datagrid & grid properties
-_STLIT8(KGridColumns,       "_s60-grid-columns");
-_STLIT8(KS60GridOrientation, "_s60-grid-orientation");
-_STLIT8(KS60GridVerDirection, "_s60-grid-ver-direction"); //lr, rl
-_STLIT8(KS60GridHorDirection, "_s60-grid-hor-direction"); //tb, bt
 
 //Views and view properties
 _STLIT8(KViewDecoration,       "_s60-view-decoration");
@@ -256,23 +237,6 @@ const TXnPropertyProxy KXnElementWithTextPropertyTable[] =
 const TXnPropertyProxy KXnTextElementPropertyTable[] =
 	{
 	    {(const void*)&KOverflow,       EFalse}
-	};
-	
-const TXnPropertyProxy KXnGridAndListPropertyTable[] =
-	{
-	    {(const void*)&KVisibleRows,          EFalse},
-	    {(const void*)&KInitialSelection,     EFalse},
-	    {(const void*)&KFocusHorLooping,      EFalse},
-	    {(const void*)&KFocusVerLooping,      EFalse},
-	    {(const void*)&KOverflow,             EFalse}
-	};
-
-const TXnPropertyProxy KXnDataGridAndGridPropertyTable[] =
-	{
-	    {(const void*)&KGridColumns,            EFalse},
-	    {(const void*)&KS60GridOrientation,     EFalse},
-	    {(const void*)&KS60GridVerDirection,    EFalse},
-	    {(const void*)&KS60GridHorDirection,    EFalse}
 	};
 	
 const TXnPropertyProxy KXnViewsAndViewPropertyTable[] =

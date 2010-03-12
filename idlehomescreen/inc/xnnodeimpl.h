@@ -33,7 +33,6 @@ class CXnPropertyList;
 class CXnProperty;
 class CXnNode;
 class CXnUiEngine;
-class CGridPropertyCache;
 class CLayoutPropertyCache;
 class CXnDomNode;
 class CXnScrollableControlAdapter;
@@ -797,62 +796,6 @@ public:
      * @see GetPropertyL
      * @return The property mapped to the key or NULL if not found.
      */
-    CXnProperty* VisibleRowsL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridColumnsL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridOrientationL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridVerDirectionL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridHorDirectionL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* FocusHorLoopingL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* FocusVerLoopingL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
     CXnProperty* ZIndexL();
 
     /**
@@ -878,30 +821,6 @@ public:
      * @return The property mapped to the key or NULL if not found.
      */
     CXnProperty* BackgroundImageL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* RefL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridScrollBarMarginL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridScrollBarWidthL();
 
     /**
      * Sets the pointer of DOM node
@@ -953,29 +872,6 @@ public:
     void FixAdaptiveSizeL( const TSize& aFixedSize );
 
     /**
-     * Callback which will be called by the CPeriodic.
-     *
-     * @param aPtr User defined pointer.
-     * @return ETrue if the method should be called again.
-     */
-    static TInt PeriodicEventL( TAny* aPtr );
-
-    /**
-     * Returns a pointer to the periodic timer (for timed triggers).
-     */
-    CPeriodic* PeriodicTimer();
-
-    /**
-     * Creates a periodic timer (iPeriodicTimer).
-     */
-    void CreatePeriodicL();
-
-    /**
-     * Deletes a periodict timer (iPeriodicTimer)
-     */
-    void DeletePeriodic();
-
-    /**
      * Marks node as dirty, adds it to UiEngine's dirty list and
      * clears rendered and laidout from the node and its children.
      *
@@ -1016,7 +912,7 @@ public:
      * Gets scrollable control.
      */
     CXnScrollableControlAdapter* ScrollableControl();
-        
+            
 private:
 
     TInt DoSetPropertyL( CXnProperty* aPropery );
@@ -1129,12 +1025,6 @@ private:
     RArray< CXnDomProperty::TPseudoClass > iStates;
 
     /**
-     * Local cache for property with name KRef.
-     * Not own.
-     */
-    CXnProperty* iRef;
-
-    /**
      * Local cache for property with name KName.
      * Not own.
      */
@@ -1186,12 +1076,6 @@ private:
      * Local property cache.
      * Own.
      */
-    CGridPropertyCache* iGridPropertyCache;
-
-    /**
-     * Local property cache.
-     * Own.
-     */
     CLayoutPropertyCache* iLayoutPropertyCache;
 
     /**
@@ -1216,11 +1100,6 @@ private:
      */
     TInt iAdaptive;
 
-    /**
-     * The timer for the timed triggers.
-     * Own.
-     */
-    CPeriodic* iPeriodicTimer;
     };
 
 #endif

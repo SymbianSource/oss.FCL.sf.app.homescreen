@@ -141,33 +141,45 @@ static void SetLabelTextL( CEikLabel& aLabel, const TDesC& aSource, TInt aMaxLin
                 
                 TInt lineCount( array->Count() );
                 
-                buffer = HBufC::NewLC( temp->Length() + ( lineCount - 1 ) );
-                
-                TPtr ptr( buffer->Des() );
-                                                
-                for( TInt i = 0; i < lineCount; i++ )
+                TInt bufLen = temp->Length() + ( lineCount - 1 );
+                if ( bufLen > 0 )
                     {
-                    TPtrC line( array->At( i ) );
+                    buffer = HBufC::NewLC( bufLen );
                     
-                    ptr.Append( line );
-                    
-                    if( i + 1 < lineCount )
+                    TPtr ptr( buffer->Des() );
+                                                    
+                    for( TInt i = 0; i < lineCount; i++ )
                         {
-                        ptr.Append( '\n' );
-                        }                    
+                        TPtrC line( array->At( i ) );
+                        
+                        ptr.Append( line );
+                        
+                        if( i + 1 < lineCount )
+                            {
+                            ptr.Append( '\n' );
+                            }                    
+                        }
+                        
+                    CleanupStack::Pop();
+                    CleanupStack::PopAndDestroy( temp );
+                    CleanupStack::PushL( buffer );
                     }
-                    
-                CleanupStack::Pop();
-                CleanupStack::PopAndDestroy( temp );
-                CleanupStack::PushL( buffer );                                                    
+                else
+                    {
+                    CleanupStack::PopAndDestroy( temp );
+                    }
                 }    	        
 
             // The text is already in visual form, no need for conversion
             conversion = EFalse;
 
-            aLabel.SetTextL( *buffer );            
-                        
-            CleanupStack::PopAndDestroy( 2 ); // buffer, array                                       
+            if ( buffer )
+                {
+                aLabel.SetTextL( *buffer );
+                CleanupStack::PopAndDestroy( buffer );
+                }
+            
+            CleanupStack::PopAndDestroy(); // array                                       
     	    }
         else
             {

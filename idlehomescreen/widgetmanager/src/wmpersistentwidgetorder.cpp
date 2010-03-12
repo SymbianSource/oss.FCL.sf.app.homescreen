@@ -23,6 +23,7 @@
 #include <sysutil.h> 
 
 #include "wmwidgetdata.h"
+#include "wmwidgetorderdata.h"
 #include "wmpersistentwidgetorder.h"
 
 // CONSTANTS
@@ -67,6 +68,7 @@ void CWmPersistentWidgetOrder::ConstructL()
 CWmPersistentWidgetOrder::~CWmPersistentWidgetOrder()
     {
     CleanupArray();
+    iTagArray.Close();
     }
 
 // ---------------------------------------------------------
@@ -107,45 +109,56 @@ void CWmPersistentWidgetOrder::LoadL()
 // CWmPersistentWidgetOrder::StoreL
 // ---------------------------------------------------------
 //
-void CWmPersistentWidgetOrder::StoreL( const RWidgetDataValues& aArray )
+void CWmPersistentWidgetOrder::StoreL( const ROrderArray& aArray )
     {
+
     // 1. create stream for storing the data to a file
     TFileName storeFileName;
     GetStoreFileNameL( storeFileName );
     CPermanentFileStore* fileStore = NULL;
     fileStore = CPermanentFileStore::ReplaceLC(
             iFs, storeFileName, EFileWrite );
-    fileStore->SetTypeL( KPermanentFileStoreLayoutUid );
-    RStoreWriteStream writer;
-    TStreamId id = writer.CreateLC( *fileStore );
-    // 2. write all content to the stream
-    writer.WriteInt32L( aArray.Count() );
-    for( TInt i=0; i<aArray.Count(); ++i )
+    
+    if ( fileStore )
         {
-        CWmWidgetData* data = aArray[i];
-        if ( !data || !data->IsValid() )
+        fileStore->SetTypeL( KPermanentFileStoreLayoutUid );
+        RStoreWriteStream writer;
+        TStreamId id = writer.CreateLC( *fileStore );
+        
+        // 2. write all content to the stream
+        writer.WriteInt32L( aArray.Count() );
+        for( TInt i=0; i<aArray.Count(); ++i )
             {
-            User::Leave( KErrArgument ); 
+            CWmWidgetOrderData* data = aArray[i];
+            
+            if ( !data  )
+                {
+                User::Leave( KErrArgument ); 
+                }
+            TInt32 uid = data->Uid().iUid;
+            const TDesC16& publisherId = data->PublisherId();
+            writer.WriteInt32L( uid );
+            writer.WriteInt32L( publisherId.Length() );
+            writer.WriteL( publisherId, publisherId.Length() );
+            
             }
-        TInt32 uid = data->Uid().iUid;
-        const TDesC16& publisherId = data->HsContentInfo().PublisherId();
-        writer.WriteInt32L( uid );
-        writer.WriteInt32L( publisherId.Length() );
-        writer.WriteL( publisherId, publisherId.Length() );
+        // 3. check available space and commit the stream
+        TInt streamsize = writer.Sink()->SizeL();
+        TBool belowCriticalLevel = SysUtil::DiskSpaceBelowCriticalLevelL(
+                &iFs, streamsize, EDriveC );
+        
+        if( !belowCriticalLevel )
+            {
+            writer.CommitL();
+            fileStore->SetRootL(id);
+            fileStore->CommitL();        
+            }
+        
+        // 4. cleanup
+        CleanupStack::PopAndDestroy( &writer );        
+        CleanupStack::PopAndDestroy( fileStore );
         }
-    // 3. check available space and commit the stream
-    TInt streamsize = writer.Sink()->SizeL();
-    TBool belowCriticalLevel = SysUtil::DiskSpaceBelowCriticalLevelL(
-            &iFs, streamsize, EDriveC );
-    if( !belowCriticalLevel )
-        {
-        writer.CommitL();
-        fileStore->SetRootL(id);
-        fileStore->CommitL();        
-        }
-    // 4. cleanup
-    CleanupStack::PopAndDestroy( &writer );
-    CleanupStack::PopAndDestroy( fileStore );
+    
     }
 
 // ---------------------------------------------------------
@@ -157,9 +170,9 @@ void CWmPersistentWidgetOrder::CleanupArray()
     for( TInt i=0; i<iTagArray.Count(); ++i )
         {
         delete iTagArray[i].iPublisherId;
-        iTagArray[i].iPublisherId = 0;
+        iTagArray[i].iPublisherId = NULL;
         }
-    iTagArray.Close();
+    iTagArray.Reset();
     }
 
 // ---------------------------------------------------------
@@ -211,6 +224,22 @@ TBool CWmPersistentWidgetOrder::IsEmpty() const
     }
 
 // ---------------------------------------------------------
+// CWmPersistentWidgetOrder::IndexOf
+// ---------------------------------------------------------
+//
+TInt CWmPersistentWidgetOrder::IndexOf( 
+        const CWmWidgetOrderData& aWidgetOrder ) const
+    {
+    TInt found = KErrNotFound;
+    for( TInt i=0; i<iTagArray.Count() && found<0; ++i )
+        {
+        if ( iTagArray[i].Matches( aWidgetOrder ) )
+            found = i;
+        }
+    return found;
+    }
+
+// ---------------------------------------------------------
 // CWmPersistentWidgetOrder::Tag::Tag
 // ---------------------------------------------------------
 //
@@ -232,5 +261,15 @@ TBool CWmPersistentWidgetOrder::Tag::Matches(
             aWidgetData.HsContentInfo().PublisherId() == *iPublisherId );
     }
 
+// ---------------------------------------------------------
+// CWmPersistentWidgetOrder::Tag::Matches
+// ---------------------------------------------------------
+//
+TBool CWmPersistentWidgetOrder::Tag::Matches(
+        const CWmWidgetOrderData& aWidgetOrder ) const
+    {
+    return ( aWidgetOrder.Uid().iUid == iUid &&
+            aWidgetOrder.PublisherId() == *iPublisherId );
+    }
 
 // end of file

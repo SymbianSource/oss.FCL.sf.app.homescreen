@@ -259,22 +259,15 @@ CAIXuikonEventHandler* CXmlUiController::CreateXuikonEventHandlerL(
 // ----------------------------------------------------------------------------
 //
 void CXmlUiController::NotifyAppEnvReadyL()
-    {
+    {    
+    iCPSpublisher = CContentPublisher::NewL( *this );
+    
+    iExitTimer = CPeriodic::NewL( CActive::EPriorityStandard );    
+
     if( iFwEventHandler )
         {
-        iFwEventHandler->AppEnvReadyL();
-        iFwEventHandler->HandleUiReadyEventL( *this );
-        }
-    
-    if( !iCPSpublisher )
-        {
-        iCPSpublisher = CContentPublisher::NewL( *this );
-        }
-    
-    if( !iExitTimer )
-        {
-        iExitTimer = CPeriodic::NewL( CActive::EPriorityStandard );        
-        }
+        iFwEventHandler->AppEnvReadyL();        
+        }          
     }
 
 // ----------------------------------------------------------------------------
@@ -599,6 +592,10 @@ void CXmlUiController::GetConfigurationsL( CXnNodeAppIf& aNode,
 //
 void CXmlUiController::ActivateUI()
     {
+    if ( iRunningAsMain && iAppUi )
+        {
+        iAppUi->ActivateUi();
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -670,10 +667,12 @@ MAiSecondaryUiController* CXmlUiController::SecondaryInterface()
 //
 void CXmlUiController::RunApplicationL()
     {
-    iRunningAsMain = ETrue;
+    __PRINTS( "*** CXmlUiController::RunApplicationL" );
     
+    iRunningAsMain = ETrue;
+                                                    
     User::LeaveIfError( 
-        EikStart::RunApplication( &CXmlUiController::NewApplication ) );
+        EikStart::RunApplication( &CXmlUiController::NewApplication ) );       
     }
 
 // ----------------------------------------------------------------------------
@@ -815,9 +814,18 @@ void CXmlUiController::HandleFocusGainedL( const TDesC8& aUiElement1,
 //
 CApaApplication* CXmlUiController::NewApplication()
     {
-    CXmlUiController* self = static_cast<CXmlUiController*>(Dll::Tls());
-    __ASSERT_ALWAYS( self, Panic(ECriticalPointerNull) );
-    return CApplication::New(*self);
+    __TICK( "CXmlUiController::NewApplication" );
+    __TIME_MARK( time );
+    
+    CXmlUiController* self = static_cast< CXmlUiController* >( Dll::Tls() );
+    
+    __ASSERT_ALWAYS( self, Panic( ECriticalPointerNull ) );
+    
+    CApplication* app = CApplication::New( *self );    
+    
+    __TIME_ENDMARK( "CXmlUiController::NewApplication, done", time );
+    
+    return app;
     }
 
 const TImplementationProxy KImplementationTable[] =

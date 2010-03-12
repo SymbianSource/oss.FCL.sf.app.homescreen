@@ -96,6 +96,17 @@ void CXnUiStateListener::ConstructL()
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiStateListener::PrepareToExit()
+// Prepares for application exit
+// -----------------------------------------------------------------------------
+//
+void CXnUiStateListener::PrepareToExit()
+    {    
+    iUiStateObservers.Reset();
+    iResourceChangeObservers.Reset();
+    }
+
+// -----------------------------------------------------------------------------
 // CXnUiStateListener::AddObserver()
 // Adds MXnUiStateObserver
 // -----------------------------------------------------------------------------

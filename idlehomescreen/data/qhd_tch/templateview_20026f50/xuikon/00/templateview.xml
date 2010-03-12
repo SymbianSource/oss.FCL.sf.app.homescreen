@@ -132,7 +132,6 @@
             <menuitemgrouping>
                 <!-- These items are shown when content is visible -->
                 <menuitemgroup id="Menu/NormalMode">
-                    <property name="hs_widget_catalog"/>
                     <property name="hs_edit_widgets"/>
                     <property name="hs_set_online"/>
                     <property name="hs_set_offline"/>

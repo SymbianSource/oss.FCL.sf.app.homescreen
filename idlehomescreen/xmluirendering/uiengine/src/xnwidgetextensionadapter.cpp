@@ -46,6 +46,9 @@
 #include "xnviewdata.h"
 #include "xnplugindata.h"
 
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntransitionutils.h>
+
 // Constants
 _LIT8( KPopup, "popup" );
 _LIT8( KPositionHint, "_s60-position-hint" );
@@ -81,8 +84,12 @@ CXnWidgetExtensionAdapter::~CXnWidgetExtensionAdapter()
     {
     if ( iAppUiAdapter )
         {
-        iAppUiAdapter->UiStateListener().RemoveObserver( *this );
+        iAppUiAdapter->UiStateListener().RemoveObserver(
+                *( static_cast< MXnUiStateObserver* >( this ) ) );
+        iAppUiAdapter->UiStateListener().RemoveObserver(
+                        *( static_cast< MXnUiResourceChangeObserver* >( this ) ) );
         }
+    GfxTransEffect::Deregister( this );
     }
 
 // -----------------------------------------------------------------------------
@@ -112,10 +119,14 @@ void CXnWidgetExtensionAdapter::ConstructL()
     // we have to decide which one of them is the recent one    
  
     CXnType* typeInfo = iNode.Node().Type();
+    User::LeaveIfNull( typeInfo );
     const TDesC8& type = typeInfo->Type();
+    
+    iPermanent = EFalse;
 
     if ( type == KPopup )          
         {
+        iPopup = ETrue;
         CXnProperty* prop( iNode.Node().GetPropertyL( 
             XnPropertyNames::popup::KPopupType ) );
                        
@@ -136,7 +147,9 @@ void CXnWidgetExtensionAdapter::ConstructL()
     iUiEngine = iNode.Node().UiEngine();
     CXnControlAdapter::ConstructL( iNode );
     
-    EnableDragEvents();      
+    EnableDragEvents();
+    
+    GfxTransEffect::Register( this, KGfxPreviewPopupControlUid );
     }
 
 // -----------------------------------------------------------------------------
@@ -145,46 +158,48 @@ void CXnWidgetExtensionAdapter::ConstructL()
 // -----------------------------------------------------------------------------
 // 
 void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
-    {   
-    TBool visible( IsVisible() ? ETrue : EFalse );
+    {
+    if ( IsVisible() == aVisible )
+        {
+        return;
+        }
     
-    if ( visible == aVisible )
+    CXnPluginData* plugin( 
+            iAppUiAdapter->ViewManager().ActiveViewData().Plugin( &iNode.Node() ) );
+
+    if ( !plugin )
         {
         return;
         }
 
     SetPointerCapture( aVisible );
-    
-    CXnPluginData& plugin( 
-            iAppUiAdapter->ViewManager().ActiveViewData().Plugin( &iNode.Node() ) );
 
-    plugin.SetIsDisplayingPopup( aVisible, &iNode.Node() );
+    plugin->SetIsDisplayingPopup( aVisible, &iNode.Node() );
     
-    CXnType* typeInfo = iNode.Node().Type();
-    const TDesC8& type = typeInfo->Type();
-
-    TBool popup( type == KPopup );
-    
-    if ( !popup )
+    if ( !iPopup )
         {
         DrawableWindow()->FadeBehind( aVisible );
         }
-    else
+    
+    if ( !iPermanent )
         {
-        if ( !iPermanent )
+        if ( aVisible )
             {
-            if ( aVisible )
-                {
-                iAppUiAdapter->UiStateListener().AddObserver( *this );
-                }
-            else
-                {
-                iAppUiAdapter->UiStateListener().RemoveObserver( *this );
-                }            
+            iAppUiAdapter->UiStateListener().AddObserver(
+                    *( static_cast< MXnUiStateObserver* >( this ) ) );
+            iAppUiAdapter->UiStateListener().AddObserver(
+                            *( static_cast< MXnUiResourceChangeObserver* >( this ) ) );
+            }
+        else
+            {
+            iAppUiAdapter->UiStateListener().RemoveObserver(
+                    *( static_cast< MXnUiStateObserver* >( this ) ) );
+            iAppUiAdapter->UiStateListener().RemoveObserver(
+                            *( static_cast< MXnUiResourceChangeObserver* >( this ) ) );
             }
         }
     
-    if ( aVisible && popup )
+    if ( aVisible && iPopup )
         {        
         // read position-hint property and set-up its variable
         CXnProperty* positionHintProp = NULL;
@@ -240,7 +255,27 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
             }        
         }
 
-    CCoeControl::MakeVisible( aVisible );            
+    TBool effectStarted = EFalse;
+    if ( iAppUiAdapter->IsForeground() )
+        {
+        if ( aVisible )
+            {
+            GfxTransEffect::Begin( this, KGfxControlAppearAction );
+            }
+        else
+            {
+            GfxTransEffect::Begin( this, KGfxControlDisappearAction );
+            }
+        effectStarted = ETrue;
+        }
+
+    CCoeControl::MakeVisible( aVisible );
+
+    if ( effectStarted )
+        {
+        GfxTransEffect::SetDemarcation( this, iPosition );
+        GfxTransEffect::End( this );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -250,14 +285,12 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
 //    
 void CXnWidgetExtensionAdapter::HandlePointerEventL( 
     const TPointerEvent& aPointerEvent )
-    {        
-    CXnType* typeInfo = iNode.Node().Type();
-    const TDesC8& type = typeInfo->Type();
+    {
     
     // in case of popup, we have to make sure that 
     // it will be closed after tapping outside of the
     // area of itself and its parent
-    if ( type == KPopup )
+    if ( iPopup )
         {        
         // check if the tap was inside of popup
         TRect popupRect = this->Rect();
@@ -555,10 +588,17 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
 void CXnWidgetExtensionAdapter::NotifyForegroundChanged( 
     TForegroundStatus aStatus )
     {
-    if ( aStatus != EForeground )
+    if ( iPopup && aStatus != EForeground )
         {
         TRAP_IGNORE( HidePopupL() );
-        }    
+        }
+    else if ( !iPopup && aStatus == EForeground )
+        {
+        if ( !DrawableWindow()->IsFaded() )
+            {
+            DrawableWindow()->FadeBehind( ETrue );
+            }
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -602,6 +642,34 @@ void CXnWidgetExtensionAdapter::HidePopupL()
         iNode.Node().SetPropertyL( prop );
         
         CleanupStack::Pop( prop );        
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::NotifyStatusPaneSizeChanged
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnWidgetExtensionAdapter::NotifyStatusPaneSizeChanged()
+    {
+    }
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::NotifyResourceChanged
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnWidgetExtensionAdapter::NotifyResourceChanged( TInt aType )
+    {
+
+    // if type is widget extension and fade has changed
+    // we have to always fade main window
+    if ( !iPopup && aType == KEikMessageWindowsFadeChange )
+        {
+        if ( !DrawableWindow()->IsFaded() )
+            {
+            DrawableWindow()->FadeBehind( ETrue );
+            }
         }
     }
 

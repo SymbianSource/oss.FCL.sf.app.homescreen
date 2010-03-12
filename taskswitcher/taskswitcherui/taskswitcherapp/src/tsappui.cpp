@@ -247,7 +247,7 @@ void CTsAppUi::StartTransition( TUint aTranstionId,
                                 TBool /*aLayers*/, 
                                 TUint aSubCom )
     {
-    this->RequestPopUpL();
+    TRAP_IGNORE( RequestPopUpL() );
     const TDesC8* ptr = reinterpret_cast<const TDesC8*>(iAppView);
     GfxTransEffect::Abort(iAppView);
     GfxTransEffect::Begin( iAppView, aTranstionId );
@@ -268,11 +268,7 @@ void CTsAppUi::StartTransition( TUint aTranstionId,
 void CTsAppUi::TransitionFinished(const CCoeControl* /*aControl*/, 
                                   TUint /*aAction*/)
     {
-    DisablePopUpL();
-    /*if( aControl == iAppView )
-        {
-		@TODO IMPLEMENT
-        }*/
+    TRAP_IGNORE( DisablePopUpL() );
     }
 
 // -----------------------------------------------------------------------------

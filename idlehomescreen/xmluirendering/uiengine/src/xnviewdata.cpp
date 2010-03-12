@@ -31,8 +31,10 @@
 #include "xnoomsyshandler.h"
 #include "xnpanic.h"
 
+#include "debug.h"
+
 // Constants
-_LIT8( KLockingStatusLocked, "locked" );
+const TInt KInterval( 10000 );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -213,14 +215,16 @@ void CXnViewData::Destroy()
 // Finds plugin or view data based on node
 // -----------------------------------------------------------------------------
 //
-CXnPluginData& CXnViewData::Plugin( CXnNode* aNode )
-    {    
+CXnPluginData* CXnViewData::Plugin( CXnNode* aNode )
+    {
+    if ( !aNode ) { return NULL; }
+
     if ( aNode->ViewNodeImpl() )
         {
         // Reached view, return self
         if ( Node()->LayoutNode() == aNode )
             {
-            return *this;
+            return this;
             }
         }
 
@@ -228,7 +232,7 @@ CXnPluginData& CXnViewData::Plugin( CXnNode* aNode )
         {
         if ( iPluginsData[i]->Owner()->LayoutNode() == aNode )
             {
-            return *iPluginsData[i];
+            return iPluginsData[i];
             }
         }
 
@@ -381,6 +385,23 @@ void CXnViewData::AppearanceNodesL( RPointerArray< CXnNode >& aList ) const
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewData::PopupNodesL()
+// Gets this view data's popup nodes
+// -----------------------------------------------------------------------------
+//
+void CXnViewData::PopupNodesL( RPointerArray< CXnNode >& aList ) const
+    {
+    // Get my Popup nodes
+    CXnPluginData::PopupNodesL( aList );
+
+    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        // And Popup nodes which my plugin holds
+        iPluginsData[i]->PopupNodesL( aList );
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewData::InitialFocusNodesL()
 // Gets this view data's initial focus nodes
 // -----------------------------------------------------------------------------
@@ -444,9 +465,9 @@ void CXnViewData::LoadPublishers()
     iLoader->Cancel();
     
     iLoadIndex = 0;
-            
-    iLoader->Start( TTimeIntervalMicroSeconds32( 50 ),
-                    TTimeIntervalMicroSeconds32( 50 ),
+                                
+    iLoader->Start( TTimeIntervalMicroSeconds32( KInterval ),
+                    TTimeIntervalMicroSeconds32( KInterval ),
                     TCallBack( DoLoadPublishersL, this ) );           
     }
 
@@ -457,6 +478,8 @@ void CXnViewData::LoadPublishers()
 //
 /* static */ TInt CXnViewData::DoLoadPublishersL( TAny* aAny )
     {
+    __PRINTS( "*** CXnViewData::DoLoadPublishersL" );
+    
     CXnViewData* self = static_cast< CXnViewData* >( aAny );
     
     RPointerArray< CXnPluginData >& plugins( self->PluginData() );
@@ -512,9 +535,11 @@ void CXnViewData::LoadPublishers()
             {
             self->ShowContentRemovedError();
             self->iShowContentRemoved = EFalse;
-            }              
+            }           
         }                  
             
+    __PRINTS( "*** CXnViewData::DoLoadPublishersL - done" );
+    
     return KErrNone;       
     }
 
@@ -525,6 +550,8 @@ void CXnViewData::LoadPublishers()
 //
 void CXnViewData::DestroyPublishers( TInt aReason )
     {
+    __PRINTS( "*** CXnViewData::DestroyPublishers" );
+    
     if ( Occupied() )
         {
         // If not all plugins loaded yet               
@@ -534,6 +561,8 @@ void CXnViewData::DestroyPublishers( TInt aReason )
         
         User::Heap().Compress();        
         }
+    
+    __PRINTS( "*** CXnViewData::DestroyPublishers - done" );
     }
 
 // -----------------------------------------------------------------------------
@@ -543,6 +572,8 @@ void CXnViewData::DestroyPublishers( TInt aReason )
 //
 void CXnViewData::DoDestroyPublishersL( TInt aReason )
     {
+    __TIME_MARK( time );
+    
     // Create list of data plugins to be removed    
     RPointerArray< CXnNode > publishers;
     CleanupClosePushL( publishers );
@@ -556,25 +587,9 @@ void CXnViewData::DoDestroyPublishersL( TInt aReason )
             publishers[i]->AppIfL(), aReason );        
         }
         
-    CleanupStack::PopAndDestroy( &publishers );    
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewData::SetLockingStatus
-// Sets view's locking_status attribute ("locked"/"none")
-// -----------------------------------------------------------------------------
-//
-void CXnViewData::SetLockingStatus( const TDesC8& aLockingStatusString )
-    {
-    if( ( aLockingStatusString != KNullDesC8 ) && 
-        ( aLockingStatusString.Match( KLockingStatusLocked ) == 0 ) )
-        {
-        iFlags.Clear( EIsRemovable );
-        }
-    else
-        {
-        iFlags.Set( EIsRemovable );
-        }
+    CleanupStack::PopAndDestroy( &publishers );
+    
+    __TIME_ENDMARK( "CXnViewData::DoDestroyPublishersL, done", time );
     }
 
 // End of file

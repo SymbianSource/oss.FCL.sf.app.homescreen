@@ -29,7 +29,8 @@
 #include <mmf/common/mmfcontrollerpluginresolver.h> // for CleanupResetAndDestroyPushL
 #include <featmgr.h>
 #include <swi/swispubsubdefs.h>
-
+#include <s32mem.h>
+#include <bitmaptransforms.h>
 #include "enginelogging.h"
 
 // time to wait before refreshing content
@@ -148,6 +149,12 @@ CTsFswEngine::~CTsFswEngine()
     iAppArcSession.Close();
     iWsSession.Close();
 
+    for ( TInt i = 0; i < iRotaTasks.Count(); i++ )
+        {
+        iRotaTasks[i]->Cancel();
+        delete iRotaTasks[i];
+        }
+    iRotaTasks.Close();
 //    delete iContextUtility;
     }
 
@@ -206,36 +213,12 @@ EXPORT_C void CTsFswEngine::CloseAppL( TInt aWgId )
     TSLOG_CONTEXT( CloseAppL, TSLOG_LOCAL );
     TSLOG1_IN( "aWgId = %d", aWgId );
 
-    if ( iWidgetsSupported && aWgId < 0 && iWidgetAppUiWgId )
+    if( iWidgetsSupported && 0 > aWgId )
         {
-        // for widgets clients see a wgid that is -1*(index+1)
-        const RWidgetInfoArray& arr( iWidgetList->RunningWidgets() );
-        // convert aWgId to an index in the list of running widgets
-        TInt idx = -aWgId - 1;
-        // if index is valid then handle the widget specially
-        if ( idx >= 0 && idx < arr.Count() )
-            {
-            TWsEvent event;
-            event.SetType( EEventUser );
-            TUint8* eventData = event.EventData();
-            // Fill bits 0-31 with widget application uid.
-            reinterpret_cast<TUint32&>( *eventData ) = KWidgetAppUidValue;
-            eventData += sizeof( TUint32 );
-            // Fill bits 32-63 with uid of the widget that should be closed.
-            reinterpret_cast<TUint32&>( *eventData ) = arr[idx]->iUid.iUid;
-            // Send the event to Widget AppUi.
-            iEnv->WsSession().SendEventToWindowGroup(
-                iWidgetAppUiWgId, event );
-            // closing a widget may not cause a window group change so trigger
-            // the update manually
-            UpdateTaskList();
-            TSLOG0_OUT( "widget processing finished" );
-            return;
-            }
+        // convert aWgId to an index in the list of running widgets and close widget
+        CloseWidgetL( -aWgId -1 );
         }
-
-    TUid appUid = AppUidForWgIdL( aWgId );
-    if ( !iAlwaysShownAppList->IsAlwaysShownApp( appUid ) )
+    else if( !iAlwaysShownAppList->IsAlwaysShownApp( AppUidForWgIdL( aWgId ) ) )
         {
         // send window group event to kill the app
         TWsEvent event;
@@ -244,7 +227,6 @@ EXPORT_C void CTsFswEngine::CloseAppL( TInt aWgId )
         iEnv->WsSession().SendEventToWindowGroup( aWgId, event );
         TSLOG0( TSLOG_INFO, "event sent to wg" );
         }
-
     TSLOG_OUT();
     }
 
@@ -460,32 +442,23 @@ TBool CTsFswEngine::CollectTasksL()
             {
             continue;
             }
-
+        
         // get window group name
         TInt wgId = allWgIds[i].iId;
         CApaWindowGroupName* windowName =
             CApaWindowGroupName::NewLC( iWsSession, wgId );
         TUid appUid = windowName->AppUid();
-
+        
         // ignore entries with null uid
         if ( !appUid.iUid )
             {
             CleanupStack::PopAndDestroy( windowName );
             continue;
             }
-
+        
         // will append the task to our own list only if it is not hidden
         TBool onHiddenList = iHiddenAppList->IsHiddenL(
             appUid, iWsSession, wgId );
-
-        // if this is the widget app then save wgid for later use
-        // and ignore it, but include running widgets instead
-        if ( iWidgetsSupported && appUid.iUid == KWidgetAppUidValue )
-            {
-            iWidgetAppUiWgId = wgId;
-            onHiddenList = ETrue;
-            CheckWidgetsL( newList );
-            }
 
         // get screen number (-1=console, 0=main screen, 1=cover ui)
         TInt appScreen = 0;
@@ -502,9 +475,15 @@ TBool CTsFswEngine::CollectTasksL()
             windowName->Hidden(), onHiddenList, mustShow, appScreen );
 #endif
 
+        // if this is the widget app then save wgid for later use
+        // and ignore it, but include running widgets instead
+        if ( iWidgetsSupported && appUid.iUid == KWidgetAppUidValue )
+            {
+            changed = ETrue;
+            }
         // add item to task list if it is always-shown OR it is not hidden
         // and it is not on cover ui
-        if ( mustShow
+        else if ( mustShow
                 || ( !onHiddenList
                     && !windowName->Hidden()
                     && ( appScreen == 0 || appScreen == -1 )
@@ -517,8 +496,9 @@ TBool CTsFswEngine::CollectTasksL()
             }
         CleanupStack::PopAndDestroy( windowName );
         }
-    CleanupStack::PopAndDestroy( &allWgIds );    
-
+    CleanupStack::PopAndDestroy( &allWgIds );
+    CheckWidgetsL(newList);
+    
     // if counts for old and new lists do not match then there is a change for sure,
     // probably an app has been closed
     if ( iData.Count() != newList.Count() )
@@ -628,15 +608,19 @@ TBool CTsFswEngine::CheckIfExistsL( CTsFswEntry& aEntry,
 //
 void CTsFswEngine::CheckWidgetsL( RTsFswArray& aNewList )
     {
-    if ( iWidgetsSupported )
+    if( iWidgetsSupported )
         {
         iWidgetList->InitializeWidgetListL();
         const RWidgetInfoArray& arr( iWidgetList->RunningWidgets() );
         for ( TInt i = 0, ie = arr.Count(); i != ie; ++i )
             {
-            // wgid will be a special negative value
-            // windowgroupname is not needed here so pass NULL
-            AddEntryL( -(i+1), arr[i]->iUid, 0, aNewList, ETrue );
+            //verify if widget is working in full screen mode
+            if( arr[i]->iFileSize )
+                {
+                // wgid will be a special negative value
+                // windowgroupname is not needed here so pass NULL
+                AddEntryL( -(i+1), arr[i]->iUid, 0, aNewList, ETrue );
+                }
             }
         }
     }
@@ -697,16 +681,16 @@ TInt CTsFswEngine::FindParentWgId( TInt aWgId )
 //
 TInt CTsFswEngine::FindMostTopParentWgId( TInt aWgId )
     {
-	TInt parent( KErrNotFound );
-	parent = FindParentWgId( aWgId );
-	if( parent != KErrNotFound)
-		{
-		TInt topParent = FindMostTopParentWgId(parent);
-		if( topParent != KErrNotFound )
-			{
-			parent = topParent;
-			}
-		}
+    TInt parent( KErrNotFound );
+    parent = FindParentWgId( aWgId );
+    if( parent != KErrNotFound)
+        {
+        TInt topParent = FindMostTopParentWgId(parent);
+        if( topParent != KErrNotFound )
+            {
+            parent = topParent;
+            }
+        }
     return parent;
     }
 
@@ -918,6 +902,94 @@ void CTsFswEngine::HandleFswPpApplicationUnregistered( TInt aWgId )
     }
 
 // --------------------------------------------------------------------------
+// CTsFswEngine::HandleFswPpApplicationBitmapRotation
+// Callback from CTsFastSwapPreviewProvider
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise )
+    {
+    TSLOG_CONTEXT( HandleFswPpApplicationBitmapRotation, TSLOG_LOCAL );
+    TSLOG1_IN( "aWgId = %d", aWgId );
+    
+    CFbsBitmap** bmp = iScreenshots.Find( aWgId );
+    if ( bmp )
+        {
+        // Rotate bitmap
+        TRAP_IGNORE( RotateL( **bmp, aWgId, aClockwise ) );
+        // Bitmap in a array is invalid, remove it
+        delete *bmp;
+        iScreenshots.Remove( aWgId );
+        AssignScreenshotHandle( aWgId, 0 );
+        }
+    
+    TSLOG_OUT();
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsFswEngine::RotateL
+// Callback from CTsFastSwapPreviewProvider
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::RotateL( CFbsBitmap& aBitmap, TInt aWgId, TBool aClockwise )
+    {
+    CFbsBitmap* rotaBitmap = new (ELeave) CFbsBitmap;
+    CleanupStack::PushL( rotaBitmap );
+    User::LeaveIfError( rotaBitmap->Duplicate( aBitmap.Handle() ) );
+    CTsRotationTask* rotaTask = new (ELeave) CTsRotationTask( *this );
+    CleanupStack::PushL( rotaTask );
+    User::LeaveIfError( iRotaTasks.Append( rotaTask ) );
+    rotaTask->StartLD( aWgId, rotaBitmap, aClockwise ); // ownership transferred
+    CleanupStack::Pop( rotaTask );
+    CleanupStack::Pop( rotaBitmap );
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsFswEngine::RotationComplete
+// Callback from CTsFastSwapPreviewProvider
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::RotationComplete( TInt aWgId,
+        CFbsBitmap* aBitmap,
+        CTsRotationTask* aCompletedTask,
+        TInt aError )
+    {
+    TSLOG_CONTEXT( RotationComplete, TSLOG_LOCAL );
+    TSLOG_IN();
+    
+    TSLOG1( TSLOG_INFO, "---> rotation completed with status: %d", aError );
+    TInt idx = iRotaTasks.Find( aCompletedTask );
+    if ( idx != KErrNotFound )
+        {
+        // Update task list
+        iRotaTasks.Remove(idx);
+        }
+    
+    if ( aError == KErrNone )
+        {
+        if ( iScreenshots.Insert( aWgId, aBitmap ) != KErrNone )
+            {
+            delete aBitmap;
+            iScreenshots.Remove( aWgId );
+            AssignScreenshotHandle( aWgId, 0 );
+            }
+        else
+            {
+            AssignScreenshotHandle( aWgId, aBitmap->Handle() );
+            }
+        }
+    else
+        {
+        // Rotation failed, cleanup bitmap
+        delete aBitmap;
+        }
+    
+    TSLOG_OUT();
+    }
+
+
+// --------------------------------------------------------------------------
 // CTsFswEngine::AssignScreenshotHandle
 // Called when a screenshot arrives to check if there is a corresponding
 // application in the task list. Firstly try to match screenshot into parental
@@ -1080,5 +1152,119 @@ void CTsFswEngine::SetPreviewParams()
         EColor64K ); // displaymode is ignored
     }
 
+// --------------------------------------------------------------------------
+// CTsFswEngine::CloseWidgetL
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::CloseWidgetL(TInt aOffset )
+    {
+    TSLOG_CONTEXT( CloseWidgetL, TSLOG_LOCAL );
+    TSLOG1_IN( "aOffset = %d", aOffset );
+    if( iWidgetList->RunningWidgets().Count() <= aOffset )
+        {
+        User::Leave(KErrArgument);
+        }
+    const CWidgetInfo* widgetInfo(iWidgetList->RunningWidgets()[aOffset]);
+    const TPtrC bundleName(*widgetInfo->iBundleName);
+    RApaLsSession ls;
+    User::LeaveIfError( ls.Connect() );
+    CleanupClosePushL( ls );
+    CApaCommandLine* const cmdLine = CApaCommandLine::NewLC();
+    
+    HBufC8* const
+        opaque( HBufC8::NewLC( bundleName.Size() + 3 * sizeof( TUint32 ) ) );
+    TPtr8 des ( opaque->Des() );
+    RDesWriteStream stream;
+    stream.Open( des );
+    CleanupClosePushL( stream );
+    stream.WriteUint32L ( widgetInfo->iUid.iUid ); 
+    stream.WriteUint32L ( bundleName.Length() );
+    stream.WriteL ( reinterpret_cast< const TUint8* >( bundleName.Ptr() ), bundleName.Size());
+    stream.WriteInt32L ( KCloseWidgetCmd );
+    CleanupStack::PopAndDestroy( &stream );
+    cmdLine->SetCommandL( EApaCommandBackgroundAndWithoutViews );
+    cmdLine->SetOpaqueDataL( *opaque );
+    CleanupStack::PopAndDestroy( opaque );
+    cmdLine->SetExecutableNameL( KWidgetAppName );
+    ls.StartApp( *cmdLine );
+    CleanupStack::PopAndDestroy( cmdLine );
+    CleanupStack::PopAndDestroy( &ls );
+    TSLOG_OUT();
+    }
+
+
+
+// --------------------------------------------------------------------------
+// CTsRotationListener::CTsRotationListener
+// --------------------------------------------------------------------------
+//
+CTsRotationTask::CTsRotationTask(CTsFswEngine& aEngine )
+: CActive(EPriorityStandard),
+  iEngine(aEngine)
+    {
+    CActiveScheduler::Add( this );
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsRotationListener::~CTsRotationListener
+// --------------------------------------------------------------------------
+//
+CTsRotationTask::~CTsRotationTask()
+    {
+    Cancel();
+    delete iRotator;
+    delete iBitmap;
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsRotationListener::Start
+// --------------------------------------------------------------------------
+//
+void CTsRotationTask::StartLD( TInt aWgId,
+        CFbsBitmap* aBitmap,
+        TBool aClockwise )
+    {
+    TSLOG_CONTEXT( StartLD, TSLOG_LOCAL );
+    TSLOG_IN();
+    
+    iWgId = aWgId;
+    iBitmap = aBitmap;
+    iRotator = CBitmapRotator::NewL();
+    if ( aClockwise )
+        {
+        iRotator->Rotate(&iStatus, *iBitmap, CBitmapRotator::ERotation90DegreesClockwise);
+        }
+    else
+        {
+        iRotator->Rotate(&iStatus, *iBitmap, CBitmapRotator::ERotation270DegreesClockwise);
+        }
+    SetActive();
+    
+    TSLOG_OUT();
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsRotationListener::RunL
+// --------------------------------------------------------------------------
+//
+void CTsRotationTask::RunL()
+    {
+    iEngine.RotationComplete( iWgId, iBitmap, this, iStatus.Int() ); // bitmap ownership transferred
+    iBitmap = NULL;
+    delete this;
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsRotationListener::DoCancel
+// --------------------------------------------------------------------------
+//
+void CTsRotationTask::DoCancel()
+    {
+    iRotator->Cancel();
+    }
     
 // end of file

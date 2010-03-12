@@ -150,6 +150,7 @@ LIBRARY    hsccproviderclient.lib
 LIBRARY    extrenderingplugin.lib
 LIBRARY    disknotifyhandler.lib
 LIBRARY	   platformenv.lib
+LIBRARY    hspluginsettings.lib
 
 #if defined(_XN3_DEBUG_) || defined(AI3_DEBUG_PERFORMANCE)
 LIBRARY    flogger.lib

@@ -103,22 +103,13 @@ CHsContentControlFactory::CHsContentControlFactory( CXnAppUiAdapter& aAdapter )
 //
 EXPORT_C CHsContentControlFactory::~CHsContentControlFactory()
     {
+    delete iHsContentControlEComListener;
+    delete iHsContentControlUninstallMonitor;
+    
     iImplArray.ResetAndDestroy();
     iImplArray.Close();
     
-    if ( iHsContentControlUis.Count() > 0 )
-        {
-        for( TInt index( iHsContentControlUis.Count() - 1 ); index >= 0; --index )
-            {
-            CHsContentControlUi* cc( iHsContentControlUis[ index ] );
-            ReleaseHsCcUi( cc );
-            }
-        }
-
     iHsContentControlUis.ResetAndDestroy();
-    
-	delete iHsContentControlEComListener;
-    delete iHsContentControlUninstallMonitor;
     }
 
 // ---------------------------------------------------------------------------------
@@ -126,7 +117,7 @@ EXPORT_C CHsContentControlFactory::~CHsContentControlFactory()
 // ---------------------------------------------------------------------------------
 //
 EXPORT_C MHsContentControlUi* CHsContentControlFactory::GetHsContentController(
-    const TDesC8& aControlType )    
+    const TDesC8& aControlType )
     {
     MHsContentControlUi* retval( FindHsContentController( aControlType ) ); 
     
@@ -165,6 +156,22 @@ EXPORT_C MHsContentControlUi* CHsContentControlFactory::GetHsContentController(
         }
     
     return retval;
+    }
+
+// ---------------------------------------------------------------------------------
+// CHsContentControlFactory::PrepareToExit()
+// ---------------------------------------------------------------------------------
+//
+EXPORT_C void CHsContentControlFactory::PrepareToExit()
+    {
+    if ( iHsContentControlUis.Count() > 0 )
+        {
+        for( TInt index( iHsContentControlUis.Count() - 1 ); index >= 0; --index )
+            {
+            CHsContentControlUi* cc( iHsContentControlUis[ index ] );
+            ReleaseHsCcUi( cc );
+            }
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -245,7 +252,7 @@ void CHsContentControlFactory::CheckPluginChangesL()
     // If an implementation is not present in present in the plugInArray then its removed. 
     for( TInt index( iImplArray.Count() - 1 ); index >= 0 && !done; --index )
         {
-        uid = plugInArray[ index ]->ImplementationUid();
+        uid = iImplArray[ index ]->ImplementationUid();
         CImplementationInformation* implInfo = 
                 FindPluginImplInfo( uid, plugInArray );
         if ( implInfo && PluginUpgradeDowngrade( *implInfo ) )

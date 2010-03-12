@@ -166,6 +166,11 @@ private:
             const TDesC& aIconStr );
 
 private:
+    
+    TBool DoesScaleBitmapUseFallBack( CFbsBitmap* aSrcBitmap );
+    void ScaleBitmapL( const TSize& aSize, 
+                    CFbsBitmap* aTrgBitmap,
+                    CFbsBitmap* aSrcBitmap );    
     void ScaleBitmap( TInt aWidth, TInt aHeight );
     void ScaleMask( TInt aWidth, TInt aHeight );
     void CreateIconFromUidL( const TUid& aUid );

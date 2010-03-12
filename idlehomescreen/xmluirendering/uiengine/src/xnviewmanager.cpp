@@ -16,6 +16,7 @@
 */
 
 // System includes
+#include <startupdomainpskeys.h>
 #include <AknUtils.h>
 #include <AknsWallpaperUtils.h>
 #include <AknSkinsInternalCRKeys.h>
@@ -23,6 +24,7 @@
 #include <xnuiengine.rsg>
 #include <aknnotewrappers.h>
 #include <AknsConstants.h>
+#include <aifwdefs.h>
 
 // User includes
 #include "xnapplication.h"
@@ -60,6 +62,7 @@ const TInt KPSCategoryUid = 0x200286E3;
 const TInt KPSCrashCountKey = 1;     
 const TInt KStabilityInterval = 60000000; // 1 minute
 const TInt KCrashRestoreThreshold = 3;
+
 // ============================ LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
 // BuildTriggerL
@@ -272,6 +275,8 @@ CXnViewManager::CXnViewManager( CXnAppUiAdapter& aAdapter )
 //
 CXnViewManager::~CXnViewManager()
     {
+    delete iUiStartupPhase;
+    
     if( iStabilityTimer )
         {
         iStabilityTimer->Cancel();
@@ -301,12 +306,28 @@ CXnViewManager::~CXnViewManager()
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewManager::PropertyChangedL()
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::PropertyChangedL( const TUint32 aKey, const TInt aValue )
+    {
+    if ( aKey == KPSStartupUiPhase && aValue == EStartupUiPhaseAllDone )
+        {
+        if ( iRootData )
+            {
+            iRootData->LoadRemainingViews();
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewManager::ConstructL()
 // 2nd phase constructor
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::ConstructL()
-    {
+    {       
     iOomSysHandler = CXnOomSysHandler::NewL();
     
     // Create resource list
@@ -364,6 +385,13 @@ void CXnViewManager::LoadUiL()
     iRootData->Load();
            
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
+    
+    // Determine UI startup phase
+    delete iUiStartupPhase;
+    iUiStartupPhase = NULL;
+                   
+    iUiStartupPhase = CXnPropertySubscriber::NewL( 
+        KPSUidStartup, KPSStartupUiPhase, *this );
     }
 
 // -----------------------------------------------------------------------------
@@ -404,7 +432,7 @@ void CXnViewManager::ReloadUiL()
 // CXnViewManager::LoadWidgetToPluginL()
 // -----------------------------------------------------------------------------
 //
-TInt CXnViewManager::LoadWidgetToPluginL( CHsContentInfo& aContentInfo,
+TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
     CXnPluginData& aPluginData )
     {
     // Plugin must not have widget when about to add
@@ -494,10 +522,18 @@ TInt CXnViewManager::LoadWidgetToPluginL( CHsContentInfo& aContentInfo,
 TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData, 
     TBool aForce )    
     {                  
-    if ( !aForce && !aPluginData.Occupied() )
+    if ( !aForce )
         {
-        // Plugin must have widget when about to remove
-        return KErrNotFound;            
+        if( !aPluginData.Occupied() )
+            {
+            // Plugin must have widget when about to remove
+            return KErrNotFound;                    
+            }
+        if ( !aPluginData.Removable() )
+            {
+            // Not allowed to remove locked
+            return KErrArgument;
+            }
         }
     
     CXnViewData& viewData( 
@@ -566,18 +602,13 @@ TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData,
 // CXnViewManager::ReplaceWidgetToPluginL
 // -----------------------------------------------------------------------------
 //
-TInt CXnViewManager::ReplaceWidgetToPluginL( CHsContentInfo& aContentInfo,
-    CXnPluginData& aPluginData, TBool aUseHsps )
+TInt CXnViewManager::ReplaceWidgetToPluginL( const CHsContentInfo& aContentInfo,
+    CXnPluginData& aPluginData )
     {
     TInt retval( KErrNone );
     
-    // if aUseHsps is false, the plugin was already replaced by
-    // another process
-    if( aUseHsps )
-        {
-        retval = iHspsWrapper->ReplacePluginL( aPluginData.PluginId(),
+    retval = iHspsWrapper->ReplacePluginL( aPluginData.PluginId(),
                                            aContentInfo.Uid() );
-        }
 
     if ( retval == KErrNone )
         {
@@ -745,6 +776,41 @@ void CXnViewManager::PluginDataL( RPointerArray< CXnPluginData >& aList,
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewManager::PluginDataL()
+// Returns list of plugins from all views or from the defined view
+// -----------------------------------------------------------------------------
+//
+TInt CXnViewManager::PluginDataL( const TDesC8& aViewId, 
+    RPointerArray< CXnPluginData >& aList ) const
+    {
+    TInt err( KErrNone );
+    TBool found( EFalse );
+    
+    RPointerArray< CXnPluginData >& views( iRootData->PluginData() );
+    
+    for ( TInt i = 0; i < views.Count(); i++ )
+        {
+        if ( !aViewId.Length() || views[i]->PluginId().Compare( aViewId ) == 0 )
+            {
+            found = ETrue;
+            RPointerArray< CXnPluginData >& plugins( views[i]->PluginData() );
+            
+            for ( TInt j = 0; j < plugins.Count(); j++ )
+                {
+                aList.AppendL( plugins[ j ] );
+                }
+            }
+        }      
+    if ( !found )
+        {
+        // View not found
+        err = KErrArgument;
+        }
+    
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewManager::Resources()
 // Finds the resources from the active view data
 // -----------------------------------------------------------------------------
@@ -894,7 +960,7 @@ void CXnViewManager::ActivatePreviousViewL( TInt aEffectId )
 // Adds a new view based on info
 // -----------------------------------------------------------------------------
 //
-TInt CXnViewManager::AddViewL( CHsContentInfo& aInfo )
+TInt CXnViewManager::AddViewL( const CHsContentInfo& aInfo )
     {    
     if ( iRootData->PluginData().Count() >= iRootData->MaxPages() )
         {
@@ -1080,11 +1146,14 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
             {
             if ( !view->Removable() )
                 {
-                return retval;
+                return KErrArgument;
                 }
             
             if ( view->Active() )
                 {
+                // Destroy publishers here, must be plugin shutdown
+                view->DestroyPublishers( EAiFwPluginShutdown );
+            
                 // Activate the next view, or first if in the last view 
                 CXnViewData& next( NextViewData() );
                 iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
@@ -1155,10 +1224,13 @@ void CXnViewManager::RemoveViewL( TInt aEffectId )
             next.Load();
             }
 
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
-                
         CXnViewData* view( static_cast< CXnViewData* >( views[ index ] ) );
-
+        
+        // Destroy publishers here, must be plugin shutdown
+        view->DestroyPublishers( EAiFwPluginShutdown );
+        
+        iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
+                        
         // Remove wallpaper from cache
         iAppUiAdapter.ViewAdapter().BgManager().DeleteWallpaper( *view );
 
@@ -1214,7 +1286,7 @@ TInt CXnViewManager::ActivateAppL( const TDesC8& aPluginUid )
         return KErrArgument;
         }
 
-    if ( iRootData->PluginUid().Compare( aPluginUid ) == 0 )
+    if ( iRootData->PluginUid().CompareF( aPluginUid ) == 0 )
         {
         // Nothing to do
         return KErrNone;
@@ -1327,9 +1399,6 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
 
         // Cache update is needed after view activation
         UpdateCachesL();
-        
-        // Schedule remainngs views load
-        iRootData->LoadRemainingViews();
         }
     
     NotifyViewActivatedL( aViewToActivate );

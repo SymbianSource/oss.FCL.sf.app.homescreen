@@ -18,6 +18,7 @@
 // System includes
 #include <aknview.h>
 #include <akntoolbar.h>
+#include <avkon.rsg>
 
 // User includes
 #include "xnappuiadapter.h"
@@ -25,12 +26,13 @@
 #include "xnviewadapter.h"
 #include "xnuiengineappif.h"
 #include "xnfocuscontrol.h"
+#include "hscontentcontrolfactory.h"
+#include "xnviewadapter.h"
 
 #include "xuikon_builds_cfg.hrh"
+#include "debug.h"
 
-#ifdef _XN_PERFORMANCE_TEST_
-#include "xntimemon.h"
-#endif
+_LIT8( KActivateDefaultView, "activatedefault" );
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -52,16 +54,16 @@ EXPORT_C CXnAppUiAdapter::CXnAppUiAdapter( TUid aApplicationUid )
 //
 EXPORT_C void CXnAppUiAdapter::ConstructL()
     {
-#ifdef _XN_PERFORMANCE_TEST_
-    TInt start( 0 );
-    TInt end( 0 );
-    TInt diff( 0 );
-    CXnTimeMon::PrintUserMem( _L( "CXnAppUiAdapter::ConstructL(): - Calling CAknViewAppUi::BaseConstructL().." ) );
-    User::AllocSize( start );
-#endif //_XN_PERFORMANCE_TEST_
+    __TICK( "CXnAppUiAdapter::ConstructL" );    
+    __TIME_MARK( time );
 
+    __PRINTS( "*** CXnAppUiAdapter::ConstructL - BaseConstructL" );
+    __TIME_MARK( time2 );
+        
+    EnableLocalScreenClearer( EFalse );
+    
     CAknViewAppUi::BaseConstructL( EAknEnableSkin | EAknEnableMSK | EAknSingleClickCompatible );
-
+    
     CAknToolbar* toolbar( CurrentFixedToolbar() );
 
     if ( toolbar )
@@ -70,25 +72,13 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
 
         toolbar->DisableToolbarL( ETrue );
         }
-    
-#ifdef _XN_PERFORMANCE_TEST_
-    User::AllocSize( end );
-    diff = end - start;
-    RDebug::Print( _L( "CAknViewAppUi::BaseConstructL allocation: %d" ), diff );
-    CXnTimeMon::PrintUserMem( _L( "CXnAppUiAdapter::ConstructL(): - Calling CXnAppUiAdapterImpl::NewL().." ) );
-    User::AllocSize( start );
-#endif //_XN_PERFORMANCE_TEST_
+        
+    __TIME_ENDMARK( "CXnAppUiAdapter::ConstructL - BaseConstructL, done", time2 );
     
     iImpl = CXnAppUiAdapterImpl::NewL( iApplicationUid, *this );
     iImpl->ConstructL();
-        
-#ifdef _XN_PERFORMANCE_TEST_
-    User::AllocSize( end );
-    diff = end-start;
-    RDebug::Print( _L( "Xuikon launch allocation: %d" ), diff );
-    
-    CXnTimeMon::PrintUserMem( _L( "CXnAppUiAdapter::ConstructL() .. all done." ) );
-#endif //_XN_PERFORMANCE_TEST_
+     
+    __TIME_ENDMARK( "CXnAppUiAdapter::ConstructL, done", time );
     }
 
 // -----------------------------------------------------------------------------
@@ -97,8 +87,7 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CXnAppUiAdapter::~CXnAppUiAdapter()
-    {
-    iExitingApp = ETrue;
+    {       
     delete iUiEngineAppIf;
     
     delete iImpl;    
@@ -111,9 +100,8 @@ EXPORT_C CXnAppUiAdapter::~CXnAppUiAdapter()
 //
 EXPORT_C void CXnAppUiAdapter::HandleResourceChangeL( TInt aType )
     {
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnAppUiAdapter::HandleResourceChangeL - start" ) );
-#endif //_XN_PERFORMANCE_TEST_
+    __PRINTS( "*** CXnAppUiAdapter::HandleResourceChangeL" );
+    __TIME_MARK( time );
 
     CAknViewAppUi::HandleResourceChangeL( aType );
 
@@ -122,9 +110,7 @@ EXPORT_C void CXnAppUiAdapter::HandleResourceChangeL( TInt aType )
         iImpl->HandleResourceChangeL( aType );
         }
 
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnAppUiAdapter::HandleResourceChangeL - end" ) );
-#endif //_XN_PERFORMANCE_TEST_
+    __TIME_ENDMARK( "CXnAppUiAdapter::HandleResourceChangeL, done", time );
     }
 
 // -----------------------------------------------------------------------------
@@ -281,11 +267,46 @@ EXPORT_C void CXnAppUiAdapter::RemoveViewL( CAknView& aView )
 EXPORT_C void CXnAppUiAdapter::PrepareToExit()
     {
     iExitingApp = ETrue;
-    delete iUiEngineAppIf;
-    iUiEngineAppIf = NULL;
-    delete iImpl;
-    iImpl = NULL;
+    
+    if ( iImpl )
+        {
+        iImpl->UiStateListener().PrepareToExit();
+
+        iImpl->ViewAdapter().PrepareToExit();
+        
+        iImpl->HsContentControlFactory()->PrepareToExit();
+        }
+
     CAknViewAppUi::PrepareToExit();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::UiActivated
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnAppUiAdapter::UiActivated()
+    {
+    // Default empty implementation
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::ProcessMessageL
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CXnAppUiAdapter::ProcessMessageL( TUid aUid,
+        const TDesC8& /*aParams*/ )
+    {
+    if ( aUid.iUid == KUidApaMessageSwitchOpenFileValue )
+        {
+        // activate default homescreen view.
+        // customcontrol is set so that window group order is not changed
+        SetCustomControl( 1 );
+        TRAP_IGNORE( ActivateLocalViewL(
+                View().Id(), TUid::Null(), KActivateDefaultView() ) );
+        SetCustomControl( 0 );
+        }
     }
 
 // -----------------------------------------------------------------------------

@@ -65,6 +65,7 @@ CWmInstaller::CWmInstaller() : CActive( EPriorityStandard )
 //
 void CWmInstaller::ConstructL()
     {
+    iMime = KWrtMime().AllocL();
     iIdle = CIdle::NewL( CActive::EPriorityStandard );
     }
 
@@ -81,6 +82,7 @@ CWmInstaller::~CWmInstaller()
         iIdle->Cancel();
         }
     delete iIdle;
+    delete iMime;
     }
 
 // ---------------------------------------------------------
@@ -166,7 +168,7 @@ void CWmInstaller::UninstallL( CWmWidgetData* aData )
         optionsUninstall.iKillApp = SwiUI::EPolicyAllowed;
         SwiUI::TUninstallOptionsPckg uninstallOptionsPkg( optionsUninstall );
         iInstaller.SilentUninstall( iStatus, iUid, 
-                                uninstallOptionsPkg, KWrtMime );
+                                uninstallOptionsPkg, *iMime );
         
         aData->VisualizeUninstallL();
         SetActive();

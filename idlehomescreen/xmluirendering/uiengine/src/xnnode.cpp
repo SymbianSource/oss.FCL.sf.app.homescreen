@@ -822,41 +822,6 @@ CXnProperty* CXnNode::NavIndexL()
     return iImpl->NavIndexL();
     }
 
-CXnProperty* CXnNode::VisibleRowsL()
-    {
-    return iImpl->VisibleRowsL();
-    }
-
-CXnProperty* CXnNode::GridColumnsL()
-    {
-    return iImpl->GridColumnsL();
-    }
-
-CXnProperty* CXnNode::GridOrientationL()
-    {
-    return iImpl->GridOrientationL();
-    }
-
-CXnProperty* CXnNode::GridVerDirectionL()
-    {
-    return iImpl->GridVerDirectionL();
-    }
-
-CXnProperty* CXnNode::GridHorDirectionL()
-    {
-    return iImpl->GridHorDirectionL();
-    }
-
-CXnProperty* CXnNode::FocusHorLoopingL()
-    {
-    return iImpl->FocusHorLoopingL();
-    }
-
-CXnProperty* CXnNode::FocusVerLoopingL()
-    {
-    return iImpl->FocusVerLoopingL();
-    }
-
 CXnProperty* CXnNode::ZIndexL()
     {
     return iImpl->ZIndexL();
@@ -875,21 +840,6 @@ CXnProperty* CXnNode::BackgroundImageL()
 CXnProperty* CXnNode::FocusBackgroundL()
     {
     return iImpl->FocusBackgroundL();
-    }
-
-CXnProperty* CXnNode::RefL()
-    {
-    return iImpl->RefL();
-    }
-
-CXnProperty* CXnNode::GridScrollBarMarginL()
-    {
-    return iImpl->GridScrollBarMarginL();
-    }
-
-CXnProperty* CXnNode::GridScrollBarWidthL()
-    {
-    return iImpl->GridScrollBarWidthL();
     }
 
 // -----------------------------------------------------------------------------
@@ -963,51 +913,6 @@ void CXnNode::SetAdaptiveL( const TInt aAdaptive )
 void CXnNode::FixAdaptiveSizeL( const TSize& aFixedSize )
     {
     iImpl->FixAdaptiveSizeL( aFixedSize );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNode::RestartTimedTrigger
-// Restarts the timed trigger.
-// -----------------------------------------------------------------------------
-//
-void CXnNode::RestartTimedTrigger( TInt aDelay )
-    {
-    CPeriodic* timer = iImpl->PeriodicTimer();
-    if ( timer )
-        {
-        if ( timer->IsActive() )
-            {
-            timer->Cancel();
-            if ( aDelay > 0 )
-                {
-                timer->After( aDelay );
-                }
-            else
-                {
-                iImpl->DeletePeriodic();
-                }
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNode::SetTriggerDelay
-// Sets default trigger delay
-// -----------------------------------------------------------------------------
-//
-void CXnNode::SetTriggerDelay( TTimeIntervalMicroSeconds32 aDelay )
-    {
-    iTriggerDelay = aDelay;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNode::TriggerDelay
-// Returns default trigger delay
-// -----------------------------------------------------------------------------
-//
-TTimeIntervalMicroSeconds32 CXnNode::TriggerDelay()
-    {
-    return iTriggerDelay;
     }
 
 // -----------------------------------------------------------------------------

@@ -93,7 +93,9 @@ void CXnBackgroundManager::ConstructL()
     User::LeaveIfError( iDiskNotifier->NotifyDisk() );
     
     // Reads from cenrep wheteher page specific wallpaper is enabled or not
-    CheckFeatureTypeL();
+    CheckFeatureTypeL();   
+
+    iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
     }
 
 // -----------------------------------------------------------------------------
@@ -117,6 +119,7 @@ CXnBackgroundManager* CXnBackgroundManager::NewL( CXnViewManager& aViewManager,
 //
 CXnBackgroundManager::~CXnBackgroundManager()
     {
+    delete iTimer;
     CleanCache();
     iSkinSrv.Close();
     delete iDiskNotifier;
@@ -150,11 +153,11 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
                 
                 SystemGc().SetBrushColor( KRgbBlack );
                 SystemGc().Clear( aRect );
-                SystemGc().BitBlt( point, wallpaper ); 
+                SystemGc().DrawBitmap( TRect( point, bitmapSize), wallpaper );
                 }
             else
                 {
-                SystemGc().BitBlt( TPoint( 0, 0 ), wallpaper );
+                SystemGc().DrawBitmap( iRect, wallpaper );
                 }
 
             if( iViewManager.UiEngine().IsEditMode() )
@@ -178,11 +181,12 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
             
             SystemGc().SetBrushColor( KRgbBlack );
             SystemGc().Clear( aRect );
-            SystemGc().BitBlt( point, iBgImage ); 
+            SystemGc().DrawBitmap( TRect( point, bitmapSize ), iBgImage );
+
             }
         else
             {
-            SystemGc().BitBlt( TPoint( 0, 0 ), iBgImage );
+            SystemGc().DrawBitmap( iRect, iBgImage );
             }
         if( iViewManager.UiEngine().IsEditMode() )
             {
@@ -363,11 +367,14 @@ void CXnBackgroundManager::WallpaperChanged( CXnViewData& aOldView, CXnViewData&
         aOldView.WallpaperImagePath().Compare( aNewView.WallpaperImagePath() ) )
         {
         UpdateScreen();
-        TInt err = AknsWallpaperUtils::SetIdleWallpaper( aNewView.WallpaperImagePath(), NULL );
-        if( err == KErrNone )
+
+        // Since AknsWallpaperUtils::SetIdleWallpaper() call is slow, it is called
+        // asynchronously. In that way we can avoid it slowing down page switching.
+        if ( iTimer->IsActive() )
             {
-            iIntUpdate++;
+            iTimer->Cancel();
             }
+        iTimer->Start( 0, 1000, TCallBack( TimerCallback, this ) );
         }
     }
 
@@ -713,44 +720,42 @@ TInt CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
     CXnViewData& viewData( iViewManager.ActiveViewData() );
     const TDesC& old = viewData.WallpaperImagePath();
 
-    if( aFileName.Compare( old ) )
+    // Remove old from the cache
+    if( old != KNullDesC )
         {
-        // Remove old from the cache
-        if( old != KNullDesC )
-            {
-            RemoveWallpaperFromCache( old );
-            }
+        RemoveWallpaperFromCache( old );
+        }
 
-        // Add new to the cache
-        if( aFileName != KNullDesC )
+    // Add new to the cache
+    if( aFileName != KNullDesC )
+        {
+        if( CacheWallpaperL( aFileName, viewData ) == KErrNone )
             {
-            if( CacheWallpaperL( aFileName, viewData ) == KErrNone )
-                {
-                SaveWallpaperL(); // to HSPS
-                }
-            else
-                {
-                // image is corrupted or format is not supported
-                return KErrCACorruptContent;
-                }
-            }
-        // WallpaperImage changed back to default. Update view data.
-        else
-            {
-            viewData.SetWallpaperImagePathL( KNullDesC );
-            viewData.SetWallpaperImage( NULL ); 
             SaveWallpaperL(); // to HSPS
             }
-
-        // Update screen
-        UpdateScreen();
-        
-        err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
-        if( err == KErrNone )
+        else
             {
-            iIntUpdate++;
+            // image is corrupted or format is not supported
+            return KErrCACorruptContent;
             }
         }
+    // WallpaperImage changed back to default. Update view data.
+    else
+        {
+        viewData.SetWallpaperImagePathL( KNullDesC );
+        viewData.SetWallpaperImage( NULL ); 
+        SaveWallpaperL(); // to HSPS
+        }
+
+    // Update screen
+    UpdateScreen();
+    
+    err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
+    if( err == KErrNone )
+        {
+        iIntUpdate++;
+        }
+        
     return err;
     }
         
@@ -903,5 +908,24 @@ void CXnBackgroundManager::DrawEditModeBackgroundSkin() const
     AknsDrawUtils::DrawFrame( AknsUtils::SkinInstance(), SystemGc(), 
             iRect, shrunkRect, KAknsIIDQgnHomeEditBg, KAknsIIDDefault );
     }
+
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::TimerCallback
+// -----------------------------------------------------------------------------
+//
+TInt CXnBackgroundManager::TimerCallback(TAny *aPtr)
+    {
+    CXnBackgroundManager* bgManager = reinterpret_cast<CXnBackgroundManager*>( aPtr );    
+    bgManager->iTimer->Cancel();
+    
+    TInt err = AknsWallpaperUtils::SetIdleWallpaper( bgManager->
+        iViewManager.ActiveViewData().WallpaperImagePath(), NULL );
+    if( err == KErrNone )
+        {
+        bgManager->iIntUpdate++;
+        }   
+    return EFalse;
+    }
+
 
 //  End of File

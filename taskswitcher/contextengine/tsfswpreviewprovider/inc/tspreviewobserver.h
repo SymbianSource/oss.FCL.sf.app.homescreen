@@ -51,7 +51,17 @@ public:
      *
      * @param aWgId Window group id of the application.
      */         
-    virtual void HandleFswPpApplicationUnregistered( TInt aWgId ) = 0;    
+    virtual void HandleFswPpApplicationUnregistered( TInt aWgId ) = 0;
+    
+    /**
+     * Called when screenshot for the application needs rotation. Client should
+     * rotate bitmap for the given aWgId by 90 degrees, otherwise it will be
+     * displayed incorrectly.
+     * 
+     * @param aWgId Window group id of the application
+     * @param aClockwise marks direction of the rotation (ETrue - clockwise, EFalse - counter clockwise)
+     */
+    virtual void HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise ) = 0;
     };
 
 #endif // TSPREVIEWOBSERVER_H

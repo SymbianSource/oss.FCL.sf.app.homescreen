@@ -86,6 +86,16 @@ TBool CTsPhysicsEngine::IsRunning() const
     return iPhysics->OngoingPhysicsAction() != CAknPhysics::EAknPhysicsActionNone;
     }
 
+
+// -----------------------------------------------------------------------------
+// CTsPhysicsEngine::IsDragging
+// -----------------------------------------------------------------------------
+//
+TBool CTsPhysicsEngine::IsDragging() const
+    {
+    return iPhysics->OngoingPhysicsAction() == CAknPhysics::EAknPhysicsActionDragging;
+    }
+
 // -----------------------------------------------------------------------------
 // CTsPhysicsEngine::HandleDragEvent
 // -----------------------------------------------------------------------------

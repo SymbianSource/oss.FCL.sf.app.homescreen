@@ -338,6 +338,13 @@ public:
     virtual void InitialFocusNodesL( RPointerArray< CXnNode >& aList ) const;
 
     /**
+     * Returns list of popup nodes
+     * 
+     * @param aList List of popup nodes
+     */
+    virtual void PopupNodesL( RPointerArray< CXnNode >& aList ) const;
+
+    /**
      * Sets the plugin occupied     
      */
     inline void SetOccupied();
@@ -348,14 +355,7 @@ public:
      * @return ETrue when occupied EFalse when not
      */
     inline TBool Occupied() const;
-    
-    /*
-     * Sets the plugin removable
-     * 
-     * @param aRemovable ETrue when removable EFalse when not
-     */    
-    inline void SetRemovable( TBool aRemovable );
-    
+        
     /*
      * Checks whether removable
      * 
@@ -424,6 +424,13 @@ public:
      * Show oom error note
      */    
     void ShowOutOfMemError();
+    
+    /**
+     * Sets locking_status attribute (locked/none) 
+     * 
+     * @param aStatus "locked" / "none"
+     */
+    void SetLockingStatus( const TDesC8& aStatus );    
         
 private:
     // New functions

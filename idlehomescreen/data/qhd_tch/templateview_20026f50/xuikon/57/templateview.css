@@ -11,7 +11,7 @@ view
 box#plugins_container
 {
     direction: rtl;
-    block-progression: tb;
+    block-progression: rl;
     padding-top: 3px;
 }
 
@@ -23,16 +23,10 @@ plugin.plugins
     margin-bottom: 4px;
     margin-right: 5px;
     margin-left: 5px;
-    background-color: "SKIN(268458534 9916)";
 
     _s60-longtap: true;
 
     nav-index: appearance;
-}
-
-plugin:edit
-{
-    background-color:"SKIN(270501603 8582)";
 }
 
 image.widget_indication

@@ -888,62 +888,6 @@ public:
      * @see GetPropertyL
      * @return The property mapped to the key or NULL if not found.
      */
-    CXnProperty* VisibleRowsL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridColumnsL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridOrientationL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridVerDirectionL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridHorDirectionL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* FocusHorLoopingL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* FocusVerLoopingL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
     CXnProperty* ZIndexL();
 
     /**
@@ -969,30 +913,6 @@ public:
      * @return The property mapped to the key or NULL if not found.
      */
     CXnProperty* BackgroundImageL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* RefL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridScrollBarMarginL();
-
-    /**
-     * Get property as indicated by method name.
-     *
-     * @see GetPropertyL
-     * @return The property mapped to the key or NULL if not found.
-     */
-    CXnProperty* GridScrollBarWidthL();
 
     /**
      * Sets the pointer of DOM node
@@ -1050,27 +970,6 @@ public:
      * @param aFixedSize the node's size determined by layout algorithm
      */
     void FixAdaptiveSizeL( const TSize& aFixedSize );
-
-    /**
-     * Restarts the timer in a timed trigger.
-     *
-     * @param aDelay Delay in microseconds. If delay is zero, then the timer
-     *        is only cancelled.
-     */
-    void RestartTimedTrigger( TInt aDelay = 0 );
-
-    /**
-     * Sets default trigger delay.
-     *
-     * @param aDelay delay in microseconds. If new delay is not set, then
-     *        this value is used in restarting the timer.
-     */
-    void SetTriggerDelay( TTimeIntervalMicroSeconds32 aDelay );
-
-    /**
-     * Returns the default trigger delay.
-     */
-    TTimeIntervalMicroSeconds32 TriggerDelay();
 
     /**
      * Marks node as dirty, adds it to UiEngine's dirty list and
@@ -1184,10 +1083,6 @@ private:
      */
     CXnNodeAppIf* iAppIf;
 
-    /**
-     * delay in microseconds for timer.
-     */
-    TTimeIntervalMicroSeconds32 iTriggerDelay;
     };
 
 #endif

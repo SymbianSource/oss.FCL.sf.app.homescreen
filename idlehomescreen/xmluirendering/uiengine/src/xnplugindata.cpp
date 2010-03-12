@@ -35,7 +35,10 @@
 #include "xnoomsyshandler.h"
 #include "xnpanic.h"
 
+#include "debug.h"
+
 // Constants
+_LIT8( KLockingStatusLocked, "locked" );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -132,8 +135,7 @@ TInt CXnPluginData::Load()
         }
 
     iFlags.Clear( EIsEmpty );
-    iFlags.Set( EIsRemovable );
-           
+              
     TInt err( KErrNone );
     
     TRAP( err, err = iManager.Composer().ComposeWidgetL( *this ) );
@@ -224,7 +226,9 @@ void CXnPluginData::LoadPublishers()
 // -----------------------------------------------------------------------------
 //
 TInt CXnPluginData::LoadPublishers( TInt aReason )
-    {                
+    {           
+    __PRINTS( "*** CXnPluginData::LoadPublishers" );
+    
     TInt err( KErrNone );
 
     TRAP( err,
@@ -250,6 +254,8 @@ TInt CXnPluginData::LoadPublishers( TInt aReason )
         return KErrNone;
         }
     
+    __PRINTS( "*** CXnPluginData::LoadPublishers - done" );
+    
     return err;        
     }
 
@@ -259,7 +265,9 @@ TInt CXnPluginData::LoadPublishers( TInt aReason )
 // -----------------------------------------------------------------------------
 //
 void CXnPluginData::DestroyPublishers()
-    {              
+    {    
+    __PRINTS( "*** CXnPluginData::DestroyPublishers" );
+    
     if ( Occupied() )
         {
         // If not all plugins loaded yet               
@@ -269,6 +277,8 @@ void CXnPluginData::DestroyPublishers()
         
         User::Heap().Compress();
         }    
+    
+    __PRINTS( "*** CXnPluginData::DestroyPublishers - done" );
     }
 
 // -----------------------------------------------------------------------------
@@ -288,6 +298,8 @@ TBool CXnPluginData::VirginPublishers() const
 //
 void CXnPluginData::DoDestroyPublishersL()
     {
+    __TIME_MARK( time );
+    
     for ( TInt i = 0; i < iContentSourceNodes.Count(); i++ )
         {
         CXnNodeAppIf& plugin( iContentSourceNodes[i]->AppIfL() );
@@ -296,6 +308,8 @@ void CXnPluginData::DoDestroyPublishersL()
         iManager.AppUiAdapter().DestroyPublisher( 
             plugin, EAiFwPluginShutdown );        
         }
+    
+    __TIME_ENDMARK( "CXnPluginData::DoDestroyPublishersL, done", time );
     }
 
 // -----------------------------------------------------------------------------
@@ -583,8 +597,7 @@ void CXnPluginData::SetEmptyL( const TDesC8& aPluginId )
     // Takes ownership
     iPluginId = id;
            
-    iFlags.Set( EIsEmpty );
-    iFlags.Clear( EIsRemovable );
+    iFlags.Set( EIsEmpty );    
     }
     
 // -----------------------------------------------------------------------------
@@ -617,6 +630,18 @@ void CXnPluginData::SetIsDisplayingPopup ( TBool aVisible, CXnNode* aNode )
 TBool CXnPluginData::IsDisplayingPopup() const
     {
     return ( iPopupNodes.Count() > 0 );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnPluginData::PopupNodesL()
+// -----------------------------------------------------------------------------
+//
+void CXnPluginData::PopupNodesL( RPointerArray< CXnNode >& aList ) const
+    {
+    for ( TInt i = 0; i < iPopupNodes.Count(); i++ )
+        {
+        aList.AppendL( iPopupNodes[i] );
+        }
     }
 
 //------------------------------------------------------------------------------
@@ -655,6 +680,23 @@ void CXnPluginData::DoShowContentRemovedErrorL()
 void CXnPluginData::ShowOutOfMemError()
     {
     TRAP_IGNORE( ViewManager().OomSysHandler().HandlePotentialOomL() );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewData::SetLockingStatus
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnPluginData::SetLockingStatus( const TDesC8& aStatus )
+    {
+    if ( aStatus.CompareF( KLockingStatusLocked ) == 0 )
+        {
+        iFlags.Clear( EIsRemovable );
+        }
+    else
+        {
+        iFlags.Set( EIsRemovable );
+        }
     }
 
 // End of file

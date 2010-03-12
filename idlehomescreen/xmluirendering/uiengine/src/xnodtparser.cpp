@@ -60,8 +60,6 @@ _LIT8( KViewNodeName, "view" );
 _LIT8( KBoxNodeName, "box" );
 _LIT8( KButtonNodeName, "button" );
 _LIT8( KStylusPopupNodeName, "styluspopup" );
-_LIT8( KListNodeName, "list" );
-_LIT8( KGridNodeName, "grid" );
 _LIT8( KImageNodeName, "image" );
 _LIT8( KTooltipNodeName, "tooltip" );
 _LIT8( KMenuBarNodeName, "menubar" );
@@ -74,8 +72,6 @@ _LIT8( KActionNodeName, "action" );
 _LIT8( KTriggerNodeName, "trigger" );
 _LIT8( KEventNodeName, "event" );
 _LIT8( KTextNodeName, "text" );
-_LIT8( KGridCellTemplateNodeName, "gridcelltemplate" );
-_LIT8( KListRowTemplateNodeName, "listrowtemplate" );
 _LIT8( KMarqueeNodeName, "marquee" );
 _LIT8( KObjectNodeName, "object" );
 _LIT8( KTracksterNodeName, "trackster" );
@@ -502,12 +498,8 @@ static CXnNode* ConstructKnownBuiltinNodeL( CXnDomNode& aSource )
         returnValue->SetViewNodeImpl( impl );
         CleanupStack::Pop( impl );
         }
-    else if ( name == KGridCellTemplateNodeName ||
-              name == KListRowTemplateNodeName ||
-              name == KBoxNodeName ||
+    else if ( name == KBoxNodeName ||
               name == KButtonNodeName ||
-              name == KListNodeName ||
-              name == KGridNodeName ||
               name == KImageNodeName ||
               name == KMenuBarNodeName ||
               name == KTooltipNodeName ||

@@ -159,12 +159,8 @@ private:
     TInt                    iMaxLines; 
     /** Flag to indicate whether focus loss is refused */
     TBool                   iRefusesFocusLoss;
-    /** Flag to indicate is partial input supported*/
-    TBool                   iPartialInputEnabled;
-    /** Flag to indicate is partial input open*/
-    TBool                   iPartialInputOpen;
-    /** Flag to indicate whether split input should be remove or not*/
-    TBool                   iRemoveSplitInputFromStack;
+    /** Split input states*/
+    TInt                    iSplitInputState;
     };
 
 #endif      // _XNTEXTEDITORADAPTER_H

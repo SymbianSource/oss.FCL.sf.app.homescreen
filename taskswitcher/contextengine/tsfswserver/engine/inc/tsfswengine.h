@@ -39,6 +39,8 @@ class MTsFswEngineObserver;
 class CTsFswIconCache;
 class CTsFastSwapPreviewProvider;
 class CApaWindowGroupName;
+class CBitmapRotator;
+class CTsRotationTask;
 
 // descriptor big enough to store hex repr of 32-bit integer plus 0x prefix
 typedef TBuf<10> TAppUidHexString;
@@ -104,6 +106,15 @@ public:
      */
     IMPORT_C TUid ForegroundAppUidL( TInt aType );
 
+    /**
+     * Callback for rotation completion. Takes ownership of a given
+     * bitmap.
+     */
+    void RotationComplete( TInt aWgId,
+            CFbsBitmap* aBitmap,
+            CTsRotationTask* aCompletedTask,
+            TInt aError );
+    
 private:
     // from CActive
     void RunL();
@@ -122,6 +133,9 @@ private:
     // from MTsFastSwapPreviewObserver
     void HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle );
     void HandleFswPpApplicationUnregistered( TInt aWgId );
+    void HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise );
+    
+    void RotateL( CFbsBitmap& aBitmap, TInt aWgId, TBool aClockwise );
 
 private:
     /**
@@ -271,11 +285,10 @@ private:
     void PublishFgAppUidL();
 
     /**
-     * Helper function to publish something to CFW.
-     * @param   aType   context type
-     * @param   aValue  value to publish
+     * Close running widget
+     * @param aOffset - widget info offset
      */
-    //void PublishContextL( const TDesC& aType, const TDesC& aValue );
+    void CloseWidgetL(TInt aOffset);
 
 private: // data    
     MTsFswEngineObserver& iObserver;
@@ -316,8 +329,6 @@ private: // data
     
     // true if web widgets are supported by the system
     TBool iWidgetsSupported;
-    // wgid of widget appui is saved here
-    TInt iWidgetAppUiWgId;
 
     // PS property to listen for swi status changes
     RProperty iSwiProp;
@@ -338,6 +349,30 @@ private: // data
     TAppUidHexString iFgAppUidStr;
     TUid iFgAppUid;
 
+    // For rotating bitmaps
+    RPointerArray<CTsRotationTask> iRotaTasks;
+    };
+
+
+/**
+ * Listener for rotation complete event
+ */
+NONSHARABLE_CLASS( CTsRotationTask ) : public CActive
+    {
+public:
+    CTsRotationTask( CTsFswEngine& aEngine );
+    ~CTsRotationTask();
+    void StartLD( TInt aWgId,
+            CFbsBitmap* aBitmapHandle,
+            TBool aClockwise );
+private:
+    void RunL();
+    void DoCancel();
+private: // Data
+    CTsFswEngine& iEngine;
+    TInt iWgId;
+    CFbsBitmap* iBitmap; // owned for the duration of transformation
+    CBitmapRotator* iRotator; // owned
     };
 
 #endif

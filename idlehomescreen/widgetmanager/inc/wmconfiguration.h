@@ -52,21 +52,7 @@ private:
     void ConstructL();
 
 public: // API
-
-    /**
-     * portal button methods. This - along with the parameter -
-     * represents the action that the portal button is configured
-     * to do when pressed. The portal button itself should contain
-     * the execution code itself.
-     */
-    enum TMethod
-        {
-        ENone = 0, // no method
-        EHttp, // open browser to a certain page
-        EWidget, // open given widget with params
-        EApplication // launch an application
-        };
-
+    
     /**
      * Number of portal buttons (1 or more)
      */
@@ -107,7 +93,8 @@ private: // New functions
     
     void LoadConfigurationL();
     TInt FindCorrectLanguageId();
-    HBufC* ReadParameterL( TInt aKey );
+    HBufC* ReadDescParameterL( TInt aKey );
+    void ReadIntParameter( TInt aKey, TInt32& aValue );
     HBufC* ReadLocalisedParameterL( TInt aOffset );
     void IndexConversion( TInt& aIndex );
 
@@ -140,20 +127,14 @@ private:
     HBufC*                  iOviButtonIcon;
     
     /**
-     * OVI store button browser Url
-     * (browser is used if OVI client is not working)
-     */
-    HBufC*                  iOviButtonUrl;
-    
-    /**
      * OVI store button widget client param
      */
     HBufC*                  iOviStoreClientParam;
     
     /**
-     * OVI store button widget bundle ID
+     * OVI store laucher ui
      */
-    HBufC*                  iOviStoreBundleId;
+    TUid                      iOviStoreUid;
     
     /**
      * OPERATOR button text

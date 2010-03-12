@@ -22,6 +22,7 @@
 // INCLUDES
 #include <e32base.h>
 #include "wmwidgetdata.h"
+#include "wmwidgetorderdata.h"
 
 // FORWARD DECLARATIONS
 class RFs;
@@ -66,7 +67,7 @@ public: // API
      * The instance can now be used to sort widget data.
      */
     void LoadL();
-  
+
     /**
      * Stores a sorted array of WmWidgetData types. Note that
      * the order will be directly stored and a copy will not
@@ -75,7 +76,7 @@ public: // API
      * 
      * @param aArray the array of widget daya types
      */
-    void StoreL( const RWidgetDataValues& aArray );
+    void StoreL( const ROrderArray& aArray );
 
     /**
      * Retrieves an index of given widget data object within the list.
@@ -88,6 +89,17 @@ public: // API
      */
     TInt IndexOf( const CWmWidgetData& aWidgetData ) const;
 
+    /**
+     * Retrieves an index of given widget order object within the order list.
+     * This index can be used to sort and organise. Note that LoadL()
+     * must be used prior to calling this method, and before that
+     * there must be something persisted.
+     * 
+     * @param aWidgetOrder data to seek index of in the sorted order
+     * @return the index found, or KErrNotFound if widget is new
+     */
+    TInt IndexOf( const CWmWidgetOrderData& aWidgetOrder ) const;
+    
     /**
      * checks if the persistent widget order is empty. In this case it does
      * not make any sense to use the object to sort anything.
@@ -121,6 +133,9 @@ protected:
             /** compares a tag agains a widget data */
             TBool Matches( const CWmWidgetData& aWidgetData ) const;
 
+            /** compares a tag agains a widget order */
+            TBool Matches( const CWmWidgetOrderData& aWidgetOrder ) const;
+                        
             /** widget uid */
             TInt32 iUid;
 

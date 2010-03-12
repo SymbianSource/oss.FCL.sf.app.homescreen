@@ -29,6 +29,7 @@
 // FORWARD DECLARATIONS
 class CXnNodePluginIf;
 class CXnUiEngine;
+class CAknListQueryDialog;
 
 // CLASS DECLARATION
 
@@ -200,6 +201,10 @@ NONSHARABLE_CLASS( CXnListQueryDialogAdapter ) : public CXnControlAdapter
         void ModifyDynamicEventL( TInt aIndex );
             
     private:    // Data	
+        
+        // Dialog
+        CAknListQueryDialog* iDialog;
+        
         // Node 
         CXnNodePluginIf& iNode;
         /**

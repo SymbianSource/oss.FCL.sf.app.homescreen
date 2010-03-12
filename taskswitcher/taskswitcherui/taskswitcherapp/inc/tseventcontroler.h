@@ -152,6 +152,11 @@ public:
                         TBool aLandscape);
     
     /**
+     * Returns ETrue if avkon physics is running, EFalse if not.
+     */
+    TBool IsPhysicsRunning();
+    
+    /**
      * Stops currently ongoing animation
      */
     void StopAnimation();

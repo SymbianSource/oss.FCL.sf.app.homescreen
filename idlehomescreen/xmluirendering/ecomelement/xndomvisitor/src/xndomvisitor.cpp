@@ -33,8 +33,6 @@ LOCAL_C void SetPropertiesL( const TXnPropertyProxy aTable[], TInt aCount, TAny*
 LOCAL_C void SetCommonPropertiesL( TAny* aData );
 LOCAL_C void SetElementWithTextPropertiesL( TAny* aData );
 LOCAL_C void SetTextElementPropertiesL( TAny* aData );
-LOCAL_C void SetGridAndListPropertiesL( TAny* aData );
-LOCAL_C void SetDataGridAndGridPropertiesL( TAny* aData );
 LOCAL_C void SetViewsAndViewPropertiesL( TAny* aData );
 LOCAL_C void SetViewPropertiesL( TAny* aData );
 
@@ -56,13 +54,6 @@ const TXnElementVisitor KXnElementVisitorTable[]=
         { (const void*)&KApplication,       NULL,                           EEmpty},
         { (const void*)&KDesc,              NULL,                           EPCData},
         { (const void*)&KButton,            &SetTextElementPropertiesL,     EEmpty},
-        { (const void*)&KGrid,              &SetDataGridAndGridPropertiesL, EEmpty},
-        { (const void*)&KListItem,          &SetElementWithTextPropertiesL, EEmpty},
-        { (const void*)&KDataGrid,          &SetDataGridAndGridPropertiesL, EEmpty},
-        { (const void*)&KGridCellTemplate,  &SetCommonPropertiesL,          EEmpty},
-        { (const void*)&KList,              &SetGridAndListPropertiesL,     EEmpty},
-        { (const void*)&KDataList,          &SetGridAndListPropertiesL,     EEmpty},
-        { (const void*)&KListRowTemplate,   &SetCommonPropertiesL,          EEmpty},
         { (const void*)&KMenuBar,           NULL,                           EEmpty},
         { (const void*)&KMenu,              NULL,                           EEmpty},
         { (const void*)&KMenuItem,          NULL,                           EEmpty},
@@ -141,22 +132,7 @@ LOCAL_C void SetTextElementPropertiesL( TAny* aData )
     SetElementWithTextPropertiesL( aData );
     TInt count( sizeof (KXnTextElementPropertyTable) / sizeof(TXnPropertyProxy) );
     SetPropertiesL( KXnTextElementPropertyTable, count, aData );
-    }
-
-LOCAL_C void SetGridAndListPropertiesL( TAny* aData )
-    {
-    SetCommonPropertiesL( aData );
-    TInt count( sizeof (KXnGridAndListPropertyTable) / sizeof(TXnPropertyProxy) );
-    SetPropertiesL( KXnGridAndListPropertyTable, count, aData );
-    }
-
-LOCAL_C void SetDataGridAndGridPropertiesL( TAny* aData )
-    {
-    SetGridAndListPropertiesL( aData );
-    TInt count( sizeof (KXnDataGridAndGridPropertyTable) / sizeof(TXnPropertyProxy) );
-    SetPropertiesL( KXnDataGridAndGridPropertyTable, count, aData );
-    }
-        
+    }        
 
 LOCAL_C void SetViewsAndViewPropertiesL( TAny* aData )
     {

@@ -93,6 +93,11 @@ public:
      * @see CXnPluginData           
      */    
     void AppearanceNodesL( RPointerArray< CXnNode >& aList ) const;
+
+    /**
+     * @see CXnPluginData           
+     */    
+    void PopupNodesL( RPointerArray< CXnNode >& aList ) const;
             
 public:   
     // New functions
@@ -143,7 +148,7 @@ public:
      * @param aNode Node
      * @return Plugin data
      */
-    CXnPluginData& Plugin( CXnNode* aNode );
+    CXnPluginData* Plugin( CXnNode* aNode );
 
     /**
      * Finds and reurns plugin/view data for namespace
@@ -196,22 +201,19 @@ public:
      *         Returns KNullCDes if wallpaper has not been set.
      */
     const TDesC& WallpaperImagePath() const;
-
+    
     /**
-     * Sets view's locking_status attribute (locked/none) to determine if view
-     * is prevented from removing/deleting or not
+     * Destroys all publishers in this view
      * 
-     * @param aLockingStatusString attr. locking_status ("locked"/"none")
+     * @param aReason Destroy reason
      */
-    void SetLockingStatus( const TDesC8& aLockingStatusString );
-        
+    void DestroyPublishers( TInt aReason );
+    
 private:
     // new functions
     
     void LoadPublishers();    
-    
-    void DestroyPublishers( TInt aReason );
-    
+           
     static TInt DoLoadPublishersL( TAny* aAny );
     
     void DoDestroyPublishersL( TInt aReason );

@@ -23,7 +23,6 @@
 #include <avkon.loc>
 #include <appinfo.rh>
 #include <avkon.mbg>
-#include <activeidle3.loc>
 #include <widgetmanagerview.loc>
 
 #include "widgetmanager.hrh"

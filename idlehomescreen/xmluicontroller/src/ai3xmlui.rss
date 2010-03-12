@@ -29,6 +29,7 @@ NAME    AI3X
 #include <avkon.mbg>
 #include <e32keys.h>
 #include <activeidle3.loc>
+
 // ========== RESOURCE DEFINITIONS ============================================
 
 RESOURCE RSS_SIGNATURE { }
@@ -140,6 +141,11 @@ RESOURCE TBUF r_qtn_hs_automatic_offline
 RESOURCE TBUF r_qtn_hs_operation_failed_no_disk
     {
     buf = qtn_hs_operation_failed_no_disk;
+    }
+
+RESOURCE TBUF r_qtn_hs_title_editmode
+    {
+    buf = qtn_hs_title_editing;
     }
 
 // home screen online dialog

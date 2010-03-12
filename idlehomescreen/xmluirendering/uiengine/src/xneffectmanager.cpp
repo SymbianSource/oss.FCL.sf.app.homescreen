@@ -31,9 +31,6 @@
 #include <akntranseffect.h>                 // For transition effects
 
 // CONSTANTS
-const TInt KEffectTypeFullscreen = 1;
-const TInt KEffectTypeControl = 2;
-
 const TInt KWaitForLayout = 1;
 const TInt KEffectStarted = 2;
 
@@ -79,53 +76,13 @@ CXnEffectManager::~CXnEffectManager()
     }
 
 // -----------------------------------------------------------------------------
-// CXnEffectManager::BeginControlEffectL
-// -----------------------------------------------------------------------------
-//
-void CXnEffectManager::BeginControlEffectL( TInt /*aId*/, CXnPluginData& /*aPlugin*/ )
-    {
-    /*
-    TXnEffect* effect = new (ELeave) TXnEffect;
-    CleanupStack::PushL( effect );
-    effect->iId = aId;
-    effect->iType = KEffectTypeControl;
-    effect->iNode = aPlugin.Node()->LayoutNode();
-    iEffects.AppendL( effect );
-    CleanupStack::Pop( effect );
-    
-    if ( effect->iNode && !effect->iNode->IsLaidOut() )
-        {
-        effect->iState = KWaitForLayout;
-        }
-    else
-        {
-        DoBeginControlEffect( *effect );
-        }
-    */
-    }
-
-// -----------------------------------------------------------------------------
-// CXnEffectManager::BeginControlEffectL
-// -----------------------------------------------------------------------------
-//
-void CXnEffectManager::BeginControlEffectL( TInt aId,
-                RPointerArray<CXnPluginData>& aPlugins )
-    {
-    TInt count = aPlugins.Count();
-    for ( TInt i = 0; i < count; i++ )
-        {
-        BeginControlEffectL( aId, *aPlugins[i] );
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // CXnEffectManager::BeginFullscreenEffectL
 // -----------------------------------------------------------------------------
 //
 void CXnEffectManager::BeginFullscreenEffectL( TInt aId, CXnViewData& aView )
     {
     // Only one fullscreen effect at time
-    if ( EffectCount( KEffectTypeFullscreen ) != 0 )
+    if ( iEffects.Count() != 0 )
         {
         return;
         }
@@ -133,7 +90,6 @@ void CXnEffectManager::BeginFullscreenEffectL( TInt aId, CXnViewData& aView )
     TXnEffect* effect = new (ELeave) TXnEffect;
     CleanupStack::PushL( effect );
     effect->iId = aId;
-    effect->iType = KEffectTypeFullscreen;
     effect->iNode = aView.ViewNode();
     iEffects.AppendL( effect );
     CleanupStack::Pop( effect );
@@ -157,16 +113,10 @@ void CXnEffectManager::UiRendered()
     for ( TInt i = 0; i < iEffects.Count(); )
         {
         TXnEffect* effect = iEffects[i];
-        if ( effect && effect->iState == KEffectStarted )
+        if ( effect &&
+             effect->iState == KEffectStarted )
             {
-            if ( effect->iType == KEffectTypeFullscreen )
-                {
-                GfxTransEffect::EndFullScreen();
-                }
-            else if ( effect->iType == KEffectTypeControl )
-                {
-                GfxTransEffect::End( effect->iNode->Control() );
-                }
+            GfxTransEffect::EndFullScreen();
             RemoveEffect( effect );
             }
         else
@@ -188,16 +138,9 @@ void CXnEffectManager::UiLayouted()
         TXnEffect* effect = iEffects[i];
         if ( effect && effect->iNode &&
              effect->iState == KWaitForLayout &&
-             effect->iNode->IsLaidOut())
+             effect->iNode->IsLaidOut() )
             {
-            if ( effect->iType == KEffectTypeFullscreen )
-                {
-                effectStarted = DoBeginFullscreenEffect( *effect );
-                }
-            else if ( effect->iType == KEffectTypeControl )
-                {
-                effectStarted = DoBeginControlEffect( *effect );
-                }
+            effectStarted = DoBeginFullscreenEffect( *effect );
             }
         
         if ( effectStarted )
@@ -240,33 +183,6 @@ TBool CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
     }
 
 // -----------------------------------------------------------------------------
-// CXnEffectManager::DoBeginControlEffect
-// -----------------------------------------------------------------------------
-//
-TBool CXnEffectManager::DoBeginControlEffect( TXnEffect& aEffect )
-    {
-    TBool ret = EFalse;
-    CCoeEnv* coe( CCoeEnv::Static() );
-           
-    if ( coe->WsSession().GetFocusWindowGroup() != 
-         coe->RootWin().Identifier() )
-        {
-        // Window group is not focused
-        return ret;
-        }
-
-    // Set effect begin point
-    if ( aEffect.iNode )
-        {
-        GfxTransEffect::Begin( aEffect.iNode->Control() , aEffect.iId );
-        aEffect.iState = KEffectStarted;
-        ret = ETrue;
-        }
-    
-    return ret;
-    }
-
-// -----------------------------------------------------------------------------
 // CXnEffectManager::RemoveEffect
 // -----------------------------------------------------------------------------
 //
@@ -279,24 +195,6 @@ void CXnEffectManager::RemoveEffect( TXnEffect* aEffect )
         iEffects.Remove( index );
         delete temp;
         }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnEffectManager::EffectCount
-// -----------------------------------------------------------------------------
-//
-TInt CXnEffectManager::EffectCount( TInt aType )
-    {
-    TInt effectCount = 0;
-    TInt count = iEffects.Count();
-    for ( TInt i = 0; i < count; i++ )
-        {
-        if ( iEffects[i]->iType == aType )
-            {
-            effectCount++;
-            }
-        }
-    return effectCount;
     }
 
 //  End of File

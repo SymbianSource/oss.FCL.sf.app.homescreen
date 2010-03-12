@@ -196,12 +196,13 @@ void CXnPopupControlAdapter::SetObserver(
 //
 void CXnPopupControlAdapter::TryDisplayingStylusPopupL( CXnNode& aPlugin )
     {
-    CXnViewManager* manager( iUiEngine->ViewManager() );
-            
-    CXnPluginData& plugin( manager->ActiveViewData().Plugin( &aPlugin ) );
-        
     HideMenuL();
-    
+    CXnViewManager* manager( iUiEngine->ViewManager() );            
+    CXnPluginData* plugin( manager->ActiveViewData().Plugin( &aPlugin ) );
+    if ( !plugin )
+        {
+        return;
+        }
     TPointerEvent event( iUiEngine->HitTest().PointerEvent() );
     
     delete iStylusPopupMenu;
@@ -214,10 +215,10 @@ void CXnPopupControlAdapter::TryDisplayingStylusPopupL( CXnNode& aPlugin )
     
     for ( TInt i = 0; i < children.Count(); i++ )
         {      
-        PopulateMenuL( plugin, children[i] );
+        PopulateMenuL( *plugin, children[i] );
         }
     
-    ShowMenuL( plugin, event.iParentPosition );
+    ShowMenuL( *plugin, event.iParentPosition );
     }
 
 // -----------------------------------------------------------------------------

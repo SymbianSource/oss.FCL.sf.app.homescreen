@@ -23,6 +23,7 @@
 
 // Enabled by DTD-localization tools, language specific
 data=ZPRIVATE\200159c0\install\profile_2001cb7c\xuikon\00\profile.o0000 \private\200159c0\install\profile_2001cb7c\xuikon\00\profile.o0000
+data=ZPRIVATE\200159c0\install\profile_2001cb7c\hsps\00\profileconfiguration.dtd \private\200159c0\install\profile_2001cb7c\hsps\00\profileconfiguration.dtd
 
 #endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH
 

@@ -24,6 +24,7 @@
 #include "wmlistbox.h"
 #include "wmwidgetloaderao.h"
 #include "wminstaller.h"
+#include "wmwidgetorderdata.h"
 
 #include <hscontentcontroller.h> // content control api
 #include <hscontentinfoarray.h> // content control api
@@ -139,13 +140,17 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     iWidgetOrder = CWmPersistentWidgetOrder::NewL( iWmPlugin.FileServer() );
     TRAPD( loadError, iWidgetOrder->LoadL() );
 
-    // 3. prepare the widget data list
+    // 3. prepare the widget data array & sort order array
     for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
         {
         iWidgetsList.WidgetData(i).SetPersistentWidgetOrder( iWidgetOrder );
         iWidgetsList.WidgetData(i).SetValid( EFalse );
         }
-
+    for( TInt i = 0; i < iWidgetsList.OrderDataArray().Count(); ++i )
+        {
+        iWidgetsList.OrderData(i)->SetPersistentWidgetOrder( iWidgetOrder );
+        }
+    
     // 4. loop through the content array and compare it against the existing
     // widget data.
     TInt widgetsAdded = 0;
@@ -162,18 +167,27 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
         CWmWidgetData* existingData = FindWidgetData( *contentInfo );
         if ( existingData )
             {
-            // update existing widget data
+            // update existing visible widget data
             existingData->SetValid( ETrue );
             if ( existingData->ReplaceContentInfoL( contentInfo ) )
                 {
+                // Update name to order array if name changed
+                for ( TInt i=0; i < iWidgetsList.OrderDataArray().Count(); i++ )
+                    {
+                    CWmWidgetOrderData* order = iWidgetsList.OrderData(i);
+                    if ( order->EqualsTo( 
+                            existingData->Uid(), existingData->PublisherId() ) )
+                        {
+                        order->UpdateNameL( existingData->Name() );
+                        }
+                    }
                 ++widgetsChanged;
                 }
             }
         else
             {
             // add a new widget data
-            AddWidgetDataL( contentInfo );
-            ++widgetsAdded;
+            AddWidgetDataL( contentInfo, widgetsAdded );
             }
         }
 
@@ -219,9 +233,8 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     // 8. store list order if necessary
     if ( loadError != KErrNone || widgetsAdded > 0 || widgetsRemoved > 0 )
         {
-        iWidgetOrder->StoreL( iWidgetsList.WidgetDataArray() );
+        iWidgetOrder->StoreL( iWidgetsList.OrderDataArray() );
         }
-
     }
 
 // ---------------------------------------------------------
@@ -247,31 +260,65 @@ CWmWidgetData* CWmWidgetLoaderAo::FindWidgetData(
 // ---------------------------------------------------------
 //
 void CWmWidgetLoaderAo::AddWidgetDataL(
-        CHsContentInfo* aContentInfo )
+        CHsContentInfo* aContentInfo, TInt& aCount )
     {
     CleanupStack::PushL( aContentInfo );
     if ( !iWidgetRegistry )
         {
         iWidgetRegistry = new (ELeave) RWidgetRegistryClientSession();
-        User::LeaveIfError( iWidgetRegistry->Connect() );
+        TInt err = iWidgetRegistry->Connect();
+        if ( KErrNone != err )
+            {
+            delete iWidgetRegistry;
+            iWidgetRegistry = NULL;
+            User::Leave( err );
+            }
         }
-    CleanupStack::Pop( aContentInfo );
+            
+    // Becouse we show only widgets that can be added we need two arrays
+    // to maintain order data and visible data. 
+    // All widgets are added to listbox's iOrderDataArray and 
+    // widgets that CanBeAdded are added also to iVisibleWidgetArray.
+    CWmWidgetOrderData* order = CWmWidgetOrderData::NewLC(
+            aContentInfo->PublisherId(), 
+            UidFromString( aContentInfo->Uid() ), 
+            aContentInfo->Name(),
+            iWidgetOrder
+            );
     
-    CWmWidgetData* widgetData = CWmWidgetData::NewLC(
-            iWidgetsList.LogoSize(),
-            iWmPlugin.ResourceLoader(),
-            aContentInfo, iWidgetRegistry );
-    widgetData->SetPersistentWidgetOrder( iWidgetOrder );
-    widgetData->SetValid( ETrue );
-       
-    if ( iUninstallUid != KNullUid &&
-        iUninstallUid == widgetData->PublisherUid() )
+    // add to order data
+    iWidgetsList.AddOrderDataL( order );
+    CleanupStack::Pop( order );
+    
+    if ( aContentInfo->CanBeAdded() )
         {
-        widgetData->VisualizeUninstallL();
+		// widgetdata takes ownership of contentinfo
+        CleanupStack::Pop( aContentInfo );
+        
+        CWmWidgetData* widgetData = CWmWidgetData::NewLC(
+                iWidgetsList.LogoSize(),
+                iWmPlugin.ResourceLoader(),
+                aContentInfo, iWidgetRegistry );
+        widgetData->SetPersistentWidgetOrder( iWidgetOrder );
+        widgetData->SetValid( ETrue );
+        
+        // start uninstall animation if this widget
+        // is currently been unistalled
+        if ( iUninstallUid != KNullUid &&
+            iUninstallUid == widgetData->PublisherUid() )
+            {
+            widgetData->VisualizeUninstallL();
+            }
+        // add to visible data
+        iWidgetsList.AddWidgetDataL( widgetData, EFalse );
+        CleanupStack::Pop( widgetData );
+		aCount++;
         }
-    
-    iWidgetsList.AddWidgetDataL( widgetData, EFalse );
-    CleanupStack::Pop( widgetData );
+    else
+        {
+        //delete aContentInfo when it's not added to iVisibleWidgetArray
+        CleanupStack::PopAndDestroy( aContentInfo );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -298,5 +345,24 @@ void CWmWidgetLoaderAo::Cleanup()
     iWidgetOrder = NULL;
     }
 
+// ----------------------------------------------------
+// CWmWidgetData::UidFromString
+// ----------------------------------------------------
+//
+TUid CWmWidgetLoaderAo::UidFromString( const TDesC8& aUidString ) const
+    {
+    TUid uid( KNullUid );
+    const TInt KHexPrefixLength = 2;
+    if ( aUidString.Length() > KHexPrefixLength )
+        {
+        TUint id = 0;
+        TLex8 lex( aUidString.Mid( KHexPrefixLength ) );
+        if ( lex.Val( id, EHex ) == KErrNone )
+            {
+            uid.iUid = (TInt32)id;
+            }
+        }
+    return uid;
+    }
 // end of file
 

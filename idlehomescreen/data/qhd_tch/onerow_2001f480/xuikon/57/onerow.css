@@ -21,6 +21,7 @@ text
     padding-left:8px;
     padding-right:8px;
     font-line-space: 15;
+    direction: ltr;
     text-align: right;
     text-overflow-mode: wrap;
     max-line-amount: 2;

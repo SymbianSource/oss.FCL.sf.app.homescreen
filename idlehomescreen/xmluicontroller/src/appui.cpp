@@ -17,12 +17,16 @@
 
 // System includes
 #include <centralrepository.h>
-#include <avkon.rsg>                    // For status pane layout resource ids
-#include <startupdomainpskeys.h>
-#include <e32property.h>                // For RProperty
+#include <avkon.rsg>                    
+#include <e32property.h>                
 #include <activeidle2domainpskeys.h>
-#include <AknDlgShut.h>                 // Avkon dialog shutter.
+#include <AknDlgShut.h>                 
 #include <aknview.h>
+#include <apacmdln.h>
+#include <logsuicmdstarter.h>
+#include <aknconsts.h>
+#include <akntitle.h>
+#include <StringLoader.h>
 
 // User includes
 #include <hspublisherinfo.h>
@@ -44,17 +48,18 @@
 #include "aiuiidleintegration.h"
 #include "xmluicontrollerpanic.h"
 
-#include "debug.h"
-#include "ai3perf.h"
 #include "xndomnode.h"
 #include "xnproperty.h"
 #include "xnuiengineappif.h"
 #include "onlineofflinehelper.h"
 #include "ainativeuiplugins.h"
 
+#include "debug.h"
+
 // Constants
 // EAiDeviceStatusContentNetworkIdentity content id
 _LIT( KNetworkIdentity, "NetworkIdentity" );
+const TUid KVoiceUiUID = { 0x101F8543 };
 
 using namespace AiXmlUiController;
 
@@ -75,18 +80,23 @@ CAppUi::CAppUi( CXmlUiController& aUiCtl, TUid aAppUid )
 //
 void CAppUi::ConstructL()
     {
-    AI3_PERF_START(perfdata, "xmluicontroller: CAppUi::ConstructL")
-        
+    __TICK( "CAppUi::ConstructL" );
+    
     // Always reset the phoneforward P&S key on startup just in case
     RProperty::Set( KPSUidAiInformation,
       KActiveIdleForwardNumericKeysToPhone, EPSAiForwardNumericKeysToPhone );
-          
+
+    iEditModeTitle = StringLoader::LoadL( R_QTN_HS_TITLE_EDITMODE );
+    
     // Initialize with empty title pane so it's not shown on startup.                  
     __HEAP("XML UI: Init - Construct App UI")
-    __TIME("XML UI: XnAppUiAdapted::ConstructL",
+    __TIME("XML UI: CXnAppUiAdapter::ConstructL",
         CXnAppUiAdapter::ConstructL();       
     ) 
-        
+      
+    CAknAppUiBase::SetKeyEventFlags( CAknAppUiBase::EDisableSendKeyShort |
+                                     CAknAppUiBase::EDisableSendKeyLong );
+    
     // Register for XML UI view activation & deactivation
     AddViewActivationObserverL( this );
     
@@ -114,26 +124,14 @@ void CAppUi::ConstructL()
     keySoundConfig.iKeySounds = KeySounds();
     keySoundConfig.iContextResId = R_XUI_DEFAULT_SKEY_LIST;
     
-    iIdleIntegration = CAiUiIdleIntegration::NewL
-        ( *iEikonEnv, keySoundConfig, iUiCtl.FwEventHandler() );
-                         
     iUiCtl.NotifyAppEnvReadyL();
-        
-    CAknAppUiBase::SetKeyEventFlags( CAknAppUiBase::EDisableSendKeyShort |
-                                     CAknAppUiBase::EDisableSendKeyLong );
-
+    
     iHelper = COnlineOfflineHelper::NewL( iUiCtl );
     
-    // Load device status plugin here because it is always needed    
-    iDeviceStatusInfo = THsPublisherInfo( KDeviceStatusPluginUid, 
-        KDeviceStatusPluginName, KNullDesC8 ); 
-                
-    iUiCtl.FwStateHandler()->LoadPlugin( 
-            iDeviceStatusInfo, EAiFwSystemStartup );        
-    
-    __HEAP("XML UI: Done - Construct App UI");
-    
-    AI3_PERF_STOP(perfdata, "xmluicontroller: CAppUi::ConstructL")
+    iIdleIntegration = CAiUiIdleIntegration::NewL
+        ( *iEikonEnv, keySoundConfig, iUiCtl.FwEventHandler() );
+               
+    __TICK( "CAppUi::ConstructL - done" );          
     }
 
 // ----------------------------------------------------------------------------
@@ -155,6 +153,8 @@ CAppUi* CAppUi::NewL( CXmlUiController& aUiCtl )
 //
 CAppUi::~CAppUi()
     {
+    delete iEditModeTitle;
+    delete iKeyTimer;
     delete iHelper;
     delete iEventHandler;
     delete iContentRenderer;
@@ -162,13 +162,50 @@ CAppUi::~CAppUi()
     }
 
 // ----------------------------------------------------------------------------
+// CAppUi::ActivateUi()
+// ----------------------------------------------------------------------------
+//
+void CAppUi::ActivateUi()
+    {
+    __TICK( "CAppUi::ActivateUi" );
+    
+    TVwsViewId activeViewId;
+        
+    TInt err( GetActiveViewId( activeViewId ) );
+    
+    if ( err == KErrNotFound )
+        {    
+        // Get Xml Ui view id
+        TVwsViewId xmlViewId( View().ViewId() );
+    
+        TRAP_IGNORE( ActivateLocalViewL( xmlViewId.iViewUid ) );              
+        }                  
+
+    if ( iDeviceStatusInfo.Uid() == TUid::Null() )
+        {
+        __PRINTS( "*** CAppUi::ActivateUI - Loading DeviceStatus plugin" );
+        
+        _LIT8( KNs, "namespace" );
+        
+        // Load device status plugin here because it is always needed    
+        iDeviceStatusInfo = THsPublisherInfo( KDeviceStatusPluginUid, 
+            KDeviceStatusPluginName, KNs ); 
+                           
+        iUiCtl.FwStateHandler()->LoadPlugin( 
+            iDeviceStatusInfo, EAiFwSystemStartup );                                       
+        }
+    
+    iUiCtl.FwEventHandler()->HandleUiReadyEventL( iUiCtl );
+    
+    __PRINTS( "*** CAppUi::ActivateUi - done" );
+    }
+
+// ----------------------------------------------------------------------------
 // CAppUi::PrepareToExit()
 // ----------------------------------------------------------------------------
 //
 void CAppUi::PrepareToExit()
-    {
-    iUiShutdown = ETrue;
-
+    {    
     RemoveViewActivationObserver( this );
     
     iUiCtl.FwEventHandler()->HandleUiShutdown( iUiCtl );
@@ -226,12 +263,35 @@ void CAppUi::HandleWsEventL( const TWsEvent& aEvent,
             TKeyEvent key;
             
             key.iScanCode = EStdKeyNo;
-            key.iCode = EStdKeyNull;
+            key.iCode = EKeyNull;
             key.iModifiers = 0;
             key.iRepeats = 0;
             
             iCoeEnv->SimulateKeyEventL( key, EEventKey );            
             }        
+        }
+    
+    if( aEvent.Type() == EEventKeyDown )
+        {
+        if( aEvent.Key()->iScanCode == EStdKeyYes )
+            {
+            // Send key was pushed and long press recognition is started
+            StartKeyTimerL();
+            }
+        }
+    
+    if( aEvent.Type() == EEventKeyUp )
+        {
+        if( aEvent.Key()->iScanCode == EStdKeyYes )
+            {
+            if( iKeyTimer && iKeyTimer->IsActive() )
+                {
+                // up event is coming before long press of Send key is recognized
+                // Start dialled calls
+                StopKeyTimer();
+                LogsUiCmdStarter::CmdStartL( LogsUiCmdStarterConsts::KDialledView() );
+                }
+            }
         }
          	  
     if( iIdleIntegration )
@@ -285,12 +345,6 @@ void CAppUi::HandleEventL( const TDesC& aEvent, CXnNodeAppIf& aDestination )
 //
 TInt CAppUi::LoadPublisher( CXnNodeAppIf& aPublisher, TInt aReason )
     {
-    if ( iUiShutdown )
-        {
-        // Framework has already destroyed all publishers
-        return KErrNone;
-        }
-    
     THsPublisherInfo info;
     
     TRAP_IGNORE( iUiCtl.PublisherInfoL( aPublisher, info ) );
@@ -311,12 +365,6 @@ TInt CAppUi::LoadPublisher( CXnNodeAppIf& aPublisher, TInt aReason )
 //
 TInt CAppUi::DestroyPublisher( CXnNodeAppIf& aPublisher, TInt aReason )
     {
-    if ( iUiShutdown )
-        {
-        // Framework has already destroyed all publishers
-        return KErrNone;
-        }
-    
     THsPublisherInfo info;
            
     TRAP_IGNORE( iUiCtl.PublisherInfoL( aPublisher, info ) );
@@ -334,12 +382,6 @@ TInt CAppUi::DestroyPublisher( CXnNodeAppIf& aPublisher, TInt aReason )
 TBool CAppUi::DynInitMenuItemL( const TDesC& aItemType, 
     RPointerArray< CXnNodeAppIf >* aList )
     {
-    if ( iUiShutdown )
-        {
-        // Framework has already destroyed all publishers
-        return EFalse;
-        }
-    
     _LIT( KOnline, "hs_online" );
     _LIT( KOffline, "hs_offline" );
     
@@ -376,11 +418,8 @@ TBool CAppUi::DynInitMenuItemL( const TDesC& aItemType,
 // ----------------------------------------------------------------------------
 //
 void CAppUi::SetOnlineStateL( TBool aOnline )
-    {
-    if ( !iUiShutdown )
-        {
-        iHelper->ProcessOnlineStateL( aOnline );    
-        }
+    {       
+    iHelper->ProcessOnlineStateL( aOnline );        
     }
 
 // ----------------------------------------------------------------------------
@@ -409,13 +448,26 @@ void CAppUi::HandleEnterEditModeL( TBool aEnter )
     {
     if ( iInEditMode != aEnter )
         {
+        TVwsViewId activeViewId;
+        TInt err( GetActiveViewId( activeViewId ) );
+
         if ( aEnter )
-            {            
+            {        
             iUiCtl.FwEventHandler()->SuspendContent( 
                 iDeviceStatusInfo, KNetworkIdentity );
+            
+            if ( !err && View().ViewId() == activeViewId )
+                {
+                SetTitlePaneTextL( *iEditModeTitle );
+                }            
             }
         else
             {
+            if ( !err && View().ViewId() == activeViewId )
+                {
+                SetTitlePaneTextL( KNullDesC );
+                }
+        
             iUiCtl.FwEventHandler()->RefreshContent( 
                 iDeviceStatusInfo, KNetworkIdentity );            
             }
@@ -435,7 +487,7 @@ void CAppUi::HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId,
     
     TInt err( GetActiveViewId( activeViewId ) );
     
-    if ( iInEditMode || err == KErrNotFound )
+    if ( err == KErrNotFound )
         {
         return;
         }
@@ -444,17 +496,143 @@ void CAppUi::HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId,
     TVwsViewId xmlViewId( View().ViewId() );
                      
     if ( xmlViewId == aNewlyActivatedViewId && activeViewId != xmlViewId )
-          {        
-          // Xml Ui view became active         
-          iUiCtl.FwEventHandler()->RefreshContent( 
-              iDeviceStatusInfo, KNetworkIdentity );                                
-          }    
+        { 
+        if ( iInEditMode )
+            {
+            TRAP_IGNORE( SetTitlePaneTextL( *iEditModeTitle ) );
+            }
+        else
+            {
+            // Xml Ui view became active         
+            iUiCtl.FwEventHandler()->RefreshContent( 
+                iDeviceStatusInfo, KNetworkIdentity );                                        
+            }
+        }    
     else if ( xmlViewId == aViewIdToBeDeactivated && activeViewId == xmlViewId )
-          {
-          // Xml Ui view became inactive
-          iUiCtl.FwEventHandler()->SuspendContent( 
-              iDeviceStatusInfo, KNetworkIdentity );          
-          }
-      }    
+        {
+        if ( iInEditMode )
+            {
+            TRAP_IGNORE( SetTitlePaneTextL( KNullDesC ) );
+            }
+        else
+            {
+            // Xml Ui view became inactive
+            iUiCtl.FwEventHandler()->SuspendContent( 
+                iDeviceStatusInfo, KNetworkIdentity );                  
+            }
+        }
+    } 
+
+// ----------------------------------------------------------------------------
+// CAppUi::StartKeyTimerL()
+// Starts long press recognizer of Send key.
+// ----------------------------------------------------------------------------
+//
+void CAppUi::StartKeyTimerL()
+    {
+    if ( !iKeyTimer )
+        {
+        iKeyTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+        }
+    else if ( iKeyTimer->IsActive() )
+        {
+        iKeyTimer->Cancel();
+        }
+    iKeyTimer->Start( KAknKeyboardRepeatInitialDelay,
+                      KAknKeyboardRepeatInitialDelay, 
+                      TCallBack ( ReportLongPressL, this ) );
+    }
+
+// ----------------------------------------------------------------------------
+// CAppUi::StopKeyTimer()
+// Stops Send key long press recognizer.
+// ----------------------------------------------------------------------------
+//
+void CAppUi::StopKeyTimer()
+    {
+    if ( iKeyTimer && iKeyTimer->IsActive() )
+        {
+        iKeyTimer->Cancel();
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CAppUi::HandleViewActivation()
+// Launches Voice command application after long Send key is pressed.
+// ----------------------------------------------------------------------------
+//
+void CAppUi::LaunchVoiceCommandL()
+    {
+    TApaTaskList apaTaskList( iCoeEnv->WsSession() );
+    TApaTask apaTask = apaTaskList.FindApp( KVoiceUiUID );
+    
+    if ( apaTask.Exists() )
+        {
+        apaTask.BringToForeground();
+        }
+    else
+        {
+        RApaLsSession apaLsSession;
+        User::LeaveIfError( apaLsSession.Connect() );
+        CleanupClosePushL( apaLsSession );
+        
+        TApaAppInfo appInfo;
+        
+        if( apaLsSession.GetAppInfo( appInfo, KVoiceUiUID ) == KErrNone )
+            {
+            CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
+            cmdLine->SetExecutableNameL( appInfo.iFullName );
+            cmdLine->SetCommandL( EApaCommandRun );
+            User::LeaveIfError( apaLsSession.StartApp( *cmdLine ) );
+            CleanupStack::PopAndDestroy( cmdLine );
+            }
+        CleanupStack::PopAndDestroy( &apaLsSession );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CAppUi::ReportLongPressL()
+// Callback function for long press timer of the Send key.
+// ----------------------------------------------------------------------------
+//
+TInt CAppUi::ReportLongPressL( TAny* aThis )
+    {
+    CAppUi* self = reinterpret_cast <CAppUi* > ( aThis );
+    
+    self->StopKeyTimer();
+    
+    if ( iAvkonAppUi->IsForeground() )
+        {
+        self->LaunchVoiceCommandL();
+        }
+    
+    return 1; // CPeriodic ignores return value
+    }
+
+// ----------------------------------------------------------------------------
+// CAppUi::SetTitlePaneTextL()
+// 
+// ----------------------------------------------------------------------------
+//
+void CAppUi::SetTitlePaneTextL( const TDesC& aText )
+    {
+    CEikStatusPane* sp( StatusPane() );
+    
+    TUid titlePaneUid( TUid::Uid( EEikStatusPaneUidTitle ) );
+           
+    CEikStatusPaneBase::TPaneCapabilities subPaneTitle( 
+        sp->PaneCapabilities( titlePaneUid ) ); 
+                    
+    if ( subPaneTitle.IsPresent() && subPaneTitle.IsAppOwned() )
+        {
+        CAknTitlePane* title = 
+            static_cast< CAknTitlePane* >( sp->ControlL( titlePaneUid ) ); 
+        
+        if ( title )
+            {
+            title->SetTextL( aText );        
+            }               
+        }
+    }
 
 // End of File.

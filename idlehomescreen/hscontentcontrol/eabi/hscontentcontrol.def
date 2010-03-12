@@ -5,4 +5,5 @@ EXPORTS
 	_ZN24CHsContentControlFactoryD0Ev @ 4 NONAME
 	_ZN24CHsContentControlFactoryD1Ev @ 5 NONAME
 	_ZN24CHsContentControlFactoryD2Ev @ 6 NONAME
+	_ZN24CHsContentControlFactory13PrepareToExitEv @ 7 NONAME
 

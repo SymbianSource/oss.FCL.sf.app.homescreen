@@ -366,96 +366,6 @@ EXPORT_C CXnProperty* CXnNodePluginIf::IdL()
     }
 
 // -----------------------------------------------------------------------------
-// CXnNodePluginIf::VisibleRowsL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::VisibleRowsL()
-    {
-    return iNode->VisibleRowsL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::GridColumnsL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::GridColumnsL()
-    {
-    return iNode->GridColumnsL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::GridOrientationL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::GridOrientationL()
-    {
-    return iNode->GridOrientationL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::GridVerDirectionL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::GridVerDirectionL()
-    {
-    return iNode->GridVerDirectionL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::GridHorDirectionL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::GridHorDirectionL()
-    {
-    return iNode->GridHorDirectionL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::FocusHorLoopingL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::FocusHorLoopingL()
-    {
-    return iNode->FocusHorLoopingL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::FocusVerLoopingL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::FocusVerLoopingL()
-    {
-    return iNode->FocusVerLoopingL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::RefL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnProperty* CXnNodePluginIf::RefL()
-    {
-    return iNode->RefL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::GridScrollBarWidthL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C  CXnProperty* CXnNodePluginIf::GridScrollBarWidthL()
-    {
-    return iNode->GridScrollBarWidthL();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::GridScrollBarMarginL
-// -----------------------------------------------------------------------------
-//
-EXPORT_C  CXnProperty* CXnNodePluginIf::GridScrollBarMarginL()
-    {
-    return iNode->GridScrollBarMarginL();
-    }
-
-// -----------------------------------------------------------------------------
 // CXnNodePluginIf::SetHandleTooltip
 // -----------------------------------------------------------------------------
 //
@@ -542,9 +452,7 @@ EXPORT_C void CXnNodePluginIf::SetDirtyL()
     {
     const TDesC8& type( iNode->Type()->Type() );
 
-    if ( iNode->IsAdaptive( ETrue ) ||
-         type == _L8( "grid" ) ||
-         type == _L8( "list" ) )
+    if ( iNode->IsAdaptive( ETrue ) )
         {
         iNode->SetDirtyL( XnDirtyLevel::ELayoutAndRender );
         }

@@ -21,7 +21,7 @@
 #include <eikapp.h>
 #include <AknUtils.h>
 #include <layoutmetadata.cdl.h>
-#include <aknpriv.hrh> 
+#include <AknPriv.hrh> 
 
 // User includes
 #include "xnuiengine.h"
@@ -56,6 +56,7 @@
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
 #include "xntexteditor.h"
+#include "xnbgcontrol.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -271,7 +272,6 @@ static CXnNode* BuildScreenDeviceChangeTriggerNodeLC(
     CXnUiEngine& aUiEngine );
 static void FillFocusCandidatesL( CXnNode* aParent,
     RPointerArray< CXnNode >& aArray );
-static TInt DetermineStatusPaneLayout( CXnProperty* aProperty );
 static TBool SetAdaptivesL( CXnNode& aNode );
 
 static void FindNodeByClassL( CXnNode* aRootNode, const TDesC8& aClassId,
@@ -7901,18 +7901,18 @@ static CXnNode* BuildScreenDeviceChangeTriggerNodeLC( CXnUiEngine& aUiEngine )
     if ( Layout_Meta_Data::IsLandscapeOrientation() )
         {
         reasonString = &XnPropertyNames::action::trigger::name::
-            uidefinitionmodification::reason::KLandscape;
+            orientation::reason::KLandscape;
         }
     else
         {
         reasonString = &XnPropertyNames::action::trigger::name::
-            uidefinitionmodification::reason::KPortrait;
+            orientation::reason::KPortrait;
         }
 
     reasonValue->SetStringValueL( CXnDomPropertyValue::EString, *reasonString );
 
     CXnProperty* reason = CXnProperty::NewL( XnPropertyNames::action::trigger::
-        name::uidefinitionmodification::KReason, reasonValue, *sp );
+        name::orientation::KReason, reasonValue, *sp );
 
     CleanupStack::Pop( reasonValue );
 
@@ -7940,52 +7940,6 @@ static void FillFocusCandidatesL( CXnNode* aParent,
         {
         FillFocusCandidatesL( children[i], aArray );
         }
-    }
-
-// -----------------------------------------------------------------------------
-// DetermineStatusPaneLayout
-// -----------------------------------------------------------------------------
-//
-static TInt DetermineStatusPaneLayout( CXnProperty* aProperty )
-    {
-    TInt spane( KErrNotFound );
-
-    if ( aProperty )
-        {
-        const TDesC8& value( aProperty->StringValue() );
-
-        // Currently supported status pane layout
-        if ( value == XnPropertyNames::view::statuspanelayout::KNone )
-            {
-            spane = R_AVKON_STATUS_PANE_LAYOUT_EMPTY;
-            }
-        if ( value == XnPropertyNames::view::statuspanelayout::KBasic )
-            {
-            spane = R_AVKON_STATUS_PANE_LAYOUT_IDLE;
-            }
-        else if ( value == XnPropertyNames::view::statuspanelayout::KBasicFlat )
-            {
-            spane = R_AVKON_STATUS_PANE_LAYOUT_IDLE_FLAT;
-            }
-        else if ( value ==
-                  XnPropertyNames::view::statuspanelayout::KWideScreen )
-            {
-            spane = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE;
-            }
-        else if ( value ==
-                  XnPropertyNames::view::statuspanelayout::KWideScreenFlat )
-            {
-            spane = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE_FLAT;
-            }
-        else if ( value ==
-                  XnPropertyNames::view::statuspanelayout::
-                  KWideScreenFlat3Softkeys )
-            {
-            spane = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE_FLAT_NO_SOFTKEYS;
-            }
-        }
-
-    return spane;
     }
 
 // -----------------------------------------------------------------------------
@@ -8542,7 +8496,10 @@ CArrayPtrSeg< CXnResource >& CXnUiEngineImpl::Resources()
 //
 void CXnUiEngineImpl::SetFocusedNodeL( CXnNode* aFocusedNode, TInt aSource )
     {
-    iKeyEventDispatcher->SetNodeL( aFocusedNode, aSource );
+    if ( iKeyEventDispatcher )
+        {
+        iKeyEventDispatcher->SetNodeL( aFocusedNode, aSource );
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -8552,7 +8509,12 @@ void CXnUiEngineImpl::SetFocusedNodeL( CXnNode* aFocusedNode, TInt aSource )
 //
 CXnNode* CXnUiEngineImpl::FocusedNode()
     {
-    return iKeyEventDispatcher->FocusedNode();
+    if ( iKeyEventDispatcher )
+        {
+        return iKeyEventDispatcher->FocusedNode();
+        }
+    
+    return NULL;
     }
 
 // -----------------------------------------------------------------------------
@@ -8579,31 +8541,16 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
     iDirtyList.Reset();
 
     iRedrawRegions.ResetAndDestroy();
-    
-    // Set status pane layout
-    CXnProperty* prop( iCurrentView->GetPropertyL( 
-        XnPropertyNames::view::KStatusPaneLayout ) );
-
-    // Is there status pane declaration available
-    TInt spane( DetermineStatusPaneLayout( prop ) );
-
-    if ( spane != KErrNotFound )
-        {
-        CEikStatusPane* sp( iAppUiAdapter.StatusPane() );
-
-        if ( sp && sp->CurrentLayoutResId() != spane )
-            {
-            sp->SwitchLayoutL( spane );
-            sp->ApplyCurrentSettingsL();
-            }
-        }
 
     // Remove previous menubar and stylus popup node
     iMenuNode = NULL;
     iStylusPopupNode = NULL;
 
-    iKeyEventDispatcher->ResetMenuNodeL();
-
+    if ( iKeyEventDispatcher )
+        {
+        iKeyEventDispatcher->ResetMenuNodeL();    
+        }
+    
     RPointerArray< CXnNode >& children( iCurrentView->Children() );
 
     for ( TInt count = children.Count() - 1; count >= 0 ; --count )
@@ -8635,8 +8582,11 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
 
     // Set menu node even if its NULL, to allow keyevent dispatcher
     // to handle no softkeys
-    iKeyEventDispatcher->SetMenuNodeL( iMenuNode );
-
+    if ( iKeyEventDispatcher )
+        {
+        iKeyEventDispatcher->SetMenuNodeL( iMenuNode );    
+        }
+    
     ReportScreenDeviceChangeL();
             
     SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
@@ -8697,9 +8647,9 @@ TBool CXnUiEngineImpl::DynInitMenuItemL( CXnNodeAppIf& aMenuItem,
             {
             if ( aPlugin && &aPlugin->Node() )
                 {
-                CXnPluginData& data( viewData.Plugin( &aPlugin->Node() ) );
+                CXnPluginData* data( viewData.Plugin( &aPlugin->Node() ) );
                 
-                if ( !data.Occupied() )
+                if ( data && !data->Occupied() )
                     {
                     retval = ETrue;
                     }
@@ -8711,9 +8661,9 @@ TBool CXnUiEngineImpl::DynInitMenuItemL( CXnNodeAppIf& aMenuItem,
 
             if ( node )
                 {
-                CXnPluginData& data( viewData.Plugin( node ) );
+                CXnPluginData* data( viewData.Plugin( node ) );
                 
-                if ( data.Removable() && data.Occupied() )
+                if ( data && data->Removable() && data->Occupied() )
                     {
                     retval = ETrue;
                     }                              
@@ -8842,7 +8792,11 @@ void CXnUiEngineImpl::RefreshMenuL()
     {
     if ( iLayoutControl & XnLayoutControl::ERefreshMenu )
         {
-        iKeyEventDispatcher->RefreshMenuL();
+        if ( iKeyEventDispatcher )
+            {
+            iKeyEventDispatcher->RefreshMenuL();        
+            }
+        
         iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
         }
     }
@@ -8937,6 +8891,7 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
             DisableRenderUiLC();
             HandlePartialTouchInputL( aType );
             RootNode()->SetDirtyL();
+            ForceRenderUIL();
             CleanupStack::PopAndDestroy();
             }
         }    
@@ -8948,7 +8903,8 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
             DisableRenderUiLC();
             HandlePartialTouchInputL( aType );
             RootNode()->SetDirtyL();
-            CleanupStack::PopAndDestroy();        
+            ForceRenderUIL();
+            CleanupStack::PopAndDestroy();
             }
         }    
 
@@ -9028,7 +8984,12 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
 //
 TBool CXnUiEngineImpl::IsMenuDisplaying()
     {
-    return iKeyEventDispatcher->IsMenuFocused();
+    if ( iKeyEventDispatcher )
+        {
+        return iKeyEventDispatcher->IsMenuFocused();    
+        }
+    
+    return EFalse;
     }
 
 // -----------------------------------------------------------------------------
@@ -9057,7 +9018,10 @@ CXnNode* CXnUiEngineImpl::StylusPopupNode() const
 //
 void CXnUiEngineImpl::AddPassiveFocusedNodeL( CXnNode* aNode )
     {
-    iKeyEventDispatcher->AddPassiveFocusedNodeL( aNode );
+    if ( iKeyEventDispatcher )
+        {
+        iKeyEventDispatcher->AddPassiveFocusedNodeL( aNode );    
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -9066,7 +9030,10 @@ void CXnUiEngineImpl::AddPassiveFocusedNodeL( CXnNode* aNode )
 //
 void CXnUiEngineImpl::RemovePassiveFocusedNodeL( CXnNode* aNode )
     {
-    iKeyEventDispatcher->RemovePassiveFocusedNodeL( aNode );
+    if ( iKeyEventDispatcher )
+        {
+        iKeyEventDispatcher->RemovePassiveFocusedNodeL( aNode );    
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -9075,7 +9042,10 @@ void CXnUiEngineImpl::RemovePassiveFocusedNodeL( CXnNode* aNode )
 //
 void CXnUiEngineImpl::ClearPassiveFocusedNodesL()
     {
-    iKeyEventDispatcher->ClearPassiveFocusedNodesL();
+    if ( iKeyEventDispatcher )
+        {
+        iKeyEventDispatcher->ClearPassiveFocusedNodesL();
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -9758,7 +9728,11 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( TInt aType )
         return;
         }
     if ( aType == KAknSplitInputEnabled ) 
-        {        
+        {
+        // make sure that we always get up event
+        CCoeControl& bg( iAppUiAdapter.ViewAdapter().BgControl() );                    
+        static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();        
+
         // don't remove input from stack if split input is enabled
         XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;             
         XnComponentInterface::MakeInterfaceL( editorControl, 
@@ -9912,7 +9886,7 @@ void CXnUiEngineImpl::SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher )
 // -----------------------------------------------------------------------------
 void CXnUiEngineImpl::NotifyStatusPaneSizeChanged()
     {
-    TRAP_IGNORE( iUiEngine->SetClientRectL( iAppUiAdapter.ClientRect() ) );
+    TRAP_IGNORE( iUiEngine->SetClientRectL( iAppUiAdapter.ClientRect(), EFalse ) );
     }
     
 // -----------------------------------------------------------------------------

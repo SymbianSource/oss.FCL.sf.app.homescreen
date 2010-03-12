@@ -260,7 +260,7 @@ TKeyResponse CWmMainContainer::OfferKeyEventL(
              aKeyEvent.iScanCode == EStdKeyBackspace && 
              aKeyEvent.iModifiers == EModifierAutorepeatable )
         {
-        return EKeyWasNotConsumed;
+        return EKeyWasConsumed;
         }
     
     // Handle search keyevent
@@ -310,7 +310,7 @@ TKeyResponse CWmMainContainer::HandleSearchKeyEventL(
             aKeyEvent.iScanCode < EStdKeyF1 &&
         TChar( aKeyEvent.iScanCode ).IsAlphaDigit() )
         {
-        ActivateFindPaneL();
+        ActivateFindPaneL( EFalse );
         
         if ( iFindPaneIsVisible )
             {
@@ -974,12 +974,7 @@ TBool CWmMainContainer::CanDoLaunch()
 //
 TBool CWmMainContainer::CanDoFind()
     {
-    TBool canDo( !iFindPaneIsVisible );
-    if ( canDo )
-        {
-        canDo = ( iFocusMode == EList || iFocusMode == ENowhere );
-        }
-    return canDo;
+    return !iFindPaneIsVisible;
     }
 
 // ---------------------------------------------------------
@@ -1081,7 +1076,7 @@ void CWmMainContainer::LaunchWidgetL()
 // CWmMainContainer::ActivateFindPaneL
 // ---------------------------------------------------------------------------
 //
-void CWmMainContainer::ActivateFindPaneL()
+void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdabtive )
     {
     if ( iFindbox && !iFindPaneIsVisible &&
             iWidgetsList->Model()->NumberOfItems() > KMinWidgets )
@@ -1102,13 +1097,16 @@ void CWmMainContainer::ActivateFindPaneL()
         iFindbox->ResetL();
         iFindbox->SetSearchTextL( KNullDesC );
         iFindbox->SetSkinEnabledL( ETrue );
-
         iFindPaneIsVisible = ETrue;
         iFindbox->MakeVisible( ETrue );
         
         // layout listbox and findbox
         LayoutControls();        
         
+        if ( aActivateAdabtive )
+            {
+            iFindbox->ShowAdaptiveSearchGrid();
+            }
         iFindbox->SetFocus( ETrue );
         iWidgetsList->SetFindPaneIsVisible( ETrue );
 
@@ -1176,15 +1174,16 @@ void CWmMainContainer::SortListAlphabeticallyL()
     {
     if ( iWidgetsList )
         {
-        iWidgetsList->SetSortOrderL( CWmListBox::EAlphabetical );
+        iWidgetsList->DoSortToVisibleArray( CWmListBox::EAlphabetical );
+        iWidgetsList->DoSortToOrderData( CWmListBox::EAlphabetical );
        
         //store changed list order
         CWmPersistentWidgetOrder* widgetOrder =
             CWmPersistentWidgetOrder::NewL( iWmPlugin.FileServer() );
         CleanupStack::PushL( widgetOrder );
-        widgetOrder->StoreL( iWidgetsList->WidgetDataArray() );
+        widgetOrder->StoreL( iWidgetsList->OrderDataArray() );
+		
         CleanupStack::PopAndDestroy( widgetOrder );
-
         }
     }
 

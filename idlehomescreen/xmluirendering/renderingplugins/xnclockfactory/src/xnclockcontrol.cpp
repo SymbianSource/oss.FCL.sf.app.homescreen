@@ -18,6 +18,7 @@
 
 // SYSTEM INCLUDE FILES
 #include <e32std.h>         // for RChangeNotifier
+#include <debug.h>
 
 // USER INCLUDE FILES
 #include "xncontroladapter.h"
@@ -61,6 +62,7 @@ class CXnClockChangeHandler : public CActive
 
         void RunL()
             {
+            __PRINTS( "CXnClockChangeHandler::RunL, timer runs" );            
             if( iStatus.Int() & ( EChangesLocale | EChangesSystemTime ) )
                 {
                 iClient.TimeOrLocaleChanged();
@@ -244,9 +246,6 @@ void CXnClockControl::Draw( CWindowGc& aGc, const TRect& aRect ) const
         homeTime.HomeTime();
 
         TRAP_IGNORE( iFace->DrawL( *iAdapter, aGc, aRect, homeTime ) );
-        
-        // Ensure timer is active
-        const_cast< CXnClockControl* >( this )->StartTimer();
         }
     }
 
@@ -257,6 +256,7 @@ void CXnClockControl::Draw( CWindowGc& aGc, const TRect& aRect ) const
 //
 TInt CXnClockControl::TimerCallback( TAny* aThis )
     {
+    __PRINTS( "CXnClockControl::TimerCallback, timer runs" );
     CXnClockControl* self = static_cast< CXnClockControl* >( aThis );
 
     // Update the clock display

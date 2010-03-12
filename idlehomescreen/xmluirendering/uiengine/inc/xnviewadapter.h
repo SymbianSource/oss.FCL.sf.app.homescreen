@@ -77,7 +77,7 @@ public:
      * 
      * @since S60 5.0
      */    
-    void PrepareDestroy();
+    void PrepareToExit();
 
     /**
      * Gets event dispatcher
@@ -116,8 +116,15 @@ public:
      * 
      * @since S60 5.0
      */  
-	    void UpdateRskByModeL();  
-    
+    void UpdateRskByModeL();
+
+    /**
+     * Closes all popups for this container.
+     * 
+     * @since S60 5.0
+     */
+    void CloseAllPopupsL();
+
 public:
     // from CAknView
 
@@ -191,6 +198,29 @@ private:
      * @since S60 5.0               
      */    
     void DeactivateContainerL();
+
+    /**
+     * Activates default container to view. 
+     * Deactivates internally previous container if it exists.
+     * 
+     * @since S60 5.0
+     * @param aEnterEditState ETrue if default container should be set to edit state.
+     */
+    void ActivateDefaultContainerL( TBool aEnterEditState = EFalse );
+
+    /**
+     * Sets edit state property of container
+     * 
+     * @since S60 5.0
+     * @param aView container
+     * @param aEnter ETrue if container should be set to edit state.
+     */
+    void EnterEditStateL( CXnViewData& aView, TBool aEnter );
+    
+    /**
+     * Callback function to be used with CPeriodic.
+     */
+    static TInt TimerCallback( TAny *aPtr );
     
 private:
 
@@ -226,7 +256,9 @@ private:
     /** Active container, Not owned */
     const CXnViewData* iContainer;
     /** Flags */
-    TBitFlags32 iFlags; 
+    TBitFlags32 iFlags;
+    /** Timer to set window group order after default view is activated, owned */
+    CPeriodic* iTimer;
     };
 
 #endif // XNVIEWADAPTER_H

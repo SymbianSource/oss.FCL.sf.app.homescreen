@@ -38,7 +38,9 @@ namespace NPreviewMsg
         // From PreviewProvider ECOM plugin to PreviewProviderClient. 
         EPreviewReady,
         EAckPreviewReady,
-        EUnregisterReady
+        EUnregisterReady,
+        EBitmapRotationNeeded90,
+        EBitmapRotationNeeded270
         };
     }
 

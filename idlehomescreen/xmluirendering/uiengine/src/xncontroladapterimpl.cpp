@@ -75,7 +75,6 @@ const TInt KLongTapStartShortDelay( 150000 ); // 0.15s for Sk
 const TInt KLongTapStartLongDelay( 500000 ); // 0.5s
 const TInt KLongTapTimeShortDelay( 600000 ); // 0.6s for SK
 const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s 
-_LIT( KWidgetBg, "SKIN(268458534 9916)" );
 
 // LOCAL FUNCTION PROTOTYPES
 static TRgb ConvertHslToRgb( TInt aHue, TInt aSaturation, TInt aLightness );
@@ -4037,7 +4036,6 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
                 {
                 // Remove pressed down
                 node->UnsetStateL( XnPropertyNames::style::common::KPressedDown );
-                node->HideTooltipsL();            
                 }            
             }
         }
@@ -4058,7 +4056,9 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
                 
                 if ( feedback )
                     {
-                    feedback->InstantFeedback( ETouchFeedbackBasic );
+                    feedback->InstantFeedback( iAdapter, ETouchFeedbackBasic, 
+                		                       ETouchFeedbackVibra,
+                		                       aPointerEvent );
                     }
 #endif
                 node->SetStateL( XnPropertyNames::style::common::KActive );
@@ -4090,6 +4090,12 @@ void CXnControlAdapterImpl::DoDrawL( const TRect& aRect, CWindowGc& aGc ) const
         DrawFocusAppearance( node, aGc );
         }
     
+    // Draw plus sign for empty plugins in edit mode.
+    if( node.UiEngine()->EditMode()->EditState() )
+        {
+        const_cast< CXnControlAdapterImpl* >( this )->DrawPlusSign( node, aGc );
+        }
+    
     if ( iAnimation )
         {
         TRect rect = iComponent->Node()->Rect();
@@ -4117,8 +4123,6 @@ void CXnControlAdapterImpl::DrawBackgroundDataL(
     CXnNode& aNode,
     CWindowGc& aGc )
     {
-    // For widgets and plugins, drawing is handled differently in edit mode
-    const TDesC8& widgetType = aNode.DomNode()->Name();
     if( aNode.UiEngine()->EditMode()->EditState() )
         {
         DrawEditModeBgData( aNode, aGc );
@@ -4176,13 +4180,26 @@ void CXnControlAdapterImpl::DrawEditModeBgData(
         {
         TRect rect = aNode.PaddingRect();
         DrawBackgroundSkin( KAknsIIDQgnHomeEditBgWidget, aGc, rect );
+        }    
+    }
 
-        CXnPluginData& data( aNode.UiEngine()->ViewManager()->ActiveViewData().Plugin( &aNode ) );
-        if( !data.Occupied() ) // Empty widget
+// -----------------------------------------------------------------------------
+// CXnControlAdapterImpl::DrawPlusSign
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnControlAdapterImpl::DrawPlusSign( CXnNode& aNode, CWindowGc& aGc )
+    {
+    const TDesC8& widgetType = aNode.DomNode()->Name();
+    if( widgetType == XnPropertyNames::KPlugin )
+        {
+        CXnPluginData* data( aNode.UiEngine()->ViewManager()->ActiveViewData().Plugin( &aNode ) );
+        if( data && !data->Occupied() ) // Empty widget
             {
             // Draw + -icon
             // Make rect as 50% of the widget's height.
             // It needs to be square in order to keep aspect ratio.
+            TRect rect = aNode.PaddingRect();
             TInt w = rect.Width();
             TInt h = rect.Height();
             rect.Shrink( ( w - h * 0.5 ) * 0.5, h * 0.25 );            
@@ -4287,20 +4304,11 @@ void CXnControlAdapterImpl::DrawBackgroundSkinL(CXnNode& aNode,
         aRect = aNode.PaddingRect();
         }
     
-    //CXnProperty* colorProperty( aNode.BackgroundColorL() );
     CXnProperty* colorProperty( aBgColor );
     if ( colorProperty )
         {
         HBufC* skinID = colorProperty->StringValueL();
         CleanupStack::PushL( skinID );
-
-        // Widget background should not be drawn in edit mode
-        if( aNode.UiEngine()->EditMode()->EditState() && 
-                skinID->Des() == KWidgetBg )
-            {
-            CleanupStack::PopAndDestroy( skinID );
-            return;
-            }
 
         if ( skinID->Length() != 0 )
             {

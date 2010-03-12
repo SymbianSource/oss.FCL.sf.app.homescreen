@@ -25,8 +25,10 @@
 #include <testclassassert.h>
 #include <s32file.h> // RFs
 
+#include "wmwidgetorderdata.h"
 #include "wmimageconverter.h" // MConverterObserver
 #include <hscontentcontroller.h>
+#include "wminstaller.h"
 
 // MACROS
 #define TEST_CLASS_VERSION_MAJOR 0
@@ -58,7 +60,7 @@ class CWmImageConverter;
 class CHsContentInfo;
 class CHsContentInfoArray;
 class RWidgetDataValues;
-
+class CWmInstaller;
 
 // CLASS DECLARATION
 /**
@@ -95,6 +97,7 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
 
         
         TInt WidgetListL( CHsContentInfoArray& aArray );
+        TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
         TInt ViewListL( CHsContentInfoArray& aArray );
         TInt AppListL( CHsContentInfoArray& aArray );
         TInt AddWidgetL( CHsContentInfo& aInfo );
@@ -169,12 +172,24 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
         // cancel ongoing convert
         TInt CancelConvertL( CStifItemParser& aItem );
 
-
-    private: // members used in testing
+        // TESTING UNISTALL
+        TInt UninstallL( CStifItemParser& aItem );
+        TInt WaitUninstallToFinnishL( CStifItemParser& aItem );
+        TInt UninstallUidL( CStifItemParser& aItem );
+        TInt CleanUninstall( CStifItemParser& aItem );
+        TInt WasUnistalledL( CStifItemParser& aItem );
+        TInt CancelUninstall( CStifItemParser& aItem );
+        
+    private: // helper functions for test cases
 
         void CreateContentInfoArrayL( CHsContentInfoArray& aArray, TInt aCount );
-        void CreateWidgetDataArrayL( RWidgetDataValues& aArray, TInt aCount );
-
+        void CreateWidgetDataArrayL( ROrderArray& aArray, TInt aCount );
+        TUid UidFromString( const TDesC8& aUidString ) const;
+        void StartTimerL();
+        static TInt Timeout( TAny* aPtr );
+        
+    private: // members used in testing
+        
         // file server
         RFs iFs;
 
@@ -202,6 +217,12 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
         // multipurpose test data count
         TInt iMass;
 
+        // uninstall uid
+        TUid iUninstallUid;
+        
+        // timer for waiting uninstall to finnish
+        CPeriodic* iTimer;
+        
         // requested changes to the content
         TInt iChangeIndex;
         TInt iChangeType;

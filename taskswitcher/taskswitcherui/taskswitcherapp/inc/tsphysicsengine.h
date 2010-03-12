@@ -71,10 +71,17 @@ public:
     void HandleDragEvent(AknTouchGestureFw::MAknTouchGestureFwDragEvent& aEvent);
     
     /**
+     * Checks if the physics is running
      */
     TBool IsRunning() const;
     
     /**
+     * Checks if the physics is running drag
+     */
+    TBool IsDragging() const;
+    
+    /**
+     * Stops physics
      */
     void Stop();
     

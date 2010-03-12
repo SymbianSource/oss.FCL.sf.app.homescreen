@@ -18,6 +18,7 @@
 // System includes
 #include <aknViewAppUi.h>
 #include <eikbtgpc.h>
+#include <avkon.rsg>
 
 // User includes
 #include "xnappuiadapter.h"
@@ -44,14 +45,19 @@
 #include "xnviewadapter.h"
 #include "xnmenu.h"
 #include "xneditmode.h"
+#include "xnrootdata.h"
+
+#include "debug.h"
 
 // Constants
 const TUid KXmlViewUid = { 1 };
+_LIT8( KActivateDefaultView, "activatedefault" );
 
 // Data types
 enum 
     {
     EIsActivated,
+    EIsFirstActivation,
     EIsInCall,
     EIsLightsOn,
     EIsForeground,    
@@ -60,6 +66,52 @@ enum
     };
 
 // ============================= LOCAL FUNCTIONS ===============================
+// -----------------------------------------------------------------------------
+// DetermineStatusPaneLayout
+// -----------------------------------------------------------------------------
+//
+static TInt DetermineStatusPaneLayout( CXnProperty* aProperty )
+    {
+    TInt spane( KErrNotFound );
+
+    if ( aProperty )
+        {
+        const TDesC8& value( aProperty->StringValue() );
+
+        // Currently supported status pane layout
+        if ( value == XnPropertyNames::view::statuspanelayout::KNone )
+            {
+            spane = R_AVKON_STATUS_PANE_LAYOUT_EMPTY;
+            }
+        if ( value == XnPropertyNames::view::statuspanelayout::KBasic )
+            {
+            spane = R_AVKON_STATUS_PANE_LAYOUT_IDLE;
+            }
+        else if ( value == XnPropertyNames::view::statuspanelayout::KBasicFlat )
+            {
+            spane = R_AVKON_STATUS_PANE_LAYOUT_IDLE_FLAT;
+            }
+        else if ( value ==
+                  XnPropertyNames::view::statuspanelayout::KWideScreen )
+            {
+            spane = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE;
+            }
+        else if ( value ==
+                  XnPropertyNames::view::statuspanelayout::KWideScreenFlat )
+            {
+            spane = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE_FLAT;
+            }
+        else if ( value ==
+                  XnPropertyNames::view::statuspanelayout::
+                  KWideScreenFlat3Softkeys )
+            {
+            spane = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE_FLAT_NO_SOFTKEYS;
+            }
+        }
+
+    return spane;
+    }
+
 // -----------------------------------------------------------------------------
 // BuildTriggerL
 // -----------------------------------------------------------------------------
@@ -155,7 +207,8 @@ CXnViewAdapter::CXnViewAdapter( CXnAppUiAdapter& aAdapter )
 // -----------------------------------------------------------------------------
 //
 CXnViewAdapter::~CXnViewAdapter()
-    {           
+    {
+    delete iTimer;
     delete iActivate;
     delete iDeactivate;
     delete iEditState;
@@ -186,6 +239,10 @@ CXnViewAdapter* CXnViewAdapter::NewL( CXnAppUiAdapter& aAdapter )
 void CXnViewAdapter::ConstructL()
     {
     BaseConstructL();
+    
+    iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
+    
+    iFlags.Set( EIsFirstActivation );
     
     // Base class CAknViewAppUi takes ownership of iViewAdapter
     iAppUiAdapter.AddViewL( this );    
@@ -241,20 +298,17 @@ void CXnViewAdapter::ReloadUiL()
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewAdapter::PrepareDestroy
+// CXnViewAdapter::PrepareToExit
 // Sets view to be destroyed
 // -----------------------------------------------------------------------------
 //
-void CXnViewAdapter::PrepareDestroy()
-    {
-    iAppUiAdapter.UiStateListener().RemoveObserver( *this );
-    iBgControl->PrepareDestroy();
-    
-    TRAP_IGNORE( DeactivateContainerL() );
-    
+void CXnViewAdapter::PrepareToExit()
+    {                
     iAppUiAdapter.RemoveFromStack( iEventDispatcher );
     delete iEventDispatcher;
     iEventDispatcher = NULL;
+    
+    iAppUiAdapter.UiEngine().SetEventDispatcher( NULL );
     
     iContainer = NULL;
     
@@ -318,12 +372,15 @@ TUid CXnViewAdapter::Id() const
 //
 void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,    
     TUid /*aCustomMessageId*/,
-    const TDesC8& /*aCustomMessage*/ )
+    const TDesC8& aCustomMessage )
     {
     if ( iFlags.IsSet( EIsDestructionRunning ) )
         {
         return;
         }
+
+    __TICK( "CXnViewAdapter::DoActivateL" );
+    __TIME_MARK( time );
     
     iFlags.Set( EIsActivated );
     
@@ -342,9 +399,83 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
     
     iBgControl->MakeVisible( ETrue );
     iBgManager->MakeVisible( ETrue );
+
+    // Set status pane layout
+    CXnViewData& viewData( iAppUiAdapter.ViewManager().ActiveViewData() );
+    CXnProperty* prop( viewData.Node()->LayoutNode()->GetPropertyL( 
+        XnPropertyNames::view::KStatusPaneLayout ) );
+
+    // Is there status pane declaration available
+    TInt spane( DetermineStatusPaneLayout( prop ) );
+
+    if ( spane != KErrNotFound )
+        {
+        CEikStatusPane* sp( iAppUiAdapter.StatusPane() );
+
+        if ( sp && sp->CurrentLayoutResId() != spane )
+            {
+            sp->SwitchLayoutL( spane );
+            sp->ApplyCurrentSettingsL();
+            }
+        }    
+                
+    if ( iFlags.IsSet( EIsFirstActivation ) )
+        {                             
+        // Set the active container
+        ActivateContainerL( iAppUiAdapter.ViewManager().ActiveViewData() );
+        
+        __TICK( "CXnViewAdapter::DoActivateL - Calling UiActivated" );
+        __TIME_MARK( time2 );
     
-    // Set the active container
-    ActivateContainerL( iAppUiAdapter.ViewManager().ActiveViewData() );             
+        iFlags.Clear( EIsFirstActivation );
+        
+        iAppUiAdapter.UiActivated();
+        
+        __TIME_ENDMARK( "CXnViewAdapter::DoActivateL - Calling UiActivated", time );        
+        }
+    else
+        {
+	    // Set the active container
+	    if ( aCustomMessage == KActivateDefaultView )
+	        {
+            __PRINTS( "*** CXnViewAdapter::DoActivateL - activating default container" );
+	    
+	        ActivateDefaultContainerL();
+        
+	        iTimer->Cancel();
+	        iTimer->Start( 1000, 1000, TCallBack( TimerCallback, this ) );
+	        }
+	    else
+	        {
+            __PRINTS( "*** CXnViewAdapter::DoActivateL - activating container" );
+	    
+	        ActivateContainerL( viewData );
+	        }
+        }
+			  
+    __TIME_ENDMARK( "CXnViewAdapter::DoActivateL, done", time );
+    
+    __TICK( "CXnViewAdapter::DoActivateL - HS UI Ready" );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewAdapter::TimerCallback
+// 
+// -----------------------------------------------------------------------------
+//
+TInt CXnViewAdapter::TimerCallback( TAny *aPtr )
+    {
+    __PRINTS( "*** CXnViewAdapter::TimerCallback" );
+    
+    CXnViewAdapter* self = reinterpret_cast< CXnViewAdapter* >( aPtr );
+    self->iTimer->Cancel();
+    
+    self->iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
+            self->iCoeEnv->RootWin().Identifier(), 0 );
+
+    __PRINTS( "*** CXnViewAdapter::TimerCallback, done" );
+    
+    return KErrNone;
     }
 
 // -----------------------------------------------------------------------------
@@ -359,6 +490,9 @@ void CXnViewAdapter::DoDeactivate()
         return;
         }
     
+    __PRINTS( "*** CXnViewAdapter::DoDeactivate" );
+    __TIME_MARK( time );
+    
     iAppUiAdapter.RemoveFromStack( iEventDispatcher );
 
     TRAP_IGNORE( DeactivateContainerL() );
@@ -369,6 +503,8 @@ void CXnViewAdapter::DoDeactivate()
     iFocusControl->MakeVisible( EFalse );
     
     iFlags.Clear( EIsActivated );
+    
+    __TIME_ENDMARK( "CXnViewAdapter::DoDeactivate, done", time );
     }
 
 // -----------------------------------------------------------------------------
@@ -379,7 +515,7 @@ void CXnViewAdapter::DoDeactivate()
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
     TBool aEnterEditState )
     {                       
-    if ( iContainer == &aContainer )    
+    if ( iContainer == &aContainer || iFlags.IsSet( EIsDestructionRunning ) )    
         {            
         return;
         }
@@ -422,30 +558,14 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
                  
     iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
     
-    if ( !iEditState )
-        {
-        iEditState = BuildEditStateTriggerL( iAppUiAdapter.UiEngine() ); 
-        }
-    
-    CXnProperty* prop( iEditState->GetPropertyL( 
-        XnPropertyNames::action::KValue ) );
-    
     if ( aEnterEditState || iAppUiAdapter.UiEngine().IsEditMode() )
         {
-        static_cast< CXnDomPropertyValue* >(
-            prop->Property()->PropertyValueList().Item( 0 ) )
-            ->SetStringValueL( CXnDomPropertyValue::EString,
-            XnPropertyNames::action::trigger::name::editmode::KEnter() );                        
+        EnterEditStateL( aContainer, ETrue );                        
         }
     else
         {
-        static_cast< CXnDomPropertyValue* >(
-            prop->Property()->PropertyValueList().Item( 0 ) )
-            ->SetStringValueL( CXnDomPropertyValue::EString,
-            XnPropertyNames::action::trigger::name::editmode::KExit() );                                
+        EnterEditStateL( aContainer, EFalse );                                
         }
-    
-    node->ReportXuikonEventL( *iEditState );
     
     CXnControlAdapter* adapter( node->Control() );
     
@@ -457,16 +577,89 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewAdapter::ActivateDefaultContainerL
+// Activates default container
+// -----------------------------------------------------------------------------
+//
+void CXnViewAdapter::ActivateDefaultContainerL( TBool aEnterEditState )
+    {
+    CXnRootData& rootData( iAppUiAdapter.ViewManager().ActiveAppData() );
+    
+    RPointerArray< CXnPluginData >& views( rootData.PluginData() );
+    
+    if ( !views.Count() )
+        {
+        return;
+        }    
+    
+    // Deactivate container even though it hasn't changed to close all popups
+    // and other windows
+    DeactivateContainerL();
+    
+    // first view is default
+    CXnViewData* viewData = static_cast<CXnViewData*>( views[0] );
+    
+    if ( viewData )
+        {
+        EnterEditStateL( *viewData, aEnterEditState );
+        ActivateContainerL( *viewData, aEnterEditState );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewAdapter::EnterEditStateL
+// Sets edit state property
+// -----------------------------------------------------------------------------
+//
+void CXnViewAdapter::EnterEditStateL( CXnViewData& aView, TBool aEnter )
+    {
+    if ( !iEditState )
+        {
+        iEditState = BuildEditStateTriggerL( iAppUiAdapter.UiEngine() ); 
+        }
+    
+    CXnProperty* prop( iEditState->GetPropertyL( 
+        XnPropertyNames::action::KValue ) );
+    
+    if ( !prop )
+        {
+        return;
+        }
+    
+    if ( aEnter )
+        {
+        static_cast< CXnDomPropertyValue* >(
+            prop->Property()->PropertyValueList().Item( 0 ) )
+            ->SetStringValueL( CXnDomPropertyValue::EString,
+            XnPropertyNames::action::trigger::name::editmode::KEnter() );
+        }
+    else
+        {
+        static_cast< CXnDomPropertyValue* >(
+            prop->Property()->PropertyValueList().Item( 0 ) )
+            ->SetStringValueL( CXnDomPropertyValue::EString,
+            XnPropertyNames::action::trigger::name::editmode::KExit() );
+        }
+    
+    if ( aView.Node() && aView.Node()->LayoutNode() )
+        {
+        aView.Node()->LayoutNode()->ReportXuikonEventL( *iEditState );
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewAdapter::DeactivateContainerL
 // Deactivates current container
 // -----------------------------------------------------------------------------
 //
 void CXnViewAdapter::DeactivateContainerL()
     {
-    if ( !iContainer )    
+    if ( !iContainer || iFlags.IsSet( EIsDestructionRunning ) )    
         {
         return;
         }
+    
+    CloseAllPopupsL();
     
     // Run controls to powersave mode
     ChangeControlsStateL( EFalse );
@@ -676,6 +869,39 @@ void CXnViewAdapter::UpdateRskByModeL()
                 }
             }
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewAdapter::CloseAllPopupsL()
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnViewAdapter::CloseAllPopupsL()
+    {
+    if ( !iContainer )
+        {
+        return;
+        }
+    
+    RPointerArray< CXnNode > popups;
+    CleanupClosePushL( popups );
+    
+    iContainer->PopupNodesL( popups );
+    
+    for ( TInt i = 0; i < popups.Count(); i++ )
+        {
+        CXnProperty* display = CXnProperty::NewL(
+            XnPropertyNames::style::common::KDisplay,
+            XnPropertyNames::style::common::display::KNone,
+            CXnDomPropertyValue::EString,
+            *iAppUiAdapter.UiEngine().ODT()->DomDocument().StringPool() );
+        
+        CleanupStack::PushL( display );         
+        popups[i]->SetPropertyL(display);             
+        CleanupStack::Pop( display );
+        }
+        
+    CleanupStack::PopAndDestroy( &popups );
     }
 
 

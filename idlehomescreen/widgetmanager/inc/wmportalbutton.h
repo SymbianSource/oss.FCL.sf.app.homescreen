@@ -83,6 +83,11 @@ protected: // from MCoeControlObserver
     /** Observes the button's own activity  */
     void HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType );
     
+protected: // from CCoeControl
+
+    /** Handles pointer events.  */
+    void HandlePointerEventL( const TPointerEvent& aPointerEvent );
+    
 protected: // Constructors
     
     /** Constructor for performing 1st stage construction */

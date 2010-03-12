@@ -26,6 +26,7 @@ text.text_box
     padding-right:8px;
     padding-left:8px;
     padding-top:8px;
+    direction: ltr;
     text-align: right;
     font-family: EAknLogicalFontSecondaryFont;
     font-size: 23px;

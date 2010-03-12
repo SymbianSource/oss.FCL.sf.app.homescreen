@@ -280,6 +280,9 @@ void CWmWidgetData::HandleIconString( const TDesC& aIconStr )
         {
         iconStr = aIconStr.Alloc();
         }
+    
+    // nothing to do if no iconstr
+    if ( !iconStr ){ return; }
 
     TSize size( iLogoSize );
     if ( iLogoImage ) { size = iLogoImage->SizeInPixels(); }
@@ -295,7 +298,8 @@ void CWmWidgetData::HandleIconString( const TDesC& aIconStr )
     iconStr = NULL;
     
     // handle result
-    if ( KErrNone == err && IsPrepairingLogo() )
+    if ( KErrNone == err && iWait &&
+        IsPrepairingLogo() )
         {
         iWait->Start();
         }

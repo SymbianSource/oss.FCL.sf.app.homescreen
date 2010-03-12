@@ -249,17 +249,6 @@ void CXnBgControl::ResetGrabbingL()
     }
 
 // -----------------------------------------------------------------------------
-// CXnBgControl::PrepareDestroy()
-// Prepares control for destroying
-// -----------------------------------------------------------------------------
-//
-void CXnBgControl::PrepareDestroy()
-    {
-    static_cast< CXnAppUiAdapter* >( iAvkonAppUi )
-            ->UiStateListener().RemoveObserver( *this );
-    }
-
-// -----------------------------------------------------------------------------
 // CXnBgControl::RemoveGrabbingControL()
 // Removes recursively grabbing controls
 // -----------------------------------------------------------------------------

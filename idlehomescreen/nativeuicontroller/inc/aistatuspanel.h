@@ -201,10 +201,14 @@ private: // data
      TInt iMaskHandle;
 
     /**
-     *
+     * Navidecorator observer
      */
      MAknNaviDecoratorObserver* iNaviDecoratorObserver;
 
+     /**
+      * Flag to indicate wheter text is published to title pane
+      */
+     TBool iTextInTitlePane;
     };
 
 } // namespace AiNativeUiController

@@ -152,6 +152,11 @@ private:
     void UnregisterComplete( TInt aWgId );
     
     /**
+     * Notifies the PreviewProviderClient that specific bitmap needs rotation.
+     */
+    void BitmapRotationNeeded( TInt aWgId, TBool aClockwise );
+    
+    /**
      * Uses window server front buffer to create a screenshot.
      * @param aFront preallocated destination bitmap
      * @param aFront Front buffer. 
@@ -171,6 +176,8 @@ private:
     TSize iScreenshotSize;
     TDisplayMode iScreenshotMode;
     RArray<TInt> iWgIds;
+    TTime iScreenChangedTime; // fix for orientation changed/wg group changed problem
+    TBool iClockwiseRot; // for marking rotation direction
     };
 
 #endif // PREVIEWPROVIDERCRP_H

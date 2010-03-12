@@ -158,6 +158,9 @@ void CAiStatusPanel::RenderTextOnTitlePaneL()
     if( !iTitlePaneText )
         {
         __PRINTS("XAI: Rendering text to title pane - invalid text, aborting");
+        
+        iTextInTitlePane = EFalse;
+        
         return;
         }
 
@@ -173,6 +176,9 @@ void CAiStatusPanel::RenderTextOnTitlePaneL()
     iTitlePaneText = NULL;
 
     UpdatePhoneDisplayInfo( displayText );
+    
+    iTextInTitlePane = ETrue;
+    
     __PRINTS("XAI: Rendering text to title pane - done");
     }
 
@@ -183,6 +189,7 @@ void CAiStatusPanel::RenderBitmapOnTitlePaneL()
     if( iBitmapHandle == KErrNotFound )
         {
         __PRINTS("XAI: Rendering bitmap to title pane - invalid bitmap handle, aborting");
+                
         return;
         }
 
@@ -275,6 +282,9 @@ void CAiStatusPanel::RenderBitmapOnTitlePaneL()
     // undetermined stuff could occurr
     iBitmapHandle = KErrNotFound;
     iMaskHandle = KErrNotFound;
+    
+    iTextInTitlePane = EFalse;
+    
     __PRINTS("XAI: Rendering bitmap to title pane - done");
     }
 
@@ -386,7 +396,7 @@ void CAiStatusPanel::RenderNaviPaneL()
 void CAiStatusPanel::StopTitlePaneScrollingL()
     {
     // stop scrolling
-    if( iTitlePane->Text() )
+    if(  iTextInTitlePane && iTitlePane->Text() )
         {
         iTitlePane->SetTextL( *iTitlePane->Text(), EFalse );
         }
@@ -395,7 +405,7 @@ void CAiStatusPanel::StopTitlePaneScrollingL()
 void CAiStatusPanel::ScrollTitlePaneTextL()
     {
     // start scrolling
-    if( iTitlePane->Text() )
+    if ( iTextInTitlePane && iTitlePane->Text() )           
         {
         iTitlePane->SetTextL( *iTitlePane->Text(), ETrue );
         }

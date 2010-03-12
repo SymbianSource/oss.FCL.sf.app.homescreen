@@ -67,6 +67,12 @@ void CTsFsWidgetList::InitializeWidgetListL()
     User::LeaveIfError( iWidgetRegistryClientSession.Connect() );
     CleanupStack::PushL( TCleanupItem( CleanupConnect, this) );
     iWidgetRegistryClientSession.RunningWidgetsL(iRunningWidgets);
+    //modify useless file size information with mode flag
+    for ( TInt i(iRunningWidgets.Count() - 1); 0 <= i; --i )
+        {
+        iRunningWidgets[i]->iFileSize = 
+             iWidgetRegistryClientSession.IsWidgetInFullView(iRunningWidgets[i]->iUid);
+        }
     CleanupStack::Pop(); // clean WidgetRegistryClientSession item
     iWidgetRegistryClientSession.Disconnect();
     }

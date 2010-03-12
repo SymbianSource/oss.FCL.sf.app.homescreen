@@ -116,7 +116,15 @@ public:
      * @return Content control UI interface, NULL if not present
      */
     MHsContentControlUi* HsContentController( const TDesC8& aType ) const;
-		
+
+    /**
+     * Gets the Content control factory
+     *
+     * @since S60 5.0
+     * @return Content control factory
+     */
+    CHsContentControlFactory* HsContentControlFactory();
+    
     /**
      * Get the effect manager
      * 

@@ -103,6 +103,9 @@ private:
      * wrt widget that is currently been uninstalled
      */    
     TUid iUid;
+    
+    
+    HBufC8* iMime;
     };
 
 #endif // __WMPLUGIN_

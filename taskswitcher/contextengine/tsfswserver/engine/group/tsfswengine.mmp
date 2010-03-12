@@ -50,6 +50,7 @@ LIBRARY aknskins.lib
 LIBRARY egul.lib
 LIBRARY widgetregistryclient.lib
 LIBRARY featmgr.lib
+LIBRARY bitmaptransforms.lib
 
 LIBRARY tspreviewprovider.lib
 LIBRARY tsfswutils.lib

@@ -23,7 +23,7 @@
 #define qtn_profile_configuration_name  "Time & profile"
 
 // d: profile widget description
-// l: listrow_wgtman_pane_t2
+// l: wgtman_list_pane_t1 
 // w:
 // r: TB9.2
 #define qtn_profile_configuration_desc  "Quick access to time, date and change profile."

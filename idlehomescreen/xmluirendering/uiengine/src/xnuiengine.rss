@@ -29,6 +29,7 @@ NAME    XNAI
 #include <avkon.mbg>
 #include <e32keys.h>
 #include <activeidle3.loc>
+
 // ========== RESOURCE DEFINITIONS ============================================
 
 RESOURCE RSS_SIGNATURE { }
@@ -102,11 +103,6 @@ RESOURCE TBUF r_qtn_hs_delete_page
     buf = qtn_hs_delete_current_page; 
     }
     
-RESOURCE TITLE_PANE r_qtn_hs_title_editmode 
-    { 
-    txt = qtn_hs_title_editing; 
-    }
-
 RESOURCE DIALOG r_yes_no_hs_remove_view 
     { 
     flags = EGeneralQueryFlags; 

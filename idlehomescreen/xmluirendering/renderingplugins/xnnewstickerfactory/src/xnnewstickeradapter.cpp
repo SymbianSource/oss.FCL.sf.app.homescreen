@@ -21,6 +21,7 @@
 #include <AknUtils.h>
 #include <AknMarqueeControl.h>
 #include <AknBidiTextUtils.h>
+#include <debug.h>
 
 // User includes
 #include "xnviewnodeimpl.h"
@@ -684,6 +685,7 @@ void CXnNewstickerAdapter::StartAlternateCounter()
 //
 TInt CXnNewstickerAdapter::PeriodicEventL( TAny* aPtr )
     {
+    __PRINTS( "CXnNewstickerAdapter::PeriodicEventL, timer runs" );
     CXnNewstickerAdapter* self = static_cast< CXnNewstickerAdapter* >( aPtr );
     self->DoScroll();
   

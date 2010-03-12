@@ -26,34 +26,30 @@ const TUint32 KCrWidgetManagerm = 0x20026F53;
 
 // ************************************************************
 // LOCALISED parameters start here
-// Key Id's from 0x1 to 0x28 are reserved for languages.
+// Key Id's from 0x1 to 0x1E are reserved for languages.
 // LangId_0                 0x1
-// OviStoreBrowserUrl_0     0x2
-// OperatorUrl_0            0x3
-// OperatorButtonText_0     0x4
+// OperatorUrl_0            0x2
+// OperatorButtonText_0     0x3
 // ...
-// LangId_1                 0x5
+// LangId_1                 0x4
 // ...
-// LangId_9                 0x25
-// OviStoreBrowserUrl_9     0x26
-// OperatorUrl_9            0x27
-// OperatorButtonText_9     0x28 
+// LangId_9                 0x1C
+// OperatorUrl_9            0x1D
+// OperatorButtonText_9     0x1E 
 // ************************************************************
 
 /** localised set #0, language ID */
 const TUint32 KLangId0 = 0x1;
-/** localised set #0, Ovi store browser URL */
-const TUint32 KOviStoreBrowserUrl0 = 0x2;
 /** localised set #0, Operator button URL */
-const TUint32 KOperatorButtonUrl0 = 0x3;
+const TUint32 KOperatorButtonUrl0 = 0x2;
 /** localised set #0, Operator button text */
-const TUint32 KOperatorButtonText0 = 0x4;
+const TUint32 KOperatorButtonText0 = 0x3;
 
 /** localised set #1, language ID */
-const TUint32 KLangId1 = 0x5;
+const TUint32 KLangId1 = 0x4;
 
 /** localised set #9, language ID */
-const TUint32 KLangId9 = 0x25;
+const TUint32 KLangId9 = 0x1C;
 
 
 // ************************************************************
@@ -61,13 +57,13 @@ const TUint32 KLangId9 = 0x25;
 // ************************************************************
 
 /** Key to Ovi Store Client param */
-const TUint32 KOviStoreClientParam = 0x29;
+const TUint32 KOviStoreClientParam = 0x1F;
 
 /** Key to Operator button icon */
-const TUint32 KOperatorButtonIcon = 0x2A;
+const TUint32 KOperatorButtonIcon = 0x20;
 
-/** Key to Ovi Store client BundleId */
-const TUint32 KOviStoreBundleId = 0x2B;
+/** Key to Ovi Store client Uid */
+const TUint32 KOviStoreUid = 0x21;
 
 
 

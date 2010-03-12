@@ -25,6 +25,8 @@ TARGETTYPE      dll
 UID             0x1000008D 0x101FB3E3
 
 CAPABILITY      ALL -TCB
+MACRO           _WM_UNIT_TEST
+
 VENDORID        VID_DEFAULT
 SECUREID        0x101FB3E3
 
@@ -52,7 +54,8 @@ SOURCE          wmportalbutton.cpp
 SOURCE          wmwidgetloaderao.cpp
 SOURCE          wmconfiguration.cpp
 SOURCE          wminstaller.cpp
-SOURCE  	      wmprocessmonitor.cpp
+SOURCE          wmprocessmonitor.cpp
+SOURCE          wmwidgetorderdata.cpp
 
 SOURCEPATH      ../src
 SOURCE          wmunittest.cpp
@@ -60,6 +63,7 @@ SOURCE          wmunittest_all.cpp
 SOURCE          wmunittest_plugin.cpp
 SOURCE          wmunittest_sortorder.cpp
 SOURCE          wmunittest_converter.cpp
+SOURCE          wmunittest_uninstaller.cpp
 
 // same as in widgetmanager.mmp
 LIBRARY	    euser.lib
@@ -102,6 +106,8 @@ LIBRARY     etext.lib
 LIBRARY     centralrepository.lib
 LIBRARY     bmpanim.lib // AknBitmap animation
 LIBRARY     inetprotutil.lib
+LIBRARY     bitgdi.lib // CFbsBitmapDevice
+LIBRARY     charconv.lib
 
 // libraries needed by the test framework
 LIBRARY     stiftestinterface.lib

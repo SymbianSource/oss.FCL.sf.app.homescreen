@@ -30,7 +30,9 @@ enum TPreviewOperation
     {
     EOperationNone,
     EOperationUnregister,
-    EOperationBitmapUpdated
+    EOperationBitmapUpdated,
+    EOperationBitmapRotation90,
+    EOperationBitmapRotation270
     };
 
 /**

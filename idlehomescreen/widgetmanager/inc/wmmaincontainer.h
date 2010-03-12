@@ -148,7 +148,7 @@ public: // new functions
 	/** 
 	 * executes findbox activation 
 	 */
-	void ActivateFindPaneL();
+	void ActivateFindPaneL( TBool aActivateAdabtive = EFalse );
 
     /** 
 	 * executes findbox deactivation 
@@ -381,6 +381,9 @@ private:
      */
     CWmConfiguration*       iConfiguration;
     
+#ifdef _WM_UNIT_TEST
+    friend class CWmUnitTest;
+#endif
     };
 
 #endif // WMMAINCONTAINER_H

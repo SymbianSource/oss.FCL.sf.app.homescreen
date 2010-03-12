@@ -68,13 +68,7 @@ using namespace cpswrapper;
 _LIT8( KEventPluginUnInstalled, "PluginUninstalled" );
 _LIT8( KEventRootConfActivated, "AppConfActivated" );
 _LIT8( KEventPluginUpdated, "PluginUpdated" );
-_LIT8( KEventPluginActivated, "PluginActivated" );
 _LIT8( KEventPluginInstalled, "PluginInstalled" );
-_LIT8( KEventPluginAdded, "PluginAdded" );
-_LIT8( KEventPluginRemoved, "PluginRemoved" );
-_LIT8( KEventPluginReplaced, "PluginReplaced" );
-
-_LIT8( KAi3Uid, "0x102750f0" );
 
 _LIT8( KEmptyWidgetUid, "0x2001F47F" );
 _LIT8( KDownload, "Editor/DownloadCaption" );
@@ -219,11 +213,11 @@ CXnPluginData* DeterminePlugin( CXnViewManager& aViewManager,
 
     if ( aPredicate )
         {
-        CXnPluginData& plugin( viewData.Plugin( aPredicate ) );
+        CXnPluginData* plugin( viewData.Plugin( aPredicate ) );
 
-        if ( !plugin.Occupied() )
+        if ( plugin && !plugin->Occupied() )
             {
-            return &plugin;
+            return plugin;
             }
         }
 
@@ -233,11 +227,11 @@ CXnPluginData* DeterminePlugin( CXnViewManager& aViewManager,
         {
         CXnNode* node( nodes[i] );
 
-        CXnPluginData& plugin( viewData.Plugin( node ) );
+        CXnPluginData* plugin( viewData.Plugin( node ) );
 
-        if ( !plugin.Occupied() )
+        if ( plugin && !plugin->Occupied() )
             {
-            return &plugin;
+            return plugin;
             }
         }
 
@@ -594,7 +588,7 @@ void CXnEditor::RemoveUnInstalledWidgetL( const CHsContentInfo& aContentInfo )
 // CXnEditor::ReplaceWidgetL
 // ---------------------------------------------------------------------------
 //
-void CXnEditor::ReplaceWidgetL( CHsContentInfo& aContentInfo, TBool aUseHsps ) 
+void CXnEditor::ReplaceWidgetL( CHsContentInfo& aContentInfo ) 
     {
     RPointerArray< CXnPluginData > plugins;
     CleanupClosePushL( plugins );
@@ -609,6 +603,15 @@ void CXnEditor::ReplaceWidgetL( CHsContentInfo& aContentInfo, TBool aUseHsps )
         
         if( plugin->PluginId() == aContentInfo.PluginId() )
             {
+            if ( aContentInfo.Type() == KNullDesC8 )
+                {
+                aContentInfo.SetTypeL( plugin->Type() );
+                }
+            
+            if ( aContentInfo.PublisherId() == KNullDesC )
+                {
+                aContentInfo.SetPublisherIdL( plugin->PublisherName() );
+                }
             match = plugin;
             break;
             }
@@ -616,7 +619,7 @@ void CXnEditor::ReplaceWidgetL( CHsContentInfo& aContentInfo, TBool aUseHsps )
     
     if( match )
         {
-        iViewManager.ReplaceWidgetToPluginL( aContentInfo, *match, aUseHsps );
+        iViewManager.ReplaceWidgetToPluginL( aContentInfo, *match );
         }
     
     CleanupStack::PopAndDestroy( &plugins );    
@@ -814,11 +817,11 @@ void CXnEditor::RemoveWidgetL( CXnNode* aNode )
         return;
         }
 
-    CXnPluginData& plugin( iViewManager.ActiveViewData().Plugin( aNode ) );
+    CXnPluginData* plugin( iViewManager.ActiveViewData().Plugin( aNode ) );
 
-    if( plugin.Removable() )
+    if( plugin && plugin->Removable() )
         {
-        TRAPD( err, err = iViewManager.UnloadWidgetFromPluginL( plugin ) );
+        TRAPD( err, err = iViewManager.UnloadWidgetFromPluginL( *plugin ) );
         
         if ( err != KErrNone )
             {
@@ -850,15 +853,17 @@ void CXnEditor::ReorderWidgetsL( RPointerArray< CXnNode >* aPluginArray )
 
     for ( TInt i = 0; i < aPluginArray->Count(); i++ )
         {
-        CXnPluginData& plugin( viewData.Plugin( ( *aPluginArray )[i] ) );
-
-        const TDesC8& id( plugin.PluginId() );
-        
-        if ( id != KNullDesC8 )
+        CXnPluginData* plugin( viewData.Plugin( ( *aPluginArray )[i] ) );
+        if ( plugin )
             {
-            ids->AppendL( id );
-            }              
-        }
+            const TDesC8& id( plugin->PluginId() );
+            
+            if ( id != KNullDesC8 )
+                {
+                ids->AppendL( id );
+                }
+            }
+        }        
 
     iHspsWrapper->MovePluginsL( configurationId, *ids );
 
@@ -878,19 +883,18 @@ CPublisherInfo* CXnEditor::PublisherInfoL( const CHsContentInfo& aContentInfo )
 
     RPointerArray< CPublisherInfo >& publisherInfo(
         iPublisherMap->PublisherInfo() );
-
-    const TDesC& widgetName( aContentInfo.Name() );
+    
     const TDesC& publisherId( aContentInfo.PublisherId() );
 
     CPublisherInfo* info = NULL;
     
     for ( TInt i = 0; i < publisherInfo.Count(); i++ )
         {
-        info = publisherInfo[i];
+        CPublisherInfo* temp = publisherInfo[i];
 
-        if ( info->WidgetName() == widgetName &&
-            info->PublisherId() == publisherId )
+        if ( temp->PublisherId() == publisherId )
             {
+            info = temp;
             break;
             }
         }
@@ -1425,6 +1429,7 @@ void CXnEditor::NotifyWidgetRegisteredL()
 //
 void CXnEditor::NotifyViewDeactivatedL( const CXnViewData& /*aViewData*/)
     {
+    iTargetPlugin = NULL;
     }
 
 // ---------------------------------------------------------------------------
@@ -1472,30 +1477,11 @@ TInt CXnEditor::HandleNotifyL(
     const TDesC8& aEvent,
     const TDesC8& /*aAppConfUid*/,
     const TDesC8& aPluginName,
-    const TDesC8& aOrigUid,
+    const TDesC8& /*aOrigUid*/,
     const TDesC8& aPluginUid,
     const TDesC8& aPluginId )
     {
-    // Someone else has modified the configuration. Handle UI side here.
-    if( aEvent == KEventPluginAdded ||
-        aEvent == KEventPluginRemoved ||
-        aEvent == KEventPluginReplaced )
-        {
-        if( aOrigUid != KNullDesC8 && 
-            aOrigUid != KAi3Uid )
-            {
-            CHsContentInfo* info = CHsContentInfo::NewLC();
-            
-            info->SetNameL( aPluginName );
-            info->SetUidL( aPluginUid );
-            info->SetPluginIdL( aPluginId );
-            
-            ReplaceWidgetL( *info, EFalse );
-            
-            CleanupStack::PopAndDestroy( info );
-            }
-        }
-    else if ( aEvent == KEventPluginUnInstalled )
+    if ( aEvent == KEventPluginUnInstalled )
         {
         CHsContentInfo* info = CHsContentInfo::NewLC();
 
@@ -1529,9 +1515,6 @@ TInt CXnEditor::HandleNotifyL(
             CleanupStack::PopAndDestroy( info );
             }
         WidgetListChanged();
-        }    
-    else if ( aEvent == KEventPluginActivated )
-        {
         }
  
     return KErrNone;
@@ -1607,9 +1590,68 @@ TInt CXnEditor::WidgetListL( CHsContentInfoArray& aArray )
     // get installed widgets from HSPS
     TemplatedWidgetsL( array );
     
-    FilterWidgetListL( aArray, EFalse );
+    FilterWidgetListL( aArray, ETrue );
     
     return KErrNone;
+    }
+
+// -----------------------------------------------------------------------------
+// from MHsContentController
+// -----------------------------------------------------------------------------
+//
+TInt CXnEditor::WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray )
+    {
+    TInt err( KErrNone );
+    RPointerArray< CXnPluginData > widgets;
+    CleanupClosePushL( widgets );
+    
+    if ( aInfo.Type() == KApplication )
+        {
+        if ( aInfo.Uid().CompareF( iViewManager.ActiveAppData().PluginUid() ) == 0 )
+            {
+            // Get widgets included in active application configuration
+            err = iViewManager.PluginDataL( KNullDesC8(), widgets );
+            }
+        else
+            {
+            // Invalid application configuration
+            err = KErrArgument;
+            }
+        }
+    else if ( aInfo.Type() == KView )
+        {
+        // Get widgets included in a view
+        err = iViewManager.PluginDataL( aInfo.PluginId(), widgets );
+        }
+    else
+        {
+        err = KErrArgument;
+        }
+    
+    if ( !err )
+        {
+        // Get installed widget content infos
+        RPointerArray< CHsContentInfo > array;
+        CleanupClosePushL( array );        
+        HSPSPluginsL( array, KKeyWidget );
+        TemplatedWidgetsL( array );
+
+        // Create content info for each found widget
+        for ( TInt i = 0; i < widgets.Count(); i++ )
+            {
+            CHsContentInfo* info = CreateContentInfoLC( *widgets[i], array );
+            if ( info )
+                {
+                aArray.Array().AppendL( info );
+                CleanupStack::Pop( info );
+                }
+            }
+        CleanupStack::PopAndDestroy(); // array
+        }
+    
+    CleanupStack::PopAndDestroy(); // widgets
+        
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1658,18 +1700,16 @@ TInt CXnEditor::AddWidgetL( CHsContentInfo& aInfo )
         return KErrArgument;
         }
 
-    if ( !aInfo.CanBeAdded() )
+    // the widget can not be added. Return proper error code
+    if ( IsCurrentViewFull() )
         {
-        // the widget can not be added. Return proper error code
-        if ( IsCurrentViewFull() )
-            {
-            return KHsErrorViewFull;
-            }
-        else
-            {
-            return KHsErrorMaxInstanceCountExceeded;
-            }
+        return KHsErrorViewFull;
         }
+    else if ( !aInfo.CanBeAdded() )
+        {
+        return KHsErrorMaxInstanceCountExceeded;
+        }
+
 
     CXnPluginData* plugin( NULL );
     
@@ -1829,6 +1869,7 @@ TInt CXnEditor::ActiveViewL( CHsContentInfo& aInfo )
         CleanupStack::PushL( view );
         
         aInfo.SetNameL( view->PluginInfo().Name() );
+        aInfo.SetPluginIdL( plugin->PluginId() );
         aInfo.SetUidL( view->PluginInfo().Uid() );
         aInfo.SetTypeL( view->PluginInfo().Type() );
         aInfo.SetDescriptionL( view->PluginInfo().Description() );
@@ -1871,6 +1912,32 @@ TInt CXnEditor::ActiveAppL( CHsContentInfo& aInfo )
     
     CleanupStack::PopAndDestroy( app );
     return err;     
+    }
+
+// -----------------------------------------------------------------------------
+// CXnEditor::CreateContentInfoLC
+// -----------------------------------------------------------------------------
+//
+CHsContentInfo* CXnEditor::CreateContentInfoLC( CXnPluginData& aPlugin, 
+    RPointerArray< CHsContentInfo >& aInfos )
+    {
+    CHsContentInfo* contentInfo( NULL );
+    if ( aPlugin.Occupied() )
+        {
+        for ( TInt i = 0; i < aInfos.Count() && !contentInfo; i++ )
+            {
+            CHsContentInfo* info = aInfos[i];
+            if ( aPlugin.PluginUid().CompareF( info->Uid() ) == 0 && 
+                 ( ( aPlugin.PublisherName().Length() == 0 ) || 
+                   ( aPlugin.PublisherName().CompareF( info->PublisherId() ) == 0 ) ) )
+                {
+                contentInfo = info->CloneL();
+                CleanupStack::PushL( contentInfo );
+                contentInfo->SetPluginIdL( aPlugin.PluginId() );
+                }
+            }
+        }
+    return contentInfo;
     }
 
 // End of file

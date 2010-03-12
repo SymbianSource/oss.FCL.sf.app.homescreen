@@ -230,6 +230,10 @@ private: // data members
      * Handles installation
      */
     CWmInstaller* iWmInstaller;
+    
+#ifdef _WM_UNIT_TEST
+    friend class CWmUnitTest;
+#endif
     };
 
 #endif // __WMPLUGIN_

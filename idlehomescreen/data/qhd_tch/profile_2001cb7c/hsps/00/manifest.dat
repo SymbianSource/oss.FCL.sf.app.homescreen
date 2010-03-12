@@ -14,22 +14,17 @@
 
     <configurationuid>0x2001cb7c</configurationuid>
 
-    <!-- Name of the localization files 
-    waiting for localization from platform
     <filedtd>profileconfiguration.dtd</filedtd>
-    <fullname>&amp;qtn_profile_configuration_name;</fullname>
-    <description>&amp;qtn_profile_configuration_desc;</description>
-    -->
     
-    <!-- description -->
-    <fullname>profilename waits loc</fullname>
+    <fullname>&amp;qtn_profile_configuration_name;</fullname>
     <shortname>profile</shortname>
     <version>1.0</version>
 
+    <!-- description -->
+    <description>&amp;qtn_profile_configuration_desc;</description>
+    
     <!-- configuration -->
     <filexml>widgetconfiguration.xml</filexml>
-
-    <description>profiledesc waits localization from platform</description>
    
     <filelogo>skin(270501603 9360):mif(icon.mif 16384 16385)</filelogo>
     <!-- Locale specific resources -->

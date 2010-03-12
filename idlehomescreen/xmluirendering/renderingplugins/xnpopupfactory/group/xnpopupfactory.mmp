@@ -45,6 +45,7 @@ LIBRARY         xn3utils.lib
 LIBRARY         xn3domdocument.lib
 LIBRARY	        avkon.lib
 LIBRARY         ws32.lib
+LIBRARY         gfxtrans.lib
 
 START RESOURCE  xn3popupfactory.rss
 #ifdef SYMBIAN_SECURE_ECOM

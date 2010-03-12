@@ -26,6 +26,7 @@
 // components to test
 #include "wmpersistentwidgetorder.h"
 #include "wmwidgetdata.h"
+#include "wmwidgetorderdata.h"
 #include <hscontentinfo.h>
 #include <hscontentinfoarray.h>
 #include <widgetregistryclient.h> // widgetreqistry
@@ -85,7 +86,7 @@ TInt CWmUnitTest::WidgetOrderSaveL( CStifItemParser& /*aItem*/ )
     TInt ret = KErrNone;
 
     _CLEANUPCHECK_BEGIN
-    RWidgetDataValues array;
+    ROrderArray array;
     CleanupClosePushL( array );
     CreateWidgetDataArrayL( array, iMass );
     iWmWidgetOrder->StoreL( array );
@@ -126,7 +127,7 @@ TInt CWmUnitTest::WidgetOrderUseL( CStifItemParser& /*aItem*/ )
 
     _CLEANUPCHECK_BEGIN
     // test IndexOf
-    RWidgetDataValues array;
+    ROrderArray array;
     CreateWidgetDataArrayL( array, iMass );
     for( TInt i=0; i<array.Count() && ret==KErrNone; ++i )
         {
@@ -145,35 +146,45 @@ TInt CWmUnitTest::WidgetOrderUseL( CStifItemParser& /*aItem*/ )
 // CWmUnitTest::CreateWidgetDataArrayL
 // -----------------------------------------------------------------------------
 //
-void CWmUnitTest::CreateWidgetDataArrayL( RWidgetDataValues& aArray, TInt aCount )
+void CWmUnitTest::CreateWidgetDataArrayL( ROrderArray& aArray, TInt aCount )
     {
     // first create an array of content info classes
     CHsContentInfoArray* contentArray = CHsContentInfoArray::NewL();
     CleanupStack::PushL( contentArray );
     CreateContentInfoArrayL( *contentArray, aCount );
-    // connect to widget registry
-    RWidgetRegistryClientSession registryClient;
-    User::LeaveIfError( registryClient.Connect() );
-    CleanupClosePushL( registryClient );
-    TSize dummySize(40,40);
-    CWmResourceLoader* resLoader = NULL; // not used in this case
-    while( contentArray->Array().Count() > 0 )
-        {        
-        CWmWidgetData* data = CWmWidgetData::NewL(
-                dummySize, *resLoader, 
-                contentArray->Array()[0],
-                &registryClient);
 
-        contentArray->Array().Remove( 0 );
+    for ( TInt i = 0; i < contentArray->Array().Count(); i++ )
+        {
+        CHsContentInfo* contentInfo = contentArray->Array()[i];
+        CWmWidgetOrderData* data = CWmWidgetOrderData::NewL(
+                contentInfo->PublisherId(), 
+                UidFromString ( contentInfo->Uid() ), 
+                contentInfo->Name(),
+                iWmWidgetOrder );
+        
         CleanupStack::PushL( data );
         aArray.AppendL( data );
         CleanupStack::Pop( data );
         }
- 
-    registryClient.Disconnect();
-    CleanupStack::PopAndDestroy( &registryClient );
+
+    contentArray->Array().ResetAndDestroy();
     CleanupStack::PopAndDestroy( contentArray );
     }
 
+TUid CWmUnitTest::UidFromString( const TDesC8& aUidString ) const
+    {
+    TUid uid( TUid::Null() );
+    const TInt KHexPrefixLength = 2;
+    if ( aUidString.Length() > KHexPrefixLength )
+        {
+        TUint id = 0;
+        TLex8 lex( aUidString.Mid( KHexPrefixLength ) );
+        if ( lex.Val( id, EHex ) == KErrNone )
+            {
+            uid.iUid = (TInt32)id;
+            }
+        }
+    return uid;
+    }
 
 // End of File

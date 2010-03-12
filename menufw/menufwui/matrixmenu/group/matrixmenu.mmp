@@ -21,8 +21,6 @@
 #include <data_caging_paths.hrh>
 #include "../inc/mmguiuid.hrh"
 
-epocheapsize  1800000 4500000
-
 TARGET          matrixmenu.exe
 TARGETTYPE      exe
 UID             0x100039CE _MATRIX_UID3  
@@ -88,6 +86,7 @@ LIBRARY           mmextensionmanager.lib
 LIBRARY           aknskins.lib
 LIBRARY           aknskinsrv.lib
 LIBRARY           aknswallpaperutils.lib
+LIBRARY           MemMan.lib
 
 #ifdef _MATRIX_MENU_TRACE_PERFORMANCE
 LIBRARY         flogger.lib

@@ -18,6 +18,8 @@
 #include <AknsDrawUtils.h>
 #include <AknsConstants.h>
 #include <barsread.h>
+#include <debug.h>
+
 #include "xnnodepluginif.h"
 #include "xndomproperty.h"
 #include "xnproperty.h"
@@ -112,6 +114,26 @@ void CXnAnimationAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
     }
 
 // -----------------------------------------------------------------------------
+// CXnAnimationAdapter::DoEnterPowerSaveModeL
+// -----------------------------------------------------------------------------
+//
+void CXnAnimationAdapter::DoEnterPowerSaveModeL( TModeEvent /*aEvent*/ )
+    {
+    iInPowerSaveMode = ETrue;
+    StopAnimation();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAnimationAdapter::DoExitPowerSaveModeL
+// -----------------------------------------------------------------------------
+//
+void CXnAnimationAdapter::DoExitPowerSaveModeL( TModeEvent /*aEvent*/ )
+    {
+    iInPowerSaveMode = EFalse;
+    StartAnimation();
+    }
+
+// -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::MakeVisible()
 // -----------------------------------------------------------------------------
 //
@@ -176,6 +198,7 @@ void CXnAnimationAdapter::Update()
 //
 TInt CXnAnimationAdapter::TimerCallBack(TAny* aAny)
     {
+    __PRINTS( "CXnAnimationAdapter::TimerCallback, timer runs" );
     CXnAnimationAdapter* self = static_cast<CXnAnimationAdapter*> (aAny);
 
     // Update widget
@@ -190,7 +213,7 @@ TInt CXnAnimationAdapter::TimerCallBack(TAny* aAny)
 //
 void CXnAnimationAdapter::StartAnimation()
     {
-    if ( !iPeriodicTimer && IsVisible() )
+    if ( !iPeriodicTimer && IsVisible() && !iInPowerSaveMode )
         {
        TRAPD(err, iPeriodicTimer = CPeriodic::NewL(CActive::EPriorityIdle) );
        if ( err == KErrNone )

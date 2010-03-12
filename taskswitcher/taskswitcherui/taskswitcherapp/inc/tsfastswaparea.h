@@ -155,6 +155,12 @@ public:
      * Handling short/long app key.
      */
     void HandleAppKey(TInt aType);
+    
+    /*
+     * Updates components visibility, used to switch off
+     * grid scrollbar visibility for transition effects
+     */
+    void UpdateComponentVisibility();
 
 private:
 

@@ -112,9 +112,14 @@ void CTsEventControler::HandleTapEventL(
         }
     else if(EAknTouchGestureFwTap == aEvent.Type())
         {
-        if( iPhysicsHelper->IsRunning())
+        if( IsPhysicsRunning() )
             {
+            TBool forwardTap = iPhysicsHelper->IsDragging();
             iPhysicsHelper->Stop();
+            if ( forwardTap )
+                {
+                iObserver.TapL(aEvent.Position());
+                }
             }
         else
             {
@@ -180,6 +185,15 @@ void CTsEventControler::ReInitPhysicsL(const TSize& aWorldSize,
         const TSize& aViewSize, TBool aLandscape)
     {
     iPhysicsHelper->ReInitPhysicsL( aWorldSize, aViewSize, aLandscape);
+    }
+
+// -----------------------------------------------------------------------------
+// IsPhysicsRunning
+// -----------------------------------------------------------------------------
+//
+TBool CTsEventControler::IsPhysicsRunning()
+    {
+    return iPhysicsHelper->IsRunning();
     }
 
 // -----------------------------------------------------------------------------

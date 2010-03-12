@@ -18,7 +18,7 @@
         <!--Contacts application-->
         <menu:application uid="0x101F4CCE"/>
         <!-- Music Player (MusicPlayer)-->
-	<menu:application uid="0x102072C3"/> 
+        <menu:application uid="0x102072C3"/> 
         <!--Internet folder-->
         <!--  now using qgnmenugroupweb available in skin -->
         <menu:folder title_name="&qtn_apps_browserng_title;" 
@@ -126,13 +126,13 @@
           <menu:application uid="0x100058EC"
                             view="0x10283321"
                             long_name="Installations"/>
-          
+
           <menu:shortcut    uid="0x99999999"
                             long_name="New message"
-                            icon_file="z:\resource\apps\matrixmenudata.mif"
-                            icon_id="16392"
-                            mask_id="16393"
-                            icon_skin_minor_id="0x1327"
+                            icon_file="aimcsplugin.mif"
+                            icon_id="16406"
+                            mask_id="16407"
+                            icon_skin_minor_id="0x2056"
                             icon_skin_major_id="0x101F86E3"
                             param="messaging:msg"/>
                             
@@ -141,15 +141,15 @@
                             icon_file="aimcsplugin.mif"
                             icon_id="16388"
                             mask_id="16389"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
+                            icon_skin_minor_id="0x2058"
+                            icon_skin_major_id="0x101F86E3"
                             param="messaging:seltype"/>
                             
           <menu:shortcut    uid="0x99999997"
                             long_name="New email"
                             icon_file="aimcsplugin.mif"
-                            icon_id="16388"
-                            mask_id="16389"
+                            icon_id="16402"
+                            mask_id="16403"
                             icon_skin_minor_id=""
                             icon_skin_major_id=""
                             param="messaging:email"/>
@@ -159,24 +159,24 @@
                             icon_file="aimcsplugin.mif"
                             icon_id="16390"
                             mask_id="16391"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
+                            icon_skin_minor_id="0x205a"
+                            icon_skin_major_id="0x101F86E3"
                             param="messaging:syncmlmail"/>
                             
           <menu:shortcut    uid="0x99999995"
                             long_name="New postcard"
                             icon_file="aimcsplugin.mif"
-                            icon_id="16388"
-                            mask_id="16389"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
+                            icon_id="16400"
+                            mask_id="16401"
+                            icon_skin_minor_id="0x2057"
+                            icon_skin_major_id="0x101F86E3"
                             param="messaging:postcard"/>
           
           <menu:shortcut    uid="0x99999994"
                             long_name="New audio message"
                             icon_file="aimcsplugin.mif"
-                            icon_id="16388"
-                            mask_id="16389"
+                            icon_id="16404"
+                            mask_id="16405"
                             icon_skin_minor_id=""
                             icon_skin_major_id=""
                             param="messaging:audiomsg"/>
@@ -217,6 +217,8 @@
 
           <!-- Menu Application Launcher -->
           <menu:application uid="0x101F4CD2"/>
+          <!-- Themes Application Launcher -->
+          <menu:application uid="0x10005A32"/>
           <!-- Photos Suite launcher -->
           <menu:application uid="0x200104E4"/>
           <!-- Video Suite launcher -->

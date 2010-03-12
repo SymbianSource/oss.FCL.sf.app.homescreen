@@ -69,6 +69,16 @@ void CTsPropertyListener::RunL()
             iObs.HandleFswPpApplicationChange( iWgId, iFbsBitmapId );
             break;
             }
+        case EOperationBitmapRotation90:
+            {
+            iObs.HandleFswPpApplicationBitmapRotation( iWgId, ETrue );
+            break;
+            }
+        case EOperationBitmapRotation270:
+            {
+            iObs.HandleFswPpApplicationBitmapRotation( iWgId, EFalse );
+            break;
+            }
         default:
             break;
         }

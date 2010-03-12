@@ -35,7 +35,9 @@
 #include "xndomlist.h"
 #include "xndomattribute.h"
 
+
 // ======== LOCAL FUNCTIONS ========
+
 // ---------------------------------------------------------------------------
 // Finds recursively node by type
 // @return    returns pointer to desired node, NULL if nothing found 
@@ -225,9 +227,17 @@ void CXnListQueryDialogAdapter::ConstructL()
 // -----------------------------------------------------------------------------
 // 
 void CXnListQueryDialogAdapter::ReplaceItemL(const TDesC& aText, TInt aIndex )
-    {
+    {    
+    if ( iDialog )
+        {
+        iDialog->DismissQueryL();        
+        }    
+
+    iDialog = NULL;
+    
     aIndex += iStaticItems.Count();
     TInt count( iItemArray->Count());
+    
     if( aIndex >= count )
         {
         iItemArray->AppendL( aText );
@@ -236,7 +246,7 @@ void CXnListQueryDialogAdapter::ReplaceItemL(const TDesC& aText, TInt aIndex )
         {
         iItemArray->Delete( aIndex );
         iItemArray->InsertL( aIndex, aText );
-        }
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -244,13 +254,22 @@ void CXnListQueryDialogAdapter::ReplaceItemL(const TDesC& aText, TInt aIndex )
 // -----------------------------------------------------------------------------
 // 
 void CXnListQueryDialogAdapter::InsertItemL(const TDesC& aText, TInt aIndex )
-    {
+    {    
+    if ( iDialog )
+        {
+        iDialog->DismissQueryL();
+        }    
+    
+    iDialog = NULL;
+    
     aIndex += iStaticItems.Count();
     TInt count( iItemArray->Count());
+    
     if( count < aIndex )
         {
         aIndex = count;
         }
+    
     iItemArray->InsertL( aIndex, aText );
     }
 
@@ -260,11 +279,19 @@ void CXnListQueryDialogAdapter::InsertItemL(const TDesC& aText, TInt aIndex )
 // 
 void CXnListQueryDialogAdapter::DeleteItem( TInt aIndex )
     {
+    if ( iDialog )
+        {
+        TRAP_IGNORE( iDialog->DismissQueryL() );
+        }
+    
+    iDialog = NULL;
+    
     aIndex += iStaticItems.Count();
+    
     if( aIndex < iItemArray->Count())
         {
         iItemArray->Delete( aIndex );
-        }    
+        }       
     }
 
 // -----------------------------------------------------------------------------
@@ -273,16 +300,23 @@ void CXnListQueryDialogAdapter::DeleteItem( TInt aIndex )
 //
 void CXnListQueryDialogAdapter::TryDisplayingDialogL( )
     {
+    if ( iDialog )
+        {
+        iDialog->DismissQueryL();
+        }
+    
+    iDialog = NULL;
+    
     CXnAppUiAdapter& appui( static_cast< CXnAppUiAdapter& >( *iAvkonAppUi ) );
     
     appui.HideFocus();
     
     TInt selectedIndex( 0 );
     
-    CAknListQueryDialog* query =
-       new ( ELeave ) CAknListQueryDialog( &selectedIndex );
-
-    query->PrepareLC( R_XML_LISTQUERY );
+    CAknListQueryDialog* dialog =
+       new ( ELeave ) CAknListQueryDialog( &selectedIndex );                 
+    dialog->PrepareLC( R_XML_LISTQUERY );
+    
 /* Not tested
     CAknPopupHeadingPane* heading( query->QueryHeading() );
     if ( heading )
@@ -303,13 +337,17 @@ void CXnListQueryDialogAdapter::TryDisplayingDialogL( )
             }
         }
 */
-    query->SetItemTextArray( iItemArray );
-    query->SetOwnershipType( ELbmDoesNotOwnItemArray );
-
-    if ( query->RunLD() )
+    dialog->SetItemTextArray( iItemArray );
+    dialog->SetOwnershipType( ELbmDoesNotOwnItemArray );
+    
+    iDialog = dialog;
+    
+    if ( dialog->RunLD() )
         {
         ActivateItemL( selectedIndex );
-        }
+        }            
+           
+    iDialog = NULL;
     }
 
 // -----------------------------------------------------------------------------
@@ -345,6 +383,11 @@ void CXnListQueryDialogAdapter::ModifyDynamicEventL( TInt aIndex )
 
     CXnDomAttribute* attribute = static_cast<CXnDomAttribute*> 
         (eventNode->AttributeList().FindByName( XnPropertyNames::action::event::KName ));
+    
+    if ( !attribute )
+        {
+        return;
+        }
     
     HBufC8* nameStr( attribute->Value().AllocLC());
     TPtr8 namePtr = nameStr->Des();

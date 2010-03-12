@@ -483,6 +483,7 @@ private:
     void DrawBackgroundDataL( const TRect& aRect, CXnNode& aNode,
         CWindowGc& aGc );
     void DrawEditModeBgData( CXnNode& aNode, CWindowGc& aGc );
+    void DrawPlusSign( CXnNode& aNode, CWindowGc& aGc );
     void DrawTransparentColorL( CXnNode& aNode, CWindowGc& aGc,
         CFbsBitmap* aMask );
      void DrawBackgroundSkinL( CXnNode& aNode, CFbsBitmap* aMask, 

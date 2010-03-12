@@ -363,7 +363,7 @@ TBool CWmMainContainerView::HandleSearchMenuItemSelectedL()
 	{
     if ( iWmMainContainer )
         {
-        iWmMainContainer->ActivateFindPaneL();
+        iWmMainContainer->ActivateFindPaneL( ETrue );
         }
 	return ETrue;
 	}

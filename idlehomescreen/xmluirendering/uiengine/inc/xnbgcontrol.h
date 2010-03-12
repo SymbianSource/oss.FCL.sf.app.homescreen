@@ -104,12 +104,7 @@ public:
      * Service for removing grabbing controls
      */
     void ResetGrabbingL();
-    
-    /**
-     * Prepares control for destroying
-     */
-    void PrepareDestroy();
-  
+      
 private:  
 	// new functions
     

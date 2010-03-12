@@ -54,7 +54,6 @@
 #include "xntexteditor.h"
 
 // Local constants
-_LIT8( KRef, "ref" );
 _LIT8( KId, "id" );
 _LIT8( KName, "name" );
 _LIT8( KToolTip, "tooltip" );
@@ -63,10 +62,6 @@ _LIT8( KTextEditor, "texteditor" );
 
 _LIT8( KActionsHandler, "actionshandler" );
 
-const TReal KS60ScrollbarDefaultWidth = 1.5;
-const TReal KS60ScrollbarDefaultMargin = 0.25;
-const TReal KS60ScrollbarDefaultWidthPenEnabled = 3;
-const TReal KS60ScrollbarDefaultMarginPenEnabled = 0.5;
 const TInt KUnitMaxLen = 2;
 const TInt KOneView = 1;
 
@@ -87,30 +82,6 @@ _LIT8( KBlock, "block" );
 _LIT8( KNone, "none" );
 _LIT8( KGainEnd, "gainend" );
 _LIT8( KLoseEnd, "loseend" );
-
-// Local classes
-struct TXnTimedTrigger
-    {
-    CXnNodeImpl* iNodeImpl;
-    CXnUiEngine* iEngine;
-    CXnNode* iNode;
-    CXnNode* iEventData;
-    CXnDomNode* iActionNode;
-    CXnDomNode* iTriggerNode;
-    };
-
-struct CGridPropertyCache : public CBase
-    {
-    CXnProperty* iVisibleRows;
-    CXnProperty* iGridColumns;
-    CXnProperty* iGridOrientation;
-    CXnProperty* iGridVerDirection;
-    CXnProperty* iGridHorDirection;
-    CXnProperty* iFocusHorLooping;
-    CXnProperty* iFocusVerLooping;
-    CXnProperty* iGridScrollBarWidth;
-    CXnProperty* iGridScrollBarMargin;
-    };
 
 struct CLayoutPropertyCache : public CBase
     {
@@ -282,9 +253,6 @@ struct CLayoutPropertyCache : public CBase
 
 // Local function prototypes
 static TBool IsTriggerRunnableL( CXnDomNode& aTriggerNode );
-static CXnNode* RefNodeL(
-    CXnNodeImpl* aThis, CXnProperty* aRef, CXnUiEngine* aUiEngine );
-static const TDesC8* CheckRefAttributeL( CXnProperty* aRef );
 static TBool DoMatchTriggerForKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType,
@@ -294,7 +262,6 @@ static void GetFocusCandidatesL(
     RPointerArray< CXnNode >& aFocusCandidates );
 static void RunAppUiNotificationL( CXnUiEngine& aEngine, CXnNode& aNode,
     CXnDomNode& aEventNode, CXnDomNode& aTriggerNode, CXnNode& aEventData );
-static void RunAppExit( CXnUiEngine& aEngine );
 static void RunFullScreenEffectL(
     CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunActivateViewL(
@@ -338,8 +305,6 @@ static void RunTryDisplayingStylusPopupL(
 static void RunTryDisplayingListQueryDialogL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunSetInitialFocusL( CXnUiEngine& aEngine );
-static void ResolveTriggerDelayL(
-    CXnUiEngine& aEngine, CXnDomNode& aNode, TInt& aDelay );
 static TBool RunEventL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnNode& aNode,
     CXnDomNode& aEventNode, CXnDomNode& aTriggerNode, CXnNode& aEventData );
@@ -1380,7 +1345,6 @@ static void DoSetCachedProperty(
 static void SetCachedProperty(
     CXnProperty* aProperty,
     CLayoutPropertyCache*& aLayoutPropertyCache,
-    CXnProperty*& aRef,
     CXnProperty*& aName,
     CXnProperty*& aValue,
     CXnProperty*& aLabel,
@@ -1389,7 +1353,6 @@ static void SetCachedProperty(
     CXnProperty*& aId,
     CXnProperty*& aPath,
     CXnProperty*& aMaskPath,
-    CGridPropertyCache*& aGridPropertyCache,
     TBool aInitializing,
     TBool aArrayOnly)
     {
@@ -1481,10 +1444,6 @@ static void SetCachedProperty(
     else if ( name == XnPropertyNames::image::KMaskPath )
         {
         aMaskPath = aProperty;
-        }
-    else if ( name == KRef )
-        {
-        aRef = aProperty;
         }
     else if ( name == XnPropertyNames::style::common::KMarginLeft )
         {
@@ -1749,105 +1708,6 @@ static void SetCachedProperty(
             aLayoutPropertyCache->iNavIndex,
             aLayoutPropertyCache->iNavIndexes,
             aInitializing, aArrayOnly );
-        }
-    else if ( name == XnPropertyNames::grid::KS60VisibleRows )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iVisibleRows = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60GridColumns )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iGridColumns = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60GridOrientation )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iGridOrientation = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60GridVerDirection )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iGridVerDirection = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60GridHorDirection )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iGridHorDirection = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60FocusHorLooping )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iFocusHorLooping = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60FocusVerLooping )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iFocusVerLooping = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60GridScrollbarWidth )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iGridScrollBarWidth = aProperty;
-            }
-        }
-    else if ( name == XnPropertyNames::grid::KS60GridScrollbarMargin )
-        {
-        if ( !aGridPropertyCache )
-            {
-            aGridPropertyCache = new CGridPropertyCache;
-            }
-        if ( aGridPropertyCache )
-            {
-            aGridPropertyCache->iGridScrollBarMargin = aProperty;
-            }
         }
     }
 
@@ -2315,20 +2175,6 @@ static const TDesC8& PseudoClassName( CXnDomProperty::TPseudoClass aPseudoClass 
     }
 
 // -----------------------------------------------------------------------------
-// CheckRefAttributeL
-// -----------------------------------------------------------------------------
-//
-static const TDesC8* CheckRefAttributeL( CXnProperty* aRef )
-    {
-    if ( !aRef )
-        {
-        return NULL;
-        }
-
-    return &aRef->StringValue();
-    }
-
-// -----------------------------------------------------------------------------
 // DoMatchTriggerForKeyEventL
 // -----------------------------------------------------------------------------
 //
@@ -2471,187 +2317,6 @@ static TBool MatchTriggerForKeyEventL(
     }
 
 // -----------------------------------------------------------------------------
-// MatchTimedTriggerPropertiesL
-// -----------------------------------------------------------------------------
-//
-static TBool MatchTimedTriggerPropertiesL( CXnDomNode& aTriggerNode )
-    {
-    CXnDomList& children = aTriggerNode.ChildNodes();
-    TInt count = children.Length();
-    if ( count > 0 )
-        {
-        for ( TInt i = 0; i < count; ++i )
-            {
-            CXnDomNode* child = static_cast< CXnDomNode* >( children.Item( i ) );
-            const TDesC8& name = child->AttributeValue( XnPropertyNames::action::KName );
-            if ( name == XnPropertyNames::action::trigger::KDelay )
-                {
-                return ETrue;
-                }
-            }
-        }
-    return EFalse;
-    }
-
-// -----------------------------------------------------------------------------
-// MatchStylusTriggerL
-// -----------------------------------------------------------------------------
-//
-static TBool MatchStylusTriggerL(
-    CXnNode& aMatchingTriggerNode,
-    CXnDomNode& aTreeTriggerNode )
-    {
-    TInt ret( EFalse );
-
-    CXnDomList& treeChildren = aTreeTriggerNode.ChildNodes();
-    TInt treeCount = treeChildren.Length();
-
-    RPointerArray< CXnNode >& matchingChildren = aMatchingTriggerNode.Children();
-    TInt matchCount = matchingChildren.Count();
-
-    if ( treeCount == 0 )
-        {
-        // If stylus-trigger does not have properties, trigger is run with stylus up.
-        for ( TInt i = 0; i < matchCount; ++i )
-            {
-            CXnNode* node = matchingChildren[i];
-            CXnProperty* nameProperty = node->NameL();
-            if ( nameProperty )
-                {
-                const TDesC8& name = nameProperty->StringValue();
-                if ( name ==
-                     XnPropertyNames::action::trigger::name::stylus::KStylusEventType )
-                    {
-                    CXnProperty* valueProperty = node->ValueL();
-                    if ( valueProperty )
-                        {
-                        const TDesC8& name = valueProperty->StringValue();
-                        if ( name == XnPropertyNames::action::trigger::name::KDownAndUp )
-                            {
-                            return ETrue;
-                            }
-                        }
-                    }
-                }
-            }
-        return EFalse;
-        }
-
-    // Fetch trigger data defined in the theme
-    TInt treeTriggerState( 1 );
-    HBufC8* treeTriggerType( NULL );
-    for ( TInt i = 0; i < treeCount; ++i )
-        {
-        CXnDomNode* domNode = static_cast< CXnDomNode* >( treeChildren.Item( i ) );
-        CXnDomList& attrs = domNode->AttributeList();
-        CXnDomAttribute* nameAttribute = static_cast< CXnDomAttribute* >(
-            attrs.FindByName( XnPropertyNames::action::KName ) );
-        CXnDomAttribute* valueAttribute = static_cast< CXnDomAttribute* >(
-            attrs.FindByName( XnPropertyNames::action::KValue ) );
-        if ( !nameAttribute || !valueAttribute )
-            {
-            continue;
-            }
-        if ( nameAttribute->Value() ==
-             XnPropertyNames::action::trigger::name::stylus::KStylusState )
-            {
-            TLex8 lex( valueAttribute->Value() );
-            lex.Val( treeTriggerState );
-            }
-        else if ( nameAttribute->Value() ==
-                  XnPropertyNames::action::trigger::name::stylus::KStylusEventType )
-            {
-            // just in case
-            if ( treeTriggerType )
-                {
-                CleanupStack::PopAndDestroy( treeTriggerType );
-                treeTriggerType = NULL;
-                }
-            const TDesC8& value = valueAttribute->Value();
-            treeTriggerType = HBufC8::NewL( value.Length() );
-            TPtr8 ptr = treeTriggerType->Des();
-            ptr = value;
-            CleanupStack::PushL( treeTriggerType );
-            }
-        }
-
-    // If not defined, use the default value 'up'
-    if ( !treeTriggerType )
-        {
-        treeTriggerType = HBufC8::NewL( 10 );
-        TPtr8 ptr = treeTriggerType->Des();
-        ptr.Append( XnPropertyNames::action::trigger::name::KDownAndUp );
-        CleanupStack::PushL( treeTriggerType );
-        }
-
-    // Fetch matching trigger data.
-    TInt matchTriggerState( 1 );
-    HBufC8* matchTriggerType( NULL );
-    for ( TInt i = 0; i < matchCount; ++i )
-        {
-        CXnNode* matchNode = matchingChildren[i];
-        CXnProperty* nameProperty = matchNode->NameL();
-        CXnProperty* valueProperty = matchNode->ValueL();
-        if ( nameProperty && valueProperty )
-            {
-            if ( nameProperty->StringValue() ==
-                 XnPropertyNames::action::trigger::name::stylus::KStylusState )
-                {
-                TLex8 lex( valueProperty->StringValue() );
-                lex.Val( matchTriggerState );
-                }
-            else if ( nameProperty->StringValue() ==
-                      XnPropertyNames::action::trigger::name::stylus::KStylusEventType )
-                {
-                // just in case
-                if ( matchTriggerType )
-                    {
-                    CleanupStack::PopAndDestroy( matchTriggerType );
-                    matchTriggerType = NULL;
-                    }
-                const TDesC8& value = valueProperty->StringValue();
-                matchTriggerType = HBufC8::NewL( value.Length() );
-                TPtr8 ptr = matchTriggerType->Des();
-                ptr = value;
-                CleanupStack::PushL( matchTriggerType );
-                }
-            }
-        }
-
-    if ( treeTriggerState == matchTriggerState )
-        {
-        // just in case
-        if ( !matchTriggerType )
-            {
-            ret = EFalse;
-            }
-        else if ( treeTriggerType->Des() == matchTriggerType->Des() )
-            {
-            ret = ETrue;
-            }
-        // still, if trigger type is 'KUp' it should match to 'KDownAndUp' event
-        else if ( treeTriggerType->Des() ==
-                  XnPropertyNames::action::trigger::name::KUp )
-            {
-            if ( matchTriggerType->Des() ==
-                 XnPropertyNames::action::trigger::name::KDownAndUp )
-                {
-                ret = ETrue;
-                }
-            }
-        }
-    if ( matchTriggerType )
-        {
-        CleanupStack::PopAndDestroy( matchTriggerType );
-        }
-    if ( treeTriggerType )
-        {
-        CleanupStack::PopAndDestroy( treeTriggerType );
-        }
-    return ret;
-    }
-
-// -----------------------------------------------------------------------------
 // MatchActivateTriggerPropertiesL
 // Checks if triggered node properties match
 // ones defined in theme
@@ -2749,7 +2414,7 @@ static TBool MatchScreenDeviceChangePropertiesL(
     CXnDomList& attributeList( aTriggerNode.AttributeList() );
 
     const TDesC8& reason(
-        XnPropertyNames::action::trigger::name::uidefinitionmodification::KReason );
+        XnPropertyNames::action::trigger::name::orientation::KReason );
 
     CXnDomAttribute* attribute( static_cast< CXnDomAttribute* >
         ( attributeList.FindByName( reason ) ) );
@@ -2763,9 +2428,9 @@ static TBool MatchScreenDeviceChangePropertiesL(
     const TDesC8& value( attribute->Value() );
 
     if ( value ==
-         XnPropertyNames::action::trigger::name::uidefinitionmodification::reason::KLandscape ||
+         XnPropertyNames::action::trigger::name::orientation::reason::KLandscape ||
          value ==
-         XnPropertyNames::action::trigger::name::uidefinitionmodification::reason::KPortrait )
+         XnPropertyNames::action::trigger::name::orientation::reason::KPortrait )
         {
         CXnProperty* reasonProp( aEventData.GetPropertyL( reason ) );
 
@@ -2914,7 +2579,7 @@ static TBool MatchTriggerForEventL(
     CXnNode& aEventData,
     CXnDomNode& aActionNode,
     CXnDomNode& aTriggerNode,
-    TInt aSource )
+    TInt /*aSource*/ )
     {
     const TDesC8& nameString( aTriggerNode.AttributeValue( KName ) );
 
@@ -2928,57 +2593,11 @@ static TBool MatchTriggerForEventL(
 
     if ( nameString == eventNameString )
         {
-        if ( nameString == XnPropertyNames::action::trigger::name::KStylus )
-            {
-            if ( !MatchStylusTriggerL( aEventData, aTriggerNode ) )
-                {
-                return EFalse;
-                }
-            }
         // Check if triggernode properties match the ones defined in theme
         // This is for identifying keyup in activate-trigger
-        else if ( nameString == XnPropertyNames::action::trigger::name::KActivate )
+        if ( nameString == XnPropertyNames::action::trigger::name::KActivate )
             {
             if ( !MatchActivateTriggerPropertiesL( aEventData, aTriggerNode ) )
-                {
-                return EFalse;
-                }
-            }
-        // Check if the trigger is timed trigger
-        else if ( MatchTimedTriggerPropertiesL( aTriggerNode ) )
-            {
-            if ( !aThis->PeriodicTimer() )
-                {
-                aThis->CreatePeriodicL();
-                }
-
-            if ( !aThis->PeriodicTimer()->IsActive() )
-                {
-                TXnTimedTrigger* params = new ( ELeave ) TXnTimedTrigger;
-                CleanupStack::PushL( params );
-
-                params->iNodeImpl = aThis;
-                params->iEngine = &aEngine;
-                params->iNode = &aNode;
-                params->iEventData = &aEventData;
-                params->iActionNode = &aActionNode;
-                params->iTriggerNode = &aTriggerNode;
-
-                TInt delay( 0 );
-
-                ResolveTriggerDelayL( aEngine, aTriggerNode, delay );
-                aNode.SetTriggerDelay( delay );
-
-                CleanupStack::Pop( params );
-
-                aThis->PeriodicTimer()->Start(
-                    TTimeIntervalMicroSeconds32( delay ),
-                    TTimeIntervalMicroSeconds32( delay ),
-                    TCallBack( CXnNodeImpl::PeriodicEventL, params ) );
-
-                return ETrue;
-                }
-            else
                 {
                 return EFalse;
                 }
@@ -3013,27 +2632,6 @@ static TBool MatchTriggerForEventL(
             if ( !MatchValueAttributeTriggerL( aEventData, aTriggerNode ) )
                 {
                 return EFalse;
-                }
-            }
-        else if ( aSource != XnEventSource::EUnknown )
-            {
-            CXnDomAttribute* attr = static_cast< CXnDomAttribute* >
-                ( aTriggerNode.AttributeList().FindByName(
-                    XnPropertyNames::common::KEventFilter ) );
-            if ( attr )
-                {
-                if ( attr->Value().Find(XnPropertyNames::action::trigger::name::KStylus)
-                     != KErrNotFound &&
-                     aSource == XnEventSource::EStylus )
-                    {
-                    return EFalse;
-                    }
-                else if ( attr->Value().Find(XnPropertyNames::action::trigger::name::KKeyEvent)
-                          != KErrNotFound &&
-                          aSource == XnEventSource::EKey )
-                    {
-                    return EFalse;
-                    }
                 }
             }
 
@@ -3156,17 +2754,6 @@ static void RunAppUiNotificationL(
     
     adapter.HandleXuikonEventL(
         aNode.AppIfL(), aEventData.AppIfL(), aTriggerNode, aEventNode );
-    }
-
-// -----------------------------------------------------------------------------
-// RunAppExit
-// -----------------------------------------------------------------------------
-//
-static void RunAppExit( CXnUiEngine& aEngine )
-    {
-    CXnAppUiAdapter& adapter( aEngine.AppUiAdapter() );
-    
-    adapter.Exit();
     }
 
 // -----------------------------------------------------------------------------
@@ -3353,9 +2940,7 @@ static void RunEditL(
     CXnNodeImpl* aThis,
     CXnUiEngine& aEngine,
     CXnDomNode& aEventNode )
-    {    
-    TBool keyEditMode(EFalse);
-    
+    {        
     aEngine.DisableRenderUiLC();
    
     // Set plugins to edit state
@@ -3420,68 +3005,28 @@ static void RunEditL(
 
                     CleanupStack::PopAndDestroy( array );
                     }
-                else if ( name == XnPropertyNames::common::KKeyMoveMode )
-                    {
-                    if ( value == XnPropertyNames::KTrue )
-                        {
-                        keyEditMode = ETrue;
-                        }
-                    }
                 }
             }
         }
-    if ( keyEditMode )
+    TBool useEmpty( aEngine.ViewManager()->ActiveViewData().UseEmptyWidget() );
+    
+    for ( TInt i = 0; i < plugins.Count(); i++ )
         {
-        for ( TInt i = 0; i < plugins.Count(); i++ )
-            {
-            if ( plugins[i]->Occupied() )
-                {
-                CXnNode* node( plugins[i]->Owner()->LayoutNode() );
-                                             
-                node->SetStateL( XnPropertyNames::style::common::KEdit );                                       
-                }
-            }
+        CXnNode* node( plugins[i]->Owner()->LayoutNode() );
         
-        aEngine.EditMode()->SetEditModeL( CXnEditMode::EKeyMove );
-
-        // Put focus to parent plugin if focused node is not a plugin already
-        CXnNode* focusedNode = aEngine.FocusedNode();
-        
-        if ( focusedNode && focusedNode->DomNode()->Name() != _L8( "plugin" ) )
-            {
-            for ( CXnNode* candidate =
-                  focusedNode; candidate; candidate = candidate->Parent() )
-                {
-                if ( candidate->DomNode()->Name() == _L8( "plugin" ) )
-                    {
-                    candidate->SetStateL( XnPropertyNames::style::common::KFocus );
-                    break;
-                    }
-                }
-            }
+        node->SetStateL( XnPropertyNames::style::common::KEdit );
+                               
+        if ( !plugins[i]->Occupied() && useEmpty )
+            {                               
+            // Make empty space visible
+            SetStringPropertyToNodeL( *sp, *node,
+                XnPropertyNames::style::common::KVisibility,
+                XnPropertyNames::style::common::visibility::KVisible );                    
+            }                                              
         }
-    else 
-        {        
-        TBool useEmpty( aEngine.ViewManager()->ActiveViewData().UseEmptyWidget() );
-        
-        for ( TInt i = 0; i < plugins.Count(); i++ )
-            {
-            CXnNode* node( plugins[i]->Owner()->LayoutNode() );
-            
-            node->SetStateL( XnPropertyNames::style::common::KEdit );
-                                   
-            if ( !plugins[i]->Occupied() && useEmpty )
-                {                               
-                // Make empty space visible
-                SetStringPropertyToNodeL( *sp, *node,
-                    XnPropertyNames::style::common::KVisibility,
-                    XnPropertyNames::style::common::visibility::KVisible );                    
-                }                                              
-            }
-        
+    
         aEngine.EditMode()->SetEditModeL( CXnEditMode::EDragAndDrop );        
-        aEngine.AppUiAdapter().ViewAdapter().BgManager().DrawNow();
-        }
+        aEngine.AppUiAdapter().ViewAdapter().CloseAllPopupsL();
 
     CleanupStack::PopAndDestroy();
     
@@ -3497,9 +3042,6 @@ static void RunResetEditL(
     CXnUiEngine& aEngine,
     CXnDomNode& aEventNode )
     {    
-    TBool keyEditMode( 
-            aEngine.EditMode()->EditState() == CXnEditMode::EKeyMove );
-    
     CXnDomList& children( aEventNode.ChildNodes() );
 
     TInt count( children.Length() );
@@ -3558,40 +3100,24 @@ static void RunResetEditL(
 
     CXnDomStringPool* sp( aEventNode.StringPool() );
 
-    if ( keyEditMode )
+    TBool useEmpty( aEngine.ViewManager()->ActiveViewData().UseEmptyWidget() );
+    
+    for ( TInt i = 0; i < plugins.Count(); i++ )
         {
-        for ( TInt i = 0; i < plugins.Count(); i++ )
-            {
-            if ( plugins[i]->Occupied() )
-                {
-                CXnNode* node( plugins[i]->Owner()->LayoutNode() );
-                                             
-                node->UnsetStateL( XnPropertyNames::style::common::KEdit );                                       
-                }
-            }        
-        }
-    else
-        {
-        TBool useEmpty( aEngine.ViewManager()->ActiveViewData().UseEmptyWidget() );
+        CXnNode* node( plugins[i]->Owner()->LayoutNode() );
         
-        for ( TInt i = 0; i < plugins.Count(); i++ )
-            {
-            CXnNode* node( plugins[i]->Owner()->LayoutNode() );
-            
-            node->UnsetStateL( XnPropertyNames::style::common::KEdit );
-            
-            if ( !plugins[i]->Occupied() && useEmpty )
-                {                               
-                // Make empty space blank
-                SetStringPropertyToNodeL( *sp, *node,
-                    XnPropertyNames::style::common::KVisibility,
-                    XnPropertyNames::style::common::visibility::KBlank );                    
-                }
-            }                
-        }
+        node->UnsetStateL( XnPropertyNames::style::common::KEdit );
+        
+        if ( !plugins[i]->Occupied() && useEmpty )
+            {                               
+            // Make empty space blank
+            SetStringPropertyToNodeL( *sp, *node,
+                XnPropertyNames::style::common::KVisibility,
+                XnPropertyNames::style::common::visibility::KBlank );                    
+            }
+        }                
     
     aEngine.EditMode()->SetEditModeL( CXnEditMode::ENone );   
-    aEngine.AppUiAdapter().ViewAdapter().BgManager().DrawNow();
 
     aEngine.AppUiAdapter().ViewAdapter().UpdateRskByModeL();
     }
@@ -3828,28 +3354,6 @@ static void RunSystemSetStringL(
         aNode->SetPropertyL( propertyValue );
 
         CleanupStack::Pop( propertyValue );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// RunResetStylusCounterL
-// -----------------------------------------------------------------------------
-//
-static void RunResetStylusCounterL(
-    CXnNodeImpl* aThis,
-    CXnUiEngine& aEngine,
-    const TDesC8& aId )
-    {
-    CXnNode* node( aEngine.FindNodeByIdL( aId, aThis->Namespace() ) );
-
-    if ( node )
-        {
-        CXnControlAdapter* adapter( node->Control() );
-
-        if ( adapter )
-            {
-            adapter->ResetStylusCounter();
-            }
         }
     }
 
@@ -4155,11 +3659,11 @@ static void RunSetInitialFocusL( CXnUiEngine& aEngine )
 
         for( TInt i = 0; i < pluginNodes.Count(); i++ )
             {
-            CXnPluginData& data( viewData.Plugin( pluginNodes[i] ) );
+            CXnPluginData* data( viewData.Plugin( pluginNodes[i] ) );
             
-            if( data.Occupied() )
+            if( data && data->Occupied() )
                 {
-                plugins.AppendL( &data );
+                plugins.AppendL( data );
                 }
             }
         
@@ -4302,35 +3806,6 @@ static void RunSystemSetL(
     }
 
 // -----------------------------------------------------------------------------
-// ResolveTriggerDelayL
-// -----------------------------------------------------------------------------
-//
-static void ResolveTriggerDelayL(
-    CXnUiEngine& /*aEngine*/,
-    CXnDomNode& aNode,
-    TInt& aDelay )
-    {
-    CXnDomList& children = aNode.ChildNodes();
-    for ( TInt i = 0; i < children.Length(); i++ )
-        {
-        CXnDomNode* child = static_cast< CXnDomNode* >( children.Item( i ) );
-        const TDesC8& name = child->AttributeValue( XnPropertyNames::action::KName );
-        if ( name == XnPropertyNames::action::trigger::KDelay )
-            {
-            const TDesC8& value = child->AttributeValue( XnPropertyNames::action::KValue );
-            if ( value != KNullDesC8 )
-                {
-                TInt triggerDelay( 0 );
-                TLex8 lex;
-                lex.Assign( value );
-                lex.Val( triggerDelay );
-                aDelay = triggerDelay;
-                }
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // RunEventL
 // -----------------------------------------------------------------------------
 //
@@ -4402,19 +3877,6 @@ static TBool RunEventL(
         RunResetEditL( aThis, aEngine, aEventNode );
         return ETrue;
         }
-    else if ( nameString == XnPropertyNames::action::event::KResetStylusCounter )
-        {
-        HBufC8* id( NULL );
-
-        GetSystemSetDataL( aEventNode, id );
-        CleanupStack::PushL( id );
-
-        RunResetStylusCounterL( aThis, aEngine, *id );
-
-        CleanupStack::PopAndDestroy( id );
-
-        return EFalse;
-        }
     else if ( nameString == XnPropertyNames::action::event::KRunAddWidgetQuery )
         {
         aEngine.Editor()->AddWidgetL();
@@ -4464,10 +3926,6 @@ static TBool RunEventL(
         {
         RunDeactivateL( aThis, aEngine, aEventNode );
         return ETrue;
-        }
-    else if ( nameString == XnPropertyNames::action::event::KExit )
-        {
-        RunAppExit( aEngine );
         }
     else if ( nameString == XnPropertyNames::action::event::KTryDisplayingMenu )
         {
@@ -4546,29 +4004,6 @@ static TBool RunEventL(
         
         CleanupStack::PopAndDestroy( trigger );
                 
-        return ETrue;
-        }
-    else if ( nameString == XnPropertyNames::action::event::KRestartTriggerTimer )
-        {
-        TInt delay( 0 );
-
-        ResolveTriggerDelayL( aEngine, aEventNode, delay );
-
-        if ( delay > 0 )
-            {
-            aNode.RestartTimedTrigger( delay );
-            }
-        else
-            {
-            TTimeIntervalMicroSeconds32 delayms = aNode.TriggerDelay();
-            aNode.RestartTimedTrigger( delayms.Int() );
-            }
-
-        return ETrue;
-        }
-    else if ( nameString == XnPropertyNames::action::event::KCancelTriggerTimer )
-        {
-        aNode.RestartTimedTrigger();
         return ETrue;
         }
     else if ( nameString == XnPropertyNames::action::event::KSetWallpaper )
@@ -4915,7 +4350,7 @@ static CXnNode* FindLoopedFocusableNodeL( CXnNode& aNode, TBool aForward )
         {
         const TDesC8& loopValue = navLoopProperty->StringValue();
         if ( loopValue != KNullDesC8 &&
-             loopValue == XnPropertyNames::grid::s60_focus_looping::KStop )
+             loopValue == XnPropertyNames::style::common::s60_focus_looping::KStop )
             {
             return NULL;
             }
@@ -6556,13 +5991,12 @@ static TBool DoInternalFocusChangeL( CXnUiEngine& aEngine,
         {
         
         CXnAppUiAdapter& appui = static_cast< CXnAppUiAdapter& >( *iAvkonAppUi );
-        CXnPluginData& plugin( 
+        CXnPluginData* plugin( 
                     appui.ViewManager().ActiveViewData().Plugin( &aNode ) );
         
-        // find if node is in a widget that contatins some opened popup window
-       
-        TBool containsPopUp = plugin.IsDisplayingPopup();
-        
+        // find if node is in a widget that contatins some opened popup window       
+        TBool containsPopUp = ( plugin ? plugin->IsDisplayingPopup() : EFalse );
+
         CXnNode* nextNode( NULL );
         RPointerArray< CXnNode >& array = aEngine.ViewManager()->AppearanceNodes();
         if ( aKeyEvent.iScanCode == EStdKeyDownArrow )
@@ -7081,7 +6515,7 @@ static TBool IsLoopingNodeL( CXnNode* aNode )
     if ( navLoopProperty )
         {
         const TDesC8& loopValue = navLoopProperty->StringValue();
-        if ( loopValue == XnPropertyNames::grid::s60_focus_looping::KStop )
+        if ( loopValue == XnPropertyNames::style::common::s60_focus_looping::KStop )
             {
             return EFalse;
             }
@@ -7400,9 +6834,7 @@ CXnNodeImpl::~CXnNodeImpl()
     iPropertyPseudoClasses.Reset();
     iStates.Reset();
     iChildren.ResetAndDestroy();
-    delete iGridPropertyCache;
     delete iLayoutPropertyCache;
-    DeletePeriodic();
     }
 
 // -----------------------------------------------------------------------------
@@ -7601,17 +7033,6 @@ void CXnNodeImpl::SetPCDataL( const TDesC8& aData )
 //
 const TDesC8& CXnNodeImpl::GetPCData()
     {
-    if ( iRef )
-        {
-        CXnNode* refNode( NULL );
-        TRAP_IGNORE( refNode = RefNodeL( this, iRef, iUiEngine ) );
-
-        if ( refNode )
-            {
-            return refNode->GetPCData();
-            }
-        }
-
     return iDomNode->PCData();
     }
 
@@ -7630,7 +7051,7 @@ void CXnNodeImpl::SetHandleTooltip( TBool aFlag )
 // Searchs and shoes tooltips
 // -----------------------------------------------------------------------------
 //
-void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt /*aSource*/ )
+void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt aSource )
     {
     if ( iHandleTooltip )
         {
@@ -7647,7 +7068,17 @@ void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt /*aSource*/ )
 
                 if ( popup )
                     {
-                    popup->ShowPopupL( aRect );
+                    if ( aSource == XnEventSource::EStylus )
+                        {
+                        const TTimeIntervalMicroSeconds32 delay( 0 );                       
+                        const TTimeIntervalMicroSeconds32 display( 1000 * 1000 * 6 );                                                
+                        
+                        popup->ShowPopupL( aRect, delay, display );
+                        }
+                    else
+                        {
+                        popup->ShowPopupL( aRect );
+                        }
                     }
                 }
             }
@@ -7858,15 +7289,6 @@ TInt CXnNodeImpl::DoSetPropertyL( CXnProperty* aProperty )
     {
     TInt level( XnDirtyLevel::ENone );
 
-    const TDesC8* refid( CheckRefAttributeL( iRef ) );
-
-    if ( refid && aProperty->Property()->Name() != XnPropertyNames::common::KId )
-        {
-        delete aProperty;
-
-        return level;
-        }
-
     const TDesC8& name( aProperty->Property()->Name() );
 
     CXnProperty* prop( GetPropertyL( name ) );
@@ -7895,7 +7317,6 @@ TInt CXnNodeImpl::DoSetPropertyL( CXnProperty* aProperty )
             SetCachedProperty(
                 aProperty,
                 iLayoutPropertyCache,
-                iRef,
                 iName,
                 iValue,
                 iLabel,
@@ -7904,7 +7325,6 @@ TInt CXnNodeImpl::DoSetPropertyL( CXnProperty* aProperty )
                 iId,
                 iPath,
                 iMaskPath,
-                iGridPropertyCache,
                 EFalse,
                 EFalse );
             }
@@ -7914,7 +7334,6 @@ TInt CXnNodeImpl::DoSetPropertyL( CXnProperty* aProperty )
         SetCachedProperty(
             aProperty,
             iLayoutPropertyCache,
-            iRef,
             iName,
             iValue,
             iLabel,
@@ -7923,7 +7342,6 @@ TInt CXnNodeImpl::DoSetPropertyL( CXnProperty* aProperty )
             iId,
             iPath,
             iMaskPath,
-            iGridPropertyCache,
             EFalse,
             EFalse );
         }
@@ -7983,15 +7401,6 @@ TInt CXnNodeImpl::DoSetPropertyL( CXnProperty* aProperty )
 //
 void CXnNodeImpl::InitializePropertyL( CXnProperty* aProperty )
     {
-    const TDesC8* refid( CheckRefAttributeL( iRef ) );
-
-    if ( refid && aProperty->Property()->Name() != XnPropertyNames::common::KId )
-        {
-        delete aProperty;
-
-        return;
-        }
-
     if ( aProperty->Property()->PseudoClass() != CXnDomProperty::ENone )
         {
         InsertPropertyPseudoClassL(
@@ -8000,7 +7409,6 @@ void CXnNodeImpl::InitializePropertyL( CXnProperty* aProperty )
         SetCachedProperty(
             aProperty,
             iLayoutPropertyCache,
-            iRef,
             iName,
             iValue,
             iLabel,
@@ -8009,7 +7417,6 @@ void CXnNodeImpl::InitializePropertyL( CXnProperty* aProperty )
             iId,
             iPath,
             iMaskPath,
-            iGridPropertyCache,
             ETrue,
             ETrue );
         }
@@ -8018,7 +7425,6 @@ void CXnNodeImpl::InitializePropertyL( CXnProperty* aProperty )
         SetCachedProperty(
             aProperty,
             iLayoutPropertyCache,
-            iRef,
             iName,
             iValue,
             iLabel,
@@ -8027,7 +7433,6 @@ void CXnNodeImpl::InitializePropertyL( CXnProperty* aProperty )
             iId,
             iPath,
             iMaskPath,
-            iGridPropertyCache,
             ETrue,
             EFalse );
         }
@@ -8042,13 +7447,6 @@ void CXnNodeImpl::InitializePropertyL( CXnProperty* aProperty )
 //
 CXnProperty* CXnNodeImpl::GetPropertyL( const TDesC8& aKey )
     {
-    CXnNode* refNode( RefNodeL( this, iRef, iUiEngine ) ) ;
-
-    if ( refNode && aKey != KRef && aKey != KId )
-        {
-        return refNode->GetPropertyL( aKey );
-        }
-
     CXnDomProperty* attribute = NULL;
     CXnProperty* property = iPropertyList->GetProperty( aKey );
 
@@ -8581,17 +7979,10 @@ XnComponentInterface::MXnComponentInterface* CXnNodeImpl::MakeInterfaceL(
 // Returns a property.
 // -----------------------------------------------------------------------------
 //
-static CXnProperty* PropertyL( CXnNodeImpl* aThis, CXnProperty* aProperty,
-    CXnProperty* ( CXnNode::* aFunc )(), CXnUiEngine* aUiEngine,
-    TAny* aLayoutPropertyCache, CXnNode* aParent, CXnProperty* aRef )
+static CXnProperty* PropertyL( CXnProperty* aProperty,
+    CXnProperty* ( CXnNode::* aFunc )(),
+    TAny* aLayoutPropertyCache, CXnNode* aParent )
     {
-    CXnNode* refNode( RefNodeL( aThis, aRef, aUiEngine ) ) ;
-
-    if ( refNode )
-        {
-        return ( refNode->*aFunc )();
-        }
-
     if ( aLayoutPropertyCache && aProperty )
         {
         CXnDomProperty* attribute = aProperty->Property();
@@ -8624,93 +8015,16 @@ static CXnProperty* PropertyL( CXnNodeImpl* aThis, CXnProperty* aProperty,
     }
 
 // -----------------------------------------------------------------------------
-// ReferredPropertyL
-// Returns a referred property.
-// -----------------------------------------------------------------------------
-//
-static CXnProperty* ReferredPropertyL(
-    RPointerArray< CXnProperty >* aPropertyArray,
-    RArray< CXnDomProperty::TPseudoClass >& aStates )
-    {
-    if ( !aPropertyArray )
-        {
-        return NULL;
-        }
-    for ( TInt i = aPropertyArray->Count() - 1; i >= 0; --i )
-        {
-        CXnProperty* tmp = ( *aPropertyArray )[i];
-        for ( TInt j = aStates.Count() - 1; j >= 0; --j )
-            {
-            if ( aStates[j] == tmp->Property()->PseudoClass() )
-                {
-                return tmp;
-                }
-            }
-        for ( TInt j = aStates.Count() - 1; j >= 0; --j )
-            {
-            if ( tmp->Property()->PseudoClass() == CXnDomProperty::ENone )
-                {
-                return tmp;
-                }
-            }
-        }
-    for ( TInt i = aPropertyArray->Count() - 1; i >= 0; --i )
-        {
-        CXnProperty* tmp = ( *aPropertyArray )[i];
-        if ( tmp->Property()->PseudoClass() == CXnDomProperty::ENone )
-            {
-            return tmp;
-            }
-        }
-    return NULL;
-    }
-
-// -----------------------------------------------------------------------------
-// RefNodeL
-// Returns referred node.
-// -----------------------------------------------------------------------------
-//
-static CXnNode* RefNodeL(
-    CXnNodeImpl* aThis,
-    CXnProperty* aRef,
-    CXnUiEngine* aUiEngine )
-    {
-    const TDesC8* refid( CheckRefAttributeL( aRef ) );
-
-    if ( refid )
-        {
-        CXnNode* node( aUiEngine->FindNodeByIdL( *refid, aThis->Namespace() ) );
-
-        if ( node )
-            {
-            return node;
-            }
-        }
-
-    return NULL;
-    }
-
-// -----------------------------------------------------------------------------
 // CXnNodeImpl::WidthL
 // Returns width property.
 // -----------------------------------------------------------------------------
 //
 CXnProperty* CXnNodeImpl::WidthL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iWidths ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iWidth : NULL;
-    return PropertyL( this, property, &CXnNode::WidthL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::WidthL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8720,20 +8034,10 @@ CXnProperty* CXnNodeImpl::WidthL()
 //
 CXnProperty* CXnNodeImpl::HeightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if (refNode)
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iHeights ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iHeight : NULL;
-    return PropertyL( this, property, &CXnNode::HeightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::HeightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8743,22 +8047,12 @@ CXnProperty* CXnNodeImpl::HeightL()
 //
 CXnProperty* CXnNodeImpl::MarginLeftL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMarginLefts ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ?
         iLayoutPropertyCache->iMarginLeft :
         NULL;
-    return PropertyL( this, property, &CXnNode::MarginLeftL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MarginLeftL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8768,22 +8062,12 @@ CXnProperty* CXnNodeImpl::MarginLeftL()
 //
 CXnProperty* CXnNodeImpl::MarginRightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMarginRights ) :
-            NULL;
-        return ReferredPropertyL(propertyArray, iStates);
-        }
     CXnProperty* property =
         iLayoutPropertyCache ?
         iLayoutPropertyCache->iMarginRight :
         NULL;
-    return PropertyL( this, property, &CXnNode::MarginRightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MarginRightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8793,21 +8077,11 @@ CXnProperty* CXnNodeImpl::MarginRightL()
 //
 CXnProperty* CXnNodeImpl::BorderLeftL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderLefts ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property = iLayoutPropertyCache ?
         iLayoutPropertyCache->iBorderLeft :
         NULL;
-    return PropertyL( this, property, &CXnNode::BorderLeftL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderLeftL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8817,22 +8091,12 @@ CXnProperty* CXnNodeImpl::BorderLeftL()
 //
 CXnProperty* CXnNodeImpl::BorderRightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderRights ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ?
         iLayoutPropertyCache->iBorderRight :
         NULL;
-    return PropertyL( this, property, &CXnNode::BorderRightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderRightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8842,22 +8106,12 @@ CXnProperty* CXnNodeImpl::BorderRightL()
 //
 CXnProperty* CXnNodeImpl::PaddingLeftL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iPaddingLefts ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ?
         iLayoutPropertyCache->iPaddingLeft :
         NULL;
-    return PropertyL( this, property, &CXnNode::PaddingLeftL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::PaddingLeftL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8867,20 +8121,10 @@ CXnProperty* CXnNodeImpl::PaddingLeftL()
 //
 CXnProperty* CXnNodeImpl::PaddingRightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iPaddingRights ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iPaddingRight : NULL;
-    return PropertyL( this, property, &CXnNode::PaddingRightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::PaddingRightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8890,20 +8134,10 @@ CXnProperty* CXnNodeImpl::PaddingRightL()
 //
 CXnProperty* CXnNodeImpl::MarginTopL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMarginTops ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iMarginTop : NULL;
-    return PropertyL( this, property, &CXnNode::MarginTopL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MarginTopL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8913,20 +8147,10 @@ CXnProperty* CXnNodeImpl::MarginTopL()
 //
 CXnProperty* CXnNodeImpl::MarginBottomL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMarginBottoms ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iMarginBottom : NULL;
-    return PropertyL( this, property, &CXnNode::MarginBottomL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MarginBottomL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8936,20 +8160,10 @@ CXnProperty* CXnNodeImpl::MarginBottomL()
 //
 CXnProperty* CXnNodeImpl::BorderTopL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderTops ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderTop : NULL;
-    return PropertyL( this, property, &CXnNode::BorderTopL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderTopL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8959,20 +8173,10 @@ CXnProperty* CXnNodeImpl::BorderTopL()
 //
 CXnProperty* CXnNodeImpl::BorderBottomL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderBottoms ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderBottom : NULL;
-    return PropertyL( this, property, &CXnNode::BorderBottomL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderBottomL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -8982,20 +8186,10 @@ CXnProperty* CXnNodeImpl::BorderBottomL()
 //
 CXnProperty* CXnNodeImpl::PaddingTopL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iPaddingTops ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iPaddingTop : NULL;
-    return PropertyL( this, property, &CXnNode::PaddingTopL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::PaddingTopL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9005,20 +8199,10 @@ CXnProperty* CXnNodeImpl::PaddingTopL()
 //
 CXnProperty* CXnNodeImpl::PaddingBottomL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iPaddingBottoms ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iPaddingBottom : NULL;
-    return PropertyL( this, property, &CXnNode::PaddingBottomL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::PaddingBottomL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9028,20 +8212,10 @@ CXnProperty* CXnNodeImpl::PaddingBottomL()
 //
 CXnProperty* CXnNodeImpl::BorderWidthL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderWidths ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderWidth : NULL;
-    return PropertyL( this, property, &CXnNode::BorderWidthL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderWidthL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9051,20 +8225,10 @@ CXnProperty* CXnNodeImpl::BorderWidthL()
 //
 CXnProperty* CXnNodeImpl::BlockProgressionL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBlockProgressions ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBlockProgression : NULL;
-    return PropertyL( this, property, &CXnNode::BlockProgressionL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BlockProgressionL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9074,20 +8238,10 @@ CXnProperty* CXnNodeImpl::BlockProgressionL()
 //
 CXnProperty* CXnNodeImpl::DirectionL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iDirections ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iDirection : NULL;
-    return PropertyL( this, property, &CXnNode::DirectionL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::DirectionL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9097,20 +8251,10 @@ CXnProperty* CXnNodeImpl::DirectionL()
 //
 CXnProperty* CXnNodeImpl::PositionL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iPositions ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iPosition : NULL;
-    return PropertyL( this, property, &CXnNode::PositionL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::PositionL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9120,20 +8264,10 @@ CXnProperty* CXnNodeImpl::PositionL()
 //
 CXnProperty* CXnNodeImpl::MaxHeightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMaxHeights ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iMaxHeight : NULL;
-    return PropertyL( this, property, &CXnNode::MaxHeightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MaxHeightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9143,20 +8277,10 @@ CXnProperty* CXnNodeImpl::MaxHeightL()
 //
 CXnProperty* CXnNodeImpl::MinHeightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMinHeights ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iMinHeight : NULL;
-    return PropertyL( this, property, &CXnNode::MinHeightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MinHeightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9166,20 +8290,10 @@ CXnProperty* CXnNodeImpl::MinHeightL()
 //
 CXnProperty* CXnNodeImpl::MaxWidthL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMaxWidths ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iMaxWidth : NULL;
-    return PropertyL( this, property, &CXnNode::MaxWidthL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MaxWidthL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9189,20 +8303,10 @@ CXnProperty* CXnNodeImpl::MaxWidthL()
 //
 CXnProperty* CXnNodeImpl::MinWidthL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iMinWidths ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iMinWidth : NULL;
-    return PropertyL( this, property, &CXnNode::MinWidthL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::MinWidthL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9212,20 +8316,10 @@ CXnProperty* CXnNodeImpl::MinWidthL()
 //
 CXnProperty* CXnNodeImpl::DisplayL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iDisplays ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iDisplay : NULL;
-    return PropertyL( this, property, &CXnNode::DisplayL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::DisplayL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9235,20 +8329,10 @@ CXnProperty* CXnNodeImpl::DisplayL()
 //
 CXnProperty* CXnNodeImpl::LeftL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iLefts ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iLeft : NULL;
-    return PropertyL( this, property, &CXnNode::LeftL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::LeftL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9258,20 +8342,10 @@ CXnProperty* CXnNodeImpl::LeftL()
 //
 CXnProperty* CXnNodeImpl::RightL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iRights ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iRight : NULL;
-    return PropertyL( this, property, &CXnNode::RightL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::RightL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9281,20 +8355,10 @@ CXnProperty* CXnNodeImpl::RightL()
 //
 CXnProperty* CXnNodeImpl::TopL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iTops ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iTop : NULL;
-    return PropertyL( this, property, &CXnNode::TopL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::TopL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9304,20 +8368,10 @@ CXnProperty* CXnNodeImpl::TopL()
 //
 CXnProperty* CXnNodeImpl::BottomL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBottoms ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBottom : NULL;
-    return PropertyL( this, property, &CXnNode::BottomL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BottomL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9327,20 +8381,10 @@ CXnProperty* CXnNodeImpl::BottomL()
 //
 CXnProperty* CXnNodeImpl::BorderLeftStyleL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderLeftStyles ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderLeftStyle : NULL;
-    return PropertyL( this, property, &CXnNode::BorderLeftStyleL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderLeftStyleL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9350,20 +8394,10 @@ CXnProperty* CXnNodeImpl::BorderLeftStyleL()
 //
 CXnProperty* CXnNodeImpl::BorderRightStyleL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderRightStyles ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderRightStyle : NULL;
-    return PropertyL( this, property, &CXnNode::BorderRightStyleL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderRightStyleL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9373,20 +8407,10 @@ CXnProperty* CXnNodeImpl::BorderRightStyleL()
 //
 CXnProperty* CXnNodeImpl::BorderTopStyleL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderTopStyles ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderTopStyle : NULL;
-    return PropertyL( this, property, &CXnNode::BorderTopStyleL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderTopStyleL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9396,20 +8420,10 @@ CXnProperty* CXnNodeImpl::BorderTopStyleL()
 //
 CXnProperty* CXnNodeImpl::BorderBottomStyleL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderBottomStyles ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderBottomStyle : NULL;
-    return PropertyL( this, property, &CXnNode::BorderBottomStyleL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderBottomStyleL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9419,20 +8433,10 @@ CXnProperty* CXnNodeImpl::BorderBottomStyleL()
 //
 CXnProperty* CXnNodeImpl::BorderStyleL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBorderStyles ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderStyle : NULL;
-    return PropertyL( this, property, &CXnNode::BorderStyleL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderStyleL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9444,9 +8448,8 @@ CXnProperty* CXnNodeImpl::BorderImageL()
     {
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBorderImage : NULL;
-    return PropertyL( this, property, &CXnNode::BorderImageL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BorderImageL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9456,20 +8459,10 @@ CXnProperty* CXnNodeImpl::BorderImageL()
 //
 CXnProperty* CXnNodeImpl::DisplayPriorityL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iDisplayPriorities ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iDisplayPriority : NULL;
-    return PropertyL( this, property, &CXnNode::DisplayPriorityL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::DisplayPriorityL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9479,9 +8472,7 @@ CXnProperty* CXnNodeImpl::DisplayPriorityL()
 //
 CXnProperty* CXnNodeImpl::NameL()
     {
-    return PropertyL( this, iName, &CXnNode::NameL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iName, &CXnNode::NameL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9491,9 +8482,7 @@ CXnProperty* CXnNodeImpl::NameL()
 //
 CXnProperty* CXnNodeImpl::ValueL()
     {
-    return PropertyL( this, iValue, &CXnNode::ValueL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iValue, &CXnNode::ValueL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9503,20 +8492,10 @@ CXnProperty* CXnNodeImpl::ValueL()
 //
 CXnProperty* CXnNodeImpl::VisibilityL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iVisibilities ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iVisibility : NULL;
-    return PropertyL( this, property, &CXnNode::VisibilityL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::VisibilityL, 
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9526,9 +8505,7 @@ CXnProperty* CXnNodeImpl::VisibilityL()
 //
 CXnProperty* CXnNodeImpl::LabelL()
     {
-    return PropertyL( this, iLabel, &CXnNode::LabelL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iLabel, &CXnNode::LabelL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9538,9 +8515,7 @@ CXnProperty* CXnNodeImpl::LabelL()
 //
 CXnProperty* CXnNodeImpl::InitialFocusL()
     {
-    return PropertyL( this, iInitialFocus, &CXnNode::InitialFocusL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iInitialFocus, &CXnNode::InitialFocusL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9550,9 +8525,7 @@ CXnProperty* CXnNodeImpl::InitialFocusL()
 //
 CXnProperty* CXnNodeImpl::ClassL()
     {
-    return PropertyL( this, iClass, &CXnNode::ClassL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iClass, &CXnNode::ClassL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9596,9 +8569,7 @@ CXnProperty* CXnNodeImpl::IdL()
 //
 CXnProperty* CXnNodeImpl::PathL()
     {
-    return PropertyL( this, iPath, &CXnNode::PathL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iPath, &CXnNode::PathL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9608,9 +8579,7 @@ CXnProperty* CXnNodeImpl::PathL()
 //
 CXnProperty* CXnNodeImpl::MaskPathL()
     {
-    return PropertyL( this, iMaskPath, &CXnNode::MaskPathL,
-        iUiEngine, this,
-        iParent, iRef );
+    return PropertyL( iMaskPath, &CXnNode::MaskPathL, this, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9620,118 +8589,10 @@ CXnProperty* CXnNodeImpl::MaskPathL()
 //
 CXnProperty* CXnNodeImpl::NavIndexL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iNavIndexes ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iNavIndex : NULL;
-    return PropertyL( this, property, &CXnNode::NavIndexL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::VisibleRowsL
-// Returns visible-rows property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::VisibleRowsL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iVisibleRows : NULL;
-    return PropertyL( this, property, &CXnNode::VisibleRowsL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::GridColumnsL
-// Returns grid-columns property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::GridColumnsL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iGridColumns : NULL;
-    return PropertyL( this, property, &CXnNode::GridColumnsL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::GridOrientationL
-// Returns grid-orientation property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::GridOrientationL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iGridOrientation : NULL;
-    return PropertyL( this, property, &CXnNode::GridOrientationL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::GridVerDirectionL
-// Returns grid-ver-direction property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::GridVerDirectionL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iGridVerDirection : NULL;
-    return PropertyL( this, property, &CXnNode::GridVerDirectionL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::GridHorDirectionL
-// Returns grid-hor-direction property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::GridHorDirectionL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iGridHorDirection : NULL;
-    return PropertyL( this, property, &CXnNode::GridHorDirectionL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::FocusHorLoopingL
-// Returns focus-hor-looping property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::FocusHorLoopingL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iFocusHorLooping : NULL;
-    return PropertyL( this, property, &CXnNode::FocusHorLoopingL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::FocusVerLoopingL
-// Returns focus-ver-looping property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::FocusVerLoopingL()
-    {
-    CXnProperty* property =
-        iGridPropertyCache ? iGridPropertyCache->iFocusVerLooping : NULL;
-    return PropertyL( this, property, &CXnNode::FocusVerLoopingL,
-        iUiEngine, iGridPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::NavIndexL, 
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9741,20 +8602,10 @@ CXnProperty* CXnNodeImpl::FocusVerLoopingL()
 //
 CXnProperty* CXnNodeImpl::ZIndexL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iZIndexes ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iZIndex : NULL;
-    return PropertyL( this, property, &CXnNode::ZIndexL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::ZIndexL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9764,20 +8615,10 @@ CXnProperty* CXnNodeImpl::ZIndexL()
 //
 CXnProperty* CXnNodeImpl::BackgroundColorL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iBackgroundColors ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBackgroundColor : NULL;
-    return PropertyL( this, property, &CXnNode::BackgroundColorL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BackgroundColorL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9787,20 +8628,10 @@ CXnProperty* CXnNodeImpl::BackgroundColorL()
 //
 CXnProperty* CXnNodeImpl::BackgroundImageL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-             &( refNode->Impl()->iLayoutPropertyCache->iBackgroundImages ) :
-             NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iBackgroundImage : NULL;
-    return PropertyL( this, property, &CXnNode::BackgroundImageL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
+    return PropertyL( property, &CXnNode::BackgroundImageL,
+        iLayoutPropertyCache, iParent );
     }
 
 // -----------------------------------------------------------------------------
@@ -9810,174 +8641,11 @@ CXnProperty* CXnNodeImpl::BackgroundImageL()
 //
 CXnProperty* CXnNodeImpl::FocusBackgroundL()
     {
-    CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-
-    if ( refNode )
-        {
-        RPointerArray< CXnProperty >* propertyArray =
-            refNode->Impl()->iLayoutPropertyCache ?
-            &( refNode->Impl()->iLayoutPropertyCache->iFocusBackgrounds ) :
-            NULL;
-        return ReferredPropertyL( propertyArray, iStates );
-        }
-
     CXnProperty* property =
         iLayoutPropertyCache ? iLayoutPropertyCache->iFocusBackground : NULL;
 
-    return PropertyL( this, property, &CXnNode::FocusBackgroundL,
-        iUiEngine, iLayoutPropertyCache,
-        iParent, iRef );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::RefL
-// Returns ref property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::RefL()
-    {
-    return iRef;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::GridScrollBarWidthL
-// Returns grid-scrollbar-width property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::GridScrollBarWidthL()
-    {
-    CXnProperty* property = NULL;
-
-    if ( iGridPropertyCache && iGridPropertyCache->iGridScrollBarWidth)
-        {
-        property = PropertyL(
-            this,
-            iGridPropertyCache->iGridScrollBarWidth,
-            &CXnNode::GridScrollBarWidthL,
-            iUiEngine, iGridPropertyCache,
-            iParent,
-            iRef );
-        }
-
-    if ( !property && iRef )
-        {
-        CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-
-        if ( refNode )
-            {
-            property = refNode->GridScrollBarWidthL();
-            }
-        }
-
-    if ( !property )
-        {
-        TReal sbWidth( KS60ScrollbarDefaultWidth );
-        // Set default value
-        CXnDomDocument& doc = iUiEngine->ODT()->DomDocument();
-        CXnDomProperty* domProperty = CXnDomProperty::NewL(
-            XnPropertyNames::grid::KS60GridScrollbarWidth, doc.StringPool() );
-        CleanupStack::PushL( domProperty );
-        CXnDomPropertyValue* propertyValue = CXnDomPropertyValue::NewL(
-            doc.StringPool() );
-        CleanupStack::PushL( propertyValue );
-        if ( AknLayoutUtils::PenEnabled() )
-            {
-            sbWidth = KS60ScrollbarDefaultWidthPenEnabled;
-            }
-        propertyValue->SetFloatValueL( CXnDomPropertyValue::EUnitValue, sbWidth );
-        domProperty->PropertyValueList().AddItemL( propertyValue );
-        CleanupStack::Pop( propertyValue );
-
-        property = CXnProperty::NewL( domProperty );
-        CleanupStack::Pop( domProperty );
-        CleanupStack::PushL( property );
-
-        // If this is a reference node, set property to the referred node, not this.
-        CXnNode* node = RefNodeL( this, iRef, iUiEngine );
-        if ( node )
-            {
-            node->SetPropertyL( property );
-            }
-        else
-            {
-            this->SetPropertyL( property ); // deletes existing one
-            }
-
-        CleanupStack::Pop( property );
-        }
-
-    return property;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodeImpl::GridScrollBarMarginL
-// Returns grid-scrollbar-margin property.
-// -----------------------------------------------------------------------------
-//
-CXnProperty* CXnNodeImpl::GridScrollBarMarginL()
-    {
-    CXnProperty* property = NULL;
-    if ( iGridPropertyCache && iGridPropertyCache->iGridScrollBarMargin )
-        {
-        property = PropertyL(
-            this,
-            iGridPropertyCache->iGridScrollBarMargin,
-            &CXnNode::GridScrollBarMarginL,
-            iUiEngine, iGridPropertyCache,
-            iParent,
-            iRef );
-        }
-
-    if ( !property && iRef )
-        {
-        CXnNode* refNode = RefNodeL( this, iRef, iUiEngine );
-
-        if ( refNode )
-            {
-            property = refNode->GridScrollBarMarginL();
-            }
-        }
-
-    if ( !property )
-        {
-        TReal sbMarginWidth( KS60ScrollbarDefaultMargin );
-        // Set default value
-        CXnDomDocument& doc = iUiEngine->ODT()->DomDocument();
-        CXnDomProperty* domProperty =
-            CXnDomProperty::NewL(
-                XnPropertyNames::grid::KS60GridScrollbarMargin,
-                doc.StringPool() );
-        CleanupStack::PushL( domProperty );
-        CXnDomPropertyValue* propertyValue = CXnDomPropertyValue::NewL(
-            doc.StringPool() );
-        CleanupStack::PushL( propertyValue );
-        if ( AknLayoutUtils::PenEnabled() )
-            {
-            sbMarginWidth = KS60ScrollbarDefaultMarginPenEnabled;
-            }
-        propertyValue->SetFloatValueL(
-            CXnDomPropertyValue::EUnitValue, sbMarginWidth );
-        domProperty->PropertyValueList().AddItemL( propertyValue );
-        CleanupStack::Pop( propertyValue );
-
-        property = CXnProperty::NewL( domProperty );
-        CleanupStack::Pop( domProperty );
-        CleanupStack::PushL( property );
-
-        // If this is a reference node, set property to the referred node, not this.
-        CXnNode* node = RefNodeL( this, iRef, iUiEngine );
-        if ( node )
-            {
-            node->SetPropertyL( property );
-            }
-        else
-            {
-            this->SetPropertyL( property ); // deletes existing one
-            }
-
-        CleanupStack::Pop(property);
-        }
-    return property;
+    return PropertyL( property, &CXnNode::FocusBackgroundL,
+        iLayoutPropertyCache, iParent );
     }
 
 // ----------------------------------------------------------------------------
@@ -10199,57 +8867,6 @@ void CXnNodeImpl::FixAdaptiveSizeL( const TSize& aFixedSize )
         iAdaptive &= ~XnAdaptive::EMeasure;
         // Size is now fixed
         iAdaptive |= XnAdaptive::ESizeFixed;
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CXnNodeImpl::PeriodicEventL
-// ----------------------------------------------------------------------------
-//
-TInt CXnNodeImpl::PeriodicEventL( TAny* aPtr )
-    {
-    TXnTimedTrigger* params = static_cast< TXnTimedTrigger* >( aPtr );
-    CXnNodeImpl* impl = params->iNodeImpl;
-    CXnUiEngine* engine = params->iEngine;
-    CXnNode* node = params->iNode;
-    CXnNode* eventData = params->iEventData;
-    CXnDomNode* actionNode = params->iActionNode;
-    CXnDomNode* triggerNode = params->iTriggerNode;
-    RunEventsL( impl, *engine, *node, *actionNode, *triggerNode, *eventData );
-    delete params;
-    impl->DeletePeriodic();
-    return EFalse;
-    }
-
-// ----------------------------------------------------------------------------
-// CXnNodeImpl::PeriodicTimer
-// ----------------------------------------------------------------------------
-//
-CPeriodic* CXnNodeImpl::PeriodicTimer()
-    {
-    return iPeriodicTimer;
-    }
-
-// ----------------------------------------------------------------------------
-// CXnNodeImpl::CreatePeriodicL
-// ----------------------------------------------------------------------------
-//
-void CXnNodeImpl::CreatePeriodicL()
-    {
-    iPeriodicTimer = CPeriodic::NewL( CActive::EPriorityIdle );
-    }
-
-// ---------------------------------------------------------
-// CXnNodeImpl::DeletePeriodic
-// ---------------------------------------------------------
-//
-void CXnNodeImpl::DeletePeriodic()
-    {
-    if ( iPeriodicTimer )
-        {
-        iPeriodicTimer->Cancel();
-        delete iPeriodicTimer;
-        iPeriodicTimer = NULL;
         }
     }
 
@@ -10514,4 +9131,3 @@ TRect CXnNodeImpl::AdjustRectIfNeeded( TRect aRect )
         }
     return aRect;
     }
-

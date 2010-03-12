@@ -21,6 +21,9 @@
 // System includes
 #include <e32base.h>
 
+// User includes
+#include "xnpropertysubscriber.h"
+
 // Forward declarations
 class CXnUiEngine;
 class CXnComposer;
@@ -82,7 +85,8 @@ public:
  * @lib xn3layoutengine.lib
  * @since S60 5.0
  */
-NONSHARABLE_CLASS( CXnViewManager ) : public CBase
+NONSHARABLE_CLASS( CXnViewManager ) : public CBase,
+    public MXnPropertyChangeObserver
     {
 public:
     /**
@@ -115,6 +119,14 @@ private:
      */
     void ConstructL();
 
+private:
+    // from MXnPropertyChangeObserver
+    
+    /**
+     * @see MXnPropertyChangeObserver
+     */
+    void PropertyChangedL( const TUint32 aKey, const TInt aValue );
+    
 public:
     // New functions
 
@@ -145,6 +157,9 @@ public:
     void PluginDataL( RPointerArray< CXnPluginData >& aList, 
         TBool aGlobal = EFalse ) const;
 
+    TInt PluginDataL( const TDesC8& aParentId, 
+        RPointerArray< CXnPluginData >& aList ) const;
+
     RPointerArray< CXnNode >& AppearanceNodes() const;
 
     CArrayPtrSeg< CXnResource >& Resources() const ;
@@ -154,22 +169,21 @@ public:
     void ReloadUiL();
 
     TInt LoadWidgetToPluginL(
-        CHsContentInfo& aContentInfo,
+        const CHsContentInfo& aContentInfo,
         CXnPluginData& aPluginData );
 
     TInt UnloadWidgetFromPluginL(
         CXnPluginData& aPluginData, TBool aForce = EFalse );
         
     TInt ReplaceWidgetToPluginL(
-        CHsContentInfo& aContentInfo,
-        CXnPluginData& aPluginData,
-        TBool aUseHsps = ETrue );
+        const CHsContentInfo& aContentInfo,
+        CXnPluginData& aPluginData );
 
     void ActivateNextViewL( TInt aEffectId = 0 );
 
     void ActivatePreviousViewL( TInt aEffectId = 0 );
 
-    TInt AddViewL( CHsContentInfo& aInfo );
+    TInt AddViewL( const CHsContentInfo& aInfo );
     
     void AddViewL( TInt aEffectId = 0 );
     
@@ -283,6 +297,12 @@ private:
     CXnUiEngine* iUiEngine;
 
     /**
+     * UI startup phase observer
+     * Own.
+     */
+    CXnPropertySubscriber* iUiStartupPhase;
+    
+    /**
      * Comopser.
      * Own.
      */
@@ -332,19 +352,21 @@ private:
     RPointerArray< MXnViewObserver > iObservers;
     
     /**
-     * OOM system handler. Owned.
+     * OOM system handler. 
+     * Own.
      */
     CXnOomSysHandler* iOomSysHandler;
     
+    /**
+     * Timer for system stability.
+     * Own.
+     */
+    CPeriodic* iStabilityTimer;
+        
 private:   
     // Friend classes
     
-    friend class CXnViewAdapter;       
-    
-    /**
-     * Timer for system stability.
-     */
-    CPeriodic* iStabilityTimer;
+    friend class CXnViewAdapter;           
     };
 
 // Inline functions

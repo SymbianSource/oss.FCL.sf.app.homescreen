@@ -57,11 +57,17 @@ CWmPlugin* CWmPlugin::NewL()
 //
 CWmPlugin::~CWmPlugin()
     {
+    if ( iWmInstaller && 
+       iWmInstaller->IsActive() )
+        {
+        iWmInstaller->Cancel();
+        }
+
     // delete members
     delete iResourceLoader;
     delete iEffectManager;
     delete iPostponedContent;
-	delete iWmInstaller;
+    delete iWmInstaller;
     }
 
 // ---------------------------------------------------------
@@ -113,7 +119,7 @@ void CWmPlugin::Activate()
         {
         TRAP_IGNORE( 
             iEffectManager->BeginFullscreenEffectL( 
-                KAppStartCommonDefaultStyle );
+                KAppStartEffectStyle );
             iViewAppUi->ActivateLocalViewL( 
                 TUid::Uid( EWmMainContainerViewId ) );
             );
@@ -180,7 +186,7 @@ void CWmPlugin::CloseView()
         iWmMainContainer->SetClosingDown( ETrue );
         TRAP_IGNORE( 
             iEffectManager->BeginFullscreenEffectL(
-                KAppExitCommonDefaultStyle );
+                KAppExitEffectStyle );
             iViewAppUi->ActivateLocalViewL(
                 iPreviousViewUid.iViewUid ); 
             );
@@ -287,24 +293,16 @@ void CWmPlugin::ShowErrorNoteL( TInt aError )
         {
         case KHsErrorViewFull:
         case KHsErrorDoesNotFit:
+            // Not enough space to add new widget to active page. 
+            // Remove some content first.
             ResourceLoader().InfoPopupL(
                 R_QTN_HS_ADD_WIDGET_NO_SPACE_NOTE, KNullDesC );
             break;
-            
-        case KHsErrorMaxInstanceCountExceeded:
-            {
-            TInt resource = ( iPostponedContent->Type() == KContentTemplate ) ?
-                resource = R_QTN_HS_ADD_WIDGET_MAX_REACHED : // wrt
-                resource = R_QTN_HS_ADD_WIDGET_MAX_COUNT_NOTE; // native
-            
-            ResourceLoader().InfoPopupL( resource, KNullDesC );
-            break;
-            }
-            
         case KErrNoMemory:
-            ResourceLoader().InfoPopupL( R_QTN_HS_HS_MEMORY_FULL, KNullDesC );
+            // Not enough memory to add more content. 
+            // Please remove some Homescreen content and try again.
+            ResourceLoader().InfoPopupL( R_QTN_HS_HS_MEMORY_FULL, KNullDesC ); 
             break;
-            
         default:
             ResourceLoader().ErrorPopup( aError );
             break;

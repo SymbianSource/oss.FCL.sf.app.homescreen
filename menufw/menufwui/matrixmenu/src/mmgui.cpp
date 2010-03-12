@@ -17,6 +17,7 @@
 
 
 // INCLUDE FILES
+#include <mw/memorymanager.h>
 #include <eikstart.h>
 #include "mmapplication.h"
 
@@ -37,5 +38,8 @@ LOCAL_C CApaApplication* NewApplication()
 //
 GLDEF_C TInt E32Main()
 	{
-	return EikStart::RunApplication( NewApplication );
+	RAllocator* iAllocator = MemoryManager::SwitchToFastAllocator();
+	TInt err = EikStart::RunApplication( NewApplication );
+	MemoryManager::CloseFastAllocator(iAllocator);
+	return err;
 	}

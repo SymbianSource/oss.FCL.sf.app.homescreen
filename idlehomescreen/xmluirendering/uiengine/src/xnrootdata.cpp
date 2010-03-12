@@ -38,6 +38,8 @@
 #include "xnplugindata.h"
 #include "xnrootdata.h"
 
+#include "debug.h"
+
 // Constants
 const TInt KScheduleInterval( 2000000 );
 
@@ -468,6 +470,8 @@ TBool CXnRootData::AllViewsDestroyed() const
 //
 /* static */ TInt CXnRootData::RunLoadL( TAny* aAny )
     {
+    __PRINTS( "*** CXnRootData::RunLoadL" );
+    
     CXnRootData* self = static_cast< CXnRootData* >( aAny );
     
     if ( self->iFlags.IsSet( EIsDispose ) )
@@ -541,6 +545,8 @@ TBool CXnRootData::AllViewsDestroyed() const
             }                    
         }
         
+    __PRINTS( "*** CXnRootData::RunLoadL - done" );
+    
     return KErrNone;
     }
 
@@ -571,6 +577,8 @@ TInt32 CXnRootData::MaxPages()
 //
 /* static */ TInt CXnRootData::RunDestroyL( TAny* aAny )
     {
+    __PRINTS( "*** CXnRootData::RunDestroyL" );
+    
     CXnRootData* self = static_cast< CXnRootData* >( aAny );
     
     if( self->iFlags.IsSet( EIsDispose ) )
@@ -627,6 +635,8 @@ TInt32 CXnRootData::MaxPages()
                 }            
             }
         }
+    
+    __PRINTS( "*** CXnRootData::RunDestroyL - done" );
     
     return KErrNone;
     }

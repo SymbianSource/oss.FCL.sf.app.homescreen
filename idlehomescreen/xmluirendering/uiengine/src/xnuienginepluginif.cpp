@@ -370,14 +370,17 @@ EXPORT_C CXnNodePluginIf& TXnUiEnginePluginIf::PluginNodeL(
     
     if ( manager )
         {
-        CXnPluginData& pluginData( 
+        CXnPluginData* pluginData( 
             manager->ActiveViewData().Plugin( &aNode->Node() ) );
-            
-        CXnDomNode* domNode( pluginData.Owner() );
         
-        if ( domNode )
+        if ( pluginData )
             {
-            node = domNode->LayoutNode();
+            CXnDomNode* domNode( pluginData->Owner() );
+            
+            if ( domNode )
+                {
+                node = domNode->LayoutNode();
+                }        
             }
         }
     

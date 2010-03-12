@@ -18,9 +18,7 @@
 // System includes
 #include <AknUtils.h>
 #include <gulgcmap.h>
-#include <akntitle.h>
 #include <barsread.h>
-#include <xnuiengine.rsg>
 
 #ifdef RD_TACTILE_FEEDBACK
 #include <touchfeedback.h>
@@ -42,6 +40,7 @@
 #include "xneditor.h"
 #include "xntype.h"
 #include "xnmenu.h"
+#include "xnbackgroundmanager.h"
 
 #include "xneditmode.h"
 
@@ -358,14 +357,21 @@ void CXnEditMode::MakeVisible( TBool aVisible )
         
         Window().SetOrdinalPosition( 0 );
         Window().SetPointerGrab( ETrue );
-        Window().ClaimPointerGrab();               
+        Window().ClaimPointerGrab();      
+        
+        TRAP_IGNORE( appui.HandleEnterEditModeL( ETrue ) );                                
         }
     else
         {
         Window().SetPointerGrab( EFalse );
         
-        bg.DrawableWindow()->SetPointerGrab( ETrue );               
+        bg.DrawableWindow()->SetPointerGrab( ETrue );
+        
+        TRAP_IGNORE( appui.HandleEnterEditModeL( EFalse ) );                                                
         }
+    
+    // Update background
+    appui.ViewAdapter().BgManager().DrawNow();
     }
 
 // -----------------------------------------------------------------------------
@@ -483,10 +489,10 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
                
         if ( node )
             {
-            CXnPluginData& plugin( iUiEngine.ViewManager()->
+            CXnPluginData* plugin( iUiEngine.ViewManager()->
                     ActiveViewData().Plugin( node ) );
             
-            if ( plugin.Occupied() )
+            if ( plugin && plugin->Occupied() )
                 {
                 StartDragL( *node );
                                   
@@ -542,7 +548,10 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
         {
 #ifdef RD_TACTILE_FEEDBACK                
-        Feedback( ETouchFeedbackBasic );
+        MTouchFeedback* feedback( MTouchFeedback::Instance() );
+        feedback->InstantFeedback( this,ETouchFeedbackBasic, 
+    		                       ETouchFeedbackVibra,
+    		                       aPointerEvent );
 #endif
         // Cancel
         if ( !iTargetNode || !iDraggingNode ||                 
@@ -563,10 +572,10 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
                         
             if ( node && !iDragged )
                 {
-                CXnPluginData& plugin( iUiEngine.ViewManager()->
+                CXnPluginData* plugin( iUiEngine.ViewManager()->
                         ActiveViewData().Plugin( node ) );
 
-                if ( plugin.Occupied() )
+                if ( plugin && plugin->Occupied() )
                     {
                     CXnNode* popup( iUiEngine.StylusPopupNode() );
                     
@@ -637,10 +646,10 @@ TKeyResponse CXnEditMode::OfferKeyEventL( const TKeyEvent& aKeyEvent,
         if ( focused && ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
             aKeyEvent.iScanCode == EStdKeyEnter ) )
             {
-            CXnPluginData& plugin( iUiEngine.ViewManager()->
+            CXnPluginData* plugin( iUiEngine.ViewManager()->
                     ActiveViewData().Plugin( focused ) );
             
-            if ( plugin.Occupied() )
+            if ( plugin && plugin->Occupied() )
                 {
                 // Open context menu
                 CXnNode* menubar( iUiEngine.MenuBarNode() );
@@ -706,7 +715,7 @@ void CXnEditMode::SizeChanged()
 void CXnEditMode::StartDragL( CXnNode& aNode )
     {  
     CXnControlAdapter* control( aNode.Control() );
-    
+        
     TRect rect( control->Rect() );
     
     // Clear first with alpha 
@@ -725,11 +734,25 @@ void CXnEditMode::StartDragL( CXnNode& aNode )
     CWindowGc* gc( control->CustomGc() );
             
     control->SetCustomGc( iMapGc );
+
+    TBool focusStateChanged( EFalse );
     
+    if( aNode.IsStateSet( XnPropertyNames::style::common::KFocus ) )
+        {        
+        aNode.UnsetStateL( XnPropertyNames::style::common::KFocus );
+        focusStateChanged = ETrue;
+        }
+
     control->DrawNow( rect );
-        
+
     control->SetCustomGc( gc );
-           
+
+    if( focusStateChanged )
+        {
+        aNode.SetStateL( XnPropertyNames::style::common::KFocus );
+        iUiEngine.RenderUIL( &aNode );
+        }
+
     if ( iWidget->SizeInPixels() != rect.Size() )
         {
         iWidget->Resize( rect.Size() );
@@ -797,10 +820,7 @@ void CXnEditMode::SetEditModeL( CXnEditMode::TEditState aState )
     if ( aState == CXnEditMode::EDragAndDrop )
         {               
         iState = aState;
-        
-        iUiEngine.AppUiAdapter().HandleEnterEditModeL( ETrue );
-        SetStatusPaneTitleL( ETrue );
-        
+                
         MakeVisible( ETrue );               
         }
 
@@ -811,11 +831,7 @@ void CXnEditMode::SetEditModeL( CXnEditMode::TEditState aState )
         iTargetNode = NULL;
         
         iState = aState;
-        
-        SetStatusPaneTitleL( EFalse );
-               
-        iUiEngine.AppUiAdapter().HandleEnterEditModeL( EFalse );
-        
+                
         MakeVisible( EFalse );
         }   
     }
@@ -828,35 +844,6 @@ void CXnEditMode::SetEditModeL( CXnEditMode::TEditState aState )
 CXnEditMode::TEditState CXnEditMode::EditState() const
     {
     return iState;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnEditMode::SetStatusPaneTitleL( TBool aEdit )
-// -----------------------------------------------------------------------------
-//
-void CXnEditMode::SetStatusPaneTitleL( TBool aEdit )
-    {
-    TUid titlePaneUid = TUid::Uid( EEikStatusPaneUidTitle );
-    CEikStatusPaneBase::TPaneCapabilities subPaneTitle = 
-        iUiEngine.AppUiAdapter().StatusPane()->PaneCapabilities( titlePaneUid );
-    if ( subPaneTitle.IsPresent() && subPaneTitle.IsAppOwned() )
-        {
-        CAknTitlePane* title = static_cast< CAknTitlePane* >( 
-            iUiEngine.AppUiAdapter().StatusPane()->ControlL( titlePaneUid ) );
-        if( aEdit )
-            {
-            TResourceReader reader;
-            CEikonEnv::Static()->CreateResourceReaderLC(
-                reader, R_QTN_HS_TITLE_EDITMODE );
-            title->SetFromResourceL( reader );
-            CleanupStack::PopAndDestroy(); // reader internal state
-            }
-        else
-            {
-            title->SetTextL( KNullDesC );
-            }
-
-        }
     }
 
 // -----------------------------------------------------------------------------

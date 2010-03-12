@@ -33,12 +33,15 @@
   * @return count of widget data array
   */
  inline TInt CWmListBox::WidgetDataCount()
-     { return iWidgetDatas.Count(); }
+     { return iVisibleWidgetArray.Count(); }
  
  /**
   * gets the constant widget data array
   */
  inline const RWidgetDataValues& CWmListBox::WidgetDataArray()
-     { return iWidgetDatas; }
+     { return iVisibleWidgetArray; }
 
+ inline const ROrderArray& CWmListBox::OrderDataArray()
+      { return iOrderDataArray; }
+ 
 #endif /* WMLISTBOX_INL_ */

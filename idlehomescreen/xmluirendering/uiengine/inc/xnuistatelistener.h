@@ -156,6 +156,13 @@ private:
 public:
     // New functions
     
+    /**
+     * Prepares for application exit
+     * 
+     * @since S60 5.0
+     */
+    void PrepareToExit();
+    
     /*
      * Adds MXnUiStateObserver
      * 

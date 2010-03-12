@@ -31,7 +31,7 @@
 #include <apgtask.h>
 #include <widgetregistryclient.h> // widgetreqistry
 #include <bacline.h>
-#include <EscapeUtils.h> 
+#include <escapeutils.h> 
 
 #include "wmportalbutton.h"
 #include "wmcommon.h"
@@ -42,13 +42,10 @@
 #include "wmprocessmonitor.h"
 
 // CONSTANTS
-_LIT( KOviUrlPrefix, "oviurl ");
-_LIT( KBrowserUrlPrefix, "browserurl ");
-_LIT( KSpace, " ");
-_LIT( Kurlprefix, "4 ");
+_LIT( KUrlPrefix, "4 ");
+
 
 const TUid KOSSBrowserUidValue = { 0x10008D39 };
-const TInt KMaxParam = 512;
 // MEMBER FUNCTIONS
 
 // ---------------------------------------------------------
@@ -128,28 +125,17 @@ void CWmPortalButton::ConstructL(
     // construct the button
     CAknButton::ConstructL( NULL, NULL, NULL, NULL, aText, KNullDesC, 0 );
 
-    TAknsItemID frameId = KAknsIIDQgnHomeWmButton;
-    TAknsItemID frameCenterId = KAknsIIDQgnHomeWmButtonCenter;
-    TAknsItemID framePressedId = KAknsIIDQgnHomeWmButtonPressed;
-    TAknsItemID framePressedCenterId = KAknsIIDQgnHomeWmButtonPressedCenter;
-
-    SetFocusing( ETrue );
-    SetBackgroundIds( frameId,
-                      framePressedId,
-                      KAknsIIDQsnFrButtonInactive,
-                      framePressedId,
-                      KAknsIIDQsnFrButtonInactive );
     SetFrameAndCenterIds( 
-                        frameId,
-						frameCenterId,
-						KAknsIIDDefault,
-						KAknsIIDDefault,
-						KAknsIIDDefault,
-						KAknsIIDDefault,
-						framePressedId,
-						framePressedCenterId,
-						KAknsIIDDefault,
-						KAknsIIDDefault );
+            KAknsIIDQsnFrButtonNormal,
+            KAknsIIDQsnFrButtonCenterNormal,
+            KAknsIIDQsnFrButtonPressed,
+            KAknsIIDQsnFrButtonCenterPressed,
+            KAknsIIDQsnFrButtonInactive,
+            KAknsIIDQsnFrButtonCenterInactive,
+            KAknsIIDQsnFrButtonPressed,
+            KAknsIIDQsnFrButtonCenterPressed,
+            KAknsIIDQsnFrButtonInactive,
+            KAknsIIDQsnFrButtonCenterInactive );
     
     // start image converter for the icon
     iImageConverter = CWmImageConverter::NewL( this );
@@ -158,6 +144,9 @@ void CWmPortalButton::ConstructL(
             iconsize.iWidth, iconsize.iHeight, aIcon );
     // observe our own press events
     SetObserver( this );
+    
+    SetFocusing( ETrue );
+    SetRequestExit( ETrue ); // notification request for button up event
     
     // ready to be drawn
     ActivateL();
@@ -177,12 +166,7 @@ void CWmPortalButton::ExecuteL()
             }
 		if ( !iProcessMonitor->IsActive() )
             {
-            // We will have laucher for starting ovi store but until
-            // it's added to SDK we need to start browser to ovi url
-            if ( 0 )
-                RunOviL( iWmMainContainer->Configuration() );
-            else
-                StartBrowserL( iWmMainContainer->Configuration() );
+            RunOviL( iWmMainContainer->Configuration() );
             }
         }
     else if ( iPortalButtonIndex == 1 )
@@ -202,36 +186,39 @@ void CWmPortalButton::ExecuteL()
 //
 void CWmPortalButton::RunOviL( CWmConfiguration& aConf )
     {
+    // param is: channel=homescreenwidgets 
+    // laucher uid: 0x2002D07F
     RApaLsSession session;
     User::LeaveIfError( session.Connect() );
     CleanupClosePushL( session );
     
     //get app info
     TApaAppInfo appInfo;
-    TUid launchUid; //plan was to save uid in cenrep and fetch it from there
+    TUid launchUid;
     launchUid = aConf.PortalButtonClientUid( iPortalButtonIndex );
-    User::LeaveIfError( session.GetAppInfo( appInfo, launchUid ) );
-   
-    // Form parameter
-    // it should look like this "oviurl url1 browserurl url2"  
-    HBufC* param = HBufC::NewLC( KMaxParam );
-    param->Des().Copy( KOviUrlPrefix );
-    HBufC* decodedParam = EscapeUtils::EscapeEncodeL( aConf.PortalButtonClientParam( iPortalButtonIndex ), EscapeUtils::EEscapeUrlEncoded );
-    CleanupStack::PushL( decodedParam );
-    param->Des().Append( *decodedParam );
-    param->Des().Append( KSpace );
-    param->Des().Append( KBrowserUrlPrefix );
-    decodedParam->Des().Copy( aConf.PortalButtonBrowserUrl( iPortalButtonIndex ) );
-    param->Des().Append( *decodedParam );
 
-    // do the launch
-    RProcess process;
-    User::LeaveIfError( process.Create( appInfo.iFullName, *param ) );
-    iProcessMonitor->Monitor( process );
-    process.Resume();
-
-    CleanupStack::PopAndDestroy( decodedParam );
-    CleanupStack::PopAndDestroy( param );
+    TInt err = session.GetAppInfo( appInfo, launchUid );
+    if ( err != KErrNone )
+        {
+        //This is temp until we have laucher in SDK
+        StartBrowserL( aConf );
+        }
+    else
+        {
+        // Form parameter
+        HBufC* param = HBufC::NewLC( aConf.PortalButtonClientParam( iPortalButtonIndex ).Length() );
+        param->Des().Copy( aConf.PortalButtonClientParam( iPortalButtonIndex ) );
+        
+        // do the launch
+        RProcess process;
+        User::LeaveIfError( process.Create( appInfo.iFullName, *param ) );
+    
+        iProcessMonitor->Monitor( process );
+        process.Resume();
+    
+        CleanupStack::PopAndDestroy( param );
+        }
+    
     CleanupStack::PopAndDestroy( &session );
     }
 
@@ -245,16 +232,27 @@ void CWmPortalButton::StartBrowserL( CWmConfiguration& aConf )
     User::LeaveIfError( session.Connect() );
     CleanupClosePushL( session );
 
-    // browser start parameters
-    HBufC* param = HBufC::NewLC( 
-            aConf.PortalButtonBrowserUrl( iPortalButtonIndex ).Length() + 
-            Kurlprefix().Length() );
-    
-    param->Des().Copy( Kurlprefix );
-    param->Des().Append( aConf.PortalButtonBrowserUrl( iPortalButtonIndex ) );
+    HBufC* param = NULL;
+    if ( iPortalButtonIndex == 1 )
+        {
+        // browser start parameter
+        param = HBufC::NewLC( 
+                aConf.PortalButtonBrowserUrl( iPortalButtonIndex ).Length() + 
+                        KUrlPrefix().Length() );
+        
+        param->Des().Copy( KUrlPrefix );
+        param->Des().Append( aConf.PortalButtonBrowserUrl( iPortalButtonIndex ) );
+        }
+    else
+        {
+        // becouse launcher knows url we need to have it temp here
+        // until laucher is available
+        _LIT( KTempUrl, "4 https://store.ovi.com/applications/");
+        param = HBufC::NewLC( KTempUrl().Length() );
+        param->Des().Copy( KTempUrl );
+        }
     
     TUid id( KOSSBrowserUidValue );
-    
     TApaTaskList taskList( CEikonEnv::Static()->WsSession() );
     TApaTask task = taskList.FindApp( id );
     if( task.Exists() )
@@ -284,25 +282,60 @@ void CWmPortalButton::StartBrowserL( CWmConfiguration& aConf )
 // CWmPortalButton::RunOperatorL
 // ---------------------------------------------------------
 //
-void CWmPortalButton::RunOperatorL( CWmConfiguration& /*aConf*/ )
+void CWmPortalButton::RunOperatorL( CWmConfiguration& aConf )
     {
-    //TODO: current info is that this will be a widget
+    // Current info is that this will be a widget
+    // meanwhile we just start browser
+    StartBrowserL( aConf );
     }
 
 // ---------------------------------------------------------
 // CWmPortalButton::HandleControlEventL
 // ---------------------------------------------------------
 //
-void CWmPortalButton::HandleControlEventL( CCoeControl* /*aControl*/,
+void CWmPortalButton::HandleControlEventL( CCoeControl* aControl,
         TCoeEvent aEventType )
     {
-    // execute portal action when button pressed (short or long press)
-    if ( aEventType == EEventStateChanged ||
-        aEventType == ELongPressEndedEvent )
+    if ( aControl == this )
         {
-        ExecuteL();
+        if ( aEventType == EEventStateChanged ||
+            aEventType == ELongPressEndedEvent ||
+            aEventType == EEventRequestCancel )
+            {
+            DrawDeferred();
+            }
+        // execute portal action when button pressed (short or long press)
+        if ( aEventType == EEventRequestExit )
+            {
+            SetFocus( EFalse );
+            DrawNow();
+            ExecuteL();
+            }
         }
     }
+
+// ---------------------------------------------------------
+// CWmPortalButton::HandlePointerEventL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::HandlePointerEventL( 
+        const TPointerEvent& aPointerEvent )
+    {
+    CAknButton::HandlePointerEventL( aPointerEvent );
+    
+    // remove focus from button if button is released outside rect 
+    if ( aPointerEvent.iType == TPointerEvent::EDrag )
+        {
+        TBool wasFoucused( IsFocused() );
+        SetFocus( Rect().Contains( aPointerEvent.iPosition ) );
+        if ( wasFoucused != IsFocused() ){ DrawNow(); }
+        }
+    else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+        SetFocus( EFalse ); // remove focus when button released.
+        }
+    }
+
 
 // ---------------------------------------------------------
 // CWmPortalButton::LayoutIconSize
@@ -370,11 +403,17 @@ void CWmPortalButton::NotifyCompletion( TInt aError )
         if ( iButtonIcon && iButtonIconMask )
             {
             TSize size = LayoutIconSize();
-            AknIconUtils::SetSize( 
+            if ( iButtonIcon->SizeInPixels() != size )
+                {
+                AknIconUtils::SetSize( 
                     iButtonIcon, size, EAspectRatioPreserved );
-            AknIconUtils::SetSize( 
+                }
+            if ( iButtonIconMask->SizeInPixels() != size )
+                {
+                AknIconUtils::SetSize( 
                     iButtonIconMask, size, EAspectRatioPreserved );
-            DrawDeferred();            
+                }
+            DrawDeferred();
             }
         }
     else
@@ -399,13 +438,13 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
     CWindowGc& gc = SystemGc();
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
 
- 	TAknsItemID frameId = ( KAknsIIDQgnHomeWmButton );
-    TAknsItemID frameCenterId = ( KAknsIIDQgnHomeWmButtonCenter );
+ 	TAknsItemID frameId = ( KAknsIIDQsnFrButtonNormal );
+    TAknsItemID frameCenterId = ( KAknsIIDQsnFrButtonCenterNormal );
  	
     if ( iButtonPressed )
     	{
-        frameId = ( KAknsIIDQgnHomeWmButtonPressed );
-        frameCenterId = ( KAknsIIDQgnHomeWmButtonPressedCenter );
+        frameId = ( KAknsIIDQsnFrButtonPressed );
+        frameCenterId = ( KAknsIIDQsnFrButtonCenterPressed );
     	}
     else if ( IsDimmed() )
         {
@@ -414,8 +453,8 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
         }
     else if ( IsFocused() )
         {
-        frameId = KAknsIIDQsnFrList;
-        frameCenterId = KAknsIIDQsnFrListCenter;
+        frameId = KAknsIIDQsnFrButtonHighlight;
+        frameCenterId = KAknsIIDQsnFrButtonHighlightCenter;
         }
     
     iBgContext->SetFrame( frameId );
@@ -423,7 +462,7 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
     iBgContext->SetFrameRects( rect, innerRect );
 
     if ( !AknsDrawUtils::Background( skin, iBgContext, NULL, 
-                    gc, rect, KAknsDrawParamNoClearUnderImage ) )
+        gc, rect, KAknsDrawParamNoClearUnderImage ) )
         {
         gc.SetBrushColor( KRgbRed );
         gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
@@ -510,6 +549,12 @@ void CWmPortalButton::DrawText(
         // try over-writing color from theme, ignore error.
         AknsUtils::GetCachedColor( 
                 skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );        
+        }
+    else
+        {
+        // default for button
+        AknsUtils::GetCachedColor( 
+                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG80 ); 
         }
     aGc.SetPenColor( textColor);
     

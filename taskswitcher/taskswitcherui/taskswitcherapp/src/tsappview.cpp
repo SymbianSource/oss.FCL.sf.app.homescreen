@@ -484,6 +484,7 @@ void CTsAppView::HandleSwitchToForegroundEvent()
         MakeVisible( ETrue );
         }
     
+    iFastSwapArea->UpdateComponentVisibility();
     DrawDeferred();
     
     TSLOG_OUT();
@@ -661,6 +662,7 @@ void CTsAppView::OrderFullWindowRedraw()
 //
 void CTsAppView::MoveOffset(const TPoint& aOffset)
     {
+    DrawDeferred();
     iFastSwapArea->MoveOffset(aOffset);
     }
 

@@ -16,6 +16,7 @@
 */
 
 // System includes
+#include <startupdomainpskeys.h>
 #include <bautils.h>
 #include <e32property.h>
 #include <ecom/ecom.h>
@@ -455,9 +456,7 @@ void CNativeUiController::LoadUIDefinitionL()
         
         iPlugins.Append( profile );
         
-        iFwStateHandler->LoadPlugin( profile, EAiFwSystemStartup );
-        
-	    TRAP_IGNORE( iAppUi->StartL() );	        
+        iFwStateHandler->LoadPlugin( profile, EAiFwSystemStartup );        	        
         }
 
     // We need to load the resource file here if we are not main controller.
@@ -624,13 +623,13 @@ void CNativeUiController::GetSettingsFromCRL(
     TInt32 settingId = 0;
 
     TInt err = KErrNone;
-    TBool settingFound = EFalse;
+    //TBool settingFound = EFalse;
 
     CRepository *settingsRepository = CRepository::NewLC( TUid::Uid( KCRUidActiveIdleLV ) );
 
     while ( moreSettings )
         {
-        settingFound = EFalse;
+        //settingFound = EFalse;
 
         pluginIdPtr.Zero();
         settingValuePtr.Zero();
@@ -674,7 +673,7 @@ void CNativeUiController::GetSettingsFromCRL(
                         if ( item.Key() == settingId && item.PublisherId() == aPublisherInfo.Uid() )
                             {
                             item.SetValueL( settingValuePtr, EFalse );
-                            settingFound = ETrue;
+                            //settingFound = ETrue;
                             break;
                             }
                         }
@@ -724,9 +723,18 @@ void CNativeUiController::GetSettingsFromCRL(
 //
 void CNativeUiController::ActivateUI()
     {
-    if( iAppUi )
+    if( iAppUi && iRunningAsMain )
         {        
-        TRAP_IGNORE( iAppUi->StartL() );            
+        TRAP_IGNORE( iAppUi->StartL() );
+        
+        TInt value( EIdlePhase1Ok );
+        
+        RProperty::Get( KPSUidStartup, KPSIdlePhase1Ok, value ); 
+                                                                                              
+        if ( value == EIdlePhase1NOK )
+            {
+            RProperty::Set( KPSUidStartup, KPSIdlePhase1Ok, EIdlePhase1Ok );                                                                                                          
+            }                
         }
     }
 

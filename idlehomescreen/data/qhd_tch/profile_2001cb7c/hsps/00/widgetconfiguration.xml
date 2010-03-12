@@ -1,9 +1,5 @@
 <configuration>
     <control>
-        <settings>
-          <item id="profilewidget" name="ContentSource">
-            <property  name="removable" value="false"/>
-          </item>
-        </settings>
+        <settings/>
     </control>
 </configuration>

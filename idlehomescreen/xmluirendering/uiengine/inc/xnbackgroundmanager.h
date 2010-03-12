@@ -175,7 +175,12 @@ private:
     void ReadWallpaperFromCenrepL();
     void UpdateScreen();
     void DrawEditModeBackgroundSkin() const;
-    
+
+    /**
+     * Callback function to be used with CPeriodic.
+     */
+    static TInt TimerCallback( TAny *aPtr );
+
 private: // data
 
     /**
@@ -248,6 +253,12 @@ private: // data
      */  
     HBufC* iBgImagePath;
 
+    /**
+     * Periodic timer.
+     * Own.
+     */
+    CPeriodic* iTimer;
+    
     };
 
 #endif      // CXNBACKGROUNDMANAGER_H

@@ -68,7 +68,6 @@ CXnFocusControl* CXnFocusControl::NewLC( CXnAppUiAdapter& aAppUiAdapter )
 //
 CXnFocusControl::~CXnFocusControl()
     {
-    delete iMonitor;
     }
 
 // -----------------------------------------------------------------------------
@@ -88,17 +87,6 @@ CXnFocusControl::CXnFocusControl( CXnAppUiAdapter& aAppUiAdapter )
 //
 void CXnFocusControl::ConstructL()
     {   
-    iMonitor = CXnInactivityMonitor::NewL( *this );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnFocusControl::InactivityTimerExpired()
-// 
-// -----------------------------------------------------------------------------
-//
-void CXnFocusControl::InactivityTimerExpired()
-    {       
-    MakeVisible( EFalse );    
     }
 
 // -----------------------------------------------------------------------------
@@ -126,8 +114,6 @@ void CXnFocusControl::DoMakeVisibleL( TBool aVisible )
             
             iRefused = EFalse;
             
-            iMonitor->Stop();
-                        
             CXnNode* node( iAppUiAdapter.UiEngine().FocusedNode() ); 
                                    
             if ( node )
@@ -156,8 +142,6 @@ void CXnFocusControl::DoMakeVisibleL( TBool aVisible )
             iRefused = EFalse;
             
             iVisible = aVisible;
-            
-            iMonitor->Start();            
             }              
         }        
     }

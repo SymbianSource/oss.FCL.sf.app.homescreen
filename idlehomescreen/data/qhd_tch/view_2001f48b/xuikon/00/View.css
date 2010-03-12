@@ -11,7 +11,7 @@ view
 box#plugins_container
 {
     direction: ltr;
-    block-progression: tb;
+    block-progression: rl;
     padding-top: 3px;
 }
 
@@ -27,11 +27,6 @@ plugin.plugins
     _s60-longtap: true;
 
     nav-index: appearance;
-}
-
-plugin:edit
-{
-    background-color:"SKIN(270501603 8582)";
 }
 
 image.widget_indication

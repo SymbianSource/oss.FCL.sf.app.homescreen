@@ -19,6 +19,7 @@
 #include <hsccproviderclient.h>
 #include <hscontentcontroller.h>
 #include <hscontentcontrolui.h>
+#include <hspluginsettings.h>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
 
@@ -28,12 +29,15 @@
 #include "xnviewmanager.h"
 #include "xnviewadapter.h"
 #include "xnuistatelistener.h"
+#include "xnbackgroundmanager.h"
 #include "hscontentcontrolfactory.h"
 #include "xneditor.h"
 #include "xnwallpaperview.h"
 #include "xneffectmanager.h"
 
 #include "xnappuiadapterimpl.h"
+
+#include "debug.h"
 
 // Constants
 _LIT( KResourceDrive, "z:" );
@@ -72,9 +76,15 @@ CXnAppUiAdapterImpl::CXnAppUiAdapterImpl( TUid aApplicationUid,
 //
 void CXnAppUiAdapterImpl::ConstructL()
     {       
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnAppUiAdapterImpl::ConstructL() - start" ) );
-#endif //_XN_PERFORMANCE_TEST_
+    __PRINTS( "*** CXnAppUiAdapterImpl::ConstructL" );
+    __TIME_MARK( time );
+    
+    const TInt KMaxUidLength( 10 );
+    _LIT8( KUint, "%u" );
+    TBuf8< KMaxUidLength > uid;
+    uid.Format( KUint, iApplicationUid.iUid );    
+    
+    HSPluginSettingsIf::CHomescreenSettings::InitializeL( uid );
     
     TFileName resFile;
     resFile.Append( KResourceDrive );
@@ -99,17 +109,19 @@ void CXnAppUiAdapterImpl::ConstructL()
     iViewAdapter = CXnViewAdapter::NewL( iAdapter );
        
     iViewManager->LoadUiL();
-    
+        
     iCcProviderClient = CHsCcProviderClient::NewL( iViewManager->Editor() );
     
     CXnWallpaperView* wallpaper = CXnWallpaperView::NewL( *iUiEngine );
-    iAdapter.AddViewL( wallpaper );
-           
-    iEffectManager = CXnEffectManager::NewL();    
+    CleanupStack::PushL( wallpaper );
     
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnAppUiAdapterImpl::ConstructL() - end" ) );
-#endif //_XN_PERFORMANCE_TEST_    
+    // wallpaper view is owned by CAknViewAppUi
+    iAdapter.AddViewL( wallpaper );
+    CleanupStack::Pop( wallpaper );
+    
+    iEffectManager = CXnEffectManager::NewL();   
+    
+    __TIME_ENDMARK( "CXnAppUiAdapterImpl::ConstructL, done", time );    
     }
 
 // -----------------------------------------------------------------------------
@@ -119,17 +131,14 @@ void CXnAppUiAdapterImpl::ConstructL()
 //
 void CXnAppUiAdapterImpl::ReloadUiL()
     {
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnAppUiAdapterImpl::ReloadUiL() - start" ) );
-#endif //_XN_PERFORMANCE_TEST_
+    __PRINTS( "*** CXnAppUiAdapterImpl::ReloadUiL" );
+    __TIME_MARK( time );
 
     iViewAdapter->ReloadUiL();
            
     iViewManager->ReloadUiL();
-          
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnAppUiAdapterImpl::ReloadUiL() - end" ) );
-#endif //_XN_PERFORMANCE_TEST_
+        
+    __TIME_ENDMARK( "CXnAppUiAdapterImpl::ReloadUiL, done", time );
     }
 
 // -----------------------------------------------------------------------------
@@ -139,13 +148,6 @@ void CXnAppUiAdapterImpl::ReloadUiL()
 //
 CXnAppUiAdapterImpl::~CXnAppUiAdapterImpl()
     {  
-    delete iContentControlFactory;  
-    
-    if ( iViewAdapter )
-        {
-        iViewAdapter->PrepareDestroy();
-        }
-    
     delete iUiEngine;
     
     delete iUiStateListener;
@@ -155,8 +157,11 @@ CXnAppUiAdapterImpl::~CXnAppUiAdapterImpl()
     delete iCcProviderClient;
 
     delete iEffectManager;
+
+    CCoeEnv::Static()->DeleteResourceFile( iResourceOffset ) ;
+    HSPluginSettingsIf::CHomescreenSettings::UnInitialize();
     
-    CCoeEnv::Static()->DeleteResourceFile( iResourceOffset ) ;        
+    delete iContentControlFactory;
     }
 
 // -----------------------------------------------------------------------------
@@ -209,6 +214,16 @@ MHsContentControlUi* CXnAppUiAdapterImpl::HsContentController(
     const TDesC8& aType ) const
     {
     return iContentControlFactory->GetHsContentController( aType );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapterImpl::HsContentControlFactory
+// Gets Content control factory
+// -----------------------------------------------------------------------------
+//
+CHsContentControlFactory* CXnAppUiAdapterImpl::HsContentControlFactory()
+    {
+    return iContentControlFactory;
     }
 
 // -----------------------------------------------------------------------------

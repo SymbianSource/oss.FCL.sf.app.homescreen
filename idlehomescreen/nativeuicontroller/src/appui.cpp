@@ -197,18 +197,13 @@ void CAppUi::ConstructL()
 
     iFwEventHandler = iUiCtl->FwEventHandler();
    
-    TAiIdleKeySoundConfig keySoundConfig;
-    keySoundConfig.iKeySounds = KeySounds();
-    keySoundConfig.iContextResId = R_NATIVEUI_DEFAULT_SKEY_LIST;
-    iIdleIntegration = CAiUiIdleIntegration::NewL
-        ( *iEikonEnv, keySoundConfig, iFwEventHandler );
-
     iUiCtl->SetAppUi( this );
 
     if( iFwEventHandler )
         {
         iFwEventHandler->AppEnvReadyL();
         }
+    
     TBool isFullScreen = EFalse;
     //Get pointer to status pane
     CEikStatusPane* statusPane = static_cast<CAknAppUi*>( iEikonEnv->EikAppUi() )->StatusPane();
@@ -271,11 +266,12 @@ void CAppUi::ConstructL()
                                                  CCenRepNotifyHandler::EIntKey,
                                                  KAiStatusPaneLayout );
     iNotifyHandler->StartListeningL();
-
-    if( iFwEventHandler )
-        {
-        iFwEventHandler->HandleUiReadyEventL(*iUiCtl);
-        }
+    
+    TAiIdleKeySoundConfig keySoundConfig;
+    keySoundConfig.iKeySounds = KeySounds();
+    keySoundConfig.iContextResId = R_NATIVEUI_DEFAULT_SKEY_LIST;
+    iIdleIntegration = CAiUiIdleIntegration::NewL
+        ( *iEikonEnv, keySoundConfig, iFwEventHandler );
 
     // Check powerkey availability
     FeatureManager::InitializeLibL();
@@ -625,6 +621,11 @@ void CAppUi::StartL()
         {
         iStanbyContainerIF->StartL();
         }
+    
+    if( iFwEventHandler )
+        {
+        iFwEventHandler->HandleUiReadyEventL( *iUiCtl );
+        }           
     }
 
 void CAppUi::HandleNotifyInt( TUint32 aId, TInt aNewValue )
