@@ -496,16 +496,6 @@ CXnHitTest& CXnUiEngine::HitTest() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnUiEngine::PositionStylusPopupL
-// -----------------------------------------------------------------------------
-//
-void CXnUiEngine::PositionStylusPopupL( CXnNode& aNode,
-    CXnNode& aReference, const TPoint& aPosition )
-    {
-    iUiEngineImpl->PositionStylusPopupL( aNode, aReference, aPosition );
-    }
-
-// -----------------------------------------------------------------------------
 // CXnUiEngine::GetThemeResource
 // -----------------------------------------------------------------------------
 //
@@ -538,6 +528,25 @@ void CXnUiEngine::SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher )
     {
     iUiEngineImpl->SetEventDispatcher( aDispatcher );
     }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngine::EnablePartialTouchInput( )
+// -----------------------------------------------------------------------------
+//               
+void CXnUiEngine::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
+    {
+    iUiEngineImpl->EnablePartialTouchInput(aNode, aEnable);
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngine::isPartialInputActive()
+// -----------------------------------------------------------------------------
+//               
+TBool CXnUiEngine::IsPartialInputActive()
+    {
+    return iUiEngineImpl->IsPartialInputActive();
+    }
+
 
 #ifndef EKA2
 GLDEF_C TInt  E32Dll( TDllReason )

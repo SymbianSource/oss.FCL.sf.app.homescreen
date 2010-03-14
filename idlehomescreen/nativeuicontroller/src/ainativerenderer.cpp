@@ -15,21 +15,34 @@
 *
 */
 
+// System includes
 
-#include <aipropertyextension.h>
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
+
 #include "ainativerenderer.h"
 #include "ainativeuiplugins.h"
 
 using namespace AiNativeUiController;
 
-
+// ======== MEMBER FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::CAiNativeRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNativeRenderer::~CAiNativeRenderer()
     {
     }
 
-    
-TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent, 
-									TInt aResource, TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::Publish()
+//
+// ----------------------------------------------------------------------------
+//    
+TInt CAiNativeRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent, 
+    TInt aResource, TInt aIndex )
     {
     TRAPD( err, DoMimeTypeCheckL( aPlugin, aContent ) );
     
@@ -39,12 +52,17 @@ TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent,
         }
         
     TRAP( err, DoPublishL( aPlugin, aContent, aResource, aIndex ) );
+    
     return err;
     }
     
-    
-TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent,
-									const TDesC16& aText, TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::Publish()
+//
+// ----------------------------------------------------------------------------
+//    
+TInt CAiNativeRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent,
+	const TDesC16& aText, TInt aIndex )
     {    
     TRAPD( err, DoMimeTypeCheckL( aPlugin, aContent ) );
     
@@ -54,12 +72,17 @@ TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent,
         }
         
     TRAP( err, DoPublishL( aPlugin, aContent, aText, aIndex ) );
+    
     return err;
     }
     
-    
-TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent, 
-									const TDesC8& aBuf, TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::Publish()
+//
+// ----------------------------------------------------------------------------
+//
+TInt CAiNativeRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent, 
+	const TDesC8& aBuf, TInt aIndex )
     {    
     TRAPD( err, DoMimeTypeCheckL( aPlugin, aContent ) );
     
@@ -69,12 +92,17 @@ TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent,
         }
         
     TRAP( err, DoPublishL( aPlugin, aContent, aBuf, aIndex ) );
+    
     return err;
     }
     
-    
-TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent, 
-									RFile& aFile, TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::Publish()
+//
+// ----------------------------------------------------------------------------
+//    
+TInt CAiNativeRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent, 
+	RFile& aFile, TInt aIndex )
     {    
     TRAPD( err, DoMimeTypeCheckL( aPlugin, aContent ) );
     
@@ -84,11 +112,16 @@ TInt CAiNativeRenderer::Publish( MAiPropertyExtension& aPlugin, TInt aContent,
         }
         
     TRAP( err, DoPublishL( aPlugin, aContent, aFile, aIndex ) );
+    
     return err;
     }
     
-    
-TInt CAiNativeRenderer::Clean( MAiPropertyExtension& aPlugin, TInt aContent )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::Clean()
+//
+// ----------------------------------------------------------------------------
+//    
+TInt CAiNativeRenderer::Clean( CHsContentPublisher& aPlugin, TInt aContent )
     {    
     TRAPD( err, DoMimeTypeCheckL( aPlugin, aContent ) );
     
@@ -98,50 +131,75 @@ TInt CAiNativeRenderer::Clean( MAiPropertyExtension& aPlugin, TInt aContent )
         }
         
     TRAP( err, DoCleanL( aPlugin, aContent ) );
+    
     return err;
     }
     
-    
-void CAiNativeRenderer::DoPublishL
-        ( MAiPropertyExtension& /*aPlugin*/, TInt /*aContent*/, TInt /*aResource*/, TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//    
+void CAiNativeRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/, 
+    TInt /*aContent*/, TInt /*aResource*/, TInt /*aIndex*/ )
     { 
 	// Default implementation, overridden in subclass if needed.
     User::Leave( KErrNotFound );   
     }
     
-    
-void CAiNativeRenderer::DoPublishL
-        ( MAiPropertyExtension& /*aPlugin*/, TInt /*aContent*/, const TDesC16& /*aText*/, TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//    
+void CAiNativeRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/, 
+    TInt /*aContent*/, const TDesC16& /*aText*/, TInt /*aIndex*/ )
     {    
     // Default implementation, overridden in subclass if needed. 
     User::Leave( KErrNotFound );   
     }
     
-    
-void CAiNativeRenderer::DoPublishL
-        ( MAiPropertyExtension& /*aPlugin*/, TInt /*aContent*/, const TDesC8& /*aBuf*/, TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//    
+void CAiNativeRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/, 
+    TInt /*aContent*/, const TDesC8& /*aBuf*/, TInt /*aIndex*/ )
     {    
     // Default implementation, overridden in subclass if needed. 
     User::Leave( KErrNotFound );   
     }
     
-    
-void CAiNativeRenderer::DoPublishL
-        ( MAiPropertyExtension& /*aPlugin*/, TInt /*aContent*/, RFile& /*aFile*/, TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//    
+void CAiNativeRenderer::DoPublishL( CHsContentPublisher& /*aPlugin*/, 
+    TInt /*aContent*/, RFile& /*aFile*/, TInt /*aIndex*/ )
     {    
     // Default implementation, overridden in subclass if needed. 
     User::Leave( KErrNotFound );   
     }
     
-    
-void CAiNativeRenderer::DoCleanL
-        ( MAiPropertyExtension& /*aPlugin*/, TInt /*aContent*/ )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::DoCleanL()
+//
+// ----------------------------------------------------------------------------
+//    
+void CAiNativeRenderer::DoCleanL( CHsContentPublisher& /*aPlugin*/, 
+    TInt /*aContent*/ )
     {    
     // Default implementation, overridden in subclass if needed. 
     User::Leave( KErrNotFound );   
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::GetIntContentId()
+//
+// ----------------------------------------------------------------------------
+//
 TInt CAiNativeRenderer::GetIntContentId( const TDesC& aCid ) const
     {
     for( TInt i( 0 ); i < KAiDeviceStatusContentCount; i++ )
@@ -154,30 +212,19 @@ TInt CAiNativeRenderer::GetIntContentId( const TDesC& aCid ) const
             }
         }
 
-    for( TInt i( 0 ); i < KAiScutContentCount; i++ )
-        {
-        const TAiContentItem& item = KAiScutContent[i];
-        if( ContentCid(item) == aCid )
-            {
-            //match
-            return item.id;            
-            }
-        }
-
     return KErrNotFound;
     }
     
-
-TBool CAiNativeRenderer::MatchMimeType( MAiPropertyExtension& aPlugin, 
-                                        TInt aContentId, 
-                                        const TDesC8& aMimeType ) const
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::MatchMimeType()
+//
+// ----------------------------------------------------------------------------
+//
+TBool CAiNativeRenderer::MatchMimeType( CHsContentPublisher& aPlugin, 
+    TInt aContentId, const TDesC8& aMimeType ) const                                        
     {      
-    TUid pluginUid;
-    TRAPD( err, pluginUid = aPlugin.PublisherInfoL()->iUid );
-    if ( err != KErrNone )
-        {
-        return EFalse;
-        }
+    TUid pluginUid( aPlugin.PublisherInfo().Uid() );
+           
     // loop through Device Status content items
     if ( pluginUid == KDeviceStatusPluginUid )
         {
@@ -195,23 +242,6 @@ TBool CAiNativeRenderer::MatchMimeType( MAiPropertyExtension& aPlugin,
             return ( mimeType.Match( aMimeType ) != KErrNotFound );
             }        
         }
-    else if ( pluginUid == KShortcutPluginUid )
-    { 
-    // if match not found, loop through Shortcut content items
-    for( TInt i( 0 ); i < KAiScutContentCount; i++ )
-        {
-        const TAiContentItem& item = KAiScutContent[i];
-        
-        if( item.id != aContentId )
-            {
-            continue;
-            }            
-        
-        TBuf8<KAiContentTypeMaxLength> mimeType((TText8*) item.type);
-            
-        return ( mimeType.Match( aMimeType ) != KErrNotFound );
-        }        
-    }
     else if ( pluginUid == KProfilePluginUid )
     { 
     // if match not found, loop through Profile content items
@@ -233,11 +263,22 @@ TBool CAiNativeRenderer::MatchMimeType( MAiPropertyExtension& aPlugin,
     return EFalse;    
     }
 
-
-void CAiNativeRenderer::DoMimeTypeCheckL( MAiPropertyExtension& aPlugin, TInt aContentId )
+// ----------------------------------------------------------------------------
+// CAiNativeRenderer::DoMimeTypeCheckL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiNativeRenderer::DoMimeTypeCheckL( CHsContentPublisher& aPlugin, 
+    TInt aContentId )
     {
-    MAiContentItemIterator* iter = 
-        (MAiContentItemIterator*)aPlugin.GetPropertyL( EAiPublisherContent );
+    MAiContentItemIterator* iter( static_cast< MAiContentItemIterator* >(         
+        aPlugin.GetProperty( CHsContentPublisher::EPublisherContent ) ) );
+        
+    if ( !iter )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    
     const TAiContentItem& item = iter->ItemL( aContentId );
 
     aContentId = GetIntContentId( ContentCid(item) );
@@ -246,6 +287,7 @@ void CAiNativeRenderer::DoMimeTypeCheckL( MAiPropertyExtension& aPlugin, TInt aC
         {
         User::Leave( KErrNotSupported );
         }
-
     }
-    
+
+// End of file
+

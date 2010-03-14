@@ -19,14 +19,16 @@
 #ifndef M_AINATIVERENDERER_H
 #define M_AINATIVERENDERER_H
 
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "aidevicestatuscontentmodel.h"
-#include "aiscutcontentmodel.h"
 #include "aiprofileplugincontentmodel.h"
 
-
+// Forward declarations
+class CHsContentPublisher;
 class RFile;
-class MAiPropertyExtension;
 
 namespace AiNativeUiController
 {
@@ -36,13 +38,15 @@ namespace AiNativeUiController
  *
  *  @since S60 3.2
  */
-class CAiNativeRenderer : public CBase
+NONSHARABLE_CLASS( CAiNativeRenderer ) : public CBase
     {
-
 public:
 
-    virtual ~CAiNativeRenderer();
+    ~CAiNativeRenderer();
 
+public:
+    // new methods
+    
     /**
      * Publish resource.
      *
@@ -53,7 +57,7 @@ public:
      * @param aIndex is index of the content.
      * @return KErrNone if publish is successful.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, 
+    virtual TInt Publish( CHsContentPublisher& aPlugin, 
                             TInt aContent, 
                             TInt aResource,
                             TInt aIndex );
@@ -68,7 +72,7 @@ public:
      * @param aIndex is index of the content.
      * @return KErrNone if publish is successful.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, 
+    virtual TInt Publish( CHsContentPublisher& aPlugin, 
                             TInt aContent, 
                             const TDesC16& aText,
                             TInt aIndex );
@@ -83,7 +87,7 @@ public:
      * @param aIndex is index of the content.
      * @return KErrNone if publish is successful.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, 
+    virtual TInt Publish( CHsContentPublisher& aPlugin, 
                             TInt aContent, 
                             const TDesC8& aBuf,
                             TInt aIndex );
@@ -98,7 +102,7 @@ public:
      * @param aIndex is index of the content.
      * @return KErrNone if publish is successful.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, 
+    virtual TInt Publish( CHsContentPublisher& aPlugin, 
                             TInt aContent, 
                             RFile& aFile,
                             TInt aIndex );
@@ -112,7 +116,7 @@ public:
      * @param aIndex is index of the content.
      * @return KErrNone if cleaning works.
      */
-    virtual TInt Clean( MAiPropertyExtension& aPlugin, TInt aContent );
+    virtual TInt Clean( CHsContentPublisher& aPlugin, TInt aContent );
 
     /**
      * Renderer must implement this method if it needs to support resource publishing.
@@ -125,7 +129,7 @@ public:
      * @param aResource is id of the resource.
      * @param aIndex is index of the content.
      */
-    virtual void DoPublishL( MAiPropertyExtension& aPlugin, 
+    virtual void DoPublishL( CHsContentPublisher& aPlugin, 
                                 TInt aContent, 
                                 TInt aResource,
                                 TInt aIndex );
@@ -141,7 +145,7 @@ public:
      * @param aText is published text.
      * @param aIndex is index of the content.
      */
-    virtual void DoPublishL( MAiPropertyExtension& aPlugin, 
+    virtual void DoPublishL( CHsContentPublisher& aPlugin, 
                                 TInt aContent, 
                                 const TDesC16& aText,
                                 TInt aIndex );
@@ -157,7 +161,7 @@ public:
      * @param aBuf is published data.
      * @param aIndex is index of the content.
      */
-    virtual void DoPublishL( MAiPropertyExtension& aPlugin, 
+    virtual void DoPublishL( CHsContentPublisher& aPlugin, 
                                 TInt aContent, 
                                 const TDesC8& aBuf,
                                 TInt aIndex );
@@ -173,7 +177,7 @@ public:
      * @param aFile is reference to file client.
      * @param aIndex is index of the content.
      */
-    virtual void DoPublishL( MAiPropertyExtension& aPlugin, 
+    virtual void DoPublishL( CHsContentPublisher& aPlugin, 
                                 TInt aContent, 
                                 RFile& aFile,
                                 TInt aIndex );
@@ -187,7 +191,7 @@ public:
      * @param aPlugin is publishing plugin.
      * @param aContent is id of the content.
      */
-    virtual void DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent );
+    virtual void DoCleanL( CHsContentPublisher& aPlugin, TInt aContent );
     
     /**
      * Called when UI switches to foreground.
@@ -238,7 +242,7 @@ protected:
      * @param aMimeType is mime type.
      * @return ETrue if match is successful.
      */
-    TBool MatchMimeType( MAiPropertyExtension& aPlugin, TInt aContentId, const TDesC8& aMimeType ) const;
+    TBool MatchMimeType( CHsContentPublisher& aPlugin, TInt aContentId, const TDesC8& aMimeType ) const;
 
 
     /**
@@ -248,7 +252,7 @@ protected:
      * @param aPlugin is publishing plugin.
      * @param aContentId is id of the content.
      */
-    void DoMimeTypeCheckL( MAiPropertyExtension& aPlugin, TInt aContentId );
+    void DoMimeTypeCheckL( CHsContentPublisher& aPlugin, TInt aContentId );
     
     };
 

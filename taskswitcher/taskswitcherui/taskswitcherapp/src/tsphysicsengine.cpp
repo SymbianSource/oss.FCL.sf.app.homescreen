@@ -102,6 +102,7 @@ void CTsPhysicsEngine::HandleDragEvent(
         {
         TPoint deltaPoint(aEvent.PreviousPosition() - aEvent.CurrentPosition());
         iPhysics->RegisterPanningPosition(deltaPoint);
+        iStartTime.HomeTime();
         }
     else //AknTouchGestureFw::EAknTouchGestureFwStop
         {

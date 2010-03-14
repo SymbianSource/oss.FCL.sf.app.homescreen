@@ -799,7 +799,7 @@ void CXnEditMode::SetEditModeL( CXnEditMode::TEditState aState )
         iState = aState;
         
         iUiEngine.AppUiAdapter().HandleEnterEditModeL( ETrue );
-        SetStatusPaneTitleL();
+        SetStatusPaneTitleL( ETrue );
         
         MakeVisible( ETrue );               
         }
@@ -811,7 +811,9 @@ void CXnEditMode::SetEditModeL( CXnEditMode::TEditState aState )
         iTargetNode = NULL;
         
         iState = aState;
-                       
+        
+        SetStatusPaneTitleL( EFalse );
+               
         iUiEngine.AppUiAdapter().HandleEnterEditModeL( EFalse );
         
         MakeVisible( EFalse );
@@ -829,10 +831,10 @@ CXnEditMode::TEditState CXnEditMode::EditState() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnEditMode::SetStatusPaneTitleL()
+// CXnEditMode::SetStatusPaneTitleL( TBool aEdit )
 // -----------------------------------------------------------------------------
 //
-void CXnEditMode::SetStatusPaneTitleL()
+void CXnEditMode::SetStatusPaneTitleL( TBool aEdit )
     {
     TUid titlePaneUid = TUid::Uid( EEikStatusPaneUidTitle );
     CEikStatusPaneBase::TPaneCapabilities subPaneTitle = 
@@ -841,11 +843,19 @@ void CXnEditMode::SetStatusPaneTitleL()
         {
         CAknTitlePane* title = static_cast< CAknTitlePane* >( 
             iUiEngine.AppUiAdapter().StatusPane()->ControlL( titlePaneUid ) );
-        TResourceReader reader;
-        CEikonEnv::Static()->CreateResourceReaderLC(
+        if( aEdit )
+            {
+            TResourceReader reader;
+            CEikonEnv::Static()->CreateResourceReaderLC(
                 reader, R_QTN_HS_TITLE_EDITMODE );
-        title->SetFromResourceL( reader );
-        CleanupStack::PopAndDestroy(); // reader internal state
+            title->SetFromResourceL( reader );
+            CleanupStack::PopAndDestroy(); // reader internal state
+            }
+        else
+            {
+            title->SetTextL( KNullDesC );
+            }
+
         }
     }
 

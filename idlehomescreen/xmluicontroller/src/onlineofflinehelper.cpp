@@ -20,22 +20,47 @@
 #include <CNWSession.h>
 #include <MProfileEngine.h>
 #include <CProfileChangeNotifyHandler.h>
-#include <aifweventhandler.h>
 #include <ai3xmlui.rsg>
 #include <AknQueryDialog.h>
 #include <AknGlobalNote.h>
 #include <StringLoader.h>
-
+#include <cmmanagerkeys.h>
+#include <AknGlobalConfirmationQuery.h>
+#include <StringLoader.h> // StringLoader
+#include <AknQueryDialog.h>
+#include <ai3xmlui.rsg>
 // User includes
+#include <aifwstatehandler.h>
+#include <aifwdefs.h>
 #include <activeidle2domaincrkeys.h>
+#include <hspublisherinfo.h>
 #include "onlineofflinehelper.h"
 #include "xmluicontroller.h"
 #include "appui.h"
+#include "ai3.hrh"
+#include "globalqueryhandler.h"
 
 // Constants
 const TInt KOfflineProfileId( 5 );
 
 using namespace AiXmlUiController;
+
+#ifdef HS_NETWORK_MONITOR
+#include <flogger.h>
+_LIT( KLogFolder,"xnnetwork" );
+_LIT( KLogDom, "networksettings.log" );
+
+#define _LOG1( a ) RFileLogger::Write( \
+    KLogFolder, KLogDom, EFileLoggingModeAppend, ( a ) );
+#define _LOG2( a, b ) RFileLogger::WriteFormat( \
+    KLogFolder, KLogDom, EFileLoggingModeAppend, ( a ), ( b ) )
+#else
+#define _LOG1
+#define _LOG2
+#endif
+
+_LIT( KDisConnected, "disconnected");
+_LIT( KConnected, "connected");
 
 // ============================ LOCAL FUNCTIONS ==============================
 
@@ -92,10 +117,18 @@ void COnlineOfflineHelper::ConstructL()
             }                    
         }
     
-    // Update repository
-    iUiCtl.SettingsRepository().Set(  KAIWebStatus, iFlags.IsSet( EOnline ) ); 
-    
+    // Update state manager
+    SetOnline( iFlags.IsSet( EOnline ) );
+         
     iCurrentNwStatus = ENWRegistrationUnknown;    
+    iHomeNetwork = KErrNotFound;
+    iRoamingNetwork = KErrNotFound;
+    
+    iNwSettingObserver = CCenRepObserver::NewL( this );
+    
+    iGlobalQueryHandler = CGlobalQueryHandler::NewL(iUiCtl);
+    iGlobalConfirmationQuery = CAknGlobalConfirmationQuery::NewL();
+
     }
       
 // ----------------------------------------------------------------------------
@@ -106,7 +139,25 @@ COnlineOfflineHelper::~COnlineOfflineHelper()
     {
     delete iHandler;
     delete iSession;
-    // Whether the user choice EOnline should be stored in cenrep ?
+    delete iNwSettingObserver;
+    delete iGlobalQueryHandler;
+    delete iGlobalConfirmationQuery; 
+    }
+
+// ----------------------------------------------------------------------------
+// COnlineOfflineHelper::CurrentCellularDataUsageChangedL
+// ----------------------------------------------------------------------------
+//
+void COnlineOfflineHelper::CurrentCellularDataUsageChangedL(const TInt aValue)
+    {
+    if ( iCurrentNwStatus == ENWRegisteredOnHomeNetwork )
+        {
+        iHomeNetwork = aValue;
+        }
+    else if ( iCurrentNwStatus == ENWRegisteredRoaming )
+        {
+        iRoamingNetwork = aValue;
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -114,8 +165,8 @@ COnlineOfflineHelper::~COnlineOfflineHelper()
 // ----------------------------------------------------------------------------
 //
 TBool COnlineOfflineHelper::ShowOnlineItem() const
-    {
-    if ( iFlags.IsSet( EUtilizeOnline ) )
+    {    
+    if ( iUiCtl.FwStateHandler()->OnlineStateInUse() )
     	{
     	TInt value ( KErrNotFound );
     	if ( iUiCtl.SettingsRepository().Get(  KAIWebStatus, value ) == KErrNone )
@@ -132,7 +183,7 @@ TBool COnlineOfflineHelper::ShowOnlineItem() const
 //
 TBool COnlineOfflineHelper::ShowOfflineItem() const
     {
-    if ( iFlags.IsSet( EUtilizeOnline ) )
+    if ( iUiCtl.FwStateHandler()->OnlineStateInUse() )
 		{
 		TInt value ( KErrNotFound );
 		if ( iUiCtl.SettingsRepository().Get(  KAIWebStatus, value ) == KErrNone )
@@ -147,71 +198,22 @@ TBool COnlineOfflineHelper::ShowOfflineItem() const
 // COnlineOfflineHelper::ProcessOnlineStateL
 // ----------------------------------------------------------------------------
 //
-void COnlineOfflineHelper::ProcessOnlineStateL( 
-    RPointerArray< CXnNodeAppIf >& aList )
-    {
-    _LIT( KOnlineOffline, "online_offline" );
-
-    iFlags.Clear( EUtilizeOnline );
-                   
-    // Check if data plugins are using online_offline
-    for ( TInt i = 0; i < aList.Count(); i++ )
-        {
-        TAiPublisherInfo info;
-        
-        iUiCtl.PublisherInfoL( *aList[i], info );
-                         
-        if( iUiCtl.FwEventHandler()->HasMenuItemL( info, KOnlineOffline() ) )
-            {
-            iFlags.Set( EUtilizeOnline );            
-            break;                       
-            }
-        }    
-    
-    if( iFlags.IsSet( EUtilizeOnline ) )
-        {
-        TInt value( 0 );
-        iUiCtl.SettingsRepository().Get( KAIWebStatus, value );
-        
-        if ( value )
-        	{
-            // Switch to online
-        	SetOnlineL( ETrue );
-        	}
-        else
-        	{
-            // Switch to offline
-        	SetOnlineL( EFalse );
-        	}                
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// COnlineOfflineHelper::ProcessOnlineStateL
-// ----------------------------------------------------------------------------
-//
 void COnlineOfflineHelper::ProcessOnlineStateL( TBool aOnline )
     {
     // User has selected online/offline item from menu
-    if( iFlags.IsSet( EUtilizeOnline ) )
+    if( iUiCtl.FwStateHandler()->OnlineStateInUse() )
     	{
-    	 // Don't show R_YES_NO_HS_ONLINE query as user selected online
-    	 if (aOnline )
-			{
+    	// Don't show R_YES_NO_HS_ONLINE query as user selected online
+    	if ( aOnline )
+    	    {
 			iFlags.Set( EOnline );
-			// Save state
-			iUiCtl.SettingsRepository().Set( KAIWebStatus, ETrue );
-			// Run state change.
-			iUiCtl.FwEventHandler()->ProcessStateChange( EAifwOnline  );     
 			}
-    	 else
-    		 {
-    		 iFlags.Clear( EOnline );
-    		 // Save state
-			 iUiCtl.SettingsRepository().Set( KAIWebStatus, EFalse );
-			 // Run state change.
-			 iUiCtl.FwEventHandler()->ProcessStateChange( EAifwOffline  );
-    		 }
+    	else
+    	    {
+    		iFlags.Clear( EOnline );
+    		}
+    	 
+    	SetOnline( aOnline );
     	}
     }
 
@@ -219,22 +221,14 @@ void COnlineOfflineHelper::ProcessOnlineStateL( TBool aOnline )
 // COnlineOfflineHelper::SetOnline
 // ----------------------------------------------------------------------------
 //
-void COnlineOfflineHelper::SetOnlineL( TBool aOnline )    
-    {
-    
+void COnlineOfflineHelper::SetOnline( TBool aOnline )    
+    {    
     // Save state
     iUiCtl.SettingsRepository().Set( KAIWebStatus, aOnline );
 
-    if( aOnline )
-        {
-        // Run state change.
-        iUiCtl.FwEventHandler()->ProcessStateChange( EAifwOnline  );        
-        }
-    else  
-        {
-		// Run state change.
-		iUiCtl.FwEventHandler()->ProcessStateChange( EAifwOffline );
-        }
+    // Run state change.
+    iUiCtl.FwStateHandler()->ChangePluginState( 
+            aOnline ? EAiFwOnline : EAiFwOffline );                    
     }
 
 // ----------------------------------------------------------------------------
@@ -265,11 +259,16 @@ void COnlineOfflineHelper::InterpretNWMessageL( const TNWMessages aMessage,
             switch ( aNWInfo.iRegistrationStatus )
                 {
                 case ENWRegisteredRoaming:
-                    if( iFlags.IsSet( EOnline ) )
+                    _LOG1( _L(" Roaming Network Activated "));
+                    iCurrentNwStatus = aNWInfo.iRegistrationStatus;
+                    CurrentNetworkSetting();
+                    if( ( iRoamingNetwork == ECmCellularDataUsageConfirm
+                          || iRoamingNetwork == ECmCellularDataUsageDisabled )
+                            && iFlags.IsSet( EOnline ) )
                         {
                         // Process to offline state. 
                         // Don't change the user selection.
-                        SetOnlineL ( EFalse );
+                        SetOnline( EFalse );
                         // Show roaming notification
 						CAknGlobalNote* note = CAknGlobalNote::NewLC();
 						HBufC* msg( StringLoader::LoadLC( R_QTN_HS_AUTOMATIC_OFFLINE ) );
@@ -277,15 +276,19 @@ void COnlineOfflineHelper::InterpretNWMessageL( const TNWMessages aMessage,
 						note->ShowNoteL( EAknGlobalInformationNote, *msg );
 						CleanupStack::PopAndDestroy( 2, note ); // msg    
                         }
-                    
-                    iCurrentNwStatus = aNWInfo.iRegistrationStatus;
                     break;
+
                 case ENWRegisteredOnHomeNetwork:
-                	// Reset to user selection
-                	SetOnlineL(iFlags.IsSet( EOnline ) );
-                	
+                    _LOG1( _L(" Home Network Activated "));
                     iCurrentNwStatus = aNWInfo.iRegistrationStatus;
+                    CurrentNetworkSetting();
+                    if( iHomeNetwork == ECmCellularDataUsageAutomatic )
+                        {
+                        // Reset to user selection
+                        SetOnline( iFlags.IsSet( EOnline ) );
+                        }
                     break;                     
+
                 default:                        
                     // unknown state                    
                     iCurrentNwStatus = ENWRegistrationUnknown;
@@ -372,13 +375,13 @@ void COnlineOfflineHelper::HandleActiveProfileEventL(
             {
             iFlags.Set( EOfflineProfile );
             // Don't change the user selection.
-            SetOnlineL( EFalse );
+            SetOnline( EFalse );
             }
         else
             {
             iFlags.Clear( EOfflineProfile );
             // Reset to user selection
-            SetOnlineL(iFlags.IsSet( EOnline ) );
+            SetOnline( iFlags.IsSet( EOnline ) );
             }
         }
     
@@ -388,5 +391,70 @@ void COnlineOfflineHelper::HandleActiveProfileEventL(
     iHandler = CProfileChangeNotifyHandler::NewL( this );        
     }
 
- // End of file
+// ---------------------------------------------------------------------------
+// COnlineOfflineHelper::CurrentNetworkSetting
+// ---------------------------------------------------------------------------
+//
+void COnlineOfflineHelper::CurrentNetworkSetting() 
+    {    
+    CRepository* repository( NULL );
+    
+    TRAP_IGNORE( repository = CRepository::NewL( KCRUidCmManager ) )
+    
+    if ( repository )
+        {        
+        TInt value( 0 );
+        TInt err( repository->Get( KCurrentCellularDataUsage, value ) );
 
+        if ( err == KErrNone )
+            {
+            if ( iCurrentNwStatus == ENWRegisteredRoaming )
+                {
+                iRoamingNetwork = value;
+                _LOG2( _L("Roaming Network Setting <%d>"), value ); 
+                }
+            else if  ( iCurrentNwStatus == ENWRegisteredOnHomeNetwork )
+                {
+                iHomeNetwork = value;
+                _LOG2( _L("Home Network Setting <%d>"), value );
+                }            
+            }    
+        }
+    delete repository;
+    }
+
+// ---------------------------------------------------------------------------
+// COnlineOfflineHelper::HandleConnectionQueryL
+// ---------------------------------------------------------------------------
+//
+void COnlineOfflineHelper::HandleConnectionQueryL( const TDesC& aConnection)
+    {
+    if ( aConnection == KDisConnected() ) 
+        {
+        ShowGlobalQueryL(R_QTN_HS_DISABLE_NETWORK, EFalse );
+        }
+    else if ( aConnection == KConnected() )
+        {
+        ShowGlobalQueryL(R_QTN_HS_SWITCH_ONLINE, ETrue );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// COnlineOfflineHelper::ShowGlobalQueryL
+// ---------------------------------------------------------------------------
+//
+void COnlineOfflineHelper::ShowGlobalQueryL( TInt aResourceId, TBool aSetOnline )
+    {
+    if ( !iGlobalQueryHandler->IsActive() )
+        {
+        HBufC* confirmationText = StringLoader::LoadLC(aResourceId);
+        iGlobalConfirmationQuery->ShowConfirmationQueryL(
+                iGlobalQueryHandler->iStatus,
+            *confirmationText, 
+            R_AVKON_SOFTKEYS_YES_NO);
+        iGlobalQueryHandler->SetOnlineParamAndActivate(aSetOnline);
+        CleanupStack::PopAndDestroy(); //confirmationText
+        }
+    }
+
+ // End of file

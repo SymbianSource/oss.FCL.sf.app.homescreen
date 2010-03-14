@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.61 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.61 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.65 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.65 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -611,7 +611,7 @@ void CMmAppUi::ForwardEventToHNL( TInt aEvent, TInt aItemId,
                 GfxTransEffect::BeginFullScreen(
                      effect, rect,
                      AknTransEffect::EParameterType,
-                     AknTransEffect::GfxTransParam( appUid ) );
+                     AknTransEffect::GfxTransParam( appUid , KUidMatrixMenuApp ) );
                 }
             }
 
@@ -1131,14 +1131,6 @@ void CMmAppUi::HandleDragStopL( TInt aModelItemIndex )
             iCurrentContainer->HandleItemRemovalL();
             iCurrentContainer->CancelDragL( EFalse );
 
-            if( typeCurr == EItemTypeParentFolder )
-                {
-                StartLayoutSwitchFullScreen( EMenuCloseFolderEffect );
-                }
-            else
-                {
-                StartLayoutSwitchFullScreen( EMenuOpenFolderEffect );
-                }
             iHNInterface->TriggerHnEventL( KKeyIdMoveInto, itemId, eventParameters );
             iMakeHightlightedItemFullyVisible = ETrue;
             }
@@ -2833,6 +2825,10 @@ void CMmAppUi::RefreshIconsL()
     paramList->AppendL(command);
     HandleRequestL(*paramList);
     CleanupStack::PopAndDestroy(paramList);
+    if( iCurrentContainer )
+        {
+        iCurrentContainer->HandleResourceChange( KAknsMessageSkinChange );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -2957,7 +2953,7 @@ void CMmAppUi::HandleFocusLostL()
 			}
 		if( IsEditMode() && iCurrentContainer->IsDraggable() )
 			{
-			iCurrentContainer->CancelDragL( EFalse );
+			HandleDragStopL( iCurrentContainer->GetHighlight() );
 			iCurrentContainer->DrawNow();
 			}
 		iCurrentContainer->SetHasFocusL( EFalse );
@@ -2990,6 +2986,7 @@ void CMmAppUi::HandleFullOrPartialForegroundGainedL()
 		if (skinInstance && !skinInstance->IsUpdateInProgress())
 			{
 			RefreshIconsL();
+
 			}
 		}
 	}

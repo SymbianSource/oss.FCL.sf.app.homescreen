@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBox
-*  Version     : %version: MM_22.1.16 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_22.1.17 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -389,12 +389,12 @@ private:
      * This function typically calls @c ProcessScrollEventL,
      * which actually scrolls the view and causes a redraw. 
      */
-    void HandleRedrawTimerEvent();
+    void HandleRedrawTimerEventL();
     
 private:
     /**
      * Callback function for @c iRedrawTimer.
-     * It simply calls @c HandleRedrawTimerEvent and returns 0.
+     * It simply calls @c HandleRedrawTimerEventL and returns 0.
      * 
      * @param aPtr A pointer to CMmListBox object.
      * @return 0 (always).

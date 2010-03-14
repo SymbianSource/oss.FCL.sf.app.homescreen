@@ -130,4 +130,6 @@ EXPORTS
 	_ZTVN11hspswrapper16CAddPluginResultE @ 129 NONAME
 	_ZTVN11hspswrapper18CHspsConfigurationE @ 130 NONAME
 	_ZTVN11hspswrapper8CItemMapE @ 131 NONAME
+	_ZN11hspswrapper12CHspsWrapper18RestoreActiveViewLEv @ 132 NONAME
+	_ZN11hspswrapper12CHspsWrapper12RestoreRootLEv @ 133 NONAME
 

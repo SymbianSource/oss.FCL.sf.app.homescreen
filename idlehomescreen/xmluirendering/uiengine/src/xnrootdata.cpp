@@ -39,7 +39,7 @@
 #include "xnrootdata.h"
 
 // Constants
-const TInt KScheduleInterval( 1000000 );
+const TInt KScheduleInterval( 2000000 );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -130,109 +130,96 @@ void CXnRootData::ConstructL()
     
     iParser = CXnODTParser::NewL( iManager, *iEcomHandler );   
     
-    iLoadTimer = CPeriodic::NewL( CActive::EPriorityStandard );           
-    iDestroyTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iLoadTimer = CPeriodic::NewL( CActive::EPriorityLow );           
+    iDestroyTimer = CPeriodic::NewL( CActive::EPriorityLow );
     }
 
 // -----------------------------------------------------------------------------
-// CXnRootData::LoadL()
+// CXnRootData::Load()
 // 
 // -----------------------------------------------------------------------------
 //
-void CXnRootData::LoadL()
+TInt CXnRootData::Load()
     { 
     if ( Occupied() )
         {
-        return;
+        return KErrInUse;
         }
-           
+    
+    TInt err( KErrNone );
+        
     // Load application root configuration
-    TRAPD( error,
-            
-        iODT = iManager.Composer().ComposeRootL( *this );
+    TRAP( err, iODT = iManager.Composer().ComposeRootL( *this ) );
     
-        if ( iODT )
-            {
-            iManager.Parser().LoadRootL( *this, iApplicationUid );
-            }              
-        );
-    
-    if ( !iODT || error || !Occupied() )
-        {
-        // Can't recover
-        Panic( EXnInvalidConfiguration );               
-        }
-    
-    RPointerArray< CXnViewData > failedPlugins;
-    CleanupClosePushL( failedPlugins );
-    
-    TBool succeed( EFalse );
-           
-    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
-        {
-        CXnViewData* plugin( 
-                static_cast< CXnViewData* >( iPluginsData[ i ] ) ); 
-        
-        if ( plugin->Initial() )
-            {
-            plugin->LoadL();
-    
-            if ( plugin->Occupied() )
-                {
-                succeed = ETrue;                
-                }
-            else
-                {
-                // Failed to load
-                failedPlugins.AppendL( plugin );                
-                }
-
-            break;
-            }
-        } 
-                            
-    for ( TInt i = 0; !succeed && i < iPluginsData.Count(); i++ )
-        {
-        CXnViewData* plugin( 
-                static_cast< CXnViewData* >( iPluginsData[ i ] ) );
-        
-        if ( failedPlugins.Find( plugin ) == KErrNotFound )
-            {
-            plugin->SetInitial();
-            
-            plugin->LoadL();
-
-            if ( plugin->Occupied() )
-                {                                       
-                succeed = ETrue;                
-                }
-            else
-                {
-                // Failed to load
-                failedPlugins.AppendL( plugin );                                                    
-                }
-            }
-        }    
-    
-    if ( !succeed )
+    if ( !iODT )
         {
         // Can't recover
         Panic( EXnInvalidConfiguration );                       
         }
-    
-    for ( TInt i = failedPlugins.Count() - 1; i >= 0; i-- )
-        {        
-        CXnPluginData* toDestroy( failedPlugins[i] );
-        
-        TInt index( iPluginsData.Find( toDestroy ) );
-        
-        iPluginsData.Remove( index );
-        
-        delete toDestroy;
-        toDestroy = NULL;                     
+       
+    if ( !err )
+        {
+        TRAP( err, iManager.Parser().LoadRootL( *this, iApplicationUid ) );
         }
     
-    CleanupStack::PopAndDestroy( &failedPlugins );
+    if ( !err )
+        {                
+        for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+            {
+            CXnViewData* plugin( 
+                static_cast< CXnViewData* >( iPluginsData[ i ] ) ); 
+            
+            if ( plugin->Initial() )
+                {
+                err = plugin->Load();
+                                    
+                if ( plugin->Occupied() )
+                    {
+                    // Initial view is succesfully composed. Some plugins
+                    // may have failed but it doesn't matter as those are removed                                        
+                    return KErrNone;
+                    }     
+                
+                // Initial view failed, remove it
+                iPluginsData.Remove( i );
+                
+                delete plugin;
+                plugin = NULL;                                                
+                break;                             
+                }
+            }
+                                    
+        // Initial view loading failed, fallback to load any of the views
+        while( iPluginsData.Count() )
+            {
+            CXnViewData* plugin( 
+                static_cast< CXnViewData* >( iPluginsData[ 0 ] ) ); 
+
+            // Ignore error
+            plugin->Load();
+                            
+            if ( plugin->Occupied() )
+                {
+                // Return error because of fallback condition                                
+                return KXnErrPluginFailure;
+                }
+
+            // View failed, remove it
+            iPluginsData.Remove( 0 );
+            
+            delete plugin;
+            plugin = NULL;
+            }        
+        }
+    else if ( err == KErrNoMemory )
+        {
+        ShowOutOfMemError();
+        }
+
+    // Configuration loading failed totally
+    Panic( EXnInvalidConfiguration );
+    
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -542,7 +529,10 @@ TBool CXnRootData::AllViewsDestroyed() const
         
         if ( !self->AllViewsLoaded() && toLoad )
             {                       
-            toLoad->LoadL();            
+            if ( toLoad->Load() == KErrNoMemory )
+                {
+                self->ShowOutOfMemError();
+                }
             }
         
         if ( self->AllViewsLoaded() )

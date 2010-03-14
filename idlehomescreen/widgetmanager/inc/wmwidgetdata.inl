@@ -59,7 +59,6 @@
     inline void CWmWidgetData::SetValid( TBool aValid )
         { iValid = aValid; }
     
-    
     //From  RWidgetDataValues
     
     /** returns number of items in the pointer array */
@@ -70,7 +69,7 @@
     /** returns the pointed widget name */
     inline TPtrC16 RWidgetDataValues::MdcaPoint(TInt aIndex) const
         {
-        const TPtrC16 ptr( (*this)[aIndex]->Name() );
+        const TPtrC16 ptr( (*this)[aIndex]->MdcaPoint() );
         return ptr;
         }
 

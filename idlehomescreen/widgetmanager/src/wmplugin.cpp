@@ -57,52 +57,10 @@ CWmPlugin* CWmPlugin::NewL()
 //
 CWmPlugin::~CWmPlugin()
     {
-    iPostponedCommand = ENone;
-
-    // delete WM UI resources
-    if ( iViewAppUi )
-        {
-        if ( iWmMainContainer && IsActive() )
-            {
-            // WM is showing. Hide first!
-            iWmMainContainer->SetClosingDown( ETrue );
-            TRAPD( err, iViewAppUi->ActivateLocalViewL(
-                            iPreviousViewUid.iViewUid ); );
-            if ( KErrNone == err )
-                {
-                // wait until previous view is switched on top
-                // then continue destruction.
-                iWait->Start();
-                }
-            else
-                {
-                // try to activate default view
-                TVwsViewId viewId;
-                if ( iViewAppUi->GetDefaultViewId( viewId ) != KErrNone )
-                    {
-                    viewId.iAppUid = iViewAppUi->Application()->AppDllUid();
-                    viewId.iViewUid = TUid::Uid( 1 );
-                    }
-                
-                TRAPD( err, iViewAppUi->ActivateLocalViewL( viewId.iViewUid ); );
-                if ( KErrNone == err )
-                    {
-                    // wait until previous view is switched on top
-                    // then continue destruction.
-                    iWait->Start();
-                    }
-                }
-            }
-        // remove view from appui (also deletes it)
-        iViewAppUi->RemoveView( 
-                TUid::Uid( EWmMainContainerViewId ) );
-        }
-
-    // delete other members
+    // delete members
     delete iResourceLoader;
     delete iEffectManager;
     delete iPostponedContent;
-    delete iWait;
 	delete iWmInstaller;
     }
 
@@ -133,18 +91,14 @@ void CWmPlugin::ConstructL()
     iFs = &eikonEnv->FsSession();
     iResourceLoader = CWmResourceLoader::NewL( *eikonEnv );
     iEffectManager = CWmEffectManager::NewL( *eikonEnv );
-    
-    // wait object
-    iWait = new (ELeave) CActiveSchedulerWait();
-    
+    iWmInstaller = CWmInstaller::NewL();
+
     // main view
     CWmMainContainerView* mainView =
             CWmMainContainerView::NewL( *this );
     CleanupStack::PushL( mainView );
 	iViewAppUi->AddViewL( mainView );	
 	CleanupStack::Pop( mainView );
-	
-    iWmInstaller = CWmInstaller::NewL();
     }
 
 // ---------------------------------------------------------
@@ -153,14 +107,44 @@ void CWmPlugin::ConstructL()
 //
 void CWmPlugin::Activate()
     {
-    if ( !IsActive() && iHsContentController )
+    CWmMainContainerView* view = static_cast<CWmMainContainerView*>(
+            iViewAppUi->View( TUid::Uid(EWmMainContainerViewId) ) );
+    if ( !IsActive() && view && iHsContentController )
         {
         TRAP_IGNORE( 
             iEffectManager->BeginFullscreenEffectL( 
                 KAppStartCommonDefaultStyle );
             iViewAppUi->ActivateLocalViewL( 
-                TUid::Uid( EWmMainContainerViewId ) ); 
+                TUid::Uid( EWmMainContainerViewId ) );
             );
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmPlugin::DeActivate
+// ---------------------------------------------------------
+//
+void CWmPlugin::DeActivate()
+    {
+    iPostponedCommand = ENone;
+    iPreviousViewUid.iViewUid = KNullUid;    
+    CWmMainContainerView* view = static_cast<CWmMainContainerView*>(
+        iViewAppUi->View( TUid::Uid(EWmMainContainerViewId) ) );
+    if ( view ) { view->DoDeactivate(); }
+    }
+
+// ---------------------------------------------------------
+// CWmPlugin::Views
+// ---------------------------------------------------------
+//
+void CWmPlugin::Views( RPointerArray<CAknView>& aViews )
+    {
+    // return view to be destroyed.
+    CAknView* view = iViewAppUi->View( 
+            TUid::Uid(EWmMainContainerViewId) );
+    if ( view )
+        {        
+        aViews.Append( view );
         }
     }
 
@@ -170,14 +154,26 @@ void CWmPlugin::Activate()
 //
 TBool CWmPlugin::IsActive()
     {
-    return ( iPreviousViewUid.iViewUid != KNullUid );
+    TVwsViewId activeViewId(KNullUid,KNullUid);
+    if ( iViewAppUi->GetActiveViewId( activeViewId ) == KErrNone &&
+        activeViewId.iViewUid == TUid::Uid( EWmMainContainerViewId ) )
+        {
+        if ( iPreviousViewUid.iViewUid == KNullUid )
+            {            
+            iPreviousViewUid.iAppUid = iViewAppUi->Application()->AppDllUid();
+            iPreviousViewUid.iViewUid = TUid::Uid( 1 );
+            }        
+        return ETrue;
+        }
+
+    return( iPreviousViewUid.iViewUid != KNullUid );
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::Deactivate
+// CWmPlugin::CloseView
 // ---------------------------------------------------------
 //
-void CWmPlugin::Deactivate()
+void CWmPlugin::CloseView()
     {
     if ( IsActive() )
         {
@@ -200,13 +196,21 @@ void CWmPlugin::MainViewActivated(
                     CWmMainContainer* aWmMainContainer )
     {
     iPreviousViewUid = aViewId;
+    // verify if we have correct viewid to activate.
+    if ( iPreviousViewUid.iViewUid == KNullUid )
+        {
+        // use default if we got wrong viewid as previous view
+        iPreviousViewUid.iAppUid = iViewAppUi->Application()->AppDllUid();
+        iPreviousViewUid.iViewUid = TUid::Uid( 1 );
+        }
+
     iWmMainContainer = aWmMainContainer;
     iEffectManager->UiRendered();
     iWmMainContainer->SetClosingDown( EFalse );
     
     // Don't forward numeric keys to phone
     ForwardNumericKeysToPhone( EFalse );
-    }    
+    }
 
 // ---------------------------------------------------------
 // CWmPlugin::MainViewDeactivated
@@ -219,14 +223,12 @@ void CWmPlugin::MainViewDeactivated()
     
     iPreviousViewUid.iViewUid = KNullUid;
     iWmMainContainer = NULL;
-    if ( iEffectManager && !iWait->IsStarted() )
+    if ( iEffectManager )
         {
         iEffectManager->UiRendered();
         }
 
     TRAP_IGNORE( ExecuteCommandL(); );
-
-    if ( iWait->IsStarted() ) { iWait->AsyncStop(); }
     }
 
 // ---------------------------------------------------------
@@ -267,26 +269,8 @@ void CWmPlugin::ExecuteCommandL()
     if ( iPostponedCommand == EAddToHomescreen )
         {
         TInt err = ContentController().AddWidgetL( *iPostponedContent );
-        if ( err == KHsErrorViewFull ||
-                err == KHsErrorDoesNotFit )
-            {
-            ResourceLoader().InfoPopupL(
-                R_QTN_HS_ADD_WIDGET_NO_SPACE_NOTE, KNullDesC );
-            }
-        else if ( err == KHsErrorMaxInstanceCountExceeded )
-            {
-            ResourceLoader().InfoPopupL(
-                R_QTN_HS_ADD_WIDGET_MAX_COUNT_NOTE, KNullDesC );
-            }
-        else if ( err == KErrNoMemory )
-            {
-            ResourceLoader().InfoPopupL(
-                R_QTN_HS_HS_MEMORY_FULL, KNullDesC );
-            }
-        else if ( ( err != KErrNone ) && ( err != KErrDiskFull ) )
-            {
-            ResourceLoader().ErrorPopup( err );
-            }
+        if ( err != KErrNone )
+            ShowErrorNoteL( err );
         }
     iPostponedCommand = ENone;
     delete iPostponedContent;
@@ -294,7 +278,41 @@ void CWmPlugin::ExecuteCommandL()
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::MainViewDeactivated
+// CWmPlugin::ShowErrorNoteL
+// ---------------------------------------------------------
+//
+void CWmPlugin::ShowErrorNoteL( TInt aError )
+    {
+    switch ( aError )
+        {
+        case KHsErrorViewFull:
+        case KHsErrorDoesNotFit:
+            ResourceLoader().InfoPopupL(
+                R_QTN_HS_ADD_WIDGET_NO_SPACE_NOTE, KNullDesC );
+            break;
+            
+        case KHsErrorMaxInstanceCountExceeded:
+            {
+            TInt resource = ( iPostponedContent->Type() == KContentTemplate ) ?
+                resource = R_QTN_HS_ADD_WIDGET_MAX_REACHED : // wrt
+                resource = R_QTN_HS_ADD_WIDGET_MAX_COUNT_NOTE; // native
+            
+            ResourceLoader().InfoPopupL( resource, KNullDesC );
+            break;
+            }
+            
+        case KErrNoMemory:
+            ResourceLoader().InfoPopupL( R_QTN_HS_HS_MEMORY_FULL, KNullDesC );
+            break;
+            
+        default:
+            ResourceLoader().ErrorPopup( aError );
+            break;
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmPlugin::ViewAppUi
 // ---------------------------------------------------------
 //
 CAknViewAppUi& CWmPlugin::ViewAppUi()
@@ -303,7 +321,7 @@ CAknViewAppUi& CWmPlugin::ViewAppUi()
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::MainViewDeactivated
+// CWmPlugin::ResourceLoader
 // ---------------------------------------------------------
 //
 CWmResourceLoader& CWmPlugin::ResourceLoader()
@@ -312,7 +330,7 @@ CWmResourceLoader& CWmPlugin::ResourceLoader()
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::MainViewDeactivated
+// CWmPlugin::ContentController
 // ---------------------------------------------------------
 //
 MHsContentController& CWmPlugin::ContentController()
@@ -321,7 +339,7 @@ MHsContentController& CWmPlugin::ContentController()
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::MainViewDeactivated
+// CWmPlugin::FileServer
 // ---------------------------------------------------------
 //
 RFs& CWmPlugin::FileServer()

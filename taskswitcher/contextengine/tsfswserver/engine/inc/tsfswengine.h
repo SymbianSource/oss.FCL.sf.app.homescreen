@@ -190,6 +190,13 @@ private:
     TInt FindParentWgId( TInt aWgId );
     
     /**
+     * Returns the most top parent's wg id or KErrNotFound.
+     * @param   aWgId   a valid window group id
+     * @return parent wg id or KErrNotFound if there is no parent
+     */
+    TInt FindMostTopParentWgId( TInt aWgId );
+    
+    /**
      * Finds out the application name.
      * @param   aWindowName window group name or NULL
      * @param   aAppUId     application uid
@@ -215,6 +222,16 @@ private:
      * @param   aBitmapHandle       handle for screenshot bitmap
      */
     void AssignScreenshotHandle( TInt aWgIdForScreenshot, TInt aBitmapHandle );
+    
+    /**
+     * Checks if the app to which the screenshot belongs is in the task list
+     * and updates the entry when found. 
+     * @param   aWgIdForScreenshot  wgid for the screenshot 
+     * @param   aBitmapHandle       handle for screenshot bitmap
+     * @param   aAsigned       		result of operation
+     */
+    void AssignScreenshotHandle( TInt aWgIdForScreenshot,
+            TInt aBitmapHandle, TBool& aAsigned  );
     
     /**
      * Returns the bitmap handle for the screenshot belonging to the given app

@@ -52,6 +52,7 @@ SOURCE          wmportalbutton.cpp
 SOURCE          wmwidgetloaderao.cpp
 SOURCE          wmconfiguration.cpp
 SOURCE          wminstaller.cpp
+SOURCE  	      wmprocessmonitor.cpp
 
 SOURCEPATH      ../src
 SOURCE          wmunittest.cpp
@@ -100,6 +101,7 @@ LIBRARY     featmgr.lib // FeatureManager
 LIBRARY     etext.lib 
 LIBRARY     centralrepository.lib
 LIBRARY     bmpanim.lib // AknBitmap animation
+LIBRARY     inetprotutil.lib
 
 // libraries needed by the test framework
 LIBRARY     stiftestinterface.lib

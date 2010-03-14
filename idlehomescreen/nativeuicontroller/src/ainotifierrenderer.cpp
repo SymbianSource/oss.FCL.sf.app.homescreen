@@ -15,23 +15,31 @@
 *
 */
 
-
+// System includes 
 #include <e32property.h>
+
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
 #include <activeidle2domainpskeys.h>
-#include <aipropertyextension.h>
-
 #include <AiNativeUi.rsg>
-
 #include "ainotifierrenderer.h"
 #include "ainativeuiplugins.h"
 
 using namespace AiNativeUiController;
+
+// Constants
 
 // 1-minute timeout before showing soft notification
 const TInt KNetworkLostTimeout = 60*1000000;
 
 // ======== MEMBER FUNCTIONS ========
 
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNotifierRenderer* CAiNotifierRenderer::NewLC()
     {
     CAiNotifierRenderer* self = new( ELeave ) CAiNotifierRenderer;
@@ -40,30 +48,48 @@ CAiNotifierRenderer* CAiNotifierRenderer::NewLC()
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::~CAiNotifierRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNotifierRenderer::~CAiNotifierRenderer()
     {
     delete iSoftNotifier;
     delete iTimer;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::CAiNotifierRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNotifierRenderer::CAiNotifierRenderer()
     {
     }
 
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::ConstructL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNotifierRenderer::ConstructL()
     {
     iSoftNotifier = CAknSoftNotifier::NewL();
     iTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     }
 
-void CAiNotifierRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                    TInt aContent,
-                                    TInt aResource,
-                                    TInt /*aIndex*/  )
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiNotifierRenderer::DoPublishL( CHsContentPublisher& aPlugin,
+    TInt aContent, TInt aResource, TInt /*aIndex*/ )                                                                       
     {
-    if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
     	{
 	    switch( aContent )
 	        {
@@ -90,7 +116,7 @@ void CAiNotifierRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
 	            User::Leave( KErrNotFound );
 	            break;
 	            }
-	        };
+	        }
     	}
     else
    		{
@@ -98,8 +124,13 @@ void CAiNotifierRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
    		}
     }
 
-void CAiNotifierRenderer::DoCleanL( MAiPropertyExtension& /*aPlugin*/,
-                                    TInt aContent )
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::DoCleanL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiNotifierRenderer::DoCleanL( CHsContentPublisher& /*aPlugin*/,
+    TInt aContent )
     {
     switch( aContent )
         {
@@ -114,30 +145,47 @@ void CAiNotifierRenderer::DoCleanL( MAiPropertyExtension& /*aPlugin*/,
             User::Leave( KErrNotFound );
             break;
             }
-        };
-
+        }
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::AddNotification()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNotifierRenderer::AddNotification( TAknSoftNotificationType aType )
     {
-    TRAP_IGNORE( iSoftNotifier->AddNotificationL( aType, 1 ); );
+    TRAP_IGNORE( iSoftNotifier->AddNotificationL( aType, 1 ) );
     }
 
-void CAiNotifierRenderer::RemoveNotification( TAknSoftNotificationType aType)
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::RemoveNotification()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiNotifierRenderer::RemoveNotification( TAknSoftNotificationType aType )
     {
     TRAP_IGNORE( iSoftNotifier->CancelSoftNotificationL( aType ); );
     }
 
-TInt CAiNotifierRenderer::NWLostDelayCallBack(TAny* aParam)
+// ----------------------------------------------------------------------------
+// CAiNotifierRenderer::NWLostDelayCallBack()
+//
+// ----------------------------------------------------------------------------
+//
+TInt CAiNotifierRenderer::NWLostDelayCallBack( TAny* aParam )
     {
-    CAiNotifierRenderer* self = reinterpret_cast<CAiNotifierRenderer *> (aParam);
-    if ( self )
+    CAiNotifierRenderer* self = 
+        reinterpret_cast< CAiNotifierRenderer* >( aParam );
+    
+        if ( self )
         {
         self->iTimer->Cancel();
         self->AddNotification( ESelectNetworkNotification );
         }
+        
     return KErrNone;
     }
 
+// End of file
 

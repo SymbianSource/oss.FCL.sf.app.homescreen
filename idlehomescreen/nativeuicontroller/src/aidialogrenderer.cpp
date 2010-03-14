@@ -15,13 +15,16 @@
 *
 */
 
-
+// System includes
 #include <e32property.h>
-#include <activeidle2domainpskeys.h>
-#include <aipropertyextension.h>
 #include <aknnotedialog.h>
 #include <avkon.rsg>
 #include <StringLoader.h>
+
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
+#include <activeidle2domainpskeys.h>
 #include <AiNativeUi.rsg>
 #include "aidialogrenderer.h"
 #include "ainativeuiplugins.h"
@@ -32,7 +35,11 @@
 using namespace AiNativeUiController;
 
 // ======== MEMBER FUNCTIONS ========
-
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
 CAiDialogRenderer* CAiDialogRenderer::NewLC()
     {
     CAiDialogRenderer* self = new( ELeave ) CAiDialogRenderer;
@@ -40,25 +47,37 @@ CAiDialogRenderer* CAiDialogRenderer::NewLC()
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::~CAiDialogRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiDialogRenderer::~CAiDialogRenderer()
     {
     delete iDialog;
     delete iText;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::CAiDialogRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiDialogRenderer::CAiDialogRenderer()
     {
     }
     
-
-void CAiDialogRenderer::DoPublishL( MAiPropertyExtension& aPlugin, 
-                                    TInt aContent, 
-                                    TInt aResource,
-                                    TInt /*aIndex*/  )
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDialogRenderer::DoPublishL( CHsContentPublisher& aPlugin, 
+    TInt aContent, TInt aResource, TInt /*aIndex*/  )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
     	{
 	    switch( aContent )
 	        {
@@ -99,7 +118,7 @@ void CAiDialogRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
 	            User::Leave( KErrNotFound );
 	            break;
 	            }
-	        };
+	        }
     	}
     else
    		{
@@ -107,8 +126,13 @@ void CAiDialogRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
    		}
     }
 
-void CAiDialogRenderer::DoCleanL( MAiPropertyExtension& /*aPlugin*/, 
-                                    TInt aContent )
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::DoCleanL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDialogRenderer::DoCleanL( CHsContentPublisher& /*aPlugin*/, 
+    TInt aContent )
     {
     switch( aContent )
         {
@@ -124,11 +148,14 @@ void CAiDialogRenderer::DoCleanL( MAiPropertyExtension& /*aPlugin*/,
             User::Leave( KErrNotFound );
             break;
             }
-        };
-
+        }
     }
     
-    
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::ShowDialogL()
+//
+// ----------------------------------------------------------------------------
+//  
 void CAiDialogRenderer::ShowDialogL()
     {
     if ( iDialog )
@@ -153,7 +180,11 @@ void CAiDialogRenderer::ShowDialogL()
     iDialog->RunLD();
     }
     
-    
+// ----------------------------------------------------------------------------
+// CAiDialogRenderer::FocusObtainedL()
+//
+// ----------------------------------------------------------------------------
+//    
 void CAiDialogRenderer::FocusObtainedL()
     {
     if( iShowDialog )
@@ -161,3 +192,5 @@ void CAiDialogRenderer::FocusObtainedL()
         ShowDialogL();
         }
     }
+
+// End of file

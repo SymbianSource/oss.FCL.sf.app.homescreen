@@ -135,6 +135,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     controller.WidgetListL( *contentInfoArray );
     
     // 2. load the widget order
+    if ( iWidgetOrder ) { Cleanup(); }
     iWidgetOrder = CWmPersistentWidgetOrder::NewL( iWmPlugin.FileServer() );
     TRAPD( loadError, iWidgetOrder->LoadL() );
 
@@ -152,6 +153,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     while( contentInfoArray->Array().Count() > 0 )
         {
         CHsContentInfo* contentInfo = contentInfoArray->Array()[0];
+        if ( !contentInfo ) { break; }
         contentInfoArray->Array().Remove( 0 );
 
         // check if this widget exists.
@@ -255,19 +257,20 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
         }
     CleanupStack::Pop( aContentInfo );
     
-    CWmWidgetData* widgetData = CWmWidgetData::NewLC( 
+    CWmWidgetData* widgetData = CWmWidgetData::NewLC(
             iWidgetsList.LogoSize(),
             iWmPlugin.ResourceLoader(),
             aContentInfo, iWidgetRegistry );
     widgetData->SetPersistentWidgetOrder( iWidgetOrder );
     widgetData->SetValid( ETrue );
-    iWidgetsList.AddWidgetDataL( widgetData, EFalse );
-    if ( iUninstallUid != KNullUid 
-            && iUninstallUid == widgetData->PublisherUid() )
+       
+    if ( iUninstallUid != KNullUid &&
+        iUninstallUid == widgetData->PublisherUid() )
         {
         widgetData->VisualizeUninstallL();
         }
     
+    iWidgetsList.AddWidgetDataL( widgetData, EFalse );
     CleanupStack::Pop( widgetData );
     }
 

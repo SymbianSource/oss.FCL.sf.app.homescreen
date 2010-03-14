@@ -32,7 +32,7 @@
 
 
 // ---------------------------------------------------------------------------
-// Safe constructor. Initializes refrerece to the Meta Data Model in which 
+// Safe constructor. Initializes refrerece to the Meta Data Model in which
 // the event-to-action mappings are stored.
 // ---------------------------------------------------------------------------
 //
@@ -43,7 +43,7 @@ CHnEventHandler::CHnEventHandler( MHnMdModelEventObserver& aModelObserver,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnEventHandler::~CHnEventHandler()
@@ -52,10 +52,10 @@ CHnEventHandler::~CHnEventHandler()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnEventHandler* CHnEventHandler::NewLC( 
+CHnEventHandler* CHnEventHandler::NewLC(
                                       MHnMdModelEventObserver& aModelObserver,
                                       MHnControllerInterface& aController )
     {
@@ -67,21 +67,21 @@ CHnEventHandler* CHnEventHandler::NewLC(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnEventHandler* CHnEventHandler::NewL( 
+CHnEventHandler* CHnEventHandler::NewL(
                                     MHnMdModelEventObserver& aModelObserver,
                                     MHnControllerInterface& aController )
     {
-    CHnEventHandler* self=CHnEventHandler::NewLC( aModelObserver, 
+    CHnEventHandler* self=CHnEventHandler::NewLC( aModelObserver,
                                                   aController );
-    CleanupStack::Pop(self); 
+    CleanupStack::Pop(self);
     return self;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnEventHandler::ConstructL()
@@ -89,45 +89,70 @@ void CHnEventHandler::ConstructL()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-
 TInt CHnEventHandler::ExecuteStandardActionL( CHnActionModel* aActionModel )
     {
-    delete iServiceHandler;
-    iServiceHandler = NULL;
-    iServiceHandler = CHnServiceHandler::NewL(
-            aActionModel->Service(),
-            aActionModel->Interface(),
-            aActionModel->CommandName(),
-            aActionModel->ServiceMode(),
-            aActionModel->ConstructorLC(), 
-            aActionModel->CommandLC() );
+    const TDesC8& service = aActionModel->Service();
+    const TDesC8& interface =  aActionModel->Interface();
+    const TDesC8& commandName = aActionModel->CommandName();
+    const TServiceMode mode = aActionModel->ServiceMode();
+    CLiwGenericParamList* constructor = aActionModel->ConstructorLC();
+    CLiwGenericParamList* serviceCommand = aActionModel->CommandLC();
+    
+    if ( iServiceHandler && ( iIsExecutingStandardAsyncAction
+            || !iServiceHandler->ServiceHandlerMatchesModel(
+                    service, interface, constructor ) ) )
+        {
+        delete iServiceHandler; // this will cancel async. action execution
+        iServiceHandler = NULL;
+        iIsExecutingStandardAsyncAction = EFalse;
+        }
+    
+    if ( !iServiceHandler )
+        {
+        iServiceHandler = CHnServiceHandler::NewL( service, interface,
+                commandName, mode, constructor, serviceCommand );
+        CleanupStack::Pop( serviceCommand );
+        CleanupStack::Pop( constructor );
+        }
+    else
+        {
+        iServiceHandler->PrepareForNextExecutionL(
+                commandName, mode, serviceCommand );
+        CleanupStack::Pop( serviceCommand );
+        CleanupStack::PopAndDestroy( constructor );
+        constructor = NULL;
+        }
 
-    CleanupStack::Pop( 2 );
-    TInt res = iServiceHandler->ExecuteL( this, 0 ); 
+    __ASSERT_DEBUG( !iIsExecutingStandardAsyncAction, User::Invariant() );
+    if ( mode == EServiceModeAsynchronous )
+        {
+        iIsExecutingStandardAsyncAction = ETrue;
+        }
+    TInt res = iServiceHandler->ExecuteL( this, 0 );
     return res;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-TInt CHnEventHandler::ExtractUidFromActionL( const TDesC8& aInterface, 
+TInt CHnEventHandler::ExtractUidFromActionL( const TDesC8& aInterface,
         TUid& aUid )
     {
     DEBUG16(("_MM_: CHnEventHandler::ExtractUidFromActionL UIext - uid %S",
                 &aInterface ));
-  
+
     TLex8 lex( aInterface );
     lex.Inc( 2 );
     return lex.Val( (TUint32 &) aUid.iUid, EHex );
     }
-    
+
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CHnEventHandler::ExecuteInternalActionL( CHnActionModel* aActionModel )
@@ -136,32 +161,32 @@ TInt CHnEventHandler::ExecuteInternalActionL( CHnActionModel* aActionModel )
     CLiwGenericParamList* params = aActionModel->CommandLC();
     if ( aActionModel->CommandName() == KServiceOpenSuite )
         {
-        ret = iEventObserver.HandleModelEventL( KNewSuiteLoadedMdEvent(), 
+        ret = iEventObserver.HandleModelEventL( KNewSuiteLoadedMdEvent(),
                 *params );
         }
     else if ( aActionModel->CommandName() == KServiceSwitchWidget )
         {
-        ret = iEventObserver.HandleModelEventL( KSwitchWidgetMdEvent(), 
+        ret = iEventObserver.HandleModelEventL( KSwitchWidgetMdEvent(),
                 *params );
         }
     else if ( aActionModel->CommandName() == KServiceStartEditMode )
         {
-        ret = iEventObserver.HandleModelEventL( KStartEditModeMdEvent(), 
+        ret = iEventObserver.HandleModelEventL( KStartEditModeMdEvent(),
                 *params );
         }
     else if ( aActionModel->CommandName() == KServiceStopEditMode )
         {
-        ret = iEventObserver.HandleModelEventL( KStopEditModeMdEvent(), 
+        ret = iEventObserver.HandleModelEventL( KStopEditModeMdEvent(),
                 *params );
         }
     else if ( aActionModel->CommandName() == KServiceBack )
         {
-        ret = iEventObserver.HandleModelEventL( KBackMdEvent(), 
+        ret = iEventObserver.HandleModelEventL( KBackMdEvent(),
                 *params );
         }
     else if ( aActionModel->CommandName() == KSetFocus )
         {
-        ret = iEventObserver.HandleModelEventL( KSetFocusEvent(), 
+        ret = iEventObserver.HandleModelEventL( KSetFocusEvent(),
                 *params );
         }
 
@@ -170,7 +195,7 @@ TInt CHnEventHandler::ExecuteInternalActionL( CHnActionModel* aActionModel )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CHnEventHandler::ExecuteExtensionManagerActionL(
@@ -178,28 +203,28 @@ TInt CHnEventHandler::ExecuteExtensionManagerActionL(
     {
     TUid uid;
     TInt err = ExtractUidFromActionL( aActionModel->Interface(), uid );
-    
+
     if ( KErrNone == err )
         {
         HBufC* cmd = HnConvUtils::Str8ToStrFastLC( aActionModel->CommandName() );
         CLiwGenericParamList* command = aActionModel->CommandLC();
-        err = iControllerInterface.ExecuteExtensionActionL( uid, *cmd, command );        
+        err = iControllerInterface.ExecuteExtensionActionL( uid, *cmd, command );
         CleanupStack::PopAndDestroy( command );
         CleanupStack::PopAndDestroy( cmd );
         }
-    
+
     return err;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnEventHandler::ExecuteActionL( CHnActionModel* aActionModel )
     {
     ASSERT( aActionModel );
     TInt err( KErrNone );
-    
+
     if( aActionModel->Service() == KServiceMultimediaMenu )
         {
         if ( aActionModel->Interface().Length() == 0 )
@@ -215,7 +240,7 @@ EXPORT_C TInt CHnEventHandler::ExecuteActionL( CHnActionModel* aActionModel )
         {
         err = ExecuteStandardActionL( aActionModel );
         }
-    
+
     return err;
     }
 
@@ -226,5 +251,6 @@ TInt CHnEventHandler::HandleNotifyL( TInt /*aCmdId*/, TInt /*aEventId*/,
         CLiwGenericParamList& /*aEventParamList*/,
         const CLiwGenericParamList& /*aInParamList*/ )
     {
+    iIsExecutingStandardAsyncAction = EFalse;
     return KErrNone;
     }

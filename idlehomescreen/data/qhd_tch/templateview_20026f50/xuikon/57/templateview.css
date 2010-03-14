@@ -35,6 +35,28 @@ plugin:edit
     background-color:"SKIN(270501603 8582)";
 }
 
+image.widget_indication
+{
+    display: none;
+    position: absolute;
+
+    right: auto;        
+    left: 3px;
+    top: 5px;
+    
+    height: 26px; 
+    width: 26px;
+    
+    path: "SKIN(270501603 9252)";
+    _s60-aspect-ratio: preserve;
+    z-index: 2;       
+}
+
+image.widget_indication:edit
+{
+    display: block;
+}
+
 trigger#hs_popup_open_hold:edit
 {
     display: none;
@@ -55,3 +77,13 @@ softkey#rsk
     _s60-longtap: true;
     _s60-aspect-ratio: preserve;
 }  
+
+softkey#msk_ltr
+{
+    display: none;
+}
+
+softkey#msk_rtl
+{
+    display: block;
+}

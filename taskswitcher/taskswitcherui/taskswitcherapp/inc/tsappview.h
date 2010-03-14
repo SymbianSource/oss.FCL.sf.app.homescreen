@@ -22,6 +22,7 @@
 #include <e32base.h> 
 #include <coecntrl.h>
 #include <AknPopupFader.h>
+#include <touchfeedback.h>
 #include "tsdevicestate.h"
 #include "tsdatachangeobserver.h"
 #include "tseventcontrolerobserver.h"
@@ -49,13 +50,15 @@ public:
      * @param aRect Area where view should draw itself.
      */
     static CTsAppView* NewL(const TRect& aRect,
-            CTsDeviceState& aDeviceState);
+            CTsDeviceState& aDeviceState,
+            RWindowGroup& aWg);
 
     /**
      * @copydoc NewL
      */
     static CTsAppView* NewLC(const TRect& aRect,
-            CTsDeviceState& aDeviceState);
+            CTsDeviceState& aDeviceState,
+            RWindowGroup& aWg);
 
     /**
      * Destructor.
@@ -93,6 +96,12 @@ public:
      * Forward app key handling to fasswaparea control.
      */
     void HandleAppKey(TInt aType);
+    
+    /**
+     * Orders window invalidation to perform full
+     * background redraw.
+     */
+    void OrderFullWindowRedraw();
 
 protected:
     // from MCoeControlObserver
@@ -116,7 +125,7 @@ private:
     /**
      * @copydoc NewL
      */
-    void ConstructL( const TRect& aRect );
+    void ConstructL( const TRect& aRect, RWindowGroup& aWg );
 
     /**
      * C++ constructor.
@@ -164,6 +173,20 @@ private:
      */
     void DisableAppSwitchEffects();
     
+    /**
+     * Launches feedback through MTouchFeedback::Instance()
+     * 
+     * @param aType         - The logical feedback type to play.
+     * @param aFeedbackType - Feedback types to be played as a bitmask 
+     *                        combination of enumeration items from
+     *                        TTouchFeedbackType
+     * @param aPointerEvent - Pointer event, which triggered this feedback.
+     */
+    void LaunchFeedback( TTouchLogicalFeedback aType,
+		TTouchFeedbackType aFeedbackType,
+		const TPointerEvent& aPointerEvent);
+    
+
     
 public://From MTsEventControlerObserver
     /**
@@ -187,7 +210,7 @@ public://From MTsEventControlerObserver
     /**
      * 
      */
-    virtual void Drag(
+    virtual void DragL(
         const AknTouchGestureFw::MAknTouchGestureFwDragEvent& aEvent);
     
     /**

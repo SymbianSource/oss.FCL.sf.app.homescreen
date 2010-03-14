@@ -29,6 +29,7 @@
 // Forward declarations
 class CHsContentControlEComListener;
 class CHsContentControlUninstallMonitor;
+class CXnAppUiAdapter;
 
 /**
  *  Content control UI base class
@@ -49,7 +50,7 @@ public: // Constructor and destructor
     /**
      * Two-phased constructor.
      */
-    IMPORT_C static CHsContentControlFactory* NewL();
+    IMPORT_C static CHsContentControlFactory* NewL( CXnAppUiAdapter& aAdapter );
 
     /**
      * Destructor.
@@ -70,16 +71,15 @@ private: // from MHsContentControlUninstallObserver
      * @param aPkgUid The package UID which is being uninstalled.
      */
      void HandleUninstallEvent( const TUid& aPkgUid );
-    
+
 private: // Constructors
     /**
      * Constructor
      */
-    CHsContentControlFactory();
+    CHsContentControlFactory( CXnAppUiAdapter& aAdapter );
 
     /** Second phase constructor */
     void ConstructL();
-
 
 public: // New functions
     /**
@@ -89,6 +89,12 @@ public: // New functions
         const TDesC8& aControllerType );
 
 private:
+
+    /** 
+     * Deregisters/Removes/Deletes plugin's views from AppUi.
+     */
+    void ReleaseHsCcUi( CHsContentControlUi* aHsContentControlUi );
+
     /** 
      * Finds and returns loaded ContentControlUi object from array.
      */
@@ -117,6 +123,11 @@ private:
     TBool PluginUpgradeDowngrade( const CImplementationInformation& aPluginImplInfo );
 
 private: // Data
+
+    /**
+     * Reference to XnAppUiAdapter.
+     */
+    CXnAppUiAdapter& iAdapter;
 
     /**
      * An array of type CHsContentControlUi ( Owned ).

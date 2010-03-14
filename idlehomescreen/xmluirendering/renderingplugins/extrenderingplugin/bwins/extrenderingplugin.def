@@ -7,4 +7,6 @@ EXPORTS
 	?ImplUid@CXnExtRenderingPluginAdapter@@QBE?AVTUid@@XZ @ 6 NONAME ; class TUid CXnExtRenderingPluginAdapter::ImplUid(void) const
 	??1CXnExtRenderingPluginAdapter@@UAE@XZ @ 7 NONAME ; CXnExtRenderingPluginAdapter::~CXnExtRenderingPluginAdapter(void)
 	?EnterPowerSaveModeL@CXnExtRenderingPluginAdapter@@UAEXXZ @ 8 NONAME ; void CXnExtRenderingPluginAdapter::EnterPowerSaveModeL(void)
+	?SetEventHandler@CXnExtRenderingPluginAdapter@@UAEXPAVMXnExtEventHandler@@@Z @ 9 NONAME ; void CXnExtRenderingPluginAdapter::SetEventHandler(class MXnExtEventHandler *)
+	?SetDataL@CXnExtRenderingPluginAdapter@@UAEXABVTDesC8@@ABVTDesC16@@H@Z @ 10 NONAME ; void CXnExtRenderingPluginAdapter::SetDataL(class TDesC8 const &, class TDesC16 const &, int)
 

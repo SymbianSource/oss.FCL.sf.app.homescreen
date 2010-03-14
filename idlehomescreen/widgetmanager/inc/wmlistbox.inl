@@ -41,13 +41,4 @@
  inline const RWidgetDataValues& CWmListBox::WidgetDataArray()
      { return iWidgetDatas; }
 
-/** 
-  * State of pointer down event 
-  * 
-  * @return ETrue if pointer is down
-  */
- inline TBool CWmListBox::PressedDown()
-     { return iPressedDown; }
- 
-	 
 #endif /* WMLISTBOX_INL_ */

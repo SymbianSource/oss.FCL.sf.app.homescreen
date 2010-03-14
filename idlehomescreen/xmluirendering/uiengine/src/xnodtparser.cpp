@@ -51,7 +51,7 @@
 
 #include "xnodtparser.h"
 
-_LIT8( KWidgetBgSkinId, "SKIN(268458534 9886)" );
+_LIT8( KWidgetBgSkinId, "SKIN(268458534 9916)" );
 
 // CONSTANTS
 _LIT8( KXMLUIMLNodeName, "xmluiml" );
@@ -770,6 +770,15 @@ void CXnODTParser::DestroyWidgetL( CXnPluginData& aPluginData )
         
     CXnNode* owner( widgetNode->Parent() );
     
+    CXnControlAdapter* widgetControl( widgetNode->Control() );
+    
+    RPointerArray< CXnControlAdapter >& 
+        childAdapters( owner->Control()->ChildAdapters() );
+    
+    childAdapters.Remove( childAdapters.Find( widgetControl ) ); 
+    
+    childAdapters.Compress();
+    
     RPointerArray< CXnNode >& children( owner->Children() );
     
     TInt index( children.Find( widgetNode ) );
@@ -784,9 +793,7 @@ void CXnODTParser::DestroyWidgetL( CXnPluginData& aPluginData )
        
         CXnDomNode* owner( aPluginData.Owner() );
         owner->DeleteChild( aPluginData.Node() );
-        }
-    
-    owner->Control()->RemoveChildAdapters();
+        }       
     }
 
 // -----------------------------------------------------------------------------

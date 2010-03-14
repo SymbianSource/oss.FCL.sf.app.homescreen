@@ -24,6 +24,7 @@ EPOCHEAPSIZE    0x100000 0xa00000  // 1 Mb - 10 Mb
 EPOCSTACKSIZE   0x5000 // 20KB
 
 TARGET          taskswitcher.exe
+
 TARGETTYPE      exe
 UID             0x100039CE KTsAppUidValue
 CAPABILITY      CAP_APPLICATION NetworkControl PowerMgmt
@@ -88,14 +89,14 @@ LIBRARY         tsfswclient.lib
 LIBRARY         tsfswutils.lib
 
 SOURCEPATH      ../data
-START RESOURCE  tstaskswitcher.rss
+START RESOURCE  taskswitcher.rss
 HEADER
 TARGETPATH      APP_RESOURCE_DIR
 LANGUAGE_IDS
 END
 
 SOURCEPATH      ../data
-START RESOURCE  tstaskswitcher_reg.rss
-DEPENDS tstaskswitcher.rsg
+START RESOURCE  taskswitcher_reg.rss
+DEPENDS taskswitcher.rsg
 TARGETPATH      /private/10003a3f/apps
 END

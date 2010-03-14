@@ -15,42 +15,42 @@
 *
 */
 
+#ifndef _XMLUICONTROLLER_H
+#define _XMLUICONTROLLER_H
 
-#ifndef C_XMLUICONTROLLER_H
-#define C_XMLUICONTROLLER_H
+// System includes
 
+// User includes
 #include <aisystemuids.hrh>
 #include "aiuicontroller.h"
 #include "aiuieventhandler.h"
 
-
+// Constants
 const TInt KImplementationUidXmlUiController = AI3_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML;
 const TUid KUidXmlUiController = { KImplementationUidXmlUiController };
 
-
+// Forward declarations
 class CApaApplication;
 class TXnUiEngineAppIf;
 class CXnNodeAppIf;
 class CRepository;
+class THsPublisherInfo;
 
 namespace AiXmlUiController
 {
-
 class CAppUi;
 class CAIXuikonEventHandler;
 class CXmlNodeIdGenerator;
 class CContentRenderer;
 class CContentPublisher;
 
-
 /**
  *  @ingroup group_xmluicontroller
  * 
  *  Active Idle XML UI Controller.
  */
-class CXmlUiController : public CAiUiController,
-                         public MAiMainUiController,
-                         public MAiUiEventHandler
+NONSHARABLE_CLASS( CXmlUiController ) : public CAiUiController,
+    public MAiMainUiController, public MAiUiEventHandler                         
     {
 public:   
     // Constructors and destructor
@@ -104,20 +104,20 @@ public:
     void NotifyAppEnvReadyL();
 
     /**
-     * Gets UiFw observer
-     *
-     * @since S60 5.0
-     * @return UiFw observer     
-     */
-    MAiUiFrameworkObserver* UiFrameworkObserver() const;
-
-    /**
      * Gets UiFw event handler 
      *
      * @since S60 5.0
      * @return UiFw event handler     
      */    
     MAiFwEventHandler* FwEventHandler() const;
+
+    /**
+     * Gets UiFw state handler 
+     *
+     * @since S60 5.2
+     * @return UiFw state handler     
+     */    
+    MAiFwStateHandler* FwStateHandler() const;
     
     /**
      * Gets UiEngine.
@@ -136,135 +136,149 @@ public:
     CRepository& SettingsRepository() const;
 
     /**
-     * Gets native ui publishers
-     * 
-     * @since S60 5.0
-     * @param aPlugins Array where plugins are appended.
-     */
-    void PublisherInfoL( RAiPublisherInfoArray& aPlugins );
-
-    /**
      * Gets xml ui publishers
      * 
-     * @since S60 5.0
+     * @since S60 5.2
      * @param aSource Xml node which defineds the publisher
-     * @param aInfo Publisher info filled based aSource information
+     * @param aPublisherInfo Publisher info filled based aSource information
      */    
     void PublisherInfoL( CXnNodeAppIf& aSource,
-                         TAiPublisherInfo& aInfo );
+        THsPublisherInfo& aPublisherInfo );
 
 public: 
     // from CAiUiController
 
+    /**
+     * @see CAiUiController
+     */
     void LoadUIDefinitionL();
-    
-    void GetPluginsL( RAiPublisherInfoArray& aPlugins );
-                                             
-    void GetSettingsL( const TAiPublisherInfo& aPubInfo, 
+       
+    /**
+     * @see CAiUiController
+     */    
+    void GetSettingsL( const THsPublisherInfo& aPublisherInfo, 
         RAiSettingsItemArray& aSettings );
     
+    /**
+     * @see CAiUiController
+     */    
     void ActivateUI();
     
+    /**
+     * @see CAiUiController
+     */    
     MAiContentObserver& GetContentObserver();
     
+    /**
+     * @see CAiUiController
+     */    
     void SetEventHandler( MAiFwEventHandler& aFwEventHandler );
     
-    void RemovePluginFromUI( MAiPropertyExtension& aPlugin );
-            
+    /**
+     * @see CAiUiController
+     */    
+    void SetStateHandler( MAiFwStateHandler& aFwStateHandler );
+       
+    /**
+     * @see CAiUiController
+     */    
     MAiMainUiController* MainInterface();
     
+    /**
+     * @see CAiUiController
+     */    
     MAiSecondaryUiController* SecondaryInterface();
         
 private: 
     // from MAiMainUiController
 
+    /**
+     * @see MAiMainUiController
+     */
     void RunApplicationL();
     
+    /**
+     * @see MAiMainUiController
+     */    
     CCoeEnv& CoeEnv();
-    
-    void SetUiFrameworkObserver( MAiUiFrameworkObserver& aObserver );
-        
+            
+    /**
+     * @see MAiMainUiController
+     */    
     void Exit();
-    
+
+    /**
+     * @see MAiMainUiController
+     */        
     TBool IsMenuOpen();
     
 private: 
     // from MAiUiEventHandler
 
+    /**
+     * @see MAiUiEventHandler
+     */        
     TBool HandleUiEvent(TAny* aEvent, const TDesC8& aParam);
               
 private: 
     // Constructors
 
+    /**
+     * C++ default constructor
+     */
     CXmlUiController();
     
+    /**
+     * 2nd phase constructor
+     */
     void ConstructL();
 
 private: 
-    // New methods    
+    // New functions
+    
     static CApaApplication* NewApplication();
     
-    void HandleFocusGainedL( const TDesC8& aUiElement1, const TDesC8& aUiElement2, CXnNodeAppIf& aOrigin );
+    void HandleFocusGainedL( const TDesC8& aUiElement1, 
+        const TDesC8& aUiElement2, CXnNodeAppIf& aOrigin );
     
-    void HandleSetElementSizeL( const TDesC8& aElementName, CXnNodeAppIf& aOrigin );
+    void HandleSetElementSizeL( const TDesC8& aElementName, 
+        CXnNodeAppIf& aOrigin );
     
-    static TInt ExitTimerCallBack(TAny *aSelf);
-
-    void GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo, RAiSettingsItemArray &aPluginSettings );
+    static TInt ExitTimerCallBack( TAny *aSelf );
+       
+    void GetContentItemL( CXnNodeAppIf& aNode, 
+        RAiSettingsItemArray& aSettings, HBufC*& aItemName );
     
-    void GetContentItemL(  CXnNodeAppIf& aNode, RAiSettingsItemArray& aSettings, HBufC*& aItemName );
+    void GetConfigurationsL( CXnNodeAppIf& aNode, 
+        RAiSettingsItemArray& aSettings, const TDesC& aConfOwner );
     
-    void GetConfigurationsL( CXnNodeAppIf& aNode, RAiSettingsItemArray& aSettings, const TDesC& aConfOwner );
-    
-    void GetContentModelL(const TAiPublisherInfo& aPubInfo, RAiSettingsItemArray& aSettings);
+    void GetContentModelL( const THsPublisherInfo& aPubInfo, 
+        RAiSettingsItemArray& aSettings );
                 
-private: // data
+private: 
+    // data
         
-    /**
-     * Ai content observer. Not own.
-     */
-    MAiContentObserver* iObserver;
-    
-    /**
-     * Ui framework observer. Not own.
-     */
-    MAiUiFrameworkObserver* iUiFrameworkObserver;
-    
-    /**
-     * Event handler. Not own.
-     */
+    /** Ai content observer, Not owned */
+    MAiContentObserver* iObserver;        
+    /** AiFw Event handler, Not owned */
     MAiFwEventHandler* iFwEventHandler;
-    
-    /**
-     * Node id generator. Own.
-     */
-    CXmlNodeIdGenerator* iNodeIdGenerator;
-    
-    /**
-     * App UI. Not own.
-     */
-    CAppUi* iAppUi;
-    
-    /**
-     * Timer to call AppUi's exit. Own.
-    **/
+    /** AiFw State handler, Not owned */
+    MAiFwStateHandler* iFwStateHandler;    
+    /** * Node id generator, Owned */
+    CXmlNodeIdGenerator* iNodeIdGenerator;    
+    /** AppUi, Not owned */
+    CAppUi* iAppUi;    
+    /** Timer to call AppUi's exit, Owned */
     CPeriodic *iExitTimer; 
-    
-    /**
-     * Cenrep. Own.
-     */
+    /** Cenrep, Owned */
     CRepository *iAISettingsRepository;
-
-    /**
-     * CPS publisher. Own.
-     */
-    CContentPublisher* iCPSpublisher;
-    
-    /**
-     * Flag to indicate whether running as main UI controller
-     */
+    /** CPS publisher, Owned */
+    CContentPublisher* iCPSpublisher;    
+    /** Flag to indicate whether running as main UI controller */
     TBool iRunningAsMain;
     };    
 }  // namespace AiXmlUiController
 
-#endif  // C_XMLUICONTROLLER_H
+#endif  // _XMLUICONTROLLER_H
+
+// End of file

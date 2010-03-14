@@ -86,54 +86,23 @@ public: // API
     const TDesC& PortalButtonIcon( TInt aIndex );
     
     /**
-     * Portal button action method.
-     * Defines what happens when the portal button is pressed.
+     * Returns url to for browser by button index
      * @param aIndex index of the button, starting at 0
      */
-    TMethod PortalButtonPrimaryMethod( TInt aIndex );
+    const TDesC& PortalButtonBrowserUrl( TInt aIndex );
     
     /**
-     * Service name for the primary method.
-     * For EHttp this is unused.
-     * For EWidget, this is the widget Bundle ID.
-     * For EApplication, this is the application name.
+     * Returns client uid by button index 
      * @param aIndex index of the button, starting at 0
      */
-    const TDesC& PortalButtonPrimaryService( TInt aIndex );
+    TUid PortalButtonClientUid( TInt aIndex );
     
     /**
-     * parameters related to the method.
-     * For EHttp this is the HTTP address
-     * For EWidget the parameters passed to the widget
-     * For EApplication the params passed to the app.
+     * Returns client parameter by button index 
      * @param aIndex index of the button, starting at 0
      */
-    const TDesC& PortalButtonPrimaryParams( TInt aIndex );
-    
-    /**
-     * Secondary method, which is excuted if
-     * primary method fails.
-     * Works like Primary method.
-     * @param aIndex index of the button, starting at 0
-     */
-    TMethod PortalButtonSecondaryMethod( TInt aIndex );
-    
-    /**
-     * Service name for the primary method.
-     * For EHttp this is unused.
-     * For EWidget, this is the widget Bundle ID.
-     * For EApplication, this is the application name.
-     * @param aIndex index of the button, starting at 0
-     */
-    const TDesC& PortalButtonSecondaryService( TInt aIndex );
-    
-    /**
-     * Parameters for Secondary method. Like Primary method
-     * Works like Primary params.
-     * @param aIndex index of the button, starting at 0
-     */
-    const TDesC& PortalButtonSecondaryParams( TInt aIndex );
-    
+    const TDesC& PortalButtonClientParam( TInt aIndex );
+        
 private: // New functions
     
     void LoadConfigurationL();

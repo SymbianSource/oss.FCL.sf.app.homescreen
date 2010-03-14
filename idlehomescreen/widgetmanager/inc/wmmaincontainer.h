@@ -243,6 +243,12 @@ public:
      */
     CWmConfiguration& Configuration();
     
+    /**
+     * Process foregound events.
+     * @param aForeground ETrue indicates foreground
+     */
+    void ProcessForegroundEvent( TBool aForeground );
+    
 protected: // from base class CCoeControl
     
     /**

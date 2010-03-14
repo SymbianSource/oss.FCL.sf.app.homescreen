@@ -29,9 +29,7 @@
 #include <akntranseffect.h>
 #include <aknPopupHeadingPane.h>
 #include <StringLoader.h>
-#include <tstaskswitcher.rsg>
-#include <touchfeedback.h>
-
+#include <taskswitcher.rsg>
 #include "tsappview.h"
 #include "tsappui.h"
 #include "tsapplogging.h"
@@ -39,14 +37,17 @@
 #include "tseventcontroler.h"
 #include "tsuid.hrh"
 
+
+
 // -----------------------------------------------------------------------------
 // CTsAppView::NewL
 // -----------------------------------------------------------------------------
 //
 CTsAppView* CTsAppView::NewL( const TRect& aRect,
-        CTsDeviceState& aDeviceState )
+        CTsDeviceState& aDeviceState,
+        RWindowGroup& aWg)
     {
-    CTsAppView* self = CTsAppView::NewLC( aRect, aDeviceState );
+    CTsAppView* self = CTsAppView::NewLC( aRect, aDeviceState, aWg );
     CleanupStack::Pop( self );
     return self;
     }
@@ -56,11 +57,12 @@ CTsAppView* CTsAppView::NewL( const TRect& aRect,
 // -----------------------------------------------------------------------------
 //
 CTsAppView* CTsAppView::NewLC( const TRect& aRect,
-        CTsDeviceState& aDeviceState )
+        CTsDeviceState& aDeviceState,
+        RWindowGroup& aWg)
     {
     CTsAppView* self = new (ELeave) CTsAppView( aDeviceState );
     CleanupStack::PushL( self );
-    self->ConstructL( aRect );
+    self->ConstructL( aRect, aWg );
     return self;
     }
 
@@ -100,14 +102,6 @@ static void InvalidateWindows( CCoeControl* aControl )
 //
 CTsAppView::~CTsAppView()
     {
-    GfxTransEffect::SetTransitionObserver( 0 );
-    if ( GfxTransEffect::IsRegistered( this ) )
-        {
-        MakeVisible( EFalse ); 
-        CAknTransitionUtils::MakeVisibleSubComponents( this,
-            CAknTransitionUtils::EForceInvisible );
-        GfxTransEffect::Deregister( this );
-        }
     delete iBgContext;
     delete iFastSwapArea;
     delete iAppsHeading;
@@ -119,13 +113,13 @@ CTsAppView::~CTsAppView()
 // CTsAppView::ConstructL
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::ConstructL( const TRect& aRect )
+void CTsAppView::ConstructL( const TRect& aRect, RWindowGroup& aWg )
     {
     TSLOG_CONTEXT( CTsAppView::ConstructL, TSLOG_LOCAL );
     TSLOG_IN();
 
     // Create a window for this application view
-    CreateWindowL();
+    CreateWindowL(aWg);
 
     // Store rect
     TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
@@ -174,9 +168,8 @@ void CTsAppView::ConstructL( const TRect& aRect )
         }
     
     DrawableWindow()->EnableBackup(EWindowBackupFullScreen);
-    Window().SetOrdinalPosition( 0, ECoeWinPriorityNormal );
     SetComponentsToInheritVisibility(ETrue);
-    MakeVisible(ETrue);
+    MakeVisible(EFalse);
     // Ready to be drawn
     ActivateL();
     
@@ -221,14 +214,6 @@ void CTsAppView::UpdatePopupRects(  )
     TSLOG4( TSLOG_INFO, "inner rect for popup = %d %d %d %d",
             iBgContextInnerRect.iTl.iX, iBgContextInnerRect.iTl.iY,
             iBgContextInnerRect.iBr.iX, iBgContextInnerRect.iBr.iY );
-   
-#ifdef TASKSWITCHER_USE_CUSTOM_LAYOUT
-    if ( iFastSwapArea )
-        {
-        iBgContextOuterRect = iFastSwapArea->Rect();
-        iBgContextInnerRect = iFastSwapArea->Rect();
-        }
-#endif
     
     TSLOG_OUT();
     }
@@ -321,6 +306,7 @@ void CTsAppView::SizeChanged()
     {
     TSLOG_CONTEXT( CTsAppView::SizeChanged, TSLOG_LOCAL );
     TSLOG_IN();
+    iViewRect = Rect();
     UpdatePopupRects();
     iBgContext->SetFrameRects(iBgContextOuterRect, iBgContextInnerRect);
     if ( iFastSwapArea && iAppsHeading  )
@@ -455,19 +441,10 @@ CCoeControl* CTsAppView::ComponentControl( TInt aIndex ) const
 //
 void CTsAppView::HandleSwitchToBackgroundEvent()
     {
-    // Stop animation and unfade
-    GfxTransEffect::Abort();
     iPopupFader.FadeBehindPopup( this, NULL, EFalse );
     
-    GfxTransEffect::Begin( this, 5);
-    // Forward event to interested controls
     iFastSwapArea->HandleSwitchToBackgroundEvent();
 
-    // Hide
-    MakeVisible( EFalse );
-    //GfxTransEffect::NotifyExternalState( ENotifyGlobalAbort );
-    CAknTransitionUtils::MakeVisibleSubComponents( this,
-        CAknTransitionUtils::EForceInvisible );
     }
 
 // -----------------------------------------------------------------------------
@@ -476,6 +453,9 @@ void CTsAppView::HandleSwitchToBackgroundEvent()
 //
 void CTsAppView::HandleSwitchToForegroundEvent()
     {
+    TSLOG_CONTEXT( CTsAppView::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
+    TSLOG_IN();
+    
     Window().Invalidate(Rect());
     
     // Fade behind the pop-up
@@ -495,7 +475,7 @@ void CTsAppView::HandleSwitchToForegroundEvent()
     if ( appui->EffectsEnabled() )
         {
         InvalidateWindows( this );
-        appui->StartTransion(AknTransEffect::EApplicationStart);
+        appui->StartTransion(CTsAppUi::EForegroundTransition);
         }
     else
         {
@@ -505,6 +485,8 @@ void CTsAppView::HandleSwitchToForegroundEvent()
         }
     
     DrawDeferred();
+    
+    TSLOG_OUT();
     }
 
 // -----------------------------------------------------------------------------
@@ -551,7 +533,7 @@ void CTsAppView::HandleControlEventL( CCoeControl* aControl,
 // Called when screen orientation, touch awareness, or the skin has been changed.
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::HandleDeviceStateChanged( TChangeType /*aChangeType*/ )
+void CTsAppView::HandleDeviceStateChanged( TChangeType aChangeType )
     {
     TSLOG_CONTEXT( HandleDeviceStateChanged, TSLOG_LOCAL );
     TSLOG_IN();
@@ -559,11 +541,20 @@ void CTsAppView::HandleDeviceStateChanged( TChangeType /*aChangeType*/ )
     // Just set all the sizes, even when there is a skin change, because this will
     // guarantee proper redraw also with the ganes controls.
 
-    iViewRect = Rect();
-    TSLOG4( TSLOG_INFO, "setting rect %d %d %d %d",
-        iViewRect.iTl.iX, iViewRect.iTl.iY,
-        iViewRect.iBr.iX, iViewRect.iBr.iY );
-    SetRect( iViewRect );
+    if(aChangeType == EOrientation)
+        {
+        SetRect( static_cast<CAknAppUi*>(iEikonEnv->AppUi())->ApplicationRect() );
+        }
+    else
+        {
+        iViewRect = Rect();
+        TSLOG4( TSLOG_INFO, "setting rect %d %d %d %d",
+            iViewRect.iTl.iX, iViewRect.iTl.iY,
+            iViewRect.iBr.iX, iViewRect.iBr.iY );
+        SetRect( iViewRect );
+        }
+    
+    InvalidateWindows(this);
 
     TSLOG_OUT();
     }
@@ -606,15 +597,10 @@ CCoeControl* CTsAppView::FadedComponent( TInt aIndex )
 //
 void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
     {
-    MTouchFeedback* feedback = MTouchFeedback::Instance();
-    if(0 != feedback &&
-       (TPointerEvent::EButton1Down == aPointerEvent.iType || 
-       TPointerEvent::EButton1Up == aPointerEvent.iType))
+    if( TPointerEvent::EButton1Down == aPointerEvent.iType )
         {
-        feedback->InstantFeedback(this,
-                                  ETouchFeedbackBasic, 
-                                  ETouchFeedbackVibra, 
-                                  aPointerEvent);
+		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
+				ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
         } 
     iFastSwapArea->HandlePointerEventL(aPointerEvent);
     }
@@ -656,6 +642,18 @@ void CTsAppView::HandleAppKey(TInt aType)
     {
     iFastSwapArea->HandleAppKey(aType);
     }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppView::OrderBackgrRedraw
+// -----------------------------------------------------------------------------
+//
+void CTsAppView::OrderFullWindowRedraw()
+    {
+    InvalidateWindows(this);
+    DrawNow();
+    }
+
 
 // -----------------------------------------------------------------------------
 // CTsAppView::MoveOffset
@@ -702,12 +700,26 @@ void CTsAppView::LongTapL(const TPoint& aPoint)
     }
 
 // -----------------------------------------------------------------------------
-// CTsAppView::Drag()
+// CTsAppView::DragL()
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::Drag(const MAknTouchGestureFwDragEvent& aEvent)
+void CTsAppView::DragL(const MAknTouchGestureFwDragEvent& aEvent)
     {
-    iFastSwapArea->Drag(aEvent);
+	if( aEvent.State() == EAknTouchGestureFwStop )
+		{
+		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
+				ETouchFeedbackVibra | ETouchFeedbackAudio), TPointerEvent());
+		}
+    if( iFastSwapArea->Rect().Contains(aEvent.StartPosition()) ||
+		iAppsHeading->Rect().Contains(aEvent.StartPosition()) )
+        {
+		iFastSwapArea->DragL(aEvent);
+        }
+    else 
+    	{
+		//move task switcher to background
+		iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
+    	}
     }
 
 // -----------------------------------------------------------------------------
@@ -727,5 +739,25 @@ TPoint CTsAppView::ViewPos() const
     {
     return iFastSwapArea->ViewPos();
     }
+
+// -----------------------------------------------------------------------------
+// CTsAppView::LaunchFeedback
+// -----------------------------------------------------------------------------
+//
+void CTsAppView::LaunchFeedback( TTouchLogicalFeedback aLogicalType,
+        TTouchFeedbackType aFeedbackType,
+        const TPointerEvent& aPointerEvent)
+	{
+	MTouchFeedback* feedback = MTouchFeedback::Instance();
+	if(0 != feedback)
+	    {
+	    feedback->InstantFeedback(this, aLogicalType,
+	    		aFeedbackType,
+	    		aPointerEvent);
+	    } 
+	}
+
+
+
 
 // End of file

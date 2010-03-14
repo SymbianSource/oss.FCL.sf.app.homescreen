@@ -19,7 +19,7 @@
 // INCLUDE FILES
 #include <centralrepository.h>
 #include <StringLoader.h>
-#include <aknsconstants.h>
+#include <AknsConstants.h>
 
 #include <widgetmanagerview.rsg>
 #include <widgetmanager.mbg>
@@ -261,85 +261,50 @@ const TDesC& CWmConfiguration::PortalButtonIcon( TInt aIndex )
     }
 
 // ---------------------------------------------------------
-// CWmConfiguration::PortalButtonPrimaryMethod
+// CWmConfiguration::PortalButtonBrowserUrl
 // ---------------------------------------------------------
 //
-CWmConfiguration::TMethod
-    CWmConfiguration::PortalButtonPrimaryMethod( TInt aIndex )
+const TDesC& CWmConfiguration::PortalButtonBrowserUrl( TInt aIndex )
     {
-    IndexConversion( aIndex );
-    if ( aIndex == 0 && iOviStoreBundleId && iOviStoreBundleId->Length() > 0 )
-        return EWidget;
-    if ( aIndex == 1 && iOperatorButtonUrl && iOperatorButtonUrl->Length() > 0 )
-        return EHttp;
-    return ENone;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonPrimaryService
-// ---------------------------------------------------------
-//
-const TDesC&
-    CWmConfiguration::PortalButtonPrimaryService( TInt aIndex )
-    {
-    IndexConversion( aIndex );
-    if ( aIndex == 0 && iOviStoreBundleId && iOviStoreBundleId->Length() > 0 )
-        return *iOviStoreBundleId;
-    return KNullDesC;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonPrimaryParams
-// ---------------------------------------------------------
-//
-const TDesC&
-    CWmConfiguration::PortalButtonPrimaryParams( TInt aIndex )
-    {
-    IndexConversion( aIndex );
-    if ( aIndex == 0 && iOviStoreClientParam )
-        return *iOviStoreClientParam;
-    if ( aIndex == 1 && iOperatorButtonUrl )
-        return *iOperatorButtonUrl;
-    return KNullDesC;
-    }
-
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonSecondaryMethod
-// ---------------------------------------------------------
-//
-CWmConfiguration::TMethod
-    CWmConfiguration::PortalButtonSecondaryMethod( TInt aIndex )
-    {
-    IndexConversion( aIndex );
-    if ( aIndex == 0 && iOviButtonUrl && iOviButtonUrl->Length() > 0 )
-        return EHttp;
-    return ENone;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonSecondaryService
-// ---------------------------------------------------------
-//
-const TDesC&
-    CWmConfiguration::PortalButtonSecondaryService( TInt aIndex )
-    {
-    IndexConversion( aIndex );
-    return KNullDesC;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonSecondaryParams
-// ---------------------------------------------------------
-//
-const TDesC&
-    CWmConfiguration::PortalButtonSecondaryParams( TInt aIndex )
-    {
-    IndexConversion( aIndex );
     if ( aIndex == 0 && iOviButtonUrl )
         return *iOviButtonUrl;
+    else if ( aIndex == 1 && iOperatorButtonUrl )
+        return *iOperatorButtonUrl;
+
     return KNullDesC;
     }
+
+// ---------------------------------------------------------
+// CWmConfiguration::PortalButtonClientUid
+// ---------------------------------------------------------
+//
+TUid CWmConfiguration::PortalButtonClientUid( TInt aIndex )
+    {
+    if ( aIndex == 0 && iOviStoreBundleId )
+        {
+        // idea: change iOviStoreBundleId to UID of laucher in cenrep
+        return TUid::Uid( 0x2002D07F );
+        }
+    // Operator client uid not supported. 
+    // If operator client is a widget we can use widget registry 
+    // to fetch uid of operator widget save it to member and return that here
+    return KNullUid;
+    }
+
+// ---------------------------------------------------------
+// CWmConfiguration::PortalButtonClientParam
+// ---------------------------------------------------------
+//
+const TDesC& CWmConfiguration::PortalButtonClientParam( TInt aIndex )
+    {
+    if ( aIndex == 0 && iOviStoreClientParam )
+        {
+        return *iOviStoreClientParam;
+        }
+    // Operator client param not supported. Can be added if needed.
+    return KNullDesC;
+    }
+
 
 // ---------------------------------------------------------
 // CWmConfiguration::IndexConversion
@@ -355,9 +320,6 @@ void CWmConfiguration::IndexConversion( TInt& /*aIndex*/ )
     
     // but for now, this method is empty.
     }
-
-
-
 
 // End of File
 

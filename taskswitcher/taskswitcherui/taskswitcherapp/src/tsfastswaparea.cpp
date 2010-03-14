@@ -24,7 +24,7 @@
 #include <aknstyluspopupmenu.h>
 #include <AknQueryDialog.h>
 #include <StringLoader.h>
-#include <tstaskswitcher.rsg>
+#include <taskswitcher.rsg>
 #include <aknlayoutscalable_apps.cdl.h>
 #include <layoutmetadata.cdl.h>
 #include <aknlists.h>
@@ -38,6 +38,7 @@
 #include "tsappui.h"
 #include "tsdatachangeobserver.h"
 #include "tseventcontroler.h"
+#include "tsappview.h"
 
 /** command ids for the fsw popup */
 enum TPopupCommands
@@ -48,10 +49,6 @@ enum TPopupCommands
 
 /** Number of closable applications, to show "close all" option. */
 const TInt KTsMaxClosableApps = 2;
-
-/** Interval until which no change in the fsw content is rendered
-    after starting the closing of an application. */
-const TInt KRefreshDelayAfterClose = 2; // seconds
 
 /** Uid of Active Idle application. 
     Used when movind Ai to specified position.*/
@@ -69,8 +66,11 @@ const TInt KAppKeyTypeLong = 2;
 const TInt KLayoutItemCount = 4;
 
 const TInt KRedrawTime = 250000; // 0.25 sec
+const TInt KRedrawTimeForLayoutSwitch = 700000; // 0.7 sec
 const TInt KHighlighActivationTime = 100000; // 100 ms
 const TInt KUpdateGridTime = 1000000; // 1 s
+
+const TInt KMaxGranularity = 4;
 
 // -----------------------------------------------------------------------------
 // CTsFastSwapArea::NewL
@@ -185,6 +185,7 @@ void CTsFastSwapArea::ReCreateGridL()
     
     iGrid = new( ELeave ) CTsFastSwapGrid;
     iGrid->ConstructL( this );
+	iGrid->DisableSingleClick(ETrue);//enables highlight on pointer
     iDeviceState.AddObserverL(*iGrid, MTsDeviceStateObserver::ESkin);
     
     AknListBoxLayouts::SetupStandardGrid( *iGrid );
@@ -201,7 +202,6 @@ void CTsFastSwapArea::ReCreateGridL()
     
     TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     iGrid->SetRect(gridAppPane.Rect());
-    iGrid->SetVisibleViewRect(gridAppPane.Rect());
     TAknLayoutScalableParameterLimits gridParams = 
         AknLayoutScalable_Apps::cell_tport_appsw_pane_ParamLimits( variety );
     TPoint empty( ELayoutEmpty, ELayoutEmpty );
@@ -353,7 +353,15 @@ void CTsFastSwapArea::SizeChanged()
         iGrid->SetCurrentDataIndex(selIdx);
         UpdateGrid(ETrue, EFalse);
         DrawDeferred();
+        
+        // Order full redraw after switch
+        if(iRedrawTimer)
+            {
+            iRedrawTimer->Cancel();
+            iRedrawTimer->After(KRedrawTimeForLayoutSwitch);
+            }
         }
+    
     TSLOG_OUT();
     }
 
@@ -389,7 +397,7 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
         // Therefore ts must be moved to background.
         CTsAppUi* appui =
             static_cast<CTsAppUi*>( iEikonEnv->AppUi() );
-        appui->MoveAppToBackground( AknTransEffect::EApplicationStartRect );
+        appui->MoveAppToBackground( CTsAppUi::EActivationTransition );
         }
     }
 
@@ -405,6 +413,11 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
 
     if ( aIndex >= 0 && aIndex < iArray.Count() && CanClose( aIndex ) )
         {
+        TInt selIdx = SelectedIndex();
+        if ( selIdx > aIndex && selIdx > 0 )
+            {
+            selIdx--;
+            }
         TInt wgId = iArray[aIndex]->WgId();
         iFSClient->CloseApp( wgId );
         // The fsw content will change sooner or later
@@ -419,7 +432,7 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
         NotifyChange();
         if ( !aSuppressRendering )
             {
-            RenderContentL();
+            RenderContentL( ETrue );
             }
         // Update item selection on the screen if last item was deleted
         TInt newItemCount = GridItemCount();
@@ -428,7 +441,11 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
             newItemCount--;
             iGrid->SetCurrentDataIndex(newItemCount);
             }
-        iTimeOfLastClose.HomeTime();
+        else
+            {
+            DrawDeferred();
+            iGrid->SetCurrentDataIndex(selIdx);
+            }
         }
 
     TSLOG_OUT();
@@ -455,7 +472,7 @@ void CTsFastSwapArea::TryCloseAllL()
         {
         RenderContentL();
         RestoreSelectedIndex();
-        iGrid->DrawNow();
+        UpdateGrid();
         }
     }
 
@@ -518,18 +535,6 @@ void CTsFastSwapArea::HandleFswContentChangedL()
     TSLOG_CONTEXT( HandleFswContentChangedL, TSLOG_LOCAL );
     TSLOG_IN();
 
-    // If there was an app close operation started during the last
-    // few seconds then stop, to prevent flickering.
-    TTime now;
-    now.HomeTime();
-    TTimeIntervalSeconds iv;
-    if ( now.SecondsFrom( iTimeOfLastClose, iv ) == KErrNone
-            && iv.Int() <= KRefreshDelayAfterClose )
-        {
-        TSLOG1_OUT( "difference since last close is only %d sec, stop", iv.Int() );
-        return;
-        }
-
     // get current content from fastswap server
     iFSClient->GetContentL( iArray );
     SwapApplicationOrder( iArray );
@@ -556,16 +561,16 @@ void CTsFastSwapArea::HandleFswContentChangedL()
 // CTsFastSwapArea::RenderContentL
 // --------------------------------------------------------------------------
 //
-void CTsFastSwapArea::RenderContentL()
+void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     {
     TSLOG_CONTEXT( RenderContentL, TSLOG_LOCAL );
     TSLOG_IN();
 
     _LIT(KSeparator, "\t");
     
-    CArrayPtr<CGulIcon>* iconArray = new ( ELeave ) CAknIconArray( iArray.Count() );
+    CArrayPtr<CGulIcon>* iconArray = new ( ELeave ) CAknIconArray( KMaxGranularity );
     CleanupStack::PushL( iconArray );
-    CDesCArrayFlat* textArray = new ( ELeave ) CDesCArrayFlat( iArray.Count() );
+    CDesCArrayFlat* textArray = new ( ELeave ) CDesCArrayFlat( KMaxGranularity );
     CleanupStack::PushL( textArray );
     RArray<TInt> closeItemArray;
     CleanupClosePushL(closeItemArray);
@@ -577,15 +582,18 @@ void CTsFastSwapArea::RenderContentL()
     GetFastSwapAreaRects(rects);
     TAknLayoutRect gridItem = rects[1];
     CleanupStack::PopAndDestroy(&rects);
-    if ( AknLayoutUtils::LayoutMirrored() )
+    if ( iArray.Count() )
         {
-        iGrid->SetLayoutL( EFalse, EFalse, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
+        if ( AknLayoutUtils::LayoutMirrored() )
+            {
+            iGrid->SetLayoutL( EFalse, EFalse, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
+            }
+        else
+            {
+            iGrid->SetLayoutL( EFalse, ETrue, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
+            }
         }
-    else
-        {
-        iGrid->SetLayoutL( EFalse, ETrue, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
-        }
-    
+        
     for ( TInt i = 0, ie = iArray.Count(); i != ie; ++i )
         {
         const TDesC& appName( iArray[i]->AppName() );
@@ -649,8 +657,11 @@ void CTsFastSwapArea::RenderContentL()
     CleanupStack::Pop(textArray);
     CleanupStack::Pop(iconArray);
     
-    iGrid->ScrollBarFrame()->SetScrollBarVisibilityL(
+    if( iGrid->ScrollBarFrame() )
+        {
+        iGrid->ScrollBarFrame()->SetScrollBarVisibilityL(
                 CEikScrollBarFrame::EOff, CEikScrollBarFrame::EOff);
+        }
     
     // refresh the items in the grid
     if(iPreviousNoOfItems < iArray.Count())
@@ -663,7 +674,7 @@ void CTsFastSwapArea::RenderContentL()
         }
     iPreviousNoOfItems = iArray.Count();
     iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
-    UpdateGrid( ETrue );
+    UpdateGrid( ETrue, !aSuppressAnimation );
     
     TSLOG_OUT();
     }
@@ -752,7 +763,7 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
         }
     
     RestoreSelectedIndex();
-    UpdateGrid(ETrue, EFalse);
+    UpdateGrid(EFalse, EFalse);
     
     iRedrawTimer->Cancel();
     iRedrawTimer->After(KRedrawTime);
@@ -784,7 +795,6 @@ void CTsFastSwapArea::FocusChanged( TDrawNow /*aDrawNow*/ )
         // store the currently selected index if there is one
         SaveSelectedIndex();
         }
-    iGrid->DrawDeferred();
     }
 
 // -----------------------------------------------------------------------------
@@ -865,7 +875,7 @@ TKeyResponse CTsFastSwapArea::ShowHighlightOnKeyEvent(
 			{
 			if (aType == EEventKey)
 				{
-				ShowHighlight();
+				iGrid->ShowHighlight();
 				iConsumeEvent = ETrue;
 				}
 			retVal = EKeyWasConsumed;
@@ -937,8 +947,6 @@ void CTsFastSwapArea::RestoreSelectedIndex()
             }
         iSavedSelectedIndex = highlightItem - 1;//count from 0
         iGrid->SetCurrentDataIndex( iSavedSelectedIndex );
-        TBool forceRedraw(ETrue);
-        UpdateGrid(forceRedraw);
         }
     }
 
@@ -949,6 +957,7 @@ void CTsFastSwapArea::RestoreSelectedIndex()
 //
 void CTsFastSwapArea::ProcessCommandL( TInt aCommandId )
     {
+    static_cast<CTsAppUi*>(iEikonEnv->AppUi())->DisablePopUpL();
     switch ( aCommandId )
         {
         case EFswCmdClose:
@@ -1017,7 +1026,7 @@ void CTsFastSwapArea::TimerCompletedL( CTsFastSwapTimer* aSource )
         }
     else if(aSource == iRedrawTimer)
         {
-        DrawNow();
+        static_cast<CTsAppView*>(&iParent)->OrderFullWindowRedraw();
         }
     else if( aSource == iUpdateGridTimer )
         {
@@ -1063,6 +1072,7 @@ TBool CTsFastSwapArea::ShowPopupL( TInt aIndex, const TPoint& aPoint )
 
     if(showPopUp)
         {
+        static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL();
         // give feedback
         LaunchPopupFeedback();
         // save index for later use & show popup
@@ -1164,6 +1174,7 @@ void CTsFastSwapArea::HandleListBoxEventL(CEikListBox* aListBox, TListBoxEvent a
             {
             case EEventEnterKeyPressed:
             case EEventItemClicked:
+            case EEventItemSingleClicked:
                 {
                 SwitchToApp(SelectedIndex());
                 }
@@ -1225,15 +1236,6 @@ void CTsFastSwapArea::SelectNextItem()
     UpdateGrid(forceRedraw, animate);
     }
 
-// --------------------------------------------------------------------------
-// CTsFastSwapArea::ShowHiglight
-// --------------------------------------------------------------------------
-//
-void CTsFastSwapArea::ShowHighlight()
-    {
-    iGrid->ShowHighlight();
-    UpdateGrid(ETrue, EFalse);
-    }
 
 // --------------------------------------------------------------------------
 // CTsFastSwapArea::CenterItem
@@ -1279,6 +1281,7 @@ void CTsFastSwapArea::UpdateGrid( TBool aForceRedraw, TBool aAnimate )
         {
         if ( aAnimate )
             {
+			iIgnorePhysicsMove = EFalse;
             iEvtHandler.Animate( targetPoint );
             }
         else
@@ -1307,7 +1310,7 @@ void CTsFastSwapArea::HandleAppKey(TInt aType)
             }
         else
             {
-            ShowHighlight();
+            iGrid->ShowHighlight();
             }
         }
     else if( aType == KAppKeyTypeLong )
@@ -1327,6 +1330,18 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint)
     TSLOG2_IN("New position x: %d, y:%d", aPoint.iX, aPoint.iY);
     TSLOG_OUT();
     
+    //ignore case when drag occurs outside owned area 
+    if( iIgnorePhysicsMove )
+    	{
+		return;
+    	}
+    //postpone center item request in case of being moved
+    if(iUpdateGridTimer->IsActive())
+    	{
+    	iUpdateGridTimer->Cancel();
+		iUpdateGridTimer->After(KUpdateGridTime);
+    	}
+    
     TInt currentXPos = aPoint.iX;
     currentXPos -= Rect().Width() / 2;
     TRect gridViewRect = Rect();
@@ -1339,7 +1354,7 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint)
         gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
         }
     iGrid->SetRect( gridViewRect );
-    DrawNow();
+    DrawDeferred();
     }
 
 // --------------------------------------------------------------------------
@@ -1390,16 +1405,28 @@ void CTsFastSwapArea::LongTapL(const TPoint& aPoint)
     }
 
 // --------------------------------------------------------------------------
-// CTsFastSwapArea::Drag
+// CTsFastSwapArea::DragL
 // --------------------------------------------------------------------------
 //
-void CTsFastSwapArea::Drag(
-    const MAknTouchGestureFwDragEvent& /*aEvent*/)
+void CTsFastSwapArea::DragL(
+    const MAknTouchGestureFwDragEvent& aEvent)
     {
+	if( aEvent.State() == EAknTouchGestureFwStop)
+		{
+		CenterItem( KUpdateGridTime );
+		}
+	if( !Rect().Contains(aEvent.CurrentPosition()) )
+		{
+		iIgnorePhysicsMove = ETrue;
+		return;
+		}
+	else
+		{
+		iIgnorePhysicsMove = EFalse;
+		}
+		
     iGrid->SetTactileFeedbackSupport(ETrue);
     iGrid->HideHighlight();
-    CenterItem( KUpdateGridTime );
-    DrawNow();
     }
 
 // -----------------------------------------------------------------------------

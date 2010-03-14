@@ -57,7 +57,23 @@ public: // From MHsContentControlUi
      * @see MHsContentControlUi::Activate
      */
     void Activate();
-    
+
+    /** 
+     * notification for widget manager UI that its
+     * deactivated and plugin is about to be destroyed.
+     * 
+     * @see MHsContentControlUi::DeActivate
+     */
+    void DeActivate();
+
+    /** 
+     * returns array of AknViews which were added to
+     * AknViewAppUi by this plugin. 
+     * 
+     * @see MHsContentControlUi::Views
+     */
+    void Views( RPointerArray<CAknView>& aViews );
+
     /** 
      * Notifies widget list changes 
      * 
@@ -77,7 +93,7 @@ public: // plugin services
     /** 
      * hides widget manager UI 
      */
-    void Deactivate();
+    void CloseView();
 
     /** 
      * main view activated. Sets the previous view ID and main container 
@@ -159,6 +175,13 @@ private:
      * @param aEnabled ETrue if numeric keys are forwarded to phone
      */
     void ForwardNumericKeysToPhone( TBool aEnabled );
+    
+    /** 
+     * Shows error note.
+     * 
+     * @parama aError Error to be shown.
+     */
+    void ShowErrorNoteL( TInt aError );
 
 private: // data members
 
@@ -202,12 +225,6 @@ private: // data members
      * content info as parameter to iPostponedCommand
      */
     CHsContentInfo* iPostponedContent;
-    
-    /**
-     * ActiveSchedulerWait used to wait while previous view is
-	 * being activated upon deletion.
-     */
-    CActiveSchedulerWait* iWait;
     
     /*
      * Handles installation

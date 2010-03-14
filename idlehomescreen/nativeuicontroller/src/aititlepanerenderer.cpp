@@ -15,53 +15,80 @@
 *
 */
 
-
+// System includes
 #include <StringLoader.h>
 #include <AiNativeUi.rsg>
 #include <gulicon.h>
+
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
+
 #include "aititlepanerenderer.h"
 #include "aistatuspanel.h"
-#include "aipropertyextension.h"
+
 #include <aicontentrequest.h>
 #include "ainativeuiplugins.h"
 #include "debug.h"
 
 using namespace AiNativeUiController;
 
-
+// ======== MEMBER FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::ConstructL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiTitlePaneRenderer::ConstructL()
     {
     }
 
-
-CAiTitlePaneRenderer* CAiTitlePaneRenderer::NewLC( CAiStatusPanel& aStatusPanel )
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
+CAiTitlePaneRenderer* CAiTitlePaneRenderer::NewLC( 
+    CAiStatusPanel& aStatusPanel )
     {
-    CAiTitlePaneRenderer* self = new( ELeave ) CAiTitlePaneRenderer( aStatusPanel );
+    CAiTitlePaneRenderer* self = 
+        new( ELeave ) CAiTitlePaneRenderer( aStatusPanel );
+    
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::CAiTitlePaneRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiTitlePaneRenderer::~CAiTitlePaneRenderer()
     {
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::CAiTitlePaneRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiTitlePaneRenderer::CAiTitlePaneRenderer( CAiStatusPanel& aStatusPanel )
 	: iStatusPanel( aStatusPanel )
     {
     }
 
-
-
-
-void CAiTitlePaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-										TInt aContent,
-										const TDesC16& aText,
-										TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
+    TInt aContent, const TDesC16& aText, TInt /*aIndex*/ )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
 	    {
 	    switch( aContent )
 	        {
@@ -89,12 +116,17 @@ void CAiTitlePaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
 		}
     }
 
-void CAiTitlePaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-										TInt aContent,
-										const TDesC8& aBuf,
-										TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
+	TInt aContent, const TDesC8& aBuf, TInt /*aIndex*/ )
     {
-   	if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+   	if( info.Uid() == KDeviceStatusPluginUid )
 	   	{
 	    switch( aContent )
 	        {
@@ -135,12 +167,17 @@ void CAiTitlePaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
 		}
     }
 
-void CAiTitlePaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin, 
-                                    	TInt aContent, 
-                                    	TInt aResource,
-                                    	TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin, 
+    TInt aContent, TInt aResource, TInt /*aIndex*/ )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
 	    {
 	    switch( aContent )
 	        {
@@ -168,11 +205,19 @@ void CAiTitlePaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
 		}
     }
 
-
-void CAiTitlePaneRenderer::DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent )
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::DoCleanL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiTitlePaneRenderer::DoCleanL( CHsContentPublisher& aPlugin, 
+    TInt aContent )
 	{
     __PRINT(__DBG_FORMAT("XAI: Clean title pane - %d"), aContent );
-	if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+	
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
 		{
 	    switch( aContent )
 	        {
@@ -199,21 +244,43 @@ void CAiTitlePaneRenderer::DoCleanL( MAiPropertyExtension& aPlugin, TInt aConten
 		}
 	}
 
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::TransactionCommittedL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiTitlePaneRenderer::TransactionCommittedL()
     {
     }
 
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::KeylockEnabledL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiTitlePaneRenderer::KeylockEnabledL()
 	{
 	iStatusPanel.StopTitlePaneScrollingL();
 	}
 
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::FocusObtainedL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiTitlePaneRenderer::FocusObtainedL()
     {
     iStatusPanel.RenderTitlePaneL();
     }
 
+// ----------------------------------------------------------------------------
+// CAiTitlePaneRenderer::FocusLostL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiTitlePaneRenderer::FocusLostL()
 	{
 	iStatusPanel.StopTitlePaneScrollingL();
 	}
+
+// End of file

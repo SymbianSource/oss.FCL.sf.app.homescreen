@@ -174,6 +174,9 @@ public: // comparing / sorting
             const CWmWidgetData& aDataTwo );
 
 public: // methods to read the content
+
+    /** Mdcapoint for listbox("\t0widget name") */    
+    const TDesC& MdcaPoint() const;
     
     /** the HsContent info */
     inline CHsContentInfo& HsContentInfo();
@@ -262,7 +265,10 @@ private: // data members
 
     /** persistent order of widgets (used in sorting) */
     const CWmPersistentWidgetOrder* iPersistentWidgetOrder;
-
+    
+    /** "0\t" + widget name for listbox*/
+    HBufC*              iMdcaPoint;
+    
     /** wrt widget publisher uid */
     TUid                iPublisherUid;
     

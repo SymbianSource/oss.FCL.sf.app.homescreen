@@ -18,9 +18,12 @@
 #ifndef __XNWIDGETEXTENSIONADAPTER_H__
 #define __XNWIDGETEXTENSIONADAPTER_H__
 
-//  INCLUDES
-#include "xncontroladapter.h"
+// System includes
 #include <e32base.h>
+
+// User includes
+#include "xncontroladapter.h"
+#include "xnuistatelistener.h"
 
 // Forward declarations
 class CXnAppUiAdapter;
@@ -35,81 +38,98 @@ class CXnUiEngine;
 *  @lib xnlayoutengine.lib
 *  @since Series 60 5.0
 */
-NONSHARABLE_CLASS( CXnWidgetExtensionAdapter ) : public CXnControlAdapter/*, 
-    public MCoeMessageMonitorObserver*/
+NONSHARABLE_CLASS( CXnWidgetExtensionAdapter ) : public CXnControlAdapter, 
+    public MXnUiStateObserver
     {
-    public: // Constructors and destructor
+public: // Constructors and destructor
 
-        enum TPositionHint
-               {
-               ENone,
-               EAboveLeft,
-               EAboveRight,
-               EBelowLeft,
-               EBelowRight,
-               ELeft,
-               ERight
-               };
-        /**
-        * Two-phased constructor.
-        */
-		static CXnWidgetExtensionAdapter* NewL( CXnNodePluginIf& aNode );
-		
-        /**
-        * Destructor.
-        */
-		~CXnWidgetExtensionAdapter();
-         
-    private: // Functions from base classes    
-        /**
-        * @see CCoeControl documentation        
-        */         
-        void MakeVisible( TBool aVisible );
+    enum TPositionHint
+           {
+           ENone,
+           EAboveLeft,
+           EAboveRight,
+           EBelowLeft,
+           EBelowRight,
+           ELeft,
+           ERight
+           };
+    /**
+    * Two-phased constructor.
+    */
+    static CXnWidgetExtensionAdapter* NewL( CXnNodePluginIf& aNode );
+    
+    /**
+    * Destructor.
+    */
+    ~CXnWidgetExtensionAdapter();
+     
+private: 
+    // Functions from base classes    
+    /**
+    * @see CCoeControl documentation        
+    */         
+    void MakeVisible( TBool aVisible );
 
-        /**
-        * see CCoeControl 
-        */
-        void HandlePointerEventL(const TPointerEvent& aPointerEvent);
+    /**
+    * see CCoeControl 
+    */
+    void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 
-        /**
-        * see CCoeControl 
-        */
-        void Draw(const TRect& aRect) const;        
+    /**
+    * see CCoeControl 
+    */
+    void Draw(const TRect& aRect) const;        
 
-    private: // Constructors
-		/**
-        * C++ default constructor.
-        */
-	    CXnWidgetExtensionAdapter( CXnNodePluginIf& aNode );
+private:
+    // from MXnUiStateObserver
+    
+    /**
+     * @see MXnUiStateObserver
+     */
+    void NotifyForegroundChanged( TForegroundStatus aStatus );         
 
-	   	/**
-        * Two-phased constructor.        
-        */ 
-	    void ConstructL();	   
-	    
-    private: // New functions
-        /**
-        * Hides this control
-        */ 
-        void HidePopupL();
-            
-        void CalculatePosition();
+    /**
+     * @see MXnUiStateObserver
+     */    
+    void NotifyLightStatusChanged( TBool aLightsOn );
+       
+    /**
+     * @see MXnUiStateObserver
+     */    
+    void NotifyInCallStateChaged( TBool aInCall );    
+    
+private: 
+    // Constructors
+    /**
+    * C++ default constructor.
+    */
+    CXnWidgetExtensionAdapter( CXnNodePluginIf& aNode );
+
+    /**
+    * Two-phased constructor.        
+    */ 
+    void ConstructL();	   
+    
+private: 
+    // New functions
+    
+    void HidePopupL();
         
-    private:
-        
-        // Data
-        // UiEngine, not owned
-        CXnUiEngine* iUiEngine; 	
-        
-        // Node 
-        CXnNodePluginIf& iNode;
-        
-        // position hint
-        TPositionHint iPositionHint;
-        
-        CXnAppUiAdapter* iAppUiAdapter;
-
-
+    void CalculatePosition();
+    
+private:    
+    // Data
+    
+    /** UiEngine, not owned */
+    CXnUiEngine* iUiEngine; 	    
+    /** Node, not owned */ 
+    CXnNodePluginIf& iNode;    
+    /** Position hint */
+    TPositionHint iPositionHint;    
+    /** AppUi, not owned */
+    CXnAppUiAdapter* iAppUiAdapter;
+    /** Flag to indicate whether <popup> is permanent */
+    TBool iPermanent;    
 	};
 
 #endif // __XNWIDGETEXTENSIONADAPTER_H__

@@ -15,10 +15,13 @@
 *
 */
 
-
-#include <aipropertyextension.h>
+// System includes
 #include <centralrepository.h>
 #include <ProfileEngineSDKCRKeys.h>
+
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
 
 #include "ainavipanerenderer.h"
 #include "ainavipaneanimator.h"
@@ -31,7 +34,11 @@
 
 using namespace AiNativeUiController;
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::ConstructL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNaviPaneRenderer::ConstructL()
     {
     iAnimator = CAiNaviPaneAnimator::NewL( iStatusPanel, 
@@ -41,17 +48,26 @@ void CAiNaviPaneRenderer::ConstructL()
     iSilentIndicator = HBufC::NewL(0);
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNaviPaneRenderer* CAiNaviPaneRenderer::NewLC( 
         CAiStatusPanel& aStatusPanel )
     {
-    CAiNaviPaneRenderer* self = new( ELeave ) CAiNaviPaneRenderer( aStatusPanel );
+    CAiNaviPaneRenderer* self = 
+        new( ELeave ) CAiNaviPaneRenderer( aStatusPanel );
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::~CAiNaviPaneRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNaviPaneRenderer::~CAiNaviPaneRenderer()
     { 
     delete iAnimator;
@@ -60,7 +76,11 @@ CAiNaviPaneRenderer::~CAiNaviPaneRenderer()
     delete iTimedProfileIndicator;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::CAiNaviPaneRenderer()
+//
+// ----------------------------------------------------------------------------
+//
 CAiNaviPaneRenderer::CAiNaviPaneRenderer( CAiStatusPanel& aStatusPanel )
     : iStatusPanel( aStatusPanel ), 
     iRenderingPriorities( AiNativeUiModel::RenderingPriorities( AiNativeUiModel::KNaviPaneId ) ),
@@ -69,13 +89,17 @@ CAiNaviPaneRenderer::CAiNaviPaneRenderer( CAiStatusPanel& aStatusPanel )
     {
     }
 
-
-void CAiNaviPaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
-                                      TInt aContent, 
-                                      const TDesC16& aText,
-                                      TInt /*aIndex*/ )
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiNaviPaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
+    TInt aContent, const TDesC16& aText, TInt /*aIndex*/ )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
            {
         switch( aContent )
             {
@@ -226,6 +250,11 @@ void CAiNaviPaneRenderer::DoPublishL( MAiPropertyExtension& aPlugin,
            }
     }
 
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::ConstructProfileTextLC()
+//
+// ----------------------------------------------------------------------------
+//
 HBufC* CAiNaviPaneRenderer::ConstructProfileTextLC()
     {
     TInt bufLen = iProfileText->Length();
@@ -253,9 +282,16 @@ HBufC* CAiNaviPaneRenderer::ConstructProfileTextLC()
     return temp;
     }
 
-void CAiNaviPaneRenderer::DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent )
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::DoCleanL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiNaviPaneRenderer::DoCleanL( CHsContentPublisher& aPlugin, TInt aContent )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KDeviceStatusPluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KDeviceStatusPluginUid )
         {    
 
         switch( aContent )
@@ -305,7 +341,7 @@ void CAiNaviPaneRenderer::DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent
                     iStatusPanel.RenderNaviPaneL();
 
                     MAiContentRequest* contentReq = static_cast<MAiContentRequest*>(
-                        aPlugin.GetPropertyL( EAiContentRequest ) );
+                        aPlugin.GetProperty( CHsContentPublisher::EContentRequest ) );
                         
                     if ( contentReq )
                         {
@@ -349,7 +385,11 @@ void CAiNaviPaneRenderer::DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent
     
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::FocusObtainedL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNaviPaneRenderer::FocusObtainedL()
     {
     if( !iStatusPanel.IsKeyLockEnabled() )
@@ -359,7 +399,11 @@ void CAiNaviPaneRenderer::FocusObtainedL()
     iFocusObtained = ETrue;    
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::FocusLostL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNaviPaneRenderer::FocusLostL()
     {
     iAnimator->CancelAnimationL();
@@ -367,19 +411,31 @@ void CAiNaviPaneRenderer::FocusLostL()
     iCommitted = EFalse;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::KeylockDisabledL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNaviPaneRenderer::KeylockDisabledL()
     {
     iAnimator->AnimateL();
     }
  
-    
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::KeylockEnabledL()
+//
+// ----------------------------------------------------------------------------
+//    
 void CAiNaviPaneRenderer::KeylockEnabledL()
     {
     iAnimator->CancelAnimationL();
     }
     
-
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::TransactionCommittedL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNaviPaneRenderer::TransactionCommittedL()
     {
     if( iIsChanged )
@@ -393,7 +449,11 @@ void CAiNaviPaneRenderer::TransactionCommittedL()
         }
     }
     
-    
+// ----------------------------------------------------------------------------
+// CAiNaviPaneRenderer::AnimationCompleteL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiNaviPaneRenderer::AnimationCompleteL()
     {
     // Navi pane animation is now completed -> show original text
@@ -414,3 +474,4 @@ void CAiNaviPaneRenderer::AnimationCompleteL()
     CleanupStack::PopAndDestroy( newText );
     }
 
+// End of file

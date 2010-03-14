@@ -18,6 +18,6 @@
 #define TASKSWITCHERRES_IBY
 
 // resources for taskswitcher app
-data=DATAZ_/APP_RESOURCE_DIR/tstaskswitcher.rsc    APP_RESOURCE_DIR/hgteleport.rsc
+data=DATAZ_/APP_RESOURCE_DIR/taskswitcher.rsc    APP_RESOURCE_DIR/taskswitcher.rsc
 
 #endif 

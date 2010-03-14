@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -22,17 +22,20 @@
 #include <NWHandlingEngine.h>
 #include <MProfileChangeObserver.h>
 #include <babitflags.h>
+#include <cmgenconnsettings.h>
+#include "cenrepobserver.h"
 
 // Forward declrations
 class CNWSession;
 class CProfileChangeNotifyHandler;
 class CXnNodeAppIf;
+class CAknGlobalConfirmationQuery;
 
 namespace AiXmlUiController
 {
 // Forward declrations
 class CXmlUiController;
-
+class CGlobalQueryHandler;
 // Classe declaration
 
 
@@ -45,7 +48,7 @@ class CXmlUiController;
  */
 
 class COnlineOfflineHelper : public CBase, 
-    public MNWMessageObserver, public MProfileChangeObserver
+    public MNWMessageObserver, public MProfileChangeObserver, public MCenRepObserver
     {    
 public:
     // Constructors
@@ -71,6 +74,18 @@ private:
      */
     void ConstructL();    
 
+public : 
+    // from MCenRepObserver
+
+    /**
+    * This method is called every time when Central Repository key 
+    * KCRUidCmManager/ KCurrentCellularDataUsage changes.
+    *
+    * @param aValue The new value for KCurrentCellularDataUsage.
+    * 
+    */
+    void CurrentCellularDataUsageChangedL( const TInt aValue );
+    
 public:
     // New functions
     
@@ -91,14 +106,6 @@ public:
     TBool ShowOfflineItem() const;
     
     /*
-     * Check and set whether online/offline state is needed by plugins
-     * 
-     * @since S60 5.0
-     * @param aList List of plugins 
-     */
-    void ProcessOnlineStateL( RPointerArray< CXnNodeAppIf >& aList );
-
-    /*
      * Set online or offline state based on user selection
      * 
      * @since S60 5.0
@@ -106,6 +113,22 @@ public:
      */    
     void ProcessOnlineStateL( TBool aOnline );
     
+    /*
+     * Handles the connection query dialogs
+     * 
+     * @since S60 5.0
+     * @param aConnection connection disconnected or connected 
+     */ 
+    void HandleConnectionQueryL( const TDesC& aConnection);
+    
+    /**
+     * Displayes global query for 'go online' or 'go offline' confirmations
+     * @param aResourceId resource id for the text string
+     * @param aSetOnline if ETrue then set widgets online if confirmation accepted,
+     *     if EFalse then set widgets offline if confirmation accepted 
+     */
+    void ShowGlobalQueryL( TInt aResourceId, TBool aSetOnline );
+
 private:    
     // from MNWMessageObserver
 
@@ -146,7 +169,10 @@ private:
     TBool HasNetworkInfoChanged( const TNWMessages aMsg );
     void InterpretNWMessageL( const TNWMessages aMessage, const TNWInfo );
     
-    void SetOnlineL( TBool aOnline );
+    void SetOnline( TBool aOnline );
+    
+    void CurrentNetworkSetting();
+    
 private:
     // Data types
     
@@ -222,12 +248,34 @@ private:
     * Flags
     */
    TBitFlags32 iFlags;
+   
+   /**
+    * Network setting observer, owned
+    */
+   CCenRepObserver *iNwSettingObserver;
+  
+   /**
+    * Home network setting
+    */
+   TInt iHomeNetwork;
+   
+   /**
+     * Roaming network setting
+     */
+   TInt iRoamingNetwork;
+   
+   /**
+    * Global query handler, owned.
+    */
+   CGlobalQueryHandler* iGlobalQueryHandler;
+   
+   /**
+    * Global confirmation query, owned.
+    */
+   CAknGlobalConfirmationQuery* iGlobalConfirmationQuery;
+
    };
 
 }// namespace AiXmlUiController
 #endif //ONLINEOFFLINEHELPER_H
-
-
-
-
 

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.51 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.55 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -237,7 +237,7 @@ void CMmWidgetContainer::HandleResourceChange( TInt aType )
 
 	if ( aType == KEikDynamicLayoutVariantSwitch && !IsHighlightVisible() )
 		{
-		SetDefaultHighlightL( EFalse );
+		TRAP_IGNORE( SetDefaultHighlightL( EFalse ) );
 		}
     }
 
@@ -612,7 +612,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
 
     TInt index = KErrNotFound;
     TBool itemExists = iWidget->View()->XYPosToItemIndex( aPointerEvent.iPosition, index );
-    
+
     if ( iLongTapDetector )
         {
         if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
@@ -733,38 +733,43 @@ EXPORT_C void CMmWidgetContainer::SetHighlightVisibilityL( TBool aEnable )
     {
     // activate the model
     CHnSuiteModel* suiteModel = GetMmModel()->GetSuiteModel();
-
     if ( suiteModel )
         {
         suiteModel->SetActiveL( aEnable );
         }
-#ifdef RD_UI_TRANSITION_EFFECTS_LIST
-	    MAknListBoxTfxInternal *transApi = CAknListLoader::TfxApiInternal(
-	    		iDrawer->Gc() );
-#endif
-    if ( !aEnable )
+
+    if ( ( !!aEnable != !!iPreviousHighlightVisibility ) // Ex-OR
+            || ( !!aEnable != !!IsHighlightVisible() ) ) // Ex-OR
         {
-        iWidget->View()->ItemDrawer()->SetFlags(
-            CListItemDrawer::ESingleClickDisabledHighlight );
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-	    if ( transApi )
-	        {
-           	transApi->Remove( MAknListBoxTfxInternal::EListHighlight );
-  	        }
+            MAknListBoxTfxInternal *transApi = CAknListLoader::TfxApiInternal(
+                    iDrawer->Gc() );
 #endif
-        }
-    else
-        {
-        iWidget->View()->ItemDrawer()->ClearFlags(
-            CListItemDrawer::ESingleClickDisabledHighlight );
-        }
+        if ( !aEnable )
+            {
+            iWidget->View()->ItemDrawer()->SetFlags(
+                CListItemDrawer::ESingleClickDisabledHighlight );
+#ifdef RD_UI_TRANSITION_EFFECTS_LIST
+            if ( transApi )
+                {
+                transApi->Remove( MAknListBoxTfxInternal::EListHighlight );
+                }
+#endif
+            }
+        else
+            {
+            iWidget->View()->ItemDrawer()->ClearFlags(
+                CListItemDrawer::ESingleClickDisabledHighlight );
+            }
     
-    if ( IsVisible() )
-        {
-        TInt highlight = GetHighlight();
-        CListBoxView* view = Widget()->View();
-        Widget()->DrawNow( TRect( view->ItemPos( highlight ),
-                view->ItemSize( highlight ) ) );
+        if ( IsVisible() )
+            {
+            TInt highlight = GetHighlight();
+            CListBoxView* view = Widget()->View();
+            Widget()->DrawNow( TRect( view->ItemPos( highlight ),
+                    view->ItemSize( highlight ) ) );
+            }
+        iPreviousHighlightVisibility = aEnable;
         }
     }
 
@@ -774,7 +779,7 @@ EXPORT_C void CMmWidgetContainer::SetHighlightVisibilityL( TBool aEnable )
 //
 EXPORT_C TBool CMmWidgetContainer::IsHighlightVisible()
     {
-    return !( iWidget->View()->ItemDrawer()->Flags() & 
+    return !( iWidget->View()->ItemDrawer()->Flags() &
     		CListItemDrawer::ESingleClickDisabledHighlight );
     }
 
@@ -1595,7 +1600,7 @@ void CMmWidgetContainer::MakeVisible(TBool aVisible)
 	iWidget->MakeVisible(aVisible);
 	if ( !aVisible )
         {
-        SetHighlightVisibilityL( EFalse );
+		TRAP_IGNORE( SetHighlightVisibilityL( EFalse ) );
         }
 	}
 

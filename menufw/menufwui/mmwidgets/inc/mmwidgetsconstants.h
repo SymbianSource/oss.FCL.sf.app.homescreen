@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Constants for the matrixmenu
-*  Version     : %version: 33.1.11 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 33.1.12 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -136,7 +136,11 @@ namespace MmGrid
 	 * Number of columns in landscape/non-zoom mode;
 	 */
 	const TInt KColsLandscapeZoomNormal(4);
-
+	
+    /**
+     * Focus based scrolling item threshold for grid.
+     */
+    const TReal KFocusScrollingThreshold( 0.27 );
 	}
 
 /**
@@ -154,6 +158,11 @@ namespace MmListBox
 	 * Default highlight in 4x5 grid.
 	 */
 	const TInt KCols(1);
+	
+    /**
+     * Focus based scrolling item threshold for list.
+     */
+    const TReal KFocusScrollingThreshold( 0.55 );
 	}
 
 /**
@@ -200,16 +209,6 @@ namespace MmEffects
 	 * Text alpha during drag.
 	 */
 	const TInt KDragTextAlpha( 50 );
-
-	/**
-	 * Focus based scrolling item threshold.
-	 */
-	const TReal KFocusScrollingThreshold( 0.55 );
-
-	/**
-	 * Focus based scrolling item threshold for listbox landscape mode.
-	 */
-	const TReal KFocusScrollingThresholdListboxLanscape( 1.0 );
 
 	/**
 	 * Value of drag ignore.

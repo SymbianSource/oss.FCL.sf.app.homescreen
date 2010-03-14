@@ -38,7 +38,6 @@
 #include "xnbackgroundmanager.h"
 
 // Constants
-_LIT8( KStateWaitConfirmation, "WaitForConfirmation" );
 _LIT8( KStateError, "Error" );
 
 _LIT8( KXmluiml, "xmluiml" );
@@ -61,7 +60,8 @@ using namespace hspswrapper;
 // Get property value from configuration.
 // --------------------------------------------------------------------------
 //
-static HBufC* ItemValueL( CHspsConfiguration& aConfiguration, const TDesC8& aItemId, const TDesC8& aName  )
+static HBufC* ItemValueL( CHspsConfiguration& aConfiguration, 
+    const TDesC8& aItemId, const TDesC8& aName )
     {
     HBufC* ret = NULL;
 
@@ -567,8 +567,7 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
         }
                   
     aViewData.SetConfigurationIdL( configuration->ConfId() );    
-    aViewData.SetPluginStateL( KStateWaitConfirmation );
-    
+        
     // Find a resource which can be internalized
     const CObjectMap* resourceObject = FindObject( 
                 configuration->Resources(), KTagXuikon );
@@ -713,8 +712,7 @@ TInt CXnComposer::ComposeWidgetL( CXnPluginData& aPluginData )
         }
     
     aPluginData.SetConfigurationIdL( configuration->ConfId() );    
-    aPluginData.SetPluginStateL( KStateWaitConfirmation );
-                              
+                                
     // Find a resource which can be internalized
     const CObjectMap* resourceObject = FindObject( 
                 configuration->Resources(), KTagXuikon );

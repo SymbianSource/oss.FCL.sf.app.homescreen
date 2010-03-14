@@ -135,15 +135,6 @@ inline const TDesC8& CXnPluginData::Type() const
     };
 
 // ---------------------------------------------------------------------------
-// Returns plugin state
-// ---------------------------------------------------------------------------
-//
-inline const TDesC8& CXnPluginData::PluginState() const
-    {
-    return iPluginState ? *iPluginState : KNullDesC8();
-    };
-    
-// ---------------------------------------------------------------------------
 // Returns the publisher name
 // ---------------------------------------------------------------------------
 //

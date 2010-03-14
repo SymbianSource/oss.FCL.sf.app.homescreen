@@ -15,6 +15,28 @@
 *
 */
 
+// System includes
+#include <e32std.h>
+#include <csxhelp/hmsc.hlp.hrh>
+#include <layoutmetadata.cdl.h>
+#include <e32property.h>
+#include <centralrepository.h>
+#include <AknUtils.h>
+#include <akntoolbar.h>
+#include <aknappui.h>
+#include <hlplch.h>
+#include <aknlistquerydialog.h> 
+#include <aknnotewrappers.h> 
+#include <StringLoader.h>
+
+// User includes
+#include <hspublisherinfo.h>
+#include <aiutility.h>
+#include <aistrparser.h>
+#include <ai3xmlui.rsg>
+#include <activeidle2domainpskeys.h>
+#include <activeidle2domaincrkeys.h>
+#include <aisystemuids.hrh>
 
 #include "aixuikoneventhandler.h"
 #include "aifweventhandler.h"
@@ -25,11 +47,6 @@
 #include "aixmluiconstants.h"
 #include "aixmluiutils.h"
 #include "contentrenderer.h"
-#include <activeidle2domainpskeys.h>
-#include <activeidle2domaincrkeys.h>
-#include <csxhelp/hmsc.hlp.hrh>
-#include <aisystemuids.hrh>
-
 #include "xnnodeappif.h"
 #include "xnuiengineappif.h"
 #include "xnproperty.h"
@@ -37,20 +54,6 @@
 #include "xntype.h"
 #include "xndomlist.h"      // for cxndomlist
 #include "xndomattribute.h" // for cxndomattribute
-#include <e32svr.h>
-#include <aiutility.h>
-#include <aistrparser.h>
-#include <layoutmetadata.cdl.h>
-#include <e32property.h>
-#include <centralrepository.h>
-#include <AknUtils.h>
-#include <akntoolbar.h>
-#include <aknappui.h>
-#include <hlplch.h>
-#include <aknlistquerydialog.h> 
-#include <ai3xmlui.rsg>
-#include <aknnotewrappers.h> 
-#include <StringLoader.h>
 #include "xndompropertyvalue.h"
 #include "xnnodeappif.h"
 #include "appui.h"
@@ -73,16 +76,14 @@ namespace AiXmlUiController
         void AppEnvReadyL();
         void HandleUiReadyEventL( CAiUiController& aUiController );
         void HandleActivateUI();
-        void HandleUiShutdown( CAiUiController& aUiController );
-        void CriticalStartupPhaseOver( TInt aStageInteger );
-        void HandleLoadPluginL( const TAiPublisherInfo& aPublisherInfo  );
-        void HandleDestroyPluginL( const TAiPublisherInfo& aPublisherInfo );        
+        void HandleUiShutdown( CAiUiController& aUiController );       
         void HandlePluginEvent( const TDesC& aParam );
-        void HandlePluginEventL( const TAiPublisherInfo& aPublisherInfo, const TDesC& aParam );
-        TBool HasMenuItemL( const TAiPublisherInfo& aPublisherInfo, const TDesC& aMenuItem );
+        void HandlePluginEventL( const THsPublisherInfo& aPublisherInfo, const TDesC& aParam );
+        TBool HasMenuItemL( const THsPublisherInfo& aPublisherInfo, const TDesC& aMenuItem );
         TBool RefreshContent( const TDesC& aContentCid );
-        TBool QueryIsMenuOpen();
-        void ProcessStateChange( TAifwStates aSate );
+        TBool RefreshContent( const THsPublisherInfo& aPublisherInfo, const TDesC& aContentId ); 
+        TBool SuspendContent( const THsPublisherInfo& aPublisherInfo, const TDesC& aContentId );                                     
+        TBool QueryIsMenuOpen();        
         
     private: // from MAiUiEventHandler                                 
         TBool HandleUiEvent( TAny* aEvent, const TDesC8& aParam );
@@ -358,7 +359,7 @@ void CAIXuikonEventHandler::HandlePluginEventL( CXnDomNode& aEvent )
             // Broadcast event to all plugins
             for ( TInt i = 0; i < list.Count(); i++ )
                 {
-                TAiPublisherInfo info;
+                THsPublisherInfo info;
                 
                 iUiController.PublisherInfoL( *list[i], info );
         
@@ -383,7 +384,7 @@ void CAIXuikonEventHandler::HandlePluginEventL( CXnDomNode& aEvent )
             {
             // Only one data plugin in this namespace,
             // it must handle this event.
-            TAiPublisherInfo info;
+            THsPublisherInfo info;
             
             iUiController.PublisherInfoL( *list[0], info );
     
@@ -403,7 +404,7 @@ void CAIXuikonEventHandler::HandlePluginEventL( CXnDomNode& aEvent )
             
             if ( eventHandler )
                 {            
-                TAiPublisherInfo info;
+                THsPublisherInfo info;
                 
                 iUiController.PublisherInfoL( *eventHandler, info );
                 
@@ -423,11 +424,11 @@ void CAIXuikonEventHandler::HandlePluginEventL( CXnDomNode& aEvent )
                     
                     for ( TInt i = 0; i < list.Count(); i++ )
                         {
-                        TAiPublisherInfo info;
+                        THsPublisherInfo info;
                         
                         iUiController.PublisherInfoL( *list[i], info );
                         
-                        if( info.iName == pluginName )
+                        if( info.Name() == pluginName )
                             {
                             // Forward Plug-in events to AI FW for further 
                             // dispatching to the target Plug-in
@@ -476,8 +477,8 @@ void CAIXuikonEventHandler::CNullEventHandler::AppEnvReadyL()
     {
     }
 
-void CAIXuikonEventHandler::CNullEventHandler::HandleUiReadyEventL
-        ( CAiUiController& /*aUiController*/ )
+void CAIXuikonEventHandler::CNullEventHandler::HandleUiReadyEventL(
+    CAiUiController& /*aUiController*/ )
     {
     }
 
@@ -485,24 +486,24 @@ void CAIXuikonEventHandler::CNullEventHandler::HandleActivateUI()
     {   
     }
 
-void CAIXuikonEventHandler::CNullEventHandler::HandlePluginEvent
-    ( const TDesC& /*aParam*/ )
+void CAIXuikonEventHandler::CNullEventHandler::HandlePluginEvent(
+    const TDesC& /*aParam*/ )
     {
     }
 
-void CAIXuikonEventHandler::CNullEventHandler::HandlePluginEventL
-    (const TAiPublisherInfo& /*aPublisherInfo*/, const TDesC& /*aParam*/ )
+void CAIXuikonEventHandler::CNullEventHandler::HandlePluginEventL(
+    const THsPublisherInfo& /*aPublisherInfo*/, const TDesC& /*aParam*/ )
     {
     }
 
 TBool CAIXuikonEventHandler::CNullEventHandler::HasMenuItemL( 
-    const TAiPublisherInfo& /*aPublisherInfo*/, const TDesC& /*aMenuItem*/ )    
+    const THsPublisherInfo& /*aPublisherInfo*/, const TDesC& /*aMenuItem*/ )    
     {
     return EFalse;
     }
 
-void CAIXuikonEventHandler::CNullEventHandler::HandleUiShutdown
-    ( CAiUiController& /*aUiController*/ )
+void CAIXuikonEventHandler::CNullEventHandler::HandleUiShutdown(
+    CAiUiController& /*aUiController*/ )
     {
     }
 
@@ -512,9 +513,16 @@ TBool CAIXuikonEventHandler::CNullEventHandler::RefreshContent(
     return EFalse;
     }
 
-void CAIXuikonEventHandler::CNullEventHandler::CriticalStartupPhaseOver( 
-    TInt /*aStageInteger*/ )
+TBool CAIXuikonEventHandler::CNullEventHandler::RefreshContent( 
+    const THsPublisherInfo& /*aPublisherInfo*/, const TDesC& /*aContentId*/ )    
     {
+    return EFalse;
+    }
+
+TBool CAIXuikonEventHandler::CNullEventHandler::SuspendContent( 
+    const THsPublisherInfo& /*aPublisherInfo*/, const TDesC& /*aContentId*/ )
+    {
+    return EFalse;
     }
 
 TBool CAIXuikonEventHandler::CNullEventHandler::QueryIsMenuOpen()
@@ -522,29 +530,14 @@ TBool CAIXuikonEventHandler::CNullEventHandler::QueryIsMenuOpen()
     return EFalse;
     }
 
-void CAIXuikonEventHandler::CNullEventHandler::ProcessStateChange( 
-		TAifwStates /*aSate*/)     
-    {    
-    }
-
-void CAIXuikonEventHandler::CNullEventHandler::HandleLoadPluginL(
-    const TAiPublisherInfo& /*aPluginToLoad*/ )
-    {    
-    }
-
-void CAIXuikonEventHandler::CNullEventHandler::HandleDestroyPluginL(
-    const TAiPublisherInfo& /*aPluginToDestroy*/ )
-    {    
-    }
-
-TBool CAIXuikonEventHandler::CNullEventHandler::HandleUiEvent
-        (TAny* /*aEvent*/, const TDesC8& /*aParam*/)
+TBool CAIXuikonEventHandler::CNullEventHandler::HandleUiEvent(
+    TAny* /*aEvent*/, const TDesC8& /*aParam*/ )
     {
     return EFalse;
     }
 
-TBool CAIXuikonEventHandler::CNullEventHandler::HandleApplicationEvent
-        (TInt /*aEvent*/, const TDesC8& /*aParam*/)
+TBool CAIXuikonEventHandler::CNullEventHandler::HandleApplicationEvent(
+    TInt /*aEvent*/, const TDesC8& /*aParam*/ )
     {
     return EFalse;
     }

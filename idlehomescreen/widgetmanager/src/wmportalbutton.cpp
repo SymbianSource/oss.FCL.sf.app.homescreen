@@ -30,7 +30,8 @@
 #include <apgcli.h>
 #include <apgtask.h>
 #include <widgetregistryclient.h> // widgetreqistry
-
+#include <bacline.h>
+#include <EscapeUtils.h> 
 
 #include "wmportalbutton.h"
 #include "wmcommon.h"
@@ -38,10 +39,16 @@
 #include "wmresourceloader.h"
 #include "wmmaincontainer.h"
 #include "wmconfiguration.h"
+#include "wmprocessmonitor.h"
 
 // CONSTANTS
-_LIT( KBrowserPrefix, "4 ");
+_LIT( KOviUrlPrefix, "oviurl ");
+_LIT( KBrowserUrlPrefix, "browserurl ");
+_LIT( KSpace, " ");
+_LIT( Kurlprefix, "4 ");
 
+const TUid KOSSBrowserUidValue = { 0x10008D39 };
+const TInt KMaxParam = 512;
 // MEMBER FUNCTIONS
 
 // ---------------------------------------------------------
@@ -82,6 +89,7 @@ CWmPortalButton::~CWmPortalButton()
     // then it'll try accessing imageconverter after bitmap deletion
     // for de-reference open file count, so it should be deleted last.
     delete iImageConverter;
+    delete iProcessMonitor;
     }
 
 // ---------------------------------------------------------
@@ -96,6 +104,7 @@ CWmPortalButton::CWmPortalButton(
     {
     iButtonIcon = NULL;
     iButtonIconMask = NULL;
+	iProcessMonitor = NULL;
     }
 
 // ---------------------------------------------------------
@@ -154,23 +163,95 @@ void CWmPortalButton::ConstructL(
     ActivateL();
     }
 
-// ---------------------------------------------------------------------------
-// Runs HTTP method: (starts browser or brongs browser to foreground)
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------
+// CWmPortalButton::ExecuteL
+// ---------------------------------------------------------
 //
-void TryRunHttpL( const TDesC& aParam )
+void CWmPortalButton::ExecuteL()
+    {
+    if ( iPortalButtonIndex == 0 )
+        {
+        if ( !iProcessMonitor )
+            {
+            iProcessMonitor = CWmProcessMonitor::NewL();
+            }
+		if ( !iProcessMonitor->IsActive() )
+            {
+            // We will have laucher for starting ovi store but until
+            // it's added to SDK we need to start browser to ovi url
+            if ( 0 )
+                RunOviL( iWmMainContainer->Configuration() );
+            else
+                StartBrowserL( iWmMainContainer->Configuration() );
+            }
+        }
+    else if ( iPortalButtonIndex == 1 )
+        {
+        RunOperatorL( iWmMainContainer->Configuration() );
+        } 
+    else
+        {
+        // Not supported
+        User::Leave( KErrGeneral );
+        }
+    }
+   
+// ---------------------------------------------------------
+// CWmPortalButton::RunOviL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::RunOviL( CWmConfiguration& aConf )
+    {
+    RApaLsSession session;
+    User::LeaveIfError( session.Connect() );
+    CleanupClosePushL( session );
+    
+    //get app info
+    TApaAppInfo appInfo;
+    TUid launchUid; //plan was to save uid in cenrep and fetch it from there
+    launchUid = aConf.PortalButtonClientUid( iPortalButtonIndex );
+    User::LeaveIfError( session.GetAppInfo( appInfo, launchUid ) );
+   
+    // Form parameter
+    // it should look like this "oviurl url1 browserurl url2"  
+    HBufC* param = HBufC::NewLC( KMaxParam );
+    param->Des().Copy( KOviUrlPrefix );
+    HBufC* decodedParam = EscapeUtils::EscapeEncodeL( aConf.PortalButtonClientParam( iPortalButtonIndex ), EscapeUtils::EEscapeUrlEncoded );
+    CleanupStack::PushL( decodedParam );
+    param->Des().Append( *decodedParam );
+    param->Des().Append( KSpace );
+    param->Des().Append( KBrowserUrlPrefix );
+    decodedParam->Des().Copy( aConf.PortalButtonBrowserUrl( iPortalButtonIndex ) );
+    param->Des().Append( *decodedParam );
+
+    // do the launch
+    RProcess process;
+    User::LeaveIfError( process.Create( appInfo.iFullName, *param ) );
+    iProcessMonitor->Monitor( process );
+    process.Resume();
+
+    CleanupStack::PopAndDestroy( decodedParam );
+    CleanupStack::PopAndDestroy( param );
+    CleanupStack::PopAndDestroy( &session );
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::StartBrowserL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::StartBrowserL( CWmConfiguration& aConf )
     {
     RApaLsSession session;
     User::LeaveIfError( session.Connect() );
     CleanupClosePushL( session );
 
     // browser start parameters
-    const TUid KOSSBrowserUidValue = { 0x10008D39 };
-    HBufC* param = HBufC::NewLC( aParam.Length() + 
-            KBrowserPrefix().Length() );
+    HBufC* param = HBufC::NewLC( 
+            aConf.PortalButtonBrowserUrl( iPortalButtonIndex ).Length() + 
+            Kurlprefix().Length() );
     
-    param->Des().Copy( KBrowserPrefix );
-    param->Des().Append( aParam );
+    param->Des().Copy( Kurlprefix );
+    param->Des().Append( aConf.PortalButtonBrowserUrl( iPortalButtonIndex ) );
     
     TUid id( KOSSBrowserUidValue );
     
@@ -191,110 +272,21 @@ void TryRunHttpL( const TDesC& aParam )
             User::LeaveIfError( session.Connect() );
             }
         TThreadId thread;
-        User::LeaveIfError(session.StartDocument(*param, KOSSBrowserUidValue, thread));
+        User::LeaveIfError(
+                session.StartDocument(*param, KOSSBrowserUidValue, thread));
         }
     
     CleanupStack::PopAndDestroy( param );
     CleanupStack::PopAndDestroy( &session );
     }
 
-// ---------------------------------------------------------------------------
-// Runs WIDGET method: (launches given widget with parameters)
-// ---------------------------------------------------------------------------
-//
-void TryRunWidgetL( const TDesC& aBundleId, const TDesC& aParam )
-    {
-    RApaLsSession session;
-    User::LeaveIfError( session.Connect() );
-    CleanupClosePushL( session );
-    TApaAppInfo appInfo;
-    TUid launchUid;
-    
-    // Get widget uid    
-    RWidgetRegistryClientSession widgetSession;
-    User::LeaveIfError( widgetSession.Connect() );    
-    CleanupClosePushL( widgetSession );
-    launchUid.iUid = widgetSession.GetWidgetUidL( aBundleId );
-    CleanupStack::PopAndDestroy( &widgetSession );
-
-    // prepare widget start params
-    User::LeaveIfError( session.GetAppInfo( appInfo, launchUid ) );
-    CApaCommandLine* commandLine = CApaCommandLine::NewLC();
-    commandLine->SetExecutableNameL( appInfo.iFullName );
-    HBufC8* buf8 = HBufC8::NewLC( aParam.Length() );
-    buf8->Des().Copy( aParam );
-
-    // do the launch
-    commandLine->SetTailEndL( *buf8 );
-    User::LeaveIfError( session.StartApp( *commandLine ) );
-    
-    CleanupStack::PopAndDestroy( buf8 );
-    CleanupStack::PopAndDestroy( commandLine );
-    CleanupStack::PopAndDestroy( &session );
-    }
-
-// ---------------------------------------------------------------------------
-// Runs APPLICATION method: (launches given application with parameters)
-// ---------------------------------------------------------------------------
-//
-void TryRunApplicationL( const TDesC& /*aApplication*/, const TDesC& /*aParam*/ )
-    {
-    // This method has not been implemented
-    User::Leave( KErrNotSupported );
-    }
-
-// ---------------------------------------------------------------------------
-// Tries to open a portal with given method and parameters.
-// this method may be called twice on a portal button, if a primary
-// method fails.
-// ---------------------------------------------------------------------------
-//
-void TryOpenPortalL(
-        CWmConfiguration::TMethod aMethod, const TDesC& aService,
-        const TDesC& aParam )
-    {
-    // open portal according to the method.
-    if ( aMethod == CWmConfiguration::EHttp )
-        { TryRunHttpL( aParam ); }
-    else if ( aMethod == CWmConfiguration::EWidget )
-        { TryRunWidgetL( aService, aParam ); }
-    else if ( aMethod == CWmConfiguration::EApplication )
-        { TryRunApplicationL( aService, aParam ); }
-    else
-        { User::Leave( KErrNotSupported ); }
-    }
-
-// ---------------------------------------------------------------------------
-// Opens a portal. Called when user presses a portal button. tries the
-// primary method, and if if fails, tries the secondary. If it fails,
-// gives up.
-// ---------------------------------------------------------------------------
-//
-void OpenPortalL(
-        CWmConfiguration& aConfiguration, TInt aPortalIndex )
-    {
-    TRAPD( err,
-        TryOpenPortalL(
-            aConfiguration.PortalButtonPrimaryMethod( aPortalIndex ),
-            aConfiguration.PortalButtonPrimaryService( aPortalIndex ),
-            aConfiguration.PortalButtonPrimaryParams( aPortalIndex ) ); );
-    if ( err != KErrNone )
-        {
-        // if secondary method fails, leave will be propagated.
-        TryOpenPortalL(
-            aConfiguration.PortalButtonSecondaryMethod( aPortalIndex ),
-            aConfiguration.PortalButtonSecondaryService( aPortalIndex ),
-            aConfiguration.PortalButtonSecondaryParams( aPortalIndex ) );
-        }
-    }
-
 // ---------------------------------------------------------
-// CWmPortalButton::ExecuteL
+// CWmPortalButton::RunOperatorL
 // ---------------------------------------------------------
 //
-void CWmPortalButton::ExecuteL()
+void CWmPortalButton::RunOperatorL( CWmConfiguration& /*aConf*/ )
     {
-    OpenPortalL( iWmMainContainer->Configuration(), iPortalButtonIndex );
+    //TODO: current info is that this will be a widget
     }
 
 // ---------------------------------------------------------

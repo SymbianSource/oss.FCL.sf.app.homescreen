@@ -22,7 +22,7 @@
 #if defined(__LAYOUT_360_640_TOUCH) || defined(__LAYOUT_640_360_TOUCH)          
 
 // Enabled by variation tools, variant specific
-data=ZPRIVATE\200159c0\install\root_2001f482\hsps\00\rootconfiguration.xml \private\200159c0\install\root_2001f482\hsps\00\rootconfiguration.xml
+//data=ZPRIVATE\200159c0\install\root_2001f482\hsps\00\rootconfiguration.xml \private\200159c0\install\root_2001f482\hsps\00\rootconfiguration.xml
 
 #endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH
 

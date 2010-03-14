@@ -19,6 +19,7 @@
 #include <ecom/ecom.h>
 #include <ecom/implementationinformation.h>
 #include <xnextrenderingpluginadapter.h>
+#include <xnexteventhandler.h>
 
 // Local constants
 
@@ -102,5 +103,24 @@ EXPORT_C void CXnExtRenderingPluginAdapter::SizeChanged()
 	{
 	}
 
+// ----------------------------------------------------------------------------
+// CXnExtRenderingPluginAdapter::SetEventHandler()
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void CXnExtRenderingPluginAdapter::SetEventHandler(
+        MXnExtEventHandler* /*aEventHandler*/ )
+    {
+    
+    }
+
+// ----------------------------------------------------------------------------
+// CXnExtRenderingPluginAdapter::SetDataL()
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void CXnExtRenderingPluginAdapter::SetDataL( const TDesC8& /*aData*/,
+    const TDesC& /*aType*/, TInt /*aIndex*/ )
+    {
+    
+    }
 
 // End of file

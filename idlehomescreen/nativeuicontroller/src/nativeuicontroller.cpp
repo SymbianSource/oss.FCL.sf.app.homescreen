@@ -17,22 +17,20 @@
 
 // System includes
 #include <bautils.h>
-#include <e32std.h>
 #include <e32property.h>
-#include <coemain.h>
-#include <avkon.rsg>
 #include <ecom/ecom.h>
 #include <ecom/implementationproxy.h>
-#include <data_caging_path_literals.hrh>
 #include <centralrepository.h>
 #include <activeidle2domainpskeys.h>
 #include <aipspropertyobserver.h>
 #include <eikstart.h>
-#include <AknLayout2ScalableDef.h>
 #include <avkondomainpskeys.h>
 #include <AknDlgShut.h> 
 
 // User includes
+#include <aifwstatehandler.h>
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
 #include "nativeuicontroller.h"
 #include "ainativeui.hrh"
 #include "application.h"
@@ -40,7 +38,6 @@
 #include "aiutility.h"
 #include "aistrparser.h"
 #include "aidevicestatuscontentmodel.h"
-#include "aipropertyextension.h"
 #include "aistatuspanel.h"
 #include "ainativerenderer.h"
 #include "aititlepanerenderer.h"
@@ -48,13 +45,11 @@
 #include "aidialogrenderer.h"
 #include "aisoftkeyrenderer.h"
 #include "ainotifierrenderer.h"
-#include "aitoolbarrenderer.h"
 #include "ainativeuiplugins.h"
 #include "activeidle2domaincrkeys.h"
 #include "aistatuspanetouchui.h"
 #include "ainativeuistrings.h" // string literals
 #include "aistrcnv.h"
-#include <aiscutplugindomaincrkeys.h>
 
 using namespace AiNativeUiController;
 
@@ -75,9 +70,22 @@ const TImplementationProxy KImplementationTable[] =
     IMPLEMENTATION_PROXY_ENTRY(KImplementationUidNativeUiController, CNativeUiController::NewL)
     };
 
+// ======== LOCAL FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// IsDeviceStatus()
+//
+// ----------------------------------------------------------------------------
+//
+TBool IsDeviceStatus( const THsPublisherInfo& aInfo )
+    {
+    return ( aInfo.Name() == KDeviceStatusPluginName && 
+        aInfo.Uid() == KDeviceStatusPluginUid );
+    }
 
+// ======== MEMBER FUNCTIONS ========
 // ----------------------------------------------------------------------------
 // CNativeUiController::NewL()
+//
 // ----------------------------------------------------------------------------
 //
 CNativeUiController* CNativeUiController::NewL()
@@ -96,6 +104,7 @@ CNativeUiController* CNativeUiController::NewL()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Exit()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::Exit()
@@ -107,11 +116,11 @@ void CNativeUiController::Exit()
         iExitTimer->Start( 0, KOneSecondInMicroS,                       
            TCallBack( ExitTimerCallBack, this ) );
         }
-
     }
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::ExitTimerCallBack()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::ExitTimerCallBack( TAny *aSelf )
@@ -131,12 +140,13 @@ TInt CNativeUiController::ExitTimerCallBack( TAny *aSelf )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::~CNativeUiController()
+//
 // ----------------------------------------------------------------------------
 //
 CNativeUiController::~CNativeUiController()
     {
-    iPlugins.Close();
-
+    iPlugins.Reset();
+    
     delete iExitTimer;
 
     PrepareToExit();
@@ -147,6 +157,7 @@ CNativeUiController::~CNativeUiController()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::PrepareToExit()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::PrepareToExit()
@@ -175,6 +186,7 @@ void CNativeUiController::PrepareToExit()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::CNativeUiController()
+//
 // ----------------------------------------------------------------------------
 //
 CNativeUiController::CNativeUiController() 
@@ -183,7 +195,18 @@ CNativeUiController::CNativeUiController()
     }
 
 // ----------------------------------------------------------------------------
+// CNativeUiController::SetAppUi()
+//
+// ----------------------------------------------------------------------------
+//
+void CNativeUiController::SetAppUi( CAppUi* aAppUi )
+    {
+    iAppUi = aAppUi;
+    }
+
+// ----------------------------------------------------------------------------
 // CNativeUiController::AddRendererL()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::AddRendererL( CAiNativeRenderer* aRenderer )
@@ -193,6 +216,7 @@ void CNativeUiController::AddRendererL( CAiNativeRenderer* aRenderer )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::RemoveRenderer()
+//
 // ----------------------------------------------------------------------------
 //
 TBool CNativeUiController::RemoveRenderer( CAiNativeRenderer *aRenderer, 
@@ -216,56 +240,17 @@ TBool CNativeUiController::RemoveRenderer( CAiNativeRenderer *aRenderer,
     }
 
 // ----------------------------------------------------------------------------
-// CNativeUiController::ExitTimerCallBack()
-// ----------------------------------------------------------------------------
-//
-void CNativeUiController::DeleteToolbarRenderer()
-    {
-    if ( iToolbarRenderer )
-        {
-        RemoveRenderer( iToolbarRenderer );
-        delete iToolbarRenderer;
-        iToolbarRenderer = NULL;
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CNativeUiController::RecreateToolbarRendererL()
-// ----------------------------------------------------------------------------
-//
-TBool CNativeUiController::RecreateToolbarRendererL()
-    {
-    TBool created( EFalse );
-    // Remove the old renderer...
-    DeleteToolbarRenderer();
-
-    CAknToolbar* toolbar( iAvkonAppUi->CurrentFixedToolbar() );
-    // ...and create the new if there is an existing toolbar that
-    // we can use
-    if ( toolbar )
-        {
-        iToolbarRenderer = CAiToolbarRenderer::NewL( *iFwEventHandler, *toolbar);
-        AddRendererL( iToolbarRenderer );
-        created = ETrue;
-        }
-    
-    return created;
-    }
-
-
-// ----------------------------------------------------------------------------
 // CNativeUiController::DoPublish()
+//
 // ----------------------------------------------------------------------------
 //
 template<class T>
-TInt CNativeUiController::DoPublish( MAiPropertyExtension& aPlugin,
+TInt CNativeUiController::DoPublish( CHsContentPublisher& aPlugin,
     TInt aContent, T& aData, TInt aIndex )
     {
-    const TAiPublisherInfo* info( NULL );
-    
-    TRAP_IGNORE( info = aPlugin.PublisherInfoL() );
-       
-    if ( !info || info->iNamespace != KNativeUiNamespace )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+             
+    if ( !IsDeviceStatus( info ) && info.Namespace() != KNativeUiNamespace )
         {
         return KErrNotSupported;
         }
@@ -294,6 +279,7 @@ TInt CNativeUiController::DoPublish( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::HandleIdleStateEvent()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::HandleIdleStateEvent( TAny* aPtr )
@@ -329,6 +315,7 @@ TInt CNativeUiController::HandleIdleStateEvent( TAny* aPtr )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::HandleKeylockStateEvent()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::HandleKeylockStateEvent( TAny* aPtr )
@@ -376,6 +363,7 @@ TInt CNativeUiController::HandleKeylockStateEvent( TAny* aPtr )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::HandlePluginConfChange()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::HandlePluginConfChange( TAny* aPtr )
@@ -398,6 +386,7 @@ TInt CNativeUiController::HandlePluginConfChange( TAny* aPtr )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::LoadUIDefinitionL()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::LoadUIDefinitionL()
@@ -412,7 +401,7 @@ void CNativeUiController::LoadUIDefinitionL()
             }
         return;
         }
-    
+                     
     if ( !iExitTimer )
         {
         iExitTimer = CPeriodic::NewL( CActive::EPriorityStandard );
@@ -452,10 +441,23 @@ void CNativeUiController::LoadUIDefinitionL()
         CleanupStack::Pop();//CAiSoftKeyRenderer
 
         // Toolbar shown only when we are not the main ui controller
-        DeleteToolbarRenderer();
-	    
-	    TRAP_IGNORE(
-	        iAppUi->StartL(); )
+        //DeleteToolbarRenderer();
+	            
+        THsPublisherInfo deviceStatus( KDeviceStatusPluginUid, 
+            KDeviceStatusPluginName, KNativeUiNamespace );
+        
+        iPlugins.Append( deviceStatus );
+        
+        iFwStateHandler->LoadPlugin( deviceStatus, EAiFwSystemStartup );
+        
+        THsPublisherInfo profile( KProfilePluginUid, 
+            KProfilePluginName, KNativeUiNamespace );
+        
+        iPlugins.Append( profile );
+        
+        iFwStateHandler->LoadPlugin( profile, EAiFwSystemStartup );
+        
+	    TRAP_IGNORE( iAppUi->StartL() );	        
         }
 
     // We need to load the resource file here if we are not main controller.
@@ -473,7 +475,7 @@ void CNativeUiController::LoadUIDefinitionL()
             iResourceOffset = iCoeEnv->AddResourceFileL( resourceFile );
             }
         // Create the toolbar renderer
-        RecreateToolbarRendererL();
+        //RecreateToolbarRendererL();
         }
 
     // 4) Add an observer that informs us about the focus transition changes
@@ -503,59 +505,19 @@ void CNativeUiController::LoadUIDefinitionL()
     }
 
 // ----------------------------------------------------------------------------
-// CNativeUiController::GetPluginsL()
-// ----------------------------------------------------------------------------
-//
-void CNativeUiController::GetPluginsL( RAiPublisherInfoArray& aPlugins )
-    {
-    iPlugins.Reset();
-    
-    if( iRunningAsMain )
-        {               
-        TAiPublisherInfo shortcutPublisherInfo;
-        shortcutPublisherInfo.iUid = KShortcutPluginUid;
-        shortcutPublisherInfo.iName.Copy( KShortcutPluginName );
-        shortcutPublisherInfo.iNamespace.Copy( KNativeUiNamespace );        
-    
-        User::LeaveIfError( iPlugins.Append( shortcutPublisherInfo ) );
-    
-        TAiPublisherInfo deviceStatusPublisherInfo;
-        deviceStatusPublisherInfo.iUid = KDeviceStatusPluginUid;
-        deviceStatusPublisherInfo.iName.Copy( KDeviceStatusPluginName );
-        deviceStatusPublisherInfo.iNamespace.Copy( KNativeUiNamespace );
-        
-        User::LeaveIfError( iPlugins.Append( deviceStatusPublisherInfo ) );
-    
-        TAiPublisherInfo profilePublisherInfo;
-        profilePublisherInfo.iUid = KProfilePluginUid;
-        profilePublisherInfo.iName.Copy( KProfilePluginName );
-        profilePublisherInfo.iNamespace.Copy( KNativeUiNamespace );
-        
-        User::LeaveIfError( iPlugins.Append( profilePublisherInfo ) );
-    
-        // Copy iPlugins to aPlugins
-        aPlugins.ReserveL( aPlugins.Count() + iPlugins.Count() );
-        
-        for( TInt i = 0; i < iPlugins.Count(); ++i )
-            {
-            aPlugins.Append( iPlugins[i] );
-            }
-        }
-    }
-
-// ----------------------------------------------------------------------------
 // CNativeUiController::GetSettingsL()
+//
 // ----------------------------------------------------------------------------
 //
-void CNativeUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
+void CNativeUiController::GetSettingsL( const THsPublisherInfo& aPublisherInfo,
     RAiSettingsItemArray& aSettings )
     {
-    if ( aPubInfo.iNamespace != KNativeUiNamespace )
+    if ( aPublisherInfo.Namespace() != KNativeUiNamespace )
         {
         return;
         }
     
-    if( iRunningAsMain && aPubInfo.iUid == KShortcutPluginUid )        
+    if( iRunningAsMain && aPublisherInfo.Uid() == KShortcutPluginUid )        
         {
         RProperty::Set( KPSUidAiInformation, KActiveIdleExtHS_PluginConfChange, 0 );
         
@@ -563,7 +525,7 @@ void CNativeUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
         CleanupDeletePushL( settings );
 
         MAiPluginSettingsItem& item = settings->AiPluginSettingsItem();
-        item.SetPublisherId( aPubInfo.iUid );
+        item.SetPublisherId( aPublisherInfo.Uid() );
 
         HBufC* appBuf;
         appBuf = HBufC::NewLC( RProperty::KMaxPropertySize );
@@ -593,7 +555,7 @@ void CNativeUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
         CleanupDeletePushL( settings );
 
         MAiPluginSettingsItem& item2 = settings->AiPluginSettingsItem();
-        item2.SetPublisherId( aPubInfo.iUid );
+        item2.SetPublisherId( aPublisherInfo.Uid() );
 
         HBufC* app2Buf;
         app2Buf = HBufC::NewLC( RProperty::KMaxPropertySize );
@@ -619,19 +581,21 @@ void CNativeUiController::GetSettingsL( const TAiPublisherInfo& aPubInfo,
         
         // In case there are settings in the cenrep the settings
         // here are overwritten by them
-        GetSettingsFromCRL( aPubInfo, aSettings );
+        GetSettingsFromCRL( aPublisherInfo, aSettings );
         CleanupStack::Pop( settings );
         }
     }
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::GetSettingsFromCRL()
+//
 // ----------------------------------------------------------------------------
 //
-void CNativeUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,                            
-    RAiSettingsItemArray &aPluginSettings )
+void CNativeUiController::GetSettingsFromCRL( 
+    const THsPublisherInfo& aPublisherInfo, 
+    RAiSettingsItemArray &aPluginSettings )                                
     {
-    if ( aPubInfo.iNamespace != KNativeUiNamespace )
+    if ( aPublisherInfo.Namespace() != KNativeUiNamespace )
         {
         return;
         }
@@ -684,7 +648,7 @@ void CNativeUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,
             }
 
         // does the setting belong to this plugin
-        if ( err == KErrNone && pluginIdPtr == aPubInfo.iName )
+        if ( err == KErrNone && pluginIdPtr == aPublisherInfo.Name() )
             {
             // Get the settings id
             err = settingsRepository->Get(crKey++, settingKeyPtr);
@@ -707,7 +671,7 @@ void CNativeUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,
                         MAiPluginSettingsItem& item = setting->AiPluginSettingsItem();
 
                         // Existing setting found => replace it
-                        if ( item.Key() == settingId && item.PublisherId() == aPubInfo.iUid )
+                        if ( item.Key() == settingId && item.PublisherId() == aPublisherInfo.Uid() )
                             {
                             item.SetValueL( settingValuePtr, EFalse );
                             settingFound = ETrue;
@@ -716,19 +680,21 @@ void CNativeUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,
                         }
                     // Existing setting not found => append new one ONLY if we
                     // are dealing with the icon overrides
+                    /* NOTE ai_shortcut_command_api has been removed!
                     if ( !settingFound && ( settingId & KScutFlagBitIconOverride ) )
                         {
                         MAiPluginSettings* settings = AiUtility::CreatePluginSettingsL();
                         CleanupDeletePushL( settings );
                         MAiPluginSettingsItem& item = settings->AiPluginSettingsItem();
 
-                        item.SetPublisherId( aPubInfo.iUid );
+                        item.SetPublisherId( aPublisherInfo.Uid() );
                         item.SetKey( settingId );
                         item.SetValueL( settingValuePtr, EFalse );
                         aPluginSettings.Append( settings );
 
                         CleanupStack::Pop( settings );
                         }
+                     */
                     }
                 }
             }
@@ -753,6 +719,7 @@ void CNativeUiController::GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::ActivateUI()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::ActivateUI()
@@ -765,6 +732,7 @@ void CNativeUiController::ActivateUI()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::GetContentObserver()
+//
 // ----------------------------------------------------------------------------
 //
 MAiContentObserver& CNativeUiController::GetContentObserver()
@@ -774,6 +742,7 @@ MAiContentObserver& CNativeUiController::GetContentObserver()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::SetEventHandler()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::SetEventHandler( MAiFwEventHandler& aEventHandler )
@@ -782,7 +751,18 @@ void CNativeUiController::SetEventHandler( MAiFwEventHandler& aEventHandler )
     }
 
 // ----------------------------------------------------------------------------
+// CNativeUiController::SetStateHandler()
+//
+// ----------------------------------------------------------------------------
+//
+void CNativeUiController::SetStateHandler( MAiFwStateHandler& aStateHandler )
+    {
+    iFwStateHandler = &aStateHandler;
+    }
+
+// ----------------------------------------------------------------------------
 // CNativeUiController::FwEventHandler()
+//
 // ----------------------------------------------------------------------------
 //
 MAiFwEventHandler* CNativeUiController::FwEventHandler()
@@ -791,16 +771,8 @@ MAiFwEventHandler* CNativeUiController::FwEventHandler()
     }
 
 // ----------------------------------------------------------------------------
-// CNativeUiController::RemovePluginFromUI()
-// ----------------------------------------------------------------------------
-//
-void CNativeUiController::RemovePluginFromUI( 
-    MAiPropertyExtension& /*aPlugin*/ )
-    {
-    }
-
-// ----------------------------------------------------------------------------
 // CNativeUiController::MainInterface()
+//
 // ----------------------------------------------------------------------------
 //
 MAiMainUiController* CNativeUiController::MainInterface()
@@ -810,6 +782,7 @@ MAiMainUiController* CNativeUiController::MainInterface()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::SecondaryInterface()
+//
 // ----------------------------------------------------------------------------
 //
 MAiSecondaryUiController* CNativeUiController::SecondaryInterface()
@@ -819,6 +792,7 @@ MAiSecondaryUiController* CNativeUiController::SecondaryInterface()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::RunApplicationL()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::RunApplicationL()
@@ -831,6 +805,7 @@ void CNativeUiController::RunApplicationL()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::CoeEnv()
+//
 // ----------------------------------------------------------------------------
 //
 CCoeEnv& CNativeUiController::CoeEnv()
@@ -839,26 +814,18 @@ CCoeEnv& CNativeUiController::CoeEnv()
     }
 
 // ----------------------------------------------------------------------------
-// CNativeUiController::SetUiFrameworkObserver()
-// ----------------------------------------------------------------------------
-//
-void CNativeUiController::SetUiFrameworkObserver( 
-    MAiUiFrameworkObserver& aObserver )
-    {
-    iUiFrameworkObserver = &aObserver;
-    }
-
-// ----------------------------------------------------------------------------
 // CNativeUiController::IsMenuOpen()
+//
 // ----------------------------------------------------------------------------
 //
 TBool CNativeUiController::IsMenuOpen()
     {
-    return CoeEnv().AppUi()->IsDisplayingMenuOrDialog();
+    return iAppUi->IsDisplayingMenuOrDialog();
     }
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::SetCoeEnv()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::SetCoeEnv( CCoeEnv& aCoeEnv )
@@ -867,32 +834,8 @@ void CNativeUiController::SetCoeEnv( CCoeEnv& aCoeEnv )
     }
 
 // ----------------------------------------------------------------------------
-// CNativeUiController::UiFrameworkObserver()
-// ----------------------------------------------------------------------------
-//
-MAiUiFrameworkObserver* CNativeUiController::UiFrameworkObserver()
-    {
-    return iUiFrameworkObserver;
-    }
-
-// ----------------------------------------------------------------------------
-// CNativeUiController::HandleResourceChange()
-// ----------------------------------------------------------------------------
-//
-void CNativeUiController::HandleResourceChange( TInt /*aType*/ )
-    {
-    }
-
-// ----------------------------------------------------------------------------
-// CNativeUiController::HandleForegroundEvent()
-// ----------------------------------------------------------------------------
-//
-void CNativeUiController::HandleForegroundEvent( TBool /*aForeground*/ )
-    {
-    }
-
-// ----------------------------------------------------------------------------
 // CNativeUiController::StartTransaction()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::StartTransaction( TInt /*aTxId*/ )
@@ -902,6 +845,7 @@ TInt CNativeUiController::StartTransaction( TInt /*aTxId*/ )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Commit()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::Commit( TInt /*aTxId*/ )
@@ -919,6 +863,7 @@ TInt CNativeUiController::Commit( TInt /*aTxId*/ )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::CancelTransaction()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CNativeUiController::CancelTransaction( TInt /*aTxId*/ )
@@ -928,23 +873,27 @@ TInt CNativeUiController::CancelTransaction( TInt /*aTxId*/ )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::CanPublish()
+//
 // ----------------------------------------------------------------------------
 //
-TBool CNativeUiController::CanPublish( MAiPropertyExtension& aPlugin,
+TBool CNativeUiController::CanPublish( CHsContentPublisher& aPlugin,
     TInt /*aContent*/, TInt /*aIndex*/ )                                      
     {    
-    const TAiPublisherInfo* info( NULL );
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+             
+    if ( IsDeviceStatus( info ) )
+        {
+        return ETrue;
+        }
     
-    TRAP_IGNORE( info = aPlugin.PublisherInfoL() );
-       
-    if ( !info || info->iNamespace != KNativeUiNamespace )
+    if ( info.Namespace() != KNativeUiNamespace )
         {
         return EFalse;
         }
     
     for( TInt i = 0; i < iPlugins.Count(); i++ )
         {               
-        if ( iPlugins[i] == *info )
+        if ( iPlugins[i] == info )
             {
             return ETrue;
             }
@@ -955,9 +904,10 @@ TBool CNativeUiController::CanPublish( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Publish()
+//
 // ----------------------------------------------------------------------------
 //
-TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
+TInt CNativeUiController::Publish( CHsContentPublisher& aPlugin,
     TInt aContent, TInt aResource, TInt aIndex )
     {
     TInt err = DoPublish( aPlugin, aContent, aResource, aIndex );
@@ -966,9 +916,10 @@ TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Publish()
+//
 // ----------------------------------------------------------------------------
 //
-TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
+TInt CNativeUiController::Publish( CHsContentPublisher& aPlugin,
     TInt aContent, const TDesC16& aText, TInt aIndex )        
     {
     TInt err = DoPublish( aPlugin, aContent, aText, aIndex );
@@ -977,9 +928,10 @@ TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Publish()
+//
 // ----------------------------------------------------------------------------
 //
-TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
+TInt CNativeUiController::Publish( CHsContentPublisher& aPlugin,
     TInt aContent, const TDesC8& aBuf, TInt aIndex )
     {
     TInt err = DoPublish( aPlugin, aContent, aBuf, aIndex );
@@ -988,9 +940,10 @@ TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Publish()
+//
 // ----------------------------------------------------------------------------
 //
-TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,                                     
+TInt CNativeUiController::Publish( CHsContentPublisher& aPlugin,                                     
     TInt aContent, RFile& aFile, TInt aIndex )                                   
     {
     TInt err = DoPublish( aPlugin, aContent, aFile, aIndex );
@@ -999,9 +952,10 @@ TInt CNativeUiController::Publish( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Clean()
+//
 // ----------------------------------------------------------------------------
 //
-TInt CNativeUiController::Clean( MAiPropertyExtension& aPlugin, 
+TInt CNativeUiController::Clean( CHsContentPublisher& aPlugin, 
     TInt aContent, TInt /*aIndex*/ )
     {
     const TInt count( iRenderers.Count() ); 
@@ -1016,6 +970,7 @@ TInt CNativeUiController::Clean( MAiPropertyExtension& aPlugin,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::Extension()
+//
 // ----------------------------------------------------------------------------
 //
 TAny* CNativeUiController::Extension( TUid /*aUid*/ )
@@ -1025,12 +980,14 @@ TAny* CNativeUiController::Extension( TUid /*aUid*/ )
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::RequiresSubscription()
+//
 // ----------------------------------------------------------------------------
 //
 TBool CNativeUiController::RequiresSubscription( 
-    const TAiPublisherInfo& aPublisherInfo ) const
+    const THsPublisherInfo& aPublisherInfo ) const
     {
-    if ( aPublisherInfo.iNamespace == KNativeUiNamespace )
+    if ( IsDeviceStatus( aPublisherInfo ) || 
+        aPublisherInfo.Namespace() == KNativeUiNamespace )
         {
         // Targeted to this content renderer
         return ETrue;
@@ -1043,12 +1000,11 @@ TBool CNativeUiController::RequiresSubscription(
 // CNativeUiController::SetProperty()
 // ----------------------------------------------------------------------------
 //
-TInt CNativeUiController::SetProperty( MAiPropertyExtension& /*aPlugin*/,
+TInt CNativeUiController::SetProperty( CHsContentPublisher& /*aPlugin*/,
         const TDesC8& /*aElementId*/,
         const TDesC8& /*aPropertyName*/,
         const TDesC8& /*aPropertyValue*/ ) 
-    {
-   
+    {   
     return KErrNotSupported;
     }
 
@@ -1056,7 +1012,7 @@ TInt CNativeUiController::SetProperty( MAiPropertyExtension& /*aPlugin*/,
 // CNativeUiController::SetProperty()
 // ----------------------------------------------------------------------------
 //   
-TInt CNativeUiController::SetProperty(MAiPropertyExtension& /*aPlugin*/,
+TInt CNativeUiController::SetProperty(CHsContentPublisher& /*aPlugin*/,
         const TDesC8& /*aElementId*/,
         const TDesC8& /*aPropertyName*/,
         const TDesC8& /*aPropertyValue*/,
@@ -1067,6 +1023,7 @@ TInt CNativeUiController::SetProperty(MAiPropertyExtension& /*aPlugin*/,
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::NewApplication()
+//
 // ----------------------------------------------------------------------------
 //
 CApaApplication* CNativeUiController::NewApplication()
@@ -1079,6 +1036,7 @@ CApaApplication* CNativeUiController::NewApplication()
 
 // ----------------------------------------------------------------------------
 // CNativeUiController::VariateToMainUiController()
+//
 // ----------------------------------------------------------------------------
 //
 void CNativeUiController::VariateToMainUiController()

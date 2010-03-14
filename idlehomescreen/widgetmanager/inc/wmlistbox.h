@@ -118,10 +118,6 @@ private: // data members
      */
     CWmListBox* iListBox;
 
-    /** 
-     * current font used in drawing (not owned) 
-     */
-    const CFont*    iFont;
 
     /**
      * add-button colored bitmap (default color)
@@ -292,13 +288,6 @@ public: // API for manipulating list content
      */
     void HandleSkinChanged();
 
-	/** 
-     * State of pointer down event 
-     * 
-     * @return ETrue if pointer is down
-     */
-    inline TBool PressedDown();
-
     /**
      * Returns size of logo 
      * 
@@ -387,11 +376,6 @@ private:
      * state of list box find pane 
      */
     TBool               iFindPaneIsVisible;
-	
-	/** 
-     * state of pointer pressed down and hold 
-     */
-    TBool               iPressedDown;
 	
     /** size of logo rect in list item */
     TSize               iLogoSize;    

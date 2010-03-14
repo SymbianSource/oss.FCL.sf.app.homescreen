@@ -30,6 +30,7 @@ class CXnType;
 class CXnProperty;
 class CXnNode;
 class TXnUiEngineAppIf;
+class CXnComponent;
 
 namespace XnComponentInterface
     {
@@ -247,6 +248,14 @@ public:
      * Get namespace of this node
      */
     IMPORT_C const TDesC8& Namespace();
+    
+    /**
+     * Get the component object of the node.
+     *
+     * @since Series 60 5.2
+     * @return component object
+     */
+    IMPORT_C CXnComponent& Component();
 
 private:
     // Data

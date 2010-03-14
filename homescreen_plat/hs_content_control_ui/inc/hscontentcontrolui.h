@@ -24,6 +24,7 @@
 
 // Forward declarations
 class MHsContentController;
+class CAknView;
 
 /**
  *  Content control UI interface
@@ -44,6 +45,16 @@ public:
      */
     virtual void Activate() = 0;
 
+    /**
+     *
+     */
+    virtual void DeActivate() = 0;
+
+    /**
+    *
+    */    
+    virtual void Views( RPointerArray<CAknView>& aViews ) = 0;
+    
     /**
      *
      */
@@ -97,6 +108,16 @@ public:  // From MHsContentControlUi
      */
     inline void Activate();
 
+    /**
+     *
+     */
+    inline void DeActivate();
+
+    /**
+     *
+     */
+    inline void Views( RPointerArray<CAknView>& aViews );
+    
     /**
      *
      */
@@ -170,6 +191,15 @@ inline CHsContentControlUi::~CHsContentControlUi()
     }
 
 inline void CHsContentControlUi::Activate()
+    {
+    // Default implementation of MHsContentControlUi method
+    }
+inline void CHsContentControlUi::DeActivate()
+    {
+    // Default implementation of MHsContentControlUi method
+    }
+inline void CHsContentControlUi::Views( 
+        RPointerArray<CAknView>& /*aViews*/ )
     {
     // Default implementation of MHsContentControlUi method
     }

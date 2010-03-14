@@ -17,6 +17,8 @@
         <!-- </menu:folder> -->
         <!--Contacts application-->
         <menu:application uid="0x101F4CCE"/>
+        <!-- Music Player (MusicPlayer)-->
+	<menu:application uid="0x102072C3"/> 
         <!--Internet folder-->
         <!--  now using qgnmenugroupweb available in skin -->
         <menu:folder title_name="&qtn_apps_browserng_title;" 
@@ -212,11 +214,14 @@
                             icon_skin_minor_id=""
                             icon_skin_major_id=""
                             param="logs:dialed"/>
-          <!-- Photos Suite launcher -->      
-		  <menu:application uid="0x200104E4"/>
-          <!-- Video Suite launcher -->      
-		  <menu:application uid="0x200211FA"/>			
-			
+
+          <!-- Menu Application Launcher -->
+          <menu:application uid="0x101F4CD2"/>
+          <!-- Photos Suite launcher -->
+          <menu:application uid="0x200104E4"/>
+          <!-- Video Suite launcher -->
+          <menu:application uid="0x200211FA"/>
+
         </menu:folder>
     </menu:folder>
 </menu:data>

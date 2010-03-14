@@ -26,26 +26,28 @@
 #include "xnappuiadapter.h"
 #include "xnwallpaperview.h"
 #include "xnrootdata.h"
+#include "xnuiengine.h"
 
 // SYSTEM INCLUDE FILES
 #include <aknlistquerydialog.h> 
 #include <xnuiengine.rsg>
-#include <aknskinsinternalcrkeys.h>
+#include <AknSkinsInternalCRKeys.h>
 #include <activeidle2domaincrkeys.h>
-#include <aknswallpaperutils.h>
+#include <AknsWallpaperUtils.h>
 #include <imageconversion.h>
 #include <bitmaptransforms.h>
 
-#include <aknsutils.h>
-#include <aknsdrawutils.h>
-#include <aknscontrolcontext.h>
-#include <aknslayeredbackgroundcontrolcontext.h>
+#include <AknsUtils.h>
+#include <AknsDrawUtils.h>
+#include <AknsControlContext.h>
+#include <AknsLayeredBackgroundControlContext.h>
 #include <driveinfo.h>
 
 using namespace hspswrapper;
 
 _LIT8( KSingle, "single" );
 const TUid KDummyUid = { 0x0000000 };
+const TInt KSkinGfxInnerRectShrink = 5;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -67,8 +69,9 @@ void CXnBackgroundManager::ConstructL()
     {    
     CreateWindowL();
 
+    iRect = TRect();
     iBgContext = CAknsLayeredBackgroundControlContext::NewL(
-            KAknsIIDQsnBgScreenIdle, TRect(), ETrue, 1 );
+            KAknsIIDQsnBgScreenIdle, iRect, ETrue, 1 );
 
     TRect bgRect;
     AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, bgRect );
@@ -134,18 +137,66 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
         CXnViewData& viewData( iViewManager.ActiveViewData() );
         CFbsBitmap* wallpaper = viewData.WallpaperImage();
         if( wallpaper )
-            {
-            SystemGc().BitBlt( TPoint(0, 0), wallpaper ); 
+            {   
+            TSize bitmapSize = wallpaper->SizeInPixels();
+            
+            if( iRect.Height() > bitmapSize.iHeight && iRect.Width() > bitmapSize.iWidth )
+                {
+                TInt width = bitmapSize.iWidth / 2;
+                TInt height = bitmapSize.iHeight / 2;
+            
+                TPoint point = iRect.Center();
+                point.SetXY( point.iX - width, point.iY - height );
+                
+                SystemGc().SetBrushColor( KRgbBlack );
+                SystemGc().Clear( aRect );
+                SystemGc().BitBlt( point, wallpaper ); 
+                }
+            else
+                {
+                SystemGc().BitBlt( TPoint( 0, 0 ), wallpaper );
+                }
+
+            if( iViewManager.UiEngine().IsEditMode() )
+                {
+                DrawEditModeBackgroundSkin();
+                }
             return;
             }
         }
     else if( iBgImage )
         {
-        SystemGc().BitBlt( TPoint(0, 0), iBgImage ); 
+        TSize bitmapSize = iBgImage->SizeInPixels();
+        
+        if( iRect.Height() > bitmapSize.iHeight && iRect.Width() > bitmapSize.iWidth )
+            {
+            TInt width = bitmapSize.iWidth / 2;
+            TInt height = bitmapSize.iHeight / 2;
+        
+            TPoint point = iRect.Center();
+            point.SetXY( point.iX - width, point.iY - height );
+            
+            SystemGc().SetBrushColor( KRgbBlack );
+            SystemGc().Clear( aRect );
+            SystemGc().BitBlt( point, iBgImage ); 
+            }
+        else
+            {
+            SystemGc().BitBlt( TPoint( 0, 0 ), iBgImage );
+            }
+        if( iViewManager.UiEngine().IsEditMode() )
+            {
+            DrawEditModeBackgroundSkin();
+            }
         return;
         }    
     MAknsSkinInstance* skin( AknsUtils::SkinInstance() );     
     AknsDrawUtils::Background( skin, iBgContext, this, SystemGc(), aRect );
+    
+    if( iViewManager.UiEngine().IsEditMode() )
+        {
+        DrawEditModeBackgroundSkin();
+        }   
     }
 
 // -----------------------------------------------------------------------------
@@ -687,7 +738,8 @@ TInt CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
         else
             {
             viewData.SetWallpaperImagePathL( KNullDesC );
-            viewData.SetWallpaperImage( NULL );            
+            viewData.SetWallpaperImage( NULL ); 
+            SaveWallpaperL(); // to HSPS
             }
 
         // Update screen
@@ -834,6 +886,22 @@ void CXnBackgroundManager::UpdateScreen()
         {
         DrawNow();  
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::DrawEditModeBackgroundSkin
+// -----------------------------------------------------------------------------
+//
+void CXnBackgroundManager::DrawEditModeBackgroundSkin() const
+    { 
+    TRect shrunkRect = iRect;
+
+    shrunkRect.Shrink(
+        KSkinGfxInnerRectShrink,
+        KSkinGfxInnerRectShrink );
+    
+    AknsDrawUtils::DrawFrame( AknsUtils::SkinInstance(), SystemGc(), 
+            iRect, shrunkRect, KAknsIIDQgnHomeEditBg, KAknsIIDDefault );
     }
 
 //  End of File

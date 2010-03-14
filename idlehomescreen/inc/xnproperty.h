@@ -86,15 +86,16 @@ namespace XnPropertyNames
             _LIT8(KLeft, "left");
             }
         }
-    namespace styluspopup
+    namespace popup
         {
-        _LIT8(KPositionHint, "_s60-position-hint");
-        namespace positionhint
+        _LIT8(KPopupType, "_s60-popup-type");
+        
+        namespace popuptype
             {
-            _LIT8(KAbove, "above");
-//            _LIT8(KBelow, "below");
-            }        
-        }        
+            _LIT8(KNormal, "normal");
+            _LIT8(KPermanent, "permanent");
+            }
+        }
     namespace view
         {
 //        _LIT8(KUid, "uid");
@@ -427,7 +428,6 @@ namespace XnPropertyNames
             _LIT8(KRemoveFocusedWidget, "system/removefocusedwidget");            
             _LIT8(KRemoveWidget, "system/removewidget");            
             _LIT8(KAddWidget, "system/addwidget");
-            _LIT8(KRunFullScreenEffect, "system/runfullscreeneffect");
             _LIT8(KActivateView, "system/activateview");
             _LIT8(KActivateNextView, "system/activatenextview");
             _LIT8(KActivatePreviousView, "system/activatepreviousview");
@@ -453,6 +453,8 @@ namespace XnPropertyNames
             /*_LIT8(KStoreFocus, "system/storefocus");
             _LIT8(KRestoreFocus, "system/restorefocus");*/
             _LIT8(KSetWallpaper, "system/setwallpaper");
+            _LIT8(KActivateTextEditor, "system/activatetexteditor");
+            _LIT8(KDeactivateTextEditor, "system/deactivatetexteditor");
             _LIT8(KActivateSelectedItem, "system/activateselecteditem");
             _LIT8(KDestination, "destination");
             _LIT8(KBroadcast, "broadcast");

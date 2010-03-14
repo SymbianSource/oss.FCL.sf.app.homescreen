@@ -21,6 +21,7 @@
 #include <eikapp.h>
 #include <AknUtils.h>
 #include <layoutmetadata.cdl.h>
+#include <aknpriv.hrh> 
 
 // User includes
 #include "xnuiengine.h"
@@ -54,6 +55,7 @@
 #include "xneffectmanager.h"
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
+#include "xntexteditor.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -282,6 +284,24 @@ static void TraceTreeL( CXnNode* aRootNode );
 #endif
 
 // ============================= LOCAL FUNCTIONS ===============================
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+CXnNode* FindPlugin( CXnNode& aNode )
+    {
+    CXnNode* pluginNode( NULL );
+    for( CXnNode* node = &aNode; node; node = node->Parent() )
+        {
+        if( node->DomNode()->Name() == KPlugin )
+            {
+            pluginNode = node;
+            break;
+            }
+        }
+    return pluginNode;
+    }
+
 // -----------------------------------------------------------------------------
 // GrowIfNeeded()
 // When a plugin is focused, the focus is a bit bigger than its control 
@@ -8128,6 +8148,7 @@ CXnUiEngineImpl::~CXnUiEngineImpl()
            
     delete iEditMode;
     delete iHitTest;
+    delete iSplitScreenState.iPartialScreenBlock;
 
     iFocusCandidateList.Reset();
     iRedrawRegions.ResetAndDestroy();
@@ -8395,12 +8416,6 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
 
     RefreshMenuL();
 
-    if ( iLayoutControl & XnLayoutControl::EFirstPassDraw )
-        {
-        iViewManager.SetFirstPassDrawCompleteL();
-        iLayoutControl &= ~XnLayoutControl::EFirstPassDraw;
-        }
-
     iLayoutControl &= ~XnLayoutControl::ERenderUI;
     
     iAppUiAdapter.EffectManager()->UiRendered();
@@ -8561,8 +8576,6 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
     iControlAdapterList = &iViewManager.Controls();
     iCurrentViewControlAdapter = iCurrentView->Control();
     
-    iLayoutControl |= XnLayoutControl::EFirstPassDraw;
-
     iDirtyList.Reset();
 
     iRedrawRegions.ResetAndDestroy();
@@ -8639,7 +8652,6 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
 void CXnUiEngineImpl::NotifyWidgetAdditionL(
     const CXnPluginData& /*aPluginData*/ )
     {
-    iLayoutControl |= XnLayoutControl::EFirstPassDraw;
     }
 
 // -----------------------------------------------------------------------------
@@ -8916,7 +8928,30 @@ TBool CXnUiEngineImpl::IsDialogDisplaying()
 // -----------------------------------------------------------------------------
 //
 void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
-    {    
+    {
+    
+    if ( aType == KAknSplitInputEnabled ) 
+        {
+        if(!iSplitScreenState.isPartialScreenEnabled )
+            {
+            DisableRenderUiLC();
+            HandlePartialTouchInputL( aType );
+            RootNode()->SetDirtyL();
+            CleanupStack::PopAndDestroy();
+            }
+        }    
+    
+     if ( aType == KAknSplitInputDisabled ) 
+        {
+        if( iSplitScreenState.isPartialScreenEnabled )    
+            {
+            DisableRenderUiLC();
+            HandlePartialTouchInputL( aType );
+            RootNode()->SetDirtyL();
+            CleanupStack::PopAndDestroy();        
+            }
+        }    
+
     if ( iMenuNode )
         {
         CXnControlAdapter* adapter( iMenuNode->Control() );
@@ -9514,239 +9549,6 @@ CXnHitTest& CXnUiEngineImpl::HitTest() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnUiEngineImpl::PositionStylusPopupL
-// -----------------------------------------------------------------------------
-//
-void CXnUiEngineImpl::PositionStylusPopupL( CXnNode& aNode,
-    CXnNode& aReference, const TPoint& aPosition )
-    {
-    CXnDomStringPool* sp( aNode.DomNode()->StringPool() );
-    TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
-    RRegion region;
-    region.Copy( dirtyRegion->iRegion );    
-    CleanupClosePushL( region );
-
-    // Set initial position to (0, 0) to calculate popup metrics
-    CXnProperty* top = CXnProperty::NewL(
-        XnPropertyNames::style::common::KTop, 0,
-        CXnDomPropertyValue::EPx, *sp );
-    CleanupStack::PushL( top );
-    aNode.SetPropertyL( top );
-    CleanupStack::Pop( top );
-    top = NULL;
-    CXnProperty* left = CXnProperty::NewL(
-        XnPropertyNames::style::common::KLeft, 0,
-        CXnDomPropertyValue::EPx, *sp );
-    CleanupStack::PushL( left );
-    aNode.SetPropertyL( left );
-    CleanupStack::Pop( left );
-    left = NULL;
-
-    // Make it visible
-    CXnProperty* display = CXnProperty::NewL(
-        XnPropertyNames::style::common::KDisplay,
-        XnPropertyNames::style::common::display::KBlock,
-        CXnDomPropertyValue::EString, *sp );
-    CleanupStack::PushL( display );
-    aNode.SetPropertyL( display );
-    CleanupStack::Pop( display );
-
-    if ( !aNode.IsLaidOut() || !aReference.IsLaidOut() )
-        {
-        ForceRenderUIL( ETrue );
-        }
-
-    if ( !aNode.IsLaidOut() || !aReference.IsLaidOut() )
-        {
-        // Something went wrong
-        CleanupStack::PopAndDestroy( &region );
-
-        return;
-        }
-
-    TRect rectToFit( aReference.MarginRect() );
-    TRect marginRect( aNode.MarginRect() );
-
-    if ( marginRect.Height() > rectToFit.Height() ||
-        marginRect.Width() > rectToFit.Width() )
-        {
-        // Won't fit even how much is moved
-        CleanupStack::PopAndDestroy( &region );
-
-        return;
-        }
-
-    TPoint tl;
-    TPoint br;
-
-    // Remove the initial 0,0 from redraw region and rects
-    dirtyRegion->iRegion.Clear();
-    ClearRects( aNode, ETrue );
-    CXnProperty* positionHint( aNode.GetPropertyL(
-        XnPropertyNames::styluspopup::KPositionHint ) );
-
-    // Default
-    const TDesC8* value( &XnPropertyNames::styluspopup::positionhint::KAbove );
-
-    if ( positionHint )
-        {
-        value = &positionHint->StringValue();
-        }
-
-    if ( *value == XnPropertyNames::styluspopup::positionhint::KAbove )
-        {
-        if ( AknLayoutUtils::LayoutMirrored() )
-            {
-            tl = aPosition;
-            tl.iY -= marginRect.Height();
-            tl.iX -= marginRect.Width();
-
-            // Will the popup float out?
-            if ( !rectToFit.Contains( tl ) )
-                {
-                // top left floated out
-                TInt y( rectToFit.iTl.iY - tl.iY + 1 );
-
-                if ( y >= 0 )
-                    {
-                    // y-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iY = tl.iY + y;
-                    }
-
-                TInt x( rectToFit.iTl.iX - tl.iX + 1 );
-
-                if ( x >= 0 )
-                    {
-                    // x-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iX = tl.iX + x;
-                    }
-                }
-            }
-        else
-            {
-            tl = aPosition;
-            tl.iY -= marginRect.Height();
-
-            // Will the popup float out?
-            if ( !rectToFit.Contains( tl ) )
-                {
-                // top left floated out
-                TInt y( rectToFit.iTl.iY - tl.iY + 1 );
-
-                if ( y >= 0 )
-                    {
-                    // y-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iY = tl.iY + y;
-                    }
-                }
-
-            br = TPoint( tl.iX + marginRect.Width(),
-                         tl.iY + marginRect.Height() );
-
-            if ( !rectToFit.Contains( br ) )
-                {
-                // bottom right floated out
-                TInt x( br.iX - rectToFit.iBr.iX + 1 );
-
-                if ( x >= 0 )
-                    {
-                    // x-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iX = tl.iX - x;
-                    }
-                }
-            }
-        }
-    else // value == XnPropertyNames::styluspopup::positionhint::KBelow
-        {
-        if ( AknLayoutUtils::LayoutMirrored() )
-            {
-            tl = aPosition;
-            tl.iX = tl.iX - marginRect.Width();
-
-            if ( !rectToFit.Contains( tl ) )
-                {
-                // Top left floated out
-                TInt x( rectToFit.iTl.iX - tl.iX + 1 );
-
-                if ( x >= 0 )
-                    {
-                    // x-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iX = tl.iX + x;
-                    }
-                }
-
-            br = TPoint( tl.iX + marginRect.Width(),
-                         tl.iY + marginRect.Height() );
-
-            if ( !rectToFit.Contains( br ) )
-                {
-                // bottom right floated out
-                TInt y( br.iY - rectToFit.iBr.iY + 1 );
-
-                if ( y >= 0 )
-                    {
-                    // y-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iY = tl.iY - y;
-                    }
-                }
-            }
-        else
-            {
-            tl = aPosition;
-            br = TPoint( tl.iX + marginRect.Width(),
-                         tl.iY + marginRect.Height() );
-
-            // Will the popup float out?
-            if ( !rectToFit.Contains( br ) )
-                {
-                // Bottom right floated out
-                TInt x( br.iX - rectToFit.iBr.iX + 1 );
-
-                if ( x >= 0 )
-                    {
-                    // x-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iX = tl.iX - x;
-                    }
-
-                TInt y( br.iY - rectToFit.iBr.iY + 1 );
-
-                if ( y >= 0 )
-                    {
-                    // y-coordinate floated out, move it position
-                    // so that it will be inside reference rect
-                    tl.iY = tl.iY - y;
-                    }
-                }
-            }
-        }
-
-    // Set positions
-    top = CXnProperty::NewL(
-        XnPropertyNames::style::common::KTop, tl.iY,
-        CXnDomPropertyValue::EPx, *sp );
-    CleanupStack::PushL( top );
-    aNode.SetPropertyL( top );
-    CleanupStack::Pop( top );
-    left = CXnProperty::NewL(
-        XnPropertyNames::style::common::KLeft, tl.iX,
-        CXnDomPropertyValue::EPx, *sp );
-    CleanupStack::PushL( left );
-    aNode.SetPropertyL( left );
-    CleanupStack::Pop( left );
-
-    // Copy stored region back
-    dirtyRegion->iRegion.Copy( region );                 
-    CleanupStack::PopAndDestroy( &region );
-    }
-
-// -----------------------------------------------------------------------------
 // CXnUiEngineImpl::GetThemeResource
 // -----------------------------------------------------------------------------
 //
@@ -9947,6 +9749,89 @@ void CXnUiEngineImpl::ReportScreenDeviceChangeL()
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiEngineImpl::HandlePartialTouchInputL()
+// -----------------------------------------------------------------------------
+void CXnUiEngineImpl::HandlePartialTouchInputL( TInt aType )
+    {
+    if( !iSplitScreenState.iPartialScreenEditorNode )
+        {
+        return;
+        }
+    if ( aType == KAknSplitInputEnabled ) 
+        {        
+        // don't remove input from stack if split input is enabled
+        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;             
+        XnComponentInterface::MakeInterfaceL( editorControl, 
+            iSplitScreenState.iPartialScreenEditorNode->AppIfL() );
+        if( editorControl )
+            {
+            editorControl->HandleEditorEvent(CXnTextEditor::KKeepSplitInputInStack);
+            }
+
+        RPointerArray<CXnNode> plugins = *Plugins();        
+     
+         for( TInt i=0; i<plugins.Count(); i++ )     
+             {         
+             CXnNode* pluginNode = plugins[i];
+             CXnNode* editorplugin = FindPlugin( *iSplitScreenState.iPartialScreenEditorNode );
+             
+             if ( pluginNode != editorplugin )
+                {
+                SetNodeVisibleL(pluginNode, EFalse);
+                }      
+             }
+            
+        StorePartialScreenBlockProgressionL();
+           
+        iSplitScreenState.isPartialScreenEnabled = ETrue;           
+        SetPartialScreenBlockProgressionL( 
+            XnPropertyNames::style::common::block_progression::KBT );
+        iAppUiAdapter.StatusPane()->MakeVisible( EFalse );
+        } 
+     
+     if ( aType == KAknSplitInputDisabled ) 
+         {
+         
+         // set remove stack true if disable event does not come from widget controls
+         if(iSplitScreenState.isPartialScreenOpen)
+             {
+             XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;             
+             XnComponentInterface::MakeInterfaceL( editorControl, 
+                 iSplitScreenState.iPartialScreenEditorNode->AppIfL() );
+             if( editorControl )
+                 {
+                 editorControl->HandleEditorEvent(CXnTextEditor::KRemoveSplitInputFromStack);
+                 }
+             }
+
+         RPointerArray<CXnNode> plugins = *Plugins();
+    
+            for( TInt i=0; i<plugins.Count(); i++ )
+               {           
+               CXnNode* pluginNode = plugins[i];               
+               
+               if ( pluginNode != iSplitScreenState.iPartialScreenEditorNode )
+                    {
+                    SetNodeVisibleL(pluginNode, ETrue);
+                    }           
+               }
+            
+        if( iSplitScreenState.iPartialScreenBlock == NULL )
+            {
+            SetPartialScreenBlockProgressionL( 
+                        XnPropertyNames::style::common::block_progression::KTB );
+            }
+        else
+            {
+            SetPartialScreenBlockProgressionL(iSplitScreenState.iPartialScreenBlock->Des());
+            }
+        
+         iSplitScreenState.isPartialScreenEnabled = EFalse;
+         iAppUiAdapter.StatusPane()->MakeVisible(ETrue);
+         }
+    }
+
+// -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 CCoeControl* CXnUiEngineImpl::WindowOwningControl( CXnNode& aNode )
     {
@@ -10037,5 +9922,105 @@ void CXnUiEngineImpl::NotifyResourceChanged( TInt aType )
     {
     TRAP_IGNORE( HandleResourceChangeL( aType ) );
     }
+
+// -----------------------------------------------------------------------------
+// EnablePartialTouchInput 
+// -----------------------------------------------------------------------------
+void CXnUiEngineImpl::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
+    {    
+    iSplitScreenState.iPartialScreenEditorNode = &aNode;
+    iSplitScreenState.isPartialScreenOpen = aEnable;
+    }
+
+// -----------------------------------------------------------------------------
+// SetNodeVisibleL
+// -----------------------------------------------------------------------------
+void CXnUiEngineImpl::SetNodeVisibleL( CXnNode* aNode , TBool aVisible )
+    {    
+    CXnDomStringPool* sp( iUiEngine->ODT()->DomDocument().StringPool()); 
+    
+    if(!aVisible)
+        {
+        CXnProperty* display = CXnProperty::NewL(
+        XnPropertyNames::style::common::KDisplay,
+        XnPropertyNames::style::common::display::KNone,
+        CXnDomPropertyValue::EString, *sp );
+        
+        CleanupStack::PushL( display );         
+        aNode->SetPropertyL(display);             
+        CleanupStack::Pop( display );
+        }
+    else
+        {
+         CXnProperty* visible = CXnProperty::NewL(
+         XnPropertyNames::style::common::KDisplay,
+         XnPropertyNames::style::common::display::KBlock,
+         CXnDomPropertyValue::EString, *sp );
+         
+         CleanupStack::PushL( visible );                
+         aNode->SetPropertyL(visible);                
+         CleanupStack::Pop( visible );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// SetPartialScreenBlockProgressionL
+// -----------------------------------------------------------------------------
+void CXnUiEngineImpl::SetPartialScreenBlockProgressionL( const TDesC8& aBlockProgression )
+    {
+    CXnNode* plugin = FindPlugin( *iSplitScreenState.iPartialScreenEditorNode );
+    CXnNode* parent( NULL );    
+    if( plugin )
+        {
+        parent = plugin->Parent();
+        }
+    
+    CXnDomStringPool* sp( iUiEngine->ODT()->DomDocument().StringPool());   
+    if(parent)
+        {
+        CXnProperty* block_progression = CXnProperty::NewL(
+        XnPropertyNames::style::common::KBlockProgression,
+        aBlockProgression,
+        CXnDomPropertyValue::EString, *sp );
+        
+        CleanupStack::PushL( block_progression );            
+        parent->SetPropertyL(block_progression);            
+        CleanupStack::Pop( block_progression );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// SetPartialScreenBlockProgressionL
+// -----------------------------------------------------------------------------
+void CXnUiEngineImpl::StorePartialScreenBlockProgressionL()
+    {    
+    CXnNode* parent = iSplitScreenState.iPartialScreenEditorNode->Parent();
+    
+    if(parent)
+        {
+        CXnProperty* blocProgressionProperty( 
+          parent->GetPropertyL( XnPropertyNames::style::common::KBlockProgression ) );               
+        
+        HBufC* blocProgressionValue (blocProgressionProperty->StringValueL());
+        CleanupStack::PushL( blocProgressionValue );
+        if(iSplitScreenState.iPartialScreenBlock)
+            {
+            delete iSplitScreenState.iPartialScreenBlock;
+            iSplitScreenState.iPartialScreenBlock = NULL;
+            }
+        iSplitScreenState.iPartialScreenBlock =
+                CnvUtfConverter::ConvertFromUnicodeToUtf8L(blocProgressionValue->Des() );
+        CleanupStack::PopAndDestroy( blocProgressionValue );
+        }    
+    }
+
+// -----------------------------------------------------------------------------
+// isPartialInputActive
+// -----------------------------------------------------------------------------
+TBool CXnUiEngineImpl::IsPartialInputActive()
+    {
+    return iSplitScreenState.isPartialScreenEnabled;
+    }
+
 
 // End of file

@@ -58,8 +58,7 @@ namespace XnLayoutControl
     const TInt ERefreshMenu = 0x04;
     const TInt EIgnoreState = 0x08;
     const TInt EViewDirty = 0x10;
-    const TInt EEffectStarted = 0x20;
-    const TInt EFirstPassDraw = 0x40;
+    const TInt EEffectStarted = 0x20;    
     }
 	
 NONSHARABLE_STRUCT( TXnDirtyRegion )
@@ -72,7 +71,25 @@ NONSHARABLE_STRUCT( TXnDirtyRegion )
         iRegion.Close();
         }
     };
-        
+
+
+NONSHARABLE_STRUCT( TXnSplitScreenState )
+    {
+    /** Partial screen editor node. Not own */
+    CXnNode* iPartialScreenEditorNode;
+    /** Is partial screen input open */
+    TBool isPartialScreenOpen;
+    /** Partial screen block progression. Own. */
+    HBufC8* iPartialScreenBlock;
+    /** Is partial screen enabled*/
+    TBool isPartialScreenEnabled;
+    
+    ~TXnSplitScreenState()
+        {
+        delete iPartialScreenBlock;
+        }
+    };
+
 
 // Class declaration
 
@@ -451,17 +468,6 @@ public:
     CXnHitTest& HitTest() const;
 
     /**
-     * Positions stylus popup according given position
-     * 
-     * @since S60 5.1         
-     * @param aNode stylus popup node
-     * @param aReference a reference node where popup should fit
-     * @param aPosition stylus popup position to set. 
-     */
-    void PositionStylusPopupL( CXnNode& aNode, CXnNode& aReference,
-        const TPoint& aPosition );
-
-    /**
      * Gets theme resource file
      * 
      * @since S60 5.1         
@@ -495,7 +501,24 @@ public:
      * @param aDispather Event dispatcher     
      */                    
     void SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher );
-    
+
+    /**
+     * Enables partial touch input
+     * 
+     * @since Series 60 5.2
+     * @param aNode Editor Node
+     * @param TBool Partial input is enabled      
+     */      
+    void EnablePartialTouchInput( CXnNode& aNode, TBool aEnable );
+
+    /**
+     * Is partial input active
+     * 
+     * @since Series 60 5.2
+     * @return TBool is partial input active      
+     */      
+    TBool IsPartialInputActive();
+        
 private:
     
     IMPORT_C static void EnableRenderUi( TAny* aAny );
@@ -553,6 +576,39 @@ private:
     void AddRedrawRectL( TRect aRect, CXnNode& aNode );
 
     void ReportScreenDeviceChangeL();
+    
+    /**
+      * Handle partial touch input
+      * 
+      * @since Series 60 5.2
+      * @param TInt aType 
+      */ 
+    void HandlePartialTouchInputL( TInt aType );
+
+    /**
+      * Set node visible
+      * 
+      * @since Series 60 5.2
+      * @param aNode node to hide/show
+      * @param TBool aVisible boolean to set node visible      
+      */      
+    void SetNodeVisibleL( CXnNode* aNode, TBool aVisible );
+
+    /**
+      * Set partial screen block
+      * 
+      * @since Series 60 5.2 
+      * @param TDesC8 aBlockProgression set layout direction
+      */     
+    void SetPartialScreenBlockProgressionL( const TDesC8& aBlockProgression );
+    
+    /**
+      * Store partial screen block
+      * 
+      * @since Series 60 5.2 
+      * @param TDesC8 aBlockProgression set layout direction
+      */     
+    void StorePartialScreenBlockProgressionL();
 	
 private:
     //Derived functions
@@ -668,6 +724,8 @@ private:
     CXnHitTest* iHitTest;
     /** Disable count */
     TInt iDisableCount;   
+	/**Split screen states*/
+    TXnSplitScreenState iSplitScreenState;
     };
 
 #endif      // _CXNUIENGINEIMPL_H

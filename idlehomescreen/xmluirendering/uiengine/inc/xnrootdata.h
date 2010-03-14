@@ -80,7 +80,7 @@ public:
     /**
      * @see CXnPluginData
      */
-    void LoadL();
+    TInt Load();
 
     /**
      * @see CXnPluginData

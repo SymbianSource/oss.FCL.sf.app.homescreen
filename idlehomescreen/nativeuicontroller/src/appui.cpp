@@ -16,26 +16,8 @@
 */
 
 
-#include "appui.h"
-#include "ainativeui.hrh"
-#include "ainativeuistrings.h" // string literals
-#include "ainativeuiview.h"
-#include "application.h"
-#include "nativeuicontroller.h"
-#include "aiuiframeworkobserver.h"
-#include "aifweventhandler.h"
-#include <AiNativeUi.rsg>
-
-#include "aipropertyextension.h"
-#include "aicontentmodel.h"
-#include "aiuiidleintegration.h"
-#include "activeidle2domaincrkeys.h"
-#include "activeidle2domainpskeys.h"
-#include "extrstandbycontainerif.h"
-#include "debug.h"
-
+// System includes
 #include <startupdomainpskeys.h>
-#include <aipspropertyobserver.h>
 #include <centralrepository.h>
 #include <e32base.h>
 #include <e32property.h>
@@ -50,6 +32,27 @@
 #include <AknUtils.h>
 #include <layoutmetadata.cdl.h>
 #include <aknlayoutscalable_avkon.cdl.h>
+
+// User includes
+#include <hscontentpublisher.h>
+#include <aipspropertyobserver.h>
+
+#include "appui.h"
+#include "ainativeui.hrh"
+#include "ainativeuistrings.h" // string literals
+#include "ainativeuiview.h"
+#include "application.h"
+#include "nativeuicontroller.h"
+#include "aifweventhandler.h"
+#include <AiNativeUi.rsg>
+
+#include "aicontentmodel.h"
+#include "aiuiidleintegration.h"
+#include "activeidle2domaincrkeys.h"
+#include "activeidle2domainpskeys.h"
+#include "extrstandbycontainerif.h"
+#include "debug.h"
+
 
 namespace
     {
@@ -193,9 +196,7 @@ void CAppUi::ConstructL()
         }
 
     iFwEventHandler = iUiCtl->FwEventHandler();
-
-    iUiFwObserver = iUiCtl->UiFrameworkObserver();
-
+   
     TAiIdleKeySoundConfig keySoundConfig;
     keySoundConfig.iKeySounds = KeySounds();
     keySoundConfig.iContextResId = R_NATIVEUI_DEFAULT_SKEY_LIST;
@@ -328,11 +329,6 @@ CAppUi::~CAppUi()
 void CAppUi::HandleForegroundEventL(TBool aForeground)
     {
     CAknAppUi::HandleForegroundEventL( aForeground );
-
-    if ( iUiFwObserver )
-        {
-        iUiFwObserver->HandleForegroundEvent( aForeground );
-        }
     }
 
 void CAppUi::HandleCommandL(TInt aCommand)
@@ -462,11 +458,6 @@ void CAppUi::HandleResourceChangeL(TInt aType)
             iAppView->DrawNow();
             }
 
-        }
-
-    if ( iUiFwObserver )
-        {
-        iUiFwObserver->HandleResourceChange(aType);
         }
     }
 

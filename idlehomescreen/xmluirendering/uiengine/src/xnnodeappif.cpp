@@ -21,6 +21,8 @@
 #include "xntype.h"
 #include "xnuiengine.h"
 #include "xndomnode.h"
+#include "xncomponent.h"
+#include "xncomponentnodeimpl.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -278,4 +280,13 @@ EXPORT_C const TDesC8& CXnNodeAppIf::Namespace()
         return node->Namespace();
         }
     return KNullDesC8;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNodeAppIf::Component
+// -----------------------------------------------------------------------------
+//
+EXPORT_C CXnComponent& CXnNodeAppIf::Component()
+    {
+    return *iNode->ComponentNodeImpl()->Component();
     }

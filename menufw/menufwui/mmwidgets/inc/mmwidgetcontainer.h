@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_48.1.37 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_48.1.38 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -1000,6 +1000,16 @@ private:
      * Observer to notify about long tap events.
      */
     MMmLongTapObserver* iLongTapObserver;
+    
+    /**
+     * Stores previously set highlight visibility.
+     * ETrue - hightlight visible, EFalse - highlight disabled.
+     * Please note that in most cases it is better to read
+     * ESingleClickDisabledHighlight flag of itemdrawer than rely
+     * on this member variable to determine if highlight is visible
+     * (@c IsHighlightVisible).
+     */
+    TBool iPreviousHighlightVisibility;
 
 	};
 

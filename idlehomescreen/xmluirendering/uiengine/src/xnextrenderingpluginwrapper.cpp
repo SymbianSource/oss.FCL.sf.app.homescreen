@@ -18,6 +18,10 @@
 // System include files
 
 // User include files
+#include "xnnode.h"
+#include "xnuiengine.h"
+#include "xnappuiadapter.h"
+
 #include "xnextrenderingpluginwrapper.h"
 
 // ======== MEMBER FUNCTIONS ========
@@ -49,6 +53,7 @@ void CXnExtRenderingPluginWrapper::ConstructL( CXnNodePluginIf& aNode )
     iNode = &aNode;
     
     CXnControlAdapter::ConstructL( aNode );
+    iAdapter->SetEventHandler( this );
     }
 
 // ----------------------------------------------------------------------------
@@ -210,5 +215,28 @@ void CXnExtRenderingPluginWrapper::DoExitPowerSaveModeL(
 	{
 	iAdapter->ExitPowerSaveModeL();
 	}
-	
+
+// ----------------------------------------------------------------------------
+// CXnExtRenderingPluginWrapper::HandleEventL()
+//
+// ----------------------------------------------------------------------------
+//
+void CXnExtRenderingPluginWrapper::HandleEventL( const TDesC& aEvent, const TDesC8& aDestination )
+    {
+    
+    CXnNode* node = iNode->Node().UiEngine()->FindNodeByIdL( aDestination );
+    CXnAppUiAdapter* appui = static_cast<CXnAppUiAdapter*>(iAvkonAppUi);
+    appui->HandleEventL( aEvent, node->AppIfL() );
+    }
+
+// ----------------------------------------------------------------------------
+// CXnExtRenderingPluginWrapper::SetDataL()
+//
+// ----------------------------------------------------------------------------
+//
+void CXnExtRenderingPluginWrapper::SetDataL( const TDesC8& aData, const TDesC& aType, TInt aIndex )
+    {
+    iAdapter->SetDataL( aData, aType, aIndex );
+    }
+
 // End of file

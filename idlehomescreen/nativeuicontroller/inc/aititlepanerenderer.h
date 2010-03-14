@@ -19,10 +19,15 @@
 #ifndef C_AITITLEPANERENDERER_H
 #define C_AITITLEPANERENDERER_H
 
-
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "ainativerenderer.h"
 #include "ainativeuimodel.h"
+
+// Forward declarations
+class CHsContentPublisher;
 
 namespace AiUtility
 	{
@@ -43,7 +48,7 @@ class CAiStatusPanel;
  *
  *  @since S60 3.2
  */
-class CAiTitlePaneRenderer : public CAiNativeRenderer
+NONSHARABLE_CLASS( CAiTitlePaneRenderer ) : public CAiNativeRenderer
     {
 public:
 
@@ -53,22 +58,22 @@ public:
 
 // from base class CAiNativeRenderer
 
-    void DoPublishL( MAiPropertyExtension& aPlugin, 
+    void DoPublishL( CHsContentPublisher& aPlugin, 
                         TInt aContent, 
                         const TDesC16& aText,
                         TInt aIndex );
 
-    void DoPublishL( MAiPropertyExtension& aPlugin, 
+    void DoPublishL( CHsContentPublisher& aPlugin, 
                         TInt aContent, 
                         const TDesC8& aBuf,
                         TInt aIndex );
 
-    void DoPublishL( MAiPropertyExtension& aPlugin, 
+    void DoPublishL( CHsContentPublisher& aPlugin, 
                         TInt aContent, 
                         TInt aResource,
                         TInt aIndex );
 
-	void DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent );
+	void DoCleanL( CHsContentPublisher& aPlugin, TInt aContent );
 
     void TransactionCommittedL();
 

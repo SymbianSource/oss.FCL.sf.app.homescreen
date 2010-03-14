@@ -35,7 +35,7 @@ namespace XnComponentInterface
  *  Xuikon component base class.
  *
  *  @ingroup group_xnlayoutengine
- *  @lib ?library
+ *  @lib xnlayoutengine.lib
  *  @since Series 60 3.1
  */
 class CXnComponent : public CBase
@@ -121,6 +121,18 @@ protected:
      * Two-phased constructor.
      */
     IMPORT_C void ConstructL();
+    
+public:
+    
+    /**
+     * Routes the data stream for the external rendering plugin.
+     *
+     * @since Series 60 5.2
+     * @param aData Data stream.
+     * @param aType Type of the stream.
+     * @param aIndex Index of the data.
+     */
+    IMPORT_C void SetDataL( const TDesC8& aData, const TDesC& aType, TInt aIndex );
 
 private:
     // Data

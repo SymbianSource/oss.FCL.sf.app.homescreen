@@ -680,7 +680,7 @@ TInt CTsFswEngine::FindParentWgId( TInt aWgId )
         for ( TInt i( 0 ); i < count; i++ )
             {
             RWsSession::TWindowGroupChainInfo info = allWgIds[i];
-            if ( info.iId == aWgId )
+            if ( info.iId == aWgId && info.iParentId > 0)
                 {
                 parent = info.iParentId;
                 break;
@@ -688,6 +688,25 @@ TInt CTsFswEngine::FindParentWgId( TInt aWgId )
             }
         }
     allWgIds.Close();
+    return parent;
+    }
+
+// --------------------------------------------------------------------------
+// CTsFswEngine::FindMostTopParentWgId
+// --------------------------------------------------------------------------
+//
+TInt CTsFswEngine::FindMostTopParentWgId( TInt aWgId )
+    {
+	TInt parent( KErrNotFound );
+	parent = FindParentWgId( aWgId );
+	if( parent != KErrNotFound)
+		{
+		TInt topParent = FindMostTopParentWgId(parent);
+		if( topParent != KErrNotFound )
+			{
+			parent = topParent;
+			}
+		}
     return parent;
     }
 
@@ -901,35 +920,57 @@ void CTsFswEngine::HandleFswPpApplicationUnregistered( TInt aWgId )
 // --------------------------------------------------------------------------
 // CTsFswEngine::AssignScreenshotHandle
 // Called when a screenshot arrives to check if there is a corresponding
-// application in the task list.
+// application in the task list. Firstly try to match screenshot into parental
+// application then into standalone one.
 // --------------------------------------------------------------------------
 //
 void CTsFswEngine::AssignScreenshotHandle( TInt aWgIdForScreenshot,
         TInt aBitmapHandle )
     {
     TBool changed = EFalse;
-    TInt parentWgId = FindParentWgId( aWgIdForScreenshot );
+    TInt parentWgId = FindMostTopParentWgId( aWgIdForScreenshot );
     // now parentWgId is a valid wgid or KErrNotFound (-1)
-    for ( TInt i = 0, ie = iData.Count(); i != ie; ++i )
-        {
-        if ( iData[i]->Widget() )
-            {
-            // Do not do anything for now => no screenshot for widgets.
-            continue;
-            }
-        TInt appWgId = iData[i]->WgId();
-        if ( appWgId == aWgIdForScreenshot || appWgId == parentWgId )
-            {
-            iData[i]->SetScreenshotHandle( aBitmapHandle );
-            changed = ETrue;
-            break;
-            }
-        }
+    if (parentWgId != KErrNotFound)
+		{
+		AssignScreenshotHandle( parentWgId, aBitmapHandle, changed );
+		}
+    if (!changed)
+		{
+		AssignScreenshotHandle( aWgIdForScreenshot, aBitmapHandle, changed );
+		}
     if ( changed )
         {
         iObserver.FswDataChanged();
         }
     }
+
+// --------------------------------------------------------------------------
+// CTsFswEngine::AssignScreenshotHandle
+// Called when a screenshot arrives to check if there is a corresponding
+// application in the task list. It might be tried to be match into parental 
+// or standalone application.
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::AssignScreenshotHandle(TInt aWgIdForScreenshot,
+		TInt aBitmapHandle, TBool& aAsigned)
+	{
+	aAsigned = EFalse;
+	for (TInt i = 0, ie = iData.Count(); i != ie; ++i)
+		{
+		if (iData[i]->Widget())
+			{
+			// Do not do anything for now => no screenshot for widgets.
+			continue;
+			}
+		TInt appWgId = iData[i]->WgId();
+		if (appWgId == aWgIdForScreenshot)
+			{
+			iData[i]->SetScreenshotHandle(aBitmapHandle);
+			aAsigned = ETrue;
+			break;
+			}
+		}
+	}
 
 // --------------------------------------------------------------------------
 // CTsFswEngine::LookupScreenshotHandle

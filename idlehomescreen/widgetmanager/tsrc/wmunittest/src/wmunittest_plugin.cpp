@@ -98,7 +98,7 @@ TInt CWmUnitTest::PluginActivateL( CStifItemParser& /*aItem*/ )
 TInt CWmUnitTest::PluginDeactivateL( CStifItemParser& /*aItem*/ )
     {
     if ( iWmPlugin == 0 ) User::Leave( KErrArgument );
-    iWmPlugin->Deactivate();
+    iWmPlugin->CloseView();
     _RETURN("PluginActivateL End", KErrNone);
     }
 

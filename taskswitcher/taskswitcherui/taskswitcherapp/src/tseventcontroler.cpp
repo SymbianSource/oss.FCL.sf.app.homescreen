@@ -130,7 +130,7 @@ void CTsEventControler::HandleTapEventL(
 void CTsEventControler::HandleDragEventL(
     MAknTouchGestureFwDragEvent& aEvent)
     {
-    iObserver.Drag(aEvent);
+    iObserver.DragL(aEvent);
     iPhysicsHelper->HandleDragEvent(aEvent);
     }
 

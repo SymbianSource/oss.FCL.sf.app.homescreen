@@ -11,4 +11,6 @@ EXPORTS
 	_ZNK28CXnExtRenderingPluginAdapter7ImplUidEv @ 10 NONAME
 	_ZTI28CXnExtRenderingPluginAdapter @ 11 NONAME
 	_ZTV28CXnExtRenderingPluginAdapter @ 12 NONAME
+	_ZN28CXnExtRenderingPluginAdapter15SetEventHandlerEP18MXnExtEventHandler @ 13 NONAME
+	_ZN28CXnExtRenderingPluginAdapter8SetDataLERK6TDesC8RK7TDesC16i @ 14 NONAME
 

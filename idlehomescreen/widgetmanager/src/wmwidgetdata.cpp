@@ -89,6 +89,7 @@ CWmWidgetData::CWmWidgetData( const TSize& aLogoSize,
     iAnimationIndex = 0;
     iAsyncUninstalling = EFalse;
     iFireLogoChanged = EFalse;
+    iMdcaPoint = NULL;
     }
 
 // ---------------------------------------------------------
@@ -131,10 +132,14 @@ void CWmWidgetData::InitL(
 
     // take ownership of the content info
     iHsContentInfo = aHsContentInfo;
-
+    
+    // create iMdcaPoint for listbox    
+    _LIT( KFormatStr, "0\t%S");
+    iMdcaPoint = HBufC::NewL( 
+            iHsContentInfo->Name().Length() + KFormatStr().Length() );
+    iMdcaPoint->Des().Format( KFormatStr(), &iHsContentInfo->Name() );
     // get publisher uid from widget registry
     FetchPublisherUidL( aRegistryClientSession );
-
     }
 
 // ---------------------------------------------------------
@@ -155,6 +160,7 @@ CWmWidgetData::~CWmWidgetData()
     delete iLogoImageMask;
     delete iImageConverter;
     delete iHsContentInfo;
+    delete iMdcaPoint;
     }
 
 // ---------------------------------------------------------
@@ -595,6 +601,18 @@ const CFbsBitmap* CWmWidgetData::AnimationMask( const TSize& aSize )
 TBool CWmWidgetData::IsUninstalling()
     {
     return iAsyncUninstalling;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::MdcaPoint
+// ---------------------------------------------------------
+//
+const TDesC& CWmWidgetData::MdcaPoint() const
+    {
+    if ( iMdcaPoint )
+        return *iMdcaPoint;
+    else
+        return KNullDesC;
     }
 
 // End of file

@@ -19,16 +19,19 @@
 #ifndef C_AISOFTNOTIFERRENDERER_H
 #define C_AISOFTNOTIFERRENDERER_H
 
-
+// System includes
 #include <e32base.h>
-#include "ainativerenderer.h"
 #include <AknSoftNotifier.h>
 
+// User includes
+#include "ainativerenderer.h"
+
+// Forward declarations
+class CHsContentPublisher;
 class CAknSoftNotifier;
 
 namespace AiNativeUiController
 {
-
 /**
  *  Dialog renderer.
  *
@@ -36,7 +39,7 @@ namespace AiNativeUiController
  *
  *  @since S60 3.2
  */
-class CAiNotifierRenderer : public CAiNativeRenderer
+NONSHARABLE_CLASS( CAiNotifierRenderer ) : public CAiNativeRenderer
     {
 public:
 
@@ -46,9 +49,9 @@ public:
 
 // from base class CAiNativeRenderer
 
-    void DoPublishL( MAiPropertyExtension& aPlugin, TInt aContent, TInt aResource, TInt aIndex );
+    void DoPublishL( CHsContentPublisher& aPlugin, TInt aContent, TInt aResource, TInt aIndex );
 
-    void DoCleanL( MAiPropertyExtension& aPlugin, TInt aContent );
+    void DoCleanL( CHsContentPublisher& aPlugin, TInt aContent );
 
 private:
 

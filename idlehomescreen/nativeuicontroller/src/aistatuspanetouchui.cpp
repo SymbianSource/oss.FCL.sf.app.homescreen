@@ -15,10 +15,22 @@
 *
 */
 
-
+// System includes
 #include <AknLayout2ScalableDef.h>
-#include <aipropertyextension.h>
+#include <aknstyluspopupmenu.h>
+#include <AknUtils.h>
+#include <aknnavide.h>
+#include <akntitle.h>
+#include <MProfileEngine.h>
+#include <viewcli.h>
+#include <aknlayoutscalable_avkon.cdl.h>
+#ifdef RD_TACTILE_FEEDBACK
+#include <touchfeedback.h>
+#endif
 
+// User includes
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
 #include "aistrcnv.h"
 #include "aistatuspanetouchui.h"
 #include "aistatuspanel.h"
@@ -26,22 +38,11 @@
 #include "aifweventhandler.h"
 #include "aiconsts.h"
 #include "aidevicestatuscontentmodel.h"
-#include <aknstyluspopupmenu.h>
-
 #include <AiNativeUi.rsg>
-#include <AknUtils.h>
-#include <aknnavide.h>
-#include <akntitle.h>
-#include <MProfileEngine.h>
-#include <viewcli.h>
-#include <aknlayoutscalable_avkon.cdl.h>
-
-#ifdef RD_TACTILE_FEEDBACK
-#include <touchfeedback.h>
-#endif
 
 using namespace AiNativeUiController;
 
+// Constants
 _LIT( KProfileSwitchByIndexEvent, "Profile/SwitchProfileByIndex" );
 const TInt KProfileSwitchByIndexEventLength = 28;
 const TInt KRadix = 10;
@@ -52,6 +53,12 @@ const TInt KStylusMenuMaxItemsDefault = 0;
 _LIT( KOpenAppProfiles, "Shortcut/LaunchByValue(localapp:0x100058F8)" );
 _LIT( KOpenAppCalendar, "Shortcut/LaunchByValue(localapp:0x10005901)" );
 
+// ======== LOCAL FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// IndexLength()
+//
+// ----------------------------------------------------------------------------
+//
 static TInt IndexLength( TInt aIndex )
     {
     TInt length = 0;
@@ -72,35 +79,54 @@ static TInt IndexLength( TInt aIndex )
 
 // ======== MEMBER FUNCTIONS ========
 
-
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::NewL()
+//
+// ----------------------------------------------------------------------------
+//
 CAiStatusPaneTouchUi* CAiStatusPaneTouchUi::NewL( CAiStatusPanel& aStatusPanel,
-                          MAiFwEventHandler& aEventHandler )
+    MAiFwEventHandler& aEventHandler )
     {
-    CAiStatusPaneTouchUi* self = CAiStatusPaneTouchUi::NewLC( aStatusPanel, aEventHandler );
+    CAiStatusPaneTouchUi* self = 
+        CAiStatusPaneTouchUi::NewLC( aStatusPanel, aEventHandler );
     CleanupStack::Pop( self );
 
     return self;
     }
 
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::NewLC()
+//
+// ----------------------------------------------------------------------------
+//
 CAiStatusPaneTouchUi* CAiStatusPaneTouchUi::NewLC( CAiStatusPanel& aStatusPanel,
-                          MAiFwEventHandler& aEventHandler )
+    MAiFwEventHandler& aEventHandler )
     {
-    CAiStatusPaneTouchUi* self = new (ELeave) CAiStatusPaneTouchUi( aStatusPanel, aEventHandler );
+    CAiStatusPaneTouchUi* self = 
+        new ( ELeave ) CAiStatusPaneTouchUi( aStatusPanel, aEventHandler );
     CleanupStack::PushL( self );
     self->ConstructL();
 
     return self;
     }
 
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::CAiStatusPaneTouchUi()
+//
+// ----------------------------------------------------------------------------
+//
 CAiStatusPaneTouchUi::CAiStatusPaneTouchUi( CAiStatusPanel& aStatusPanel,
-                          MAiFwEventHandler& aEventHandler )
-  :
-  iStatusPane( aStatusPanel ),
-  iEventHandler( aEventHandler )
+    MAiFwEventHandler& aEventHandler )
+    : iStatusPane( aStatusPanel ), iEventHandler( aEventHandler )
     {
-  // no implementation required
+    // no implementation required
     }
 
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::~CAiStatusPaneTouchUi()
+//
+// ----------------------------------------------------------------------------
+//
 CAiStatusPaneTouchUi::~CAiStatusPaneTouchUi()
     {
     delete iEventBuffer;
@@ -108,6 +134,11 @@ CAiStatusPaneTouchUi::~CAiStatusPaneTouchUi()
     iProfileNamePointerArray.ResetAndDestroy();
     }
 
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::ConstructL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiStatusPaneTouchUi::ConstructL()
     {
     if( AknLayoutUtils::PenEnabled() )
@@ -116,6 +147,11 @@ void CAiStatusPaneTouchUi::ConstructL()
         }
     }
 
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::LoadUIDefinitionL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiStatusPaneTouchUi::LoadUIDefinitionL()
     {
     // If profile popup exists, for example, when screendevicechange occurs,
@@ -127,6 +163,11 @@ void CAiStatusPaneTouchUi::LoadUIDefinitionL()
         }
     }
 
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::ProcessCommandL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiStatusPaneTouchUi::ProcessCommandL( TInt aCommandId )
     {
     if( aCommandId == EAIGotoCalendarCmdLink )
@@ -162,8 +203,11 @@ void CAiStatusPaneTouchUi::ProcessCommandL( TInt aCommandId )
       }
     }
 
-
-
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::HandleNaviDecoratorEventL()
+//
+// ----------------------------------------------------------------------------
+//
 void CAiStatusPaneTouchUi::HandleNaviDecoratorEventL( TInt aEventID )
     {
     if( aEventID == EAknNaviDecoratorEventNaviLabel )
@@ -261,13 +305,17 @@ void CAiStatusPaneTouchUi::HandleNaviDecoratorEventL( TInt aEventID )
         }
     }
 
-
-void CAiStatusPaneTouchUi::DoPublishL( MAiPropertyExtension& aPlugin,
-                    TInt aContent,
-                    const TDesC16& aText,
-                    TInt aIndex )
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::DoPublishL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiStatusPaneTouchUi::DoPublishL( CHsContentPublisher& aPlugin,
+    TInt aContent, const TDesC16& aText, TInt aIndex )
     {
-    if( aPlugin.PublisherInfoL()->iUid == KProfilePluginUid )
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    if( info.Uid() == KProfilePluginUid )
       {
       switch( aContent )
         {
@@ -303,8 +351,14 @@ void CAiStatusPaneTouchUi::DoPublishL( MAiPropertyExtension& aPlugin,
       }
     }
 
-void CAiStatusPaneTouchUi::SetEmphasis( CCoeControl* /*aMenuControl*/, TBool /*aEmphasis*/ )
-  {
-  }
+// ----------------------------------------------------------------------------
+// CAiStatusPaneTouchUi::SetEmphasis()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiStatusPaneTouchUi::SetEmphasis( CCoeControl* /*aMenuControl*/, 
+    TBool /*aEmphasis*/ )
+    {
+    }
 
-
+// End of file

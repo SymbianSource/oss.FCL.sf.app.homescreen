@@ -20,11 +20,10 @@
 #define AINATIVEUIPLUGINS_H
 
 #include <aisystemuids.hrh>
-#include "aipropertyextension.h"
-#include "aiprofilepluginuids.hrh"
+#include <aiprofilepluginuids.hrh>
 
 const TUid KDeviceStatusPluginUid = { AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DEVSTAPLUGIN };
-_LIT( KDeviceStatusPluginName, "0x102750F8" );
+_LIT( KDeviceStatusPluginName, "DeviceStatus" );
 
 const TUid KShortcutPluginUid = { AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_SHORTCUTPLUGIN };
 _LIT( KShortcutPluginName, "Shortcut" );

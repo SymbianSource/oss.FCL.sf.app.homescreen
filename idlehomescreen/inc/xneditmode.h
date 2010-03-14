@@ -156,8 +156,9 @@ private:
      * Sets the title for status pane
      *
      * @since Series 60 5.0
+     * @param aEdit Edit mode or not.
      */
-    void SetStatusPaneTitleL();
+    void SetStatusPaneTitleL( TBool aEdit );
     
 private:    
     // Constructors

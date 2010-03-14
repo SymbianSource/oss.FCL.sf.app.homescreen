@@ -295,6 +295,10 @@ TKeyResponse CWmMainContainer::OfferKeyEventL(
     return EKeyWasConsumed;
     }
 
+// ---------------------------------------------------------
+// CWmMainContainer::HandleSearchKeyEventL
+// ---------------------------------------------------------
+//
 TKeyResponse CWmMainContainer::HandleSearchKeyEventL( 
         const TKeyEvent& aKeyEvent, 
         TEventCode aType )
@@ -346,6 +350,10 @@ TKeyResponse CWmMainContainer::HandleSearchKeyEventL(
     return keyResponse;
     }
 
+// ---------------------------------------------------------
+// CWmMainContainer::HandleListKeyEventL
+// ---------------------------------------------------------
+//
 TKeyResponse CWmMainContainer::HandleListKeyEventL( 
         const TKeyEvent& aKeyEvent, 
         TEventCode aType )
@@ -382,6 +390,10 @@ TKeyResponse CWmMainContainer::HandleListKeyEventL(
     return keyResponse;
     }
 
+// ---------------------------------------------------------
+// CWmMainContainer::HandleButtonKeyEventL
+// ---------------------------------------------------------
+//
 TKeyResponse CWmMainContainer::HandleButtonKeyEventL( 
         const TKeyEvent& aKeyEvent, 
         TEventCode aType )
@@ -591,14 +603,14 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         // focus is NOWHERE
         // ------------------------------------
         if ( aKeyEvent.iScanCode == EStdKeyUpArrow ||
-                aKeyEvent.iScanCode == EStdKeyDownArrow ||
-                aKeyEvent.iScanCode == EStdKeyLeftArrow ||
-                aKeyEvent.iScanCode == EStdKeyRightArrow )
+            aKeyEvent.iScanCode == EStdKeyDownArrow )
             {
             // no focus -> key hit -> focus list
             if ( aType == EEventKey )
+                {
                 SetFocusToWidgetList();
-            keyResponse = EKeyWasConsumed;
+                keyResponse = EKeyWasNotConsumed;
+                }
             }
         }
 
@@ -716,19 +728,6 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 	        CCoeControl* control = FindChildControlByPoint( aPointerEvent.iPosition );
 	        if ( control && !control->IsFocused() )
 	            {
-	            // set focus to selected list box item.           
-                if ( control == iWidgetsList )
-                    {
-                    TInt itemIndex = iWidgetsList->CurrentListBoxItemIndex();
-                    TBool itemPointed = iWidgetsList->View()->XYPosToItemIndex(
-                            aPointerEvent.iPosition,
-                            itemIndex );
-                    if ( itemIndex >= 0 && itemPointed )
-                        {
-                        iWidgetsList->SetCurrentItemIndex( itemIndex );
-                        }
-                    }
-	            
 	            // remove focus from ALL other child controls.
 	            CCoeControlArray::TCursor cursor = Components().Begin();
 	            CCoeControl* c;
@@ -879,8 +878,17 @@ void CWmMainContainer::AddControlL(
                                 TInt aControlId )
     {
     Components().AppendLC( aControl, aControlId ); // Ownership transfered 
-    CleanupStack::Pop(aControl);    
-    iWmPlugin.ViewAppUi().AddToStackL( aControl );
+    CleanupStack::Pop(aControl);
+    CAknView* view = iWmPlugin.ViewAppUi().View( 
+            TUid::Uid(EWmMainContainerViewId) );
+    if ( view )
+		{
+        iWmPlugin.ViewAppUi().AddToStackL( *view, aControl );
+		}
+	else
+		{
+        iWmPlugin.ViewAppUi().AddToStackL( aControl );
+		}
     aControl->MakeVisible( ETrue );
     }
 
@@ -1033,17 +1041,14 @@ void CWmMainContainer::AddWidgetToHomeScreenL()
                 }
             }
         
-        // do not deactivate wm if wrt widget already exists on hs,
-        // instead of that show popup info note.
-        if ( CWmWidgetData::ECps == data->WidgetType() &&
-            !data->HsContentInfo().CanBeAdded() &&
-            !hsContentFull )
+        // deactivate wm if there's not enough space to add widget to hs.
+        if ( !data->HsContentInfo().CanBeAdded() && !hsContentFull )
             {
             iWmPlugin.ExecuteCommandL();
             }
         else
             {
-            iWmPlugin.Deactivate();
+            iWmPlugin.CloseView();
             }
         }
     }
@@ -1147,12 +1152,15 @@ void CWmMainContainer::DeactivateFindPaneL()
         iWidgetsList->SetFindPaneIsVisible( EFalse );
         
         LayoutControls();
-        iWidgetsList->SetFocus( ETrue );
 
         // set soft key set
         CEikButtonGroupContainer* cbaGroup =
             CEikButtonGroupContainer::Current();
-        cbaGroup->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT );
+        TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
+                                    R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
+                                    R_AVKON_SOFTKEYS_OPTIONS_BACK );
+
+        cbaGroup->SetCommandSetL( cbaResourceId );
         cbaGroup->DrawNow();
 
         UpdateFocusMode();
@@ -1267,7 +1275,7 @@ void CWmMainContainer::ShowHelpL()
 // ---------------------------------------------------------------------------
 //
 void CWmMainContainer::RemoveCtrlsFromStack()
-    {    
+    {
     for ( TInt i=0; i < CountComponentControls(); i++ ) 
         {
         CCoeControl* ctl = ComponentControl( i ) ;
@@ -1375,6 +1383,29 @@ void CWmMainContainer::HandleFindSizeChanged()
     iWidgetsList->DrawNow();
     }
 
+// ----------------------------------------------------
+// CWmMainContainer::ProcessForegroundEvent
+// ----------------------------------------------------
+//
+void CWmMainContainer::ProcessForegroundEvent( TBool aForeground )
+    {
+    if ( aForeground )
+        {
+        // set init state when wm comes to foreground.
+		// remove focus from all controls when activating view.
+        CCoeControl* control = NULL;
+        CCoeControlArray::TCursor cursor = Components().Begin();
+        while( ( control = cursor.Control<CCoeControl>() ) != NULL )
+            {
+            if( control->IsVisible() && control->IsFocused() )
+                {
+                control->SetFocus( EFalse, EDrawNow );
+                }
+            cursor.Next();
+            }
+        UpdateFocusMode();
+        }
+    }
 
 // End of File
 

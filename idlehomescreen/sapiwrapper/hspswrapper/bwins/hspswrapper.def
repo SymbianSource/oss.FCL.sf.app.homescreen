@@ -97,4 +97,6 @@ EXPORTS
 	?SetConfIdL@CHspsConfiguration@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 96 NONAME ; class hspswrapper::CHspsConfiguration & hspswrapper::CHspsConfiguration::SetConfIdL(class TDesC8 const &)
 	?NewLC@CPropertyMap@hspswrapper@@SAPAV12@XZ @ 97 NONAME ; class hspswrapper::CPropertyMap * hspswrapper::CPropertyMap::NewLC(void)
 	??0CAddPluginResult@hspswrapper@@AAE@XZ @ 98 NONAME ; hspswrapper::CAddPluginResult::CAddPluginResult(void)
+	?RestoreActiveViewL@CHspsWrapper@hspswrapper@@QAEHXZ @ 99 NONAME ; int hspswrapper::CHspsWrapper::RestoreActiveViewL(void)
+	?RestoreRootL@CHspsWrapper@hspswrapper@@QAEHXZ @ 100 NONAME ; int hspswrapper::CHspsWrapper::RestoreRootL(void)
 

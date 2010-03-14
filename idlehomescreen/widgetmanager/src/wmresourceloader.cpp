@@ -133,7 +133,7 @@ void CWmResourceLoader::UnloadResources()
     {
     if ( iResourceFileOffset )
         {
-        iEnv.DeleteResourceFile( iResourceFileOffset );        
+        iEnv.DeleteResourceFile( iResourceFileOffset );
         }
     }
 

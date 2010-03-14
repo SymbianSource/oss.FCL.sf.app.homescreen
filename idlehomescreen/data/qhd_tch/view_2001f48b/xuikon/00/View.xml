@@ -21,7 +21,8 @@
                     <property name="class" value="plugins"/>
                 </event>
                 <event name="system/seteditmode">
-                    <property name="id" value="hs_popup_open_hold"/>                                                  
+                    <property name="id" value="hs_popup_open_hold"/>
+                    <property name="class" value="widget_indication"/>                                       
                 </event>                                    
             </action>                
             <action>
@@ -33,18 +34,17 @@
                     <property name="class" value="plugins"/>
                 </event>
                 <event name="system/reseteditmode">
-                    <property name="id" value="hs_popup_open_hold"/>                                        
+                    <property name="id" value="hs_popup_open_hold"/>
+                    <property name="class" value="widget_indication"/>                                        
                 </event>                                                    
             </action>                                
             <action>
                 <trigger name="swipe" direction="left" conditional="true"/>
-                <event name="system/activatenextview"/>
-                <event name="system/runfullscreeneffect" effectid="1003"/>
+                <event name="system/activatenextview" effectid="1003"/>
             </action>
             <action>
                 <trigger name="swipe" direction="right" conditional="true"/>
-                <event name="system/activatepreviousview"/>
-                <event name="system/runfullscreeneffect" effectid="1004"/>
+                <event name="system/activatepreviousview" effectid="1004"/>
             </action>
             <action>
                 <trigger name="screendevicechange" reason="portrait"/>
@@ -76,38 +76,28 @@
                     <property name="id" value="plugins_container"/>
                 </event>
             </action>
-            <action>
-                <!-- No widgets in this view -->
-                <trigger name="widgetamount" value="0"/>
-                <event name="system/set">
-                    <!-- Hide "remove content" menuitem -->
-                    <property name="name" value="display"/>
-                    <property name="value" value="none"/>
-                    <property name="type" value="string"/>
-                    <property name="id" value="hs_remove_widget"/>
-                </event>
-            </action>
-            <action>
-                <!-- At least one widget added to this view -->
-                <trigger name="widgetamount" value="1"/>
-                <event name="system/set">
-                    <!-- Show "remove content" menuitem -->
-                    <property name="name" value="display"/>
-                    <property name="value" value="block"/>
-                    <property name="type" value="string"/>
-                    <property name="id" value="hs_remove_widget"/>
-                </event>
-            </action>
         </actions>
 
         <!-- Plugins in this view -->
         <box id="plugins_container">
-            <plugin id="plugin1" class="plugins" actionshandler="plugin_actions" />
-            <plugin id="plugin2" class="plugins" actionshandler="plugin_actions" />
-            <plugin id="plugin3" class="plugins" actionshandler="plugin_actions" />
-            <plugin id="plugin4" class="plugins" actionshandler="plugin_actions" />
-            <plugin id="plugin5" class="plugins" actionshandler="plugin_actions" />
-            <plugin id="plugin6" class="plugins" actionshandler="plugin_actions" />
+            <plugin id="plugin1" class="plugins" actionshandler="plugin_actions">
+                <image class="widget_indication" />
+            </plugin>
+            <plugin id="plugin2" class="plugins" actionshandler="plugin_actions">
+                <image class="widget_indication" />
+            </plugin>
+            <plugin id="plugin3" class="plugins" actionshandler="plugin_actions">
+                <image class="widget_indication" />
+            </plugin>
+            <plugin id="plugin4" class="plugins" actionshandler="plugin_actions">
+                <image class="widget_indication" />
+            </plugin>
+            <plugin id="plugin5" class="plugins" actionshandler="plugin_actions">
+                <image class="widget_indication" />
+            </plugin>
+            <plugin id="plugin6" class="plugins" actionshandler="plugin_actions">
+                <image class="widget_indication" />
+            </plugin>
         </box>
 
         <!-- plugins' actions handler -->
@@ -115,23 +105,13 @@
             <actions>
                 <action>
                     <trigger id="hs_popup_open_hold" name="hold" conditional="true" />
-                    <event name="system/reportentereditmode" />
-                    <event name="system/runfullscreeneffect" effectid="1005"/>
+                    <event name="system/reportentereditmode" effectid="1005"/>
                 </action>
             </actions>
         </actionshandler>
 
         <!-- Avkon stylus popup menu is not layout capable -->
         <styluspopup id="hs_popup_menu" display="none">
-            <!-- "Add content" item initialized in runtime to check whether popup is on top of empty space -->
-            <dynmenuitem id="hs_popup_add_widget" type="hs_add_widget" label="&qtn_hs_longtap_add;">
-                <actions>
-                    <action>
-                        <trigger name="activate"/>
-                        <event name="system/runaddwidgetquery"/>
-                    </action>
-                </actions>
-            </dynmenuitem>
             <!-- menuitems controlled by widgets' <menuextension> -->
             <widgetmenuitem id="hs_popup_widget_settings" source="hs_widget_menuitem_settings" label="&qtn_hs_longtap_settings;" />
             <widgetmenuitem id="hs_popup_widget_general_1" source="hs_widget_general_stylus_popup_1"/>
@@ -151,7 +131,7 @@
             <!-- menu item grouping table is traversed through in run-time always when options menu is launched. -->
             <menuitemgrouping>
                 <!-- These items are shown when content is visible -->
-                <menuitemgroup id="Menu/WidgetsShown">
+                <menuitemgroup id="Menu/NormalMode">
                     <property name="hs_widget_catalog"/>
                     <property name="hs_edit_widgets"/>
                     <property name="hs_set_online"/>
@@ -184,14 +164,6 @@
                         </action>
                     </actions>
                 </menuitem>
-                <menuitem id="hs_add_widget" label="&qtn_hs_add_widget;">
-                    <actions>
-                        <action>
-                            <trigger name="activate"/>
-                            <event name="system/runaddwidgetquery"/>
-                        </action>
-                    </actions>
-                </menuitem>
                 <!-- menuitems controlled by widgets' <menuextension> element -->
                 <widgetmenuitem id="hs_widget_settings" source="hs_widget_menuitem_settings" label="&qtn_hs_widget_settings;"/>
                 <widgetmenuitem id="hs_widget_general_1" source="hs_widget_general_options_menu_1"/>
@@ -209,8 +181,7 @@
                     <actions>
                         <action>
                             <trigger name="activate"/>
-                            <event name="system/reportentereditmode"/>
-                            <event name="system/runfullscreeneffect" effectid="1005"/>
+                            <event name="system/reportentereditmode" effectid="1005"/>
                         </action>
                     </actions>
                 </menuitem>
@@ -227,8 +198,7 @@
                     <actions>
                         <action>
                             <trigger name="activate"/>
-                            <event name="system/addview"/>
-                            <event name="system/runfullscreeneffect" effectid="1009"/>
+                            <event name="system/addview" effectid="1009"/>
                         </action>
                     </actions>
                 </dynmenuitem>
@@ -236,8 +206,7 @@
                     <actions>
                         <action>
                             <trigger name="activate"/>
-                            <event name="system/removeview"/>
-                            <event name="system/runfullscreeneffect" effectid="1010"/>
+                            <event name="system/removeview" effectid="1010"/>
                         </action>
                     </actions>
                 </dynmenuitem>
@@ -301,17 +270,24 @@
                 <actions>
                     <action>
                         <trigger name="activate"/>
-                        <event name="system/reportexiteditmode"/>
-                        <event name="system/runfullscreeneffect" effectid="1006"/>
+                        <event name="system/reportexiteditmode" effectid="1006"/>
                     </action>
                 </actions>
             </softkey>
-            <softkey id="msk" type="middle" label=""> <!--TODO: Remove label when MSK icon available-->
+            <softkey id="msk_ltr" type="middle" label=""> <!--TODO: Remove label when MSK icon available-->
                 <actions>
                     <action>
                         <trigger name="activate"/>
-                        <event name="system/activatenextview"/>
-                        <event name="system/runfullscreeneffect" effectid="1003"/>
+                        <event name="system/activatenextview" effectid="1003"/>
+                    </action>
+                </actions>
+                <!--image id="switcher_icon"/-->
+            </softkey>
+            <softkey id="msk_rtl" type="middle" label=""> <!--TODO: Remove label when MSK icon available-->
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="system/activatepreviousview" effectid="1004"/>
                     </action>
                 </actions>
                 <!--image id="switcher_icon"/-->

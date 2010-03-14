@@ -19,24 +19,24 @@
 #ifndef C_NATIVEUICONTROLLER_H
 #define C_NATIVEUICONTROLLER_H
 
-
+// System includes
 #include <aisystemuids.hrh>
-#include "aiuicontroller.h"
-#include "aiuiframeworkobserver.h"
-#include "aicontentobserver.h"
 
+// User includes
+#include <aiuicontroller.h>
+#include <aicontentobserver.h>
 #include <aiutility.h>
 
-class MAiPropertyExtension;
+// Forward declarations
 class MAiPSPropertyObserver;
+class CHsContentPublisher;
+class THsPublisherInfo;
 
 namespace AiNativeUiController
 {
-
 class CAiNativeRenderer;
 class CAiStatusPanel;
 class CAppUi;
-class CAiToolbarRenderer;
 
 const TInt KImplementationUidNativeUiController = AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE;
 
@@ -50,125 +50,132 @@ const TUid KUidNativeUiController = { KImplementationUidNativeUiController };
 *
 * @since Series 60 3.2
 */
-class CNativeUiController : public CAiUiController, 
-                            public MAiSecondaryUiController, 
-                            public MAiMainUiController, 
-                            public MAiUiFrameworkObserver,
-                            public MAiContentObserver
+NONSHARABLE_CLASS( CNativeUiController ) : public CAiUiController, 
+    public MAiSecondaryUiController, public MAiMainUiController,                                                         
+    public MAiContentObserver
 	{
 public:
-
+    // Constructor and destructor
     static CNativeUiController* NewL();
 
-	virtual ~CNativeUiController();
+	~CNativeUiController();
 
-// from base class CAiUiController
-
-    void PrepareToExit();
-
+public:	
+    // from CAiUiController
+   
     void LoadUIDefinitionL();
-
-    void GetPluginsL(RAiPublisherInfoArray& aPlugins);
-
-    void GetSettingsL(const TAiPublisherInfo& aPubInfo, 
-                        RAiSettingsItemArray& aSettings);
+    
+    void GetSettingsL( const THsPublisherInfo& aPublisherInfo, 
+        RAiSettingsItemArray& aSettings );
 
     void ActivateUI();
 
     MAiContentObserver& GetContentObserver();
 
-    void SetEventHandler(MAiFwEventHandler& aEventHandler);
+    void SetEventHandler( MAiFwEventHandler& aEventHandler );
+    
+    void SetStateHandler( MAiFwStateHandler& aStateHandler );
 
     MAiFwEventHandler* FwEventHandler();
 
-    void RemovePluginFromUI( MAiPropertyExtension& aPlugin );
-
+    MAiFwStateHandler* FwStateHandler();
+       
     MAiMainUiController* MainInterface();
 
     MAiSecondaryUiController* SecondaryInterface();
-    
-    void HandleLoadedPlugins(const RAiPublisherInfoArray& /*aRequiredPlugins*/ ) {};
-    
-// from base class MAiMainUiController
+            
+public:    
+    // from MAiMainUiController
 
     void RunApplicationL();
 
     CCoeEnv& CoeEnv();
-
-    void SetUiFrameworkObserver( MAiUiFrameworkObserver& aObserver );
     
     TBool IsMenuOpen();
 
-// from base class CAiSecordaryUiController
+public:
+    // from CAiSecordaryUiController
 
     void SetCoeEnv( CCoeEnv& aCoeEnv );
 
-    MAiUiFrameworkObserver* UiFrameworkObserver(); 
-
-// from base class MAiUiFrameworkObserver
-
-    void HandleResourceChange( TInt aType );
-
-    void HandleForegroundEvent( TBool aForeground );
-
-// from base class MAiContentObserver
-       
+public:     
+    // from MAiContentObserver       
     TInt StartTransaction(TInt aTxId);
 
     TInt Commit(TInt aTxId);
 
     TInt CancelTransaction(TInt aTxId);
 
-    TBool CanPublish(MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex);
+    TBool CanPublish(CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex);
 
-    TInt Publish(MAiPropertyExtension& aPlugin, TInt aContent, TInt aResource, TInt aIndex );
+    TInt Publish(CHsContentPublisher& aPlugin, TInt aContent, TInt aResource, TInt aIndex );
 
-    TInt Publish(MAiPropertyExtension& aPlugin, TInt aContent, const TDesC16& aText, TInt aIndex );
+    TInt Publish(CHsContentPublisher& aPlugin, TInt aContent, const TDesC16& aText, TInt aIndex );
 
-    TInt Publish(MAiPropertyExtension& aPlugin, TInt aContent, const TDesC8& aBuf, TInt aIndex );
+    TInt Publish(CHsContentPublisher& aPlugin, TInt aContent, const TDesC8& aBuf, TInt aIndex );
 
-    TInt Publish(MAiPropertyExtension& aPlugin, TInt aContent, RFile& aFile, TInt aIndex );
+    TInt Publish(CHsContentPublisher& aPlugin, TInt aContent, RFile& aFile, TInt aIndex );
 
-    TInt Clean(MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex );
+    TInt Clean(CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex );
 
     TAny* Extension(TUid aUid);
 
-    TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const;
+    TBool RequiresSubscription( const THsPublisherInfo& aPublisherInfo ) const;
     
-    TInt SetProperty( MAiPropertyExtension& aPlugin,
+    TInt SetProperty( CHsContentPublisher& aPlugin,
             const TDesC8& aElementId,
             const TDesC8& aPropertyName,
             const TDesC8& aPropertyValue );
     
-    TInt SetProperty( MAiPropertyExtension& aPlugin,
+    TInt SetProperty( CHsContentPublisher& aPlugin,
             const TDesC8& aElementId,
             const TDesC8& aPropertyName,
             const TDesC8& aPropertyValue,  
             MAiContentObserver::TValueType aValueType);
 
-// new methods
+private:
+    // constructors
+    
+    /**
+     * C++ default contructor
+     */
+    CNativeUiController();
 
+public:    
+    // new functions
+       
     /**
      * Set app ui instance to this class.
      *
      * @since S60 3.2
      * @param aAppUi is pointer to app ui.
      */
-    void SetAppUi( CAppUi* aAppUi )
-        {
-        iAppUi = aAppUi;
-        }
-        
+    void SetAppUi( CAppUi* aAppUi );
+
+    /**
+     * Promotes this UI controller as main UI controller.
+     *
+     * @since S60 3.2     
+     */    
     void VariateToMainUiController();
 
+    /**
+     * Runs exit timer.
+     *
+     * @since S60 3.2     
+     */        
     void Exit();
 
+    /**
+     * Preperas to exit
+     * 
+     * @since S60 3.2  
+     */
+    void PrepareToExit();
+    
 private:
-
-    CNativeUiController();
-
-    static CApaApplication* NewApplication();
-
+    // new functions
+    
     /**
      * Add renderer.
      *
@@ -190,17 +197,6 @@ private:
      * @return ETrue upon successful removing.
      */
     TBool RemoveRenderer( CAiNativeRenderer *aRenderer, TBool aDelete = EFalse );
-
-    /**
-     * Recreates the toolbar renderer
-     */
-    TBool RecreateToolbarRendererL();
-
-    /**
-     * Deletes and removes the toolbar renderer from
-     * renderer array.
-     */
-    void DeleteToolbarRenderer();
     
     /**
      * Template function for publish.
@@ -213,7 +209,7 @@ private:
      * @return KErrNone if publishing was successful.
      */
 	template<class T>
-    TInt DoPublish( MAiPropertyExtension& aPlugin, TInt aContent, T& aData, TInt aIndex );
+    TInt DoPublish( CHsContentPublisher& aPlugin, TInt aContent, T& aData, TInt aIndex );
     
     /**
      * Handles idle state changes.
@@ -232,10 +228,13 @@ private:
     static TInt HandlePluginConfChange( TAny* aPtr );
     
     static TInt ExitTimerCallBack( TAny* aSelf );
-    void GetSettingsFromCRL( const TAiPublisherInfo& aPubInfo,
-                                                  RAiSettingsItemArray &aPluginSettings );
-
-private:     // Data
+    void GetSettingsFromCRL( const THsPublisherInfo& aPublisherInfo,
+           RAiSettingsItemArray &aPluginSettings );
+    
+    static CApaApplication* NewApplication();
+    
+private:     
+    // data
 
     /**
      * Array of renderers.
@@ -281,24 +280,25 @@ private:     // Data
     /**
      * Native UI controller plug-ins
      */
-    RAiPublisherInfoArray iPlugins;
+    RArray< THsPublisherInfo > iPlugins;
     
     /**
       * Plug-in event handler.
       * Doesn't own.
       */
     MAiFwEventHandler* iFwEventHandler;
+
+    /**
+      * Plug-in state handler.
+      * Doesn't own.
+      */    
+    MAiFwStateHandler* iFwStateHandler;
     
     /**
      * Pointer to this, when role is main ui controller.
      */
     MAiMainUiController* iMain;
 
-    /**
-     * Ui framework observer. Not own.
-     */
-    MAiUiFrameworkObserver* iUiFrameworkObserver;
-    
     /**
      * Pointer to app ui.
      * Not own.
@@ -320,13 +320,6 @@ private:     // Data
     * To prevent double loading of the UI
     **/
     TBool iUiLoaded;
-    
-    /**
-     * Pointer to our toolbar renderer. Do not delete
-     * renderer through this pointer
-     */
-    CAiToolbarRenderer *iToolbarRenderer;
-
     };
 
 #include "nativeuicontroller.inl"

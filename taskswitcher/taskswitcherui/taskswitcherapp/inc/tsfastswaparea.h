@@ -196,7 +196,7 @@ public:
      * Implements drag gesture handling
      * @see MTsEventControlerObserver
      */
-    void Drag(const AknTouchGestureFw::MAknTouchGestureFwDragEvent& aEvent);
+    void DragL(const AknTouchGestureFw::MAknTouchGestureFwDragEvent& aEvent);
     
     /**
      * Implements animation stop handling
@@ -256,7 +256,7 @@ private:
     /**
      * Shows the content from iArray on the screen.
      */
-    void RenderContentL();
+    void RenderContentL( TBool aSuppressAnimation = EFalse );
     
     /**
      * Creates the ganes grid control.
@@ -311,11 +311,6 @@ private:
      * Selects next item in grid
      */
     void SelectNextItem();
-    
-    /**
-     * Highlight current grid'd item and redraw
-     */
-    void ShowHighlight();
     
     /**
      * Centralise most centered item so it was most exposed on the view.
@@ -400,9 +395,6 @@ private: // Data
     CAknStylusPopUpMenu* iPopup;
     // the aIndex argument of ShowPopupL is stored here
     TInt iAppIndexForPopup;
-
-    // Timestamp of the last application close operation
-    TTime iTimeOfLastClose;
     
     // Observer ptr, may be NULL, not owned
     MTsDataChangeObserver* iDcObserver;
@@ -416,6 +408,9 @@ private: // Data
     // Tap event
     TPointerEvent iTapEvent;
     CTsFastSwapTimer* iHighlightTimer;
+    
+    //Ignore physics move when request is cased by drag outside owned area
+    TBool iIgnorePhysicsMove;
     
     // Grid scrolling
     TInt iGridItemWidth;
