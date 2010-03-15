@@ -23,7 +23,7 @@
 #include <AknDlgShut.h>                 
 #include <aknview.h>
 #include <apacmdln.h>
-#include <logsuicmdstarter.h>
+#include <LogsUiCmdStarter.h>
 #include <aknconsts.h>
 #include <akntitle.h>
 #include <StringLoader.h>
@@ -195,7 +195,7 @@ void CAppUi::ActivateUi()
             iDeviceStatusInfo, EAiFwSystemStartup );                                       
         }
     
-    iUiCtl.FwEventHandler()->HandleUiReadyEventL( iUiCtl );
+    TRAP_IGNORE( iUiCtl.FwEventHandler()->HandleUiReadyEventL( iUiCtl ) );
     
     __PRINTS( "*** CAppUi::ActivateUi - done" );
     }
@@ -616,7 +616,11 @@ TInt CAppUi::ReportLongPressL( TAny* aThis )
 //
 void CAppUi::SetTitlePaneTextL( const TDesC& aText )
     {
-    CEikStatusPane* sp( StatusPane() );
+    CEikStatusPane* sp( StatusPane() );  
+    if ( !sp ) { return; }
+    
+    // make sure status pane is transparent.
+    sp->EnableTransparent( ETrue );
     
     TUid titlePaneUid( TUid::Uid( EEikStatusPaneUidTitle ) );
            
@@ -631,8 +635,12 @@ void CAppUi::SetTitlePaneTextL( const TDesC& aText )
         if ( title )
             {
             title->SetTextL( aText );        
+            title->DrawNow();
             }               
         }
+    
+    // redraw statuspane
+    sp->DrawNow();
     }
 
 // End of File.

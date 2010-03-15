@@ -34,6 +34,7 @@
 #include "debug.h"
 
 // Constants
+const TInt KLoadDelay( 100000 );
 const TInt KInterval( 10000 );
 
 // ============================ LOCAL FUNCTIONS ================================
@@ -111,12 +112,11 @@ void CXnViewData::SetActive( TBool aActive )
         }
        
     if ( aActive )
-        {     
-        iFlags.Clear( EIsInitial );
-
+        {
         iFlags.Set( EIsActive );
-
-        LoadPublishers();       
+        iFlags.Clear( EIsInitial );
+        
+        LoadPublishers();                             
         }
     else
         {                              
@@ -217,12 +217,17 @@ void CXnViewData::Destroy()
 //
 CXnPluginData* CXnViewData::Plugin( CXnNode* aNode )
     {
-    if ( !aNode ) { return NULL; }
+    if ( !aNode ) 
+        { 
+        return NULL; 
+        }
 
+    CXnDomNode* view( Node() );
+    
     if ( aNode->ViewNodeImpl() )
         {
         // Reached view, return self
-        if ( Node()->LayoutNode() == aNode )
+        if ( view && view->LayoutNode() == aNode )
             {
             return this;
             }
@@ -230,7 +235,9 @@ CXnPluginData* CXnViewData::Plugin( CXnNode* aNode )
 
     for ( TInt i = 0; i < iPluginsData.Count(); i++ )
         {
-        if ( iPluginsData[i]->Owner()->LayoutNode() == aNode )
+        CXnDomNode* plugin( iPluginsData[i]->Owner() );
+        
+        if ( plugin && plugin->LayoutNode() == aNode )
             {
             return iPluginsData[i];
             }
@@ -466,7 +473,7 @@ void CXnViewData::LoadPublishers()
     
     iLoadIndex = 0;
                                 
-    iLoader->Start( TTimeIntervalMicroSeconds32( KInterval ),
+    iLoader->Start( TTimeIntervalMicroSeconds32( KLoadDelay ),
                     TTimeIntervalMicroSeconds32( KInterval ),
                     TCallBack( DoLoadPublishersL, this ) );           
     }
@@ -505,7 +512,14 @@ void CXnViewData::LoadPublishers()
         TInt reason( plugin->VirginPublishers() ? 
             EAiFwSystemStartup : EAiFwPageStartup );         
         
-        if( plugin->LoadPublishers( reason ) != KErrNone )
+        TInt ret( plugin->LoadPublishers( reason ) );
+        
+        if ( ret == KErrAlreadyExists )
+            {
+            ret = KErrNone;
+            }
+        
+        if( ret != KErrNone )
             {
             self->iManager.UnloadWidgetFromPluginL( *plugin, ETrue );
             

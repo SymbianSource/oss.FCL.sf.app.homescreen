@@ -184,7 +184,7 @@ public:
      * Implements drag gesture handling
      * @see MTsEventControlerObserver
      */
-    void MoveOffset(const TPoint&);
+    void MoveOffset(const TPoint&, TBool);
 
     /**
      * Implements tap gesture handling
@@ -375,6 +375,13 @@ private:
      * consume EEventKeyUp that follows after event that swiched on the highlight.
      */
     TKeyResponse ShowHighlightOnKeyEvent(const TKeyEvent& aKeyEvent, TEventCode aType);
+    
+    /**
+     * Returns current screen orientation:
+     * 
+     * @return  1 if landscape, 0 if portait 
+     */
+    TInt GetCurrentScreenOrientation();
 
 private: // Data
     
@@ -415,16 +422,18 @@ private: // Data
     TPointerEvent iTapEvent;
     CTsFastSwapTimer* iHighlightTimer;
     
-    //Ignore physics move when request is cased by drag outside owned area
-    TBool iIgnorePhysicsMove;
+    // View offset position, used by animation physics
+    TInt iLogicalViewPosOffset;
     
     // Grid scrolling
     TInt iGridItemWidth;
     TInt iGridItemGap;
     
     CTsFastSwapTimer* iRedrawTimer; // owned
-    
     CTsFastSwapTimer* iUpdateGridTimer;//owned
+    CTsFastSwapTimer* iOrientationSignalTimer; // owned
+    TInt iPrevScreenOrientation;
+    TBool iIgnoreLayoutSwitch;
     
     // Key event handling
     TBool iConsumeEvent;

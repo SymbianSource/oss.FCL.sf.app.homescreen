@@ -32,6 +32,7 @@
 #include "xnuiengine.h"
 #include "xntype.h"
 #include "xncontroladapter.h"
+#include "xnviewcontroladapter.h"
 #include "xnpopupcontroladapter.h"
 #include "xnwidgetextensionadapter.h"
 #include "xnscrollablecontroladapter.h"
@@ -1179,7 +1180,7 @@ TBool CXnODTParser::CreateBuiltInControlL( CXnNode& aNode,
     if ( aName != KBoxNodeName && aName != KButtonNodeName &&
          aName != KStylusPopupNodeName && aName != KScrollableBoxNodeName&& 
          aName != KWidgetExtensionNodeName && 
-                  aName != KPopUpNodeName &&
+         aName != KPopUpNodeName && aName != KViewNodeName &&
 		 aName != XnPropertyNames::listquerydialog::KListQueryDialog )         
         {
         return CreateExternalControlL( aNode, aName );
@@ -1226,12 +1227,15 @@ TBool CXnODTParser::CreateBuiltInControlL( CXnNode& aNode,
                 }
             }
         }
-
-    __ASSERT_DEBUG( parentAdapter, User::Leave( KErrGeneral ) );
     
     CXnControlAdapter* adapter( NULL );
-    
-    if( aName == KStylusPopupNodeName )
+
+    if( aName == KViewNodeName )
+        {
+        adapter = CXnViewControlAdapter::NewL( aNode.PluginIfL() );
+        CleanupStack::PushL( adapter );
+        }
+    else if( aName == KStylusPopupNodeName )
         {
         adapter = CXnPopupControlAdapter::NewL( aNode.PluginIfL() );
         CleanupStack::PushL( adapter );
@@ -1270,12 +1274,24 @@ TBool CXnODTParser::CreateBuiltInControlL( CXnNode& aNode,
         CleanupStack::PushL( adapter );
         }
     
-    parentAdapter->AppendChildL( *adapter, aNode );
-    CleanupStack::Pop( adapter );
+    if ( parentAdapter )
+        {
+        parentAdapter->AppendChildL( *adapter, aNode );
+        }
     
-    component->SetControlAdapter( adapter );
+    component->SetControlAdapter( adapter ); // ovnership transferred
+    CleanupStack::Pop( adapter );
 
-    aNode.ComponentNodeImpl()->SetComponent( component );
+    __ASSERT_DEBUG( adapter, User::Leave( KErrGeneral ) );
+    
+    if( aName == KViewNodeName )
+        {
+        aNode.ViewNodeImpl()->SetComponent( component );
+        }
+    else
+        {
+        aNode.ComponentNodeImpl()->SetComponent( component );
+        }
 
     component->SetNode( aNode.PluginIfL() );
 

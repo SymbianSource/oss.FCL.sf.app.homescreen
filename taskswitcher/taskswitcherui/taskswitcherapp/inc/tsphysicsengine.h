@@ -76,11 +76,6 @@ public:
     TBool IsRunning() const;
     
     /**
-     * Checks if the physics is running drag
-     */
-    TBool IsDragging() const;
-    
-    /**
      * Stops physics
      */
     void Stop();
@@ -114,9 +109,22 @@ private:
     TTime iStartTime;
     
     /**
+     * Drag start position
+     */
+    TPoint iStartPosition;
+    
+    /**
      * Taskswitcher physics for item switch animation
      */
     CTsPhysics* iTaskswitcherPhysics;
+    
+    /**
+     * Marks direction in which drag events are made:
+     * Values: 0 - uninitialized
+     *         1 - drag right
+     *        -1 - drag left 
+     */
+    TInt iDragDirection;
 
     };
 

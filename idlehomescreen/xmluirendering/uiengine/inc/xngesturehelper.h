@@ -22,20 +22,12 @@
 // System includes
 #include <e32base.h>
 
+// User includes
+#include "xngesturerecogniser.h"
+
 // Forward declarations
 class CXnNode;
 struct TPointerEvent;
-
-
-/**
- * Swipe directions (left, right, none)
- */
-enum TSwipeResult
-    {
-    ESwipeNone = 0,
-    ESwipeLeft,
-    ESwipeRight
-    };
 
 /**
  * XnGestureHelper namespace
@@ -50,10 +42,9 @@ namespace XnGestureHelper
     class CXnGesture;
     
     // Constants
-    const TReal32 KGestureMinSpeedX = 300;
-    const TInt KGestureMinLengthX = 100;
-    const TInt KGestureMaxDeltaY = 100;
-    
+    const TInt KGestureMinSpeed = 25;
+    const TInt KGestureMinLength = 100;
+        
     /**
      *  Implementation of CGestureHelper interface
      *
@@ -113,8 +104,8 @@ namespace XnGestureHelper
          * 
          * @see CGestureHelper::HandlePointerEventL 
          */ 
-        TSwipeResult HandlePointerEventL( const TPointerEvent& aEvent );
-        
+        TXnGestureCode HandlePointerEventL( const TPointerEvent& aEvent ); 
+                    
         /** Reset helper state */
         void Reset();
 
@@ -153,7 +144,7 @@ namespace XnGestureHelper
          * 
          * @return Swiping left/right/none 
          */
-        TSwipeResult ValidSwipe();
+        TXnGestureCode ValidSwipe() const;
 
     private:
 
@@ -178,7 +169,9 @@ namespace XnGestureHelper
         /** 
          * Gesture destination, Not owned.
          */        
-        CXnNode* iDestination;        
+        CXnNode* iDestination;
+        
+        TXnGestureCode iDirection;
         };
     } // GestureHelper
 

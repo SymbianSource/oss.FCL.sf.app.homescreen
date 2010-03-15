@@ -293,6 +293,7 @@ void CMmListBoxItemDrawer::AnimateItemZoomOutL( TInt aItemIndex )
 //
 void CMmListBoxItemDrawer::DrawFloatingItems(TRect currentlyDrawnRect)
     {
+    TBool redrawItemBackground = IsRedrawItemBackgroundEnabled( );
     SetRedrawItemBackground( EFalse );
     for(TInt i(iFloatingItems.Count()-1); i >= 0 ; i--)
         {
@@ -327,7 +328,7 @@ void CMmListBoxItemDrawer::DrawFloatingItems(TRect currentlyDrawnRect)
             iFloatingItems.Remove(i);
         	}
         }
-    SetRedrawItemBackground( ETrue );
+    SetRedrawItemBackground( redrawItemBackground );
     }
 
 // -----------------------------------------------------------------------------
@@ -1035,11 +1036,13 @@ void CMmListBoxItemDrawer::DrawActualIndicatorItem( TInt aItemIndex, TRect /*act
 	if ( iDrawMoveIndicators )
 		{
 		iIsIndicatorItem = ETrue;
+		TBool redrawItemBackground =
+            IsRedrawItemBackgroundEnabled( );
 		SetRedrawItemBackground( EFalse );
 
 		DrawActualItem( aItemIndex, AdjustItemRect( aItemIndex ) , EFalse, EFalse, EFalse, EFalse);
 
-		SetRedrawItemBackground( ETrue );
+		SetRedrawItemBackground( redrawItemBackground );
 		iIsIndicatorItem = EFalse;
 		}
 	}

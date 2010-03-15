@@ -52,6 +52,7 @@
 #include <hlplch.h>      // HlpLauncher
 #include <csxhelp/hmsc.hlp.hrh>
 #include <aisystemuids.hrh>
+#include <babitflags.h>
 
 #include "wmcommon.h"
 #include "wmplugin.h"
@@ -92,9 +93,11 @@ CWmMainContainer::CWmMainContainer( CWmPlugin& aWmPlugin ) :
 //
 CWmMainContainer::~CWmMainContainer()
 	{
+    delete iWidgetLoader;
+
     RemoveCtrlsFromStack();
     Components().ResetAndDestroy();
-    delete iWidgetLoader;
+    
     iWidgetsList = NULL;
     iPortalButtonOne = NULL;
     iPortalButtonTwo = NULL;
@@ -893,6 +896,16 @@ void CWmMainContainer::AddControlL(
     }
 
 // ---------------------------------------------------------
+// CWmMainContainer::IsLoadingWidgets
+// ---------------------------------------------------------
+//
+TBool CWmMainContainer::IsLoadingWidgets()
+    {    
+    return ((iWidgetLoader && iWidgetLoader->IsLoading()) ? 
+        ETrue : EFalse);
+    }
+
+// ---------------------------------------------------------
 // CWmMainContainer::PortalSelected
 // ---------------------------------------------------------
 //
@@ -1081,7 +1094,13 @@ void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdabtive )
     if ( iFindbox && !iFindPaneIsVisible &&
             iWidgetsList->Model()->NumberOfItems() > KMinWidgets )
         {
-		// enable filtering
+        // set column filter flag
+        TBitFlags32 bitFlag;
+        bitFlag.ClearAll(); // clear all columns
+        bitFlag.Assign( 1,1 ); // turn on column at index one
+        iFindbox->SetListColumnFilterFlags( bitFlag );
+        
+        // enable filtering
         CAknFilteredTextListBoxModel* m = 
                 static_cast <CAknFilteredTextListBoxModel*> ( iWidgetsList->Model() );
         if ( m )
@@ -1404,6 +1423,15 @@ void CWmMainContainer::ProcessForegroundEvent( TBool aForeground )
             }
         UpdateFocusMode();
         }
+    }
+
+// ----------------------------------------------------
+// CWmMainContainer::WmListBox
+// ----------------------------------------------------
+//
+CWmListBox& CWmMainContainer::WmListBox()
+    {
+    return *iWidgetsList;
     }
 
 // End of File

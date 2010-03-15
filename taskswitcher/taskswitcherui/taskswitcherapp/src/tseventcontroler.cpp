@@ -65,7 +65,8 @@ CTsEventControler::CTsEventControler(
     MTsEventControlerObserver& aObserver)
     :
     CBase(),
-    iObserver(aObserver)
+    iObserver(aObserver),
+    iHandleEvents(ETrue)
     {
     }
 
@@ -88,15 +89,18 @@ void CTsEventControler::ConstructL(CCoeControl& aEventSrc)
 void CTsEventControler::HandleTouchGestureL(
     AknTouchGestureFw::MAknTouchGestureFwEvent& aEvent)
     {
-    if (AknTouchGestureFwEventDrag(aEvent))
+    if ( iHandleEvents )
         {
-        HandleDragEventL(*AknTouchGestureFwEventDrag(aEvent));
+        if (AknTouchGestureFwEventDrag(aEvent))
+            {
+            HandleDragEventL(*AknTouchGestureFwEventDrag(aEvent));
+            }
+        else if (AknTouchGestureFwEventTap(aEvent))
+            {
+            HandleTapEventL(*AknTouchGestureFwEventTap(aEvent));
+            }
+        //ignore flick and pinch events
         }
-    else if (AknTouchGestureFwEventTap(aEvent))
-        {
-        HandleTapEventL(*AknTouchGestureFwEventTap(aEvent));
-        }
-    //ignore flick and pinch events
     }
 
 // -----------------------------------------------------------------------------
@@ -114,12 +118,7 @@ void CTsEventControler::HandleTapEventL(
         {
         if( IsPhysicsRunning() )
             {
-            TBool forwardTap = iPhysicsHelper->IsDragging();
             iPhysicsHelper->Stop();
-            if ( forwardTap )
-                {
-                iObserver.TapL(aEvent.Position());
-                }
             }
         else
             {
@@ -136,7 +135,10 @@ void CTsEventControler::HandleDragEventL(
     MAknTouchGestureFwDragEvent& aEvent)
     {
     iObserver.DragL(aEvent);
-    iPhysicsHelper->HandleDragEvent(aEvent);
+    if ( iHandleEvents )
+        {
+        iPhysicsHelper->HandleDragEvent(aEvent);
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -144,10 +146,10 @@ void CTsEventControler::HandleDragEventL(
 // -----------------------------------------------------------------------------
 //
 void CTsEventControler::ViewPositionChanged(const TPoint& aNewPosition,
-    TBool /*aDrawNow*/,
+    TBool aDrawNow,
     TUint /*aFlags*/)
     {
-    iObserver.MoveOffset(aNewPosition);
+    iObserver.MoveOffset(aNewPosition, aDrawNow);
     }
 
 // -----------------------------------------------------------------------------
@@ -203,6 +205,20 @@ TBool CTsEventControler::IsPhysicsRunning()
 void CTsEventControler::StopAnimation()
     {
     iPhysicsHelper->Stop();
+    }
+
+
+// -----------------------------------------------------------------------------
+// EnableEventHandling
+// -----------------------------------------------------------------------------
+//
+void CTsEventControler::EnableEventHandling( TBool aEnable )
+    {
+    iHandleEvents = aEnable;
+    if ( !aEnable && IsPhysicsRunning() )
+        {
+        iPhysicsHelper->Stop();
+        }
     }
 
 // end of file

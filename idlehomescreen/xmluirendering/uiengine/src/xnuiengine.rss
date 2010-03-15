@@ -157,7 +157,4 @@ RESOURCE TBUF r_qtn_hs_operation_failed_no_disk
     buf = qtn_hs_operation_failed_no_disk; 
     }
 
-RESOURCE TBUF r_qtn_hs_corrupted_image_note 
-    {
-    buf = qtn_hs_corrupted_image_note; 
-    }
+// End of file

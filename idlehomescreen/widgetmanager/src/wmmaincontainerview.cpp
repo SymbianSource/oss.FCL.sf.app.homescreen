@@ -27,6 +27,7 @@
 #include <eikbtgpc.h>
 #include <widgetmanagerview.rsg>
 #include <hscontentcontroller.h>
+#include <AknUtils.h>
 
 #include "wmplugin.h"
 #include "widgetmanager.hrh"
@@ -141,8 +142,14 @@ void CWmMainContainerView::HandleCommandL( TInt aCommand )
                 break;
             case EWmMainContainerViewBackMenuItemCommand: // flow through
             case EAknSoftkeyBack:
-                iWmPlugin.CloseView();
+                {
+                if ( iWmMainContainer && 
+                  !iWmMainContainer->IsLoadingWidgets() )
+                    {
+                    iWmPlugin.CloseView();
+                    }
                 break;
+                }
             case EWmMainContainerViewWiddetDetailsMenuItemCommand:
                 HandleDetailsMenuItemSelectedL();
                 break;
@@ -176,6 +183,12 @@ void CWmMainContainerView::DoActivateL(
             R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
     StatusPane()->ApplyCurrentSettingsL();
     
+    // disable transparancy 
+    if ( StatusPane()->IsTransparent() )
+        {
+        StatusPane()->EnableTransparent( EFalse );    
+        }
+
     // title in status pane
     SetTitleL();
     
@@ -185,7 +198,12 @@ void CWmMainContainerView::DoActivateL(
     CEikButtonGroupContainer* bgc( Cba() );
     CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
     if ( cba ) 
-        {       
+        {
+        TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
+                                R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
+                                R_AVKON_SOFTKEYS_OPTIONS_BACK );
+
+        cba->SetCommandSetL( cbaResourceId );
         bgc->SetBoundingRect( TRect() );
         cba->DrawNow();
         }

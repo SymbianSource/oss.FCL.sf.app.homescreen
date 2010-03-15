@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_101 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_102 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -318,72 +318,7 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
 //
 void CMmGrid::HandlePointerEventInNormalModeL( const TPointerEvent& aPointerEvent )
     {
-    CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
-    if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
-		{
-        const TInt KIgnoreRectSize = 40;
-        TRect ignoreDragRect(aPointerEvent.iPosition,
-                TSize(KIgnoreRectSize, KIgnoreRectSize));
-        ignoreDragRect.Move( - KIgnoreRectSize / 2, - KIgnoreRectSize / 2 );
-        Window().RequestPointerRepeatEvent( 50000, ignoreDragRect );
-		}
-    else if ( aPointerEvent.iType == TPointerEvent::EButtonRepeat )
-        {
-        HandleButtonRepeatEventInNormalModeL( aPointerEvent );
-        }
-	CAknGrid::HandlePointerEventL(aPointerEvent);
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CMmGrid::HandleButtonRepeatEventInNormalModeL(
-        const TPointerEvent& aPointerEvent )
-    {
-    TInt itemUnderPointerIndex = KErrNotFound;
-    TBool itemFound = View()->XYPosToItemIndex(
-            aPointerEvent.iPosition, itemUnderPointerIndex );
-    if ( !itemFound )
-        {
-        return;
-        }
-
-    View()->ItemDrawer()->SetFlags( CListItemDrawer::EPressedDownState );
-    CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
-    TBool highlightWasVisible = parent->IsHighlightVisible();
-
-    if( itemUnderPointerIndex == View()->CurrentItemIndex() )
-        {
-#ifdef RD_UI_TRANSITION_EFFECTS_LIST
-        MAknListBoxTfxInternal *transApi = CAknListLoader::TfxApiInternal(
-                iMmDrawer->Gc() );
-         if ( transApi )
-             {
-             transApi->Remove( MAknListBoxTfxInternal::EListHighlight );
-             View()->DrawItem( itemUnderPointerIndex );
-             TRect itemUnderPointerIndexRect (
-                     View()->ItemPos(itemUnderPointerIndex),
-                     View()->ItemSize(itemUnderPointerIndex));
-             transApi->Draw( itemUnderPointerIndexRect );
-             }
-         else
-        	 {
-        	 View()->DrawItem( itemUnderPointerIndex );
-        	 }
-#else
-         View()->DrawItem( itemUnderPointerIndex );
-#endif
-        }
-     else
-        {
-        TInt previouslyHighlightedItemIndex = View()->CurrentItemIndex();
-        parent->SetManualHighlightL( itemUnderPointerIndex , EFalse );
-        if ( highlightWasVisible )
-            {
-            View()->DrawItem( previouslyHighlightedItemIndex );
-            }
-        }
+    CAknGrid::HandlePointerEventL(aPointerEvent);
     }
 
 // -----------------------------------------------------------------------------

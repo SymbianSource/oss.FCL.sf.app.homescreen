@@ -16,7 +16,13 @@
 */
 
 
-// INCLUDE FILES
+// System includes
+#include <eikapp.h>
+#include <aknappui.h>
+#include <gfxtranseffect/gfxtranseffect.h>  
+#include <akntranseffect.h>                 
+
+// User includes
 #include "xneffectmanager.h"
 #include "xnplugindata.h"
 #include "xnviewdata.h"
@@ -24,20 +30,15 @@
 #include "xndomnode.h"
 #include "xncontroladapter.h"
 
-// SYSTEM INCLUDE FILES
-#include <eikapp.h>
-#include <aknappui.h>
-#include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
-#include <akntranseffect.h>                 // For transition effects
-
-// CONSTANTS
+// Constants
 const TInt KWaitForLayout = 1;
 const TInt KEffectStarted = 2;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
-// C++ default constructor.
+// CXnEffectManager::CXnEffectManager
+//
 // -----------------------------------------------------------------------------
 //
 CXnEffectManager::CXnEffectManager()
@@ -45,7 +46,8 @@ CXnEffectManager::CXnEffectManager()
     }
 
 // -----------------------------------------------------------------------------
-// Symbian 2nd phase constructor.
+// CXnEffectManager::ConstructL
+//
 // -----------------------------------------------------------------------------
 //
 void CXnEffectManager::ConstructL()
@@ -53,12 +55,13 @@ void CXnEffectManager::ConstructL()
     }
 
 // -----------------------------------------------------------------------------
-// Two-phased constructor.
+// CXnEffectManager::NewL
+//
 // -----------------------------------------------------------------------------
 //
 CXnEffectManager* CXnEffectManager::NewL()
     {
-    CXnEffectManager* self = new (ELeave) CXnEffectManager();
+    CXnEffectManager* self = new ( ELeave ) CXnEffectManager();
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -66,7 +69,8 @@ CXnEffectManager* CXnEffectManager::NewL()
     }
 
 // -----------------------------------------------------------------------------
-// Destructor.
+// CXnEffectManager::~CXnEffectManager
+//
 // -----------------------------------------------------------------------------
 //
 CXnEffectManager::~CXnEffectManager()
@@ -77,6 +81,7 @@ CXnEffectManager::~CXnEffectManager()
 
 // -----------------------------------------------------------------------------
 // CXnEffectManager::BeginFullscreenEffectL
+//
 // -----------------------------------------------------------------------------
 //
 void CXnEffectManager::BeginFullscreenEffectL( TInt aId, CXnViewData& aView )
@@ -106,15 +111,16 @@ void CXnEffectManager::BeginFullscreenEffectL( TInt aId, CXnViewData& aView )
 
 // -----------------------------------------------------------------------------
 // CXnEffectManager::UiRendered
+//
 // -----------------------------------------------------------------------------
 //
 void CXnEffectManager::UiRendered()
     {
     for ( TInt i = 0; i < iEffects.Count(); )
         {
-        TXnEffect* effect = iEffects[i];
-        if ( effect &&
-             effect->iState == KEffectStarted )
+        TXnEffect* effect( iEffects[i] );
+        
+        if ( effect && effect->iState == KEffectStarted )            
             {
             GfxTransEffect::EndFullScreen();
             RemoveEffect( effect );
@@ -128,14 +134,17 @@ void CXnEffectManager::UiRendered()
 
 // -----------------------------------------------------------------------------
 // CXnEffectManager::UiLayouted
+//
 // -----------------------------------------------------------------------------
 //
 void CXnEffectManager::UiLayouted()
     {
     for ( TInt i = 0; i < iEffects.Count(); )
         {
-        TBool effectStarted = ETrue;
-        TXnEffect* effect = iEffects[i];
+        TBool effectStarted( ETrue );
+        
+        TXnEffect* effect( iEffects[i] );
+        
         if ( effect && effect->iNode &&
              effect->iState == KWaitForLayout &&
              effect->iNode->IsLaidOut() )
@@ -157,14 +166,16 @@ void CXnEffectManager::UiLayouted()
 
 // -----------------------------------------------------------------------------
 // CXnEffectManager::DoBeginFullscreenEffect
+//
 // -----------------------------------------------------------------------------
 //
 TBool CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
     {
-    CCoeEnv* coe( CCoeEnv::Static() );
+    CCoeEnv* env( CCoeEnv::Static() );
            
-    if ( coe->WsSession().GetFocusWindowGroup() != 
-         coe->RootWin().Identifier() )
+    RWsSession& session( env->WsSession() );
+    
+    if ( session.GetFocusWindowGroup() != env->RootWin().Identifier() )          
         {
         // Window group is not focused
         return EFalse;
@@ -172,28 +183,39 @@ TBool CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
 
     const TInt flags( AknTransEffect::TParameter::EActivateExplicitCancel );
     const TUid targetAppUid( iAvkonAppUi->Application()->AppDllUid() );
-
+    
+    // Must give some time before starting effect, because otherwise
+    // fullscreen effect may contain unwanted parts (dialog, note, etc.)
+    // which was shown when fullscreen effect is about to be started
+    session.Finish();
+    User::After( 1000 );
+        
     // Set effect begin point
     GfxTransEffect::BeginFullScreen( aEffect.iId , iAvkonAppUi->ClientRect(),
         AknTransEffect::EParameterType, AknTransEffect::GfxTransParam(
         targetAppUid, flags ) );
     
     aEffect.iState = KEffectStarted;
+    
     return ETrue;
     }
 
 // -----------------------------------------------------------------------------
 // CXnEffectManager::RemoveEffect
+//
 // -----------------------------------------------------------------------------
 //
 void CXnEffectManager::RemoveEffect( TXnEffect* aEffect )
     {
-    TInt index = iEffects.Find( aEffect );
+    TInt index( iEffects.Find( aEffect ) );
+    
     if ( index != KErrNotFound )
         {
-        TXnEffect* temp = iEffects[index];
-        iEffects.Remove( index );
+        TXnEffect* temp( iEffects[index] ); 
         delete temp;
+        temp = NULL;
+        
+        iEffects.Remove( index );        
         }
     }
 

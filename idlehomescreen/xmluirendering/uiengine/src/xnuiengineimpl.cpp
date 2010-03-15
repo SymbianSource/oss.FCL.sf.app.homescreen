@@ -33,7 +33,9 @@
 #include "xndompropertyvalue.h"
 #include "xnmenuadapter.h"
 #include "xnpopupcontroladapter.h"
+#include "xnviewcontroladapter.h"
 #include "xnviewdata.h"
+#include "xnrootdata.h"
 #include "xnnodebreadthfirstiterator.h"
 #include "xntype.h"
 #include "xnnodepluginif.h"
@@ -56,7 +58,6 @@
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
 #include "xntexteditor.h"
-#include "xnbgcontrol.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -81,6 +82,7 @@ _LIT8( KWidgetExtensionNodeName, "widgetextension" );
 _LIT8( KScrollableBoxNodeName, "scrollablebox" );
 _LIT8( KMenuBar, "menubar" );
 _LIT8( KPopUpNodeName, "popup" );
+_LIT8( KEditorNodeName, "texteditor" );
 
 _LIT8( KPlugin, "plugin" );
 
@@ -8102,7 +8104,6 @@ CXnUiEngineImpl::~CXnUiEngineImpl()
            
     delete iEditMode;
     delete iHitTest;
-    delete iSplitScreenState.iPartialScreenBlock;
 
     iFocusCandidateList.Reset();
     iRedrawRegions.ResetAndDestroy();
@@ -8274,7 +8275,7 @@ TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
                         rect = ClientRect();
                         
                         // Move it to 0, 0
-                        rect.Move( -rect.iTl.iX, -rect.iTl.iY );                        
+                        //rect.Move( -rect.iTl.iX, -rect.iTl.iY );                        
                         }
                     else
                         {
@@ -8422,9 +8423,31 @@ CXnNode* CXnUiEngineImpl::FindNodeByIdL( const TDesC8& aAreaId,
     const TDesC8& aNamespace )
     {
     // Find the namespace where to start node id look-up 
-    CXnPluginData* pluginData( 
-        iViewManager.ActiveViewData().Plugin( aNamespace ) );
-
+    CXnViewData& active( iViewManager.ActiveViewData() );
+    
+    CXnPluginData* pluginData( active.Plugin( aNamespace ) ); 
+        
+    if ( aNamespace != KNullDesC8 && !pluginData )
+        {
+        RPointerArray< CXnPluginData >& views( 
+            iViewManager.ActiveAppData().PluginData() );
+        
+        for ( TInt i = 0; i < views.Count(); i++ )
+            {
+            CXnViewData* view = static_cast< CXnViewData* >( views[i] );
+            
+            if ( view != &active )
+                {
+                pluginData = view->Plugin( aNamespace );
+                
+                if ( pluginData )
+                    {
+                    break;
+                    }
+                }
+            }                
+        }
+    
     if ( !pluginData )
         {
         return NULL;
@@ -8464,9 +8487,31 @@ CXnPointerArray* CXnUiEngineImpl::FindNodeByClassL(
     const TDesC8& aClassId, const TDesC8& aNamespace )
     {
     // Find the namespace where to start node class look-up
-    CXnPluginData* pluginData( 
-        iViewManager.ActiveViewData().Plugin( aNamespace ) );
-
+    CXnViewData& active( iViewManager.ActiveViewData() );
+    
+    CXnPluginData* pluginData( active.Plugin( aNamespace ) ); 
+        
+    if ( aNamespace != KNullDesC8 && !pluginData )
+        {
+        RPointerArray< CXnPluginData >& views( 
+            iViewManager.ActiveAppData().PluginData() );
+        
+        for ( TInt i = 0; i < views.Count(); i++ )
+            {
+            CXnViewData* view = static_cast< CXnViewData* >( views[i] );
+            
+            if ( view != &active )
+                {
+                pluginData = view->Plugin( aNamespace );
+                
+                if ( pluginData )
+                    {
+                    break;
+                    }
+                }
+            }                
+        }
+    
     CXnPointerArray* array = CXnPointerArray::NewL();
     CleanupStack::PushL( array );
     
@@ -8481,6 +8526,65 @@ CXnPointerArray* CXnUiEngineImpl::FindNodeByClassL(
     return array;
     }
 
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::FindContentSourceNodesL()
+// -----------------------------------------------------------------------------
+//
+CXnPointerArray* CXnUiEngineImpl::FindContentSourceNodesL(
+    const TDesC8& aNamespace )
+    {
+    CXnViewData& active( iViewManager.ActiveViewData() );
+
+    CXnPluginData* pluginData( active.Plugin( aNamespace ) );
+    
+    if ( aNamespace != KNullDesC8 && !pluginData )
+        {
+        RPointerArray< CXnPluginData >& views( 
+            iViewManager.ActiveAppData().PluginData() );
+        
+        for ( TInt i = 0; i < views.Count(); i++ )
+            {
+            CXnViewData* view = static_cast< CXnViewData* >( views[i] );
+            
+            if ( view != &active )
+                {
+                pluginData = view->Plugin( aNamespace );
+                
+                if ( pluginData )
+                    {
+                    break;
+                    }
+                }
+            }                    
+        }
+          
+    CXnPointerArray* array = CXnPointerArray::NewL();
+    CleanupStack::PushL( array );
+    
+    if ( pluginData )
+        {       
+        RPointerArray< CXnNode > list;
+        CleanupClosePushL( list );
+       
+        pluginData->ContentSourceNodesL( list );
+       
+        const TInt count( list.Count() );
+       
+        array->Container().ReserveL( count );
+       
+        for ( TInt i = 0; i < count; i++ )
+            {
+            array->Container().Append( list[i] );
+            }
+       
+        CleanupStack::PopAndDestroy( &list );
+        }
+   
+    CleanupStack::Pop( array );
+
+    return array;
+    }
+    
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::Resources()
 // -----------------------------------------------------------------------------
@@ -8592,7 +8696,7 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
     SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
     
     RootNode()->SetDirtyL();
-    iUiEngine->RenderUIL();
+    ForceRenderUIL();
     }
 
 // -----------------------------------------------------------------------------
@@ -8883,31 +8987,6 @@ TBool CXnUiEngineImpl::IsDialogDisplaying()
 //
 void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
     {
-    
-    if ( aType == KAknSplitInputEnabled ) 
-        {
-        if(!iSplitScreenState.isPartialScreenEnabled )
-            {
-            DisableRenderUiLC();
-            HandlePartialTouchInputL( aType );
-            RootNode()->SetDirtyL();
-            ForceRenderUIL();
-            CleanupStack::PopAndDestroy();
-            }
-        }    
-    
-     if ( aType == KAknSplitInputDisabled ) 
-        {
-        if( iSplitScreenState.isPartialScreenEnabled )    
-            {
-            DisableRenderUiLC();
-            HandlePartialTouchInputL( aType );
-            RootNode()->SetDirtyL();
-            ForceRenderUIL();
-            CleanupStack::PopAndDestroy();
-            }
-        }    
-
     if ( iMenuNode )
         {
         CXnControlAdapter* adapter( iMenuNode->Control() );
@@ -8920,61 +8999,105 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
     
     if ( aType == KEikDynamicLayoutVariantSwitch )
         {
-        // Must return here if there is no current view or
-        // controladapterlist. This may occur when the phone
-        // is booted for the first time and the location/date
-        // query is visible.
-        if ( !ActiveView() )
-            {
-            return;
-            }
-
-        // Update client rect
-        SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
-
-        // Update background rect
-        // Bg rect is always screen size.
-        TRect bgRect;
-        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, bgRect );
-        iAppUiAdapter.ViewAdapter().BgManager().SetRect( bgRect );
-
-        iEditMode->HandleScreenDeviceChangedL();
-        
-        // Force relayout
-        DisableRenderUiLC();
-        
-        RootNode()->SetDirtyL();
-
-        ReportScreenDeviceChangeL();
-                
-        for ( TInt i = 0; i < iControlAdapterList->Count(); i++ )
-            {
-            CXnControlAdapter* adapter( ( *iControlAdapterList )[i] );
-            
-            adapter->HandleScreenDeviceChangedL();
-            }
-        
-        ForceRenderUIL();
-        
-        CleanupStack::PopAndDestroy();
+        HandleDynamicLayoutVariantSwitchL();
         }
     else if ( aType == KAknsMessageSkinChange )
         {
-        // Force relayout
-        DisableRenderUiLC();
-        
-        RootNode()->SetDirtyL();
-
-        for ( TInt i = 0; i < iControlAdapterList->Count(); i++ )
-            {
-            CXnControlAdapter* adapter( ( *iControlAdapterList )[i] );
-            adapter->SkinChanged();
-            }
-
-        ForceRenderUIL();
-        
-        CleanupStack::PopAndDestroy();
+        HandleSkinChangeL();
         }
+    else if( iCurrentViewControlAdapter )
+        {
+        iCurrentViewControlAdapter->HandleResourceChange( aType );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::HandleSkinChangeL
+// Handles a skin change to the controls
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::HandleSkinChangeL()
+    {
+    // Force relayout
+    DisableRenderUiLC();
+    
+    RootNode()->SetDirtyL();
+
+    for ( TInt i = 0; i < iControlAdapterList->Count(); i++ )
+        {
+        CXnControlAdapter* adapter( ( *iControlAdapterList )[i] );
+        adapter->SkinChanged();
+        }
+
+    ForceRenderUIL();
+    
+    CleanupStack::PopAndDestroy();
+    
+    // Handle inactive views
+    RPointerArray< CXnPluginData >& views(
+            iAppUiAdapter.ViewManager().ActiveAppData().PluginData() );
+
+    for ( TInt i = 0; i < views.Count(); i++ )
+        {
+        CXnViewData* view = static_cast< CXnViewData* >( views[i] );
+        if ( view && !view->Active() )
+            {
+            RPointerArray< CXnControlAdapter > controls;
+            CleanupClosePushL( controls );
+            view->ControlsL( controls );
+            for ( TInt j = 0; j < controls.Count(); j++ )
+                {
+                controls[j]->SkinChanged();
+                }
+            CleanupStack::PopAndDestroy( &controls );
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL
+// Handles a KEikDynamicLayoutVariantSwitch resource change
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
+    {
+    // Must return here if there is no current view or
+    // controladapterlist. This may occur when the phone
+    // is booted for the first time and the location/date
+    // query is visible.
+    if ( !ActiveView() )
+        {
+        return;
+        }
+
+    // Update client rect
+    SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
+
+    // Update background rect
+    // Bg rect is always screen size.
+    TRect bgRect;
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, bgRect );
+    iAppUiAdapter.ViewAdapter().BgManager().SetRect( bgRect );
+
+    iEditMode->HandleScreenDeviceChangedL();
+    
+    // Force relayout
+    DisableRenderUiLC();
+    
+    RootNode()->SetDirtyL();
+
+    ReportScreenDeviceChangeL();
+            
+    for ( TInt i = 0; i < iControlAdapterList->Count(); i++ )
+        {
+        CXnControlAdapter* adapter( ( *iControlAdapterList )[i] );
+        
+        adapter->HandleScreenDeviceChangedL();
+        }
+    
+    ForceRenderUIL();
+    
+    CleanupStack::PopAndDestroy();
     }
 
 // -----------------------------------------------------------------------------
@@ -9188,11 +9311,15 @@ TBool CXnUiEngineImpl::IsLayoutDisabled()
         }
     
     TBool retval( EFalse );
-    if ( iDisableCount > 0 &&
-         !( iLayoutControl & XnLayoutControl::EIgnoreState ) )
+    
+    if ( !( iLayoutControl & XnLayoutControl::EIgnoreState ) )
         {
-        retval =  ETrue;
+        if ( iDisableCount > 0 )
+            {
+            retval = ETrue;
+            }
         }
+    
     return retval;
     }
 
@@ -9389,9 +9516,7 @@ void CXnUiEngineImpl::SetClientRectL( TRect aRect, TBool aDrawNow )
         
         UpdateInternalUnits( iHorizontalUnitInPixels, iVerticalUnitInPixels,
             iClientRect );
-        
-        iAppUiAdapter.ViewAdapter().BgControl().SetRect( aRect );
-
+               
         if ( aDrawNow )
             {
             RootNode()->SetDirtyL();
@@ -9721,74 +9846,59 @@ void CXnUiEngineImpl::ReportScreenDeviceChangeL()
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::HandlePartialTouchInputL()
 // -----------------------------------------------------------------------------
-void CXnUiEngineImpl::HandlePartialTouchInputL( TInt aType )
+void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
     {
-    if( !iSplitScreenState.iPartialScreenEditorNode )
-        {
-        return;
-        }
-    if ( aType == KAknSplitInputEnabled ) 
-        {
+    DisableRenderUiLC();
+    CXnNode* editorplugin = FindPlugin( aNode );
+
+    if ( aEnable ) 
+    
+        {        
+        iSplitScreenState.iPartialScreenOpen = ETrue;           
+        iSplitScreenState.iPartialScreenEditorNode = &aNode;           
+
         // make sure that we always get up event
-        CCoeControl& bg( iAppUiAdapter.ViewAdapter().BgControl() );                    
-        static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();        
+        CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(  
+            iViewManager.ActiveViewData().ViewNode()->Control() );            
+                
+        control->ResetGrabbing();
 
-        // don't remove input from stack if split input is enabled
-        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;             
-        XnComponentInterface::MakeInterfaceL( editorControl, 
-            iSplitScreenState.iPartialScreenEditorNode->AppIfL() );
-        if( editorControl )
-            {
-            editorControl->HandleEditorEvent(CXnTextEditor::KKeepSplitInputInStack);
-            }
-
-        RPointerArray<CXnNode> plugins = *Plugins();        
-     
-         for( TInt i=0; i<plugins.Count(); i++ )     
+        // Hide all plugins except the one that contains given editor node
+        RPointerArray< CXnNode >& plugins( *Plugins() );                   
+        for( TInt i=0; i<plugins.Count(); i++ )
              {         
              CXnNode* pluginNode = plugins[i];
-             CXnNode* editorplugin = FindPlugin( *iSplitScreenState.iPartialScreenEditorNode );
-             
              if ( pluginNode != editorplugin )
                 {
                 SetNodeVisibleL(pluginNode, EFalse);
                 }      
              }
-            
+         
+        // Block progression must be bottom-to-top when partial screen is open
+        // Previous value needs to be stored first
         StorePartialScreenBlockProgressionL();
            
-        iSplitScreenState.isPartialScreenEnabled = ETrue;           
         SetPartialScreenBlockProgressionL( 
             XnPropertyNames::style::common::block_progression::KBT );
+        
+        // Hide statuspane
         iAppUiAdapter.StatusPane()->MakeVisible( EFalse );
         } 
      
-     if ( aType == KAknSplitInputDisabled ) 
-         {
-         
-         // set remove stack true if disable event does not come from widget controls
-         if(iSplitScreenState.isPartialScreenOpen)
-             {
-             XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;             
-             XnComponentInterface::MakeInterfaceL( editorControl, 
-                 iSplitScreenState.iPartialScreenEditorNode->AppIfL() );
-             if( editorControl )
-                 {
-                 editorControl->HandleEditorEvent(CXnTextEditor::KRemoveSplitInputFromStack);
-                 }
-             }
+    else
+        { 
+        // Show plugin nodes again
+        RPointerArray< CXnNode >& plugins( *Plugins() );                   
 
-         RPointerArray<CXnNode> plugins = *Plugins();
-    
-            for( TInt i=0; i<plugins.Count(); i++ )
-               {           
-               CXnNode* pluginNode = plugins[i];               
-               
-               if ( pluginNode != iSplitScreenState.iPartialScreenEditorNode )
-                    {
-                    SetNodeVisibleL(pluginNode, ETrue);
-                    }           
-               }
+        for( TInt i=0; i<plugins.Count(); i++ )
+           {           
+           CXnNode* pluginNode = plugins[i];               
+           
+           if ( pluginNode != editorplugin )
+                {
+                SetNodeVisibleL(pluginNode, ETrue);
+                }           
+           }
             
         if( iSplitScreenState.iPartialScreenBlock == NULL )
             {
@@ -9798,11 +9908,20 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( TInt aType )
         else
             {
             SetPartialScreenBlockProgressionL(iSplitScreenState.iPartialScreenBlock->Des());
+            delete iSplitScreenState.iPartialScreenBlock; 
+            iSplitScreenState.iPartialScreenBlock = NULL;
             }
         
-         iSplitScreenState.isPartialScreenEnabled = EFalse;
-         iAppUiAdapter.StatusPane()->MakeVisible(ETrue);
-         }
+        iSplitScreenState.iPartialScreenEditorNode = NULL;
+        iSplitScreenState.iPartialScreenOpen = EFalse;
+                 
+        // Show statuspane again
+        iAppUiAdapter.StatusPane()->MakeVisible(ETrue);
+        }
+    
+    RootNode()->SetDirtyL();
+    ForceRenderUIL();
+    CleanupStack::PopAndDestroy();
     }
 
 // -----------------------------------------------------------------------------
@@ -9901,9 +10020,12 @@ void CXnUiEngineImpl::NotifyResourceChanged( TInt aType )
 // EnablePartialTouchInput 
 // -----------------------------------------------------------------------------
 void CXnUiEngineImpl::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
-    {    
-    iSplitScreenState.iPartialScreenEditorNode = &aNode;
-    iSplitScreenState.isPartialScreenOpen = aEnable;
+    {
+    if( aEnable && !iSplitScreenState.iPartialScreenOpen ||
+        !aEnable && iSplitScreenState.iPartialScreenOpen )
+        {
+        TRAP_IGNORE( HandlePartialTouchInputL( aNode, aEnable ) );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -9993,8 +10115,28 @@ void CXnUiEngineImpl::StorePartialScreenBlockProgressionL()
 // -----------------------------------------------------------------------------
 TBool CXnUiEngineImpl::IsPartialInputActive()
     {
-    return iSplitScreenState.isPartialScreenEnabled;
+    return iSplitScreenState.iPartialScreenOpen;
     }
 
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::IsTextEditorActive()
+// -----------------------------------------------------------------------------
+//               
+TBool CXnUiEngineImpl::IsTextEditorActive()
+    {
+    if( iSplitScreenState.iPartialScreenOpen )
+        {
+        return ETrue;
+        }
+    CXnNode* focusedNode = FocusedNode();
+    if( focusedNode )
+        {
+        if( focusedNode->Type()->Type() == KEditorNodeName )
+            {
+            return ETrue;
+            }
+        }
+    return EFalse;
+    }
 
 // End of file

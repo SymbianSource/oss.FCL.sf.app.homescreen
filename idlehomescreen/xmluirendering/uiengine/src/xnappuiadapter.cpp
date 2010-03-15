@@ -72,7 +72,13 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
 
         toolbar->DisableToolbarL( ETrue );
         }
-        
+
+    CEikStatusPane* sp( StatusPane() );
+    if ( sp )
+        {
+        sp->EnableTransparent( ETrue );
+        }
+
     __TIME_ENDMARK( "CXnAppUiAdapter::ConstructL - BaseConstructL, done", time2 );
     
     iImpl = CXnAppUiAdapterImpl::NewL( iApplicationUid, *this );

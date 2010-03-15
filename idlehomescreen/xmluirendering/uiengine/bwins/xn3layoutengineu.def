@@ -233,4 +233,5 @@ EXPORTS
 	?SetVisible@CXnControlAdapter@@QAEXH@Z @ 232 NONAME ; void CXnControlAdapter::SetVisible(int)
 	?Node@CXnComponent@@QAEPAVCXnNodePluginIf@@XZ @ 233 NONAME ; class CXnNodePluginIf * CXnComponent::Node(void)
 	?ProcessMessageL@CXnAppUiAdapter@@UAEXVTUid@@ABVTDesC8@@@Z @ 234 NONAME ; void CXnAppUiAdapter::ProcessMessageL(class TUid, class TDesC8 const &)
+	?IsTextEditorActive@TXnUiEnginePluginIf@@QAEHXZ @ 235 NONAME ; int TXnUiEnginePluginIf::IsTextEditorActive(void)
 

@@ -84,7 +84,12 @@ private:
             const TRect& aRect );
 
 public: // new functions	
-
+    
+    /** 
+     * @return true, if widgets loading operation is ongoing. 
+     */
+    TBool IsLoadingWidgets();
+    
     /** 
      * @return true, if portal button is currently selected 
      */
@@ -248,6 +253,11 @@ public:
      * @param aForeground ETrue indicates foreground
      */
     void ProcessForegroundEvent( TBool aForeground );
+    
+    /**
+     * access to WM list
+     */
+    CWmListBox& WmListBox();
     
 protected: // from base class CCoeControl
     

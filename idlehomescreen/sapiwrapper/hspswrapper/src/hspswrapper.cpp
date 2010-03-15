@@ -19,6 +19,8 @@
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <bamdesca.h>
+#include <centralrepository.h>
+#include <activeidle2domaincrkeys.h>
 
 #include "hspswrapper.h"
 #include "hspsconfiguration.h"
@@ -27,7 +29,6 @@
 #include "propertymap.h"
 #include "objectmap.h"
 #include "plugininfo.h"
-
 
 _LIT8( KHSPS, "Service.HSPS" );
 _LIT8( KHSPSConfigurationIf, "IConfiguration" );
@@ -38,7 +39,6 @@ _LIT8( KHSPSCommandGetPlugins, "GetPlugins" );
 _LIT8( KHSPSCommandAddPlugin, "AddPlugin" );
 _LIT8( KHSPSCommandRemovePlugin, "RemovePlugin" );
 _LIT8( KHSPSCommandReplacePlugin, "ReplacePlugin" );
-_LIT8( KHSPSCommandSetActivePlugin, "SetActivePlugin" );
 _LIT8( KHSPSCommandSetConfState, "SetConfState" );
 _LIT8( KHSPSCommandGetAppConfs, "GetAppConfs" );
 _LIT8( KHSPSCommandSetAppConf, "SetActiveAppConf" );
@@ -69,6 +69,10 @@ _LIT8( KHSPSCommandRestoreConfigurations, "RestoreConfigurations" );
 _LIT8( KRestore, "restore" );
 _LIT8( KActive, "active" );
 _LIT8( KAll, "all" );
+_LIT8( K0, "0" );
+_LIT8( K1, "1" );
+_LIT8( KPluginIdNotSet, "-1" );
+const TInt KMaxPluginIdLen = 32;
 
 namespace hspswrapper{
 
@@ -149,7 +153,11 @@ CHspsWrapper::CHspsWrapper(MHspsWrapperObserver* aObserver)
 // ---------------------------------------------------------------------------
 //
 void CHspsWrapper::ConstructL(const TDesC8& aAppUid)
-    {
+    {    
+    // Read active view.
+    iRepository = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
+    LoadActivePluginIdL();
+        
     // Attach to HSPS:
     iServiceHandler = CLiwServiceHandler::NewL();
     
@@ -269,6 +277,8 @@ EXPORT_C CHspsWrapper::~CHspsWrapper()
     
     delete iHspsService;
     delete iServiceHandler;    
+    delete iRepository;
+    delete iActivePluginId;
     }
 
 // ---------------------------------------------------------------------------
@@ -297,7 +307,7 @@ EXPORT_C CHspsConfiguration* CHspsWrapper::GetAppConfigurationL()
         // 2: Process Configuration map
         if(confMap)
            {
-           ProcessConfigurationMapL(*confMap,*configuration);
+           ProcessConfigurationMapL( *confMap, *configuration, ETrue );
            }
         }
     outParamList.Reset();
@@ -377,6 +387,8 @@ EXPORT_C void CHspsWrapper::GetAppConfigurationsL(
 EXPORT_C TInt CHspsWrapper::SetAppConfigurationL(
     const TDesC8& aConfigurationUid )
     {
+    SetActivePluginL( KPluginIdNotSet );
+    
 #ifdef _XN_PERFORMANCE_TEST_
     RDebug::Print( _L( "CHspsWrapper::SetAppConfigurationL() - start" ) );
 #endif //_XN_PERFORMANCE_TEST_        
@@ -451,7 +463,7 @@ EXPORT_C CHspsConfiguration* CHspsWrapper::GetPluginConfigurationL(
         // 2: Process Configuration map
         if(confMap)
            {
-           ProcessConfigurationMapL(*confMap,*configuration);
+           ProcessConfigurationMapL( *confMap, *configuration, EFalse );
            }
         }
    
@@ -725,38 +737,29 @@ EXPORT_C TInt CHspsWrapper::ReplacePluginL(
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CHspsWrapper::SetActivePluginL(const TDesC8& aPluginId)
+EXPORT_C TInt CHspsWrapper::SetActivePluginL( const TDesC8& aPluginId )
     {
-    // Compose AddPlugin hsps LIW message to Service.HomeScreenPluginConfiguration
-    CLiwGenericParamList& inParamList = iServiceHandler->InParamListL();
-    CLiwGenericParamList& outParamList = iServiceHandler->OutParamListL();
-         
-    // Compose Liw message
-    TLiwGenericParam pluginIdParam;
-    pluginIdParam.SetNameAndValueL( KKeyPluginId, TLiwVariant(aPluginId) );
-    pluginIdParam.PushL();
-    inParamList.AppendL( pluginIdParam );
-    CleanupStack::Pop(&pluginIdParam);
-    pluginIdParam.Reset();
-      
-    iHspsInterface->ExecuteCmdL( KHSPSCommandSetActivePlugin, 
-                                 inParamList, 
-                                 outParamList ); 
-      
-    inParamList.Reset();
-      
-    // check success
-    const TLiwGenericParam* outParam = NULL;
-    TInt pos(0);
-    outParam = outParamList.FindFirst( pos, KOutKeyStatus );
-    TInt status(KErrGeneral);
-    
-    if ( outParam )
+    TPtrC8 pluginId = aPluginId;
+    if( aPluginId.Length() > KMaxPluginIdLen )
         {
-        status = outParam->Value().AsTInt32();
+        pluginId.Set( aPluginId.Left( KMaxPluginIdLen ) );
         }
-    outParamList.Reset();
-    return status;
+        
+    const TInt error = iRepository->Set( KAIActiveViewPluginId, pluginId );
+
+    delete iActivePluginId;
+    iActivePluginId = NULL;    
+    
+    if( error == KErrNone )
+        {
+        iActivePluginId = pluginId.AllocL();        
+        }
+    else
+        {
+        iActivePluginId = KPluginIdNotSet().AllocL();
+        }
+    
+    return error;
     }
 
 // ---------------------------------------------------------------------------
@@ -1048,7 +1051,8 @@ EXPORT_C MLiwInterface* CHspsWrapper::HspsInterface() const
 //
 void CHspsWrapper::ProcessConfigurationMapL(
     const CLiwMap& aSource, 
-    CHspsConfiguration& aTarget)
+    CHspsConfiguration& aTarget,
+    const TBool aAppConf )
     {
     TLiwVariant tempVariant;
     tempVariant.PushL();
@@ -1090,7 +1094,9 @@ void CHspsWrapper::ProcessConfigurationMapL(
         const CLiwList* plugins( tempVariant.AsList() );
         if( plugins )
             {
-            ProcessConfigurationPluginsL(*plugins,aTarget);
+            ProcessConfigurationPluginsL( *plugins,
+                                          aTarget,
+                                          aAppConf );
             }
         }
     if( aSource.FindL( _L8("settings"), tempVariant ) )
@@ -1118,8 +1124,11 @@ void CHspsWrapper::ProcessConfigurationMapL(
 //
 void CHspsWrapper::ProcessConfigurationPluginsL(
     const CLiwList& aPluginsList, 
-    CHspsConfiguration& aTarget)
+    CHspsConfiguration& aTarget,
+    const TBool aAppConf )
     {
+    TBool activePluginFound = EFalse;
+    
     TLiwVariant pluginMapVariant;
     pluginMapVariant.PushL();
     for( int i=0;i<aPluginsList.Count();++i )
@@ -1140,24 +1149,66 @@ void CHspsWrapper::ProcessConfigurationPluginsL(
                     {
                     plugin->SetPluginUidL( pluginVariant.AsData() );
                     }
-                if( pluginMap->FindL( _L8("activationstate"),pluginVariant ) )
-                    {
-                    plugin->SetActivationStateL( pluginVariant.AsData() );
-                    }
                 if ( pluginMap->FindL( _L8( "locking_status" ), pluginVariant ) )
                     {
                     plugin->SetLockingStatusL( pluginVariant.AsData() );
+                    }                
+                
+                if( aAppConf )
+                    {
+                    if( ActivePluginId().Compare( KPluginIdNotSet ) == 0 && 
+                        pluginMap->FindL( _L8( "activationstate" ), pluginVariant ) )
+                        {
+                        const TPtrC8 data = pluginVariant.AsData();
+                        
+                        plugin->SetActivationStateL( data );
+                        
+                        if( data.Compare( K1 ) == 0 )
+                            {
+                            SetActivePluginL( plugin->PluginId() );
+                            activePluginFound = ETrue;
+                            }
+                        }
+                    else if( ActivePluginId().Compare( plugin->PluginId() ) == 0 )
+                        {
+                        plugin->SetActivationStateL( K1 );
+                        activePluginFound = ETrue;
+                        }
+                    else
+                        {
+                        plugin->SetActivationStateL( K0 );
+                        }
                     }
+                else
+                    {
+                    if ( pluginMap->FindL( _L8( "activationstate" ), pluginVariant ) )
+                        {
+                        plugin->SetActivationStateL( pluginVariant.AsData() );
+                        }                                
+                    }
+                
                 aTarget.AddPluginMapL(plugin);                    
                 CleanupStack::Pop(plugin);
                 }
             CleanupStack::Pop(&pluginVariant);
             pluginVariant.Reset();
-            }
-       
+            }       
         }
+    
     CleanupStack::Pop(&pluginMapVariant);
     pluginMapVariant.Reset();
+    
+    if( aAppConf &&
+        !activePluginFound &&
+        aTarget.PluginMaps().Count() > 0 )
+        {
+        CPluginMap* plugin = aTarget.PluginMaps()[0]; 
+        if( plugin )
+            {
+            plugin->SetActivationStateL( K1 );
+            SetActivePluginL( plugin->PluginId() );
+            }
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -1564,7 +1615,46 @@ TInt CHspsWrapper::HandleNotifyL( TInt aCmdId, TInt aEventId,
    
     
     return retval;    
-    }    
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//    
+TInt CHspsWrapper::LoadActivePluginIdL()
+    {    
+    delete iActivePluginId;
+    iActivePluginId = NULL;    
+    
+    iActivePluginId = HBufC8::NewL( KMaxPluginIdLen );
+    TPtr8 activePluginId = iActivePluginId->Des();
+        
+    const TInt error = iRepository->Get( KAIActiveViewPluginId, activePluginId );
+    
+    if( error != KErrNone )
+        {
+        delete iActivePluginId;
+        iActivePluginId = NULL;
+        iActivePluginId = KPluginIdNotSet().AllocL();
+        }
+    
+    return error;
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//    
+const TDesC8& CHspsWrapper::ActivePluginId() const
+    {
+    if( iActivePluginId )
+        {
+        return *iActivePluginId;
+        }
+    else
+        {
+        return KPluginIdNotSet;
+        }
+    }
+
 }
 
 //End of file

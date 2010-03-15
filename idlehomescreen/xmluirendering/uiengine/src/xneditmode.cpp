@@ -36,6 +36,7 @@
 #include "xnuiengine.h"
 #include "xncontroladapter.h"
 #include "xnpopupcontroladapter.h"
+#include "xnviewcontroladapter.h"
 #include "xnfocuscontrol.h"
 #include "xneditor.h"
 #include "xntype.h"
@@ -349,11 +350,12 @@ void CXnEditMode::MakeVisible( TBool aVisible )
     // Remove focus
     appui.HideFocus();
     
-    CCoeControl& bg( appui.ViewAdapter().BgControl() );
-    
+    CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(
+        appui.ViewManager().ActiveViewData().ViewNode()->Control() );
+            
     if ( aVisible )
         {
-        bg.DrawableWindow()->SetPointerGrab( EFalse );
+        control->DrawableWindow()->SetPointerGrab( EFalse );
         
         Window().SetOrdinalPosition( 0 );
         Window().SetPointerGrab( ETrue );
@@ -365,13 +367,13 @@ void CXnEditMode::MakeVisible( TBool aVisible )
         {
         Window().SetPointerGrab( EFalse );
         
-        bg.DrawableWindow()->SetPointerGrab( ETrue );
+        control->DrawableWindow()->SetPointerGrab( ETrue );               
         
         TRAP_IGNORE( appui.HandleEnterEditModeL( EFalse ) );                                                
         }
     
     // Update background
-    appui.ViewAdapter().BgManager().DrawNow();
+    appui.ViewAdapter().BgManager().UpdateScreen();
     }
 
 // -----------------------------------------------------------------------------

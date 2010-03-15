@@ -142,38 +142,33 @@ EXPORT_C RPointerArray< CXnNodeAppIf > TXnUiEngineAppIf::FindNodeByClassL(
     }
 
 // -----------------------------------------------------------------------------
-// CXnUiEngine::FindNodeByClassL
+// CXnUiEngine::FindContentSourceNodesL
 // Forwards the call to the ui engine implementation
 // -----------------------------------------------------------------------------
 //
 EXPORT_C RPointerArray< CXnNodeAppIf > TXnUiEngineAppIf::FindContentSourceNodesL(
     const TDesC8& aNamespace )
-    {
+    {   
+    CXnPointerArray* array = iUiEngine->FindContentSourceNodesL( aNamespace );
+    CleanupStack::PushL( array );
+    
     RPointerArray< CXnNodeAppIf > interfaceArray;
     CleanupClosePushL( interfaceArray );
-
-    CXnViewManager* manager( iUiEngine->ViewManager() );
-
-    CXnPluginData* data( manager->ActiveViewData().Plugin( aNamespace ) );
-
-    if ( data )
+    
+    const TInt count = array->Container().Count();
+    interfaceArray.ReserveL( count );
+    
+    for ( TInt i = 0; i < count; i++ )
         {
-        RPointerArray< CXnNode > nodes;
-        CleanupClosePushL( nodes );
-
-        data->ContentSourceNodesL( nodes );
-
-        for ( TInt i = 0; i < nodes.Count(); i++ )
-            {
-            interfaceArray.AppendL( &nodes[i]->AppIfL() );
-            }
-
-        CleanupStack::PopAndDestroy( &nodes );
+        CXnNode* node = static_cast< CXnNode* >( array->Container()[i] );
+        // Append cannot fail because ReserveL call before this loop has
+        // allocated the array buffer
+        interfaceArray.Append( &( node->AppIfL() ) );    
         }
-
+    
     CleanupStack::Pop( &interfaceArray );
-
-    return interfaceArray;
+    CleanupStack::PopAndDestroy( array );
+    return interfaceArray;    
     }
 
 // -----------------------------------------------------------------------------

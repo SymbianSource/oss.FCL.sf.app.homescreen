@@ -17,7 +17,7 @@
 
 
 // INCLUDE FILES
-#include <mw/memorymanager.h>
+#include <mw/MemoryManager.h>
 #include <eikstart.h>
 #include "mmapplication.h"
 

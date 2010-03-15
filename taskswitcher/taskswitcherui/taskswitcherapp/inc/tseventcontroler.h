@@ -161,6 +161,14 @@ public:
      */
     void StopAnimation();
     
+    /**
+     * Enables/disables event handling based on passed value.
+     * 
+     * @param  aEnable  ETrue - enables event handling
+     *                  EFalse - disables event handling
+     */
+    void EnableEventHandling( TBool aEnable );
+    
 private:
     /**
      * Controler observer. Not own
@@ -176,6 +184,11 @@ private:
      * Physics helper. Own
      */
     CTsPhysicsEngine* iPhysicsHelper;
+    
+    /**
+     * Flag to enable/disable event handling
+     */
+    TBool iHandleEvents;
     };
 
 #endif // TSEVENTCONTROLER_H

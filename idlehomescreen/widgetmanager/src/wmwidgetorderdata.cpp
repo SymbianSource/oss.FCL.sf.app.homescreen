@@ -174,13 +174,13 @@ void CWmWidgetOrderData::SetPersistentWidgetOrder(
 // CWmWidgetOrderData::UpdateName
 // ---------------------------------------------------------
 //
-void CWmWidgetOrderData::UpdateNameL( const TDesC& aName )
+void CWmWidgetOrderData::UpdateName( const TDesC& aName )
     {
     if ( iName->Compare( aName ) != KErrNone )
         {
         delete iName;
         iName = NULL;
-        iName = aName.AllocL();
+        iName = aName.Alloc();
         }
     }
 

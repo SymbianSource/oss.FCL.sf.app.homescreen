@@ -46,6 +46,13 @@ NONSHARABLE_CLASS( CXnBackgroundManager ) : public CCoeControl,
     {
 public:
 
+   enum WppType
+        {
+        ENone,
+        ECommon,        
+        EPageSpecific 
+        };
+   
     /**
      * Two-phased constructor.
      * @param aWrapper HSPS wrapper
@@ -74,7 +81,7 @@ public:
      * @since S60 5.0
      * @param aFileName WallpaperImage image path and filename
      * @return Error code.
-     */            
+     */
     TInt AddWallpaperL( const TDesC& aFileName );
 
     /**
@@ -86,11 +93,11 @@ public:
     void DeleteWallpaper( CXnViewData& aViewData );
 
     /**
-     * Checks whether page specific wallpaper feature is activated or not.
+     * Returns wallpaper type.
      *  
      * @since S60 5.0
      */
-    TBool ActivatedL();
+    CXnBackgroundManager::WppType WallpaperType();
 
     /**
      * Shows wallpaper change dialog
@@ -106,7 +113,15 @@ public:
      * @param aOldView         Old view
      * @param aNewView         New view 
      */
-    void WallpaperChanged( CXnViewData& aOldView, CXnViewData& aNewView );
+    void WallpaperChanged( const CXnViewData& aOldView, 
+        const CXnViewData& aNewView );
+    
+    /**
+     * Draws wallpaper immediately, or once the window comes visible.
+     * 
+     * @since S60 5.0
+     */
+    void UpdateScreen();
 
 public: // Functions from base classes    
 
@@ -172,8 +187,7 @@ private:
     void CheckFeatureTypeL();
     TInt AddPageSpecificWallpaperL( const TDesC& aFileName );
     TInt AddCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue );
-    void ReadWallpaperFromCenrepL();
-    void UpdateScreen();
+    void ReadWallpaperFromCenrepL();    
     void DrawEditModeBackgroundSkin() const;
 
     /**
@@ -223,10 +237,9 @@ private: // data
     TRect iRect;
 
     /** 
-     * States whether page specific wallpaper is supported or
-     * same wallpaper is shown in all pages.
+     * Stores wallpaper type. 
      */
-    TBool iFeatureSuppoted;
+    CXnBackgroundManager::WppType iType;
 
     /** 
      * Internal wallpaper update in progress

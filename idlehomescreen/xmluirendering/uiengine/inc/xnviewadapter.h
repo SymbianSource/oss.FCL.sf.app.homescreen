@@ -32,7 +32,6 @@ class CXnViewManager;
 class CXnAppUiAdapter;
 class CXnControlAdapter;
 class CXnKeyEventDispatcher;
-class CXnBgControl;
 class CXnBackgroundManager;
 class CXnFocusControl;
 
@@ -88,14 +87,6 @@ public:
     CXnKeyEventDispatcher* EventDispatcher() const;
     
     /**
-     * Gets bg control
-     * 
-     * @since S60 5.0
-     * return Bg control
-     */        
-    CCoeControl& BgControl() const;
-
-    /**
      * Gets background manager
      * 
      * @since S60 5.0
@@ -112,11 +103,11 @@ public:
     CXnFocusControl& FocusControl() const;  
 	
 	 /**
-     * updates rsk by mode
+     * updates rsk by UI state
      * 
      * @since S60 5.0
      */  
-    void UpdateRskByModeL();
+    void UpdateRskByUiStateL( const CXnViewData& aViewData );
 
     /**
      * Closes all popups for this container.
@@ -168,7 +159,7 @@ private:
      */
     void NotifyInCallStateChaged( TBool aInCall );
         
-private:
+public:
     // new functions
 
     /**
@@ -179,6 +170,9 @@ private:
      *               EFalse if controls should enter to powersavemode.
      */
     void ChangeControlsStateL( TBool aAwake );
+    
+private:
+    // new functions
     
     /**
      * Activates new container ro view. 
@@ -239,8 +233,6 @@ private:
 
     /** AppUi, Not owned */
     CXnAppUiAdapter& iAppUiAdapter;
-    /** Bg control, Owned */
-    CXnBgControl* iBgControl;
     /** Background manager, Owned */
     CXnBackgroundManager* iBgManager;
     /** Focus control, Owned */

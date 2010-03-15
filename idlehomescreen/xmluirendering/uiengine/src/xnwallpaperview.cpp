@@ -15,17 +15,7 @@
 *
 */
 
-
-// INCLUDE FILES
-#include "xnwallpaperview.h"
-#include "xnwallpapercontainer.h"
-#include "xnuiengine.h"
-#include "xnappuiadapter.h"
-#include "xnviewadapter.h"
-#include "xnbackgroundmanager.h"
-#include <xnuiengine.rsg>
-
-// SYSTEM INCLUDE FILES
+// System includes
 #include <aknappui.h>
 #include <eikbtgpc.h>
 #include <avkon.rsg>
@@ -34,9 +24,27 @@
 #include <aknnotewrappers.h>
 #include <StringLoader.h> 
 #include <caf/caf.h>
+#include <bautils.h>
+#include <data_caging_path_literals.hrh>
+
+// User includes
+#include <xnwallpaperview.rsg>
+#include "xnwallpaperview.h"
+#include "xnwallpapercontainer.h"
+#include "xnuiengine.h"
+#include "xnappuiadapter.h"
+#include "xnviewadapter.h"
+#include "xnbackgroundmanager.h"
+#include "xneffectmanager.h"
+#include "xnviewmanager.h"
+
+// Constants
+_LIT( KResourceDrive, "z:" );
+_LIT( KResourceFile, "xnwallpaperview.rsc" );
 
 _LIT8( KMulti, "multi" );
-const TInt KFileArrayGranularity = 6;
+
+const TInt KFileArrayGranularity( 6 );
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -44,8 +52,8 @@ const TInt KFileArrayGranularity = 6;
 // C++ default constructor.
 // -----------------------------------------------------------------------------
 //
-CXnWallpaperView::CXnWallpaperView( CXnUiEngine& aEngine ) :
-    iEngine( aEngine )
+CXnWallpaperView::CXnWallpaperView( CXnUiEngine& aEngine ) 
+    : iEngine( aEngine ), iAppUi( iEngine.AppUiAdapter() )    
     {
     }
 
@@ -55,7 +63,19 @@ CXnWallpaperView::CXnWallpaperView( CXnUiEngine& aEngine ) :
 //
 void CXnWallpaperView::ConstructL()
     {
-    BaseConstructL();
+    TFileName resFile;
+    resFile.Append( KResourceDrive );
+    resFile.Append( KDC_APP_RESOURCE_DIR );
+    resFile.Append( KResourceFile );
+    
+    CCoeEnv* env( CCoeEnv::Static() );
+
+    BaflUtils::NearestLanguageFile( env->FsSession(), resFile );
+
+    iResourceOffset = env->AddResourceFileL( resFile );
+    
+    BaseConstructL( R_WALLPAPER_VIEW );
+           
     iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
     }
 
@@ -77,12 +97,10 @@ CXnWallpaperView* CXnWallpaperView::NewL( CXnUiEngine& aEngine )
 // -----------------------------------------------------------------------------
 //
 CXnWallpaperView::~CXnWallpaperView()
-    {
-    if ( iContainer )
-        {
-        delete iContainer;
-        iContainer = NULL;
-        }
+    {    
+    CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );    
+    
+    delete iContainer;    
     delete iTimer;
     }
 
@@ -99,18 +117,37 @@ TUid CXnWallpaperView::Id() const
 // CXnWallpaperView::DoActivateL
 // -----------------------------------------------------------------------------
 //
-void CXnWallpaperView::DoActivateL(
-            const TVwsViewId& aPrevViewId,
-            TUid /*aCustomMessageId*/,
-            const TDesC8& aCustomMessage )
+void CXnWallpaperView::DoActivateL( const TVwsViewId& aPrevViewId,           
+    TUid /*aCustomMessageId*/, const TDesC8& aCustomMessage )            
     {
-    iAvkonAppUi->StatusPane()->SwitchLayoutL(
-            R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
-    iAvkonAppUi->StatusPane()->DrawNow();
+    // switch layout 
+    CEikStatusPane* sp( iAppUi.StatusPane() );
+    
+    sp->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
+    sp->ApplyCurrentSettingsL();
+            
+    // disable transparancy
+    if ( sp->IsTransparent() )
+        {
+        sp->EnableTransparent( EFalse );
+        }
+    
+    sp->DrawNow();
+    
+    // update cba
+    CEikButtonGroupContainer* bgc( Cba() );
+    CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
+
+    if ( cba ) 
+        {       
+        bgc->SetBoundingRect( TRect() );
+        cba->DrawNow();
+        }
+    
     if ( !iContainer )
         {
         iContainer = CXnWallpaperContainer::NewL();
-        iAvkonAppUi->AddToStackL( *this,  iContainer );
+        iAppUi.AddToStackL( *this, iContainer );
         iContainer->ActivateL();
         iContainer->DrawNow();
         }
@@ -118,19 +155,17 @@ void CXnWallpaperView::DoActivateL(
     iData.iAppUid = aPrevViewId.iAppUid;
     iData.iViewUid = aPrevViewId.iViewUid; 
     iData.iMultiple = EFalse;
-    iData.iTimer = iTimer;
-    
-    if( aCustomMessage == KMulti )
+        
+    if ( aCustomMessage == KMulti )
         {
         iData.iMultiple = ETrue;
         }
 
     // Run image selection dialog asynchronously
-    if ( iTimer->IsActive() )
-        {
-        iTimer->Cancel();
-        }
-    iTimer->Start( 0, 1000, TCallBack( TimerCallbackL, &iData ) );
+    iTimer->Cancel();
+    iTimer->Start( 0, 1000, TCallBack( TimerCallbackL, this ) );
+    
+    iAppUi.EffectManager()->UiRendered();
     }
 
 // -----------------------------------------------------------------------------
@@ -141,44 +176,48 @@ void CXnWallpaperView::DoDeactivate()
     {
     if ( iContainer )
         {
-        iAvkonAppUi->RemoveFromStack( iContainer );
+        iAppUi.RemoveFromStack( iContainer );
         delete iContainer;
         iContainer = NULL;
         }
+    
+    iAppUi.EffectManager()->UiRendered();
     }
 
 // -----------------------------------------------------------------------------
 // CXnWallpaperView::TimerCallback
 // -----------------------------------------------------------------------------
 //
-TInt CXnWallpaperView::TimerCallbackL(TAny *aPtr)
-    {
-    TInt errAddWallpaper = KErrNone;
-    
-    TXnWallpaperViewData* data = reinterpret_cast<TXnWallpaperViewData*>( aPtr );
-    data->iTimer->Cancel();
+TInt CXnWallpaperView::TimerCallbackL( TAny *aPtr )
+    {       
+    CXnWallpaperView* self = reinterpret_cast< CXnWallpaperView* >( aPtr );
+    self->iTimer->Cancel();
     
     CDesCArrayFlat* files = 
-        new (ELeave) CDesCArrayFlat( KFileArrayGranularity );
+        new (ELeave) CDesCArrayFlat( KFileArrayGranularity );    
     CleanupStack::PushL( files );
-    TBool selected = EFalse;
 
-    TRAPD( err, selected = MGFetch::RunL( *files, EImageFile, data->iMultiple ) );
-    if ( err == KErrNone &&
-         selected &&
-         files->MdcaCount() > 0 )
+    TInt err( KErrNone );
+    TBool selected( EFalse );
+        
+    TXnWallpaperViewData& data( self->iData );
+    
+    CXnBackgroundManager& bg( self->iAppUi.ViewAdapter().BgManager() );
+    
+    TRAPD( fetch, selected = MGFetch::RunL( *files, EImageFile, data.iMultiple ) );
+    
+    if ( fetch == KErrNone && selected && files->MdcaCount() > 0 )                 
         {
-        // set wallpaper.
+        // set wallpaper
         if( files->MdcaCount() == 1 )
-            {
-            CXnAppUiAdapter* appui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
-            CXnBackgroundManager& bgManager = appui->ViewAdapter().BgManager();
-            errAddWallpaper = bgManager.AddWallpaperL( files->MdcaPoint( 0 ) );
+            {                        
+            err = bg.AddWallpaperL( files->MdcaPoint( 0 ) );
             }
         }
+    
     CleanupStack::PopAndDestroy( files );
 
-    if( errAddWallpaper == KErrCACorruptContent )
+    if ( err == KErrCACorruptContent )
         {
         //load message text
         HBufC* msg = StringLoader::LoadLC( R_QTN_HS_CORRUPTED_IMAGE_NOTE );
@@ -191,10 +230,12 @@ TInt CXnWallpaperView::TimerCallbackL(TAny *aPtr)
         CleanupStack::PopAndDestroy( msg );
         }
     
-    iAvkonAppUi->ActivateViewL( TVwsViewId( data->iAppUid, data->iViewUid ) );
+    self->iAppUi.EffectManager()->BeginFullscreenEffectL( 
+        KGfxContextCloseWallpaperView, self->iAppUi.ViewManager().ActiveViewData() );
+    
+    self->iAppUi.ActivateViewL( TVwsViewId( data.iAppUid, data.iViewUid ) );
 
-    return EFalse;
+    return KErrNone;
     }
-
 
 //  End of File

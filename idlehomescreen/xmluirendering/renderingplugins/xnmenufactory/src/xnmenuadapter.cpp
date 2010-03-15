@@ -1478,13 +1478,16 @@ void CXnMenuAdapter::PopulateMenuL()
     RPointerArray< const TDesC8 > groups;
     CleanupClosePushL( groups );
                
-    if( iUiEngine->EditMode() )
-        {
-        groups.AppendL( &KEditMode );
-        }
-    else
-        {
-        groups.Append( &KNormalMode );
+    if ( !iUiEngine->IsTextEditorActive() )
+        {    
+        if( iUiEngine->EditMode() )
+            {
+            groups.AppendL( &KEditMode );
+            }
+        else
+            {
+            groups.Append( &KNormalMode );
+            }
         }
     
     groups.AppendL( &KAlwaysShown );

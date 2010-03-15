@@ -21,7 +21,6 @@
 #include <SVGEngineInterfaceImpl.h>
 #include <s32file.h>
 #include <mifconvdefs.h>
-//skinning support
 #include <AknsFrameBackgroundControlContext.h>
 #include <AknsDrawUtils.h>
 #include <aknconsts.h>
@@ -39,6 +38,7 @@
 #include "xncontroladapterimpl.h"
 #include "xncontroladapter.h"
 #include "xnmenuadapter.h"
+#include "xnviewcontroladapter.h"
 #include "xncomponentnodeimpl.h"
 #include "xntype.h"
 #include "xnnodepluginif.h"
@@ -60,7 +60,6 @@
 #include "xnscrollablecontroladapter.h"
 #include "xnfocuscontrol.h"
 #include "xneditmode.h"
-#include "xnbgcontrol.h"
 
 _LIT8(KScrollableBoxNodeName, "scrollablebox");
         
@@ -3521,6 +3520,8 @@ static void CancelFocusRefusalL( CXnUiEngine& aUiEngine )
         
         if ( control && control->RefusesFocusLoss() )
             {
+            focused->HideTooltipsL();
+            
             // It is now time to give up holding focus
             focused->UnsetStateL( 
                 XnPropertyNames::style::common::KFocus );
@@ -3897,14 +3898,17 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
             CancelFocusRefusalL( *engine );
             
             appui.HideFocus();
-                                   
-            CCoeControl& bg( appui.ViewAdapter().BgControl() );
-            
-            // Ignore events
-            bg.IgnoreEventsUntilNextPointerUp();
-            static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();
 
-          // Indicate long tap has taken plave
+            if ( !menuBar )
+                {
+                CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(
+                    appui.ViewManager().ActiveViewData().ViewNode()->Control() );
+                
+                control->IgnoreEventsUntilNextPointerUp();
+                control->ResetGrabbing();                      
+                }
+            
+            // Indicate long tap has taken plave
             iLongtap = ETrue;
             
             CXnNode* hold = BuildTriggerNodeL( *engine,
@@ -3938,9 +3942,13 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
         if( PassEventToGestureHelperL( aPointerEvent ) )
             { 
             CXnAppUiAdapter& appui( engine->AppUiAdapter() );
-            CCoeControl& bg( appui.ViewAdapter().BgControl() );
-            static_cast<CXnBgControl*>(&bg)->ResetGrabbingL();
+            CXnViewData& data( appui.ViewManager().ActiveViewData() );
             
+            CXnViewControlAdapter* control = 
+                static_cast< CXnViewControlAdapter* >( data.ViewNode()->Control() );
+            
+            control->ResetGrabbing();
+
             // Swipe took place, consume this event
             return ETrue;
             }
@@ -3962,7 +3970,8 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     
     CAknLongTapDetector* detector( iAdapter->LongTapDetector() );
     
-    if ( detector && !engine->IsPartialInputActive())
+    if ( ( detector && ( !engine->IsPartialInputActive() || 
+        event.iType == TPointerEvent::EButton1Up ) ) ) 
         {
         if ( menuBar )
             {
@@ -4025,7 +4034,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
                 XnPropertyNames::style::common::KFocus, 
                 XnEventSource::EStylus );
             node->SetStateL( 
-                XnPropertyNames::style::common::KPressedDown );                            
+                XnPropertyNames::style::common::KPressedDown );
             }        
         }
     else if ( event.iType == TPointerEvent::EDrag )
@@ -4035,8 +4044,15 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
             if ( !node->MarginRect().Contains( event.iPosition ) )
                 {
                 // Remove pressed down
-                node->UnsetStateL( XnPropertyNames::style::common::KPressedDown );
-                }            
+                node->UnsetStateL(
+                    XnPropertyNames::style::common::KPressedDown );
+                }
+            if ( node->MarginRect().Contains( event.iPosition ) )
+                {
+                // Add pressed down
+                node->SetStateL(
+                    XnPropertyNames::style::common::KPressedDown );
+                }
             }
         }
     else if ( event.iType == TPointerEvent::EButton1Up )
@@ -5895,15 +5911,15 @@ TBool CXnControlAdapterImpl::PassEventToGestureHelperL(
                 }
             }
 
-        TSwipeResult result( iGestureHelper->HandlePointerEventL( aPointerEvent ) );
+        TXnGestureCode result( iGestureHelper->HandlePointerEventL( aPointerEvent ) );
         
         const TDesC8* swipe( NULL );
     
-        if ( result == ESwipeLeft )
+        if ( result == EGestureSwipeLeft )
             {
             swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KLeft;
             }
-        else if ( result == ESwipeRight )
+        else if ( result == EGestureSwipeRight )
             {
             swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KRight;
             }

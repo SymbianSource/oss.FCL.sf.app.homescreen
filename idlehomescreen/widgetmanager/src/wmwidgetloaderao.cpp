@@ -55,12 +55,13 @@ CWmWidgetLoaderAo* CWmWidgetLoaderAo::NewL(
 CWmWidgetLoaderAo::CWmWidgetLoaderAo(
         CWmPlugin& aWmPlugin,
         CWmListBox& aTargetList )
-    : CAsyncOneShot( EPriorityStandard )
+    : CAsyncOneShot( EPriorityHigh )
     , iWmPlugin( aWmPlugin )
     , iWidgetsList( aTargetList )
     {
     iWidgetRegistry = NULL;
     iWidgetOrder = NULL;
+    iLoading = EFalse;
     }
 
 // ---------------------------------------------------------------------------
@@ -129,6 +130,9 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
 	// iUninstallUid is null no uninstallation is ongoing
     iUninstallUid = iWmPlugin.WmInstaller().UninstallUid();
     
+    // connect to widget registry
+    OpenSessionL();
+    
     // 1. load the widgets array
     MHsContentController& controller = iWmPlugin.ContentController();    
     CHsContentInfoArray* contentInfoArray = CHsContentInfoArray::NewL();
@@ -136,10 +140,10 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     controller.WidgetListL( *contentInfoArray );
     
     // 2. load the widget order
-    if ( iWidgetOrder ) { Cleanup(); }
+    if ( iWidgetOrder ) { Cleanup(); }    
     iWidgetOrder = CWmPersistentWidgetOrder::NewL( iWmPlugin.FileServer() );
     TRAPD( loadError, iWidgetOrder->LoadL() );
-
+    
     // 3. prepare the widget data array & sort order array
     for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
         {
@@ -155,6 +159,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     // widget data.
     TInt widgetsAdded = 0;
     TInt widgetsChanged = 0;
+    iLoading = ETrue;
     while( contentInfoArray->Array().Count() > 0 )
         {
         CHsContentInfo* contentInfo = contentInfoArray->Array()[0];
@@ -169,7 +174,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
             {
             // update existing visible widget data
             existingData->SetValid( ETrue );
-            if ( existingData->ReplaceContentInfoL( contentInfo ) )
+            if ( existingData->ReplaceContentInfo( contentInfo ) )
                 {
                 // Update name to order array if name changed
                 for ( TInt i=0; i < iWidgetsList.OrderDataArray().Count(); i++ )
@@ -178,7 +183,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
                     if ( order->EqualsTo( 
                             existingData->Uid(), existingData->PublisherId() ) )
                         {
-                        order->UpdateNameL( existingData->Name() );
+                        order->UpdateName( existingData->Name() );
                         }
                     }
                 ++widgetsChanged;
@@ -187,7 +192,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
         else
             {
             // add a new widget data
-            AddWidgetDataL( contentInfo, widgetsAdded );
+            TRAP_IGNORE( AddWidgetDataL( contentInfo, widgetsAdded ); );
             }
         }
 
@@ -233,7 +238,7 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     // 8. store list order if necessary
     if ( loadError != KErrNone || widgetsAdded > 0 || widgetsRemoved > 0 )
         {
-        iWidgetOrder->StoreL( iWidgetsList.OrderDataArray() );
+        TRAP_IGNORE( iWidgetOrder->StoreL( iWidgetsList.OrderDataArray() ); );
         }
     }
 
@@ -256,13 +261,11 @@ CWmWidgetData* CWmWidgetLoaderAo::FindWidgetData(
     }
 
 // ---------------------------------------------------------
-// CWmWidgetLoaderAo::AddWidgetDataL
+// CWmWidgetLoaderAo::OpenSessionL
 // ---------------------------------------------------------
 //
-void CWmWidgetLoaderAo::AddWidgetDataL(
-        CHsContentInfo* aContentInfo, TInt& aCount )
+void CWmWidgetLoaderAo::OpenSessionL()
     {
-    CleanupStack::PushL( aContentInfo );
     if ( !iWidgetRegistry )
         {
         iWidgetRegistry = new (ELeave) RWidgetRegistryClientSession();
@@ -274,6 +277,16 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
             User::Leave( err );
             }
         }
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetLoaderAo::AddWidgetDataL
+// ---------------------------------------------------------
+//
+void CWmWidgetLoaderAo::AddWidgetDataL(
+        CHsContentInfo* aContentInfo, TInt& aCount )
+    {
+    CleanupStack::PushL( aContentInfo );
             
     // Becouse we show only widgets that can be added we need two arrays
     // to maintain order data and visible data. 
@@ -292,13 +305,16 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
     
     if ( aContentInfo->CanBeAdded() )
         {
-		// widgetdata takes ownership of contentinfo
-        CleanupStack::Pop( aContentInfo );
-        
-        CWmWidgetData* widgetData = CWmWidgetData::NewLC(
+        CWmWidgetData* widgetData = CWmWidgetData::NewL(
                 iWidgetsList.LogoSize(),
                 iWmPlugin.ResourceLoader(),
                 aContentInfo, iWidgetRegistry );
+
+        // widgetdata has taken ownership of contentinfo
+        CleanupStack::Pop( aContentInfo );
+        
+        CleanupStack::PushL( widgetData );
+        
         widgetData->SetPersistentWidgetOrder( iWidgetOrder );
         widgetData->SetValid( ETrue );
         
@@ -327,6 +343,8 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
 //
 void CWmWidgetLoaderAo::Cleanup()
     {
+    iLoading = EFalse;
+    
     // disconnect widget registry
     if ( iWidgetRegistry )
         {
@@ -364,5 +382,15 @@ TUid CWmWidgetLoaderAo::UidFromString( const TDesC8& aUidString ) const
         }
     return uid;
     }
+
+// ----------------------------------------------------
+// CWmWidgetData::IsLoading
+// ----------------------------------------------------
+//
+TBool CWmWidgetLoaderAo::IsLoading()
+    {
+    return iLoading;
+    }
+
 // end of file
 

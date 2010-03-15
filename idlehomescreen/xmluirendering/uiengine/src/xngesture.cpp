@@ -668,6 +668,30 @@ TXnGestureCode CXnGesture::CodeFromPoints( TAxis aRelevantAxis ) const
     }
 
 // ----------------------------------------------------------------------------
+// CodeFromPoints
+// ----------------------------------------------------------------------------
+//
+TXnGestureCode CXnGesture::LastDirection( TAxis aRelevantAxis ) const
+    {
+    // select the correct filter based on aRelevantAxis
+    // these filter_ objects are array decorators that will eliminate either
+    // x, y or neither coordinate of each point
+    TXAxisPointArray filterY( iPoints );
+    TYAxisPointArray filterX( iPoints );
+    TXnPointArray filterNone( iPoints );
+    TXnPointArray& filter =
+        aRelevantAxis == EAxisHorizontal ? static_cast< TXnPointArray& >( filterY ) :
+        aRelevantAxis == EAxisVertical   ? static_cast< TXnPointArray& >( filterX ) :
+        /* otherwise EAxisBoth */          filterNone;
+
+    // currently the gesture recogniser does not have any state, so it is fast
+    // to instantiate. The call is not static however, to allow the recogniser
+    // to be replaced by a more complicated implementation that has state.
+    // then it may make sense to make the recogniser a member variable.
+    return TXnGestureRecogniser().LastDirection( filter );
+    }
+
+// ----------------------------------------------------------------------------
 // return nth point from the end of the points array
 // ----------------------------------------------------------------------------
 //
@@ -691,7 +715,7 @@ inline const TXnPointEntry& CXnGesture::PreviousEntry() const
 //
 inline TPoint CXnGesture::PreviousPos() const
     {
-    return PreviousEntry().iPos;
+    return NthLastEntry( KPreviousPointOffset - 1 ).iPos;
     }
 
 // ----------------------------------------------------------------------------

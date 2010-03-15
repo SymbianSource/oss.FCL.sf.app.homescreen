@@ -186,6 +186,13 @@ namespace XnPropertyNames
         _LIT8( KMute, "mute" );
         _LIT8( KVolumeLevelAdjustment, "_s60-volume-level-adjustment" ); 
         }
+    namespace texteditor
+        {
+        _LIT8( KEditorMarginLeft, "editor-margin-left" );
+        _LIT8( KEditorMarginRight, "editor-margin-right" );
+        _LIT8( KEditorMarginTop, "editor-margin-top" );
+        _LIT8( KEditorMarginBottom, "editor-margin-bottom" );
+        }
     namespace action
         {
         _LIT8(KActions, "actions");

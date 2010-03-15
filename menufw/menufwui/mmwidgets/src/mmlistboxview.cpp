@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_50 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_51 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -151,7 +151,7 @@ TInt CMmListBoxView::GetLastIndexInHeight (const TInt aStartIndex, TInt aHeight)
 		}
 
 	TInt ret(i - aStartIndex);
-	
+
 	if ( !AknLayoutUtils::PenEnabled() && totalHeight > aHeight )
 		{
 		ret--; // exclude partial item
@@ -299,7 +299,7 @@ void CMmListBoxView::DoDraw(const TRect* aClipRect) const
 		{
 		cc = itemDrawer->FormattedCellData()->SkinBackgroundContext ();
 		}
-	
+
 	itemDrawer->SetTopItemIndex (iTopItemIndex);
 
 	if ( iModel->NumberOfItems () > 0)
@@ -327,12 +327,27 @@ void CMmListBoxView::DoDraw(const TRect* aClipRect) const
 
 		TInt lastPotentialItemIndex = Min (iModel->NumberOfItems (),
 				iTopItemIndex + GetNumberOfItemsThatFitInRect( ViewRect (), ETrue ) );
-		while (i < lastPotentialItemIndex)
-			{
-            DrawItem(i++);
-            }
 
-		RedrawBackground();
+		if ( !itemDrawer->IsEditMode() )
+		    {
+		    itemDrawer->DrawBackgroundAndSeparatorLines( ViewRect() );
+            itemDrawer->SetRedrawItemBackground( EFalse );
+            while (i < lastPotentialItemIndex)
+                {
+                DrawItem(i++);
+                }
+            itemDrawer->SetRedrawItemBackground( ETrue );
+		    }
+		else
+		    {
+		    while (i < lastPotentialItemIndex)
+                {
+                DrawItem(i++);
+                }
+		    // this redraws background in the view portion not covered by items
+		    RedrawBackground();
+		    }
+
 
 		if ( CAknEnv::Static()->TransparencyEnabled () && !drawingInitiated)
 			{
@@ -360,7 +375,7 @@ void CMmListBoxView::DrawItem (TInt aItemIndex) const
 								CurrentItemIndex());
 		view->SetPreviouslyDrawnCurrentItemIndex( CurrentItemIndex() );
 		}
-	
+
 	if ( !redrawConsumed )
 		{
 		DrawSingleItem ( aItemIndex );
@@ -446,11 +461,11 @@ void CMmListBoxView::SetItemHeight (TInt aItemHeight)
 	{
 	//	we need to update the iItemHeight member in widget also (there are two different item height value holders - in widget and here in widget view)
 	iItemHeight = aItemHeight;
-	
+
 	CMmListBoxItemDrawer* itemDrawer =
 			STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
 	static_cast<CMmListBox*>(itemDrawer->Widget())->SetItemHeight( aItemHeight );
-		
+
 	}
 
 // -----------------------------------------------------------------------------
@@ -466,7 +481,7 @@ TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
 
 	TInt itemHeight = itemDrawer->
 		GetItemHeight( aItemIndex, aItemIndex == CurrentItemIndex() );
-	
+
 	// ItemIsPartiallyVisible uses fixed iItemHeight, but we have to support
 	// variable item height in lists, unfortunately ItemIsPartiallyVisible
 	// is not virtual
@@ -476,13 +491,13 @@ TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
           itemPosition.iY + itemHeight >= iViewRect.iTl.iY ) ||
         ( itemPosition.iY <= iViewRect.iBr.iY &&
           itemPosition.iY + itemHeight > iViewRect.iBr.iY );
-		
+
 	TBool itemIsFullyVisible = ItemIsVisible( aItemIndex ) &&
             !itemPartiallyVisible;
 
 	TBool itemIsAboveVisibleArea = !itemIsFullyVisible &&
             ItemPos( aItemIndex ).iY < ViewRect().iTl.iY;
-		
+
 	TBool itemIsBeneathVisibleArea = !itemIsFullyVisible &&
             !itemIsAboveVisibleArea && ItemPos( aItemIndex ).iY + itemDrawer->
             GetItemHeight( aItemIndex, aItemIndex == CurrentItemIndex() ) >
@@ -496,7 +511,7 @@ TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
 
 	if ( itemIsBeneathVisibleArea )
         {
-        const TInt viewHeight = ViewRect().Height(); 
+        const TInt viewHeight = ViewRect().Height();
         newTopItemIndex = aItemIndex;
         for ( ;; )
             {
@@ -576,7 +591,7 @@ void CMmListBoxView::RedrawBackground () const
             usedPortionHeight));
     usedPortionOfViewRect.Move(0,
             CFormattedCellListBoxView::ItemPos(iTopItemIndex).iY);
-    
+
     RedrawBackground(usedPortionOfViewRect, iViewRect);
 #endif
 	}
@@ -603,7 +618,7 @@ void CMmListBoxView::DrawSingleItem (TInt aItemIndex) const
 	TSize size = itemDrawer->GetItemSize( aItemIndex, highlightVisible &&
 	        CurrentItemIndex() == aItemIndex );
 	itemDrawer->SetItemCellSize( size );
-	
+
 	// CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
 	// view->SetItemHeight( size.iHeight );
 	// The above line (currently commented-out) was originaly needed to correct
@@ -611,8 +626,8 @@ void CMmListBoxView::DrawSingleItem (TInt aItemIndex) const
 	// rocker keys. It seems that this is no longer needed. If anything should
 	// change, please note that now the SetItemHeight method does much more than
 	// it used to, so simply uncommenting this line would be a bad idea (consider
-	// setting the iItemHeight member variable directly). 
-	
+	// setting the iItemHeight member variable directly).
+
 	CFormattedCellListBoxView::DrawItem (aItemIndex);
 
 	//To eliminate the effect of undrawn fragment of background, when the last

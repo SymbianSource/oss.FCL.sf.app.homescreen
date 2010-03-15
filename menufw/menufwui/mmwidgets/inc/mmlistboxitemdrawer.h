@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxItemDrawer
-*  Version     : %version: MM_38.1.15 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_38.1.16 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -94,42 +94,42 @@ public:
      * @since S60 v3.0
      */
     ~CMmListBoxItemDrawer();
-    
+
     /**
      * Enables/disables cached data use.
-     * 
+     *
      * When aEnable is true:
      * Enables the use of cached data when drawing items.
      * This significantly improves performance.
      * Do not ever try to use this feature in edit mode.
-     * 
+     *
      * When aEnable is false:
      * Restores the normal mode where data needed for drawing
      * items is retrieved from the model and the cached data
      * is updated with the information retrieved from the model
-     * 
+     *
      * @param aEnable Self-explanatory.
      */
     void EnableCachedDataUse( TBool aEnable );
-    
+
     /**
      * Returns ETrue if item drawer is using cached data.
      * To start/stop using cached data, use the @c EnableCachedDataUse
      * method.
-     * 
+     *
      * @return ETrue if cached data is used, EFalse otherwise.
      */
     TBool CachedDataUseIsEnabled() const;
-    
+
     /**
      * This method should be called whenever items(s) are removed
      * in order to remove corresponding entries in the local
      * items data cache.
-     * 
+     *
      * @param aItemCount current item count
      */
     void TrimCacheSize( TInt aItemCount );
-    
+
     /**
      * Invalidates the cached data for all items.
      */
@@ -154,7 +154,7 @@ public:
      * @return Size of item.
      */
     TSize GetItemSize( TInt aItemIndex, TBool aItemIsCurrent ) const;
-    
+
     /**
      * Gets rect of indicator.
      *
@@ -372,14 +372,14 @@ public:
      * @param aPosition Floating item index to be removed.
      */
     void RemoveFloatingItem( TInt aPosition );
-    
+
     /**
      * Removes all floating items.
      *
      * @since S60 5.0
      */
     void RemoveFloatingItems();
-    
+
     /**
      * Gets floating item at particular index in the
      * floating item array.
@@ -469,6 +469,14 @@ public:
 	 */
 	void SetHighlightShown( TBool aDrawn );
 
+    /**
+     * Draws background and separator lines.
+     *
+     * @since S60 v3.0
+     * @param aItemTextRect Item rectangle.
+     */
+    void DrawBackgroundAndSeparatorLines( const TRect& aItemTextRect ) const;
+
 protected:
     /**
      * From CListItemDrawer. Draws an item.
@@ -499,26 +507,19 @@ protected:
     		TBool aItemIsCurrent, TBool aViewIsEmphasized,
     		TBool aItemIsSelected ) const;
     /**
-     * Draws the actual item contents for the specified item in the specified 
+     * Draws the actual item contents for the specified item in the specified
      * rectangle.
      *
-     * @param aItemIndex Index of the item to draw. 
-     * @param aActualItemRect Area to draw into. 
-     * @param aItemIsCurrent @c ETrue if the item is current. 
-     * @param aViewIsEmphasized @c ETrue if the view is emphasised. 
+     * @param aItemIndex Index of the item to draw.
+     * @param aActualItemRect Area to draw into.
+     * @param aItemIsCurrent @c ETrue if the item is current.
+     * @param aViewIsEmphasized @c ETrue if the view is emphasised.
      * @param aViewIsDimmed Ignored
      * @param aItemIsSelected @c ETrue if the item is selected.
      */
     void DrawActualItem(TInt aItemIndex, const TRect& aActualItemRect,
 			TBool aItemIsCurrent, TBool aViewIsEmphasized, TBool aViewIsDimmed,
 			TBool aItemIsSelected) const;
-    /**
-     * Draws background and separator lines.
-     *
-     * @since S60 v3.0
-     * @param aItemTextRect Item rectangle.
-     */
-    void DrawBackgroundAndSeparatorLines( const TRect& aItemTextRect ) const;
 
     /**
      * Sets up item currently drawn item subcells.
@@ -667,11 +668,11 @@ private:
     void SetupIconSubcellL(
     		RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
     		RBuf& aItemText, TInt& aSubcellIncrement ) const;
-    
+
     /**
      * Determines whether a bitmap of given size needs scaling to be displayed
      * in a rectangular area of some given target size.
-     * 
+     *
      * This method assumes that the bitmap will always be scaled with aspect
      * ratio preserved. A bitmap does not need scaling if its size meets either
      * of the two conditions:
@@ -683,8 +684,8 @@ private:
      * 1 pixel.
      * Please note that a bitmap which is too small (i.e. neither its width or its
      * height is close to the target width/height) will be regarded as one that
-     * needs scaling. 
-     * 
+     * needs scaling.
+     *
      * @param aBmpSize size of the bitmap
      * @param aTargetSize size of the area where bitmap will be displayed
      * @return ETrue if bitmap does not need scaling
@@ -728,13 +729,13 @@ private:
      *
      * @param aItemIndex An index of a currently drawn item.
      * @param aItemIsCurrent Is aItemIndex the current item index.
-     * @param aAllowHighlightForNonDraggedItem Should highlight be shown 
+     * @param aAllowHighlightForNonDraggedItem Should highlight be shown
      * 	(set in case when effects are used).
      * @return ETrue if highlight is drawn for the actually drawn item.
      */
-    TBool GetHighlightVisibility(  TInt aItemIndex, 
+    TBool GetHighlightVisibility(  TInt aItemIndex,
     		TBool aItemIsCurrent, TBool aAllowHighlightForNonDraggedItem  ) const;
-    
+
     /**
      * Returns backdrop visibility.
      *
@@ -886,7 +887,7 @@ private: // Data
      * Not own.
      */
     CMmTemplateLibrary* iTemplateLibrary;
-    
+
     /**
      * Storage for cached items data. The data is updated during normal operation
      * and used when iUseCache is ETrue.
@@ -905,7 +906,7 @@ private: // Data
      * Stores information on the last used subcells configuration.
      * Such information is needed to determine whether it is necessary to
      * setup subcells before drawing a particular item or is it possible
-     * to skip this step because the subcells are already set properly.  
+     * to skip this step because the subcells are already set properly.
      */
     mutable TMmSubcellsSetupCode iLastSubcellsSetupCode;
 
@@ -913,17 +914,17 @@ private: // Data
      * Set to ETrue if item has backdrop.
      */
     mutable TBool iItemHasBackdrop;
-    
+
     /**
      * Number of subcells in iData.
      */
     mutable TInt iCurrentNumberOfSubcellsSet;
-    
+
     /**
      * A structure that stores color information needed to draw an item.
      */
     mutable CFormattedCellListBoxData::TColors iColors;
-    
+
     /**
      * ETrue if the item that was last drawn was a floating item.
      */

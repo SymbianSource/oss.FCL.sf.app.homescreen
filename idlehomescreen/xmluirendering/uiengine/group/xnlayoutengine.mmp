@@ -81,11 +81,11 @@ SOURCE    xnlistquerydialogadapter.cpp
 SOURCE    xnwallpaperview.cpp
 SOURCE    xnwallpapercontainer.cpp
 SOURCE    xneffectmanager.cpp
-SOURCE    xnbgcontrol.cpp 
 SOURCE    xninactivitymonitor.cpp 
 SOURCE    xnfocuscontrol.cpp
 SOURCE    xnextrenderingpluginwrapper.cpp
 SOURCE    xnbackgroundmanager.cpp
+SOURCE    xnviewcontroladapter.cpp
 
 START RESOURCE  xnuiengine.rss
 HEADER
@@ -93,6 +93,11 @@ TARGETPATH      APP_RESOURCE_DIR
 LANGUAGE_IDS
 END
 
+START RESOURCE  xnwallpaperview.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
 
 USERINCLUDE     ../inc                               // uiengine
 USERINCLUDE     ../../inc             				 // xmluirendering

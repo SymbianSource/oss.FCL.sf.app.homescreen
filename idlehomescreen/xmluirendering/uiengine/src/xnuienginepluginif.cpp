@@ -451,6 +451,15 @@ EXPORT_C void TXnUiEnginePluginIf::EnablePartialTouchInput(
     iUiEngine->EnablePartialTouchInput(aNode.Node(), aEnable);
     }
 
+// -----------------------------------------------------------------------------
+// TXnUiEnginePluginIf::IsTextEditorActive
+// 
+// -----------------------------------------------------------------------------
+//
+EXPORT_C TBool TXnUiEnginePluginIf::IsTextEditorActive()
+    {
+    return iUiEngine->IsTextEditorActive();
+    }
 
 
 // End of file

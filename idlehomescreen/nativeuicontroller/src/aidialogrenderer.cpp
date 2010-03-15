@@ -34,12 +34,12 @@
 
 
 // AVKON headers
-#include <AknNoteWrappers.h>             // for Note Wrappers
-#include <AknPopup.h>                    // for Popup menus
+#include <aknnotewrappers.h>             // for Note Wrappers
+#include <aknPopup.h>                    // for Popup menus
 #include <AknWaitDialog.h>               // for CAknWaitDialog
 #include <StringLoader.h>                // for StringLoader
 #include <eiktxlbm.h>                    // for CTextListBoxModel
-#include <AknLists.h>                    // for AknPopupListEmpty
+#include <aknlists.h>                    // for AknPopupListEmpty
 #include <bautils.h>                     // for BaflUtils
 
 // Phonesettings headers

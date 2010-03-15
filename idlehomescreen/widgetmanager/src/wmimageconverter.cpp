@@ -998,6 +998,12 @@ void CWmImageConverter::ScaleBitmapL(
         User::Leave( KErrArgument );
         }
     
+    // make target to correct size
+    if ( aTrgBitmap->SizeInPixels() != aSize )
+        {
+        aTrgBitmap->Resize( aSize );
+        }
+    
     TRect targetRect( aSize );
 
     // calculate aspect ratio

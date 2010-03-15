@@ -97,7 +97,7 @@ public:
             CWmPersistentWidgetOrder* aPersistentWidgetOrder );
     
     /** Updates name if param aName is different than iName */
-    void UpdateNameL( const TDesC& aName );
+    void UpdateName( const TDesC& aName );
     
 private: // data members
     /** uid */

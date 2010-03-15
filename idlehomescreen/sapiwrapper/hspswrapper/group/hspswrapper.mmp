@@ -62,6 +62,8 @@ nostrictdef
 
 LIBRARY		 euser.lib
 LIBRARY      liwServiceHandler.lib
+LIBRARY		 centralrepository.lib
+
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE
 #endif

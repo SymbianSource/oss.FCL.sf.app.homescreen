@@ -212,9 +212,11 @@ CXnNode* CXnGestureHelper::Owner() const
 // Handle a pointer event
 // ----------------------------------------------------------------------------
 //
-TSwipeResult CXnGestureHelper::HandlePointerEventL( const TPointerEvent& aEvent )
+TXnGestureCode CXnGestureHelper::HandlePointerEventL( 
+    const TPointerEvent& aEvent )
     {
-    TSwipeResult ret = ESwipeNone;
+    TXnGestureCode ret( EGestureUnknown );
+    
     switch ( aEvent.iType )
         {
         case TPointerEvent::EButton1Down:
@@ -238,6 +240,7 @@ TSwipeResult CXnGestureHelper::HandlePointerEventL( const TPointerEvent& aEvent 
             // since the callback would trigger a gesture callback, and that
             // would access an empty points array.
             iHoldingTimer->Start();
+            iDirection = EGestureUnknown;
             break;
 
         case TPointerEvent::EDrag:
@@ -248,16 +251,34 @@ TSwipeResult CXnGestureHelper::HandlePointerEventL( const TPointerEvent& aEvent 
             // Also, while stylus down, the same event is received repeatedly
             // even if stylus does not move. Filter out by checking if point
             // is the same as the latest point
-            if ( !IsIdle() && !iGesture->IsLatestPoint( Position( aEvent ) ) )
+            if ( iDirection != EGestureCanceled )
                 {
-                AddPointL( aEvent );
-                if ( !( iGesture->IsHolding() ||
-                        iGesture->IsNearHoldingPoint( Position( aEvent ) ) ) )
+                if ( iDirection == EGestureUnknown )
                     {
-                    // restart hold timer, since pointer has moved
-                    iHoldingTimer->Start();
-                    // Remember the point in which holding was started
-                    iGesture->SetHoldingPoint();
+                    // check current direction
+                    iDirection = iGesture->CodeFromPoints( CXnGesture::EAxisBoth );
+                    }
+                else
+                    {
+                    // check if direction has changed
+                    if ( iDirection != iGesture->LastDirection( CXnGesture::EAxisBoth ) )
+                        {
+                        // cancel swipe
+                        iDirection = EGestureCanceled;
+                        }
+                    }
+                
+                if ( !IsIdle() && !iGesture->IsLatestPoint( Position( aEvent ) ) )
+                    {
+                    AddPointL( aEvent );
+                    if ( !( iGesture->IsHolding() ||
+                            iGesture->IsNearHoldingPoint( Position( aEvent ) ) ) )
+                        {
+                        // restart hold timer, since pointer has moved
+                        iHoldingTimer->Start();
+                        // Remember the point in which holding was started
+                        iGesture->SetHoldingPoint();
+                        }
                     }
                 }
             break;
@@ -272,24 +293,27 @@ TSwipeResult CXnGestureHelper::HandlePointerEventL( const TPointerEvent& aEvent 
                 // observer leaves
                 CleanupStack::PushL( TCleanupItem( &ResetHelper, this ) );
                 iGesture->SetComplete();
-                // if adding of the point fails, notify client with a
-                // cancelled event. It would be wrong to send another
-                // gesture code when the up point is not known
-                if ( AddPoint( aEvent ) != KErrNone )
+                if ( iDirection != EGestureCanceled )
                     {
-                    iGesture->SetCancelled();
-                    }
-                else
-                    {
-                    // send gesture code if holding has not been started
-                    if ( !iGesture->IsHolding() )
+                    // if adding of the point fails, notify client with a
+                    // cancelled event. It would be wrong to send another
+                    // gesture code when the up point is not known
+                    if ( AddPoint( aEvent ) != KErrNone )
                         {
-                        // if client leaves, the state is automatically reset.
-                        // In this case the client will not get the released event
-                        ret = ValidSwipe();
+                        iGesture->SetCancelled();
                         }
-                    // send an event that stylus was lifted
-                    iGesture->SetReleased();
+                    else
+                        {
+                        // send gesture code if holding has not been started
+                        if ( !iGesture->IsHolding() )
+                            {
+                            // if client leaves, the state is automatically reset.
+                            // In this case the client will not get the released event
+                            ret = iDirection;
+                            }
+                        // send an event that stylus was lifted
+                        iGesture->SetReleased();
+                        }
                     }
                 // reset state
                 CleanupStack::PopAndDestroy( this );
@@ -299,6 +323,7 @@ TSwipeResult CXnGestureHelper::HandlePointerEventL( const TPointerEvent& aEvent 
         default:
             break;
         }
+    
     return ret;
     }
 
@@ -372,49 +397,7 @@ void CXnGestureHelper::StartHoldingL()
 // Check if swipe is valid
 // ----------------------------------------------------------------------------
 //
-TSwipeResult CXnGestureHelper::ValidSwipe()
-    {
-    TSwipeResult ret = ESwipeNone;
-    TBool validSwipe(ETrue);
-
-    // check if swipe is between defined values
-    TInt distanceX = Abs( iGesture->Distance().iX );
-    TInt speedX = Abs( static_cast< TInt >( iGesture->Speed().iX ) );
-
-    TInt minLength( iOwner.MarginRect().Width() / 2 );
-    
-    TInt dy( Abs( iGesture->StartPos().iY - iGesture->CurrentPos().iY ) );
-    
-    if ( distanceX < minLength )
-        {
-        validSwipe = EFalse;
-        }
-
-    if ( speedX < KGestureMinSpeedX )
-        {
-        validSwipe = EFalse;
-        }
-               
-    if ( dy > KGestureMaxDeltaY )
-        {
-        validSwipe = EFalse;
-        }
-    
-    // check the direction of swipe
-    if ( validSwipe )
-        {
-        switch ( iGesture->Code( CXnGesture::EAxisHorizontal ) )
-            {
-             case EGestureSwipeLeft:
-                ret = ESwipeLeft;
-                break;
-             case EGestureSwipeRight:
-                 ret = ESwipeRight;
-                break;
-             default: // fall through
-                break;
-            }
-        }
-
-    return ret;
+TXnGestureCode CXnGestureHelper::ValidSwipe() const
+    {                        
+    return iGesture->Code( CXnGesture::EAxisBoth );
     }

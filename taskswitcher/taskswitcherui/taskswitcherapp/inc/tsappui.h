@@ -167,9 +167,6 @@ private:
     // Device state
     CTsDeviceState* iDeviceState;
 
-    // Buffer to keeping some memory allocation while being in background.    
-    TUint8* iMemAllocBuf;
-
     CPeriodic* iGoToBackgroundTimer;
     
     TBool iEffectsEnabled;

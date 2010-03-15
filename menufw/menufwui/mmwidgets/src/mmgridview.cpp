@@ -95,7 +95,7 @@ TPoint CMmGridView::ItemPos( TInt aItemIndex ) const
         TInt mirroredItemCol = colNum - itemCol - 1;
         aItemIndex = aItemIndex - itemCol + mirroredItemCol;
         }
-    
+
     // return CAknGridView::ItemPos( aItemIndex );
     return CorrectItemPos( aItemIndex );
     }
@@ -109,19 +109,19 @@ TPoint CMmGridView::CorrectItemPos( TInt aItemIndex ) const
     // it the assertion below fails, review this implementation to make sure that
     // primary vertical case is handled correctly
     ASSERT( !IsPrimaryVertical() );
-    
+
     ASSERT( aItemIndex >= 0 );
     const TInt colNum = NumberOfColsInView();
     TInt itemRow = aItemIndex / colNum;
     TInt itemCol = aItemIndex % colNum;
-    
+
     TInt topItemRow = TopItemIndex() / colNum;
 //    __ASSERT_DEBUG( TopItemIndex() % colNum == 0, User::Invariant() );
-    
+
     // it is safe to assume that size between items is (0, 0) because we
     // explicitly set such value in CMmGrid::DoSetupLayoutL
     const TSize sizeBetweenItems( 0, 0 );
-    
+
     TPoint itemPos(
         iViewRect.iTl.iX + itemCol *
             ( ColumnWidth() + sizeBetweenItems.iWidth ),
@@ -240,7 +240,18 @@ void CMmGridView::DoDraw(const TRect* aClipRect) const
 		iWin->Invalidate( *aClipRect );
 		iWin->BeginRedraw( *aClipRect );
     	}
-    CAknGridView::Draw( aClipRect );
+
+    if ( !itemDrawer->IsEditMode() )
+        {
+        itemDrawer->DrawBackgroundAndSeparatorLines(ViewRect());
+        itemDrawer->SetRedrawItemBackground( EFalse );
+        CAknGridView::Draw( aClipRect );
+        itemDrawer->SetRedrawItemBackground( ETrue );
+        }
+    else
+        {
+        CAknGridView::Draw( aClipRect );
+        }
 
 	if ( aClipRect )
 	    {
@@ -288,7 +299,7 @@ void CMmGridView::SetItemHeight(TInt aItemHeight)
 	CMmListBoxItemDrawer* itemDrawer =
 	        STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
 	static_cast<CMmGrid*>(itemDrawer->Widget())->SetItemHeight( aItemHeight );
-	
+
 	CAknGridView::SetItemHeight(aItemHeight);
 	}
 

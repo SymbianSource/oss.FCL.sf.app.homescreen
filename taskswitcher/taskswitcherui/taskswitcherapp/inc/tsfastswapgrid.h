@@ -255,7 +255,8 @@ class CTsGridItemDrawer: public CFormattedCellListBoxItemDrawer
 
 public: // Constructor and destructor
     CTsGridItemDrawer( CTsFastSwapGrid* aGrid,
-                               CFormattedCellListBoxData* aData );
+                       CFormattedCellListBoxData* aData,
+                       TRect aScreenRect );
     ~CTsGridItemDrawer();
 
 public: // New functions

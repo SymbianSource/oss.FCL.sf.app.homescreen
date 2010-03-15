@@ -33,7 +33,7 @@ public:
      * Declare drag gesture handling.
      * @param aOffset - drag distance
      */
-    virtual void MoveOffset(const TPoint& aOffset)=0;
+    virtual void MoveOffset(const TPoint& aOffset, TBool aDrawNow)=0;
     
     /**
      * Declare tap gesture handling.

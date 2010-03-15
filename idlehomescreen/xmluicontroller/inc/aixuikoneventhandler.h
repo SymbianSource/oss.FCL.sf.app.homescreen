@@ -38,6 +38,7 @@ class CXmlUiController;
 class CContentRenderer;
 class MAiUiEventHandler;
 class MAiApplicationEventHandler;
+class CAIEventHandler;
 
 /**
  *  @ingroup group_xmluicontroller
@@ -169,6 +170,12 @@ private: // data
      * Not owned.
      */
     XnVolumeControlInterface::MXnVolumeControlInterface* iVolumeControl;
+    
+    /**
+     * AiEvent handler
+     * Owned
+     */
+    CAIEventHandler* iAiEventHandler;
     };
 
 } // namespace AiXmlUiController

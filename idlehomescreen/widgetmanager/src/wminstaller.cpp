@@ -20,6 +20,7 @@
 
 #include "wminstaller.h"
 #include "wmwidgetdata.h"
+#include "wmplugin.h"
 
 
 // CONSTANTS
@@ -29,9 +30,9 @@ _LIT8( KWrtMime, "application/x-nokia-widget");
 // CWmInstaller::NewL
 // ---------------------------------------------------------
 //
-CWmInstaller* CWmInstaller::NewL()
+CWmInstaller* CWmInstaller::NewL( CWmPlugin& aWmPlugin )
     {
-    CWmInstaller* self = CWmInstaller::NewLC();
+    CWmInstaller* self = CWmInstaller::NewLC( aWmPlugin );
     CleanupStack::Pop(); // self;
     return self;
     }
@@ -40,9 +41,9 @@ CWmInstaller* CWmInstaller::NewL()
 // CWmInstaller::NewLC
 // ---------------------------------------------------------
 //
-CWmInstaller* CWmInstaller::NewLC()
+CWmInstaller* CWmInstaller::NewLC( CWmPlugin& aWmPlugin )
     {
-    CWmInstaller* self = new ( ELeave ) CWmInstaller();
+    CWmInstaller* self = new ( ELeave ) CWmInstaller( aWmPlugin );
     CleanupStack::PushL(self);
     self->ConstructL();
     return self;
@@ -52,7 +53,9 @@ CWmInstaller* CWmInstaller::NewLC()
 // CWmInstaller::CWmInstaller
 // ---------------------------------------------------------
 //
-CWmInstaller::CWmInstaller() : CActive( EPriorityStandard )
+CWmInstaller::CWmInstaller( CWmPlugin& aWmPlugin ) :
+    CActive( EPriorityStandard ),
+    iWmPlugin( aWmPlugin )
     {
     iUid = KNullUid;
     iIdle = NULL;
@@ -107,6 +110,16 @@ void CWmInstaller::DoCancel()
 //
 void CWmInstaller::RunL()
     {
+    // error has occurred, stop uninstallation animation.
+    if ( iStatus != KErrNone )
+        { 
+        CWmWidgetData* widget = iWmPlugin.GetUninstalledWidgetByUid( iUid );
+        if ( widget )
+            {
+            widget->StopUninstallAnimationL();
+            }
+        }
+    
     // close SWI session
     if ( iIdle && iIdle->IsActive() )
         {

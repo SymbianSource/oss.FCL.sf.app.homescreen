@@ -81,6 +81,12 @@ private: // data
      * Own.
      */
     CLiwServiceHandler* iServiceHandler;
+    
+    /**
+     * Service interface.
+     * Own
+     */
+    MLiwInterface* iMsgInterface;
     };
 }
 

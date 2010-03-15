@@ -40,6 +40,8 @@
     ( k == EStdKeyLeftArrow || k == EStdKeyRightArrow || \
       k == EStdKeyUpArrow || k == EStdKeyDownArrow ) 
 
+const TInt KOneView = 1;
+
 // -----------------------------------------------------------------------------
 // SetInitialFocusL
 // -----------------------------------------------------------------------------
@@ -274,8 +276,30 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
                 if ( !iNode )
                     {
                     // Find initial location for focus
-                    ResolveAndSetFocusL(); 
-                                            
+                    ResolveAndSetFocusL();
+                    
+                    // If focus is still not set, we are in normal mode and the view is empty.
+                    // left and right arrows lead to next/previous view. When other arrows
+                    // are pressed, the focus is hidden.
+                    if( !iNode )
+                        {
+                        if( iUiEngine.ViewManager()->ViewAmount() != KOneView &&
+                            aKeyEvent.iScanCode == EStdKeyRightArrow )
+                            {
+                            iUiEngine.ViewManager()->ActivateNextViewL();
+                            }
+                        else if( iUiEngine.ViewManager()->ViewAmount() != KOneView &&
+                                 aKeyEvent.iScanCode == EStdKeyLeftArrow )
+                            {
+                            iUiEngine.ViewManager()->ActivatePreviousViewL();
+                            }
+                        else
+                            {
+                            // hide focus if view is not switched
+                            appui.HideFocus();
+                            }
+                        }
+
                     return EKeyWasConsumed;
                     }
                 }

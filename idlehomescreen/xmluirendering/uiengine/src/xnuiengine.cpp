@@ -138,6 +138,17 @@ CXnPointerArray* CXnUiEngine::FindNodeByClassL( const TDesC8& aClassId,
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiEngine::FindContentSourceNodesL
+// Forwards the call to the ui engine implementation
+// -----------------------------------------------------------------------------
+//
+CXnPointerArray* CXnUiEngine::FindContentSourceNodesL(
+    const TDesC8& aNamespace )
+    {
+    return iUiEngineImpl->FindContentSourceNodesL( aNamespace );
+    }
+
+// -----------------------------------------------------------------------------
 // CXnUiEngine::RenderUIL
 // Forwards the call to the ui engine implementation
 // -----------------------------------------------------------------------------
@@ -530,7 +541,7 @@ void CXnUiEngine::SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher )
     }
 
 // -----------------------------------------------------------------------------
-// CXnUiEngine::EnablePartialTouchInput( )
+// CXnUiEngine::EnablePartialTouchInput()
 // -----------------------------------------------------------------------------
 //               
 void CXnUiEngine::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
@@ -547,6 +558,14 @@ TBool CXnUiEngine::IsPartialInputActive()
     return iUiEngineImpl->IsPartialInputActive();
     }
 
+// -----------------------------------------------------------------------------
+// CXnUiEngine::IsTextEditorActive()
+// -----------------------------------------------------------------------------
+//               
+TBool CXnUiEngine::IsTextEditorActive()
+    {
+    return iUiEngineImpl->IsTextEditorActive();
+    }
 
 #ifndef EKA2
 GLDEF_C TInt  E32Dll( TDllReason )

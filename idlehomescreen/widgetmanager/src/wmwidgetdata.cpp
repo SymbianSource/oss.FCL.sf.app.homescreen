@@ -85,11 +85,13 @@ CWmWidgetData::CWmWidgetData( const TSize& aLogoSize,
     iWidgetType = CWmWidgetData::EUnknown;
     iPublisherUid = KNullUid;
     iLogoSize = aLogoSize;
-    iPeriodic = NULL;
+    iAnimationTimer = NULL;
+    iTimeoutTimer = NULL;
     iAnimationIndex = 0;
     iAsyncUninstalling = EFalse;
     iFireLogoChanged = EFalse;
     iMdcaPoint = NULL;
+    iWidgetName = NULL;
     }
 
 // ---------------------------------------------------------
@@ -100,13 +102,14 @@ void CWmWidgetData::ConstructL(
         CHsContentInfo* aHsContentInfo,
         RWidgetRegistryClientSession* aRegistryClientSession )
     {
-    InitL( aHsContentInfo, aRegistryClientSession );
-
     // start decoding the icon
     iImageConverter = CWmImageConverter::NewL( this );
     iWait = new (ELeave) CActiveSchedulerWait();
-    iPeriodic = CPeriodic::NewL( CActive::EPriorityStandard );
+    iAnimationTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iTimeoutTimer = CPeriodic::NewL( CActive::EPriorityStandard );
 
+    InitL( aHsContentInfo, aRegistryClientSession );
+    
     // start logo handling
     iImageConverter->SetLogoSize( iLogoSize );
     HandleIconString( HsContentInfo().IconPath() );
@@ -130,16 +133,18 @@ void CWmWidgetData::InitL(
         iWidgetType = CWmWidgetData::ENative;
         }
 
-    // take ownership of the content info
-    iHsContentInfo = aHsContentInfo;
+    // get publisher uid from widget registry
+    FetchPublisherUidL( aHsContentInfo->PublisherId(), 
+                        aRegistryClientSession );
     
     // create iMdcaPoint for listbox    
     _LIT( KFormatStr, "0\t%S");
     iMdcaPoint = HBufC::NewL( 
-            iHsContentInfo->Name().Length() + KFormatStr().Length() );
-    iMdcaPoint->Des().Format( KFormatStr(), &iHsContentInfo->Name() );
-    // get publisher uid from widget registry
-    FetchPublisherUidL( aRegistryClientSession );
+            aHsContentInfo->Name().Length() + KFormatStr().Length() );
+    iMdcaPoint->Des().Format( KFormatStr(), &aHsContentInfo->Name() );
+
+    // take ownership of the content info
+    iHsContentInfo = aHsContentInfo;
     }
 
 // ---------------------------------------------------------
@@ -148,6 +153,14 @@ void CWmWidgetData::InitL(
 //
 CWmWidgetData::~CWmWidgetData()
     {
+    if ( iTimeoutTimer && 
+        iTimeoutTimer->IsActive() )
+        {
+        iTimeoutTimer->Cancel();
+        }
+    delete iTimeoutTimer;
+
+    delete iWidgetName;
     if ( iWait && iWait->IsStarted() )
         {
         iWait->AsyncStop();
@@ -155,7 +168,7 @@ CWmWidgetData::~CWmWidgetData()
     delete iWait;
     SetObserver( NULL );
     DestroyAnimData();
-    delete iPeriodic;
+    delete iAnimationTimer;
     delete iLogoImage;
     delete iLogoImageMask;
     delete iImageConverter;
@@ -254,7 +267,7 @@ void CWmWidgetData::NotifyCompletion( TInt aError )
         if ( iFireLogoChanged ) 
             {
             iFireLogoChanged = EFalse;
-            FireDataChanged(); 
+            FireDataChanged();
             }
         }
     }
@@ -299,8 +312,12 @@ void CWmWidgetData::HandleIconString( const TDesC& aIconStr )
     
     // handle result
     if ( KErrNone == err && iWait &&
-        IsPrepairingLogo() )
+        IsPrepairingLogo() && iTimeoutTimer )
         {
+        iTimeoutTimer->Cancel();
+        const TInt tickInterval = 200000;        
+        iTimeoutTimer->Start(
+                tickInterval,tickInterval,TCallBack(TimeoutTick, this));
         iWait->Start();
         }
     else if ( KErrNone != err && iFireLogoChanged )
@@ -356,14 +373,15 @@ TUid CWmWidgetData::PublisherUid()
 // ----------------------------------------------------
 //
 void CWmWidgetData::FetchPublisherUidL( 
+            const TDesC& aPublisherId,
             RWidgetRegistryClientSession* aRegistryClientSession )
     {
     if ( iPublisherUid == KNullUid && 
-        PublisherId() != KNullDesC &&
+        aPublisherId != KNullDesC &&
         iWidgetType != CWmWidgetData::ENative &&
         aRegistryClientSession )
         {
-        TInt widgetUid = aRegistryClientSession->GetWidgetUidL( PublisherId() );
+        TInt widgetUid = aRegistryClientSession->GetWidgetUidL( aPublisherId );
         if ( widgetUid != 0 )
             {
             // WRT widget
@@ -414,10 +432,10 @@ void CWmWidgetData::ReCreateLogo( const TSize& aSize )
     }
 
 // ---------------------------------------------------------
-// CWmWidgetData::ReplaceContentInfoL
+// CWmWidgetData::ReplaceContentInfo
 // ---------------------------------------------------------
 //
-TBool CWmWidgetData::ReplaceContentInfoL(
+TBool CWmWidgetData::ReplaceContentInfo(
         CHsContentInfo* aHsContentInfo )
     {
     TBool sameAppearance = (
@@ -430,10 +448,15 @@ TBool CWmWidgetData::ReplaceContentInfoL(
     // delete the old content info
     delete iHsContentInfo;
     iHsContentInfo = NULL;
-
-    // re-init the object
-    InitL( aHsContentInfo, NULL );
-
+    
+    // re-init the object, take care about leave.
+    TRAPD( err, InitL( aHsContentInfo, NULL ); );
+    if ( KErrNone != err )
+        {
+        delete aHsContentInfo;
+        aHsContentInfo = NULL;
+        }
+   
     if ( !sameAppearance )
         {
         // fire change event -> widget redrawn
@@ -473,12 +496,19 @@ void CWmWidgetData::VisualizeUninstallL()
     DestroyAnimData();
     PrepairAnimL();
     
-    iHsContentInfo->SetNameL( iWmResourceLoader.Uninstalling() );
+    // set copy of widget name for uninstallation error case.
+    if ( iHsContentInfo->Name().Compare( iWmResourceLoader.Uninstalling() ) !=
+        KErrNone )
+        {
+        iWidgetName = iHsContentInfo->Name().AllocL();
+        iHsContentInfo->SetNameL( iWmResourceLoader.Uninstalling() );
+        }
+
     iAsyncUninstalling = ETrue;
     iAnimationIndex = 0;
     const TInt tickInterval = 400000;
-    iPeriodic->Start(
-            tickInterval,tickInterval,TCallBack(Tick, this));
+    iAnimationTimer->Start(
+            tickInterval,tickInterval,TCallBack(AnimationTick, this));
     }
 
 // ---------------------------------------------------------
@@ -521,9 +551,9 @@ void CWmWidgetData::PrepairAnimL()
 //
 void CWmWidgetData::DestroyAnimData()
     {
-    if ( iPeriodic && iPeriodic->IsActive() )
+    if ( iAnimationTimer && iAnimationTimer->IsActive() )
         {
-        iPeriodic->Cancel();
+        iAnimationTimer->Cancel();
         }
         
     for( TInt i=0; i < iUninstallAnimIcons.Count(); i++ )
@@ -535,10 +565,10 @@ void CWmWidgetData::DestroyAnimData()
     }
 
 // ---------------------------------------------------------
-// CWmWidgetData::Tick
+// CWmWidgetData::AnimationTick
 // ---------------------------------------------------------
 //
-TInt CWmWidgetData::Tick( TAny* aPtr )
+TInt CWmWidgetData::AnimationTick( TAny* aPtr )
     {
     CWmWidgetData* self = static_cast< CWmWidgetData* >( aPtr );
     self->iAnimationIndex += 2;
@@ -547,6 +577,21 @@ TInt CWmWidgetData::Tick( TAny* aPtr )
         self->iAnimationIndex = 0; // restart from beginging
         }
     self->FireDataChanged();
+    return 1;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::TimeoutTick
+// ---------------------------------------------------------
+//
+TInt CWmWidgetData::TimeoutTick( TAny* aPtr )
+    {
+    CWmWidgetData* self = static_cast< CWmWidgetData* >( aPtr );
+    self->iTimeoutTimer->Cancel();
+    if ( self->iWait && self->iWait->IsStarted() )
+        {
+        self->iWait->AsyncStop();
+        }
     return 1;
     }
 
@@ -617,6 +662,25 @@ const TDesC& CWmWidgetData::MdcaPoint() const
         return *iMdcaPoint;
     else
         return KNullDesC;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::StopUninstallAnimation
+// ---------------------------------------------------------
+//
+void CWmWidgetData::StopUninstallAnimationL()
+    {
+    DestroyAnimData();
+    // restore widget name
+    if ( iWidgetName )
+        {
+        iHsContentInfo->SetNameL( iWidgetName->Des() );
+        delete iWidgetName;
+        iWidgetName = NULL;
+        }
+    
+    FireDataChanged(); //redraw
+    iAsyncUninstalling = EFalse;
     }
 
 // End of file

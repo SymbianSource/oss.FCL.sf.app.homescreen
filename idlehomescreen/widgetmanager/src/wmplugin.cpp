@@ -36,7 +36,7 @@
 #include "wmeffectmanager.h"
 #include "wmwidgetdata.h"
 #include "wminstaller.h"
-
+#include "wmlistbox.h"
 
 // ---------------------------------------------------------
 // CWmPlugin::NewL
@@ -97,7 +97,7 @@ void CWmPlugin::ConstructL()
     iFs = &eikonEnv->FsSession();
     iResourceLoader = CWmResourceLoader::NewL( *eikonEnv );
     iEffectManager = CWmEffectManager::NewL( *eikonEnv );
-    iWmInstaller = CWmInstaller::NewL();
+    iWmInstaller = CWmInstaller::NewL( *this );
 
     // main view
     CWmMainContainerView* mainView =
@@ -299,10 +299,9 @@ void CWmPlugin::ShowErrorNoteL( TInt aError )
                 R_QTN_HS_ADD_WIDGET_NO_SPACE_NOTE, KNullDesC );
             break;
         case KErrNoMemory:
-            // Not enough memory to add more content. 
-            // Please remove some Homescreen content and try again.
-            ResourceLoader().InfoPopupL( R_QTN_HS_HS_MEMORY_FULL, KNullDesC ); 
-            break;
+        case KErrDiskFull:
+            // do not show error note here to avoid multiple error notes
+            break;   
         default:
             ResourceLoader().ErrorPopup( aError );
             break;
@@ -364,6 +363,31 @@ void CWmPlugin::NotifyWidgetListChanged()
 CWmInstaller& CWmPlugin::WmInstaller()
     {
     return *iWmInstaller;
+    }
+
+// ---------------------------------------------------------
+// CWmPlugin::GetUnistalledWidget
+// ---------------------------------------------------------
+//
+CWmWidgetData* CWmPlugin::GetUninstalledWidgetByUid( TUid aUid )
+    {
+    CWmWidgetData* retVal = NULL;
+    if ( iWmMainContainer )
+        {
+        const RWidgetDataValues& widgetArray =
+            iWmMainContainer->WmListBox().WidgetDataArray();
+        for ( TInt i = 0; i < widgetArray.Count(); i++ )
+            {
+            CWmWidgetData* widgetData = widgetArray[i];
+            if ( widgetData->IsUninstalling() &&
+                widgetData->PublisherUid() == aUid )
+                {
+                retVal = widgetArray[i];
+                break;
+                }
+            }
+        }
+    return retVal;
     }
 
 // End of file

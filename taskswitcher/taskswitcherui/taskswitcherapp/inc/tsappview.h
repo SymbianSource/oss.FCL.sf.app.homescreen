@@ -193,7 +193,7 @@ public://From MTsEventControlerObserver
      * Declare drag gesture handling.
      * @param aOffset - drag distance
      */
-    virtual void MoveOffset(const TPoint& aOffset);
+    virtual void MoveOffset(const TPoint& aOffset, TBool aDrawNow);
     
     /**
      * Declare tap gesture handling.

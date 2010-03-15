@@ -46,6 +46,7 @@
 #include "xnhittest.h"
 #include "xnscrollablecontroladapter.h"
 #include "xnviewdata.h"
+#include "xnrootdata.h"
 #include "xnpanic.h"
 #include "xnlistquerydialogadapter.h"
 #include "xneffectmanager.h"
@@ -59,6 +60,7 @@ _LIT8( KName, "name" );
 _LIT8( KToolTip, "tooltip" );
 _LIT8( KMenuBar, "menubar" );
 _LIT8( KTextEditor, "texteditor" );
+_LIT8( KPlugin, "plugin" );
 
 _LIT8( KActionsHandler, "actionshandler" );
 
@@ -2810,7 +2812,7 @@ static void RunActivateViewL(
 static void RunActivateNextViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
     TInt effectid = ResolveEffectId( aEventNode );
-    aEngine.ViewManager()->ActivateNextViewL( effectid );
+    aEngine.ViewManager()->ActivateNextViewL( /*effectid*/ );
     }
 
 // -----------------------------------------------------------------------------
@@ -2820,7 +2822,7 @@ static void RunActivateNextViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
 static void RunActivatePreviousViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     {
     TInt effectid = ResolveEffectId( aEventNode );
-    aEngine.ViewManager()->ActivatePreviousViewL( effectid );
+    aEngine.ViewManager()->ActivatePreviousViewL( /*effectid*/ );
     }
 
 // -----------------------------------------------------------------------------
@@ -2944,8 +2946,29 @@ static void RunEditL(
     aEngine.DisableRenderUiLC();
    
     // Set plugins to edit state
-    RPointerArray< CXnPluginData>& plugins( 
-            aEngine.ViewManager()->ActiveViewData().PluginData() );
+    RPointerArray< CXnPluginData >& views( 
+        aEngine.ViewManager()->ActiveAppData().PluginData() );
+    
+    CXnViewData* view( NULL );
+    
+    for ( TInt i = 0; i < views.Count(); i++ )
+        {
+        view = static_cast< CXnViewData* >( views[i] );
+        
+        CXnPluginData* plugin( view->Plugin( aThis->Node() ) );
+        
+        if ( plugin && plugin == view )
+            {
+            break;
+            }            
+        }
+    
+    if ( !view )
+        {
+        return;
+        }
+    
+    RPointerArray< CXnPluginData >& plugins( view->PluginData() );             
 
     CXnDomStringPool* sp( aEventNode.StringPool() );
     
@@ -2980,7 +3003,7 @@ static void RunEditL(
                 // Find nodes by class
                 else if ( name == XnPropertyNames::common::KClass )
                     {
-                    CXnPointerArray* array = aEngine.FindNodeByClassL( value );
+                    CXnPointerArray* array = aEngine.FindNodeByClassL( value, aThis->Namespace() );
                     CleanupStack::PushL( array );
 
                     if ( array )
@@ -3008,7 +3031,8 @@ static void RunEditL(
                 }
             }
         }
-    TBool useEmpty( aEngine.ViewManager()->ActiveViewData().UseEmptyWidget() );
+    
+    TBool useEmpty( view->UseEmptyWidget() );
     
     for ( TInt i = 0; i < plugins.Count(); i++ )
         {
@@ -3025,12 +3049,12 @@ static void RunEditL(
             }                                              
         }
     
-        aEngine.EditMode()->SetEditModeL( CXnEditMode::EDragAndDrop );        
-        aEngine.AppUiAdapter().ViewAdapter().CloseAllPopupsL();
+    aEngine.EditMode()->SetEditModeL( CXnEditMode::EDragAndDrop );        
+    aEngine.AppUiAdapter().ViewAdapter().CloseAllPopupsL();
 
     CleanupStack::PopAndDestroy();
     
-    aEngine.AppUiAdapter().ViewAdapter().UpdateRskByModeL();
+    aEngine.AppUiAdapter().ViewAdapter().UpdateRskByUiStateL( *view );
     }
 
 // -----------------------------------------------------------------------------
@@ -3041,7 +3065,30 @@ static void RunResetEditL(
     CXnNodeImpl* aThis,
     CXnUiEngine& aEngine,
     CXnDomNode& aEventNode )
-    {    
+    {
+    // Set plugins to edit state
+    RPointerArray< CXnPluginData >& views( 
+        aEngine.ViewManager()->ActiveAppData().PluginData() );
+    
+    CXnViewData* view( NULL );
+    
+    for ( TInt i = 0; i < views.Count(); i++ )
+        {
+        view = static_cast< CXnViewData* >( views[i] );
+        
+        CXnPluginData* plugin( view->Plugin( aThis->Node() ) );
+        
+        if ( plugin && plugin == view )
+            {
+            break;
+            }            
+        }
+    
+    if ( !view )
+        {
+        return;
+        }
+    
     CXnDomList& children( aEventNode.ChildNodes() );
 
     TInt count( children.Length() );
@@ -3072,7 +3119,7 @@ static void RunResetEditL(
                     }
                 else if ( name == XnPropertyNames::common::KClass )
                     {
-                    CXnPointerArray* array( aEngine.FindNodeByClassL( value ) );
+                    CXnPointerArray* array( aEngine.FindNodeByClassL( value, aThis->Namespace() ) );
                     CleanupStack::PushL( array );
 
                     const TInt count = array->Container().Count();
@@ -3094,13 +3141,12 @@ static void RunResetEditL(
                 }
             }
         }
-
-    RPointerArray< CXnPluginData>& plugins( 
-            aEngine.ViewManager()->ActiveViewData().PluginData() );
-
+    
+    RPointerArray< CXnPluginData>& plugins( view->PluginData() );             
+    
     CXnDomStringPool* sp( aEventNode.StringPool() );
 
-    TBool useEmpty( aEngine.ViewManager()->ActiveViewData().UseEmptyWidget() );
+    TBool useEmpty( view->UseEmptyWidget() );
     
     for ( TInt i = 0; i < plugins.Count(); i++ )
         {
@@ -3119,7 +3165,7 @@ static void RunResetEditL(
     
     aEngine.EditMode()->SetEditModeL( CXnEditMode::ENone );   
 
-    aEngine.AppUiAdapter().ViewAdapter().UpdateRskByModeL();
+    aEngine.AppUiAdapter().ViewAdapter().UpdateRskByUiStateL( *view );
     }
 
 // -----------------------------------------------------------------------------
@@ -3763,7 +3809,7 @@ static void RunSystemSetL(
         }
     else if ( name && classId && type )
         {
-        CXnPointerArray* array = aEngine.FindNodeByClassL( *classId );
+        CXnPointerArray* array = aEngine.FindNodeByClassL( *classId, aThis->Namespace() );
         CleanupStack::PushL( array );
 
         const TInt count = array->Container().Count();
@@ -4842,12 +4888,6 @@ static CXnNode* FindNextNodeFromRightL(
     // find node below or above to the right
     if ( !nextNode )
         {
-        if ( !stayInNamespace && aEngine &&
-             aEngine->ViewManager()->ViewAmount() != KOneView )
-            {
-            aEngine->ViewManager()->ActivateNextViewL();
-            return nextNode;
-            }
         CXnNode* candidateAbove = NULL;
         CXnNode* candidateBelow = NULL;
 
@@ -4968,6 +5008,13 @@ static CXnNode* FindNextNodeFromRightL(
     // loop to the right
     if ( !nextNode )
         {
+        if ( !stayInNamespace && aEngine &&
+             aEngine->ViewManager()->ViewAmount() != KOneView )
+            {
+            aEngine->ViewManager()->ActivateNextViewL();
+            return nextNode;
+            }        
+        
         CXnNode* candidateAbove = NULL;
         CXnNode* candidateBelow = NULL;
 
@@ -5271,12 +5318,6 @@ static CXnNode* FindNextNodeFromLeftL(
 
     if ( !nextNode )
         {
-        if ( !stayInNamespace && aEngine &&
-             aEngine->ViewManager()->ViewAmount() != KOneView )
-            {
-            aEngine->ViewManager()->ActivatePreviousViewL();
-            return nextNode;
-            }
         CXnNode* candidateAbove = NULL;
         CXnNode* candidateBelow = NULL;
 
@@ -5400,6 +5441,13 @@ static CXnNode* FindNextNodeFromLeftL(
     // loop to the left
     if ( !nextNode )
         {
+        if ( !stayInNamespace && aEngine &&
+             aEngine->ViewManager()->ViewAmount() != KOneView )
+            {
+            aEngine->ViewManager()->ActivatePreviousViewL();
+            return nextNode;
+            }
+        
         CXnNode* candidateAbove = NULL;
         CXnNode* candidateBelow = NULL;
 
@@ -5936,8 +5984,6 @@ static CXnNode* FindNextNodeFromAboveL(
 //
 static CXnNode* FindPluginNode( CXnNode& aNode )
     {
-    _LIT8( KPlugin, "plugin" );
-
     CXnNode* pluginNode = NULL;
     CXnNode* tmp = &aNode;
 
@@ -6017,6 +6063,19 @@ static TBool DoInternalFocusChangeL( CXnUiEngine& aEngine,
             }
         if ( nextNode )
             {
+            // focus plugin node if in edit mode
+            if( aEngine.IsEditMode() )
+                {
+                if( nextNode->Type()->Type() != KPlugin )
+                    {
+                    CXnNode* pluginNode = FindPluginNode( *nextNode );
+                    if( pluginNode )
+                        {
+                        nextNode = pluginNode;
+                        }
+                    }
+                }
+
             if( nextNode && nextNode->ScrollableControl() )
                 {
                 nextNode->ScrollableControl()->ShowItem( *nextNode );
@@ -7070,7 +7129,7 @@ void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt aSource )
                     {
                     if ( aSource == XnEventSource::EStylus )
                         {
-                        const TTimeIntervalMicroSeconds32 delay( 0 );                       
+                        const TTimeIntervalMicroSeconds32 delay( 1000 * 100 );                       
                         const TTimeIntervalMicroSeconds32 display( 1000 * 1000 * 6 );                                                
                         
                         popup->ShowPopupL( aRect, delay, display );

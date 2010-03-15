@@ -592,7 +592,7 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
         CXnBackgroundManager& bgManager = appui->ViewAdapter().BgManager();
         
         // if page specific wallpaper feature is enabled
-        if( bgManager.ActivatedL() )
+        if( bgManager.WallpaperType() == CXnBackgroundManager::EPageSpecific )
             {
             HBufC* bgImage = ItemValueL( *configuration, KWallpaper, KPath );
             CleanupStack::PushL( bgImage );

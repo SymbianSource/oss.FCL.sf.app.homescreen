@@ -78,12 +78,12 @@ NONSHARABLE_STRUCT( TXnSplitScreenState )
     /** Partial screen editor node. Not own */
     CXnNode* iPartialScreenEditorNode;
     /** Is partial screen input open */
-    TBool isPartialScreenOpen;
+    TBool iPartialScreenOpen;
     /** Partial screen block progression. Own. */
     HBufC8* iPartialScreenBlock;
-    /** Is partial screen enabled*/
-    TBool isPartialScreenEnabled;
-    
+
+    TXnSplitScreenState(): iPartialScreenBlock( NULL ){}
+
     ~TXnSplitScreenState()
         {
         delete iPartialScreenBlock;
@@ -212,6 +212,16 @@ public:
      */
     CXnPointerArray* FindNodeByClassL( const TDesC8& aClassId,
         const TDesC8& aNamespace = KNullDesC8 );
+    
+    /**
+     * Find content source nodes from namespace. Ownership is not transferred.
+     *
+     * @since S60 5.2
+     * @param aNamespace Namespace
+     * @return Content source nodes from namespace
+     */    
+    CXnPointerArray* CXnUiEngineImpl::FindContentSourceNodesL(
+        const TDesC8& aNamespace );
     
     /**
      * Gets resources of the UI
@@ -518,7 +528,15 @@ public:
      * @return TBool is partial input active      
      */      
     TBool IsPartialInputActive();
-        
+
+    /**
+      * Checks if text editor is focused or partioal touch input open.
+      * 
+      * @since Series 60 5.2
+      * @return TBool True if partial input is open or editor focused
+      */      
+    TBool IsTextEditorActive();
+
 private:
     
     IMPORT_C static void EnableRenderUi( TAny* aAny );
@@ -583,7 +601,7 @@ private:
       * @since Series 60 5.2
       * @param TInt aType 
       */ 
-    void HandlePartialTouchInputL( TInt aType );
+    void HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable );
 
     /**
       * Set node visible
@@ -609,6 +627,20 @@ private:
       * @param TDesC8 aBlockProgression set layout direction
       */     
     void StorePartialScreenBlockProgressionL();
+    
+    /**
+      * Handles skin change resource change
+      * 
+      * @since Series 60 5.2
+      */
+    void HandleSkinChangeL();
+
+    /**
+      * Handles KEikDynamicLayoutVariantSwitch resource change
+      * 
+      * @since Series 60 5.2
+      */
+    void HandleDynamicLayoutVariantSwitchL();
 	
 private:
     //Derived functions

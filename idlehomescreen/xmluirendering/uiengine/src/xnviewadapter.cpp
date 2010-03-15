@@ -37,7 +37,6 @@
 #include "xnnodeimpl.h"
 #include "xnnode.h"
 #include "xntype.h"
-#include "xnbgcontrol.h"
 #include "xnfocuscontrol.h"
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
@@ -52,6 +51,7 @@
 // Constants
 const TUid KXmlViewUid = { 1 };
 _LIT8( KActivateDefaultView, "activatedefault" );
+_LIT8( KMenuBar, "menubar" );
 
 // Data types
 enum 
@@ -211,8 +211,7 @@ CXnViewAdapter::~CXnViewAdapter()
     delete iTimer;
     delete iActivate;
     delete iDeactivate;
-    delete iEditState;
-    delete iBgControl;
+    delete iEditState;    
     delete iBgManager;
     delete iFocusControl;
     }
@@ -247,9 +246,6 @@ void CXnViewAdapter::ConstructL()
     // Base class CAknViewAppUi takes ownership of iViewAdapter
     iAppUiAdapter.AddViewL( this );    
     iAppUiAdapter.SetDefaultViewL( *this );
-
-    iBgControl = CXnBgControl::NewL();
-    iBgControl->SetMopParent( this );
 
     iBgManager = CXnBackgroundManager::NewL( iAppUiAdapter.ViewManager(),
         iAppUiAdapter.ViewManager().Editor().HspsWrapper() );
@@ -326,16 +322,6 @@ CXnKeyEventDispatcher* CXnViewAdapter::EventDispatcher() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewAdapter::BgControl
-// Returns bg control.
-// -----------------------------------------------------------------------------
-//
-CCoeControl& CXnViewAdapter::BgControl() const
-    {
-    return *iBgControl;
-    }
-
-// -----------------------------------------------------------------------------
 // CXnViewAdapter::BgManager
 // Returns background manager.
 // -----------------------------------------------------------------------------
@@ -346,7 +332,7 @@ CXnBackgroundManager& CXnViewAdapter::BgManager() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewAdapter::BgControl
+// CXnViewAdapter::FocusControl
 // Returns focus control.
 // -----------------------------------------------------------------------------
 //
@@ -386,6 +372,9 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
     
     iAppUiAdapter.AddToStackL( *this, iEventDispatcher );
 
+    // enable statuspane transparancy 
+    CEikStatusPane* sp( iAppUiAdapter.StatusPane() );
+
     CEikButtonGroupContainer* bgc( iAppUiAdapter.Cba() );
     
     if ( bgc )
@@ -396,8 +385,7 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
 
         iAppUiAdapter.RemoveFromStack( cba );        
         }
-    
-    iBgControl->MakeVisible( ETrue );
+        
     iBgManager->MakeVisible( ETrue );
 
     // Set status pane layout
@@ -410,15 +398,19 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
 
     if ( spane != KErrNotFound )
         {
-        CEikStatusPane* sp( iAppUiAdapter.StatusPane() );
-
         if ( sp && sp->CurrentLayoutResId() != spane )
             {
             sp->SwitchLayoutL( spane );
             sp->ApplyCurrentSettingsL();
             }
         }    
-                
+    
+    if ( sp && !sp->IsTransparent() ) 
+        { 
+        sp->EnableTransparent( ETrue );
+        sp->DrawNow();
+        }
+
     if ( iFlags.IsSet( EIsFirstActivation ) )
         {                             
         // Set the active container
@@ -497,7 +489,6 @@ void CXnViewAdapter::DoDeactivate()
 
     TRAP_IGNORE( DeactivateContainerL() );
     
-    iBgControl->MakeVisible( EFalse );
     iBgManager->MakeVisible( EFalse );
     
     iFocusControl->MakeVisible( EFalse );
@@ -514,12 +505,19 @@ void CXnViewAdapter::DoDeactivate()
 //
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
     TBool aEnterEditState )
-    {                       
-    if ( iContainer == &aContainer || iFlags.IsSet( EIsDestructionRunning ) )    
+    {   
+    if ( !iAppUiAdapter.ViewManager().UiStartupPhaseAllDone() )
+        {
+        return;
+        }            
+        
+    if ( iContainer == &aContainer || iFlags.IsSet( EIsDestructionRunning ) )   
         {            
         return;
         }
 
+    const CXnViewData* previous( iContainer );
+    
     // Deactivate previous
     DeactivateContainerL();
     
@@ -529,8 +527,8 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         // postpone container activation
         return;
         }
-    
-    // Update
+        
+    // Update  
     iContainer = &aContainer;
         
     // Disable layout and redraw until container activation is done
@@ -555,9 +553,7 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         // This container is in-call state
         NotifyInCallStateChaged( ETrue );        
         }
-                 
-    iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
-    
+       
     if ( aEnterEditState || iAppUiAdapter.UiEngine().IsEditMode() )
         {
         EnterEditStateL( aContainer, ETrue );                        
@@ -566,14 +562,20 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         {
         EnterEditStateL( aContainer, EFalse );                                
         }
+                          
+    iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
+    
+    if ( previous && iContainer )
+        {
+        iBgManager->WallpaperChanged( *previous, *iContainer );    
+        }
     
     CXnControlAdapter* adapter( node->Control() );
-    
-    iBgControl->SetCompoundControl( adapter );
-            
+    adapter->MakeVisible( ETrue );
+	            
     iAppUiAdapter.UiEngine().RenderUIL();
     
-    CleanupStack::PopAndDestroy(); // DisableRenderUiLC        
+    CleanupStack::PopAndDestroy(); // DisableRenderUiLC   
     }
 
 // -----------------------------------------------------------------------------
@@ -672,8 +674,7 @@ void CXnViewAdapter::DeactivateContainerL()
     CXnNode* node( iContainer->Node()->LayoutNode() );
                 
     node->ReportXuikonEventL( *iDeactivate );
-
-    iBgControl->SetCompoundControl( NULL );
+    node->Control()->MakeVisible( EFalse );
     
     iContainer = NULL;
     }
@@ -741,9 +742,9 @@ void CXnViewAdapter::NotifyInCallStateChaged( TBool aInCall )
         {
         return;
         }
-    
+
     TBool incallNow( iFlags.IsSet( EIsInCall ) ? ETrue : EFalse );
-    
+
     if ( incallNow == aInCall )
         {
         return;
@@ -757,8 +758,10 @@ void CXnViewAdapter::NotifyInCallStateChaged( TBool aInCall )
         {
         iFlags.Clear( EIsInCall );
         }
+
+    CXnViewData& view( iAppUiAdapter.ViewManager().ActiveViewData() );
     
-    TRAP_IGNORE( UpdateRskByModeL() );
+    TRAP_IGNORE( UpdateRskByUiStateL( view ) );
     }
 
 // -----------------------------------------------------------------------------
@@ -821,13 +824,35 @@ void CXnViewAdapter::ChangeControlsStateL( TBool aAwake )
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewAdapter::UpdateRskByModeL()
+// CXnViewAdapter::UpdateRskByUiStateL()
 // 
 // -----------------------------------------------------------------------------
 //
-void CXnViewAdapter::UpdateRskByModeL()
+void CXnViewAdapter::UpdateRskByUiStateL( const CXnViewData& aViewData )
     {
-    CXnNode* menubar( iAppUiAdapter.UiEngine().MenuBarNode() );
+    CXnNode* menubar( NULL );
+    
+    CXnDomNode* view( aViewData.Node() );
+    
+    if ( view && view->LayoutNode() )
+        {
+        RPointerArray< CXnNode >& children( view->LayoutNode()->Children() );
+        
+        for ( TInt count = children.Count() - 1; count >= 0 ; --count )
+            {
+            CXnNode* node( children[count] );
+
+            // Check that the given type of a control is parent
+            // (or ancestor) of this control
+            const TDesC8& type( node->Type()->Type() );
+            
+            if ( type == KMenuBar )
+                {
+                menubar = node;
+                break;
+                }
+            }        
+        }
     
     if( menubar )
         {
@@ -865,6 +890,8 @@ void CXnViewAdapter::UpdateRskByModeL()
                     {
                     menuIf->SetSoftKeyL( &node->PluginIfL() , XnMenuInterface::MXnMenuInterface::ERight );
                     node->SetDirtyL( XnDirtyLevel::ERender );
+                                       
+                    TRAP_IGNORE( iAppUiAdapter.UiEngine().RefreshMenuL() );                   
                     } 
                 }
             }

@@ -25,11 +25,13 @@
 #include <AknsUtils.h>
 #include <aknview.h>
 #include <aknedsts.h>
+#include <AknPriv.hrh>
 #include <txtglobl.h>
 #include <txtfmlyr.h>
 #include <txtfrmat.h>
 #include <txtrich.h>
 #include <gdi.h>
+#include <gulutil.h>
 
 #include <activeidle2domainpskeys.h>
 
@@ -52,10 +54,9 @@ const TInt KMaxLength = 100;
 
 enum TSplitInputState
     {
-    ESplitInputDisabled = 0,   
-    ESplitInputClosed,
-    ESplitInputOpen,
-    ESplitInputRemoveFromStack         
+    ESplitInputEnabled = 1,   
+    ESplitInputOpen = 2,
+    ESplitInputEditorInStack = 4,
     };
 
 _LIT8( KCpsPublishing, "cpspublishing" );
@@ -71,6 +72,30 @@ _LIT( KEnterChar, "\x2029" );
       k == EStdKeyUpArrow || k == EStdKeyDownArrow ) 
 
 // ============================ LOCAL FUNCTIONS ================================   
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+TBool IsFlagSet( TInt aFlags, TInt aFlag )
+    {
+    return aFlags & aFlag;
+    }
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void SetFlag( TInt& aFlags, TInt aFlag )
+    {
+    aFlags |= aFlag;
+    }
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void ClearFlag( TInt& aFlags, TInt aFlag )
+    {
+    aFlags &= ~aFlag;
+    }
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -109,7 +134,15 @@ CXnTextEditorAdapter::CXnTextEditorAdapter( CXnControlAdapter* aParent,
 // -----------------------------------------------------------------------------
 //
 CXnTextEditorAdapter::~CXnTextEditorAdapter()
-    {    
+    {  
+    if( IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )    
+        {
+        if( iUiEngine )
+            {
+            iUiEngine->EnablePartialTouchInput( iNode, EFalse );    
+            }
+        }
+
     if ( iAvkonAppUi )
         {
         iAvkonAppUi->RemoveFromStack( iEditor );
@@ -135,6 +168,8 @@ void CXnTextEditorAdapter::ConstructL()
     CXnControlAdapter::ConstructL( iNode );    
     iUiEngine = iNode.UiEngineL();
 
+    iAppui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
+    
     // Max line amount
     iMaxLines = 0;
     
@@ -183,13 +218,13 @@ void CXnTextEditorAdapter::ConstructL()
 
     // Enable partial Screen
     CXnProperty* enablepartialinput( iNode.GetPropertyL( KEnablePartialInput ) );
-    iSplitInputState = ESplitInputDisabled;
+    iSplitInputFlags = 0;
      
     if ( enablepartialinput && 
          enablepartialinput->StringValue() == XnPropertyNames::KTrue )
         {
         iEditor->SetAknEditorFlags( EAknEditorFlagEnablePartialScreen );
-        iSplitInputState = ESplitInputClosed;
+        SetFlag( iSplitInputFlags, ESplitInputEnabled );
         }
     
     iEditor->SetObserver( this );
@@ -306,50 +341,48 @@ TBool CXnTextEditorAdapter::RefusesFocusLoss() const
 // 
 void CXnTextEditorAdapter::FocusChanged( TDrawNow aDrawNow )
     {
-    CXnAppUiAdapter* appui( 
-        static_cast< CXnAppUiAdapter* >( iAvkonAppUi ) );
-    
     TBool isFocused( IsFocused() ? ETrue : EFalse );
-      
     TInt value;
 
     if ( isFocused )
         {      
         value = EPSAiDontForwardNumericKeysToPhone;
 
-        if( iSplitInputState == ESplitInputDisabled )
+        if( !IsFlagSet( iSplitInputFlags, ESplitInputEnabled ) )
             {
-            TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) );            
+            TRAP_IGNORE( iAppui->AddToStackL( iAppui->View(), iEditor ) );  
             // AddToStackL calls iEditor->SetFocus( ETrue ); 
             }
-        else if( iSplitInputState == ESplitInputClosed )
+        else if( !IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
             {
-            iUiEngine->EnablePartialTouchInput(iNode , ETrue);
-            TRAP_IGNORE( appui->AddToStackL( appui->View(), iEditor ) ); 
-            iSplitInputState = ESplitInputOpen;
+            TRAP_IGNORE( iAppui->AddToStackL( iAppui->View(), iEditor ) ); 
+            SetFlag( iSplitInputFlags, ESplitInputEditorInStack );
             }
         }
     else
         {
         value = EPSAiForwardNumericKeysToPhone;
                                       
-        if( iSplitInputState == ESplitInputDisabled )
+        if( !IsFlagSet( iSplitInputFlags, ESplitInputEnabled ) )
             {    
-            appui->RemoveFromStack( iEditor );            
+            iAppui->RemoveFromStack( iEditor );            
             iEditor->SetFocus( EFalse, aDrawNow );
             }
-        else if( iSplitInputState == ESplitInputRemoveFromStack )
+        
+        // Remove editor from stack if it has not beed removed AND split screen has been closed
+        else if( IsFlagSet( iSplitInputFlags, ESplitInputEditorInStack ) &&
+                 !IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
             {
-            appui->RemoveFromStack( iEditor );            
+            iAppui->RemoveFromStack( iEditor );            
             iEditor->SetFocus( EFalse, aDrawNow );
-            iSplitInputState = ESplitInputClosed;
+            ClearFlag( iSplitInputFlags, ESplitInputEditorInStack );            
             }            
         }
 
-    if( iSplitInputState == ESplitInputOpen )
+    if( IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
         {
         value = EPSAiDontForwardNumericKeysToPhone;
-        }
+        } 
 
     iRefusesFocusLoss = isFocused;
     
@@ -368,6 +401,50 @@ void CXnTextEditorAdapter::Draw( const TRect& aRect ) const
     CXnControlAdapter::Draw( aRect );
     }
 
+// -----------------------------------------------------------------------------
+// CXnTextEditorAdapter::HandleResourceChange
+//
+// -----------------------------------------------------------------------------
+//
+void CXnTextEditorAdapter::HandleResourceChange( TInt aType )
+    {
+    if ( aType == KAknSplitInputEnabled ) 
+        {
+        if( IsFlagSet( iSplitInputFlags, ESplitInputEditorInStack ) && 
+            !IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
+            {
+            iUiEngine->EnablePartialTouchInput( iNode, ETrue );
+            SetFlag( iSplitInputFlags, ESplitInputOpen );
+            }
+        }    
+    
+     if ( aType == KAknSplitInputDisabled ) 
+        {
+        if( IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )    
+            {
+            iUiEngine->EnablePartialTouchInput( iNode, EFalse );
+            ClearFlag( iSplitInputFlags, ESplitInputOpen );
+            
+            // If editor is not focused anymore, remove if from stack
+            CXnNodePluginIf* focusedNode( NULL );
+            TRAP_IGNORE( focusedNode = iUiEngine->FocusedNodeL() );
+            if( focusedNode != &iNode && 
+                IsFlagSet( iSplitInputFlags, ESplitInputEditorInStack ) )
+                {
+                iAppui->RemoveFromStack( iEditor );
+                iEditor->SetFocus( EFalse );
+                ClearFlag( iSplitInputFlags, ESplitInputEditorInStack );
+
+                // Forward keys to phone again    
+                RProperty::Set( KPSUidAiInformation,            
+                                KActiveIdleForwardNumericKeysToPhone,
+                                EPSAiForwardNumericKeysToPhone );
+                }
+            }
+        }
+    CCoeControl::HandleResourceChange( aType );
+    }
+    
 // -----------------------------------------------------------------------------
 // CXnTextEditorAdapter::HandleControlEventL
 // 
@@ -418,35 +495,14 @@ HBufC* CXnTextEditorAdapter::Text() const
 //
 void CXnTextEditorAdapter::HandleEditorEvent( TInt aReason )
     {
-    CXnAppUiAdapter* appui( 
-        static_cast< CXnAppUiAdapter* >( iAvkonAppUi ) );
- 
-    switch( aReason )
-            {           
-            case CXnTextEditor::KDeactivateTextEditor:
-                {
-                if( iSplitInputState == ESplitInputOpen )
-                     {
-                     iUiEngine->EnablePartialTouchInput(iNode, EFalse);
-                     iSplitInputState = ESplitInputClosed;
-                     appui->RemoveFromStack( iEditor );
-                     iEditor->SetFocus( EFalse );
-                     }              
-                break;
-                }
-            case CXnTextEditor::KRemoveSplitInputFromStack:
-                {
-                iSplitInputState = ESplitInputRemoveFromStack;
-                break;
-                }
-            case CXnTextEditor::KKeepSplitInputInStack:
-                {
-                iSplitInputState = ESplitInputOpen;
-                break;
-                }
-            default:                    
-                break;    
-            }
+    if( aReason == CXnTextEditor::KDeactivateTextEditor &&
+        IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
+        {
+        iAppui->RemoveFromStack( iEditor );
+        iEditor->SetFocus( EFalse );
+        ClearFlag( iSplitInputFlags, ESplitInputEditorInStack ); 
+        iRefusesFocusLoss = EFalse;
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -575,11 +631,61 @@ void CXnTextEditorAdapter::SetPropertiesL()
                 cf.iFontPresentation.iTextColor = KRgbBlack;                
                 }
             }
-        }    
+        }
+    
+    SetEditorMarginPropertiesL();
     
     CCharFormatLayer *pCharFL = CCharFormatLayer::NewL(cf,cfm);
     iEditor->SetCharFormatLayer(pCharFL);
     iEditor->SetTextBaselineSpacing( 2 );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnTextEditorAdapter::SetEditorMarginPropertiesL
+// Sets text properties
+// -----------------------------------------------------------------------------
+//
+void CXnTextEditorAdapter::SetEditorMarginPropertiesL()
+    {
+    TMargins8 margins;
+    
+    CXnProperty* leftMarginProp( 
+        iNode.GetPropertyL( XnPropertyNames::texteditor::KEditorMarginLeft ) );
+    if( leftMarginProp )
+        {
+        TInt leftValue = iUiEngine->HorizontalPixelValueL( leftMarginProp,
+                iNode.Rect().Width() );
+        margins.iLeft = leftValue;
+        }
+    
+    CXnProperty* rightMarginProp( 
+        iNode.GetPropertyL( XnPropertyNames::texteditor::KEditorMarginRight ) );
+    if( rightMarginProp )
+        {
+        TInt rightValue = iUiEngine->HorizontalPixelValueL( rightMarginProp,
+                iNode.Rect().Width() );
+        margins.iRight = rightValue;
+        }
+    
+    CXnProperty* topMarginProp( 
+        iNode.GetPropertyL( XnPropertyNames::texteditor::KEditorMarginTop ) );
+    if( topMarginProp )
+        {
+        TInt topValue = iUiEngine->VerticalPixelValueL( topMarginProp,
+                iNode.Rect().Width() );
+        margins.iTop = topValue;
+        }
+    
+    CXnProperty* bottomMarginProp( 
+        iNode.GetPropertyL( XnPropertyNames::texteditor::KEditorMarginBottom ) );
+    if( bottomMarginProp )
+        {
+        TInt bottomValue = iUiEngine->VerticalPixelValueL( bottomMarginProp,
+                iNode.Rect().Width() );
+        margins.iBottom = bottomValue;
+        }
+    
+    iEditor->SetBorderViewMargins( margins );
     }
 
 // End of file

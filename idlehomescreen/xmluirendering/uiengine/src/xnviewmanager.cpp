@@ -25,6 +25,8 @@
 #include <aknnotewrappers.h>
 #include <AknsConstants.h>
 #include <aifwdefs.h>
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntransitionutils.h>
 
 // User includes
 #include "xnapplication.h"
@@ -58,10 +60,10 @@
 _LIT8( KEmptyWidgetUid, "0x2001f47f" );
 _LIT8( KTemplateViewUID, "0x20026f50" );
 
-const TInt KPSCategoryUid = 0x200286E3;
-const TInt KPSCrashCountKey = 1;     
-const TInt KStabilityInterval = 60000000; // 1 minute
-const TInt KCrashRestoreThreshold = 3;
+const TInt KPSCategoryUid( 0x200286E3 );
+const TInt KPSCrashCountKey( 1 );     
+const TInt KStabilityInterval( 60000000 ); // 1 minute
+const TInt KCrashRestoreThreshold( 3 );
 
 // ============================ LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
@@ -277,12 +279,7 @@ CXnViewManager::~CXnViewManager()
     {
     delete iUiStartupPhase;
     
-    if( iStabilityTimer )
-        {
-        iStabilityTimer->Cancel();
-        delete iStabilityTimer;
-        iStabilityTimer = NULL;
-        }
+    delete iStabilityTimer;
     
     iObservers.Reset();
     
@@ -314,13 +311,24 @@ void CXnViewManager::PropertyChangedL( const TUint32 aKey, const TInt aValue )
     {
     if ( aKey == KPSStartupUiPhase && aValue == EStartupUiPhaseAllDone )
         {
-        if ( iRootData )
-            {
-            iRootData->LoadRemainingViews();
-            }
+	    iUiStartupPhaseAllDone = ETrue;
+				
+        iAppUiAdapter.ViewAdapter().ActivateContainerL( ActiveViewData() );    
         }
+    
+    iUiStartupPhaseAllDone = ETrue;
     }
 
+// -----------------------------------------------------------------------------
+// CXnViewManager::UiStartupPhaseAllDone()
+// 
+// -----------------------------------------------------------------------------
+//
+TBool CXnViewManager::UiStartupPhaseAllDone() const
+    {
+    return iUiStartupPhaseAllDone;        
+    }
+    
 // -----------------------------------------------------------------------------
 // CXnViewManager::ConstructL()
 // 2nd phase constructor
@@ -350,7 +358,7 @@ void CXnViewManager::ConstructL()
     RProperty::Get( TUid::Uid( KPSCategoryUid ),
                     KPSCrashCountKey,
                     crashCount );    
-    
+            
     if( crashCount >= KCrashRestoreThreshold )
         {
         iHspsWrapper->RestoreRootL();
@@ -366,7 +374,7 @@ void CXnViewManager::ConstructL()
         iStabilityTimer->Start( KStabilityInterval,
                                 KStabilityInterval,
                                 TCallBack( SystemStabileTimerCallback, this ) );
-        }
+        }       
     }
 
 // -----------------------------------------------------------------------------
@@ -389,6 +397,8 @@ void CXnViewManager::LoadUiL()
     // Determine UI startup phase
     delete iUiStartupPhase;
     iUiStartupPhase = NULL;
+    
+    iUiStartupPhaseAllDone = EFalse;
                    
     iUiStartupPhase = CXnPropertySubscriber::NewL( 
         KPSUidStartup, KPSStartupUiPhase, *this );
@@ -896,14 +906,14 @@ CXnViewData& CXnViewManager::NextViewData() const
     {
     return iRootData->NextViewData();
     }
-
+    
 // -----------------------------------------------------------------------------
 // CXnViewManager::ActivateNextViewL()
 // Activates the next view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ActivateNextViewL( TInt aEffectId )
-    {    
+void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
+    { 
     CXnViewData& next( NextViewData() );
     
     if ( !next.Occupied() )
@@ -911,18 +921,47 @@ void CXnViewManager::ActivateNextViewL( TInt aEffectId )
         if ( next.Load() == KErrNoMemory )
             {
             next.ShowOutOfMemError();
+            
+            return;
             }
         }
         
     // Activate view
     if ( next.Occupied() && !next.Active() )
         {       
-        if( aEffectId )
-            {
-            iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
-                    aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
-            }
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( next );                
+        CXnControlAdapter* thisView( 
+            ActiveViewData().ViewNode()->Control() );                
+        
+        CXnControlAdapter* nextView( 
+            next.ViewNode()->Control() );
+    
+        GfxTransEffect::Register( thisView, KGfxContextActivateNextView );    
+        GfxTransEffect::Register( nextView, KGfxContextActivateNextView );
+        
+        TInt ret( GfxTransEffect::BeginGroup() );
+        
+        CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+        
+        GfxTransEffect::Begin( bg, KGfxControlActionAppear );
+
+        GfxTransEffect::SetDemarcation( bg, bg->Position() );
+        GfxTransEffect::End( bg );        
+        
+        GfxTransEffect::Begin( thisView, KGfxControlActionDisappear );
+        
+        iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
+        
+        GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
+        GfxTransEffect::End( thisView );
+                
+        GfxTransEffect::Begin( nextView, KGfxControlActionAppear );
+        GfxTransEffect::SetDemarcation( nextView, nextView->Position() );
+        GfxTransEffect::End( nextView );
+                                
+        GfxTransEffect::EndGroup( ret );
+        
+        GfxTransEffect::Deregister( thisView );
+        GfxTransEffect::Deregister( nextView );
         }
     }
 
@@ -931,7 +970,7 @@ void CXnViewManager::ActivateNextViewL( TInt aEffectId )
 // Activates the previous view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ActivatePreviousViewL( TInt aEffectId )
+void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
     {    
     CXnViewData& prev( PreviousViewData() );
 
@@ -940,18 +979,48 @@ void CXnViewManager::ActivatePreviousViewL( TInt aEffectId )
         if ( prev.Load() == KErrNoMemory )
             {
             prev.ShowOutOfMemError();
+            
+            return;
             }
         }
         
     // Activate view
     if ( prev.Occupied() && !prev.Active() )
         {
-        if( aEffectId  )
-            {
-            iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
-                    aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
-            }
+        CXnControlAdapter* thisView( 
+            ActiveViewData().ViewNode()->Control() ); 
+        
+        CXnControlAdapter* prevView( 
+            prev.ViewNode()->Control() );
+
+        GfxTransEffect::Register( thisView, KGfxContextActivatePrevView );    
+        GfxTransEffect::Register( prevView, KGfxContextActivatePrevView );
+    
+        TInt ret( GfxTransEffect::BeginGroup() );
+            
+        CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+        
+        GfxTransEffect::Begin( bg, KGfxControlActionAppear );
+    
+        GfxTransEffect::SetDemarcation( bg, bg->Position() );
+        GfxTransEffect::End( bg );        
+        
+        GfxTransEffect::Begin( thisView, KGfxControlActionDisappear );
+        
         iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
+        
+        GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
+        GfxTransEffect::End( thisView );
+                
+        GfxTransEffect::Begin( prevView, KGfxControlActionAppear );
+                              
+        GfxTransEffect::SetDemarcation( prevView, prevView->Position() );
+        GfxTransEffect::End( prevView );
+                                
+        GfxTransEffect::EndGroup( ret );
+        
+        GfxTransEffect::Deregister( thisView );
+        GfxTransEffect::Deregister( prevView );        
         }
     }
 
@@ -1088,8 +1157,8 @@ void CXnViewManager::AddViewL( TInt aEffectId )
             // Start transition effect
             if( aEffectId )
                 {
-                iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
-                        aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
+                iAppUiAdapter.EffectManager()->BeginFullscreenEffectL(
+                        aEffectId, ActiveViewData() );        
                 }
 
             // Load succeed, add the new view behind the current view               
@@ -1212,8 +1281,8 @@ void CXnViewManager::RemoveViewL( TInt aEffectId )
         // Start transition effect
         if( aEffectId )
             {
-            iUiEngine->AppUiAdapter().EffectManager()->BeginFullscreenEffectL(
-                    aEffectId, iUiEngine->ViewManager()->ActiveViewData() );        
+            iAppUiAdapter.EffectManager()->BeginFullscreenEffectL(
+                    aEffectId, ActiveViewData() );        
             }
 
         // Activate the next view, or first if in the last view 
@@ -1373,10 +1442,6 @@ TInt CXnViewManager::MaxPages() const
 // -----------------------------------------------------------------------------
 void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
     {
-#ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnViewManager::NotifyContainerChangedL - start" ) );
-#endif //_XN_PERFORMANCE_TEST_        
-                     
     CXnViewData& viewToDeactivate( ActiveViewData() );
     
     if ( &aViewToActivate != &viewToDeactivate )
@@ -1385,12 +1450,11 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
                       
         viewToDeactivate.SetActive( EFalse );
         aViewToActivate.SetActive( ETrue );
-        
-        iHspsWrapper->SetActivePluginL( aViewToActivate.PluginId() );
-
+                             
+        iHspsWrapper->SetActivePluginL( aViewToActivate.PluginId() ); 
+                    
         // Cache update is needed after view activation
-        UpdateCachesL();       
-        UpdateWallpaperL( viewToDeactivate, aViewToActivate );
+        UpdateCachesL();               
         }
     else
         {
@@ -1399,14 +1463,13 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
 
         // Cache update is needed after view activation
         UpdateCachesL();
+        
+        // Schedule remaining views loading
+        iRootData->LoadRemainingViews();
         }
     
     NotifyViewActivatedL( aViewToActivate );
     UpdatePageManagementInformationL();
-    
-    #ifdef _XN_PERFORMANCE_TEST_
-    RDebug::Print( _L( "CXnViewManager::NotifyContainerChangedL - end" ) );
-#endif //_XN_PERFORMANCE_TEST_
     }
 
 // -----------------------------------------------------------------------------
@@ -1591,15 +1654,6 @@ void CXnViewManager::ReportWidgetAmountL( const CXnViewData& aViewData )
         }
 
     node->ReportXuikonEventL( *iWidgetAmountTrigger );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::UpdateWallpaperL
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::UpdateWallpaperL( CXnViewData& aCurrent, CXnViewData& aNew )
-    {
-    iAppUiAdapter.ViewAdapter().BgManager().WallpaperChanged( aCurrent, aNew );
     }
 
 // -----------------------------------------------------------------------------

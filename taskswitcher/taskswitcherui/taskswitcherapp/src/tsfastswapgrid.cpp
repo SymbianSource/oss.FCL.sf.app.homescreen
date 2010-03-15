@@ -23,6 +23,7 @@
 #include <touchfeedback.h>
 
 #include "tsfastswapgrid.h"
+#include "tsapplogging.h"
 
  /* ================================================================================
   * CTsFastSwapGrid
@@ -65,6 +66,9 @@ CTsFastSwapGrid::~CTsFastSwapGrid()
 //
 void CTsFastSwapGrid::ConstructL( const CCoeControl* aParent )
     {
+    TSLOG_CONTEXT( CTsFastSwapGrid::ConstructL, TSLOG_LOCAL );
+    TSLOG_IN();
+    
     iParent = aParent;
     CAknGrid::ConstructL( aParent, EAknListBoxSelectionGrid );
     SetPrimaryScrollingType(CAknGridView::EScrollFollowsItemsAndLoops);
@@ -79,6 +83,8 @@ void CTsFastSwapGrid::ConstructL( const CCoeControl* aParent )
     iCloseIconRedrawTimer->ConstructL();
     iFeedbackTimer = new (ELeave) CTsFastSwapTimer( *this );
     iFeedbackTimer->ConstructL();
+    
+    TSLOG_OUT();
     }
 
 // -----------------------------------------------------------------------------
@@ -87,6 +93,9 @@ void CTsFastSwapGrid::ConstructL( const CCoeControl* aParent )
 //
 void CTsFastSwapGrid::HandlePointerEventL( const TPointerEvent &aPointerEvent )
     {
+    TSLOG_CONTEXT( CTsFastSwapGrid::HandlePointerEventL, TSLOG_LOCAL );
+    TSLOG_IN();
+    
     TBool eventHandled( EFalse );
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
          aPointerEvent.iType == TPointerEvent::EButton1Down )
@@ -102,7 +111,7 @@ void CTsFastSwapGrid::HandlePointerEventL( const TPointerEvent &aPointerEvent )
                 break;
                 }
             }
-        if ( hitItem != KErrNotFound )
+        if ( hitItem != KErrNotFound && CanCloseItem( hitItem ) )
             {
             // Item found, check if close icon has been hit
             TPoint itemPos = GridView()->ItemPos( hitItem );
@@ -173,6 +182,8 @@ void CTsFastSwapGrid::HandlePointerEventL( const TPointerEvent &aPointerEvent )
         CAknGrid::HandlePointerEventL( aPointerEvent );
         Redraw();
         }
+    
+    TSLOG_OUT();
     }
 
 
@@ -182,10 +193,15 @@ void CTsFastSwapGrid::HandlePointerEventL( const TPointerEvent &aPointerEvent )
 //
 void CTsFastSwapGrid::HandleDeviceStateChanged( TChangeType aChangeType )
     {
+    TSLOG_CONTEXT( CTsFastSwapGrid::HandleDeviceStateChanged, TSLOG_LOCAL );
+    TSLOG_IN();
+    
     if ( aChangeType == ESkin )
         {
         LoadCloseIcon();
         }
+    
+    TSLOG_OUT();
     }
 
 // -----------------------------------------------------------------------------
@@ -208,11 +224,16 @@ TTypeUid::Ptr CTsFastSwapGrid::MopSupplyObject( TTypeUid aId )
 //
 void CTsFastSwapGrid::HandleResourceChange( TInt aType )
     {
+    TSLOG_CONTEXT( CTsFastSwapGrid::HandleResourceChange, TSLOG_LOCAL );
+    TSLOG_IN();
+    
     if ( aType != KEikDynamicLayoutVariantSwitch &&
          Model()->ItemTextArray()->MdcaCount() )
         {
         CAknGrid::HandleResourceChange( aType );
         }
+    
+    TSLOG_OUT();
     }
 
 
@@ -241,26 +262,32 @@ void CTsFastSwapGrid::SetFastSwapGridObserver( MTsFastSwapGridObserver* aObserve
 //
 void CTsFastSwapGrid::CreateItemDrawerL()
     {
-    TRect availableRect;
-    AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EScreen, availableRect);
+    TSLOG_CONTEXT( CTsFastSwapGrid::CreateItemDrawerL, TSLOG_LOCAL );
+    TSLOG_IN();
+    
+    TPixelsAndRotation screenSize;
+    iEikonEnv->ScreenDevice()->GetDefaultScreenSizeAndRotation(screenSize);
+    TRect availableRect = TRect( TPoint(0,0), screenSize.iPixelSize );
     TAknLayoutRect fastSwapAreaPane;
     TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     fastSwapAreaPane.LayoutRect( availableRect,
             AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
-    const TInt leftOffset = fastSwapAreaPane.Rect().iTl.iX;
-    const TInt rightOffset = availableRect.Width() - fastSwapAreaPane.Rect().iBr.iX;
+    const TInt leftOffset = iParent->Rect().iTl.iX;
+    const TInt rightOffset = availableRect.Width() - iParent->Rect().iBr.iX;
     SetVisibleViewRect(fastSwapAreaPane.Rect());
     
     CFormattedCellGridData* data = CFormattedCellGridData::NewL();
     CleanupStack::PushL( data );
     CTsGridItemDrawer* itemDrawer =
-        new ( ELeave ) CTsGridItemDrawer( this, data );
+        new ( ELeave ) CTsGridItemDrawer( this, data, availableRect );
     CleanupStack::PushL( itemDrawer );
     itemDrawer->SetEdgeOffset( leftOffset, rightOffset );
     iItemDrawer = itemDrawer;
     CleanupStack::Pop( itemDrawer );
     CleanupStack::Pop( data );
     LoadCloseIcon();
+    
+    TSLOG_OUT();
     }
 
 // -----------------------------------------------------------------------------
@@ -605,13 +632,14 @@ TBool CTsFastSwapGrid::MoveToPartialVisibleItems( TInt aItem ) const
 //
 CTsGridItemDrawer::CTsGridItemDrawer(
         CTsFastSwapGrid* aGrid,
-        CFormattedCellListBoxData* aData )
+        CFormattedCellListBoxData* aData,
+        TRect aScreenRect )
 : CFormattedCellListBoxItemDrawer( aGrid->Model(),
         NULL,
         aData ),
-  iGrid( aGrid )
+  iGrid( aGrid ),
+  iScreenRect(aScreenRect)
     {
-    AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EScreen, iScreenRect);
     }
 
 

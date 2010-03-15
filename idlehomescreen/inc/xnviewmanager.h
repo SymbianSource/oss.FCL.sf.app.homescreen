@@ -41,6 +41,7 @@ class CXnAppUiAdapter;
 class CHsContentInfo;
 class CXnViewAdapter;
 class CXnOomSysHandler;
+class CIdle;
 
 namespace hspswrapper
     {
@@ -211,6 +212,8 @@ public:
     CXnOomSysHandler& OomSysHandler() const;
     
     void UpdatePageManagementInformationL();
+    
+    TBool UiStartupPhaseAllDone() const;
             
 private:
     // new functions
@@ -245,10 +248,7 @@ private:
     
     void ShowDiskFullMessageL() const;
           
-
     TInt ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const;
-
-    void UpdateWallpaperL( CXnViewData& aCurrent, CXnViewData& aNew );
     
     /**
      * Callback for stability timer
@@ -362,7 +362,12 @@ private:
      * Own.
      */
     CPeriodic* iStabilityTimer;
-        
+
+    /**
+     * Flag to indicate that UI startup phase is ready
+     */
+    TBool iUiStartupPhaseAllDone;
+    
 private:   
     // Friend classes
     

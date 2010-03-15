@@ -145,6 +145,16 @@ public:
         const TDesC8& aNamespace = KNullDesC8 );
 
     /**
+     * Find content source nodes from namespace. Ownership is not transferred.
+     *
+     * @since S60 5.2
+     * @param aNamespace Namespace
+     * @return Content source nodes from namespace
+     */    
+    CXnPointerArray* FindContentSourceNodesL(
+        const TDesC8& aNamespace );
+    
+    /**
      * Find resources (images etc.) of the UI. Ownership is not transferred.
      *
      * @since Series 60 3.1
@@ -460,6 +470,14 @@ public:
       * @return TBool is partial input active      
       */      
     TBool IsPartialInputActive();
+
+    /**
+      * Checks if text editor is focused or partioal touch input open.
+      * 
+      * @since Series 60 5.2
+      * @return TBool True if partial input is open or editor focused
+      */      
+    TBool IsTextEditorActive();
 
 private:
     /**

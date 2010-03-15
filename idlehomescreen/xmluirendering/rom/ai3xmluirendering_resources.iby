@@ -23,5 +23,6 @@
 #include <data_caging_paths_for_iby.hrh>
 
 data=\epoc32\data\Z\resource\apps\xnuiengine.rsc      APP_RESOURCE_DIR\xnuiengine.rsc
+data=\epoc32\data\Z\resource\apps\xnwallpaperview.rsc APP_RESOURCE_DIR\xnwallpaperview.rsc
 
 #endif // XMLUIRENDERINGRESOURCES_IBY

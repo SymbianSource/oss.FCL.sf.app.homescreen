@@ -130,6 +130,8 @@ EXPORT_C void CXnControlAdapter::ConstructL( CXnNodePluginIf& aNode )
         iCurrentLongTapStartDelay = KLongTapStartDelay;
         iCurrentLongTapTimeDelay = KLongTapTimeDelay;
         }    
+    
+    CCoeControl::MakeVisible( EFalse );
     }
 
 // -----------------------------------------------------------------------------

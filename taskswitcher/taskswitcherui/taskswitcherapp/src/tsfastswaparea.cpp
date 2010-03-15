@@ -69,6 +69,7 @@ const TInt KRedrawTime = 250000; // 0.25 sec
 const TInt KRedrawTimeForLayoutSwitch = 700000; // 0.7 sec
 const TInt KHighlighActivationTime = 100000; // 100 ms
 const TInt KUpdateGridTime = 0; // imediately
+const TInt KOrientationSwitchTime = 1000000; // 1 sec
 
 const TInt KMaxGranularity = 4;
 
@@ -109,7 +110,7 @@ CTsFastSwapArea::CTsFastSwapArea(CCoeControl& aParent,
     CTsDeviceState& aDeviceState,
     CTsEventControler& aEventHandler) :
     iParent(aParent), iDeviceState(aDeviceState), iEvtHandler(aEventHandler),
-    iPreviousNoOfItems(0)
+    iPreviousNoOfItems(0), iIgnoreLayoutSwitch(EFalse)
     {
     // no implementation required
     }
@@ -127,6 +128,7 @@ CTsFastSwapArea::~CTsFastSwapArea()
     delete iHighlightTimer;
     delete iRedrawTimer;
     delete iUpdateGridTimer;
+    delete iOrientationSignalTimer;
     }
 
 // -----------------------------------------------------------------------------
@@ -161,6 +163,9 @@ void CTsFastSwapArea::ConstructL( const TRect& aRect )
 
     iUpdateGridTimer = new (ELeave) CTsFastSwapTimer( *this );
     iUpdateGridTimer->ConstructL();
+    
+    iOrientationSignalTimer = new (ELeave) CTsFastSwapTimer( *this ); 
+    iOrientationSignalTimer->ConstructL();
     
     ActivateL();
     }
@@ -326,14 +331,14 @@ void CTsFastSwapArea::SizeChanged()
     TSLOG_CONTEXT( CTsFastSwapArea::SizeChanged, TSLOG_LOCAL );
     TSLOG_IN();
     
-    if ( iGrid )
+    if ( iGrid && !iIgnoreLayoutSwitch )
         {
         // Grid needs to be recreated to proper reinitilize
         // data with new layout values
         TInt selIdx = SelectedIndex();
         TRAPD(err, 
               ReCreateGridL();
-              iEvtHandler.ReInitPhysicsL(GridWorldSize(), ViewSize(), ETrue););
+              /*iEvtHandler.ReInitPhysicsL(GridWorldSize(), ViewSize(), ETrue);*/);
         if ( err != KErrNone )
             {
             TSLOG1( TSLOG_INFO, "ReCreateGridL leaves with %d", err );
@@ -383,10 +388,18 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
         // Order is important and cannot be reversed.
         iFSClient->SwitchToApp( wgId );
         // We do not want to come back to ts if the activated app is closed.
-        // Therefore ts must be moved to background.
+        // Therefore ts must be moved to background. Ignore orientation updates, it
+        // will be done after task switcher is sent to background
+        iIgnoreLayoutSwitch = ETrue;
         CTsAppUi* appui =
             static_cast<CTsAppUi*>( iEikonEnv->AppUi() );
         appui->MoveAppToBackground( CTsAppUi::EActivationTransition );
+        iIgnoreLayoutSwitch = EFalse;
+        
+        // Orientation update
+        iPrevScreenOrientation = -1; // force orientation reinit
+        iOrientationSignalTimer->Cancel();
+        iOrientationSignalTimer->After(KOrientationSwitchTime);
         }
     }
 
@@ -435,6 +448,11 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
             DrawDeferred();
             iGrid->SetCurrentDataIndex(selIdx);
             }
+        
+        // Orientation update
+        iPrevScreenOrientation = GetCurrentScreenOrientation();
+        iOrientationSignalTimer->Cancel();
+        iOrientationSignalTimer->After(KOrientationSwitchTime);
         }
 
     TSLOG_OUT();
@@ -1024,6 +1042,17 @@ void CTsFastSwapArea::TimerCompletedL( CTsFastSwapTimer* aSource )
         {
         UpdateGrid(ETrue, ETrue);
         }
+    else if ( aSource == iOrientationSignalTimer )
+        {
+        TInt currentOrientation = GetCurrentScreenOrientation();
+        if ( currentOrientation != iPrevScreenOrientation )
+            {
+            // Order layout change
+            static_cast<CAknAppUi*>(iCoeEnv->AppUi())->HandleResourceChangeL(KEikDynamicLayoutVariantSwitch);
+            iRedrawTimer->Cancel();
+            iRedrawTimer->After(KRedrawTime);
+            }
+        }
     }
 
 
@@ -1282,12 +1311,11 @@ void CTsFastSwapArea::UpdateGrid( TBool aForceRedraw, TBool aAnimate )
         {
         if ( aAnimate )
             {
-			iIgnorePhysicsMove = EFalse;
             iEvtHandler.Animate( targetPoint );
             }
         else
             {
-            MoveOffset(targetPoint);
+            MoveOffset(targetPoint, ETrue);
             iEvtHandler.StopAnimation();
             }
         if ( aForceRedraw )
@@ -1324,18 +1352,13 @@ void CTsFastSwapArea::HandleAppKey(TInt aType)
 // CTsFastSwapArea::MoveOffset
 // --------------------------------------------------------------------------
 //
-void CTsFastSwapArea::MoveOffset(const TPoint& aPoint)
+void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
     {
     TSLOG_CONTEXT( CTsFastSwapArea::MoveOffset, TSLOG_LOCAL );
     TSLOG2_IN("Old position x: %d, y:%d", ViewPos().iX, ViewPos().iY);
     TSLOG2_IN("New position x: %d, y:%d", aPoint.iX, aPoint.iY);
     TSLOG_OUT();
-    
-    //ignore case when drag occurs outside owned area 
-    if( iIgnorePhysicsMove )
-    	{
-		return;
-    	}
+
     //postpone center item request in case of being moved
     if(iUpdateGridTimer->IsActive())
     	{
@@ -1343,19 +1366,28 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint)
 		iUpdateGridTimer->After(KUpdateGridTime);
     	}
     
-    TInt currentXPos = aPoint.iX;
-    currentXPos -= Rect().Width() / 2;
-    TRect gridViewRect = Rect();
-    gridViewRect.iTl.iX = -currentXPos;
-    // Take edge offset into account
-    gridViewRect.iTl.iX += Rect().iTl.iX;
-    if(GridItemCount() <= iMaxItemsOnScreen)
+    if ( aDrawNow )
         {
-        // Center view
-        gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
+        TInt currentXPos = aPoint.iX;
+        currentXPos -= Rect().Width() / 2;
+        TRect gridViewRect = Rect();
+        gridViewRect.iTl.iX = -currentXPos;
+        // Take edge offset into account
+        gridViewRect.iTl.iX += Rect().iTl.iX;
+        if(GridItemCount() <= iMaxItemsOnScreen)
+            {
+            // Center view
+            gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
+            }
+        iGrid->SetRect( gridViewRect );
+        DrawDeferred();
+        iLogicalViewPosOffset = 0;
         }
-    iGrid->SetRect( gridViewRect );
-    DrawDeferred();
+    else
+        {
+        // Update logical view position
+        iLogicalViewPosOffset = aPoint.iX - ViewPos().iX;
+        }
     }
 
 // --------------------------------------------------------------------------
@@ -1416,15 +1448,6 @@ void CTsFastSwapArea::DragL(
 		{
 		CenterItem( KUpdateGridTime );
 		}
-	if( !Rect().Contains(aEvent.CurrentPosition()) )
-		{
-		iIgnorePhysicsMove = ETrue;
-		return;
-		}
-	else
-		{
-		iIgnorePhysicsMove = EFalse;
-		}
 		
     iGrid->SetTactileFeedbackSupport(ETrue);
     iGrid->HideHighlight();
@@ -1464,6 +1487,7 @@ TPoint CTsFastSwapArea::ViewPos() const
         // View centered
         retVal.iX += ( Rect().Width() - gridItemCount * iGridItemWidth ) / 2;
         }
+    retVal.iX += iLogicalViewPosOffset;
     return retVal;
     }
 
@@ -1638,6 +1662,18 @@ void CTsFastSwapArea::UpdateComponentVisibility()
         TRAP_IGNORE( scrollBar->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, 
                                                         CEikScrollBarFrame::EOff));
         }
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::GetCurrentScreenOrientation
+// -----------------------------------------------------------------------------
+//
+TInt CTsFastSwapArea::GetCurrentScreenOrientation()
+    {
+    TPixelsAndRotation availableRect;
+    iEikonEnv->ScreenDevice()->GetDefaultScreenSizeAndRotation(availableRect);
+    return availableRect.iPixelSize.iWidth > availableRect.iPixelSize.iHeight;
     }
 
 // End of file

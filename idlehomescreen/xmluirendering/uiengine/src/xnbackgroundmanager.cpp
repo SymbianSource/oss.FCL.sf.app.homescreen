@@ -27,8 +27,11 @@
 #include "xnwallpaperview.h"
 #include "xnrootdata.h"
 #include "xnuiengine.h"
+#include "xneffectmanager.h"
 
 // SYSTEM INCLUDE FILES
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntransitionutils.h>
 #include <aknlistquerydialog.h> 
 #include <xnuiengine.rsg>
 #include <AknSkinsInternalCRKeys.h>
@@ -45,9 +48,11 @@
 
 using namespace hspswrapper;
 
+// Constants
 _LIT8( KSingle, "single" );
 const TUid KDummyUid = { 0x0000000 };
-const TInt KSkinGfxInnerRectShrink = 5;
+const TInt KSkinGfxInnerRectShrink( 5 );
+const TInt KCallbackDelay( 500000 ); // 500ms
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -96,6 +101,8 @@ void CXnBackgroundManager::ConstructL()
     CheckFeatureTypeL();   
 
     iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
+    
+    GfxTransEffect::Register( this, KGfxContextBgAppear );    
     }
 
 // -----------------------------------------------------------------------------
@@ -119,6 +126,8 @@ CXnBackgroundManager* CXnBackgroundManager::NewL( CXnViewManager& aViewManager,
 //
 CXnBackgroundManager::~CXnBackgroundManager()
     {
+    GfxTransEffect::Deregister( this );
+    
     delete iTimer;
     CleanCache();
     iSkinSrv.Close();
@@ -135,42 +144,23 @@ CXnBackgroundManager::~CXnBackgroundManager()
 //    
 void CXnBackgroundManager::Draw(const TRect& aRect) const
     {
-    if( iFeatureSuppoted )
+    CFbsBitmap* wallpaper( NULL );
+    if( iType == EPageSpecific )
         {
         CXnViewData& viewData( iViewManager.ActiveViewData() );
-        CFbsBitmap* wallpaper = viewData.WallpaperImage();
-        if( wallpaper )
-            {   
-            TSize bitmapSize = wallpaper->SizeInPixels();
-            
-            if( iRect.Height() > bitmapSize.iHeight && iRect.Width() > bitmapSize.iWidth )
-                {
-                TInt width = bitmapSize.iWidth / 2;
-                TInt height = bitmapSize.iHeight / 2;
-            
-                TPoint point = iRect.Center();
-                point.SetXY( point.iX - width, point.iY - height );
-                
-                SystemGc().SetBrushColor( KRgbBlack );
-                SystemGc().Clear( aRect );
-                SystemGc().DrawBitmap( TRect( point, bitmapSize), wallpaper );
-                }
-            else
-                {
-                SystemGc().DrawBitmap( iRect, wallpaper );
-                }
-
-            if( iViewManager.UiEngine().IsEditMode() )
-                {
-                DrawEditModeBackgroundSkin();
-                }
-            return;
-            }
+        wallpaper = viewData.WallpaperImage();
         }
-    else if( iBgImage )
+    else if( iType == ECommon )
         {
-        TSize bitmapSize = iBgImage->SizeInPixels();
+        wallpaper = iBgImage;
+        }
+
+    // Draw bg image
+    if( wallpaper )
+        {   
+        TSize bitmapSize = wallpaper->SizeInPixels();
         
+        // If image is smaller that screen size it needs to be centralized
         if( iRect.Height() > bitmapSize.iHeight && iRect.Width() > bitmapSize.iWidth )
             {
             TInt width = bitmapSize.iWidth / 2;
@@ -181,26 +171,26 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
             
             SystemGc().SetBrushColor( KRgbBlack );
             SystemGc().Clear( aRect );
-            SystemGc().DrawBitmap( TRect( point, bitmapSize ), iBgImage );
-
+            SystemGc().DrawBitmap( TRect( point, bitmapSize), wallpaper );
             }
         else
             {
-            SystemGc().DrawBitmap( iRect, iBgImage );
+            SystemGc().DrawBitmap( iRect, wallpaper );
             }
-        if( iViewManager.UiEngine().IsEditMode() )
-            {
-            DrawEditModeBackgroundSkin();
-            }
-        return;
-        }    
-    MAknsSkinInstance* skin( AknsUtils::SkinInstance() );     
-    AknsDrawUtils::Background( skin, iBgContext, this, SystemGc(), aRect );
+        }
     
+    // Skin bg is used by default
+    else
+        {  
+        MAknsSkinInstance* skin( AknsUtils::SkinInstance() );     
+        AknsDrawUtils::Background( skin, iBgContext, this, SystemGc(), aRect );
+        }
+
+    // Draw edit mode background highlight
     if( iViewManager.UiEngine().IsEditMode() )
         {
         DrawEditModeBackgroundSkin();
-        }   
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -210,11 +200,11 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
 void CXnBackgroundManager::SizeChanged()
     {
     iRect = Rect();
-    if( iFeatureSuppoted )
+    if( iType == EPageSpecific )
         {
         TRAP_IGNORE( UpdateWallpapersL() );
         }
-    else
+    else if( iType == ECommon ) 
         {
         if( iBgImagePath )
             {
@@ -307,15 +297,22 @@ TInt CXnBackgroundManager::CacheWallpaperL( const TDesC& aFileName, CXnViewData&
 //
 TInt CXnBackgroundManager::AddWallpaperL( const TDesC& aFileName )
     {
-    TInt retVal = KErrNone;
-    if( iFeatureSuppoted )
+    TInt retVal( KErrNone );
+    
+    GfxTransEffect::Begin( this, KGfxControlActionAppear );
+                   
+    if ( iType == EPageSpecific )
         {
         retVal = AddPageSpecificWallpaperL( aFileName );
         }
-    else
+    else if ( iType == ECommon )
         {
         retVal = AddCommonWallpaperL( aFileName );
         }
+    
+    GfxTransEffect::SetDemarcation( this, Position() );    
+    GfxTransEffect::End( this );
+    
     return retVal;
     }
 
@@ -325,7 +322,7 @@ TInt CXnBackgroundManager::AddWallpaperL( const TDesC& aFileName )
 //
 void CXnBackgroundManager::DeleteWallpaper( CXnViewData& aViewData )
     {
-    if( iFeatureSuppoted )
+    if( iType == EPageSpecific )
         {
         const TDesC& path = aViewData.WallpaperImagePath();
         if( path != KNullDesC )
@@ -335,7 +332,7 @@ void CXnBackgroundManager::DeleteWallpaper( CXnViewData& aViewData )
             aViewData.SetWallpaperImage( NULL );
             }
         }
-    else
+    else if( iType == ECommon )
         {
         if( iBgImagePath )
             {
@@ -349,21 +346,22 @@ void CXnBackgroundManager::DeleteWallpaper( CXnViewData& aViewData )
     }
     
 // ---------------------------------------------------------------------------
-// CXnBackgroundManager::ActivatedL
+// CXnBackgroundManager::WallpaperType
 // ---------------------------------------------------------------------------
 //
-TBool CXnBackgroundManager::ActivatedL()
+CXnBackgroundManager::WppType CXnBackgroundManager::WallpaperType()
     {
-    return iFeatureSuppoted;
+    return iType;
     }
     
 // -----------------------------------------------------------------------------
 // CXnBackgroundManager::WallpaperChanged
 // -----------------------------------------------------------------------------
 //
-void CXnBackgroundManager::WallpaperChanged( CXnViewData& aOldView, CXnViewData& aNewView )
+void CXnBackgroundManager::WallpaperChanged( const CXnViewData& aOldView, 
+    const CXnViewData& aNewView )
     {
-    if( iFeatureSuppoted && 
+    if( iType == EPageSpecific && 
         aOldView.WallpaperImagePath().Compare( aNewView.WallpaperImagePath() ) )
         {
         UpdateScreen();
@@ -374,7 +372,7 @@ void CXnBackgroundManager::WallpaperChanged( CXnViewData& aOldView, CXnViewData&
             {
             iTimer->Cancel();
             }
-        iTimer->Start( 0, 1000, TCallBack( TimerCallback, this ) );
+        iTimer->Start(KCallbackDelay, KCallbackDelay, TCallBack( TimerCallback, this ) );
         }
     }
 
@@ -385,7 +383,7 @@ void CXnBackgroundManager::WallpaperChanged( CXnViewData& aOldView, CXnViewData&
 void CXnBackgroundManager::SaveWallpaperL()
     {
     // Save wallpaper to HSPS
-    if( iFeatureSuppoted )
+    if( iType == EPageSpecific )
         {
         TBuf8<KMaxFileName> wallpaper8;
         CXnViewData& viewData( iViewManager.ActiveViewData() );
@@ -507,8 +505,12 @@ void CXnBackgroundManager::SetWallpaperL()
             }
         else if ( selectedIndex == 1 )
             {
-            iViewManager.AppUiAdapter().ActivateLocalViewL( KWallpaperViewUid, 
-                KDummyUid, KSingle );                
+            CXnAppUiAdapter& appui( iViewManager.AppUiAdapter() );
+            
+            appui.EffectManager()->BeginFullscreenEffectL(
+                KGfxContextOpenWallpaperView, iViewManager.ActiveViewData() );        
+            
+            appui.ActivateLocalViewL( KWallpaperViewUid, KDummyUid, KSingle );                                 
             }
         }
     CleanupStack::Pop( query );
@@ -642,7 +644,7 @@ void CXnBackgroundManager::UpdateWallpapersL()
 //
 void CXnBackgroundManager::RemovableDiskInsertedL()
     {
-    if( iFeatureSuppoted )
+    if( iType == EPageSpecific )
         {
         CXnRootData& rootData = iViewManager.ActiveAppData();
         if( !&rootData )
@@ -685,7 +687,7 @@ void CXnBackgroundManager::RemovableDiskInsertedL()
 //
 void CXnBackgroundManager::CheckFeatureTypeL()
     {
-    iFeatureSuppoted = EFalse;
+    iType = ECommon;
     CRepository* repository = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
     CleanupStack::PushL( repository );
     if ( repository )
@@ -695,7 +697,7 @@ void CXnBackgroundManager::CheckFeatureTypeL()
         TInt err = repository->Get( KAIWallpaperChangeType, type );
         if ( err == KErrNone && type == 1)
             {
-            iFeatureSuppoted = ETrue;
+            iType = EPageSpecific;
             }
         else
             {
@@ -833,13 +835,13 @@ void CXnBackgroundManager::ReadWallpaperFromCenrepL()
             {
             if ( wallpaperType == 0 )
                 {
-                if( iFeatureSuppoted )
+                if( iType == EPageSpecific )
                     {
                     CXnViewData& viewData( iViewManager.ActiveViewData() );
                     RemoveWallpaperFromCache( viewData.WallpaperImagePath() );
                     RemoveWallpaperL( viewData );                        
                     } 
-                else
+                else if( iType == ECommon )
                     {
                     if( iBgImagePath )
                         {
@@ -860,11 +862,11 @@ void CXnBackgroundManager::ReadWallpaperFromCenrepL()
                 err = repository->Get( KPslnIdleBackgroundImagePath, wallpaper );
                 if ( err == KErrNone )
                     {
-                    if( iFeatureSuppoted )
+                    if( iType == EPageSpecific )
                         {
                         AddPageSpecificWallpaperL( wallpaper );
                         }
-                    else
+                    else if( iType == ECommon )
                         {
                         AddCommonWallpaperL( wallpaper, EFalse );
                         }

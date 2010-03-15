@@ -163,6 +163,13 @@ public: // plugin services
      */
     CWmInstaller& WmInstaller();
     
+    /**
+     * Get widget by Uid. Used for getting widget details 
+     * when error has occured during uninstallation.
+     * @param aUid Uid of widget
+     */
+    CWmWidgetData* GetUninstalledWidgetByUid( TUid aUid );
+
 private:
     /** constructor */
     CWmPlugin();

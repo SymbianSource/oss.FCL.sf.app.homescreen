@@ -201,7 +201,12 @@ public:
      *         Returns KNullCDes if wallpaper has not been set.
      */
     const TDesC& WallpaperImagePath() const;
-    
+
+    /**
+     * Loads publishers to this view           
+     */
+    void LoadPublishers();    
+                   
     /**
      * Destroys all publishers in this view
      * 
@@ -212,8 +217,6 @@ public:
 private:
     // new functions
     
-    void LoadPublishers();    
-           
     static TInt DoLoadPublishersL( TAny* aAny );
     
     void DoDestroyPublishersL( TInt aReason );

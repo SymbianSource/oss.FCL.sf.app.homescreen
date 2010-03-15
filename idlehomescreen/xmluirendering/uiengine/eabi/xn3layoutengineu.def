@@ -285,4 +285,5 @@ EXPORTS
 	_ZThn52_N17CXnControlAdapter19HandleControlEventLEP11CCoeControlN19MCoeControlObserver9TCoeEventE @ 284 NONAME
 	_ZThn60_N17CXnControlAdapter19HandleLongTapEventLERK6TPointS2_ @ 285 NONAME
 	_ZN15CXnAppUiAdapter15ProcessMessageLE4TUidRK6TDesC8 @ 286 NONAME
+	_ZN19TXnUiEnginePluginIf18IsTextEditorActiveEv @ 287 NONAME
 

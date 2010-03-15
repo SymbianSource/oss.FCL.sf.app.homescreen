@@ -86,16 +86,6 @@ TBool CTsPhysicsEngine::IsRunning() const
     return iPhysics->OngoingPhysicsAction() != CAknPhysics::EAknPhysicsActionNone;
     }
 
-
-// -----------------------------------------------------------------------------
-// CTsPhysicsEngine::IsDragging
-// -----------------------------------------------------------------------------
-//
-TBool CTsPhysicsEngine::IsDragging() const
-    {
-    return iPhysics->OngoingPhysicsAction() == CAknPhysics::EAknPhysicsActionDragging;
-    }
-
 // -----------------------------------------------------------------------------
 // CTsPhysicsEngine::HandleDragEvent
 // -----------------------------------------------------------------------------
@@ -107,16 +97,25 @@ void CTsPhysicsEngine::HandleDragEvent(
         {
         iPhysics->StopPhysics();
         iStartTime.HomeTime();
+        iStartPosition = aEvent.CurrentPosition();
+        iDragDirection = 0;
         }
     else if (AknTouchGestureFw::EAknTouchGestureFwOn == aEvent.State())
         {
+        TInt direction =
+                aEvent.CurrentPosition().iX > aEvent.PreviousPosition().iX ? -1 : 1;
         TPoint deltaPoint(aEvent.PreviousPosition() - aEvent.CurrentPosition());
         iPhysics->RegisterPanningPosition(deltaPoint);
-        iStartTime.HomeTime();
+        if (iDragDirection && iDragDirection != direction)
+            {
+            iStartTime.HomeTime();
+            iStartPosition = aEvent.PreviousPosition();
+            }
+        iDragDirection = direction;
         }
     else //AknTouchGestureFw::EAknTouchGestureFwStop
         {
-        TPoint drag(aEvent.PreviousPosition() - aEvent.CurrentPosition());
+        TPoint drag(iStartPosition - aEvent.CurrentPosition());
         iPhysics->StartPhysics(drag, iStartTime);
         }
     }

@@ -214,6 +214,16 @@ namespace XnGestureHelper
          * @return Distance between two points
          */
         TPoint Distance() const;
+        
+        /**
+         * Checks and returns gesture
+         * 
+         * @param aRelevantAxis See @ref MGestureEvent::Code
+         * @return gesture code by analysing the sequence of points
+         */
+        TXnGestureCode CodeFromPoints( TAxis aRelevantAxis ) const;
+        
+        TXnGestureCode LastDirection( TAxis aRelevantAxis ) const;
 
     private:
         
@@ -237,14 +247,6 @@ namespace XnGestureHelper
             /** point of completion */
             TPoint iPos;
             };
-
-        /**
-         * Checks and returns gesture
-         * 
-         * @param aRelevantAxis See @ref MGestureEvent::Code
-         * @return gesture code by analysing the sequence of points
-         */
-        TXnGestureCode CodeFromPoints( TAxis aRelevantAxis ) const;
 
         /** 
          * Returns elapsed time

@@ -226,8 +226,20 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
 
     AknsUtils::GetCachedColor( 
                     skin, textColor, KAknsIIDQsnTextColors, index );
-    TAknTextLineLayout titleTextLayout = 
-              AknLayoutScalable_Apps::listrow_wgtman_pane_t1().LayoutLine();
+
+    TAknTextLineLayout titleTextLayout;
+    if ( !wData.IsUninstalling() )
+        {
+        // centered 1 row layout 
+        titleTextLayout = 
+              AknLayoutScalable_Apps::listrow_wgtman_pane_t1(1).LayoutLine();
+        }
+    else
+        {
+        // 2 row layout for uninstalling
+        titleTextLayout = 
+                AknLayoutScalable_Apps::listrow_wgtman_pane_t1(0).LayoutLine();
+        }
 
     TAknLayoutText textLayoutTitle;
     textLayoutTitle.LayoutText( itemRect, titleTextLayout );
@@ -574,26 +586,6 @@ void CWmListBox::Draw( const TRect& aRect ) const
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
     AknsDrawUtils::Background( skin, cc, this, gc, Rect() );
     CAknDouble2LargeStyleListBox::Draw( aRect );
-    }
-
-// ---------------------------------------------------------
-// CWmListBox::HandlePointerEventL
-// ---------------------------------------------------------
-//
-void CWmListBox::HandlePointerEventL( const TPointerEvent& aPointerEvent )
-    {
-	if ( Rect().Contains( aPointerEvent.iPosition ) )
-		{
-        TInt itemIndex = CurrentListBoxItemIndex();
-        TBool itemPointed = View()->XYPosToItemIndex(
-                                aPointerEvent.iPosition,
-                                itemIndex );
-        if ( itemIndex >= 0 && itemPointed )
-            {
-            SetCurrentItemIndex( itemIndex ); //update index
-            }
-		}
-	CAknDouble2LargeStyleListBox::HandlePointerEventL( aPointerEvent );
     }
 
 // ---------------------------------------------------------

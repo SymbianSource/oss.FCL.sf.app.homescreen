@@ -20,14 +20,34 @@
 #ifndef CXNEFFECTMANAGER_H
 #define CXNEFFECTMANAGER_H
 
-//  INCLUDES
+// System incldues
 #include <e32base.h>
 
-// CLASS DECLARATION
+// User includes
+
+// Forward declarations
 class CXnPluginData;
 class CXnViewData;
 class CXnNode;
 
+// Constants
+
+// Control effect context ids
+#define KGfxContextAddWidget            TUid::Uid( 0x102750F4 )
+#define KGfxContextRemoveWidget         TUid::Uid( 0x102750F4 )
+#define KGfxContextActivateNextView     TUid::Uid( 0x102750F1 )
+#define KGfxContextActivatePrevView     TUid::Uid( 0x102750F2 )
+#define KGfxContextBgAppear             TUid::Uid( 0x102750F3 )
+
+// Control effect action ids
+#define KGfxControlActionAppear         3
+#define KGfxControlActionDisappear      4
+
+// Full screen effect ids
+#define KGfxContextOpenWallpaperView    1007
+#define KGfxContextCloseWallpaperView   1008
+
+// Class declaration
 /**
  *  Struct which holds needed info of effect.
  */
@@ -47,6 +67,8 @@ NONSHARABLE_STRUCT( TXnEffect )
 NONSHARABLE_CLASS( CXnEffectManager ) : public CBase
     {
 public:
+    // constructor and destructor
+
     /**
      * Two-phased constructor.
      * @return new instance of CXnEffectManager.
@@ -57,9 +79,14 @@ public:
      * Destructor.
      */
     ~CXnEffectManager();
+
+public:
+    // new functions
     
     /**
      * Begin handling of fullscreen effect.
+     * 
+     * @since S60 5.2 
      * @param aId effect id
      * @aView view data
      */
@@ -67,17 +94,25 @@ public:
     
     /**
      * When UiRendered is called effect is ended and will be drawn
+     * 
+     * @since S60 5.2 
      */
     void UiRendered();
 
     /**
      * When UiLayouted is called effect is started if it was not started earlier.
+     * 
+     * @since S60 5.2
      */
     void UiLayouted();
 
 private:
+    // new functions
+    
     /**
      * Starts fullscreen effect.
+     * 
+     * @since S60 5.2
      * @param aEffect effect data
      * @return ETrue if effect started, otherwise EFalse
      */
@@ -85,25 +120,30 @@ private:
     
     /**
      * Removes and destroys effect from effect list.
+     * 
+     * @since S60 5.2
      * @param aEffect effect data
      */
     void RemoveEffect( TXnEffect* aEffect );
     
+private:
+    // constructors
+    
     /**
-     * C++ default constructor.
+     * C++ default constructor
      */
     CXnEffectManager();
 
     /**
-     * By default Symbian 2nd phase constructor is private.
+     * 2nd phase constructor 
      */
     void ConstructL();
 
-private: // data
-    /**
-     * List of started effects.
-     */
-    RPointerArray<TXnEffect> iEffects;
+private: 
+    // data
+    
+    /** List of started effects, owned */
+    RPointerArray<TXnEffect> iEffects;    
     };
 
 #endif      // CXNEFFECTMANAGER_H

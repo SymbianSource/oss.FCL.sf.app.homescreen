@@ -154,7 +154,7 @@ public: // external handles
      * @param aHsContentInfo new content (takes ownership)
      * @return ETrue if content was changed
      */
-    TBool ReplaceContentInfoL(
+    TBool ReplaceContentInfo(
             CHsContentInfo* aHsContentInfo );
     
 public: // comparing / sorting
@@ -217,6 +217,9 @@ public: // methods to read the content
 	/** start animation for uninstallation*/
     void VisualizeUninstallL();
 	
+    /** stop uninstallation animation */
+    void StopUninstallAnimationL();
+    
 protected: // from MConverterObserver
 
     /** image conversin completed */
@@ -227,10 +230,11 @@ private: // new functions
     /** uninstall animation related*/
     void PrepairAnimL();
     void DestroyAnimData();
-    static TInt Tick( TAny* aPtr );
+    static TInt AnimationTick( TAny* aPtr );
     
     /** fetches publisher uid from widget registry*/
     void FetchPublisherUidL( 
+            const TDesC& aPublisherId,
             RWidgetRegistryClientSession* aRegistryClientSession );
 
     /** Converts uid to TUid from TDesC8 */
@@ -239,6 +243,7 @@ private: // new functions
     /** Logo icon string handling */
     void HandleIconString( const TDesC& aIconStr );
     void FireDataChanged();
+    static TInt TimeoutTick( TAny* aPtr );
 
 private: // data members
     
@@ -281,8 +286,11 @@ private: // data members
     /* Array of uninstall animation bitmaps*/
     RArray<CFbsBitmap*> iUninstallAnimIcons;
     
-    /** periodic timer for updating animation */
-    CPeriodic*          iPeriodic;
+    /** timer for updating animation */
+    CPeriodic*          iAnimationTimer;
+    
+    /** timer for canceling image convertion */
+    CPeriodic*          iTimeoutTimer;
     
     /* uninstall animation index */
     TInt                iAnimationIndex;
@@ -298,6 +306,12 @@ private: // data members
      * is being prepaired.
      */
     CActiveSchedulerWait* iWait;
+    
+    /**
+     * Holds widget name. Used for restoring widget name 
+     * if error has occurred during uninstallation.
+     */
+    HBufC* iWidgetName;
     };
 
 

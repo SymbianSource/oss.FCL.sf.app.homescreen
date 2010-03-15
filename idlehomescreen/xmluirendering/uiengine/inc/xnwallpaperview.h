@@ -21,15 +21,19 @@
 #ifndef CXNWALLPAPERVIEW_H
 #define CXNWALLPAPERVIEW_H
 
-//  INCLUDES
+// System includes
 #include <aknview.h>
 
+// User includes
+
+// Forward declarations
 class CXnWallpaperContainer;
+class CXnAppUiAdapter;
 class CXnUiEngine;
 class TVwsViewId;
 class CPeriodic;
 
-// CONSTANTS
+// Constants
 const TUid KWallpaperViewUid = { 0x200286DB };
 
 /**
@@ -41,8 +45,7 @@ NONSHARABLE_STRUCT( TXnWallpaperViewData )
     {
     TBool iMultiple;
     TUid iAppUid;
-    TUid iViewUid;
-    CPeriodic* iTimer; // Not own.
+    TUid iViewUid;    
     };
 
 // CLASS DECLARATION
@@ -108,11 +111,18 @@ private: // data
      * Own.
      */
     CXnWallpaperContainer* iContainer;
-    
+        
     /**
-     * Reference to uiengine.
+     * UiEngine
+     * Not owned.
      */
     CXnUiEngine& iEngine;
+    
+    /**
+     * AppUi
+     * Not owned.
+     */
+    CXnAppUiAdapter& iAppUi;
     
     /**
      * Data structure, that is transferred to TimerCallback.
@@ -124,7 +134,11 @@ private: // data
      * Own.
      */
     CPeriodic* iTimer;
-
+    
+    /**
+     * Resource file offset
+     */
+    TInt iResourceOffset;    
     };
 
 #endif      // CXNWALLPAPERVIEW_H

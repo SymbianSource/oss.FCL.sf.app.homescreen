@@ -41,7 +41,7 @@ _LIT8( KAHService, "Service.ActionHandler");
 
 _LIT( KLaunchApplication, "launch_application" );
 _LIT( KViewActivation, "view_activation" );
-_LIT( KCmdLine, "cmd_line");
+_LIT( KCmdLine, "cmd_line" );
 
 _LIT8( KType, "type" );
 _LIT8( KLaunchMethod, "launch_method" );
@@ -107,7 +107,7 @@ static void ActivatePhoneViewL( CXmlUiController& aUiController )
 // ----------------------------------------------------------------------------
 //
 CAIEventHandler::CAIEventHandler( CXmlUiController& aUiController )
-    : iUiController( aUiController ) 
+    : iUiController( aUiController ), iMsgInterface ( NULL )
     {
     }
 
@@ -139,6 +139,12 @@ CAIEventHandler* CAIEventHandler::NewL( CXmlUiController& aUiController )
 //
 CAIEventHandler::~CAIEventHandler()
     {
+    if ( iMsgInterface )
+        {
+        iMsgInterface->Close();
+        iMsgInterface = NULL;
+        }
+    
     if( iServiceHandler )
         {
         iServiceHandler->Reset();
@@ -206,6 +212,7 @@ void CAIEventHandler::LaunchAppL( CXnDomNode& aEventNode )
     
     CLiwDefaultMap* map = CLiwDefaultMap::NewL(); 
     map->PushL();
+    
     map->InsertL( KType, TLiwVariant( KLaunchApplication ));
     map->InsertL( KLaunchMethod, TLiwVariant( KCmdLine ));
     map->InsertL( KApplicationUid, TLiwVariant( uid ));
@@ -257,8 +264,12 @@ void CAIEventHandler::ActivateViewL( CXnDomNode& aEventNode )
 //
 void CAIEventHandler::ExecuteAppLauncherL( CLiwDefaultMap& aMap )
     {
-    MLiwInterface* msgInterface = ActionHandlerInterfaceL( );
-    if( msgInterface && iServiceHandler )
+    if ( !iMsgInterface )
+        {
+        iMsgInterface = ActionHandlerInterfaceL();
+        }
+    
+    if( iMsgInterface && iServiceHandler )
         {
         CLiwGenericParamList& inparam = iServiceHandler->InParamListL();
         CLiwGenericParamList& outparam = iServiceHandler->OutParamListL();
@@ -269,8 +280,7 @@ void CAIEventHandler::ExecuteAppLauncherL( CLiwDefaultMap& aMap )
         TLiwGenericParam data( KData, TLiwVariant( &aMap ));
         inparam.AppendL( data );
 
-        msgInterface ->ExecuteCmdL(KExecute, inparam, outparam);
-        msgInterface->Close();
+        iMsgInterface ->ExecuteCmdL(KExecute, inparam, outparam);
 
         outparam.Reset();
         inparam.Reset();

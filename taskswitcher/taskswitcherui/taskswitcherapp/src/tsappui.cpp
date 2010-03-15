@@ -57,7 +57,6 @@ const TInt KAppKeyTypeLong = 2;
 //values for checking the OOM
 const TInt KMemoryRequestAmountInBytes = 524288;
 const TInt KMinMemoryAmountInBytes = 524288;
-const TInt KMemoryToBeReservedInBytes = 524288; // 512 KB
 
 // time to wait before sending the task to background
 // (must give time to animation)
@@ -190,7 +189,6 @@ CTsAppUi::~CTsAppUi()
         }
 
     delete iDeviceState;
-    delete iMemAllocBuf;
     delete iThemeEffectsEnabledWatcher;
     
     iWg.Close();
@@ -265,10 +263,13 @@ void CTsAppUi::StartTransition( TUint aTranstionId,
 // CTsAppUi::TransitionFinished
 // -----------------------------------------------------------------------------
 //
-void CTsAppUi::TransitionFinished(const CCoeControl* /*aControl*/, 
+void CTsAppUi::TransitionFinished(const CCoeControl* aControl, 
                                   TUint /*aAction*/)
     {
-    TRAP_IGNORE( DisablePopUpL() );
+    if ( aControl == iAppView )
+        {
+        TRAP_IGNORE( DisablePopUpL() );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -526,13 +527,6 @@ void CTsAppUi::HandleSwitchToBackgroundEvent()
         iForeground = EFalse;
         SetTaskswitcherStateProperty( KTaskswitcherBackgroundValue );
 
-        //allocating extra memory space
-        if ( !iMemAllocBuf )
-            {
-            iMemAllocBuf =
-                (TUint8*) User::Alloc( KMemoryToBeReservedInBytes );
-            }
-
         // notify view
         iAppView->HandleSwitchToBackgroundEvent();
         }
@@ -552,10 +546,6 @@ void CTsAppUi::HandleSwitchToForegroundEvent()
     // must not do anything if iForeground is already up-to-date
     if ( !iForeground )
         {
-        //freeing extra memory space
-        delete iMemAllocBuf;
-        iMemAllocBuf = NULL;
-
         TInt freeRamMemory;
         HAL::Get( HALData::EMemoryRAMFree, freeRamMemory );
         if ( freeRamMemory <= KMinMemoryAmountInBytes )

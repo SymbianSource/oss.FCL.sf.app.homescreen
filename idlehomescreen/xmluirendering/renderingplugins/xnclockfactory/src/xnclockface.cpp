@@ -91,62 +91,63 @@ CXnClockFaceDigital::~CXnClockFaceDigital()
 //
 void CXnClockFaceDigital::DrawL( CXnClockAdapter& aAdapter, CWindowGc& aGc, 
     const TRect& aRect, const TTime& aTime )
-    {        
+    {
     TBuf< KMaxTimeFormatSpec > time;
-    aTime.FormatL( time, KTimeFormat() );         
+    aTime.FormatL( time, KTimeFormat() );
 
     TBuf< KMaxTimeFormatSpec > ampm;
     aTime.FormatL( ampm, KAmPmFormat() );
-    
+
     AknTextUtils::LanguageSpecificNumberConversion( time );
-    
+
     const CAknLayoutFont* clockFont( 
             aAdapter.FontL( CXnClockAdapter::EDigitalFont ) );
-    
+
     const CAknLayoutFont* ampmFont( 
             aAdapter.FontL( CXnClockAdapter::EAmPmFont ) );
 
     const CAknLayoutFont* dateFont( 
             aAdapter.FontL( CXnClockAdapter::EDateFont ) );
-    
+
     const TRgb& color( aAdapter.TextColorL() );
-    
+
     CXnNodePluginIf* date( aAdapter.Date() );
-        
+
     TInt ampmWidth( 0 );
-    
+
     if( TLocale().TimeFormat() == ETime12 )
-        {                
+        {
         // Measure the full width of the ampm string 
         ampmWidth = AknBidiTextUtils::MeasureTextBoundsWidth( *ampmFont, ampm, 
-            CFont::TMeasureTextInput::EFVisualOrder );                                    
+            CFont::TMeasureTextInput::EFVisualOrder );
         }
-    
+
+
     const TInt deltaHeight( aRect.Height() - clockFont->TextPaneHeight() );
     TInt offset( clockFont->TextPaneTopToBaseline() + deltaHeight / 2 );
-    
+
     if( date )
         {
         // When date string is shown, time string must be lifted up
         offset -= ( dateFont->TextPaneHeight() / 2 );
         }
-    
+
     // Measure the full width of the time string 
     TInt textWidth( AknBidiTextUtils::MeasureTextBoundsWidth( *clockFont, time, 
         CFont::TMeasureTextInput::EFVisualOrder ) );
-    
-    TInt extraWidth( aRect.Width() - ampmWidth - textWidth );
-    
+
+    TInt extraWidth( aRect.Width() - textWidth );
+
     TInt margin( extraWidth / 2 );
-   
+
     aGc.SetPenColor( color );
-    
+
     aGc.UseFont( clockFont );
 
     CGraphicsContext::TTextAlign align;
-    
+
     TBool mirrored( AknLayoutUtils::LayoutMirrored() );
-    
+
     if( mirrored )
         {
         align = CGraphicsContext::ERight;
@@ -154,65 +155,64 @@ void CXnClockFaceDigital::DrawL( CXnClockAdapter& aAdapter, CWindowGc& aGc,
     else
         {
         align = CGraphicsContext::ELeft;
-        }        
-       
+        }
+
     aGc.DrawText( time, aRect, offset, align, margin );
 
     aGc.DiscardFont();
-    
+
     if( TLocale().TimeFormat() == ETime12 )
         {
         TRect ampmRect( aRect );
-    
+        TInt ampmHeight( ampmFont->TextPaneHeight() );
+
         if( mirrored )
             {
-            ampmRect.iBr.iX -= ( textWidth + ( margin / 2 ) );
+            align = CGraphicsContext::ELeft;
             }
         else
             {
-            ampmRect.iTl.iX += ( textWidth + ( margin / 2 ) );
-            }            
-                            
-        extraWidth = ampmRect.Width() - ampmWidth;
-        
-        margin = extraWidth / 2;
+            align = CGraphicsContext::ERight;
+            }
+
+        ampmRect.iTl.iY += ampmHeight;
 
         aGc.UseFont( ampmFont );
-                
+
         aGc.DrawText( ampm, ampmRect, offset, align, margin );
-        
+
         aGc.DiscardFont();
-        }    
-    
+        }
+
     if( date )
         {
         const TDesC* dateStr( &KNullDesC() );
-                    
+
         CXnText* textIf( NULL );
 
-        XnComponentInterface::MakeInterfaceL( textIf, date->AppIfL() );                                 
+        XnComponentInterface::MakeInterfaceL( textIf, date->AppIfL() );
 
         if( textIf )
             {
             dateStr = textIf->Text();
-            }        
-                
+            }
+
         // Measure the full width of the time string 
         TInt dateWidth( AknBidiTextUtils::MeasureTextBoundsWidth( *dateFont, *dateStr, 
             CFont::TMeasureTextInput::EFVisualOrder ) );
-        
+
         TInt width( aRect.Width() - dateWidth );
         TInt margin( width / 2 );
-        
+
         // Move date string down by text pane height and 5% of rect height
         offset += dateFont->TextPaneHeight() + ( aRect.Height() / 20 );
-        
+
         aGc.UseFont( dateFont );
-                     
+
         aGc.DrawText( *dateStr, aRect, offset, align, margin );
-        
-        aGc.DiscardFont();        
-        }    
+
+        aGc.DiscardFont();
+        }
     }
 
 // ============================ MEMBER FUNCTIONS ===============================

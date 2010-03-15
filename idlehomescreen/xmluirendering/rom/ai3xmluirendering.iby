@@ -38,6 +38,7 @@ file=ABI_DIR\BUILD_DIR\extrenderingplugin.dll SHARED_LIB_DIR\extrenderingplugin.
 data=\epoc32\data\z\resource\plugins\xn3volumecontrol.rsc \resource\plugins\xn3volumecontrol.rsc
 
 data=\epoc32\data\Z\resource\apps\xnuiengine.rsc      APP_RESOURCE_DIR\xnuiengine.rsc
+data=\epoc32\data\Z\resource\apps\xnwallpaperview.rsc APP_RESOURCE_DIR\xnwallpaperview.rsc
 
 // Stock plugins
 ECOM_PLUGIN( xn3textfactory.dll , xn3textfactory.rsc )

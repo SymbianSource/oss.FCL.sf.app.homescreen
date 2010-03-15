@@ -97,10 +97,6 @@ EXPORT_C MXnComponentFactory::TXnComponentFactoryResponse MXnComponentFactory::C
             
     if ( type == KView )
         {
-        CXnAppUiAdapter* appui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
-        
-        adapter->SetContainerWindowL( appui->ViewAdapter().BgControl() ); 
-                           
         aNode.ViewNodeImpl()->SetComponent( aTargetComponent );
         }
     else
@@ -130,9 +126,7 @@ EXPORT_C MXnComponentFactory::TXnComponentFactoryResponse MXnComponentFactory::C
         // Don't activate tooltip yet
         adapter->ActivateL();
         }
-    
-    adapter->MakeVisible( EFalse );
-    
+      
     CleanupStack::Pop( aTargetComponent );
     
     return response;

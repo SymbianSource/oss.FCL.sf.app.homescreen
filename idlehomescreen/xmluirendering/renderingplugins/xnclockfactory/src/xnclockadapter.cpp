@@ -37,7 +37,7 @@
 _LIT8( KDateInformation, "Clock/DateInformation" );
 _LIT8( KDayInformation, "Clock/DayInformation" );
 
-_LIT( KDigitalFont, "EAknLogicalFontDigitalFont" );
+_LIT( KDigitalFont, "EAknLogicalFontSecondaryFont" );
 _LIT( KAmPmFont, "EAknLogicalFontSecondaryFont" );
 _LIT( KDateFont, "EAknLogicalFontSecondaryFont" );
 

@@ -23,6 +23,8 @@
 
 using namespace XnGestureHelper;
 
+const TInt minPointCount = 5;
+
 /**
  * Vector class (math)
  */
@@ -180,9 +182,9 @@ inline TPoint PreviousPoint( const TXnPointArray& aPoints )
     }
 
 /** @return direction between last two points */
-inline TXnGestureCode LastDirection( const TXnPointArray& aPoints )
+TXnGestureCode TXnGestureRecogniser::LastDirection( const TXnPointArray& aPoints ) const
     {
-    if ( aPoints.Count() > 1 )
+    if ( aPoints.Count() > minPointCount )
         {
         // return direction between latest and previous points.
         // pick the previous point that is different than the last point
@@ -191,9 +193,10 @@ inline TXnGestureCode LastDirection( const TXnPointArray& aPoints )
         // the differing coordinate coordinate is filtered out. For example,
         // if dragging left and slightly up, many y coordinates will have the
         // same value, while only x differs.
-        return Direction( PreviousPoint( aPoints ), aPoints[aPoints.Count() - 1] );
+        return Direction( aPoints[ aPoints.Count() - minPointCount ],
+                          aPoints[ aPoints.Count() - 1 ] );
         }
-    return EGestureUnknown;
+    return GeneralDirection( aPoints );
     }
 
 // ----------------------------------------------------------------------------
@@ -205,21 +208,13 @@ TXnGestureCode TXnGestureRecogniser::GestureCode( const TXnPointArray& aPoints )
     __ASSERT_DEBUG( aPoints.Count() > 0, Panic( EGesturePanicIllegalLogic ) );
 
     if (aPoints.Count() <= 0)
-        return EGestureUnknown;
-        
-    if ( IsTap( aPoints ) )
         {
-        return EGestureTap;
+        return EGestureUnknown;
         }
 
     if ( GestureLength( aPoints ) >= KMinSwipeLength )
         {
-        TXnGestureCode direction = GeneralDirection( aPoints );
-        if ( direction != LastDirection( aPoints ) )
-            {
-            direction = EGestureUnknown;
-            }
-        return direction;
+        return GeneralDirection( aPoints );
         }
 
     // the pointer was moved but was either not moved far enough, or was

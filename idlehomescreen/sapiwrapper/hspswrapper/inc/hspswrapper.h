@@ -33,9 +33,9 @@ class CLiwDefaultMap;
 class CLiwDefaultList;
 class MLiwNotifyCallback;
 class CLiwGenericParamList;
+class CRepository;
 
 namespace hspswrapper{
-
 
 class CHspsConfiguration;
 class CItemMap;
@@ -228,20 +228,20 @@ public:
      */
     IMPORT_C TInt RemovePluginL(const TDesC8& aPluginId);
     
-   /**
-     * Sets plugin active into active configuration. 
+    /**
+     * Sets plugin active. 
      *
      * @param aPluginId Plugin id to be activated
      * @return Operation status. KErrNone (success), KErrNotFound
      */
-    IMPORT_C TInt SetActivePluginL(const TDesC8& aPluginId);	
-
+    IMPORT_C TInt SetActivePluginL(const TDesC8& aPluginId);     
+    
     /**
       * Restore active view. Will remove all plugins in active view.
       *
       * @return Operation status. KErrNone (success), KErrNotFound
       */
-     IMPORT_C TInt RestoreActiveViewL();        
+    IMPORT_C TInt RestoreActiveViewL();        
 
      /**
        * Restore whole root configuration. Will remove
@@ -249,7 +249,7 @@ public:
        *
        * @return Operation status. KErrNone (success), KErrNotFound
        */
-      IMPORT_C TInt RestoreRootL();      
+    IMPORT_C TInt RestoreRootL();      
      
     /**
      * Replace plugin in the active configuration.
@@ -314,19 +314,24 @@ public:
      * Returns HSPS services interface
      */   
     IMPORT_C MLiwInterface* HspsInterface() const;
-
+    
 protected:
     CHspsWrapper(MHspsWrapperObserver* aObserver);
-    void ConstructL(const TDesC8& aAppUid);
-    
-    void ProcessConfigurationMapL(const CLiwMap& aSource, CHspsConfiguration& aTarget);
-    void ProcessConfigurationPluginsL(const CLiwList& aPluginsList, CHspsConfiguration& aTarget);
+    void ConstructL(const TDesC8& aAppUid);    
+    void ProcessConfigurationMapL( const CLiwMap& aSource,
+                                   CHspsConfiguration& aTarget,
+                                   const TBool aAppConf );    
+    void ProcessConfigurationPluginsL( const CLiwList& aPluginsList,
+                                       CHspsConfiguration& aTarget,
+                                       const TBool aAppConf );
     void ProcessConfigurationSettingsL(const CLiwList& aItemList, CHspsConfiguration& aTarget);
     void ProcessConfigurationResourcesL(const CLiwList& aObjectList, CHspsConfiguration& aTarget);
     void ProcessConfItemPropertiesL(const CLiwList& aPropertyMapList,CItemMap& aItemMap);
     void ProcessPluginsL(const CLiwList& aPluginInfoMapList, RPointerArray<CPluginInfo>& aPlugins);
     void FillMapFromItemL( CLiwDefaultMap& aMap, const CItemMap& aItemMap );
     void FillMapFromPropertiesL( CLiwDefaultList& aInPropertyMapList, const RPointerArray<CPropertyMap>& aProperties );
+    TInt LoadActivePluginIdL();
+    const TDesC8& ActivePluginId() const;
 
 protected: // from MLiwNotifyCallback 
 
@@ -364,6 +369,16 @@ private: // data
      * Asynchronous service request tarnsaction id
      */ 
     TInt iTransactionId;
+    
+    /*
+     * Central repository session. Owned;
+     */ 
+    CRepository* iRepository;
+        
+    /*
+     * Active plugin id. Owned.
+     */ 
+    HBufC8* iActivePluginId;
     };
 }
 

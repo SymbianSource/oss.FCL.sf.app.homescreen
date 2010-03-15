@@ -56,6 +56,11 @@ public:
      */
     void StartLoading();
     
+    /**
+     * Is loading ongoing.
+     */
+    TBool IsLoading();
+
 private:
     
     /**
@@ -84,6 +89,11 @@ protected: // from CActive
 
 private:
 
+    /**
+     * connects to wrt registry
+     */
+    void OpenSessionL();
+    
     /**
      * loads widgets into the listbox
      */
@@ -126,6 +136,9 @@ private: // data
     
 	/** uid of currently unistalled widget */
     TUid iUninstallUid;
+    
+    /** switch for loading operation */
+    TBool iLoading;
     };
 
 #endif // WMWIDGETLOADERAO_H_

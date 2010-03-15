@@ -118,6 +118,8 @@ void CXnFocusControl::DoMakeVisibleL( TBool aVisible )
                                    
             if ( node )
                 {
+                node->HideTooltipsL();
+                                    
                 CXnControlAdapter* control( node->Control() );
                 
                 if  ( control && control->RefusesFocusLoss() )

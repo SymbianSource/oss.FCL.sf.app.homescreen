@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.56 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.57 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -638,7 +638,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down
             && itemExists  )
         {
-        SetHighlightL( index );
+        SetHighlightL( index );///////////--
         }
     else if ( aPointerEvent.iType == TPointerEvent::EDrag
               // the line below is needed to enable edit mode in the list widget
@@ -738,6 +738,7 @@ EXPORT_C void CMmWidgetContainer::SetHighlightVisibilityL( TBool aEnable )
     {
     // activate the model
     CHnSuiteModel* suiteModel = GetMmModel()->GetSuiteModel();
+
     if ( suiteModel )
         {
         suiteModel->SetActiveL( aEnable );
@@ -766,7 +767,7 @@ EXPORT_C void CMmWidgetContainer::SetHighlightVisibilityL( TBool aEnable )
             iWidget->View()->ItemDrawer()->ClearFlags(
                 CListItemDrawer::ESingleClickDisabledHighlight );
             }
-    
+
         if ( IsVisible() )
             {
             TInt highlight = GetHighlight();
@@ -1190,7 +1191,7 @@ void CMmWidgetContainer::SetSuiteModelL(CHnSuiteModel* aModel)
     numberOfItemsBefore = GetMmModel()->NumberOfItems();
 
     GetMmModel()->SetSuiteModelL( aModel );
-    
+
     TBool highlightVisibleBefore = iWidget->IsVisible() && IsHighlightVisible();
 
     // This needs to be in place (disabling redraw)
@@ -1210,7 +1211,7 @@ void CMmWidgetContainer::SetSuiteModelL(CHnSuiteModel* aModel)
         SetupWidgetLayoutL();
         }
     iWidget->MakeVisible(ETrue);
-    
+
     if ( highlightVisibleBefore )
         {
         SetHighlightVisibilityL( ETrue );
@@ -1895,36 +1896,14 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
     switch ( aEventType )
 		{
 		case MEikListBoxObserver::EEventPenDownOnItem:
-			{
-			iDragOccured = EFalse;
-			if ( !iLongTapInProgress )
-				{
-				SetHighlightVisibilityL( ETrue );
-				}
-			break;
-			}
 		case MEikListBoxObserver::EEventItemSingleClicked:
 			{
-			if ( !iDragOccured && !iLongTapInProgress )
-				{
-				SetHighlightL( Widget()->CurrentItemIndex() );
-				SetHighlightVisibilityL( EFalse );
-				}
 			iDragOccured = EFalse;
 			break;
 			}
 		case MEikListBoxObserver::EEventItemDraggingActioned:
 			{
-			SetHighlightVisibilityL( EFalse );
 			iDragOccured = ETrue;
-			break;
-			}
-		case MEikListBoxObserver::EEventPanningStarted:
-		case MEikListBoxObserver::EEventPanningStopped:
-		case MEikListBoxObserver::EEventFlickStarted:
-		case MEikListBoxObserver::EEventFlickStopped:
-			{
-			SetHighlightVisibilityL( EFalse );
 			break;
 			}
 		}
@@ -1935,6 +1914,7 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 		switch ( aEventType )
 			{
 			case MEikListBoxObserver::EEventFlickStarted:
+			case MEikListBoxObserver::EEventPanningStarted:
 				{
 				static_cast<CMmListBoxItemDrawer*>(
 						Widget()->View()->ItemDrawer() )->
@@ -1947,6 +1927,13 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 						Widget()->View()->ItemDrawer() )->
 						EnableCachedDataUse( EFalse );
 				DrawView();
+				break;
+				}
+			case MEikListBoxObserver::EEventPanningStopped:
+				{
+				static_cast<CMmListBoxItemDrawer*>(
+						Widget()->View()->ItemDrawer() )->
+						EnableCachedDataUse( EFalse );
 				break;
 				}
 			}
@@ -1965,10 +1952,10 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
 			}
 		}
 
-    if ( iListBoxObserver && !iLongTapInProgress && !iDrawer->IsDraggable() )
+    if ( aEventType == MEikListBoxObserver::EEventItemSingleClicked &&
+        iListBoxObserver && !iLongTapInProgress && !iDrawer->IsDraggable() )
         {
         iListBoxObserver->HandleListBoxEventL( aListBox, aEventType );
         }
     }
-
 //End of file

@@ -104,7 +104,8 @@ using namespace AiUiDef::xml::event;
 CAIXuikonEventHandler::CAIXuikonEventHandler( CXmlUiController& aUiController,
                                              CContentRenderer& aRenderer )
     : iUiController(aUiController),
-      iContentRenderer(aRenderer)
+      iContentRenderer(aRenderer),
+      iAiEventHandler( NULL )
     {
     }
 
@@ -145,7 +146,7 @@ CAIXuikonEventHandler::~CAIXuikonEventHandler()
     {
     delete iNullEventHandler;
     delete iVolumeEvent;
-    
+    delete iAiEventHandler;
     Release( iStrParser );
     }
 
@@ -225,10 +226,13 @@ inline TBool CAIXuikonEventHandler::HandleSystemEventL(
         // Event is not targeted here
         return EFalse;
         }
-    CAIEventHandler* handler = CAIEventHandler::NewL( iUiController );
-    CleanupStack::PushL( handler );
-    handler->HandleEventL( aEventText, aEvent );
-    CleanupStack::PopAndDestroy( handler );
+    
+    if ( !iAiEventHandler )
+        {
+        iAiEventHandler = CAIEventHandler::NewL( iUiController );
+        }
+    iAiEventHandler->HandleEventL( aEventText, aEvent );
+    
     return ETrue;
     }
 

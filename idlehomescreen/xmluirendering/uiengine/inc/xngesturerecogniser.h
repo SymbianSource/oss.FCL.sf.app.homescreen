@@ -70,6 +70,7 @@ namespace XnGestureHelper
         EGestureSwipeUp = 0x0000000A,
         /** swipe down */
         EGestureSwipeDown = 0x0000000B,
+        EGestureCanceled = 0x0000000C,
         /** 
          * these codes are sent when user initiates holding by keeping stylus 
          * in same place for a longer duration
@@ -104,6 +105,8 @@ namespace XnGestureHelper
          * @return recognised gesture id or EUnknownGesture
          */
         TXnGestureCode GestureCode( const TXnPointArray& aPoints ) const;
+        
+        TXnGestureCode LastDirection( const TXnPointArray& aPoints ) const;
         };
     } // namespace XnGestureHelper
 

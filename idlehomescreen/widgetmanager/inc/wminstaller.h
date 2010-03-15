@@ -24,6 +24,7 @@
 class CIdle;
 class CWmWidgetData;
 class TUid;
+class CWmPlugin;
 
 /**
  * CWmInstaller 
@@ -33,16 +34,17 @@ NONSHARABLE_CLASS( CWmInstaller ) : public CActive
 public:
     /**
      * Two-phased constructors.
+	 * @param aWmPlugin Reference to plugin root
      */
-    static CWmInstaller* NewL();
-    static CWmInstaller* NewLC();
+    static CWmInstaller* NewL( CWmPlugin& aWmPlugin );
+    static CWmInstaller* NewLC( CWmPlugin& aWmPlugin );
     
     /** Destructor */
     ~CWmInstaller();
     
 private:    
     /** constructor */
-    CWmInstaller();
+    CWmInstaller( CWmPlugin& aWmPlugin );
     
     /** 2nd phase constructor */
     void ConstructL();
@@ -106,6 +108,9 @@ private:
     
     
     HBufC8* iMime;
+    
+    /** reference to plugin root */
+    CWmPlugin& iWmPlugin;
     };
 
 #endif // __WMPLUGIN_

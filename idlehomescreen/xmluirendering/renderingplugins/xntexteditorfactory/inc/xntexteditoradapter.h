@@ -29,6 +29,7 @@
 class CXnNodePluginIf;
 class CEikEdwin;
 class CXnTextEditorPublisher;
+class CXnAppUiAdapter;
 
 // CLASS DECLARATION
 class CXnTextEditorAdapter : public CXnControlAdapter
@@ -118,7 +119,12 @@ public: // from base classes
     * See CCoeControl documentation
     */          
     void Draw( const TRect& aRect ) const;
-           
+
+    /**
+    * See CCoeControl documentation
+    */          
+    void HandleResourceChange( TInt aType );
+
 private:
     // from MCoeControlObserver
     
@@ -126,7 +132,7 @@ private:
     * See MCoeControlObserver documentation
     */
     void HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType );
-        
+
 private:
     // private constrcutors 
 
@@ -138,6 +144,8 @@ private:
     // new functions
                  
     void SetPropertiesL();
+    
+    void SetEditorMarginPropertiesL();
 
 private:
     // data
@@ -147,6 +155,8 @@ private:
     CXnNodePluginIf&    	iNode; 
     /** UI engine, not owned */
     TXnUiEnginePluginIf*    iUiEngine;
+    /** Appui adapter, not owned */
+    CXnAppUiAdapter*        iAppui;
     /** Editor, owned */
     CEikEdwin*              iEditor; 
     /** CPS publisher wrapper, owned */
@@ -160,7 +170,7 @@ private:
     /** Flag to indicate whether focus loss is refused */
     TBool                   iRefusesFocusLoss;
     /** Split input states*/
-    TInt                    iSplitInputState;
+    TInt                    iSplitInputFlags;
     };
 
 #endif      // _XNTEXTEDITORADAPTER_H

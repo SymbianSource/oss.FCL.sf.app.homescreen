@@ -322,13 +322,6 @@ private: // from base class CCoeControl
      * @see CCoeControl::Draw
      */
     void Draw( const TRect& aRect ) const;
-
-	/**
-	 * Handles pointer events.
-	 * 
-	 * @see CCoeControl::HandlePointerEventL
-	 */
-	void HandlePointerEventL( const TPointerEvent& aPointerEvent );
 	
 private:
   	 /** Constructor for performing 1st stage construction */

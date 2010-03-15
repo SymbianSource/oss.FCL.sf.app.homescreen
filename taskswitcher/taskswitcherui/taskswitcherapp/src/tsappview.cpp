@@ -458,6 +458,8 @@ void CTsAppView::HandleSwitchToForegroundEvent()
     
     Window().Invalidate(Rect());
     
+    iEvtHandler->EnableEventHandling(ETrue);
+    
     // Fade behind the pop-up
     iPopupFader.FadeBehindPopup( this, NULL, ETrue );
 
@@ -602,7 +604,15 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
         {
 		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
 				ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
-        } 
+		if ( !( iFastSwapArea->Rect().Contains(aPointerEvent.iParentPosition) ||
+		        iAppsHeading->Rect().Contains(aPointerEvent.iParentPosition)
+		       ) )
+		    {
+		    //move task switcher to background
+		    iEvtHandler->EnableEventHandling(EFalse);
+		    iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
+		    }
+        }
     iFastSwapArea->HandlePointerEventL(aPointerEvent);
     }
 
@@ -660,10 +670,13 @@ void CTsAppView::OrderFullWindowRedraw()
 // CTsAppView::MoveOffset
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::MoveOffset(const TPoint& aOffset)
+void CTsAppView::MoveOffset(const TPoint& aOffset, TBool aDrawNow)
     {
-    DrawDeferred();
-    iFastSwapArea->MoveOffset(aOffset);
+    if ( aDrawNow )
+        {
+        DrawDeferred();
+        }
+    iFastSwapArea->MoveOffset(aOffset, aDrawNow);
     }
 
 // -----------------------------------------------------------------------------
@@ -677,11 +690,6 @@ void CTsAppView::TapL(const TPoint& aPoint)
         iFastSwapArea->TapL(aPoint);
         DrawNow();
         }
-    else if( !iAppsHeading->Rect().Contains(aPoint))
-        {
-        //move task switcher to background
-        iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -693,11 +701,6 @@ void CTsAppView::LongTapL(const TPoint& aPoint)
     if(iFastSwapArea->Rect().Contains(aPoint))
         {
         iFastSwapArea->LongTapL(aPoint);
-        }
-    else if( !iAppsHeading->Rect().Contains(aPoint))
-        {
-        //move task switcher to background
-        iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
         }
     }
 
@@ -717,11 +720,6 @@ void CTsAppView::DragL(const MAknTouchGestureFwDragEvent& aEvent)
         {
 		iFastSwapArea->DragL(aEvent);
         }
-    else 
-    	{
-		//move task switcher to background
-		iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
-    	}
     }
 
 // -----------------------------------------------------------------------------

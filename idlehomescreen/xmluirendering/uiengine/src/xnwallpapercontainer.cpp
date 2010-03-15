@@ -57,9 +57,14 @@ CXnWallpaperContainer* CXnWallpaperContainer::NewL()
 void CXnWallpaperContainer::ConstructL()
     {
     CreateWindowL();
-    TRect rect = iAvkonAppUi->ClientRect();
+    
     iBgContext = CAknsBasicBackgroundControlContext::NewL(
-            KAknsIIDQsnBgScreen, rect, EFalse );
+            KAknsIIDQsnBgScreen, TRect(), ETrue );
+
+    TRect rect;
+    
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect ); 
+    
     SetRect( rect );
     }
 
@@ -97,8 +102,11 @@ void CXnWallpaperContainer::SizeChanged()
     {
     if ( iBgContext )
         {
-        iBgContext->SetRect(Rect());
-        TRect rect = Rect();
+        TRect rect;
+        
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, rect ); 
+                                    
+        iBgContext->SetRect( rect );        
         }
     }
  
@@ -107,13 +115,16 @@ void CXnWallpaperContainer::SizeChanged()
 // -----------------------------------------------------------------------------
 //
 void CXnWallpaperContainer::HandleResourceChange(TInt aType)
-    {
-    TRect rect;
+    {    
     if ( aType == KEikDynamicLayoutVariantSwitch )
         {
-        AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, rect);
-        SetRect(rect);
+        TRect rect;
+        
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );
+        
+        SetRect( rect );
         }
+    
     CCoeControl::HandleResourceChange(aType);
     }
 
