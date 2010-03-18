@@ -19,8 +19,8 @@
 //  uishellservices ado
 #include "../homescreen_plat/group/bld.inf"
 #include "../idlehomescreen/group/bld.inf"
-#include "../menufw/group/bld.inf"
-#include "../taskswitcher/group/bld.inf"
+//#include "../menufw/group/bld.inf"
+//#include "../taskswitcher/group/bld.inf"
 
 PRJ_PLATFORMS
 
