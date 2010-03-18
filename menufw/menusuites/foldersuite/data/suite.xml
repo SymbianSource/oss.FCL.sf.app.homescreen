@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<mm:content xmlns:mm="http://nokia.com/mmenu" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://nokia.com/mmenu ../mmenuschema.xsd">
-    <mm:localization namespace="foldersuite_rsc" source="foldersuite.rsc"/>
-    <mm:suite template="logical_template_3|list_single_hc_apps_pane" type="grid|list" genre="foldersuite" title="params:suite_name" custom_id="params:folder_id" emptytext="foldersuite_rsc:R_MENU_FOLDER_EMPTY_TEXT"/>
-</mm:content>
-
