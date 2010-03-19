@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<snsranalogclockstyleplugin>
+    <screensaver library="snsranalogclockstyleplugin.dll"
+                 uri="screensaver.nokia.com/screensaver/analogclock"/>
+</snsranalogclockstyleplugin>

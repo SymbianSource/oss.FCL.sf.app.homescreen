@@ -1,0 +1,16 @@
+EXPORTS
+	??0SnsrUserActivityService@@QAE@XZ @ 1 NONAME ; SnsrUserActivityService::SnsrUserActivityService(void)
+	??1SnsrUserActivityService@@UAE@XZ @ 2 NONAME ; SnsrUserActivityService::~SnsrUserActivityService(void)
+	??_ESnsrUserActivityService@@UAE@I@Z @ 3 NONAME ; SnsrUserActivityService::~SnsrUserActivityService(unsigned int)
+	?getStaticMetaObject@SnsrUserActivityService@@SAABUQMetaObject@@XZ @ 4 NONAME ; struct QMetaObject const & SnsrUserActivityService::getStaticMetaObject(void)
+	?inactivityPeriod@SnsrUserActivityService@@UBEHXZ @ 5 NONAME ; int SnsrUserActivityService::inactivityPeriod(void) const
+	?metaObject@SnsrUserActivityService@@UBEPBUQMetaObject@@XZ @ 6 NONAME ; struct QMetaObject const * SnsrUserActivityService::metaObject(void) const
+	?qt_metacall@SnsrUserActivityService@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 7 NONAME ; int SnsrUserActivityService::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?qt_metacast@SnsrUserActivityService@@UAEPAXPBD@Z @ 8 NONAME ; void * SnsrUserActivityService::qt_metacast(char const *)
+	?setInactivityPeriod@SnsrUserActivityService@@UAEXH@Z @ 9 NONAME ; void SnsrUserActivityService::setInactivityPeriod(int)
+	?tr@SnsrUserActivityService@@SA?AVQString@@PBD0@Z @ 10 NONAME ; class QString SnsrUserActivityService::tr(char const *, char const *)
+	?tr@SnsrUserActivityService@@SA?AVQString@@PBD0H@Z @ 11 NONAME ; class QString SnsrUserActivityService::tr(char const *, char const *, int)
+	?trUtf8@SnsrUserActivityService@@SA?AVQString@@PBD0@Z @ 12 NONAME ; class QString SnsrUserActivityService::trUtf8(char const *, char const *)
+	?trUtf8@SnsrUserActivityService@@SA?AVQString@@PBD0H@Z @ 13 NONAME ; class QString SnsrUserActivityService::trUtf8(char const *, char const *, int)
+	?staticMetaObject@SnsrUserActivityService@@2UQMetaObject@@B @ 14 NONAME ; struct QMetaObject const SnsrUserActivityService::staticMetaObject
+

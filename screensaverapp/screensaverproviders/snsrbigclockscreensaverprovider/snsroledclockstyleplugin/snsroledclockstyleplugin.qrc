@@ -1,0 +1,6 @@
+<RCC>
+    <qresource>
+        <file alias="snsroledclockwidget.css">resource/snsroledclockwidget.css</file>
+        <file alias="snsroledclockwidget.widgetml">resource/snsroledclockwidget.widgetml</file>
+    </qresource>
+</RCC>

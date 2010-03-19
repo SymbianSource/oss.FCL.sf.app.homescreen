@@ -1,0 +1,16 @@
+EXPORTS
+	_ZN23SnsrUserActivityService11qt_metacallEN11QMetaObject4CallEiPPv @ 1 NONAME
+	_ZN23SnsrUserActivityService11qt_metacastEPKc @ 2 NONAME
+	_ZN23SnsrUserActivityService16staticMetaObjectE @ 3 NONAME DATA 16
+	_ZN23SnsrUserActivityService19getStaticMetaObjectEv @ 4 NONAME
+	_ZN23SnsrUserActivityService19setInactivityPeriodEi @ 5 NONAME
+	_ZN23SnsrUserActivityServiceC1Ev @ 6 NONAME
+	_ZN23SnsrUserActivityServiceC2Ev @ 7 NONAME
+	_ZN23SnsrUserActivityServiceD0Ev @ 8 NONAME
+	_ZN23SnsrUserActivityServiceD1Ev @ 9 NONAME
+	_ZN23SnsrUserActivityServiceD2Ev @ 10 NONAME
+	_ZNK23SnsrUserActivityService10metaObjectEv @ 11 NONAME
+	_ZNK23SnsrUserActivityService16inactivityPeriodEv @ 12 NONAME
+	_ZTI23SnsrUserActivityService @ 13 NONAME
+	_ZTV23SnsrUserActivityService @ 14 NONAME
+

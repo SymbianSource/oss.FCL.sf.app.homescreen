@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <name>hshomescreenstateplugin</name>
+    <filepath>hshomescreenstateplugin</filepath>
+    <description></description>
+    <interface>
+        <name>com.nokia.homescreen.state.HsLoadSceneState</name>
+        <version>1.0</version>
+        <description></description>
+        <capabilities></capabilities>
+    </interface>
+    <interface>
+        <name>com.nokia.homescreen.state.HsIdleState</name>
+        <version>1.0</version>
+        <description></description>
+        <capabilities></capabilities>
+    </interface>
+</service>

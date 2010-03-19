@@ -1,3 +1,0 @@
--c32,8 qgn_menu_hswidget
--c32,8 add_widget_button
--c32,8 qgn_menu_ovistore.svg

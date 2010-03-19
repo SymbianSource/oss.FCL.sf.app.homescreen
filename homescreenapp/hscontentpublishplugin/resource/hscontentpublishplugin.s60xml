@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <name>hscontentpublishplugin</name>
+    <filepath>z:/hsresources/plugins/contentpublish/hscontentpublishplugin.qtplugin</filepath>
+    <description>Homescreen Content Publish Plugin</description>
+    <interface>
+        <name>com.nokia.homescreen.contentpublish</name>
+        <version>1.0</version>
+        <description>Content publish api for client processes </description>
+        <capabilities></capabilities>
+    </interface>
+</service>

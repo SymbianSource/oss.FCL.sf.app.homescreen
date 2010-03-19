@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/xml" >
+        <file alias="hsmenuworkerstateplugin.docml">resource/hsmenuworkerstateplugin.docml</file>
+    </qresource>
+</RCC>

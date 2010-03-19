@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/" >           
+        <file>themes/icons/hbdefault/scalable/qtg_mono_applications_all.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_mono_applications_collections.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_mono_search.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_mono_ovistore.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_large_applications_download.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_large_applications_user.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_large_super_new.svg</file>
+        
+        
+        <file>themes/icons/hbdefault/scalable/qtg_graf_hspage_normal.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_graf_hspage_highlight.svg</file>
+        <file>themes/icons/hbdefault/scalable/hs_shortcut_bg.svg</file>
+        
+        <file>themes/icons/hbdefault/scalable/qtg_graf_hs_delete_highlight.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_graf_hs_delete_normal.svg</file>
+        <file>themes/icons/hbdefault/pixmap/hs_applib_button.png</file>
+
+        <file>themes/icons/hbdefault/scalable/qtg_graf_clock_day_bg.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_graf_clock_day_hour.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_graf_clock_day_min.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_graf_hs_dialer.svg</file>
+    </qresource>    
+</RCC>

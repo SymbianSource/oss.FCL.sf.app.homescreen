@@ -1,0 +1,109 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+; Language
+&EN
+
+; SIS header: name, uid, version
+#{"homescreenapp"},(0x20022F47),1,0,0
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Supports S60 5th Edition
+[0x1028315F], 0, 0, 0, {"S60ProductID"}
+
+
+; ---- hsapplication --------------------------------------------
+
+"/epoc32/release/armv5/urel/hsapplication.exe" - "c:/sys/bin/hsapplication.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/hsapplication_reg.rsc" - "c:/private/10003a3f/import/apps/hsapplication_reg.rsc"
+"/epoc32/data/z/resource/apps/hsapplication.rsc" - "c:/resource/apps/hsapplication.rsc"
+"/epoc32/data/z/resource/apps/hsapplication.mif" - "c:/resource/apps/hsapplication.mif"
+"/epoc32/data/z/private/20022F35/homescreendb" - "c:/private/20022f35/homescreendb"
+"/epoc32/data/z/private/20022f35/wallpapers/1_portrait.png" - "c:/private/20022f35/wallpapers/1_portrait.png"
+"/epoc32/data/z/private/20022f35/wallpapers/1_landscape.png" - "c:/private/20022f35/wallpapers/1_landscape.png"
+"/epoc32/data/z/private/20022f35/wallpapers/2_portrait.png" - "c:/private/20022f35/wallpapers/2_portrait.png"
+"/epoc32/data/z/private/20022f35/wallpapers/2_landscape.png" - "c:/private/20022f35/wallpapers/2_landscape.png"
+"/epoc32/data/z/private/20022f35/wallpapers/3_portrait.png" - "c:/private/20022f35/wallpapers/3_portrait.png"
+"/epoc32/data/z/private/20022f35/wallpapers/3_landscape.png" - "c:/private/20022f35/wallpapers/3_landscape.png"
+"/epoc32/data/z/private/20022f35/wallpapers/d_portrait.png" - "c:/private/20022f35/wallpapers/d_portrait.png"
+"/epoc32/data/z/private/20022f35/wallpapers/d_landscape.png" - "c:/private/20022f35/wallpapers/d_landscape.png"
+"/epoc32/data/z/data/images/kqtihswallpapers/bg_1.png" - "c:/data/images/kqtihswallpapers/bg_1.png"
+"/epoc32/data/z/data/images/kqtihswallpapers/bg_2.png" - "c:/data/images/kqtihswallpapers/bg_2.png"
+"/epoc32/data/z/data/images/kqtihswallpapers/bg_3.png" - "c:/data/images/kqtihswallpapers/bg_3.png"
+"/epoc32/data/z/data/images/kqtihswallpapers/bg_4.png" - "c:/data/images/kqtihswallpapers/bg_4.png"
+"/epoc32/data/z/resource/homescreen.qm" - "c:/resource/homescreen.qm"
+
+; ---- hsutils --------------------------------------------
+
+"/epoc32/release/armv5/urel/hsutils.dll" - "c:/sys/bin/hsutils.dll"
+
+; ---- hsdomainmodel --------------------------------------------
+
+"/epoc32/release/armv5/urel/hsdomainmodel.dll" - "c:/sys/bin/hsdomainmodel.dll"
+
+; ---- runtimeplugins --------------------------------------------
+
+; -------- hsdefaultruntimeplugin
+"/epoc32/release/armv5/urel/hsdefaultruntimeplugin.dll"     - "c:/sys/bin/hsdefaultruntimeplugin.dll"
+"/epoc32/data/z/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.qtplugin" - "c:/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.qtplugin"
+"/epoc32/data/z/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.manifest"  - "c:/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.manifest"
+
+; ---- serviceproviders --------------------------------------------
+
+; -------- hsmenuserviceprovider
+"/epoc32/release/armv5/urel/hsmenuserviceprovider.dll" - "c:/sys/bin/hsmenuserviceprovider.dll"
+
+; ---- stateplugins --------------------------------------------
+
+; -------- hsapplibrarystateplugin
+"/epoc32/release/armv5/urel/hsapplibrarystateplugin.dll" - "c:/sys/bin/hsapplibrarystateplugin.dll"
+"/epoc32/data/z/hsresources/plugins/stateplugins/hsapplibrarystateplugin.qtplugin" - "c:/hsresources/plugins/stateplugins/hsapplibrarystateplugin.qtplugin"
+"/epoc32/data/z/hsresources/plugins/stateplugins/hsapplibrarystateplugin.xml" - "c:/hsresources/plugins/stateplugins/hsapplibrarystateplugin.xml"
+"/epoc32/data/z/resource/qt/translations/hsapplibrary.qm" - "c:/resource/qt/translations/hsapplibrary.qm"
+
+; -------- hshomescreenstateplugin
+"/epoc32/release/armv5/urel/hshomescreenstateplugin.dll" - "c:/sys/bin/hshomescreenstateplugin.dll"
+"/epoc32/data/z/hsresources/plugins/stateplugins/hshomescreenstateplugin.qtplugin" - "c:/hsresources/plugins/stateplugins/hshomescreenstateplugin.qtplugin"
+"/epoc32/data/z/hsresources/plugins/stateplugins/hshomescreenstateplugin.xml" - "c:/hsresources/plugins/stateplugins/hshomescreenstateplugin.xml"
+
+; -------- hsmenuworkerstateplugin
+"/epoc32/release/armv5/urel/hsmenuworkerstateplugin.dll"     - "c:/sys/bin/hsmenuworkerstateplugin.dll"
+"/epoc32/data/z/hsresources/plugins/stateplugins/hsmenuworkerstateplugin.qtplugin" - "c:/hsresources/plugins/stateplugins/hsmenuworkerstateplugin.qtplugin"
+"/epoc32/data/z/hsresources/plugins/stateplugins/hsmenuworkerstateplugin.xml"  - "c:/hsresources/plugins/stateplugins/hsmenuworkerstateplugin.xml"
+
+; ---- widgetplugins --------------------------------------------
+
+; -------- hsshortcutwidgetplugin
+"/epoc32/release/armv5/urel/hsshortcutwidgetplugin.dll"  - "c:/sys/bin/hsshortcutwidgetplugin.dll"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F46/hsshortcutwidgetplugin.qtplugin" - "c:/private/20022F35/import/widgetregistry/20022F46/hsshortcutwidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F46/hsshortcutwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F46/hsshortcutwidgetplugin.manifest"
+
+; -------- hsclockwidgetplugin
+"/epoc32/release/armv5/urel/hsclockwidgetplugin.dll"  - "c:/sys/bin/hsclockwidgetplugin.dll"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.qtplugin" - "c:/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.manifest"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F43/clock.png"  - "c:/private/20022F35/import/widgetregistry/20022F43/clock.png"
+
+; -------- hsdialerwidgetplugin
+"/epoc32/release/armv5/urel/hsdialerwidgetplugin.dll" - "c:/sys/bin/hsdialerwidgetplugin.dll"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.qtplugin" - "c:/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.manifest"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F44/dialer.png"  - "c:/private/20022F35/import/widgetregistry/20022F44/dialer.png"

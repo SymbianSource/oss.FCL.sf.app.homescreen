@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/xml">
+        <file alias="applibrary.docml">resource/applibrary.docml</file>
+    </qresource>
+</RCC>

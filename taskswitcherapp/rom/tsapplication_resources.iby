@@ -1,0 +1,23 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+#ifndef __TSAPP_LANGUAGE_IBY__
+#define __TSAPP_LANGUAGE_IBY__
+
+// -------- hsapplication
+data=DATAZ_\resource\qt\translations\taskswitcher.qm resource\qt\translations\taskswitcher.qm 
+
+#endif //__TSAPP_LANGUAGE_IBY__

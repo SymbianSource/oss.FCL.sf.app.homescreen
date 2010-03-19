@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/xml" >
+        <file alias="hsdigitalclockwidget.docml">resource/hsdigitalclockwidget.docml</file>
+        <file alias="hsanalogclockwidget.docml">resource/hsanalogclockwidget.docml</file>
+    </qresource>
+</RCC>

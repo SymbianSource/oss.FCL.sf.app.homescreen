@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<widgetprovider>
+    <widget library="hsshortcutwidgetplugin"
+            uri="hsshortcutwidgetplugin"
+            title="Shortcut"
+            iconuri="shortcut.png"            hidden="true"/>
+</widgetprovider>

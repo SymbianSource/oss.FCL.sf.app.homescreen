@@ -1,0 +1,21 @@
+HbWidget {
+    margin-left: 0un;
+    margin-top: 0un;
+}
+
+SnsrAnalogClockWidget {
+    layout: layout_1;
+}
+
+SnsrAnalogClockWidget::analog_clock_background {
+    pref-width: 40.0un;
+    pref-height: 40.0un;
+}
+
+SnsrAnalogClockWidget::analog_clock_hour_hand {
+    pref-height: 28.0un;
+}
+
+SnsrAnalogClockWidget::analog_clock_minute_hand {
+    pref-height: 34.0un;
+}

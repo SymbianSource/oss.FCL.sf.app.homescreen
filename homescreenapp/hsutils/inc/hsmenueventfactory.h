@@ -1,0 +1,90 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Menu Event Factory.
+*
+*/
+
+
+#ifndef HSMENUEVENTFACTORY_H
+#define HSMENUEVENTFACTORY_H
+
+#include <QEvent>
+#include <QObject>
+
+#include <qeventtransition.h>
+
+#include "hstest_global.h"
+#include "hsutils_global.h"
+#include "hsapp_defs.h"
+HOMESCREEN_TEST_CLASS(t_hsUtils)
+
+
+class HSUTILS_EXPORT HsMenuEventFactory: public QObject
+{
+
+private:
+    HsMenuEventFactory();
+
+public:
+
+    static QEvent *createAddToHomeScreenEvent(
+        int entryId,
+        const QString &entryTypeName = QString(),
+        const QString &uri = QString(),
+        const QString &library = QString()
+    );
+
+    static QEvent *createOpenCollectionEvent(int itemId,
+            const QString &collectionType);
+
+    static QEvent *createRenameCollectionEvent(int aItemId);
+
+    static QEvent *createNewCollectionEvent();
+
+    static QEvent *createDeleteCollectionEvent(int aItemId);
+
+    static QEvent *createOpenAppLibraryEvent(
+        HsMenuMode menuMode = NormalHsMenuMode);
+
+    static QEvent *createOpenHomeScreenEvent();
+
+    static QEvent *createCollectionDeletedEvent();
+
+    static QEvent *createAddAppsFromApplicationsViewEvent(
+        HsSortAttribute aApplicationsSortOder,
+        HsSortAttribute aCollectionsSortOder,
+        int aItemId = 0);
+
+    static QEvent *createAddAppsFromCallectionViewEvent(
+        int aCollectionId,
+        int aApplicationId = 0,
+        HsSortAttribute aCollectionsSortOder = NoHsSortAttribute);
+
+    static QEvent *createRemoveAppFromCollectionEvent(int aItemId, int aCollectionId);
+
+    static QEvent *createArrangeCollectionEvent(int aTopItemId);
+
+    static QEvent *createPreviewHSWidgetEvent(
+        int entryId,
+        const QString &entryTypeName = QString(),
+        const QString &uri = QString(),
+        const QString &library = QString()
+    );
+
+    static QEvent *createUnknownEvent();
+
+};
+
+
+#endif //HSMENUEVENTFACTORY_H

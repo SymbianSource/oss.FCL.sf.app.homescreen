@@ -1,9 +1,0 @@
-EXPORTS
-	_ZN6CXnODT18InternalizeHeaderLER11RReadStream @ 1 NONAME
-	_ZN6CXnODT23InternalizeDomDocumentLER11RReadStream @ 2 NONAME
-	_ZN6CXnODT24InternalizeResourceListLER11RReadStream @ 3 NONAME
-	_ZN6CXnODT4NewLEv @ 4 NONAME
-	_ZNK6CXnODT11DomDocumentEv @ 5 NONAME
-	_ZTI6CXnODT @ 6 NONAME ; #<TI>#
-	_ZTV6CXnODT @ 7 NONAME ; #<VT>#
-

@@ -1,8 +1,0 @@
-EXPORTS
-	?NewLC@CTsFswEngine@@SAPAV1@AAVMTsFswEngineObserver@@@Z @ 1 NONAME ; class CTsFswEngine * CTsFswEngine::NewLC(class MTsFswEngineObserver &)
-	?FswDataL@CTsFswEngine@@QAEABV?$RPointerArray@VCTsFswEntry@@@@XZ @ 2 NONAME ; class RPointerArray<class CTsFswEntry> const & CTsFswEngine::FswDataL(void)
-	?CloseAppL@CTsFswEngine@@QAEXH@Z @ 3 NONAME ; void CTsFswEngine::CloseAppL(int)
-	?NewL@CTsFswEngine@@SAPAV1@AAVMTsFswEngineObserver@@@Z @ 4 NONAME ; class CTsFswEngine * CTsFswEngine::NewL(class MTsFswEngineObserver &)
-	?ForegroundAppUidL@CTsFswEngine@@QAE?AVTUid@@H@Z @ 5 NONAME ; class TUid CTsFswEngine::ForegroundAppUidL(int)
-	?SwitchToAppL@CTsFswEngine@@QAEXH@Z @ 6 NONAME ; void CTsFswEngine::SwitchToAppL(int)
-

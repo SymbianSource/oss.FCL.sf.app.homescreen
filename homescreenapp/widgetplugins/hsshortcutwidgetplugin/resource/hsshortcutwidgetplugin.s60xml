@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <name>hsshortcutwidgetplugin</name>
+    <filepath>z:/private/20022F35/import/widgetregistry/20022F46/hsshortcutwidgetplugin.qtplugin</filepath>
+    <description>Shortcut widget.</description>
+    <interface>
+        <name>com.nokia.IHomeScreenWidget</name>
+        <version>1.0</version>
+        <description></description>
+        <capabilities></capabilities>
+        <customproperty key="iconuri">shortcut.png</customproperty>
+        <customproperty key="hidden">true</customproperty>
+        <customproperty key="title">Shortcut</customproperty>
+    </interface>
+</service>

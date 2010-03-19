@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/xml">
+        <file>resource/layout.docml</file>
+    </qresource>
+    <qresource prefix="/" >
+        <file>resource/delete.png</file>
+    </qresource>
+</RCC>

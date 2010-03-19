@@ -1,0 +1,98 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+; Language
+&EN
+
+; SIS header: name, uid, version
+#{"hsapp_ut_hs"},(0x20022F48),1,0,0
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Supports S60 5th Edition
+[0x1028315F], 0, 0, 0, {"S60ProductID"}
+
+;--------------- hsapplication ---------------
+"/epoc32/release/armv5/urel/t_hsapplicationexe.exe"                         - "c:/sys/bin/t_hsapplicationexe.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsapplicationexe_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsapplicationexe_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsapplicationexe.rsc"                       - "c:/resource/apps/t_hsapplicationexe.rsc"
+"/epoc32/release/armv5/urel/mockruntimeplugin.dll"     - "c:/sys/bin/mockruntimeplugin.dll"
+"/epoc32/data/z/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.qtplugin"     - "c:/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.qtplugin"
+"/epoc32/data/z/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.xml"  - "c:/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.xml"
+
+;--------------- hsutils ---------------
+"/epoc32/release/armv5/urel/t_hsutils.exe"                         - "c:/sys/bin/t_hsutils.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsutils_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsutils_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsutils.rsc"                       - "c:/resource/apps/t_hsutils.rsc"
+"../hsutils/tsrc/t_hsutils/nokia.png"       - "C:/hsresources/testresources/nokia.png"
+
+;--------------- hsdomainmodel ---------------
+
+"/epoc32/release/armv5/urel/t_hsdomainmodel.exe"                         - "c:/sys/bin/t_hsdomainmodel.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsdomainmodel_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsdomainmodel_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsdomainmodel.rsc"                       - "c:/resource/apps/t_hsdomainmodel.rsc"
+
+
+"../hsdomainmodel/tsrc/t_hsdomainmodel/testdomainmodeldb" - "c:/private/20022F59/testdomainmodeldb"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/d_landscape.png" - "c:/private/20022F59/d_landscape.png"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/d_portrait.png" - "c:/private/20022F59/d_portrait.png"
+
+"/epoc32/release/armv5/urel/mockwidgetplugin.dll" - "c:/sys/bin/mockwidgetplugin.dll"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.s60xml" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.s60xml"
+
+
+;--------------- runtimeplugins ---------------
+;hsdefaultruntimeplugin
+"/epoc32/release/armv5/urel/t_hsdefaultruntimeplugin.exe"                  - "c:/sys/bin/t_hsdefaultruntimeplugin.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsdefaultruntimeplugin_reg.rsc" - "c:/private/10003a3f/import/apps/t_hsdefaultruntimeplugin_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsdefaultruntimeplugin.rsc"                - "c:/resource/apps/t_hsdefaultruntimeplugin.rsc"
+"/epoc32/release/armv5/urel/mockstateplugins.dll"     - "c:/sys/bin/mockstateplugins.dll"
+"/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"     - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"
+"/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.s60xml"  - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.s60xml"
+
+;--------------- serviceproviders ---------------
+
+;--------------- stateplugins ---------------
+
+;hshomescreenstateplugin
+"/epoc32/release/armv5/urel/t_hshomescreenstateplugin.exe"                         - "c:/sys/bin/t_hshomescreenstateplugin.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hshomescreenstateplugin_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hshomescreenstateplugin_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hshomescreenstateplugin.rsc"                       - "c:/resource/apps/t_hshomescreenstateplugin.rsc"
+
+;--------------- widgetplugins ---------------
+
+;hsshortcutwidgetlugin
+;t_hsshortcutwidget:
+"/epoc32/release/armv5/urel/t_hsshortcutwidget.exe"                         - "c:/sys/bin/t_hsshortcutwidget.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsshortcutwidget_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsshortcutwidget_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsshortcutwidget.rsc"                       - "c:/resource/apps/t_hsshortcutwidget.rsc"
+"../widgetplugins/hsshortcutwidgetplugin/tsrc/t_hsshortcutwidget/foundicon.png"    - "c:/private/20022F64/foundicon.png"
+
+;hsclockwidgetplugin
+;t_hsclockwidgetplugin:
+"/epoc32/release/armv5/urel/t_hsclockwidgetplugin.exe"                      - "c:/sys/bin/t_hsclockwidgetplugin.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsclockwidgetplugin_reg.rsc" - "c:/private/10003a3f/import/apps/t_hsclockwidgetprovider_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsclockwidgetplugin.rsc"                    - "c:/resource/apps/t_hsclockwidgetprovider.rsc"
+
+;t_hsanalogclockstyleplugin
+"/epoc32/release/armv5/urel/t_hsanalogclockstyleplugin.exe"                     - "c:/sys/bin/t_hsanalogclockstyleplugin.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsanalogclockstyleplugin_reg.rsc" - "c:/private/10003a3f/import/apps/t_hsanalogclockstyleplugin_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsanalogclockstyleplugin.rsc"                   - "c:/resource/apps/t_hsanalogclockstyleplugin.rsc"

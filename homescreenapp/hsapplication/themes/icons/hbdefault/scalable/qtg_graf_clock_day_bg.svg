@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg baseProfile="tiny" height="177.5px" version="1.1" viewBox="0 0 177.5 177.5" width="177.5px" x="0px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" y="0px">
+<g>
+<g>
+<linearGradient gradientUnits="userSpaceOnUse" id="SVGID_1_" x1="37.645" x2="137.7448" y1="13.752" y2="160.6519">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#4D4D4D"/>
+</linearGradient>
+<path d="M88.752,1C137.218,1,176.5,40.287,176.5,88.75c0,48.467-39.281,87.75-87.748,87.75    C40.285,176.5,1,137.217,1,88.75C1,40.287,40.285,1,88.752,1z" fill="url(#SVGID_1_)"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="SVGID_2_" x1="41.5273" x2="122.1276" y1="24.771" y2="133.9712">
+<stop offset="0" style="stop-color:#FFFFFF"/>
+<stop offset="1" style="stop-color:#E6E6E6"/>
+</linearGradient>
+<path d="M88.752,4.352c46.615,0,84.396,37.789,84.396,84.398c0,46.613-37.781,84.398-84.396,84.398    c-46.614,0-84.4-37.785-84.4-84.398C4.352,42.141,42.138,4.352,88.752,4.352z" fill="url(#SVGID_2_)"/>
+<ellipse cx="88.75" cy="167.445" fill="#333333" rx="3.037" ry="3.105"/>
+<ellipse cx="88.75" cy="10.164" fill="#333333" rx="3.036" ry="3.102"/>
+<ellipse cx="10.253" cy="88.869" fill="#333333" rx="3.036" ry="3.104"/>
+<path d="M169.939,88.867c0,1.717-1.363,3.105-3.036,3.105c-1.676,0-3.037-1.389-3.037-3.105    c0-1.715,1.361-3.105,3.037-3.105C168.576,85.762,169.939,87.152,169.939,88.867z" fill="#333333"/>
+</g>
+<rect fill="none" height="177.5" width="177.5"/>
+</g>
+</svg>

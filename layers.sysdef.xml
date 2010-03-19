@@ -1,25 +1,14 @@
 <?xml version="1.0"?>
-<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_5_1.dtd" [
   <!ENTITY layer_real_source_path "sf/app/homescreen" >
 ]>
 
-<SystemDefinition name="homescreen" schema="1.4.0">
+<SystemDefinition name="homescreen" schema="1.5.1">
   <systemModel>
-
-
-    <layer name="app_layer">
-      <module name="homescreen">
-        <unit unitID="hs.homescreen" mrp="" bldFile="&layer_real_source_path;/group" name="homescreen" />
-      </module>
-    </layer>
-
-    <layer name="unit_test_layer">
-      <module name="homescreen_unit_tests">
-         <unit unitID="hsdo.wmunit.test" mrp="" bldFile="&layer_real_source_path;/idlehomescreen/widgetmanager/tsrc/wmunittest/group" name="wmunit.test" />
-      </module>
-    </layer>
-
-  </systemModel>
+        <layer name="app_layer">
+            <module name="homescreen">
+                <unit name="homescreen" unitID="homescreen" bldFile="&layer_real_source_path;" mrp="" proFile="homescreen.pro" qmakeArgs="-r -config rom"/>
+            </module>
+        </layer>
+    </systemModel>
 </SystemDefinition>
-
-

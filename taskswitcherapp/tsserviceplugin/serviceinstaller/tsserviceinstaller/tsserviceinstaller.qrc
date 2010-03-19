@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/" >
+        <file alias="tsserviceplugin.xml">../../tsserviceplugin.xml</file>
+    </qresource>
+</RCC>

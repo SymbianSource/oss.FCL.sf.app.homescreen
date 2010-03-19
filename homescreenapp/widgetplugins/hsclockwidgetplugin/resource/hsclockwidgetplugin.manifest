@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgetprovider>
+    <widget library="hsclockwidgetplugin"
+            uri="hsclockwidgetplugin"
+            title="Clock"
+            iconuri="tclock.png"
+            description="Themable clock widget."/>
+</widgetprovider>

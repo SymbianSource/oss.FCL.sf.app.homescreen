@@ -1,0 +1,10 @@
+<hbwidget version="0.1">
+    <layout name="layout_1" type="mesh">
+        <meshitem src="clock_background" srcEdge="CENTERV" dst="" dstEdge="CENTERV" spacing="0.0un" />
+        <meshitem src="clock_background" srcEdge="CENTERH" dst="" dstEdge="CENTERH" spacing="0.0un" />
+        <meshitem src="clock_hour_hand" srcEdge="CENTERV" dst="clock_background" dstEdge="CENTERV" spacing="0.0un" />
+        <meshitem src="clock_hour_hand" srcEdge="CENTERH" dst="clock_background" dstEdge="CENTERH" spacing="0.0un" />
+        <meshitem src="clock_minute_hand" srcEdge="CENTERV" dst="clock_background" dstEdge="CENTERV" spacing="0.0un" />
+        <meshitem src="clock_minute_hand" srcEdge="CENTERH" dst="clock_background" dstEdge="CENTERH" spacing="0.0un" />
+    </layout>
+</hbwidget>
