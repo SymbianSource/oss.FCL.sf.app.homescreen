@@ -19,20 +19,12 @@
 #include <platform_paths.hrh>
 #include <data_caging_paths.hrh>
 
-TARGET          dummyC.dll
-TARGETTYPE      dll
-
-UID             0x0 0x02349823
-CAPABILITY      CAP_GENERAL_DLL
+TARGET          foldersuite
+TARGETTYPE	    NONE
 
 APP_LAYER_SYSTEMINCLUDE
 
-SOURCEPATH      ../src
-SOURCE          dummyC.cpp
-
-SOURCEPATH      .
 USERINCLUDE     ../../../menufwui/matrixmenu/loc
-
 
 START RESOURCE  ../data/foldersuite.rss
 HEADER
