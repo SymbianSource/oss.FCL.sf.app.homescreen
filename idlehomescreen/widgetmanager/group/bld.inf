@@ -16,6 +16,9 @@
 *
 */
 
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
 PRJ_PLATFORMS
 DEFAULT
 

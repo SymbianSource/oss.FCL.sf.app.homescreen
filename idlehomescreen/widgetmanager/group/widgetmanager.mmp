@@ -71,7 +71,9 @@ USERINCLUDE ../inc
 
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/ecom
-
+SYSTEMINCLUDE   /epoc32/include/platform/mw/loc/sc
+SYSTEMINCLUDE   /epoc32/include/platform/app/loc/sc
+SYSTEMINCLUDE   /epoc32/include/platform/app
 
 LIBRARY	    euser.lib
 LIBRARY     cone.lib

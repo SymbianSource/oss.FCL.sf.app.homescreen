@@ -15,6 +15,8 @@
 *
 */
 
+#include <platform_paths.hrh>
+
 //  uishellservices ado
 #include "../nativeuicontroller/group/bld.inf"
 #include "../exths/group/bld.inf"
@@ -32,11 +34,12 @@
 
 PRJ_PLATFORMS
 DEFAULT
-//  Help exports
-#include "../help/group/bld.inf"
+
 
 PRJ_EXPORTS
 ../loc/activeidle3.loc              APP_LAYER_LOC_EXPORT_PATH(activeidle3.loc)
+//  Help exports
+#include "../help/group/bld.inf"
 
 PRJ_MMPFILES
 

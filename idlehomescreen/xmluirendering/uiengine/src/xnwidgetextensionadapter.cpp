@@ -274,7 +274,16 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                         // we pass the event to it after
                         // recalculating the taping point
                         TPointerEvent newPointerEvent;
-                        newPointerEvent.Copy( aPointerEvent );
+						// Copy is not yet defined in S60v5, do it manually
+                        //newPointerEvent.Copy( aPointerEvent );
+						newPointerEvent.iType=aPointerEvent.iType;
+						// Clear the advanced pointer flag EModifierAdvancedPointerEvent = 0x10000000
+						newPointerEvent.iModifiers=(aPointerEvent.iModifiers&~0x10000000);
+						// not needed, will be overwritten below
+						// newPointerEvent.iPosition=aPointerEvent.iPosition;
+						newPointerEvent.iParentPosition=aPointerEvent.iParentPosition;
+						// end copy
+						
                         newPointerEvent.iPosition = TPoint(
                                  aPointerEvent.iParentPosition - clientRect.iTl );
                         parentN->Control()->HandlePointerEventL( newPointerEvent );

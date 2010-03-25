@@ -26,6 +26,7 @@ VENDORID          VID_DEFAULT
 USERINCLUDE       ../inc
 
 APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/platform/app
 
 SOURCEPATH        ../src
 

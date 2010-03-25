@@ -28,7 +28,7 @@ NAME    XNAI
 #include <avkon.rh>
 #include <avkon.mbg>
 #include <e32keys.h>
-#include <activeidle3.loc>
+#include <app/loc/sc/activeidle3.loc>
 // ========== RESOURCE DEFINITIONS ============================================
 
 RESOURCE RSS_SIGNATURE { }

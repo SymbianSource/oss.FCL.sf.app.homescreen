@@ -48,7 +48,9 @@
 #include <avkon.rsg>
 #include <coecobs.h>
 #include <coecntrl.h>
-#include <featmgr.h>     // FeatureManager
+// this is only needed for help, see CWmMainContainer::CanDoHelp
+// we simply return false
+// #include <featmgr.h>     // FeatureManager
 #include <hlplch.h>      // HlpLauncher
 #include <csxhelp/hmsc.hlp.hrh>
 #include <aisystemuids.hrh>
@@ -999,7 +1001,9 @@ TBool CWmMainContainer::CanDoDetails()
 //
 TBool CWmMainContainer::CanDoHelp()
     {
-    return FeatureManager::FeatureSupported( KFeatureIdHelp );
+	// we don't have a featuremanager, so we return false for the moment
+    // return FeatureManager::FeatureSupported( KFeatureIdHelp );
+	return false;
     }
 
 // ---------------------------------------------------------------------------
@@ -1285,8 +1289,10 @@ void CWmMainContainer::RemoveCtrlsFromStack()
 void CWmMainContainer::HandleListBoxEventL(
         CEikListBox* /*aListBox*/, TListBoxEvent aEventType )
     {
-    if ( ( aEventType == EEventEnterKeyPressed ||
-           aEventType == EEventItemSingleClicked ) 
+	// S60v5 doesn't have EEventItemSingleClicked
+	if ( ( aEventType == EEventEnterKeyPressed ) 
+//    if ( ( aEventType == EEventEnterKeyPressed ||
+//           aEventType == EEventItemSingleClicked ) 
            && !iClosingDown )    
         {
         AddWidgetToHomeScreenL();
