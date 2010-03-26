@@ -2391,12 +2391,16 @@ void CXnMenuAdapter::ChangeSoftkeyImageL(const CXnSoftkeyItem& aSoftkey)
         CEikCba* cba = static_cast< CEikCba* >( iContainer->ButtonGroup() );
         // use iAvkonAppUi
         CAknAppUi* appUi = static_cast<CAknAppUi*>( CEikonEnv::Static()->AppUi() );
+// backport change
+// no icon support for MSK yet
+/* backport change start *
         cba->UpdateMSKIconL(
                 aSoftkey.iId,
                 aSoftkey.iBmpFile->Des(),
                 aSoftkey.iBmp,
                 aSoftkey.iBmpM,
                 ETrue );
+* backport change end */
         cba->DrawNow();
         }
     }
