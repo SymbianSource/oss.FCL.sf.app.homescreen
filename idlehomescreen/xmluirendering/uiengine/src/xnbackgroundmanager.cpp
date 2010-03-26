@@ -165,7 +165,18 @@ void CXnBackgroundManager::SizeChanged()
             {
             delete iBgImage;
             iBgImage = NULL;
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we need to retrieve the image manually
+/* backport change begin *
             TRAP_IGNORE( iBgImage = iSkinSrv.WallpaperImageL( *iBgImagePath ) );
+* backport change end */
+// backport change - new from here ...
+			CFbsBitmap* mask = NULL;
+			TRect screen;
+			AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screen );
+			TRAP_IGNORE( iSkinSrv.DecodeWallpaperImageL( *iBgImagePath, screen.Size(), iBgImage, mask ) );
+// backport change - ... till here
             }
         }
     iBgContext->SetRect( iRect );
@@ -226,23 +237,40 @@ TInt CXnBackgroundManager::CacheWallpaperL( const TDesC& aFileName, CXnViewData&
     aViewData.SetWallpaperImagePathL( aFileName );
     aViewData.SetWallpaperImage( NULL );
 
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment
     TBool err( KErrNone );
+/* backport change begin *
     TRAP( err, iSkinSrv.AddWallpaperL( aFileName, iRect.Size() ) );
     if( err == KErrNone )
         {    
+* backport change end */
         CFbsBitmap* bitmap( NULL );
         CleanupStack::PushL( bitmap );
-        TRAP( err, bitmap = iSkinSrv.WallpaperImageL( aFileName ) );
+/* backport change begin *
+			TRAP( err, bitmap = iSkinSrv.WallpaperImageL( aFileName ) );
+* backport change end */
+// backport change - new from here ...
+			CFbsBitmap* mask = NULL;
+			TRect screen;
+			AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screen );
+			TRAP( err, iSkinSrv.DecodeWallpaperImageL( aFileName, screen.Size(), iBgImage, mask ) );
+// backport change - ... till here
         if( err == KErrNone && bitmap )
             {
             aViewData.SetWallpaperImage( bitmap ); // Ownership tranferred
-            }        
+            }    
+/* backport change begin *			
         else
             {
             iSkinSrv.RemoveWallpaper( aFileName );
             }
+* backport change end */
         CleanupStack::Pop();
+/* backport change begin *
         }
+* backport change end */
     return err;
     }
 
@@ -284,7 +312,10 @@ void CXnBackgroundManager::DeleteWallpaper( CXnViewData& aViewData )
         {
         if( iBgImagePath )
             {
-            iSkinSrv.RemoveWallpaper( *iBgImagePath );          
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment
+            // iSkinSrv.RemoveWallpaper( *iBgImagePath );          
             delete iBgImagePath;
             iBgImagePath = NULL;
             }
@@ -503,7 +534,10 @@ void CXnBackgroundManager::SkinPackageChanged(
 //
 void CXnBackgroundManager::CleanCache()
     {
-    iSkinSrv.RemoveAllWallpapers();
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment	
+    // iSkinSrv.RemoveAllWallpapers();
     }
 
 // -----------------------------------------------------------------------------
@@ -536,7 +570,10 @@ void CXnBackgroundManager::RemoveWallpaperFromCache( const TDesC& aFileName,
             }
         }
     // Image is not needed anymore. Can be removed from the cache.
-    iSkinSrv.RemoveWallpaper( aFileName );  
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment
+    // iSkinSrv.RemoveWallpaper( aFileName );  
     }
 
 // -----------------------------------------------------------------------------
@@ -569,7 +606,19 @@ void CXnBackgroundManager::UpdateWallpapersL()
         const TDesC& path = viewData->WallpaperImagePath();
         if( path != KNullDesC )
             {
-            CFbsBitmap* bitmap = iSkinSrv.WallpaperImageL( path );
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we need to retrieve the image manually
+/* backport change begin *
+			CFbsBitmap* bitmap = iSkinSrv.WallpaperImageL( path );
+* backport change end */
+// backport change - new from here ...
+			CFbsBitmap* mask = NULL;
+			CFbsBitmap* bitmap = NULL;
+			TRect screen;
+			AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screen );
+			TRAP_IGNORE( iSkinSrv.DecodeWallpaperImageL( path, screen.Size(), bitmap, mask ) );
+// backport change - ... till here
             if( bitmap )
                 {
                 viewData->SetWallpaperImage( bitmap );
@@ -713,7 +762,10 @@ TInt CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
     // Remove old from the cache
     if( iBgImagePath )
         {
-        iSkinSrv.RemoveWallpaper( *iBgImagePath );          
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment
+        // iSkinSrv.RemoveWallpaper( *iBgImagePath );          
         delete iBgImagePath;
         iBgImagePath = NULL;
         }
@@ -725,6 +777,10 @@ TInt CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
         iBgImagePath = aFileName.AllocL();
     
         TBool err( KErrNone );
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment
+/* backport change begin *
         TRAP( err, iSkinSrv.AddWallpaperL( aFileName, iRect.Size() ) );
         if( err )
             {
@@ -732,9 +788,18 @@ TInt CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
             return KErrCACorruptContent;
             }
         TRAP( err, iBgImage = iSkinSrv.WallpaperImageL( aFileName ) );
+* backport change end */
+// backport change - new from here ...
+		CFbsBitmap* mask = NULL;
+		TRect screen;
+		AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screen );
+		TRAP( err, iSkinSrv.DecodeWallpaperImageL( aFileName, screen.Size(), iBgImage, mask ) );
+// backport change - ... till here
         if( err )
             {
+/* backport change begin *
             iSkinSrv.RemoveWallpaper( aFileName );
+* backport change end */
             delete iBgImage;
             iBgImage = NULL;
             // image is corrupted or format is not supported
@@ -786,7 +851,10 @@ void CXnBackgroundManager::ReadWallpaperFromCenrepL()
                     {
                     if( iBgImagePath )
                         {
-                        iSkinSrv.RemoveWallpaper( *iBgImagePath );
+// backport change
+// S60v5's AknSkinSrv doesn't support caching
+// thus we disable this for the moment
+                        // iSkinSrv.RemoveWallpaper( *iBgImagePath );
                         delete iBgImagePath;
                         iBgImagePath = NULL;
                         }
