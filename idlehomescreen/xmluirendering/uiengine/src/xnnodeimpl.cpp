@@ -900,192 +900,192 @@ static void EnableStatePropertiesL(
         aLayoutPropertyCache->iWidths, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::HeightL,
+        aNode, aPseudoClass, &CXnNode::HeightL,
         aLayoutPropertyCache->iHeight,
         aLayoutPropertyCache->iHeights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginLeftL,
+        aNode, aPseudoClass, &CXnNode::MarginLeftL,
         aLayoutPropertyCache->iMarginLeft,
         aLayoutPropertyCache->iMarginLefts, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginRightL,
+        aNode, aPseudoClass, &CXnNode::MarginRightL,
         aLayoutPropertyCache->iMarginRight,
         aLayoutPropertyCache->iMarginRights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderLeftL,
+        aNode, aPseudoClass, &CXnNode::BorderLeftL,
         aLayoutPropertyCache->iBorderLeft,
         aLayoutPropertyCache->iBorderLefts, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderRightL,
+        aNode, aPseudoClass, &CXnNode::BorderRightL,
         aLayoutPropertyCache->iBorderRight,
         aLayoutPropertyCache->iBorderRights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingLeftL,
+        aNode, aPseudoClass, &CXnNode::PaddingLeftL,
         aLayoutPropertyCache->iPaddingLeft,
         aLayoutPropertyCache->iPaddingLefts, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingRightL,
+        aNode, aPseudoClass, &CXnNode::PaddingRightL,
         aLayoutPropertyCache->iPaddingRight,
         aLayoutPropertyCache->iPaddingRights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginTopL,
+        aNode, aPseudoClass, &CXnNode::MarginTopL,
         aLayoutPropertyCache->iMarginTop,
         aLayoutPropertyCache->iMarginTops, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginBottomL,
+        aNode, aPseudoClass, &CXnNode::MarginBottomL,
         aLayoutPropertyCache->iMarginBottom,
         aLayoutPropertyCache->iMarginBottoms, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderTopL,
+        aNode, aPseudoClass, &CXnNode::BorderTopL,
         aLayoutPropertyCache->iBorderTop,
         aLayoutPropertyCache->iBorderTops, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderBottomL,
+        aNode, aPseudoClass, &CXnNode::BorderBottomL,
         aLayoutPropertyCache->iBorderBottom,
         aLayoutPropertyCache->iBorderBottoms, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingTopL,
+        aNode, aPseudoClass, &CXnNode::PaddingTopL,
         aLayoutPropertyCache->iPaddingTop,
         aLayoutPropertyCache->iPaddingTops, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingBottomL,
+        aNode, aPseudoClass, &CXnNode::PaddingBottomL,
         aLayoutPropertyCache->iPaddingBottom,
         aLayoutPropertyCache->iPaddingBottoms, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderWidthL,
+        aNode, aPseudoClass, &CXnNode::BorderWidthL,
         aLayoutPropertyCache->iBorderWidth,
         aLayoutPropertyCache->iBorderWidths, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BlockProgressionL,
+        aNode, aPseudoClass, &CXnNode::BlockProgressionL,
         aLayoutPropertyCache->iBlockProgression,
         aLayoutPropertyCache->iBlockProgressions, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::DirectionL,
+        aNode, aPseudoClass, &CXnNode::DirectionL,
         aLayoutPropertyCache->iDirection,
         aLayoutPropertyCache->iDirections, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PositionL,
+        aNode, aPseudoClass, &CXnNode::PositionL,
         aLayoutPropertyCache->iPosition,
         aLayoutPropertyCache->iPositions, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MaxHeightL,
+        aNode, aPseudoClass, &CXnNode::MaxHeightL,
         aLayoutPropertyCache->iMaxHeight,
         aLayoutPropertyCache->iMaxHeights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MinHeightL,
+        aNode, aPseudoClass, &CXnNode::MinHeightL,
         aLayoutPropertyCache->iMinHeight,
         aLayoutPropertyCache->iMinHeights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MaxWidthL,
+        aNode, aPseudoClass, &CXnNode::MaxWidthL,
         aLayoutPropertyCache->iMaxWidth,
         aLayoutPropertyCache->iMaxWidths, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MinWidthL,
+        aNode, aPseudoClass, &CXnNode::MinWidthL,
         aLayoutPropertyCache->iMinWidth,
         aLayoutPropertyCache->iMinWidths, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::DisplayL,
+        aNode, aPseudoClass, &CXnNode::DisplayL,
         aLayoutPropertyCache->iDisplay,
         aLayoutPropertyCache->iDisplays, level, ETrue );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::VisibilityL,
+        aNode, aPseudoClass, &CXnNode::VisibilityL,
         aLayoutPropertyCache->iVisibility,
         aLayoutPropertyCache->iVisibilities, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::LeftL,
+        aNode, aPseudoClass, &CXnNode::LeftL,
         aLayoutPropertyCache->iLeft,
         aLayoutPropertyCache->iLefts, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::RightL,
+        aNode, aPseudoClass, &CXnNode::RightL,
         aLayoutPropertyCache->iRight,
         aLayoutPropertyCache->iRights, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::TopL,
+        aNode, aPseudoClass, &CXnNode::TopL,
         aLayoutPropertyCache->iTop,
         aLayoutPropertyCache->iTops, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BottomL,
+        aNode, aPseudoClass, &CXnNode::BottomL,
         aLayoutPropertyCache->iBottom,
         aLayoutPropertyCache->iBottoms, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderLeftStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderLeftStyleL,
         aLayoutPropertyCache->iBorderLeftStyle,
         aLayoutPropertyCache->iBorderLeftStyles, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderRightStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderRightStyleL,
         aLayoutPropertyCache->iBorderRightStyle,
         aLayoutPropertyCache->iBorderRightStyles, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderTopStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderTopStyleL,
         aLayoutPropertyCache->iBorderTopStyle,
         aLayoutPropertyCache->iBorderTopStyles, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderBottomStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderBottomStyleL,
         aLayoutPropertyCache->iBorderBottomStyle,
         aLayoutPropertyCache->iBorderBottomStyles, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderStyleL,
         aLayoutPropertyCache->iBorderStyle,
         aLayoutPropertyCache->iBorderStyles, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::DisplayPriorityL,
+        aNode, aPseudoClass, &CXnNode::DisplayPriorityL,
         aLayoutPropertyCache->iDisplayPriority,
         aLayoutPropertyCache->iDisplayPriorities, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::NavIndexL,
+        aNode, aPseudoClass, &CXnNode::NavIndexL,
         aLayoutPropertyCache->iNavIndex,
         aLayoutPropertyCache->iNavIndexes, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::ZIndexL,
+        aNode, aPseudoClass, &CXnNode::ZIndexL,
         aLayoutPropertyCache->iZIndex,
         aLayoutPropertyCache->iZIndexes, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BackgroundColorL,
+        aNode, aPseudoClass, &CXnNode::BackgroundColorL,
         aLayoutPropertyCache->iBackgroundColor,
         aLayoutPropertyCache->iBackgroundColors, level );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BackgroundImageL,
+        aNode, aPseudoClass, &CXnNode::BackgroundImageL,
         aLayoutPropertyCache->iBackgroundImage,
         aLayoutPropertyCache->iBackgroundImages, level, ETrue );
 
     EnableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::FocusBackgroundL,
+        aNode, aPseudoClass, &CXnNode::FocusBackgroundL,
         aLayoutPropertyCache->iFocusBackground,
         aLayoutPropertyCache->iFocusBackgrounds, level );
 
@@ -1110,197 +1110,197 @@ static void DisableStatePropertiesL(
     TInt level( XnDirtyLevel::ENone );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::WidthL,
+        aNode, aPseudoClass, &CXnNode::WidthL,
         aLayoutPropertyCache->iWidth,
         aLayoutPropertyCache->iWidths, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::HeightL,
+        aNode, aPseudoClass, &CXnNode::HeightL,
         aLayoutPropertyCache->iHeight,
         aLayoutPropertyCache->iHeights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginLeftL,
+        aNode, aPseudoClass, &CXnNode::MarginLeftL,
         aLayoutPropertyCache->iMarginLeft,
         aLayoutPropertyCache->iMarginLefts, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginRightL,
+        aNode, aPseudoClass, &CXnNode::MarginRightL,
         aLayoutPropertyCache->iMarginRight,
         aLayoutPropertyCache->iMarginRights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderLeftL,
+        aNode, aPseudoClass, &CXnNode::BorderLeftL,
         aLayoutPropertyCache->iBorderLeft,
         aLayoutPropertyCache->iBorderLefts, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderRightL,
+        aNode, aPseudoClass, &CXnNode::BorderRightL,
         aLayoutPropertyCache->iBorderRight,
         aLayoutPropertyCache->iBorderRights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingLeftL,
+        aNode, aPseudoClass, &CXnNode::PaddingLeftL,
         aLayoutPropertyCache->iPaddingLeft,
         aLayoutPropertyCache->iPaddingLefts, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingRightL,
+        aNode, aPseudoClass, &CXnNode::PaddingRightL,
         aLayoutPropertyCache->iPaddingRight,
         aLayoutPropertyCache->iPaddingRights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginTopL,
+        aNode, aPseudoClass, &CXnNode::MarginTopL,
         aLayoutPropertyCache->iMarginTop,
         aLayoutPropertyCache->iMarginTops, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MarginBottomL,
+        aNode, aPseudoClass, &CXnNode::MarginBottomL,
         aLayoutPropertyCache->iMarginBottom,
         aLayoutPropertyCache->iMarginBottoms, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderTopL,
+        aNode, aPseudoClass, &CXnNode::BorderTopL,
         aLayoutPropertyCache->iBorderTop,
         aLayoutPropertyCache->iBorderTops, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderBottomL,
+        aNode, aPseudoClass, &CXnNode::BorderBottomL,
         aLayoutPropertyCache->iBorderBottom,
         aLayoutPropertyCache->iBorderBottoms, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingTopL,
+        aNode, aPseudoClass, &CXnNode::PaddingTopL,
         aLayoutPropertyCache->iPaddingTop,
         aLayoutPropertyCache->iPaddingTops, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PaddingBottomL,
+        aNode, aPseudoClass, &CXnNode::PaddingBottomL,
         aLayoutPropertyCache->iPaddingBottom,
         aLayoutPropertyCache->iPaddingBottoms, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderWidthL,
+        aNode, aPseudoClass, &CXnNode::BorderWidthL,
         aLayoutPropertyCache->iBorderWidth,
         aLayoutPropertyCache->iBorderWidths, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BlockProgressionL,
+        aNode, aPseudoClass, &CXnNode::BlockProgressionL,
         aLayoutPropertyCache->iBlockProgression,
         aLayoutPropertyCache->iBlockProgressions, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::DirectionL,
+        aNode, aPseudoClass, &CXnNode::DirectionL,
         aLayoutPropertyCache->iDirection,
         aLayoutPropertyCache->iDirections, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::PositionL,
+        aNode, aPseudoClass, &CXnNode::PositionL,
         aLayoutPropertyCache->iPosition,
         aLayoutPropertyCache->iPositions, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MaxHeightL,
+        aNode, aPseudoClass, &CXnNode::MaxHeightL,
         aLayoutPropertyCache->iMaxHeight,
         aLayoutPropertyCache->iMaxHeights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MinHeightL,
+        aNode, aPseudoClass, &CXnNode::MinHeightL,
         aLayoutPropertyCache->iMinHeight,
         aLayoutPropertyCache->iMinHeights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MaxWidthL,
+        aNode, aPseudoClass, &CXnNode::MaxWidthL,
         aLayoutPropertyCache->iMaxWidth,
         aLayoutPropertyCache->iMaxWidths, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::MinWidthL,
+        aNode, aPseudoClass, &CXnNode::MinWidthL,
         aLayoutPropertyCache->iMinWidth,
         aLayoutPropertyCache->iMinWidths, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::DisplayL,
+        aNode, aPseudoClass, &CXnNode::DisplayL,
         aLayoutPropertyCache->iDisplay,
         aLayoutPropertyCache->iDisplays, aStates, level, ETrue );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::VisibilityL,
+        aNode, aPseudoClass, &CXnNode::VisibilityL,
         aLayoutPropertyCache->iVisibility,
         aLayoutPropertyCache->iVisibilities, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::LeftL,
+        aNode, aPseudoClass, &CXnNode::LeftL,
         aLayoutPropertyCache->iLeft,
         aLayoutPropertyCache->iLefts, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::RightL,
+        aNode, aPseudoClass, &CXnNode::RightL,
         aLayoutPropertyCache->iRight,
         aLayoutPropertyCache->iRights, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::TopL,
+        aNode, aPseudoClass, &CXnNode::TopL,
         aLayoutPropertyCache->iTop,
         aLayoutPropertyCache->iTops, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BottomL,
+        aNode, aPseudoClass, &CXnNode::BottomL,
         aLayoutPropertyCache->iBottom,
         aLayoutPropertyCache->iBottoms, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderLeftStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderLeftStyleL,
         aLayoutPropertyCache->iBorderLeftStyle,
         aLayoutPropertyCache->iBorderLeftStyles, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderRightStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderRightStyleL,
         aLayoutPropertyCache->iBorderRightStyle,
         aLayoutPropertyCache->iBorderRightStyles, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderTopStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderTopStyleL,
         aLayoutPropertyCache->iBorderTopStyle,
         aLayoutPropertyCache->iBorderTopStyles, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderBottomStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderBottomStyleL,
         aLayoutPropertyCache->iBorderBottomStyle,
         aLayoutPropertyCache->iBorderBottomStyles, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BorderStyleL,
+        aNode, aPseudoClass, &CXnNode::BorderStyleL,
         aLayoutPropertyCache->iBorderStyle,
         aLayoutPropertyCache->iBorderStyles, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::DisplayPriorityL,
+        aNode, aPseudoClass, &CXnNode::DisplayPriorityL,
         aLayoutPropertyCache->iDisplayPriority,
         aLayoutPropertyCache->iDisplayPriorities, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::NavIndexL,
+        aNode, aPseudoClass, &CXnNode::NavIndexL,
         aLayoutPropertyCache->iNavIndex,
         aLayoutPropertyCache->iNavIndexes, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::ZIndexL,
+        aNode, aPseudoClass, &CXnNode::ZIndexL,
         aLayoutPropertyCache->iZIndex,
         aLayoutPropertyCache->iZIndexes, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BackgroundColorL,
+        aNode, aPseudoClass, &CXnNode::BackgroundColorL,
         aLayoutPropertyCache->iBackgroundColor,
         aLayoutPropertyCache->iBackgroundColors, aStates, level );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::BackgroundImageL,
+        aNode, aPseudoClass, &CXnNode::BackgroundImageL,
         aLayoutPropertyCache->iBackgroundImage,
         aLayoutPropertyCache->iBackgroundImages, aStates, level, ETrue );
 
     DisableStatePropertyL(
-        aNode, aPseudoClass, CXnNode::FocusBackgroundL,
+        aNode, aPseudoClass, &CXnNode::FocusBackgroundL,
         aLayoutPropertyCache->iFocusBackground,
         aLayoutPropertyCache->iFocusBackgrounds, aStates, level );
 
