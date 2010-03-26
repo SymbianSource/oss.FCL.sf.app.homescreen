@@ -29,7 +29,6 @@ class CLiwGenericParamList;
 struct THnMdCommonPointers;
 class CDesC16Array;
 class CDesC8Array;
-class CArrayFix<TInt>;
 
 // CLASS DECLARATION
 
