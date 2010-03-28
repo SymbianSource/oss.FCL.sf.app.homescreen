@@ -77,7 +77,7 @@ public:
     /**
      * Called by CPeriodic when timer expires.
      */
-    static TInt CAiNaviPaneAnimator::AnimCallback( TAny* aPtr );     
+    static TInt AnimCallback( TAny* aPtr );     
 
     /**
      * Draws the text to navi pane.

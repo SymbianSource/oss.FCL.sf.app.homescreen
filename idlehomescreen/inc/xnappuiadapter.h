@@ -136,7 +136,7 @@ public:
      * @since S60 5.0
      * @return Xml Ui View 
      */
-    IMPORT_C CAknView& CXnAppUiAdapter::View() const;
+    IMPORT_C CAknView& View() const;
 	    
     /**
      * Handles changes when entering or exiting edit mode 

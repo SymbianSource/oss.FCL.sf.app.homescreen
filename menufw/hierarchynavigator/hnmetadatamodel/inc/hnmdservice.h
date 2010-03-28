@@ -119,7 +119,7 @@ public:
      * @param aElement Xml element.
      * @return A structure of the key objects.
      */
-    void CHnMdService::SetConstructorL( TXmlEngElement aElement );
+    void SetConstructorL( TXmlEngElement aElement );
     
     /**
      * Evaluates constructor.

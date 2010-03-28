@@ -375,7 +375,7 @@ class CXnResource : public CBase
         * @param aOffset a buffer position of iBuffer to write data.
         * @return RBufWriteStream& write stream.
         */
-        IMPORT_C RBufWriteStream& CXnResource::WriteStream( TUint aOffset = 0 );      
+        IMPORT_C RBufWriteStream& WriteStream( TUint aOffset = 0 );      
         
         /**
         * CXnResource::ReadStream(). Gets read stream on iBuffer.
@@ -383,7 +383,7 @@ class CXnResource : public CBase
         * @param aOffset a buffer position of iBuffer to read data. 
         * @return RBufReadStream& read stream
         */
-        IMPORT_C RBufReadStream& CXnResource::ReadStream(TUint aOffset = 0 );
+        IMPORT_C RBufReadStream& ReadStream(TUint aOffset = 0 );
 
         /**
         * CXnResource::SetOffset(). Sets internal data pointer of iBuffer.
