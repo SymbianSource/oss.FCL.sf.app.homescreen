@@ -244,7 +244,7 @@ private:
      * @param aKeyMask A mask key to be created.
      * @param aMaskIdBuf A mask id.
      */
-    void CHnMdValueImage::CreateKeysLC( RBuf8& aKeyBitmap, RBuf8& aBitmapIdBuf, 
+    void CreateKeysLC( RBuf8& aKeyBitmap, RBuf8& aBitmapIdBuf, 
     		RBuf8& aKeyMask, RBuf8& aMaskIdBuf );
     
 

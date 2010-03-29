@@ -152,7 +152,7 @@ NONSHARABLE_CLASS(CAIPluginContainerControl) :
         * From CCoeControl
         * @param TTypeUid aId
         */
-        TTypeUid::Ptr CAIPluginContainerControl::MopSupplyObject(TTypeUid aId);
+        TTypeUid::Ptr MopSupplyObject(TTypeUid aId);
 
     public: // from CExtrStandbyContainerIF
 
