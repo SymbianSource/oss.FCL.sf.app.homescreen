@@ -31,7 +31,8 @@
   */
 
 const TInt KCloseIconRedrawTime = 300000; // 0.3 second
-const TInt KFeedbackTime = 0;
+
+const TInt KStrokeThickness = 1;
 
 // -----------------------------------------------------------------------------
 // CTsFastSwapGrid::CTsFastSwapGrid
@@ -53,11 +54,7 @@ CTsFastSwapGrid::CTsFastSwapGrid()
 CTsFastSwapGrid::~CTsFastSwapGrid()
     {
     iCloseItems.Close();
-    delete iBgContext;
     delete iCloseIconRedrawTimer;
-    delete iFeedbackTimer;
-    iFullyVisibleItems.Close();
-    iPartialVisibleItems.Close();
     }
 
 // -----------------------------------------------------------------------------
@@ -73,16 +70,8 @@ void CTsFastSwapGrid::ConstructL( const CCoeControl* aParent )
     CAknGrid::ConstructL( aParent, EAknListBoxSelectionGrid );
     SetPrimaryScrollingType(CAknGridView::EScrollFollowsItemsAndLoops);
     SetSecondaryScrollingType(CAknGridView::EScrollFollowsItemsAndLoops);
-    iBgContext = CAknsFrameBackgroundControlContext::NewL(
-               KAknsIIDQsnFrPopup,
-               TRect(),
-               TRect(),
-               ETrue );
-    iBgContext->SetCenter( KAknsIIDQsnFrPopupCenter );
     iCloseIconRedrawTimer = new (ELeave) CTsFastSwapTimer( *this );
     iCloseIconRedrawTimer->ConstructL();
-    iFeedbackTimer = new (ELeave) CTsFastSwapTimer( *this );
-    iFeedbackTimer->ConstructL();
     
     TSLOG_OUT();
     }
@@ -198,23 +187,10 @@ void CTsFastSwapGrid::HandleDeviceStateChanged( TChangeType aChangeType )
     
     if ( aChangeType == ESkin )
         {
-        LoadCloseIcon();
+        LoadCloseIconAndStrokeParams();
         }
     
     TSLOG_OUT();
-    }
-
-// -----------------------------------------------------------------------------
-// CTsFastSwapGrid::MopSupplyObject
-// -----------------------------------------------------------------------------
-//
-TTypeUid::Ptr CTsFastSwapGrid::MopSupplyObject( TTypeUid aId )
-    {
-    if ( aId.iUid == MAknsControlContext::ETypeId )
-        {
-        return MAknsControlContext::SupplyMopObject( aId, iBgContext );
-        }
-    return CCoeControl::MopSupplyObject( aId );
     }
 
 
@@ -243,6 +219,20 @@ void CTsFastSwapGrid::HandleResourceChange( TInt aType )
 //
 void CTsFastSwapGrid::SizeChanged()
     {
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapGrid::Draw
+// -----------------------------------------------------------------------------
+//
+void CTsFastSwapGrid::Draw( const TRect& aRect ) const
+    {
+    CAknGrid::Draw(aRect);
+    if ( !Model()->ItemTextArray()->MdcaCount() )
+        {
+        GridView()->DrawEmptyList();
+        }
     }
 
 
@@ -285,7 +275,7 @@ void CTsFastSwapGrid::CreateItemDrawerL()
     iItemDrawer = itemDrawer;
     CleanupStack::Pop( itemDrawer );
     CleanupStack::Pop( data );
-    LoadCloseIcon();
+    LoadCloseIconAndStrokeParams();
     
     TSLOG_OUT();
     }
@@ -301,14 +291,6 @@ void CTsFastSwapGrid::TimerCompletedL( CTsFastSwapTimer* aSource )
         TInt itemToClose = iCloseIconHitIdx;
         ResetCloseHit();
         iFastSwapGridObserver->HandleCloseEventL( itemToClose );
-        }
-    else if ( aSource == iFeedbackTimer )
-        {
-        MTouchFeedback* feedback = MTouchFeedback::Instance();
-        if (feedback)
-            {
-            feedback->InstantFeedback(ETouchFeedbackSensitive);
-            }
         }
     }
 
@@ -353,6 +335,27 @@ TBool CTsFastSwapGrid::IsItemCloseHit( TInt aItemIndex )
 void CTsFastSwapGrid::ResetCloseHit()
     {
     iCloseIconHitIdx = KErrNotFound;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapGrid::SetStrokeColor
+// -----------------------------------------------------------------------------
+//
+void CTsFastSwapGrid::SetStrokeColors( TRgb aColor,
+                                       TRgb aHighlightedColor )
+    {
+    static_cast<CTsGridItemDrawer*>(iItemDrawer)->SetStrokeColors(aColor, aHighlightedColor);
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapGrid::SetStrokeItemsL
+// -----------------------------------------------------------------------------
+//
+void CTsFastSwapGrid::SetStrokeItemsL( RArray<TInt>& aItemIndex )
+    {
+    static_cast<CTsGridItemDrawer*>(iItemDrawer)->SetStrokeItemsL(aItemIndex);
     }
 
 
@@ -459,31 +462,38 @@ TRect CTsFastSwapGrid::VisibleViewRect()
 
 
 // -----------------------------------------------------------------------------
-// CTsFastSwapGrid::LoadCloseIconL
+// CTsFastSwapGrid::LoadCloseIconAndStrokeParams
 // -----------------------------------------------------------------------------
 //
-void CTsFastSwapGrid::LoadCloseIcon()
+void CTsFastSwapGrid::LoadCloseIconAndStrokeParams()
     {
     // Load and set close icon
     CFbsBitmap* icon = NULL;
-    CFbsBitmap* mask = NULL;
-
-    TRAP_IGNORE(AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(),
-                KAknsIIDQgnIndiItutListCollapse,
-                KAknsIIDQsnTextColors,    // we use text color here, eventhough this is an icon
-                EAknsCIQsnTextColorsCG13, // softkey text color
+    CFbsBitmap* iconMask = NULL;
+    CFbsBitmap* iconPressed = NULL;
+    CFbsBitmap* iconPressedMask = NULL;
+    
+    TRAP_IGNORE(AknsUtils::CreateIconL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnIndiTsButtonClose,
                 icon,
-                mask,
+                iconMask,
                 KAvkonBitmapFile,
                 EMbmAvkonQgn_indi_button_preview_close,
-                EMbmAvkonQgn_indi_button_preview_close_mask,
-                KRgbWhite
-                );
-                CleanupStack::Pop( 2 ); // codescanner::cleanup
-                );
+                EMbmAvkonQgn_indi_button_preview_close_mask
+                ));
+    
+    TRAP_IGNORE(AknsUtils::CreateIconL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnIndiTsButtonClosePressed,
+                iconPressed,
+                iconPressedMask,
+                KAvkonBitmapFile,
+                EMbmAvkonQgn_indi_button_preview_close,
+                EMbmAvkonQgn_indi_button_preview_close_mask
+                ));
 
     TAknLayoutRect gridAppPane;
     TAknLayoutRect gridItem;
+    TAknLayoutRect gridImage;
     TAknLayoutRect gridCloseButton;
     TAknLayoutRect gridCloseIcon;
     TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
@@ -492,15 +502,21 @@ void CTsFastSwapGrid::LoadCloseIcon()
             AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
     gridItem.LayoutRect( gridAppPane.Rect(),
             AknLayoutScalable_Apps::cell_tport_appsw_pane( variety, 0, 0 ) );
+    gridImage.LayoutRect( gridItem.Rect(),
+            AknLayoutScalable_Apps::cell_tport_appsw_pane_g1( variety ) ); 
     gridCloseButton.LayoutRect( gridItem.Rect(),
             AknLayoutScalable_Apps::bg_button_pane_cp16( variety, 0, 0 ));
     gridCloseIcon.LayoutRect( gridItem.Rect(),
             AknLayoutScalable_Apps::cell_tport_appsw_pane_g3( variety, 0, 0 ));
+    
+    // Set icon size
     AknIconUtils::SetSize( icon, gridCloseIcon.Rect().Size(), EAspectRatioPreserved );
-    AknIconUtils::SetSize( mask, gridCloseIcon.Rect().Size(), EAspectRatioPreserved );
+    AknIconUtils::SetSize( iconPressed, gridCloseIcon.Rect().Size(), EAspectRatioPreserved );
     CTsGridItemDrawer* itemDrawer =
         static_cast<CTsGridItemDrawer*>(iItemDrawer);
-    itemDrawer->SetCloseIcon( icon, mask );
+    
+    // Setup close parameters
+    itemDrawer->SetCloseIcon( icon, iconMask, iconPressed, iconPressedMask );
     TRect relGridCloseButton = TRect( TPoint( gridCloseButton.Rect().iTl.iX - gridItem.Rect().iTl.iX,
                                               gridCloseButton.Rect().iTl.iY - gridItem.Rect().iTl.iY),
                                       gridCloseButton.Rect().Size() );
@@ -508,6 +524,15 @@ void CTsFastSwapGrid::LoadCloseIcon()
                                                 gridCloseIcon.Rect().iTl.iY - gridItem.Rect().iTl.iY),
                                         gridCloseIcon.Rect().Size() );
     itemDrawer->SetCloseIconRect( relGridCloseButton, relGridCloseIconRect );
+    
+    // Setup stroke parameters
+    TPoint strokeOffset;
+    strokeOffset.iX = gridImage.Rect().iTl.iX - gridItem.Rect().iTl.iX - KStrokeThickness;
+    strokeOffset.iY = gridImage.Rect().iTl.iY - gridItem.Rect().iTl.iY - KStrokeThickness;
+    TSize strokeSize = gridImage.Rect().Size();
+    strokeSize.iHeight += KStrokeThickness * 2;
+    strokeSize.iWidth += KStrokeThickness * 2;
+    itemDrawer->SetStrokeOffset( strokeOffset, strokeSize );
     }
 
 
@@ -530,96 +555,8 @@ void CTsFastSwapGrid::Redraw()
         }
     }
 
-// -----------------------------------------------------------------------------
-// CTsFastSwapGrid::LaunchTactileFeedback
-// -----------------------------------------------------------------------------
-//
-void CTsFastSwapGrid::LaunchTactileFeedback()
-    {
-    if( !iTactileFeedbackSupport )
-        {
-        return;
-        }
-    
-    iFeedbackTimer->Cancel();
-    iFeedbackTimer->After(KFeedbackTime);
-    }
-
-// -----------------------------------------------------------------------------
-// CTsFastSwapGrid::SetTactileFeedbackSupport
-// -----------------------------------------------------------------------------
-//
-void CTsFastSwapGrid::SetTactileFeedbackSupport(TBool aSupport)
-    {
-    iTactileFeedbackSupport = aSupport;
-    }
 
 
-// -----------------------------------------------------------------------------
-// CTsFastSwapGrid::RemoveFromVisibleItems
-// -----------------------------------------------------------------------------
-//
-TBool CTsFastSwapGrid::RemoveFromVisibleItems(TInt aItem) const
-    {
-    TBool retVal(EFalse);
-    TInt idx(0);
-    idx = iFullyVisibleItems.Find(aItem); 
-    if(  idx >= 0)
-        {
-        iFullyVisibleItems.Remove(idx);
-        retVal = ETrue;
-        }
-    idx = iPartialVisibleItems.Find( aItem );
-    if( idx >= 0)
-        {
-        iPartialVisibleItems.Remove(idx);
-        retVal = ETrue;
-        }
-    return retVal;    
-    }
-
-// -----------------------------------------------------------------------------
-// CTsFastSwapGrid::AddToFullyVisibleItems
-// -----------------------------------------------------------------------------
-//
-TBool CTsFastSwapGrid::AddToFullyVisibleItems( TInt aItem ) const
-    {
-    TBool retVal(EFalse);
-    TInt idx(0);
-
-    idx = iPartialVisibleItems.Find(aItem); 
-    if(  idx >= 0)
-        {
-        iPartialVisibleItems.Remove(idx);
-        }
-    idx = iFullyVisibleItems.Find( aItem );
-    if( idx == KErrNotFound )
-        {
-        iFullyVisibleItems.Append(aItem);
-        retVal = ETrue; 
-        }
-    return retVal;
-    }
-
-// -----------------------------------------------------------------------------
-// CTsFastSwapGrid::MoveToPartialVisibleItems
-// -----------------------------------------------------------------------------
-//
-TBool CTsFastSwapGrid::MoveToPartialVisibleItems( TInt aItem ) const
-    {
-    TInt idx(0);
-    idx = iFullyVisibleItems.Find(aItem); 
-    if(  idx >= 0)
-        {
-        iFullyVisibleItems.Remove(idx);
-        }
-    idx = iPartialVisibleItems.Find( aItem );
-    if( idx == KErrNotFound )
-        {
-        iPartialVisibleItems.Append(aItem);
-        }
-    return EFalse;
-    }
 
 /* ================================================================================
  * CTsGridItemDrawer
@@ -638,7 +575,9 @@ CTsGridItemDrawer::CTsGridItemDrawer(
         NULL,
         aData ),
   iGrid( aGrid ),
-  iScreenRect(aScreenRect)
+  iScreenRect( aScreenRect ),
+  iStrokeColor( KRgbBlack ),
+  iHighlightStrokeColor( KRgbBlack )
     {
     }
 
@@ -651,6 +590,9 @@ CTsGridItemDrawer::~CTsGridItemDrawer()
     {
     delete iCloseIcon;
     delete iCloseIconMask;
+    delete iCloseIconPressed;
+    delete iCloseIconPressedMask;
+    iStrokeItems.Close();
     }
 
 
@@ -658,12 +600,17 @@ CTsGridItemDrawer::~CTsGridItemDrawer()
 // CTsGridItemDrawer::SetCloseIcon
 // -----------------------------------------------------------------------------
 //
-void CTsGridItemDrawer::SetCloseIcon( CFbsBitmap* aBmp, CFbsBitmap* aMask )
+void CTsGridItemDrawer::SetCloseIcon( CFbsBitmap* aBmp, CFbsBitmap* aBmpMask,
+                                      CFbsBitmap* aBmpPressed, CFbsBitmap* aBmpPressedMask  )
     {
     delete iCloseIcon;
     iCloseIcon = aBmp;
     delete iCloseIconMask;
-    iCloseIconMask = aMask;
+    iCloseIconMask = aBmpMask;
+    delete iCloseIconPressed;
+    iCloseIconPressed = aBmpPressed;
+    delete iCloseIconPressedMask;
+    iCloseIconPressedMask = aBmpPressedMask;
     }
 
 
@@ -714,6 +661,42 @@ void CTsGridItemDrawer::SetRedrawBackground( TBool aEnable )
 
 
 // -----------------------------------------------------------------------------
+// CTsGridItemDrawer::SetStrokeColor
+// -----------------------------------------------------------------------------
+//
+void CTsGridItemDrawer::SetStrokeColors( TRgb aColor,
+                                         TRgb aHighlightedColor )
+    {
+    iStrokeColor = aColor;
+    iHighlightStrokeColor = aHighlightedColor;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsGridItemDrawer::SetStrokeItemsL
+// -----------------------------------------------------------------------------
+//
+void CTsGridItemDrawer::SetStrokeItemsL( RArray<TInt>& aItemIndex )
+    {
+    iStrokeItems.Close();
+    for ( TInt i = 0; i < aItemIndex.Count(); i++ )
+        {
+        iStrokeItems.AppendL( aItemIndex[i] );
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsGridItemDrawer::SetStrokeOffset
+// -----------------------------------------------------------------------------
+//
+void CTsGridItemDrawer::SetStrokeOffset( TPoint aStrokeOffset, TSize aStrokeSize )
+    {
+    iStrokeRect = TRect( aStrokeOffset, aStrokeSize );
+    }
+
+
+// -----------------------------------------------------------------------------
 // CTsGridItemDrawer::DrawActualItem
 // -----------------------------------------------------------------------------
 //
@@ -721,8 +704,6 @@ void CTsGridItemDrawer::SetRedrawBackground( TBool aEnable )
                                                  TBool aItemIsCurrent, TBool aViewIsEmphasized,
                                                  TBool aViewIsDimmed, TBool aItemIsSelected ) const
     {
-    TBool feedbackNeed(EFalse);//feedback when item disappear or fully appear
-    
     if (IsItemRectVisible(aActualItemRect))
         {
         // Calculate offset of the visible rectangle
@@ -736,15 +717,6 @@ void CTsGridItemDrawer::SetRedrawBackground( TBool aEnable )
             drawRect.iBr.iX = iScreenRect.Width() - iRightOffset;
             }
         iGc->SetClippingRect(drawRect);
-                
-		if(IsRectContained( aActualItemRect, drawRect ))
-            {
-            feedbackNeed = iGrid->AddToFullyVisibleItems( aItemIndex );
-            }
-        else
-            {
-            feedbackNeed = iGrid->MoveToPartialVisibleItems( aItemIndex );
-            }
 			
         // Check for item highlight
         TBool itemIsCurrent = !iGrid->IsHighlightVisible() ? EFalse : aItemIsCurrent;
@@ -769,7 +741,25 @@ void CTsGridItemDrawer::SetRedrawBackground( TBool aEnable )
         CFormattedCellListBoxItemDrawer::DrawActualItem(aItemIndex, aActualItemRect,
                 itemIsCurrent, aViewIsEmphasized, aViewIsDimmed, aItemIsSelected );
         
-        if ( iGrid->CanCloseItem( aItemIndex ) && iCloseIcon && iCloseIconMask )
+        // Draw stroke
+        if ( iStrokeItems.Find( aItemIndex ) != KErrNotFound )
+            {
+            TRect strokeRect = iStrokeRect;
+            strokeRect.Move( aActualItemRect.iTl );
+            if ( itemIsCurrent )
+                {
+                iGc->SetPenColor( iHighlightStrokeColor );
+                }
+            else
+                {
+                iGc->SetPenColor( iStrokeColor );
+                }
+            // Thumbnail stroke
+            iGc->DrawRect( strokeRect );
+            }
+        
+        // Draw close button
+        if ( iGrid->CanCloseItem( aItemIndex ) && iCloseIcon && iCloseIconPressed )
             {
             TRect closeIconRect = GetCloseButtonRect( aActualItemRect );
             // Draw frame
@@ -778,26 +768,23 @@ void CTsGridItemDrawer::SetRedrawBackground( TBool aEnable )
             MAknsSkinInstance* skin = AknsUtils::SkinInstance();
             if ( iGrid->IsItemCloseHit( aItemIndex ) )
                 {
-                AknsDrawUtils::DrawFrame(skin, *iGc, outerRect, innerRect,
-                        KAknsIIDQgnFrSctrlButtonPressed, KAknsIIDQgnFrSctrlButtonCenterPressed);
+                TRect sourceRect( TPoint(0,0), iCloseIconPressed->SizeInPixels() );
+                iGc->DrawBitmapMasked( innerRect,
+                        iCloseIconPressed,
+                        sourceRect,
+                        iCloseIconPressedMask,
+                        ETrue );
                 }
             else
                 {
-                AknsDrawUtils::DrawFrame(skin, *iGc, outerRect, innerRect,
-                        KAknsIIDQgnFrSctrlButton, KAknsIIDQgnFrSctrlButtonCenter);
+                TRect sourceRect( TPoint(0,0), iCloseIcon->SizeInPixels() );
+                iGc->DrawBitmapMasked( innerRect,
+                        iCloseIcon,
+                        sourceRect,
+                        iCloseIconMask,
+                        ETrue );
                 }
-            // Draw close icon
-            TRect sourceRect( TPoint(0,0), iCloseIcon->SizeInPixels() );
-            iGc->DrawBitmapMasked( innerRect, iCloseIcon, sourceRect, iCloseIconMask, ETrue );
             }
-        }
-    else
-        {
-        feedbackNeed = iGrid->RemoveFromVisibleItems(aItemIndex);
-        }
-    if(feedbackNeed)
-        {
-        iGrid->LaunchTactileFeedback();
         }
     }
 

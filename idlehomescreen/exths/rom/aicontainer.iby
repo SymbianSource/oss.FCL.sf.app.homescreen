@@ -23,7 +23,6 @@
 
 #ifdef RD_CUSTOMIZABLE_AI
 ECOM_PLUGIN(aicontainer.dll,101FD657.rsc)
-data=ZPRIVATE\101FD657\backup_registration.xml	private\101FD657\backup_registration.xml
 #endif // RD_CUSTOMIZABLE_AI
 
 #endif // AIPLUGINTEST_IBY

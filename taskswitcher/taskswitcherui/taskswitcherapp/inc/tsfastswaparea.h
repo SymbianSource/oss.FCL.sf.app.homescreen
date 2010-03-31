@@ -290,12 +290,6 @@ private:
      * Sends the data-changed notification.
      */   
     void NotifyChange();
-
-    /**
-     * Chage application order.
-     * move Homescreen to first left position.
-     */   
-    void SwapApplicationOrder( RPointerArray<CTsFswEntry>& aArray );
     
     /**
      * Retrieves and returns size for image graphics.
@@ -416,7 +410,6 @@ private: // Data
     CTsEventControler& iEvtHandler;
     
     TInt iMaxItemsOnScreen;
-    TInt iPreviousNoOfItems;
     
     // Tap event
     TPointerEvent iTapEvent;

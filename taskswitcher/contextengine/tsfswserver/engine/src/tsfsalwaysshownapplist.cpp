@@ -25,8 +25,7 @@
    Also, there will be no Close option for such apps. */
 const TUint32 KTsFsUidArray[] =
     {
-    0x102750F0 // Idle App Uid
-    ,0x0EFC346A //Search App Uid
+    0x0EFC346A //Search App Uid
 /* never show menu app */    //,0x101F4CD2 // Menu App Uid
     };
 

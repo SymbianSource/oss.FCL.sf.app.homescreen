@@ -237,19 +237,18 @@ public:
     IMPORT_C TInt SetActivePluginL(const TDesC8& aPluginId);     
     
     /**
-      * Restore active view. Will remove all plugins in active view.
+      * Removes all but one view and removes all plugins from it.
       *
       * @return Operation status. KErrNone (success), KErrNotFound
       */
-    IMPORT_C TInt RestoreActiveViewL();        
+    IMPORT_C TInt RestoreRootL();        
 
      /**
-       * Restore whole root configuration. Will remove
-       * everything except one view.
+       * Restore (re-install) default configuration from ROM.
        *
        * @return Operation status. KErrNone (success), KErrNotFound
        */
-    IMPORT_C TInt RestoreRootL();      
+    IMPORT_C TInt RestoreDefaultConfL();      
      
     /**
      * Replace plugin in the active configuration.

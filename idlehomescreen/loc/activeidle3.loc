@@ -297,3 +297,9 @@
 // r: TB9.2
 //
 #define qtn_hs_corrupted_image_note "Unable to select. Image corrupted or format not supported."
+
+// d: Show when default configuration is loaded (critical error case)
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_error_content_removed "Critical error occurred. Content removed."

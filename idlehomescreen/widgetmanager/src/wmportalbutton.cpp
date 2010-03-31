@@ -525,36 +525,15 @@ void CWmPortalButton::DrawText(
     
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     
-    TRgb textColor( layoutText.Color() );
-
-    if ( IsDimmed() )
+    TRgb textColor;
+    TInt err = AknsUtils::GetCachedColor( 
+                    skin, 
+                    textColor, 
+                    KAknsIIDQsnTextColors, 
+                    EAknsCIQsnTextColorsCG63 );
+    if ( err != KErrNone )
         {
-        const TInt KAlpha = 77;
-        textColor = iEikonEnv->ControlColor( EColorButtonText, *this );        
-        // try over-writing color from theme, ignore error.
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
-        textColor.SetAlpha( KAlpha );
-        }
-    else if ( IsFocused() || iButtonPressed )
-        {
-        textColor = iEikonEnv->ControlColor( EColorButtonTextPressed, *this );
-        // try over-writing color from theme, ignore error.
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG10 );
-        }
-    else if ( textColor.Internal() <= 0 )
-        {
-        textColor = iEikonEnv->ControlColor( EColorButtonText, *this );
-        // try over-writing color from theme, ignore error.
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );        
-        }
-    else
-        {
-        // default for button
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG80 ); 
+        textColor = layoutText.Color(); 
         }
     aGc.SetPenColor( textColor);
     

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<file xmlns="http://www.s60.com/xml/genconfml/1" name="empty.foo" target="\private\200159c0\install\view_2001f48b\xuikon\">
+	<setting ref="Homescreen1XuikonFolder/FolderCFG"/>
+		<xsl:stylesheet version="1.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration/data">
+		<whois>
+	  <xsl:attribute name="dude"><xsl:value-of select="Homescreen1XuikonFolder/FolderCFG"/></xsl:attribute>
+	  </whois>
+  </xsl:template>
+	</xsl:stylesheet>
+</file>

@@ -90,7 +90,13 @@ class CXnNewstickerControl : public CBase
     	 * @return The title of the given index.
     	 */
         const TDesC& Title(TInt aIndex) const;
-
+		
+		/**
+		 * Returns last index from iTitleTexts
+		 * Which is not empty string
+		 */
+        TInt LastIndexWithContent();
+        
         /**
          * Delete all titles.
          */

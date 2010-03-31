@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.57 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.59 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -237,7 +237,7 @@ void CMmWidgetContainer::HandleResourceChange( TInt aType )
     CCoeControl::HandleResourceChange( aType );
     if ( highlightVisibleBefore )
         {
-        SetHighlightVisibilityL( ETrue );
+        TRAP_IGNORE( SetHighlightVisibilityL( ETrue ) );
         }
 
 	if ( aType == KEikDynamicLayoutVariantSwitch && !IsHighlightVisible() )
@@ -638,7 +638,7 @@ void CMmWidgetContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent 
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down
             && itemExists  )
         {
-        SetHighlightL( index );///////////--
+        SetHighlightL( index );
         }
     else if ( aPointerEvent.iType == TPointerEvent::EDrag
               // the line below is needed to enable edit mode in the list widget

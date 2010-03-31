@@ -724,7 +724,9 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     {
     if ( !iClosingDown  )
         {
-		
+        TBool eatEvent( EFalse );
+        TPointerEvent event( aPointerEvent );
+
 		if (aPointerEvent.iType == TPointerEvent::EButton1Down)
 			{
 	        // Check if user clicked a child control
@@ -748,9 +750,37 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 	            // repaint
 	            DrawDeferred();
 	            }
+	        
+	        // stylus popup should not be opened when uninstalling. 
+	        // ou1cimx1#302973
+	        if ( control == iWidgetsList && iWidgetsList->IsFocused() )
+	             {
+	             TInt itemIndex = iWidgetsList->CurrentListBoxItemIndex();
+	             TBool itemPointed = iWidgetsList->View()->XYPosToItemIndex(
+	                                     aPointerEvent.iPosition,
+	                                     itemIndex );
+	             if ( itemIndex >= 0 && itemPointed )
+	                 {
+	                 CWmWidgetData& data = iWidgetsList->WidgetData( itemIndex );                
+	                 if ( &data && data.IsUninstalling() )
+	                     {
+                         event.iType = TPointerEvent::EButton1Up;
+	                     eatEvent = ETrue;
+	                     }
+	                 }
+	             }
+	        
 			}
-        
-        CCoeControl::HandlePointerEventL( aPointerEvent );
+		
+		// set downkey event to base class
+		CCoeControl::HandlePointerEventL( aPointerEvent );
+		
+		// send key up event if selected widget is being uninstalled.
+		// stylus popup shouldn't be displayed for this item.
+		if ( eatEvent )
+		    {
+            CCoeControl::HandlePointerEventL( event );
+		    }
         }
     }
 
@@ -950,7 +980,8 @@ TBool CWmMainContainer::CanDoUninstall()
     if ( WidgetSelected() && data && !data->IsUninstalling() )
         {
         if ( data->WidgetType() == CWmWidgetData::ECps &&
-                data->PublisherUid() != KNullUid )
+            data->PublisherUid() != KNullUid && 
+            data->WrtType() != CWmWidgetData::EUnIdentified )
             {
             retVal = ETrue;
             }
@@ -1025,37 +1056,20 @@ TBool CWmMainContainer::CanDoHelp()
 void CWmMainContainer::AddWidgetToHomeScreenL()
     {
     CWmWidgetData* data = iWidgetsList->WidgetData();
-    if ( !iClosingDown && data && !data->IsUninstalling() )
+    if ( !iClosingDown )
         {
         if ( iFindbox && iFindPaneIsVisible )
             {
             DeactivateFindPaneL();
             }
-
-        // set add to homescreen to be executed later
-        iWmPlugin.SetPostponedCommandL(
-            CWmPlugin::EAddToHomescreen,
-            data->HsContentInfo() );
-
-        // check if we can add any widgets to hs. 
-        TBool hsContentFull = ETrue;
-        for ( TInt i=0; i<iWidgetsList->WidgetDataCount(); i++ )
-            {
-            CHsContentInfo& info = iWidgetsList->WidgetData(i).HsContentInfo();
-            if ( info.CanBeAdded() ) 
-                {
-                hsContentFull = EFalse;
-                break;
-                }
-            }
         
-        // deactivate wm if there's not enough space to add widget to hs.
-        if ( !data->HsContentInfo().CanBeAdded() && !hsContentFull )
+        if ( data && !data->IsUninstalling() )
             {
-            iWmPlugin.ExecuteCommandL();
-            }
-        else
-            {
+            // set add to homescreen to be executed later
+            iWmPlugin.SetPostponedCommandL(
+                        CWmPlugin::EAddToHomescreen,
+                        data->HsContentInfo() );
+
             iWmPlugin.CloseView();
             }
         }
@@ -1089,11 +1103,14 @@ void CWmMainContainer::LaunchWidgetL()
 // CWmMainContainer::ActivateFindPaneL
 // ---------------------------------------------------------------------------
 //
-void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdabtive )
+void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdaptive )
     {
     if ( iFindbox && !iFindPaneIsVisible &&
             iWidgetsList->Model()->NumberOfItems() > KMinWidgets )
         {
+        // reset focus
+        ResetFocus();
+        
         // set column filter flag
         TBitFlags32 bitFlag;
         bitFlag.ClearAll(); // clear all columns
@@ -1122,7 +1139,7 @@ void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdabtive )
         // layout listbox and findbox
         LayoutControls();        
         
-        if ( aActivateAdabtive )
+        if ( aActivateAdaptive )
             {
             iFindbox->ShowAdaptiveSearchGrid();
             }
@@ -1162,11 +1179,12 @@ void CWmMainContainer::DeactivateFindPaneL()
             m->Filter()->ResetFilteringL();
             m->RemoveFilter();
             }
+        
+        ResetFocus();
 
-        iFindbox->MakeVisible( EFalse );
-        iFindbox->SetFocus( EFalse );
-        iFindPaneIsVisible = EFalse;
-        iWidgetsList->SetFindPaneIsVisible( EFalse );
+        iFindbox->MakeVisible( EFalse );        
+        iFindPaneIsVisible = EFalse;        
+        iWidgetsList->SetFindPaneIsVisible( EFalse );       
         
         LayoutControls();
 
@@ -1407,22 +1425,36 @@ void CWmMainContainer::HandleFindSizeChanged()
 //
 void CWmMainContainer::ProcessForegroundEvent( TBool aForeground )
     {
-    if ( aForeground )
+    if ( iFindbox && iFindPaneIsVisible && 
+        iFindbox->IsFocused() )
+        {
+        // keep focus & do nothing 
+        }
+    else if ( aForeground )
         {
         // set init state when wm comes to foreground.
 		// remove focus from all controls when activating view.
-        CCoeControl* control = NULL;
-        CCoeControlArray::TCursor cursor = Components().Begin();
-        while( ( control = cursor.Control<CCoeControl>() ) != NULL )
-            {
-            if( control->IsVisible() && control->IsFocused() )
-                {
-                control->SetFocus( EFalse, EDrawNow );
-                }
-            cursor.Next();
-            }
-        UpdateFocusMode();
+        ResetFocus( EDrawNow );
         }
+    }
+
+// ----------------------------------------------------
+// CWmMainContainer::ResetFocus
+// ----------------------------------------------------
+//
+void CWmMainContainer::ResetFocus( TDrawNow aDrawNow )
+    {
+    CCoeControl* control = NULL;
+    CCoeControlArray::TCursor cursor = Components().Begin();
+    while( ( control = cursor.Control<CCoeControl>() ) != NULL )
+        {
+        if( control->IsVisible() && control->IsFocused() )
+            {
+            control->SetFocus( EFalse, aDrawNow );
+            }
+        cursor.Next();
+        }
+    UpdateFocusMode();
     }
 
 // ----------------------------------------------------

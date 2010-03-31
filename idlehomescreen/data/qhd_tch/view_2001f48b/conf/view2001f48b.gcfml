@@ -1,57 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_2001f48b\hsps\00\">
-	<setting ref="HomescreenPlugins/MaxWidgets"/>
-	<setting ref="HomescreenPlugins/UseEmptyWidgets"/>
-  <setting ref="HomescreenPlugins/ItemIdEmptyWidgets"/>
-  <setting ref="HomescreenPlugins/PropertyEmptyWidgets"/>
-	<setting ref="HomescreenPlugins/Background"/>
-  <setting ref="HomescreenPlugins/BackGroundPath"/>
-  <setting ref="HomescreenPlugins/ItemIdWallpaper"/>
-  <setting ref="HomescreenPlugins/ItemIdSlideshow"/>
-  <setting ref="HomescreenPlugins/WallpaperPropertyName"/>
-  <setting ref="HomescreenPlugins/SlideshowPropertyName"/>
-	<setting ref="HomescreenPlugins/Shortcut1ItemId"/>
-  <setting ref="HomescreenPlugins/Shortcut1ItemName"/>
-  <setting ref="HomescreenPlugins/Shortcut2ItemId"/>
-  <setting ref="HomescreenPlugins/Shortcut2ItemName"/>
-  <setting ref="HomescreenPlugins/Shortcut3ItemId"/>
-  <setting ref="HomescreenPlugins/Shortcut3ItemName"/>
-  <setting ref="HomescreenPlugins/Shortcut4ItemId"/>
-  <setting ref="HomescreenPlugins/Shortcut4ItemName"/>
-  <setting ref="HomescreenPlugins/ShortcutPropertyNameType"/>
-  <setting ref="HomescreenPlugins/ShortcutPropertyNameUid"/>
-	<setting ref="HomescreenPlugins/Plugins"/>
+	<setting ref="HomescreenPlugins_1/MaxWidgets"/>
+	<setting ref="HomescreenPlugins_1/UseEmptyWidgets"/>
+  <setting ref="HomescreenPlugins_1/ItemIdEmptyWidgets"/>
+  <setting ref="HomescreenPlugins_1/PropertyEmptyWidgets"/>
+	<setting ref="HomescreenPlugins_1/Background"/>
+  <setting ref="HomescreenPlugins_1/BackGroundPath"/>
+  <setting ref="HomescreenPlugins_1/ItemIdWallpaper"/>
+  <setting ref="HomescreenPlugins_1/ItemIdSlideshow"/>
+  <setting ref="HomescreenPlugins_1/WallpaperPropertyName"/>
+  <setting ref="HomescreenPlugins_1/SlideshowPropertyName"/>
+	<setting ref="HomescreenPlugins_1/Shortcut1ItemId"/>
+  <setting ref="HomescreenPlugins_1/Shortcut1ItemName"/>
+  <setting ref="HomescreenPlugins_1/Shortcut2ItemId"/>
+  <setting ref="HomescreenPlugins_1/Shortcut2ItemName"/>
+  <setting ref="HomescreenPlugins_1/Shortcut3ItemId"/>
+  <setting ref="HomescreenPlugins_1/Shortcut3ItemName"/>
+  <setting ref="HomescreenPlugins_1/Shortcut4ItemId"/>
+  <setting ref="HomescreenPlugins_1/Shortcut4ItemName"/>
+  <setting ref="HomescreenPlugins_1/ShortcutPropertyNameType"/>
+  <setting ref="HomescreenPlugins_1/ShortcutPropertyNameUid"/>
+	<setting ref="HomescreenPlugins_1/Plugins"/>
 	<xsl:stylesheet version="1.0" 
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
                 xmlns:xi="http://www.w3.org/2001/xinclude">
 		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
 		<xsl:template match="configuration/data">
 			<configuration>
-			 <xsl:attribute name="max_child"><xsl:value-of select="HomescreenPlugins/MaxWidgets"/></xsl:attribute>
+			 <xsl:attribute name="max_child"><xsl:value-of select="HomescreenPlugins_1/MaxWidgets"/></xsl:attribute>
 				<control>
 				  <settings>
 				    <item>
-					    <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins/ItemIdEmptyWidgets"/></xsl:attribute>
+					    <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_1/ItemIdEmptyWidgets"/></xsl:attribute>
 						    <property>
-								  <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins/PropertyEmptyWidgets"/></xsl:attribute>								             
-  							  <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins/UseEmptyWidgets"/></xsl:attribute>
+								  <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_1/PropertyEmptyWidgets"/></xsl:attribute>								             
+  							  <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_1/UseEmptyWidgets"/></xsl:attribute>
 								</property>
 						</item> 
 					  <xsl:choose>
-						  <xsl:when test="HomescreenPlugins/Background = 1">
+						  <xsl:when test="HomescreenPlugins_1/Background = 1">
 							  <item>
-								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins/ItemIdWallpaper"/></xsl:attribute>
+								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_1/ItemIdWallpaper"/></xsl:attribute>
 								    <property>
-								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins/WallpaperPropertyName"/></xsl:attribute>								             
-  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins/BackGroundPath"/></xsl:attribute>
+								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_1/WallpaperPropertyName"/></xsl:attribute>								             
+  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_1/BackGroundPath"/></xsl:attribute>
 								    </property>
 								</item>     
 				      </xsl:when>
-				      <xsl:when test="HomescreenPlugins/Background = 2">
+				      <xsl:when test="HomescreenPlugins_1/Background = 2">
 						    <item>
-								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins/ItemIdSlideshow"/></xsl:attribute>
+								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_1/ItemIdSlideshow"/></xsl:attribute>
 								    <property>
-								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins/SlideshowPropertyName"/></xsl:attribute>								             
-  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins/BackGroundPath"/></xsl:attribute>
+								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_1/SlideshowPropertyName"/></xsl:attribute>								             
+  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_1/BackGroundPath"/></xsl:attribute>
 								    </property>
 								</item>     
 				      </xsl:when>
@@ -60,7 +61,7 @@
 				    </xsl:choose>
 				  </settings>
 					<plugins>
-						<xsl:for-each select="HomescreenPlugins/Plugins">
+						<xsl:for-each select="HomescreenPlugins_1/Plugins">
 							<plugin>
 								<xsl:attribute name="uid"><xsl:value-of select="Uid"/></xsl:attribute>
 								<xsl:attribute name="bundle_id"><xsl:value-of select="BundleIdentifier"/></xsl:attribute>

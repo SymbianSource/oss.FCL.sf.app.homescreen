@@ -166,14 +166,11 @@ void COnlineOfflineHelper::CurrentCellularDataUsageChangedL(const TInt aValue)
 //
 TBool COnlineOfflineHelper::ShowOnlineItem() const
     {    
-    if ( iUiCtl.FwStateHandler()->OnlineStateInUse() )
-    	{
-    	TInt value ( KErrNotFound );
-    	if ( iUiCtl.SettingsRepository().Get(  KAIWebStatus, value ) == KErrNone )
-    		{
-    		return ( !value );
-    		}
-    	}
+    TInt value ( KErrNotFound );
+    if ( iUiCtl.SettingsRepository().Get(  KAIWebStatus, value ) == KErrNone )
+        {
+        return ( !value );
+        }
     return EFalse;
     }
 
@@ -183,14 +180,11 @@ TBool COnlineOfflineHelper::ShowOnlineItem() const
 //
 TBool COnlineOfflineHelper::ShowOfflineItem() const
     {
-    if ( iUiCtl.FwStateHandler()->OnlineStateInUse() )
-		{
-		TInt value ( KErrNotFound );
-		if ( iUiCtl.SettingsRepository().Get(  KAIWebStatus, value ) == KErrNone )
-			{
-			return ( value );
-			}
-		}
+    TInt value ( KErrNotFound );
+    if ( iUiCtl.SettingsRepository().Get(  KAIWebStatus, value ) == KErrNone )
+        {
+        return ( value );
+        }
      return EFalse;
     }
 
@@ -201,20 +195,24 @@ TBool COnlineOfflineHelper::ShowOfflineItem() const
 void COnlineOfflineHelper::ProcessOnlineStateL( TBool aOnline )
     {
     // User has selected online/offline item from menu
-    if( iUiCtl.FwStateHandler()->OnlineStateInUse() )
-    	{
-    	// Don't show R_YES_NO_HS_ONLINE query as user selected online
-    	if ( aOnline )
-    	    {
-			iFlags.Set( EOnline );
-			}
-    	else
-    	    {
-    		iFlags.Clear( EOnline );
-    		}
-    	 
-    	SetOnline( aOnline );
-    	}
+    // Don't show R_YES_NO_HS_ONLINE query as user selected online
+    if ( aOnline )
+        {
+        iFlags.Set( EOnline );
+        if ( iCurrentNwStatus == ENWRegisteredRoaming )
+            {
+            // When user allready is in foreing network and sets
+            // HS online we want to disable automatic offline setting and not
+            // show note QTN_HS_AUTOMATIC_OFFLINE
+            iFlags.Set( ERoamingShown );
+            }
+        }
+    else
+        {
+        iFlags.Clear( EOnline );
+        }
+     
+    SetOnline( aOnline );
     }
 
 // ----------------------------------------------------------------------------
@@ -264,22 +262,38 @@ void COnlineOfflineHelper::InterpretNWMessageL( const TNWMessages aMessage,
                     CurrentNetworkSetting();
                     if( ( iRoamingNetwork == ECmCellularDataUsageConfirm
                           || iRoamingNetwork == ECmCellularDataUsageDisabled )
-                            && iFlags.IsSet( EOnline ) )
+                          && iFlags.IsSet( EOnline )
+                          && iFlags.IsClear( ERoamingShown ) )
                         {
                         // Process to offline state. 
                         // Don't change the user selection.
                         SetOnline( EFalse );
                         // Show roaming notification
 						CAknGlobalNote* note = CAknGlobalNote::NewLC();
-						HBufC* msg( StringLoader::LoadLC( R_QTN_HS_AUTOMATIC_OFFLINE ) );
+						HBufC* msg( StringLoader::LoadLC( 
+						        R_QTN_HS_AUTOMATIC_OFFLINE ) );
 						note->SetSoftkeys(R_AVKON_SOFTKEYS_OK_EMPTY); 
 						note->ShowNoteL( EAknGlobalInformationNote, *msg );
-						CleanupStack::PopAndDestroy( 2, note ); // msg    
+						CleanupStack::PopAndDestroy( 2, note ); // msg
+						
+						// set roming shown flag. We want to show 
+						// romign note only once while user stays in foreign
+						// network. If user sets the HS to online this note is 
+						// not showed again and HS will stay online in foreign
+						// network.
+						iFlags.Set( ERoamingShown );
                         }
                     break;
 
                 case ENWRegisteredOnHomeNetwork:
                     _LOG1( _L(" Home Network Activated "));
+                    if ( iFlags.IsSet( ERoamingShown  ) )
+                        {
+                        // Clear ERoamingShown when user returns to home 
+                        // network.
+                        iFlags.Clear( ERoamingShown );
+                        }
+                    
                     iCurrentNwStatus = aNWInfo.iRegistrationStatus;
                     CurrentNetworkSetting();
                     if( iHomeNetwork == ECmCellularDataUsageAutomatic )

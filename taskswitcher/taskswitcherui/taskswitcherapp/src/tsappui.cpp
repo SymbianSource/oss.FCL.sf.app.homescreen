@@ -60,7 +60,7 @@ const TInt KMinMemoryAmountInBytes = 524288;
 
 // time to wait before sending the task to background
 // (must give time to animation)
-const TInt KWaitBeforeGoingToBackground = 100000;
+const TInt KWaitBeforeGoingToBackground = 175000;
 
 // -----------------------------------------------------------------------------
 // CTsAppUi::ConstructL()
@@ -144,10 +144,12 @@ void CTsAppUi::ConstructL()
     // And finally, go to background.
     MoveAppToBackground( ENoneTransition );
     
-    iEikonEnv->RootWin().SetOrdinalPosition(-1);
+    iEikonEnv->RootWin().SetOrdinalPosition(-1, ECoeWinPriorityNeverAtFront);
     iEikonEnv->RootWin().EnableReceiptOfFocus(EFalse);
     
     iIsPopUpShown = EFalse;
+    iUiStarted = EFalse;
+    iDisableAppKeyHandling = EFalse;
     
     TSLOG_OUT();
     }
@@ -336,14 +338,27 @@ void CTsAppUi::HandleForegroundEventL( TBool aForeground )
     // Both this function and the 'manual' MoveAppTo functions must fire the events
     // because in some cases only one of them will run (e.g. when bringing to foreground
     // not with the hw key but by other means etc.)
+    iDisableAppKeyHandling = EFalse;
+    if ( !iUiStarted )
+        {
+        // Ignore foreground events if UI is starting
+        return;
+        }
     if ( aForeground )
         {
         HandleSwitchToForegroundEvent();
         }
     // exclude cases with dialogs like power menu, memory card
-    else if( !IsFaded())
+    else
         {
-        HandleSwitchToBackgroundEvent();
+        if( !IsFaded() )
+            {
+            HandleSwitchToBackgroundEvent();
+            }
+        else
+            {
+            iDisableAppKeyHandling = ETrue;
+            }
         }
 
     // Call Base class method
@@ -381,12 +396,12 @@ void CTsAppUi::PropertyChanged( TUid aCategory, TUint aKey )
                     {
                     MoveAppToBackground( EBackgroundTransition );
                     }
-                else
+                else if( !iDisableAppKeyHandling )
                     {
                     iAppView->HandleAppKey(KAppKeyTypeLong);
                     }
                 }
-            else if(  value & KTaskswitcherShortAppKeyPressed )
+            else if(  value & KTaskswitcherShortAppKeyPressed && !iDisableAppKeyHandling )
                 {
                 iAppView->HandleAppKey(KAppKeyTypeShort);
                 }
@@ -413,18 +428,10 @@ void CTsAppUi::HandleResourceChangeL( TInt aType )
     // Must call base class implementation first,
     // sizes from LayoutMetricsRect etc. will only be correct after this.
     CAknAppUi::HandleResourceChangeL( aType );
-    if( aType == KEikDynamicLayoutVariantSwitch && iAppView )
+    if( aType == KEikDynamicLayoutVariantSwitch && iAppView && !LayoutChangeAllowed() )
         {
-        // Check if layout switch is necessary
-        TSizeMode mode = iEikonEnv->ScreenDevice()->GetCurrentScreenModeAttributes();
-        TBool isLandscape = mode.iScreenSize.iWidth > mode.iScreenSize.iHeight;
-        TRect appRect = ApplicationRect();
-        TBool isAppLandscape = appRect.Width() > appRect.Height();
-        if(isLandscape != isAppLandscape)
-            {
-            // Keep displayed orientation
-            return;
-            }
+        // Keep displayed orientation
+        return;
         }
     // forward event
     iDeviceState->HandleResourceChange( aType );
@@ -500,6 +507,8 @@ void CTsAppUi::MoveAppToForeground( TUint  /*aTransitionType*/ )
     TSLOG_CONTEXT( MoveAppToForeground, TSLOG_LOCAL );
     TSLOG_IN();
 
+    iUiStarted = ETrue;
+    
     // Request window server to bring our application
     // to foreground
     iApplicationTask.BringToForeground();
@@ -529,6 +538,8 @@ void CTsAppUi::HandleSwitchToBackgroundEvent()
 
         // notify view
         iAppView->HandleSwitchToBackgroundEvent();
+        
+        iWg.SetOrdinalPosition(-1, ECoeWinPriorityNormal);
         }
 
     TSLOG_OUT();
@@ -558,6 +569,8 @@ void CTsAppUi::HandleSwitchToForegroundEvent()
 
         // notify view
         iAppView->HandleSwitchToForegroundEvent();
+        
+        iWg.SetOrdinalPosition(iWg.OrdinalPosition(), ECoeWinPriorityAlwaysAtFront);
         }
 
     TSLOG_OUT();
@@ -659,6 +672,30 @@ void CTsAppUi::DisablePopUpL()
         SetFullScreenApp(EFalse);
         }
     TSLOG_OUT();
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::LayoutCanBeChanged
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppUi::LayoutChangeAllowed()
+    {
+    // Check if layout switch is necessary
+    TSizeMode mode = iEikonEnv->ScreenDevice()->GetCurrentScreenModeAttributes();
+    TBool isLandscape = mode.iScreenSize.iWidth > mode.iScreenSize.iHeight;
+    TRect appRect = ApplicationRect();
+    TBool isAppLandscape = appRect.Width() > appRect.Height();
+    TBool retVal;
+    if(isLandscape != isAppLandscape)
+        {
+        retVal = EFalse;
+        }
+    else
+        {
+        retVal = ETrue;
+        }
+    return retVal;  
     }
 
 // End of file

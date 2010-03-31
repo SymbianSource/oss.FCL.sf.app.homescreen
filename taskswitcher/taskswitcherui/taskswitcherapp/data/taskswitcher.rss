@@ -275,6 +275,7 @@ RESOURCE TBUF r_ts_title { buf = "Task Switcher"; }
 RESOURCE TBUF r_ts_fsw_activate { buf = qtn_task_switcher_popup_open_app; }
 RESOURCE TBUF r_ts_fsw_close { buf = qtn_task_switcher_popup_close_app; }
 RESOURCE TBUF r_ts_fsw_close_all { buf = qtn_task_switcher_popup_close_all; }
+RESOURCE TBUF r_ts_fsw_no_apps { buf = qtn_task_switcher_no_apps; }
 RESOURCE TBUF r_ts_fsw_confirm_close { buf = qtn_memlo_confirm_close; }
 
 RESOURCE TBUF r_task_switcher_heading_applications { buf = qtn_task_switcher_heading_applications; }

@@ -63,7 +63,8 @@ _LIT8( KTemplateViewUID, "0x20026f50" );
 const TInt KPSCategoryUid( 0x200286E3 );
 const TInt KPSCrashCountKey( 1 );     
 const TInt KStabilityInterval( 60000000 ); // 1 minute
-const TInt KCrashRestoreThreshold( 3 );
+const TInt KCrashRestoreDefaultThreshold( 3 );
+const TInt KCrashRestoreAllTreshold( 4 );
 
 // ============================ LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
@@ -353,28 +354,7 @@ void CXnViewManager::ConstructL()
     
     iComposer = CXnComposer::NewL( *iHspsWrapper );
     
-    // Robustness checks.
-    TInt crashCount = 0;
-    RProperty::Get( TUid::Uid( KPSCategoryUid ),
-                    KPSCrashCountKey,
-                    crashCount );    
-            
-    if( crashCount >= KCrashRestoreThreshold )
-        {
-        iHspsWrapper->RestoreRootL();
-        ResetCrashCount();        
-        ShowErrorNoteL( R_QTN_HS_ERROR_WIDGETS_REMOVED );        
-        }
-    else if( crashCount > 0 )
-        {
-        // Start stability timer to ensure that
-        // if system is stabile at least KStabilityInterval
-        // then crash count is reset to 0. 
-        iStabilityTimer = CPeriodic::NewL( CActive::EPriorityStandard );
-        iStabilityTimer->Start( KStabilityInterval,
-                                KStabilityInterval,
-                                TCallBack( SystemStabileTimerCallback, this ) );
-        }       
+    DoRobustnessCheckL();
     }
 
 // -----------------------------------------------------------------------------
@@ -1234,7 +1214,11 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
             retval = iHspsWrapper->RemovePluginL( view->PluginId() );
             
             // Notify observers of view list change
-            NotifyViewRemovalL( *view );
+            TRAPD( err, NotifyViewRemovalL( *view ) );
+            if ( err != KErrNone )
+                {
+                // ignored
+                }            
 
             iRootData->DestroyViewData( view );
                                                                    
@@ -1307,7 +1291,11 @@ void CXnViewManager::RemoveViewL( TInt aEffectId )
         iHspsWrapper->RemovePluginL( view->PluginId() );
         
         // Notify observers of view list change
-        NotifyViewRemovalL( *view );
+        TRAPD( err, NotifyViewRemovalL( *view ) );
+        if ( err != KErrNone )
+            {
+            // ignored
+            }   
 
         iRootData->DestroyViewData( view );
         
@@ -1773,17 +1761,50 @@ void CXnViewManager::ResetCrashCount()
 // -----------------------------------------------------------------------------
 // CXnViewManager::ShowErrorNoteL 
 // -----------------------------------------------------------------------------
-void CXnViewManager::ShowErrorNoteL( const TInt aResourceId )
+void CXnViewManager::ShowErrorNoteL()
     {        
-    HBufC* msg( StringLoader::LoadLC( aResourceId ) );
-        
-    CAknErrorNote* note = new ( ELeave ) CAknErrorNote;
-    CleanupStack::PushL( note );
+    CAknQueryDialog* query = CAknQueryDialog::NewL();
+    query->PrepareLC( R_HS_CONTENT_REMOVED_VIEW );
+
+    HBufC* queryText( StringLoader::LoadLC( R_HS_ERROR_CONTENT_REMOVED ) );    
+    query->SetPromptL( queryText->Des() );    
+    CleanupStack::PopAndDestroy( queryText );
+
+    query->RunLD();   
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::DoRobustnessCheckL 
+// -----------------------------------------------------------------------------
+void CXnViewManager::DoRobustnessCheckL()
+    {
+    TInt crashCount = 0;
+    RProperty::Get( TUid::Uid( KPSCategoryUid ),
+                    KPSCrashCountKey,
+                    crashCount );    
     
-    note->ExecuteLD( *msg );
+    if( crashCount == KCrashRestoreDefaultThreshold )
+        {    
+        TInt err = iHspsWrapper->RestoreDefaultConfL();         
+        ShowErrorNoteL();
+        }
+    else if( crashCount >= KCrashRestoreAllTreshold )
+        {       
+        TInt err = iHspsWrapper->RestoreRootL();              
+        ResetCrashCount();
+        return;
+        }
     
-    CleanupStack::Pop( note );
-    CleanupStack::PopAndDestroy( msg );    
+    if( crashCount > 0 )
+        {        
+        // Start stability timer to ensure that
+        // if system is stabile at least KStabilityInterval
+        // then crash count is reset to 0. 
+        iStabilityTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+        iStabilityTimer->Start( KStabilityInterval,
+                                KStabilityInterval,
+                                TCallBack( SystemStabileTimerCallback, this ) );
+        }           
     }
 
 // End of file

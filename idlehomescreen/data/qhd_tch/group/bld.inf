@@ -25,6 +25,8 @@
 #include "../posterwideimage_2001fdbc/group/bld.inf"
 #include "../profile_2001cb7c/group/bld.inf"
 #include "../view_2001f48b/group/bld.inf"
+#include "../view_200286e4/group/bld.inf"
+#include "../view_200286e5/group/bld.inf"
 #include "../templateview_20026f50/group/bld.inf"
 #include "../root_2001f482/group/bld.inf"
 

@@ -102,6 +102,12 @@ public:
      * background redraw.
      */
     void OrderFullWindowRedraw();
+    
+    /**
+     * Orders window invalidation to perform full
+     * background redraw.
+     */
+    void EnableDragEvents( TBool aEnable );
 
 protected:
     // from MCoeControlObserver

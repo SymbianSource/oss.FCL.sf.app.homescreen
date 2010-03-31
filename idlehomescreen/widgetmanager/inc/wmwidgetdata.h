@@ -59,6 +59,14 @@ public: // types
             ECps // wrt widgets included in this category
             };
 
+    /** wrt widget type */
+    enum TWrtType
+            {
+            EUnIdentified,
+            EWgz,                    
+            EWgt
+            };
+
 public: // construction
     /**
      * static constructor
@@ -199,6 +207,9 @@ public: // methods to read the content
     /** widget type */
     inline TWidgetType WidgetType() const;
 
+    /** wrt widget type */
+    inline TWrtType WrtType() const;
+    
     /** running install animation index */
     inline TInt InstallAnimationIndex() const;
 
@@ -265,8 +276,11 @@ private: // data members
     /** The CHsContentInfo that corresponds to this list row */
     CHsContentInfo*     iHsContentInfo;
 
-    /** type oif the widget */
+    /** type of the widget */
     TWidgetType         iWidgetType;
+    
+    /** type of the wrt widget */    
+    TWrtType            iWrtType;
 
     /** persistent order of widgets (used in sorting) */
     const CWmPersistentWidgetOrder* iPersistentWidgetOrder;

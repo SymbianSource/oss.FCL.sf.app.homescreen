@@ -24,7 +24,7 @@
 #include "xnappuiadapter.h"
 #include "hscontentcontrolfactory.h"
 #include "hscontentcontrolecomlistener.h"
-#include "hscontentcontroluninstallmonitor.h"
+#include "hscontentcontrolswilistener.h"
 
 // Local constants
 
@@ -81,11 +81,11 @@ void CHsContentControlFactory::ConstructL()
     {
     iHsContentControlEComListener = 
             CHsContentControlEComListener::NewL( *this );
+    iHsContentControlSwiListener = 
+            CHsContentControlSwiListener::NewL( *this );
+
     REComSession::ListImplementationsL( 
-            KInterfaceUidContentController, iImplArray );
-    
-    iHsContentControlUninstallMonitor = 
-            CHsContentControlUninstallMonitor::NewL( *this );
+        KInterfaceUidContentController, iImplArray );
     }
 
 // ----------------------------------------------------------------------------
@@ -102,13 +102,13 @@ CHsContentControlFactory::CHsContentControlFactory( CXnAppUiAdapter& aAdapter )
 // ----------------------------------------------------------------------------
 //
 EXPORT_C CHsContentControlFactory::~CHsContentControlFactory()
-    {
-    delete iHsContentControlEComListener;
-    delete iHsContentControlUninstallMonitor;
+    {    
+	delete iHsContentControlEComListener;
+    delete iHsContentControlSwiListener;
     
     iImplArray.ResetAndDestroy();
     iImplArray.Close();
-    
+
     iHsContentControlUis.ResetAndDestroy();
     }
 
@@ -208,25 +208,29 @@ void CHsContentControlFactory::HandleEComChangeEvent()
     }
 
 // ----------------------------------------------------------------------------
-// CHsContentControlFactory::HandleUninstallEvent()
+// CHsContentControlFactory::HandleSwiEvent()
 // ----------------------------------------------------------------------------
 //
-void CHsContentControlFactory::HandleUninstallEvent( const TUid& aPkgUid )
+void CHsContentControlFactory::HandleSwiEvent( const RArray<TUid>& aUidList )
     {
     // ignore event if no plugin loaded.
-    if ( iHsContentControlUis.Count() > 0 )
+    if ( iHsContentControlUis.Count() > 0 && aUidList.Count() > 0 )
         {
         for( TInt index( iHsContentControlUis.Count() - 1 ); index >= 0; --index )
             {
             CHsContentControlUi* cc( iHsContentControlUis[ index ] );
-            // ImplUid of plugin must match Sis pkg uid
-            if ( cc && cc->ImplUid() == aPkgUid )
+            for( TInt uidIndex( aUidList.Count() - 1 ); uidIndex >= 0 && cc; --uidIndex )
                 {
-                ReleaseHsCcUi( cc );
-                iHsContentControlUis.Remove( index );
-                delete cc;
-                cc = NULL;
-                break;
+                // ImplUid of plugin must match Sis pkg uid            
+                if ( cc->ImplUid() == aUidList[uidIndex] )
+                    {
+                    // release ui and keep checking, multiple package might be being
+                    // processed by SWI, this events comes once for all packages. 
+                    ReleaseHsCcUi( cc );
+                    iHsContentControlUis.Remove( index );
+                    delete cc;
+                    cc = NULL;                    
+                    }                
                 }
             }
         }

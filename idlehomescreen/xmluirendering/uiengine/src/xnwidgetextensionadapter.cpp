@@ -91,6 +91,20 @@ CXnWidgetExtensionAdapter::~CXnWidgetExtensionAdapter()
         }
     GfxTransEffect::Deregister( this );
     }
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL
+// 
+// -----------------------------------------------------------------------------
+// 
+void CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL()
+	{
+    if( IsVisible() )
+		{
+	    CCoeControl::MakeVisible( EFalse );
+		}
+	CXnControlAdapter::HandleScreenDeviceChangedL();
+	
+	}
 
 // -----------------------------------------------------------------------------
 // CXnWidgetExtensionAdapter::CXnWidgetExtensionAdapter

@@ -268,11 +268,10 @@ static void RemoveDuplicateContentChangesL( RAiPolicyElementArray& aArray )
                 {
                 HBufC* id2( PropertyValueL( aArray[j].Target(), 
                    AiUiDef::xml::property::KId ) );
+                CleanupStack::PushL( id2 );
                 
                 if ( id2 )
                     {
-                    CleanupStack::PushL( id2 );
-                
                     // Same id and same policy
                     if ( i != j && id->Compare( *id2 ) == 0 &&                          
                      ( aArray[i].Policy().Compare( aArray[j].Policy()) == 0 ) ) 
@@ -571,15 +570,22 @@ TBool CContentRenderer::CanPublish( CHsContentPublisher& aPlugin,
     {
     TInt error( KErrNone );
     TInt retval( KErrNone );
+        
+    __PRINTS("*** XML UI: CContentRenderer::CanPublish ***");
     
-    __PRINTS("*** UC: Init - Content Validation ***");
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x" ),          
+        &aPlugin.PublisherInfo().Name(), aPlugin.PublisherInfo().Uid().iUid ); 
+                                  
 	__TIME("UC: Content Validation",
-        TRAP( error, retval = CanPublishL( aPlugin, aContent, aIndex ) );
-        );
-    __HEAP("UC: Content Validation");
-    __PRINTS("*** UC: Done - Content Validation ***");
-
-    return ( error == KErrNone && retval == KErrNone );
+        TRAP( error, retval = CanPublishL( aPlugin, aContent, aIndex ) ) );
+            
+	__HEAP("UC: Content Validation");
+    
+	TBool ret( error == KErrNone && retval == KErrNone );
+	
+	__PRINT( __DBG_FORMAT("*** XML UI: CContentRenderer::CanPublish - done, CanPublish: %d ***"), ret );
+    
+    return ret;
     }
 
 // ----------------------------------------------------------------------------
@@ -593,18 +599,23 @@ TInt CContentRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent,
 	TInt error( KErrNone );
 	TInt retval( KErrNone );
 	
-	__PRINTS("*** UC: Init - Content Publishing (Resource) ***");
+	__PRINTS("*** XML UI: CContentRenderer::Publish (Resource) ***");
+	
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x" ),          
+        &aPlugin.PublisherInfo().Name(), aPlugin.PublisherInfo().Uid().iUid ); 
+		
 	__TIME("UC: Content Publishing (Resource)",
-    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aResource, aIndex ) );
-    );
+    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aResource, aIndex ) ) );
+    
     __HEAP("UC: Content Publishing (Resource)");
-    __PRINTS("*** UC: Done - Content Publishing (Resource) ***");
-
+    
     if( !error && retval )
         {
         error = retval;
         }
     
+    __PRINT( __DBG_FORMAT("*** XML UI: CContentRenderer::Publish (Resource) - done, error: %d ***"), error );
+            
     return error;
     }
 
@@ -619,18 +630,23 @@ TInt CContentRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent,
     TInt error( KErrNone );
     TInt retval( KErrNone );
     
-    __PRINTS("*** UC: Init - Content Publishing (Value-Text) ***");
+    __PRINTS("*** XML UI: CContentRenderer::Publish (Value-Text) ***");
+    
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x" ),          
+        &aPlugin.PublisherInfo().Name(), aPlugin.PublisherInfo().Uid().iUid ); 
+    
    	__TIME("UC: Content Publishing (Value-Text)",
-    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aText, aIndex ) );
-    );
+    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aText, aIndex ) ) );
+       	
     __HEAP("UC: Content Publishing (Value-Text)");
-    __PRINTS("*** UC: Done - Content Publishing (Value-Text) ***");
-
+        
     if( !error && retval )
         {
         error = retval;
         }
 
+    __PRINT( __DBG_FORMAT("*** XML UI: CContentRenderer::Publish (Value-Text) - done, error: %d ***"), error );
+    
     return error;
     }
 
@@ -645,17 +661,22 @@ TInt CContentRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent,
     TInt error( KErrNone );
     TInt retval( KErrNone );
     
-    __PRINTS("*** UC: Init - Content Publishing (Value-Buf) ***");
+    __PRINTS("*** XML UI: CContentRenderer::Publish (Value-Buf) ***");
+    
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x" ),          
+        &aPlugin.PublisherInfo().Name(), aPlugin.PublisherInfo().Uid().iUid ); 
+    
     __TIME("UC: Content Publishing (Value-Buf)",
-    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aBuf, aIndex ) );
-    )
+    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aBuf, aIndex ) ) );
+    
     __HEAP("UC: Content Publishing (Value-Buf)");
-    __PRINTS("*** UC: Done - Content Publishing (Value-Buf) ***");
-
+       
     if( !error && retval )
         {
         error = retval;
         }
+    
+    __PRINT( __DBG_FORMAT("*** XML UI: CContentRenderer::Publish (Value-Buf) - done, error: %d ***"), error );
     
     return error;
     }
@@ -671,17 +692,22 @@ TInt CContentRenderer::Publish( CHsContentPublisher& aPlugin, TInt aContent,
     TInt error( KErrNone );
     TInt retval( KErrNone );
     	
-	__PRINTS("*** UC: Init - Content Publishing (Value-RFile) ***");
+	__PRINTS("*** XML UI: CContentRenderer::Publish (Value-RFile) ***");
+	
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x" ),          
+        &aPlugin.PublisherInfo().Name(), aPlugin.PublisherInfo().Uid().iUid ); 
+	
     __TIME("UC: Content Publishing (Value-RFile)",
-    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aFile, aIndex ) );
-    );
-    __HEAP("UC: Content Publishing (Value-RFile)");
-    __PRINTS("*** UC: Done - Content Publishing (Value-RFile) ***");
+    	TRAP( error, retval = DoPublishL( aPlugin, aContent, aFile, aIndex ) ) );
 
+    __HEAP("UC: Content Publishing (Value-RFile)");
+        
     if( !error && retval )
         {
         error = retval;
         }
+    
+    __PRINT( __DBG_FORMAT("*** XML UI: CContentRenderer::Publish (Value-RFile) - done, error: %d ***"), error );
     
     return error;
     }
@@ -697,17 +723,22 @@ TInt CContentRenderer::Clean( CHsContentPublisher& aPlugin, TInt aContent,
     TInt error( KErrNone );
     TInt retval( KErrNone );
             
-    __PRINTS("*** UC: Init - Content Publishing (Clean) ***");
+    __PRINTS("*** XML UI: CContentRenderer::Clean (Clean) ***");
+    
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x" ),          
+        &aPlugin.PublisherInfo().Name(), aPlugin.PublisherInfo().Uid().iUid ); 
+        
     __TIME("UC: Content Publishing (Clean)",
-    	TRAP( error, retval = DoCleanL( aPlugin, aContent, aIndex ) );
-    );
+    	TRAP( error, retval = DoCleanL( aPlugin, aContent, aIndex ) ) );
+    
     __HEAP("UC: Content Publishing (Clean)");
-    __PRINTS("*** UC: Done - Content Publishing (Clean) ***");
-
+       
     if( !error && retval )
         {
         error = retval;
         }
+    
+    __PRINT( __DBG_FORMAT("*** XML UI: CContentRenderer::Clean (Clean) - done, error: %d ***"), error );
     
     return error;
     }
@@ -1275,8 +1306,12 @@ void CContentRenderer::ProcessTransactionElementL(
     {
     LeaveIfNull( aElement, KErrArgument );
     
+    __PRINTS("*** XML UI: CContentRenderer::ProcessTransactionElementL ***");
+    
     if ( IsImmediateMode() || iStack->IsEmpty() )
-        {
+        {      
+        __PRINTS("* Immediate transaction mode, or transaction stack is empty" );
+        
         // No transaction. Commit element immediately
         TBool layoutChanged( EFalse );
         
@@ -1297,9 +1332,13 @@ void CContentRenderer::ProcessTransactionElementL(
     else
         {
         // Append transaction element to transaction
+        __PRINTS("* Adding transaction element to stack");
+        
         MTransaction* tr( iStack->Top() );
         tr->Append( *aElement );
         }
+    
+    __PRINTS("*** XML UI: CContentRenderer::ProcessTransactionElementL - done ***");
     }
 
 // ----------------------------------------------------------------------------

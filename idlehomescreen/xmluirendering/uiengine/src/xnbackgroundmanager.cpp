@@ -27,6 +27,7 @@
 #include "xnwallpaperview.h"
 #include "xnrootdata.h"
 #include "xnuiengine.h"
+#include "xnoomsyshandler.h"
 #include "xneffectmanager.h"
 
 // SYSTEM INCLUDE FILES
@@ -45,6 +46,7 @@
 #include <AknsControlContext.h>
 #include <AknsLayeredBackgroundControlContext.h>
 #include <driveinfo.h>
+#include <layoutmetadata.cdl.h>
 
 using namespace hspswrapper;
 
@@ -101,8 +103,10 @@ void CXnBackgroundManager::ConstructL()
     CheckFeatureTypeL();   
 
     iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
-    
+
     GfxTransEffect::Register( this, KGfxContextBgAppear );    
+
+    iOomSysHandler = CXnOomSysHandler::NewL();
     }
 
 // -----------------------------------------------------------------------------
@@ -136,6 +140,7 @@ CXnBackgroundManager::~CXnBackgroundManager()
     delete iBgContext;
     delete iBgImage;
     delete iBgImagePath;
+    delete iOomSysHandler;
     }
 
 // -----------------------------------------------------------------------------
@@ -177,6 +182,7 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
             {
             SystemGc().DrawBitmap( iRect, wallpaper );
             }
+	        DrawStatusPaneMask();		
         }
     
     // Skin bg is used by default
@@ -353,7 +359,7 @@ CXnBackgroundManager::WppType CXnBackgroundManager::WallpaperType()
     {
     return iType;
     }
-    
+
 // -----------------------------------------------------------------------------
 // CXnBackgroundManager::WallpaperChanged
 // -----------------------------------------------------------------------------
@@ -505,12 +511,19 @@ void CXnBackgroundManager::SetWallpaperL()
             }
         else if ( selectedIndex == 1 )
             {
+            if ( CXnOomSysHandler::HeapAvailable( CXnOomSysHandler::EMem2MB ) )
+                {
             CXnAppUiAdapter& appui( iViewManager.AppUiAdapter() );
             
             appui.EffectManager()->BeginFullscreenEffectL(
                 KGfxContextOpenWallpaperView, iViewManager.ActiveViewData() );        
             
             appui.ActivateLocalViewL( KWallpaperViewUid, KDummyUid, KSingle );                                 
+                }
+            else
+            	{
+            	OomSysHandler().HandlePotentialOomL();
+            	}
             }
         }
     CleanupStack::Pop( query );
@@ -929,5 +942,52 @@ TInt CXnBackgroundManager::TimerCallback(TAny *aPtr)
     return EFalse;
     }
 
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::DrawStatusPaneMask
+// -----------------------------------------------------------------------------
+//
+void CXnBackgroundManager::DrawStatusPaneMask() const
+    {
+    TRect spRect;
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EStatusPane, spRect );
+    
+    CFbsBitmap* maskBmp( NULL );
+    TInt err( KErrNone );
+    
+    if( Layout_Meta_Data::IsLandscapeOrientation() )
+        {
+        TRAP( err, maskBmp = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnGrafBgLscTopMaskIcon ) );
+        }
+    else
+        {
+        TRAP( err, maskBmp = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnGrafBgPrtTopMaskIcon ) );        
+        }
+    
+    if( err )
+        {
+        return;
+        }
+    
+    // draw mask
+    if( maskBmp )
+        {
+        AknIconUtils::SetSize( maskBmp, spRect.Size(), EAspectRatioNotPreserved );
+        SystemGc().DrawBitmap( spRect, maskBmp );
+        delete maskBmp;        
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::OOMSysHandler
+// -----------------------------------------------------------------------------
+//
+CXnOomSysHandler& CXnBackgroundManager::OomSysHandler() const
+    {
+    __ASSERT_DEBUG( iOomSysHandler , User::Panic( _L("xnbackgroundmanager"), 0 ) );
+
+    return *iOomSysHandler;
+    }
 
 //  End of File

@@ -56,6 +56,7 @@ _LIT8( KKeyPluginId, "pluginId" );
 _LIT8( KKeyConfUid, "confUid" );
 _LIT8( KInterface, "interface" );
 _LIT8( KType, "type" );
+_LIT8( KCopyLogos, "copylogos" );
 _LIT8( KKeyPlugins, "plugins" );
 _LIT8( KKeyItemId, "itemId" );
 _LIT8( KKeyName, "name" );
@@ -369,6 +370,8 @@ EXPORT_C void CHspsWrapper::GetAppConfigurationsL(
                     CleanupStack::Pop(&confVar);
                     confVar.Reset();
                     
+                    plugin->SetTypeL( _L8("application") );
+                    
                     aPlugins.AppendL( plugin );
                     CleanupStack::Pop( plugin );
                     }
@@ -498,6 +501,13 @@ EXPORT_C void CHspsWrapper::GetPluginsL(
     inParamList.AppendL( typeParam );
     CleanupStack::Pop(&typeParam);
     typeParam.Reset();
+    
+    TLiwGenericParam logosParam;
+    logosParam.SetNameAndValueL( KCopyLogos, TLiwVariant( ETrue ) );
+    logosParam.PushL();
+    inParamList.AppendL( logosParam );
+    CleanupStack::Pop(&logosParam);
+    logosParam.Reset();
 
     iHspsInterface->ExecuteCmdL( KHSPSCommandGetPlugins, inParamList, outParamList ); 
     inParamList.Reset();
@@ -512,7 +522,17 @@ EXPORT_C void CHspsWrapper::GetPluginsL(
             ProcessPluginsL(*list,aPlugins);
             }
         }
-    outParamList.Reset();
+    
+    // check success         
+    TInt pos(0);    
+    const TLiwGenericParam* outParam = 
+            outParamList.FindFirst( pos, KOutKeyStatus );               
+    if ( outParam )
+        {        
+        User::LeaveIfError( outParam->Value().AsTInt32() );
+        }
+    
+    outParamList.Reset();    
     }
     
 // ---------------------------------------------------------------------------
@@ -765,14 +785,14 @@ EXPORT_C TInt CHspsWrapper::SetActivePluginL( const TDesC8& aPluginId )
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CHspsWrapper::RestoreActiveViewL()
+EXPORT_C TInt CHspsWrapper::RestoreRootL()
     {
     CLiwGenericParamList& inParamList = iServiceHandler->InParamListL();
     CLiwGenericParamList& outParamList = iServiceHandler->OutParamListL();
          
     // Compose Liw message
     TLiwGenericParam restoreTypeParam;
-    restoreTypeParam.SetNameAndValueL( KRestore, TLiwVariant( KActive ) );
+    restoreTypeParam.SetNameAndValueL( KRestore, TLiwVariant( KAll ) );
     restoreTypeParam.PushL();
     inParamList.AppendL( restoreTypeParam );
     CleanupStack::Pop( &restoreTypeParam );
@@ -801,14 +821,14 @@ EXPORT_C TInt CHspsWrapper::RestoreActiveViewL()
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CHspsWrapper::RestoreRootL()
+EXPORT_C TInt CHspsWrapper::RestoreDefaultConfL()
     {
     CLiwGenericParamList& inParamList = iServiceHandler->InParamListL();
     CLiwGenericParamList& outParamList = iServiceHandler->OutParamListL();
          
     // Compose Liw message
     TLiwGenericParam restoreTypeParam;
-    restoreTypeParam.SetNameAndValueL( KRestore, TLiwVariant( KAll ) );
+    restoreTypeParam.SetNameAndValueL( KRestore, TLiwVariant( KActive ) );
     restoreTypeParam.PushL();
     inParamList.AppendL( restoreTypeParam );
     CleanupStack::Pop( &restoreTypeParam );

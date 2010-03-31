@@ -63,6 +63,13 @@ public: // Constructors and destructor
     * Destructor.
     */
     ~CXnWidgetExtensionAdapter();
+public:
+    /**
+     * From CCoeAppUiBase.
+     * Informs the components about the screen layout switch.
+     */
+     void HandleScreenDeviceChangedL();
+
      
 private: 
     // Functions from base classes    

@@ -296,5 +296,114 @@ qtn_apps_office_title.islocalisable "TRUE"
 -->
 <!ENTITY qtn_apps_office_title "Office">
 
+<!--
+qtn_apps_connectivity_list.attributes
+qtn_apps_connectivity_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_connectivity_list.release "5.2"
+qtn_apps_connectivity_list.description "Connectivity shortcut title"
+qtn_apps_connectivity_list.parents "Title pane"
+qtn_apps_connectivity_list.grammar "Connectivity"
+qtn_apps_connectivity_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_connectivity_list "Connectivity">
+
+<!--
+qtn_apps_installations_list.attributes
+qtn_apps_installations_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_installations_list.release "5.2"
+qtn_apps_installations_list.description "Installations shortcut title"
+qtn_apps_installations_list.parents "Title pane"
+qtn_apps_installations_list.grammar "Installations"
+qtn_apps_installations_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_installations_list "Installations">
+
+<!--
+qtn_apps_newmessage_list.attributes
+qtn_apps_newmessage_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_newmessage_list.release "5.2"
+qtn_apps_newmessage_list.description "New message shortcut title"
+qtn_apps_newmessage_list.parents "Title pane"
+qtn_apps_newmessage_list.grammar "New message"
+qtn_apps_newmessage_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_newmessage_list "New message">
+
+<!--
+qtn_apps_msgtypeselection_list.attributes
+qtn_apps_msgtypeselection_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_msgtypeselection_list.release "5.2"
+qtn_apps_msgtypeselection_list.description "Select message type shortcut title"
+qtn_apps_msgtypeselection_list.parents "Title pane"
+qtn_apps_msgtypeselection_list.grammar "Select message type"
+qtn_apps_msgtypeselection_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_msgtypeselection_list "Sel. message type">
+
+<!--
+qtn_apps_newemail_list.attributes
+qtn_apps_newemail_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_newemail_list.release "5.2"
+qtn_apps_newemail_list.description "New email shortcut title"
+qtn_apps_newemail_list.parents "Title pane"
+qtn_apps_newemail_list.grammar "New email"
+qtn_apps_newemail_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_newemail_list "New email">
+
+<!--
+qtn_apps_newsyncml_list.attributes
+qtn_apps_newsyncml_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_newsyncml_list.release "5.2"
+qtn_apps_newsyncml_list.description "New syncML shortcut title"
+qtn_apps_newsyncml_list.parents "Title pane"
+qtn_apps_newsyncml_list.grammar "New syncML"
+qtn_apps_newsyncml_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_newsyncml_list "New syncML">
+
+<!--
+qtn_apps_newpostcard_list.attributes
+qtn_apps_newpostcard_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_newpostcard_list.release "5.2"
+qtn_apps_newpostcard_list.description "New postcard shortcut title"
+qtn_apps_newpostcard_list.parents "Title pane"
+qtn_apps_newpostcard_list.grammar "New postcard"
+qtn_apps_newpostcard_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_newpostcard_list "New postcard">
+
+<!--
+qtn_apps_newaudiomsg_list.attributes
+qtn_apps_newaudiomsg_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_newaudiomsg_list.release "5.2"
+qtn_apps_newaudiomsg_list.description "New audio message shortcut title"
+qtn_apps_newaudiomsg_list.parents "Title pane"
+qtn_apps_newaudiomsg_list.grammar "New audio message"
+qtn_apps_newaudiomsg_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_newaudiomsg_list "New audio message">
+
+<!--
+qtn_apps_undefined_list.attributes
+qtn_apps_undefined_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_undefined_list.release "5.2"
+qtn_apps_undefined_list.description "Undefined shortcut title, shown if application is e.g. uninstalled"
+qtn_apps_undefined_list.parents "Title pane"
+qtn_apps_undefined_list.grammar "Undefined"
+qtn_apps_undefined_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_undefined_list "Undefined">
+
+<!--
+qtn_apps_dialledcalls_list.attributes
+qtn_apps_dialledcalls_list.layout "list_single_large_graphic_pane_1"
+qtn_apps_dialledcalls_list.release "5.2"
+qtn_apps_dialledcalls_list.description "Dialed calls shortcut title"
+qtn_apps_dialledcalls_list.parents "Title pane"
+qtn_apps_dialledcalls_list.grammar "Dialed calls"
+qtn_apps_dialledcalls_list.islocalisable "TRUE"
+-->
+<!ENTITY qtn_apps_dialledcalls_list "Dialed calls">
 
 <!-- End of File-->

@@ -56,8 +56,7 @@ _LIT8( KMenuBar, "menubar" );
 // Data types
 enum 
     {
-    EIsActivated,
-    EIsFirstActivation,
+    EIsActivated,    
     EIsInCall,
     EIsLightsOn,
     EIsForeground,    
@@ -240,9 +239,7 @@ void CXnViewAdapter::ConstructL()
     BaseConstructL();
     
     iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
-    
-    iFlags.Set( EIsFirstActivation );
-    
+            
     // Base class CAknViewAppUi takes ownership of iViewAdapter
     iAppUiAdapter.AddViewL( this );    
     iAppUiAdapter.SetDefaultViewL( *this );
@@ -411,38 +408,21 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
         sp->DrawNow();
         }
 
-    if ( iFlags.IsSet( EIsFirstActivation ) )
-        {                             
-        // Set the active container
-        ActivateContainerL( iAppUiAdapter.ViewManager().ActiveViewData() );
-        
-        __TICK( "CXnViewAdapter::DoActivateL - Calling UiActivated" );
-        __TIME_MARK( time2 );
+    // Set the active container
+    if ( aCustomMessage == KActivateDefaultView )
+        {
+        __PRINTS( "*** CXnViewAdapter::DoActivateL - activating default container" );
     
-        iFlags.Clear( EIsFirstActivation );
-        
-        iAppUiAdapter.UiActivated();
-        
-        __TIME_ENDMARK( "CXnViewAdapter::DoActivateL - Calling UiActivated", time );        
+        ActivateDefaultContainerL();
+    
+        iTimer->Cancel();
+        iTimer->Start( 1000, 1000, TCallBack( TimerCallback, this ) );
         }
     else
         {
-	    // Set the active container
-	    if ( aCustomMessage == KActivateDefaultView )
-	        {
-            __PRINTS( "*** CXnViewAdapter::DoActivateL - activating default container" );
-	    
-	        ActivateDefaultContainerL();
-        
-	        iTimer->Cancel();
-	        iTimer->Start( 1000, 1000, TCallBack( TimerCallback, this ) );
-	        }
-	    else
-	        {
-            __PRINTS( "*** CXnViewAdapter::DoActivateL - activating container" );
-	    
-	        ActivateContainerL( viewData );
-	        }
+        __PRINTS( "*** CXnViewAdapter::DoActivateL - activating container" );
+    
+        ActivateContainerL( viewData );
         }
 			  
     __TIME_ENDMARK( "CXnViewAdapter::DoActivateL, done", time );
@@ -506,11 +486,6 @@ void CXnViewAdapter::DoDeactivate()
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
     TBool aEnterEditState )
     {   
-    if ( !iAppUiAdapter.ViewManager().UiStartupPhaseAllDone() )
-        {
-        return;
-        }            
-        
     if ( iContainer == &aContainer || iFlags.IsSet( EIsDestructionRunning ) )   
         {            
         return;

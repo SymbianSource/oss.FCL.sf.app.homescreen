@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.65 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.65 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.67 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.67 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -96,7 +96,9 @@ void CMmAppUi::ConstructL()
     	EAknEnableSkin | EAknSingleClickCompatible :
         EAknEnableSkin | EAknEnableMSK;
     BaseConstructL( appUiFlags );
-
+    //hide Menu from TS at startup
+    HideApplicationFromFSW( ETrue );
+    isHiddenFromFS = ETrue;
     FeatureManager::InitializeLibL();
     iIsKastorEffectStarted = EFalse;
     StartLayoutSwitchFullScreen( AknTransEffect::EApplicationStart );
@@ -1797,15 +1799,21 @@ void CMmAppUi::HandlePresentationChangeL(
 
     if( iCurrentContainer != aWidgetContainer )
         {
-        TBool highlightVisibleBefore = iCurrentContainer != NULL &&
-			iCurrentContainer->IsHighlightVisible();
+        // We want a highlight to be visible while switching between
+        // grid and list views but no highlight should be visible
+        // after opening a folder.
+        TBool highlightVisibleBefore =
+            iCurrentContainer &&
+            aWidgetContainer &&
+			iCurrentContainer->IsHighlightVisible() &&
+			iCurrentContainer->WidgetType() != aWidgetContainer->WidgetType();
 
         HandleWidgetChangeRefreshL( aWidgetContainer );
 
         if ( highlightVisibleBefore )
-        	{
-        	iCurrentContainer->SetHighlightVisibilityL( ETrue );
-        	}
+            {
+            iCurrentContainer->SetHighlightVisibilityL( ETrue );
+            }
         }
     else
         {
@@ -2973,6 +2981,13 @@ void CMmAppUi::HandleFullOrPartialForegroundGainedL()
 	{
 		DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
 						"- KAknFullOrPartialForegroundGained"));
+    //show Menu in TS when launched for the first time
+    if( isHiddenFromFS )
+        {
+        HideApplicationFromFSW( EFalse );
+        isHiddenFromFS = EFalse;
+        }
+	
 	if (iCurrentContainer && iCurrentSuiteModel )
 		{
 		iCurrentContainer->HandleForegroundGainedL();

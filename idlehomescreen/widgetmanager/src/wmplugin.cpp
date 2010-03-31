@@ -86,7 +86,8 @@ CWmPlugin::CWmPlugin()
 void CWmPlugin::ConstructL()
     {
     iWmMainContainer = NULL;
-	
+    iPostponedCommand = ENone;
+    
     // store static view app ui
     CEikonEnv* eikonEnv = CEikonEnv::Static();
     if ( !eikonEnv ) User::Leave( KErrUnknown );
@@ -164,11 +165,12 @@ TBool CWmPlugin::IsActive()
     if ( iViewAppUi->GetActiveViewId( activeViewId ) == KErrNone &&
         activeViewId.iViewUid == TUid::Uid( EWmMainContainerViewId ) )
         {
-        if ( iPreviousViewUid.iViewUid == KNullUid )
+        if ( iPreviousViewUid.iViewUid == KNullUid && 
+            iViewAppUi->GetDefaultViewId( iPreviousViewUid ) != KErrNone ) 
             {            
             iPreviousViewUid.iAppUid = iViewAppUi->Application()->AppDllUid();
             iPreviousViewUid.iViewUid = TUid::Uid( 1 );
-            }        
+            }
         return ETrue;
         }
 
@@ -184,12 +186,16 @@ void CWmPlugin::CloseView()
     if ( IsActive() )
         {
         iWmMainContainer->SetClosingDown( ETrue );
-        TRAP_IGNORE( 
+        TRAPD( err, 
             iEffectManager->BeginFullscreenEffectL(
                 KAppExitEffectStyle );
             iViewAppUi->ActivateLocalViewL(
                 iPreviousViewUid.iViewUid ); 
             );
+        if ( KErrNone != err )
+            {
+            iWmMainContainer->SetClosingDown( EFalse );
+            }
         }
     }
 
@@ -198,12 +204,11 @@ void CWmPlugin::CloseView()
 // ---------------------------------------------------------
 //
 void CWmPlugin::MainViewActivated( 
-                    const TVwsViewId& aViewId,
+                    const TVwsViewId& /*aViewId*/,
                     CWmMainContainer* aWmMainContainer )
     {
-    iPreviousViewUid = aViewId;
-    // verify if we have correct viewid to activate.
-    if ( iPreviousViewUid.iViewUid == KNullUid )
+    // previous view for Wm is always default view.
+    if ( iViewAppUi->GetDefaultViewId( iPreviousViewUid ) != KErrNone )
         {
         // use default if we got wrong viewid as previous view
         iPreviousViewUid.iAppUid = iViewAppUi->Application()->AppDllUid();
@@ -234,7 +239,13 @@ void CWmPlugin::MainViewDeactivated()
         iEffectManager->UiRendered();
         }
 
-    TRAP_IGNORE( ExecuteCommandL(); );
+    TRAPD( err, ExecuteCommandL(); );
+    if ( KErrNone != err )
+        {
+        delete iPostponedContent;
+        iPostponedContent = NULL;
+        iPostponedCommand = ENone;
+        }
     }
 
 // ---------------------------------------------------------

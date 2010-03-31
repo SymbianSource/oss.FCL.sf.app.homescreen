@@ -83,6 +83,7 @@ CWmWidgetData::CWmWidgetData( const TSize& aLogoSize,
     iLogoImageMask = NULL;
     iHsContentInfo = NULL;
     iWidgetType = CWmWidgetData::EUnknown;
+    iWrtType = CWmWidgetData::EUnIdentified;
     iPublisherUid = KNullUid;
     iLogoSize = aLogoSize;
     iAnimationTimer = NULL;
@@ -385,7 +386,28 @@ void CWmWidgetData::FetchPublisherUidL(
         if ( widgetUid != 0 )
             {
             // WRT widget
-            iPublisherUid = TUid::Uid( widgetUid );            
+            iPublisherUid = TUid::Uid( widgetUid );
+            
+            // wrt widget type  
+            CWidgetPropertyValue* value( NULL );
+            value = aRegistryClientSession->GetWidgetPropertyValueL( 
+                    iPublisherUid, ENokiaWidget );
+            if ( value && *value == 1 )
+                {
+                iWrtType = CWmWidgetData::EWgz;
+                }
+            else if ( value && *value == 2 )
+                {
+                iWrtType = CWmWidgetData::EWgt;
+                }
+            else
+                {
+                iWrtType = CWmWidgetData::EUnIdentified;
+                }
+
+            delete value;
+            value = NULL;
+
             }
         else
             {
@@ -670,6 +692,7 @@ const TDesC& CWmWidgetData::MdcaPoint() const
 //
 void CWmWidgetData::StopUninstallAnimationL()
     {
+    iAsyncUninstalling = EFalse;
     DestroyAnimData();
     // restore widget name
     if ( iWidgetName )
@@ -680,7 +703,6 @@ void CWmWidgetData::StopUninstallAnimationL()
         }
     
     FireDataChanged(); //redraw
-    iAsyncUninstalling = EFalse;
     }
 
 // End of file

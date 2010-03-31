@@ -251,34 +251,18 @@ TXnGestureCode CXnGestureHelper::HandlePointerEventL(
             // Also, while stylus down, the same event is received repeatedly
             // even if stylus does not move. Filter out by checking if point
             // is the same as the latest point
-            if ( iDirection != EGestureCanceled )
+            iDirection = iGesture->LastDirection( CXnGesture::EAxisHorizontal );
+            
+            if ( !IsIdle() && !iGesture->IsLatestPoint( Position( aEvent ) ) )
                 {
-                if ( iDirection == EGestureUnknown )
+                AddPointL( aEvent );
+                if ( !( iGesture->IsHolding() ||
+                        iGesture->IsNearHoldingPoint( Position( aEvent ) ) ) )
                     {
-                    // check current direction
-                    iDirection = iGesture->CodeFromPoints( CXnGesture::EAxisBoth );
-                    }
-                else
-                    {
-                    // check if direction has changed
-                    if ( iDirection != iGesture->LastDirection( CXnGesture::EAxisBoth ) )
-                        {
-                        // cancel swipe
-                        iDirection = EGestureCanceled;
-                        }
-                    }
-                
-                if ( !IsIdle() && !iGesture->IsLatestPoint( Position( aEvent ) ) )
-                    {
-                    AddPointL( aEvent );
-                    if ( !( iGesture->IsHolding() ||
-                            iGesture->IsNearHoldingPoint( Position( aEvent ) ) ) )
-                        {
-                        // restart hold timer, since pointer has moved
-                        iHoldingTimer->Start();
-                        // Remember the point in which holding was started
-                        iGesture->SetHoldingPoint();
-                        }
+                    // restart hold timer, since pointer has moved
+                    iHoldingTimer->Start();
+                    // Remember the point in which holding was started
+                    iGesture->SetHoldingPoint();
                     }
                 }
             break;
@@ -293,27 +277,24 @@ TXnGestureCode CXnGestureHelper::HandlePointerEventL(
                 // observer leaves
                 CleanupStack::PushL( TCleanupItem( &ResetHelper, this ) );
                 iGesture->SetComplete();
-                if ( iDirection != EGestureCanceled )
+                // if adding of the point fails, notify client with a
+                // cancelled event. It would be wrong to send another
+                // gesture code when the up point is not known
+                if ( AddPoint( aEvent ) != KErrNone )
                     {
-                    // if adding of the point fails, notify client with a
-                    // cancelled event. It would be wrong to send another
-                    // gesture code when the up point is not known
-                    if ( AddPoint( aEvent ) != KErrNone )
+                    iGesture->SetCancelled();
+                    }
+                else
+                    {
+                    // send gesture code if holding has not been started
+                    if ( !iGesture->IsHolding() )
                         {
-                        iGesture->SetCancelled();
+                        // if client leaves, the state is automatically reset.
+                        // In this case the client will not get the released event
+                        ret = iDirection;
                         }
-                    else
-                        {
-                        // send gesture code if holding has not been started
-                        if ( !iGesture->IsHolding() )
-                            {
-                            // if client leaves, the state is automatically reset.
-                            // In this case the client will not get the released event
-                            ret = iDirection;
-                            }
-                        // send an event that stylus was lifted
-                        iGesture->SetReleased();
-                        }
+                    // send an event that stylus was lifted
+                    iGesture->SetReleased();
                     }
                 // reset state
                 CleanupStack::PopAndDestroy( this );

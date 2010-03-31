@@ -22,6 +22,7 @@
 #include <AknUtils.h>
 #include <layoutmetadata.cdl.h>
 #include <AknPriv.hrh> 
+#include <debug.h>
 
 // User includes
 #include "xnuiengine.h"
@@ -35,7 +36,6 @@
 #include "xnpopupcontroladapter.h"
 #include "xnviewcontroladapter.h"
 #include "xnviewdata.h"
-#include "xnrootdata.h"
 #include "xnnodebreadthfirstiterator.h"
 #include "xntype.h"
 #include "xnnodepluginif.h"
@@ -58,6 +58,7 @@
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
 #include "xntexteditor.h"
+#include "xnrootdata.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -8106,7 +8107,12 @@ CXnUiEngineImpl::~CXnUiEngineImpl()
     delete iHitTest;
 
     iFocusCandidateList.Reset();
-    iRedrawRegions.ResetAndDestroy();
+
+    if ( iRedrawRegions.Count() )
+        {
+        iRedrawRegions.ResetAndDestroy();
+        }
+
     iDirtyList.Reset();
     }
 
@@ -8327,6 +8333,8 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
     TraceTreeL(iCurrentView );
 #endif                          
 
+    __PRINTS("*** CXnUiEngineImpl::RenderUIL ***");
+    
     for( TInt i=0; i<iRedrawRegions.Count(); i++)
         {
         CCoeControl* control = iRedrawRegions[i]->iControl;
@@ -8337,7 +8345,9 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
             // Mark tree rendered
             iCurrentView->SetRenderedL();
             // Error occured during dirty set, redraw whole window
-            control->DrawNow();                                              
+            control->DrawNow();               
+            
+            __PRINTS("* CXnUiEngineImpl::RenderUIL - redraw region error -> full redraw ***");
             }                                        
         else 
             {
@@ -8352,7 +8362,10 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                     // Make bounding rect over the dirty areas
                     TRect boundingRect( redrawRegion.BoundingRect() );
                     
-                    control->DrawNow( boundingRect );
+                    __PRINT( __DBG_FORMAT( "* CXnUiEngineImpl::RenderUIL - redrawing bounding rect iTl.iX: %d, iTl.iY: %d, iBr.iX: %d, iBr.iY: %d" ),          
+                        boundingRect.iTl.iX, boundingRect.iTl.iY, boundingRect.iBr.iX, boundingRect.iBr.iY );                                         
+                    
+                    control->DrawNow( boundingRect );                    
                     }                               
                 else
                     {
@@ -8360,12 +8373,20 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                         {
                         // Draw every dirty area separately
                         TRect redrawRect( redrawRegion[i] );
-    
+
+                        __PRINT( __DBG_FORMAT( "* CXnUiEngineImpl::RenderUIL - redrawing rect iTl.iX: %d, iTl.iY: %d, iBr.iX: %d, iBr.iY: %d" ),          
+                                redrawRect.iTl.iX, redrawRect.iTl.iY, redrawRect.iBr.iX, redrawRect.iBr.iY );                                         
+                        
                         control->DrawNow( redrawRect );
                         }
                     }  
                 }
+            else
+                {
+                __PRINTS("* CXnUiEngineImpl::RenderUIL - nothing to redraw ***");
+                }
             }  
+        
         redrawRegion.Clear();  
         }
 
@@ -8374,6 +8395,8 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
     iLayoutControl &= ~XnLayoutControl::ERenderUI;
     
     iAppUiAdapter.EffectManager()->UiRendered();
+    
+    __PRINTS("*** CXnUiEngineImpl::RenderUIL - done ***");
     }
 
 // -----------------------------------------------------------------------------
@@ -8525,7 +8548,7 @@ CXnPointerArray* CXnUiEngineImpl::FindNodeByClassL(
 
     return array;
     }
-
+    
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::FindContentSourceNodesL()
 // -----------------------------------------------------------------------------
@@ -8584,7 +8607,7 @@ CXnPointerArray* CXnUiEngineImpl::FindContentSourceNodesL(
 
     return array;
     }
-    
+
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::Resources()
 // -----------------------------------------------------------------------------
@@ -9070,6 +9093,9 @@ void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
         return;
         }
 
+    // remove focus
+    iAppUiAdapter.HideFocus();
+
     // Update client rect
     SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
 
@@ -9088,6 +9114,10 @@ void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
 
     ReportScreenDeviceChangeL();
             
+    if ( !iControlAdapterList )
+        {
+        iControlAdapterList = &iViewManager.Controls();
+        }
     for ( TInt i = 0; i < iControlAdapterList->Count(); i++ )
         {
         CXnControlAdapter* adapter( ( *iControlAdapterList )[i] );
@@ -9402,6 +9432,10 @@ void CXnUiEngineImpl::AddToDirtyListL( CXnNode* aNode )
             {
             // Force relayout and redraw from current view
             iDirtyList.Reset();
+            if ( !iCurrentView )
+                {
+                iCurrentView = iViewManager.ViewNode();
+                }
             iDirtyList.AppendL( iCurrentView );
             TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
             if( dirtyRegion )
@@ -9516,7 +9550,7 @@ void CXnUiEngineImpl::SetClientRectL( TRect aRect, TBool aDrawNow )
         
         UpdateInternalUnits( iHorizontalUnitInPixels, iVerticalUnitInPixels,
             iClientRect );
-               
+        
         if ( aDrawNow )
             {
             RootNode()->SetDirtyL();
@@ -9860,8 +9894,8 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
         // make sure that we always get up event
         CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(  
             iViewManager.ActiveViewData().ViewNode()->Control() );            
-                
-        control->ResetGrabbing();
+                   
+        control->ResetGrabbing();  
 
         // Hide all plugins except the one that contains given editor node
         RPointerArray< CXnNode >& plugins( *Plugins() );                   
@@ -10096,8 +10130,15 @@ void CXnUiEngineImpl::StorePartialScreenBlockProgressionL()
         {
         CXnProperty* blocProgressionProperty( 
           parent->GetPropertyL( XnPropertyNames::style::common::KBlockProgression ) );               
-        
+        if ( !blocProgressionProperty )
+            {
+            User::Leave( KErrNotFound );
+            }
         HBufC* blocProgressionValue (blocProgressionProperty->StringValueL());
+        if ( !blocProgressionValue )
+            {
+            User::Leave( KErrNotFound );
+            }
         CleanupStack::PushL( blocProgressionValue );
         if(iSplitScreenState.iPartialScreenBlock)
             {

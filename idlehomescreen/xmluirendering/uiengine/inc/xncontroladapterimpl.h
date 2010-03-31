@@ -557,6 +557,8 @@ private:
     TBool iBlank;
     /** flag: to detect whether longtap occured */
     TBool iLongtap;    
+    /** record right softkey node of menubar when keydown event happened */
+    mutable CXnNode* iKeyDownNode;
     };
 
 #endif //__XNCONTROLADAPTERIMPL_H__

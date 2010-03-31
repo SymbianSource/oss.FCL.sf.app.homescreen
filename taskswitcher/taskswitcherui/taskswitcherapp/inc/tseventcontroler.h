@@ -168,6 +168,7 @@ public:
      *                  EFalse - disables event handling
      */
     void EnableEventHandling( TBool aEnable );
+    void EnableDragEventHandling( TBool aEnable );
     
 private:
     /**
@@ -189,6 +190,7 @@ private:
      * Flag to enable/disable event handling
      */
     TBool iHandleEvents;
+    TBool iHandleDragEvents;
     };
 
 #endif // TSEVENTCONTROLER_H

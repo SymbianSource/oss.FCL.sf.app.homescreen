@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="rootconfiguration.xml" target="\private\200159c0\install\root_2001f482\hsps\00\">
 	<setting ref="HSViews/MaxPages"/>
 	<setting ref="HSViews/Views"/>

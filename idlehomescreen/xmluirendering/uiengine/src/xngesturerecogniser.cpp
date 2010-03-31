@@ -184,19 +184,30 @@ inline TPoint PreviousPoint( const TXnPointArray& aPoints )
 /** @return direction between last two points */
 TXnGestureCode TXnGestureRecogniser::LastDirection( const TXnPointArray& aPoints ) const
     {
-    if ( aPoints.Count() > minPointCount )
+    TXnGestureCode ret = EGestureUnknown;
+    
+    if ( ( aPoints.Count() > 0 ) &&
+         ( GestureLength( aPoints ) >= KMinSwipeLength ))
         {
-        // return direction between latest and previous points.
-        // pick the previous point that is different than the last point
-        // because while using an x or y filter array, more than one
-        // sequential points may look like the same point because
-        // the differing coordinate coordinate is filtered out. For example,
-        // if dragging left and slightly up, many y coordinates will have the
-        // same value, while only x differs.
-        return Direction( aPoints[ aPoints.Count() - minPointCount ],
-                          aPoints[ aPoints.Count() - 1 ] );
+        if ( aPoints.Count() > minPointCount )
+            {
+            // return direction between latest and previous points.
+            // pick the previous point that is different than the last point
+            // because while using an x or y filter array, more than one
+            // sequential points may look like the same point because
+            // the differing coordinate coordinate is filtered out. For example,
+            // if dragging left and slightly up, many y coordinates will have the
+            // same value, while only x differs.
+            ret = Direction( aPoints[ aPoints.Count() - minPointCount ],
+                              aPoints[ aPoints.Count() - 1 ] );
+            }
+        else
+            {
+            ret = GeneralDirection( aPoints );
+            }
         }
-    return GeneralDirection( aPoints );
+    
+    return ret;
     }
 
 // ----------------------------------------------------------------------------

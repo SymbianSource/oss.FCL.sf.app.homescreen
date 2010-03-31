@@ -226,6 +226,10 @@ void CXnExtRenderingPluginWrapper::HandleEventL( const TDesC& aEvent, const TDes
     
     CXnNode* node = iNode->Node().UiEngine()->FindNodeByIdL( aDestination );
     CXnAppUiAdapter* appui = static_cast<CXnAppUiAdapter*>(iAvkonAppUi);
+    if ( !appui || !node )
+        {
+        User::Leave( KErrNotFound );
+        }
     appui->HandleEventL( aEvent, node->AppIfL() );
     }
 

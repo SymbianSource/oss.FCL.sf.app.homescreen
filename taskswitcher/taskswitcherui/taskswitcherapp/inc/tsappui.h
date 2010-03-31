@@ -96,6 +96,11 @@ public: //effects
     void RequestPopUpL();
     void DisablePopUpL();
     
+    /**
+     * Function for layout change check
+     */
+    TBool LayoutChangeAllowed();
+    
 public:
     /**
      * From MTsCenrepChangeObserver
@@ -181,6 +186,10 @@ private:
     
     // Monitors popup mode
     TBool iIsPopUpShown;
+    
+    // For starting in background
+    TBool iUiStarted;
+    TBool iDisableAppKeyHandling;
     
     };
 

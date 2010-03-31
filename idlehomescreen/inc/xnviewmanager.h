@@ -264,11 +264,11 @@ private:
     void ResetCrashCount();    
 
     /**
-     * Show error note
-     * 
-     * @param aResourceId   Resource id for string to be displayed.
+     * Show error note from resource.
      */
-    void ShowErrorNoteL( const TInt aResourceId );        
+    void ShowErrorNoteL();   
+    
+    void DoRobustnessCheckL();
     
 private:
     // data

@@ -43,6 +43,10 @@
     inline CWmWidgetData::TWidgetType CWmWidgetData::WidgetType() const
         { return iWidgetType; }
 
+    /** wrt widget type */
+    inline CWmWidgetData::TWrtType CWmWidgetData::WrtType() const
+        { return iWrtType; }
+    
     /** the logo bitmap */
     inline const CFbsBitmap* CWmWidgetData::LogoImage()
         { return iLogoImage; }

@@ -24,11 +24,11 @@
 
 // User includes
 #include "hscontentcontrolecomobserver.h"
-#include "hscontentcontroluninstallobserver.h"
+#include "hscontentcontrolswiobserver.h"
 
 // Forward declarations
 class CHsContentControlEComListener;
-class CHsContentControlUninstallMonitor;
+class CHsContentControlSwiListener;
 class CXnAppUiAdapter;
 
 /**
@@ -44,7 +44,7 @@ class CXnAppUiAdapter;
  */
 NONSHARABLE_CLASS( CHsContentControlFactory ) : public CBase,
                                                 public MHsContentControlEComObserver,
-                                                public MHsContentControlUninstallObserver
+                                                public MHsContentControlSwiObserver
     {
 public: // Constructor and destructor
     /**
@@ -64,14 +64,14 @@ private: // from MHsContentControlEComObserver
      */
      void HandleEComChangeEvent();
 
-private: // from MHsContentControlUninstallObserver
+private: // from MHsContentControlSwiObserver
     
     /**
-     * Notification of Uninstall event from SWI.
-     * @param aPkgUid The package UID which is being uninstalled.
+     * Notification of Install/Uninstall event from SWI.
+     * @param aUidList The package UID list which is being processed.
      */
-     void HandleUninstallEvent( const TUid& aPkgUid );
-
+     void HandleSwiEvent( const RArray<TUid>& aUidList );
+    
 private: // Constructors
     /**
      * Constructor
@@ -150,9 +150,9 @@ private: // Data
     CHsContentControlEComListener*  iHsContentControlEComListener;
 
     /**
-     * An object of type CHsContentControlUninstallMonitor ( Owned ).
+     * An object of type CHsContentControlSwiListener ( Owned ).
      */
-    CHsContentControlUninstallMonitor*  iHsContentControlUninstallMonitor;
+    CHsContentControlSwiListener*  iHsContentControlSwiListener;
     };
 
 

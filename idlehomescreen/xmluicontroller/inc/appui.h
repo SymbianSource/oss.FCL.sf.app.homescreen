@@ -80,6 +80,8 @@ private:
     
     void HandleEnterEditModeL( TBool aEnter );
        
+    void HandleUiReadyEventL();
+    
 private:
     // new functions
     

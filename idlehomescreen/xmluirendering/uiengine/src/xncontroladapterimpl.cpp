@@ -21,6 +21,7 @@
 #include <SVGEngineInterfaceImpl.h>
 #include <s32file.h>
 #include <mifconvdefs.h>
+//skinning support
 #include <AknsFrameBackgroundControlContext.h>
 #include <AknsDrawUtils.h>
 #include <aknconsts.h>
@@ -3759,6 +3760,7 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
         {
         if ( aType == EEventKeyDown )
             {
+            iKeyDownNode = node;
             iLongtap = EFalse;
             
             if ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
@@ -3787,6 +3789,10 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
             }
         else if( aType == EEventKey )
             {
+            if( iKeyDownNode != node)
+            	{
+                node = iKeyDownNode;
+            	}
             if ( aKeyEvent.iRepeats == 0 )
                 {
                 if ( !HasHoldTrigger( node->DomNode() ) )
@@ -3815,6 +3821,10 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
             {
             if ( !iLongtap )
                 {
+              if( iKeyDownNode != node)
+                {
+                node = iKeyDownNode;
+                }   
                 if ( HasHoldTrigger( node->DomNode() ) )
                     {
                     // Hold trigger defined, report activate event here                   
@@ -3907,8 +3917,8 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
                 control->IgnoreEventsUntilNextPointerUp();
                 control->ResetGrabbing();                      
                 }
-            
-            // Indicate long tap has taken plave
+
+          // Indicate long tap has taken place
             iLongtap = ETrue;
             
             CXnNode* hold = BuildTriggerNodeL( *engine,
@@ -3952,6 +3962,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
             // Swipe took place, consume this event
             return ETrue;
             }
+
         }
     
     TBool menuBar( node == engine->MenuBarNode() );
@@ -4011,6 +4022,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     if ( event.iType == TPointerEvent::EButton1Down )
         {
         iLongtap = EFalse;
+        node->HideTooltipsL();
         
         if ( !menuBar )
             {

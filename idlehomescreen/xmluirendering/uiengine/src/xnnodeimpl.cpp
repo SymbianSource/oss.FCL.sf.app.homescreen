@@ -7125,19 +7125,9 @@ void CXnNodeImpl::ShowPopupsL( TRect aRect, TInt aSource )
 
                 XnComponentInterface::MakeInterfaceL( popup, tooltipNode );
 
-                if ( popup )
+                if ( popup && aSource != XnEventSource::EStylus )
                     {
-                    if ( aSource == XnEventSource::EStylus )
-                        {
-                        const TTimeIntervalMicroSeconds32 delay( 1000 * 100 );                       
-                        const TTimeIntervalMicroSeconds32 display( 1000 * 1000 * 6 );                                                
-                        
-                        popup->ShowPopupL( aRect, delay, display );
-                        }
-                    else
-                        {
-                        popup->ShowPopupL( aRect );
-                        }
+                    popup->ShowPopupL( aRect );
                     }
                 }
             }
@@ -9080,15 +9070,34 @@ void CXnNodeImpl::ReorderNodesL( CXnNode* aSource, CXnNode* aTarget )
         }
     if ( source != -1 && target != -1 )
         {
+        TBool swap = EFalse;
+        CXnPluginData* data( aTarget->UiEngine()->ViewManager()->
+                ActiveViewData().Plugin( aTarget ) );
+        if ( data && !data->Occupied() )
+            {
+            // target is empty widget, swap widget places
+            swap = ETrue;
+            }
+        
         if ( target < source )
             {
             iChildren.InsertL( aSource, target );
             iChildren.Remove( source + 1 );
+            if ( swap )
+                {
+                iChildren.Remove( target + 1 );
+                iChildren.InsertL( aTarget, source );
+                }
             }
         else if ( source < target )
             {
             iChildren.Remove( source );
             iChildren.InsertL( aSource, target );
+            if ( swap )
+                {
+                iChildren.Insert( aTarget, source );
+                iChildren.Remove( target );
+                }
             }
 
         // put the locked nodes to the original places

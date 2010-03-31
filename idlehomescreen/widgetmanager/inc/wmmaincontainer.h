@@ -153,7 +153,7 @@ public: // new functions
 	/** 
 	 * executes findbox activation 
 	 */
-	void ActivateFindPaneL( TBool aActivateAdabtive = EFalse );
+	void ActivateFindPaneL( TBool aActivateAdaptive = EFalse );
 
     /** 
 	 * executes findbox deactivation 
@@ -302,6 +302,7 @@ private: // New functions
     void StartLoadingWidgetsL();
     void RemoveCtrlsFromStack();
     void UpdateFocusMode();
+    void ResetFocus( TDrawNow aDrawNow = ENoDrawNow );
     CCoeControl* FindChildControlByPoint( const TPoint& aPoint );
     void HandleFindSizeChanged();
     TKeyResponse MoveFocusByKeys(

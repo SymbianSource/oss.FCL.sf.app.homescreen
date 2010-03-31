@@ -105,8 +105,10 @@ private:
      * wrt widget that is currently been uninstalled
      */    
     TUid iUid;
-    
-    
+
+    /**
+     * mime type of widget currently being uninstalled.
+     */    
     HBufC8* iMime;
     
     /** reference to plugin root */

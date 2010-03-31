@@ -37,7 +37,8 @@ const TUint32 KUikAppHiddenList  = 0x00000010;
  */
 const TUint32 KTsFsAlwaysHiddenUidArray[] =
     {
-    0x100056CF // screensaver
+    0x100056CF, // screensaver
+    0x102750F0 // Idle App Uid
     };
 
 // -----------------------------------------------------------------------------

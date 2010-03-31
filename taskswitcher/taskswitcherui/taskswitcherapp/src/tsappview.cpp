@@ -134,7 +134,7 @@ void CTsAppView::ConstructL( const TRect& aRect, RWindowGroup& aWg )
                KAknsIIDQsnFrPopup,
                iBgContextOuterRect,
                iBgContextInnerRect,
-               ETrue );
+               EFalse );
     iBgContext->SetFrameRects(iBgContextOuterRect, iBgContextInnerRect);
     iBgContext->SetCenter( KAknsIIDQsnFrPopupCenter );
 
@@ -309,6 +309,7 @@ void CTsAppView::SizeChanged()
     iViewRect = Rect();
     UpdatePopupRects();
     iBgContext->SetFrameRects(iBgContextOuterRect, iBgContextInnerRect);
+    iBgContext->SetParentPos(PositionRelativeToScreen());
     if ( iFastSwapArea && iAppsHeading  )
         {
         RArray<TRect> rects;
@@ -456,6 +457,14 @@ void CTsAppView::HandleSwitchToForegroundEvent()
     TSLOG_CONTEXT( CTsAppView::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
     TSLOG_IN();
     
+    // Check for layout updates
+    CTsAppUi* appUi = static_cast<CTsAppUi*>(iCoeEnv->AppUi());
+    if ( iViewRect != appUi->ApplicationRect() &&
+         appUi->LayoutChangeAllowed() )
+        {
+        HandleDeviceStateChanged( EOrientation );
+        }
+    
     Window().Invalidate(Rect());
     
     iEvtHandler->EnableEventHandling(ETrue);
@@ -470,6 +479,7 @@ void CTsAppView::HandleSwitchToForegroundEvent()
 
     // Forward event to interested controls
     iFastSwapArea->HandleSwitchToForegroundEvent();
+    iFastSwapArea->UpdateComponentVisibility();
 
     // Start animation
     CTsAppUi* appui =
@@ -663,6 +673,16 @@ void CTsAppView::OrderFullWindowRedraw()
     {
     InvalidateWindows(this);
     DrawNow();
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppView::EnableDragEvents
+// -----------------------------------------------------------------------------
+//
+void CTsAppView::EnableDragEvents( TBool aEnable )
+    {
+    iEvtHandler->EnableDragEventHandling( aEnable );
     }
 
 

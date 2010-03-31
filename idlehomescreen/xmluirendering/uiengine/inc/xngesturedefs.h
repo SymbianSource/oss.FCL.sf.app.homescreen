@@ -56,7 +56,7 @@ namespace XnGestureHelper
      * tolerance in degrees to either side of an angle, for direction to be 
      * the same as reference angle
      */
-    const TReal KAngleTolerance = 35;
+    const TReal KAngleTolerance = 80;
     
     /**  
      * maximum pointer movement from pointer down position for a gesture be 
@@ -68,7 +68,7 @@ namespace XnGestureHelper
      * minimum length of a valid swipe in pixels. should be larger than 
      * KTapTolerance
      */
-    const TReal KMinSwipeLength = 100;
+    const TReal KMinSwipeLength = 10;
     
     /** Nth pointer event before the latest point */
     const TInt KPreviousPointOffset = 3;
