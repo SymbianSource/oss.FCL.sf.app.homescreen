@@ -6,7 +6,8 @@
     <type>application</type>
     
     <!-- application uid -->
-    <interfaceuid>0x102750f0</interfaceuid>
+    <!-- changed from 0x102750F0 to 0xEDFF45C4 for standalone app -->
+    <interfaceuid>0xEDFF45C4</interfaceuid>
 
     <!-- vendor uid -->
     <provideruid>0x101fb657</provideruid>

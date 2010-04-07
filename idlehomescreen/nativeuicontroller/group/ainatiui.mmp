@@ -81,11 +81,11 @@ LIBRARY         centralrepository.lib
 LIBRARY         cenrepnotifhandler.lib
 LIBRARY         aknlayout2scalable.lib
 LIBRARY         cdlengine.lib
-LIBRARY         aifw.lib
-LIBRARY         aiutils.lib
+LIBRARY         aifw_hs.lib
+LIBRARY         aiutils_hs.lib
 LIBRARY         bafl.lib
 LIBRARY         flogger.lib
-LIBRARY         aiidleint.lib
+LIBRARY         aiidleint_hs.lib
 LIBRARY         featmgr.lib
 LIBRARY         profileeng.lib
 LIBRARY         networkhandling.lib

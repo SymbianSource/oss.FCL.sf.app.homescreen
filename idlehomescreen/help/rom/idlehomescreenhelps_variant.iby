@@ -19,10 +19,11 @@
 #define __IDLEHOMESCREENHELPS_VARIANT_IBY__
 
 #if defined(FF_S60_HELPS_IN_USE)
-    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x102750F0\contents.zip, RESOURCE_FILES_DIR\xhtml\%02d\0x102750F0\contents.zip)
-    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x102750F0\index.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x102750F0\index.xml)
-    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x102750F0\keywords.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x102750F0\keywords.xml)
-    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x102750F0\meta.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x102750F0\meta.xml)
+// UID changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0xEDFF45C4\contents.zip, RESOURCE_FILES_DIR\xhtml\%02d\0xEDFF45C4\contents.zip)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0xEDFF45C4\index.xml, RESOURCE_FILES_DIR\xhtml\%02d\0xEDFF45C4\index.xml)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0xEDFF45C4\keywords.xml, RESOURCE_FILES_DIR\xhtml\%02d\0xEDFF45C4\keywords.xml)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0xEDFF45C4\meta.xml, RESOURCE_FILES_DIR\xhtml\%02d\0xEDFF45C4\meta.xml)
 #endif
 
 #endif

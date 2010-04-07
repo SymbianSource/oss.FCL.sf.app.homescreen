@@ -18,4 +18,5 @@ rmdir \epoc32\data\Z\resource\homescreen /s /q
 rmdir \epoc32\data\Z\private\200159c0 /s /q
 rmdir \epoc32\winscw\c\private\10202be9\persists /s /q
 rmdir \epoc32\winscw\c\private\200159c0 /s /q
-rmdir \epoc32\winscw\c\private\102750f0 /s /q
+rem changed UID from 0x102750F0 to 0xEDFF45C4 for standalone app
+rmdir \epoc32\winscw\c\private\edff45c4 /s /q

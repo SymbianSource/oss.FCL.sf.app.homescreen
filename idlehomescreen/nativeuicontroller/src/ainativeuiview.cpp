@@ -109,7 +109,8 @@ void CAiNativeUiView::Draw( const TRect& aRect ) const
 
 TVwsViewId CAiNativeUiView::ViewId() const
     {
-    return TVwsViewId( TUid::Uid( 0x102750F0 ), TUid::Uid( 0x102750F0 ) );
+	// UID changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+    return TVwsViewId( TUid::Uid( 0xEDFF45C4 ), TUid::Uid( 0xEDFF45C4 ) );
     }
 
 void CAiNativeUiView::ViewActivatedL( const TVwsViewId& /*aPrevViewId*/,

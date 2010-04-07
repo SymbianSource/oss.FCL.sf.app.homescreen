@@ -84,7 +84,7 @@ LIBRARY         ecom.lib centralrepository.lib
 LIBRARY         fbscli.lib apparc.lib cone.lib
 LIBRARY         eikcore.lib eikcoctl.lib egul.lib avkon.lib aknskins.lib
 LIBRARY         xn3layoutengine.lib xn3utils.lib xn3domdocument.lib
-LIBRARY         aiidleint.lib aiutils.lib
+LIBRARY         aiidleint_hs.lib aiutils_hs.lib
 LIBRARY         imageconversion.lib
 LIBRARY         apgrfx.lib
 LIBRARY         bafl.lib

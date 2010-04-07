@@ -74,7 +74,8 @@ _LIT8( KEventPluginAdded, "PluginAdded" );
 _LIT8( KEventPluginRemoved, "PluginRemoved" );
 _LIT8( KEventPluginReplaced, "PluginReplaced" );
 
-_LIT8( KAi3Uid, "0x102750f0" );
+// UID changed from 0x102750f0 to 0xEDFF45C4 for standalone app
+_LIT8( KAi3Uid, "0xedff45c4" );
 
 _LIT8( KEmptyWidgetUid, "0x2001F47F" );
 _LIT8( KDownload, "Editor/DownloadCaption" );
