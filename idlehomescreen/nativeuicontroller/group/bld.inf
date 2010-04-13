@@ -16,7 +16,7 @@
 */
 
 
-#ifdef RD_CUSTOMIZABLE_AI
+//#ifdef RD_CUSTOMIZABLE_AI
 
 #include <platform_paths.hrh>
 
@@ -43,5 +43,5 @@ PRJ_TESTMMPFILES
 
 PRJ_TESTEXPORTS
 
-#endif // RD_CUSTOMIZABLE_AI
+//#endif // RD_CUSTOMIZABLE_AI
 
