@@ -56,12 +56,6 @@ public:
      * Called when there is a change in the task list.
      */
     virtual void FswDataChanged() = 0;
-
-    /**
-     * Called to find out how many clients are subscribed
-     * for fsw content change notifications.
-     */
-    virtual TInt FswDataListenerCount() = 0;
     };
 
 /**

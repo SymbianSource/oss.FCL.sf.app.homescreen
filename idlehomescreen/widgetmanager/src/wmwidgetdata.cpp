@@ -420,6 +420,17 @@ void CWmWidgetData::FetchPublisherUidL(
 // CWmWidgetData::Description
 // ---------------------------------------------------------
 //
+const TDesC& CWmWidgetData::Name() const
+    {
+    return ( iAsyncUninstalling ? 
+        iWmResourceLoader.Uninstalling() :
+        iHsContentInfo->Name() );
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetData::Description
+// ---------------------------------------------------------
+//
 const TDesC& CWmWidgetData::Description() const
     {
     if ( iHsContentInfo->Description().Length() <= 0 &&
@@ -447,7 +458,7 @@ void CWmWidgetData::ReCreateLogo( const TSize& aSize )
         {
         iWait->AsyncStop();
         }
-    
+
     iFireLogoChanged = ETrue;
     iLogoSize = aSize;
     HandleIconString( HsContentInfo().IconPath() );
@@ -517,14 +528,6 @@ void CWmWidgetData::VisualizeUninstallL()
     {   
     DestroyAnimData();
     PrepairAnimL();
-    
-    // set copy of widget name for uninstallation error case.
-    if ( iHsContentInfo->Name().Compare( iWmResourceLoader.Uninstalling() ) !=
-        KErrNone )
-        {
-        iWidgetName = iHsContentInfo->Name().AllocL();
-        iHsContentInfo->SetNameL( iWmResourceLoader.Uninstalling() );
-        }
 
     iAsyncUninstalling = ETrue;
     iAnimationIndex = 0;
@@ -690,18 +693,10 @@ const TDesC& CWmWidgetData::MdcaPoint() const
 // CWmWidgetData::StopUninstallAnimation
 // ---------------------------------------------------------
 //
-void CWmWidgetData::StopUninstallAnimationL()
+void CWmWidgetData::StopUninstallAnimation()
     {
     iAsyncUninstalling = EFalse;
     DestroyAnimData();
-    // restore widget name
-    if ( iWidgetName )
-        {
-        iHsContentInfo->SetNameL( iWidgetName->Des() );
-        delete iWidgetName;
-        iWidgetName = NULL;
-        }
-    
     FireDataChanged(); //redraw
     }
 

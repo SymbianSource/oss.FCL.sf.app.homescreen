@@ -53,18 +53,46 @@ const TUint32 KLangId9 = 0x1C;
 
 
 // ************************************************************
-// NON-LOCALISED parameters
+// NON-LOCALISED OVI parameters
 // ************************************************************
 
 /** Key to Ovi Store Client param */
 const TUint32 KOviStoreClientParam = 0x1F;
 
-/** Key to Operator button icon */
-const TUint32 KOperatorButtonIcon = 0x20;
-
 /** Key to Ovi Store client Uid */
-const TUint32 KOviStoreUid = 0x21;
+const TUint32 KOviStoreUid = 0x20;
 
+// ************************************************************
+// NON-LOCALISED Operator parameters
+// ************************************************************
+
+/** Key to Operator button icon */
+const TUint32 KOperatorButtonEnabled = 0x21;
+
+/** Key to Operator button icon */
+const TUint32 KOperatorButtonIcon = 0x22;
+
+/** 
+ * Key to Operator application type and id.
+ * Give ':' as separator between type and id.
+ * Type can be s60, cwrt, wrt, java, qt
+ * Examples:
+ * s60:0x10005902                           Application Uid as id
+ * cwrt:ovi.serviceui.SSOUI                 BundleId as id
+ * wrt:com.accuweather.widget.touchNG       BundleId as id
+ * java:c:/sys/bin/javastore.jar            full path for java app
+ * qt:0x2001A9CA                            Application Uid as id
+ */
+const TUint32 KOperatorAppTypeAndId = 0x23;
+
+/** Key to Operator application param */
+const TUint32 KOperatorParam = 0x24;
+
+/** 
+ * Key to define if operator button needs to be placed to left in landscape and
+ * top on portraid. By default it's right and bottom. 
+ */
+const TUint32 KOperatorButtonHigherPriority = 0x25;
 
 
 #endif // __WMCRKEYS_H__

@@ -51,7 +51,8 @@ public:
     ENoneTransition = 0,
     EForegroundTransition = 3,
     EBackgroundTransition = 4,
-    EActivationTransition = 5
+    EActivationTransition = 5,
+    EActivationAppShowTransition = 1507,
     
     };
     /**
@@ -80,7 +81,9 @@ public: //effects
     /**
      * Function start transition  
      */
-    void StartTransion( TUint aTransitionType );
+    void StartTransion( TUint aTransitionType,
+            TUid aNextAppUid = TUid::Null(),
+            TInt aWgId = 0 );
     
     /**
      * from MGfxTransEffectObserver
@@ -88,7 +91,9 @@ public: //effects
     void TransitionFinished(const CCoeControl* aControl, TUint aAction);
     
     void MoveAppToForeground( TUint aTransitionType );
-    void MoveAppToBackground( TUint aTransitionType );
+    void MoveAppToBackground( TUint aTransitionType,
+            TUid aAppUid = TUid::Null(),
+            TInt aWgId = 0 );
     
     /**
      * Functions for showing/hiding popups.
@@ -117,11 +122,15 @@ private:
     void HandleResourceChangeL( TInt aType );
     void HandleForegroundEventL( TBool aForeground );
     void HandleCommandL( TInt aCommand );
+    void HandleWsEventL(const TWsEvent& aEvent,
+            CCoeControl* aDestination);
     
     void StartTransition( TUint aTranstionId,
                           TBool aVisibility,
                           TBool aLayers, 
                           TUint aSubCom );
+    
+    void StartAppActivateTransition( TUid aNextAppUid, TInt aWgId );
 
 private: // New functions
     
@@ -149,8 +158,33 @@ private: // New functions
      * task switcher app
      */
     void FreeMemoryRequest();
+    
+    /**
+     * Returns id of window group lying beneath task
+     * switcher window group. 
+     * In case of embeded app it returns top paren window group.
+     * 
+     * @param  aIgnoreParentChild  if set to ETrue, parent/child relationship
+     *                             will be ignored when deteriminig window
+     *                             group id
+     */
+    TInt WgIdOfUnderlyingApp( TBool aIgnoreParentChild );
 
     static TInt GoToBackgroundTimerCallback( TAny* aParam );
+    
+    /*
+     * Returns id of top parent window group for embeded window group.
+     * @param aChildWg embeded window group id
+     * @return top parent window group id or 0 in case od standlalone 
+     */
+    TInt GetTopParentWg( TInt aChildWg);
+
+    /*
+     * Returns id of parent window group for embeded window group.
+     * @param aChildWg embeded window group id
+     * @return parent window group id or 0 in case od standlalone 
+     */
+    TInt GetParentWg( TInt aChildWg );
 
 private:
 
@@ -190,6 +224,8 @@ private:
     // For starting in background
     TBool iUiStarted;
     TBool iDisableAppKeyHandling;
+    
+    TInt iUnderAppWgId;
     
     };
 

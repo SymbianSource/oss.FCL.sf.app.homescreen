@@ -38,7 +38,6 @@ class CXnKeyEventDispatcher;
 class CXnEditor;
 class CXnResource;
 class CXnEditMode;
-class CXnHitTest;
 class CXnViewManager;
 class CXnViewData;
 class CXnPluginData;
@@ -80,14 +79,13 @@ NONSHARABLE_STRUCT( TXnSplitScreenState )
     /** Is partial screen input open */
     TBool iPartialScreenOpen;
     /** Partial screen block progression. Own. */
-    HBufC8* iPartialScreenBlock;
-
-    TXnSplitScreenState(): iPartialScreenBlock( NULL ){}
-
-    ~TXnSplitScreenState()
-        {
-        delete iPartialScreenBlock;
-        }
+    const TDesC8* iPartialScreenBlock;
+    
+    // ctor
+    TXnSplitScreenState() : 
+        iPartialScreenEditorNode( NULL ),
+        iPartialScreenOpen( EFalse ),
+        iPartialScreenBlock( NULL ) {}
     };
 
 
@@ -470,14 +468,6 @@ public:
     RPointerArray< CXnNode >* Plugins();
 
     /**
-     * Gets hit test
-     * 
-     * @since S60 5.1         
-     * @return the hittest
-     */
-    CXnHitTest& HitTest() const;
-
-    /**
      * Gets theme resource file
      * 
      * @since S60 5.1         
@@ -615,19 +605,13 @@ private:
     /**
       * Set partial screen block
       * 
-      * @since Series 60 5.2 
+      * @since Series 60 5.2
+      * @param CXnNode aParent parent node 
       * @param TDesC8 aBlockProgression set layout direction
       */     
-    void SetPartialScreenBlockProgressionL( const TDesC8& aBlockProgression );
-    
-    /**
-      * Store partial screen block
-      * 
-      * @since Series 60 5.2 
-      * @param TDesC8 aBlockProgression set layout direction
-      */     
-    void StorePartialScreenBlockProgressionL();
-    
+    void SetPartialScreenBlockProgressionL( 
+            CXnNode* aParent, const TDesC8& aBlockProgression );
+   
     /**
       * Handles skin change resource change
       * 
@@ -752,8 +736,6 @@ private:
     TRect iClientRect;
     /** Owned. Edit mode storage; */
     CXnEditMode* iEditMode;
-    /** Owned. hittest */
-    CXnHitTest* iHitTest;
     /** Disable count */
     TInt iDisableCount;   
 	/**Split screen states*/

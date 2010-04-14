@@ -175,6 +175,21 @@ public: // New functions
      * Returns visible view. Items outside of visible rectangle are not drawn.
      */
     TRect VisibleViewRect();
+    
+    /**
+     * Updates layout data for item drawer. Should be called when
+     * layout maybe out of date
+     */
+    void UpdateItemDrawerLayoutDataL();
+    
+    /**
+     * Enables/disables avkon event handling.
+     * 
+     * @param  aEnable  if set to ETrue, pointer events will be forwarded
+     *                  to CAknGrid base class if necessary. If set to EFalse,
+     *                  no pointer events will be forwarded.
+     */
+    void EnableAknEventHandling( TBool aEnable );
 
 private: // From CAknGrid
     virtual void CreateItemDrawerL();
@@ -211,6 +226,9 @@ private: // Data
     
     // Visible view rectangle (horizontal scrolling support)
     TRect iVisibleViewRect;
+    
+    // Flag controlling input handling by grid
+    TBool iAknEventHandlingEnabled;
     };
 
 
@@ -223,8 +241,7 @@ class CTsGridItemDrawer: public CFormattedCellListBoxItemDrawer
 
 public: // Constructor and destructor
     CTsGridItemDrawer( CTsFastSwapGrid* aGrid,
-                       CFormattedCellListBoxData* aData,
-                       TRect aScreenRect );
+                       CFormattedCellListBoxData* aData );
     ~CTsGridItemDrawer();
 
 public: // New functions
@@ -292,6 +309,14 @@ public: // New functions
      * @param aStrokeSize     size of the stroke rectangle
      */
     void SetStrokeOffset( TPoint aStrokeOffset, TSize aStrokeSize );
+    
+    /**
+     * Set screen rectangle, used by the item drawer to determine
+     * drawn area.
+     * 
+     * @param  aRect  screen rectangle
+     */
+    void SetScreenRect( TRect aRect );
 
 private: // From CFormattedCellListBoxItemDrawer
     void DrawActualItem( TInt aItemIndex, const TRect& aActualItemRect,

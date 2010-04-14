@@ -37,6 +37,7 @@
 #include "xnbackgroundmanager.h"
 #include "xneffectmanager.h"
 #include "xnviewmanager.h"
+#include "xnspbgcleaner.h"
 
 // Constants
 _LIT( KResourceDrive, "z:" );
@@ -100,7 +101,8 @@ CXnWallpaperView::~CXnWallpaperView()
     {    
     CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );    
     
-    delete iContainer;    
+    delete iContainer;
+    delete iXnSpBgCleaner;
     delete iTimer;
     }
 
@@ -123,15 +125,22 @@ void CXnWallpaperView::DoActivateL( const TVwsViewId& aPrevViewId,
     // switch layout 
     CEikStatusPane* sp( iAppUi.StatusPane() );
     
+    // setup status pane layout
     sp->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
+    // apply changes 
     sp->ApplyCurrentSettingsL();
-            
     // disable transparancy
-    if ( sp->IsTransparent() )
-        {
-        sp->EnableTransparent( EFalse );
-        }
+    sp->EnableTransparent( EFalse );
     
+    // create background cleaner for sp
+    if ( !iXnSpBgCleaner )
+        {
+        iXnSpBgCleaner = CXnSpBgCleaner::NewL();
+        AppUi()->AddToStackL( *this, iXnSpBgCleaner );
+        }
+
+    // update sp
+    iXnSpBgCleaner->DrawNow();
     sp->DrawNow();
     
     // update cba
@@ -181,6 +190,13 @@ void CXnWallpaperView::DoDeactivate()
         iContainer = NULL;
         }
     
+    if ( iXnSpBgCleaner )
+        {
+        AppUi()->RemoveFromStack( iXnSpBgCleaner );
+        delete iXnSpBgCleaner;
+        iXnSpBgCleaner = NULL;
+        }
+
     iAppUi.EffectManager()->UiRendered();
     }
 

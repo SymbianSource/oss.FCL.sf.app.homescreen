@@ -145,6 +145,17 @@ CXnNodePluginIf* CXnMenu::SoftKeyL( TSoftKeyPosition aPos )
     }
 
 // -----------------------------------------------------------------------------
+// CXnMenu::KeyEventNode
+// 
+// -----------------------------------------------------------------------------
+//
+CXnNodePluginIf* CXnMenu::KeyEventNode()
+    {
+    CXnMenuAdapter* adapter = static_cast< CXnMenuAdapter* >( ControlAdapter() );
+    return adapter->KeyEventNode();       
+    }
+
+// -----------------------------------------------------------------------------
 // CXnMenu::SetObserver
 // 
 // -----------------------------------------------------------------------------
@@ -171,11 +182,12 @@ void CXnMenu::RemoveObserver()
 // 
 // -----------------------------------------------------------------------------
 //        
-void CXnMenu::TryDisplayingMenuBarL( const TDesC& aMenuNodeId )
+void CXnMenu::TryDisplayingMenuBarL( const TDesC& aMenuNodeId, 
+    TBool aContextMenu )
     {    
     CXnMenuAdapter* adapter = static_cast< CXnMenuAdapter* >( ControlAdapter() );
            
-    adapter->TryDisplayingMenuL( aMenuNodeId );               
+    adapter->TryDisplayingMenuL( aMenuNodeId, aContextMenu );               
     }
     
 // -----------------------------------------------------------------------------

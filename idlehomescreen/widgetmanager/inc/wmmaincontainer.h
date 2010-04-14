@@ -158,7 +158,7 @@ public: // new functions
     /** 
 	 * executes findbox deactivation 
 	 */
-    void DeactivateFindPaneL();
+    void DeactivateFindPaneL(TBool aLayout = ETrue);
 	
     /** 
      * sorts the widget list in alphabetical order
@@ -194,6 +194,13 @@ public: // new functions
 
 public:
 
+	/**
+     * Handles focus changed events.
+     *
+     * @see CCoeControl::FocusChanged
+     */    
+    void FocusChanged( TDrawNow aDrawNow );    
+	
     /**
      * Handles key events.
      * 
@@ -317,6 +324,8 @@ private: // New functions
     TKeyResponse HandleSearchKeyEventL( 
             const TKeyEvent& aKeyEvent, 
             TEventCode aType );
+    TInt OperatorButtonHigherPriority( TInt aIndex );
+    
 private:
 
     /**

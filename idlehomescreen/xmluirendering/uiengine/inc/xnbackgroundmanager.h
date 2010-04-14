@@ -261,6 +261,13 @@ private: // data
      */   
     CFbsBitmap* iBgImage;
     
+    /**
+     * Pointer to status pane mask. Drawn on top of a wallpaper in 
+     * the status pane area.
+     * Own.
+     */
+    CFbsBitmap* iSpMask;
+    
     /** 
      * Path of the wallpaper image, including filename. 
      * This is used only if same wallpaper 

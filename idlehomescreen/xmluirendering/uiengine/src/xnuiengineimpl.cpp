@@ -51,7 +51,6 @@
 #include "xndomdocument.h"
 #include "xndomnode.h"
 #include "xneditmode.h"
-#include "xnhittest.h"
 #include "xnnode.h"
 #include "xnpanic.h"
 #include "xneffectmanager.h"
@@ -8067,9 +8066,7 @@ CXnUiEngineImpl::CXnUiEngineImpl( CXnUiEngine& aUiEngine,
 void CXnUiEngineImpl::ConstructL()
     {                  
     iEditMode = CXnEditMode::NewL( *iUiEngine );
-
-    iHitTest = CXnHitTest::NewL();
-
+   
     iCurrentGraphicsDevice = CCoeEnv::Static()->ScreenDevice();
 
     // Update the units here, even the refence client rect is only a quess.
@@ -8104,7 +8101,6 @@ CXnUiEngineImpl::~CXnUiEngineImpl()
     iViewManager.RemoveObserver( *this );
            
     delete iEditMode;
-    delete iHitTest;
 
     iFocusCandidateList.Reset();
 
@@ -8291,7 +8287,15 @@ TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
                         {
                         AddToRedrawListL( node, rect );
                         
-                        adapter->SetRect( rect );
+                        // popup calculates its position based on _s60-position-hint property
+                        if( node->Type()->Type() == KPopUpNodeName )
+                            {
+                            adapter->DoHandlePropertyChangeL();
+                            }
+                        else
+                            {
+                            adapter->SetRect( rect );                        
+                            }
                         CXnProperty* prop = node->GetPropertyL(
                             XnPropertyNames::common::KSizeAware );
                         if ( prop && prop->StringValue() ==
@@ -9669,15 +9673,6 @@ void CXnUiEngineImpl::ForceRenderUIL( TBool aLayoutOnly )
     }
 
 // -----------------------------------------------------------------------------
-// CXnUiEngineImpl::HitTest
-// -----------------------------------------------------------------------------
-//
-CXnHitTest& CXnUiEngineImpl::HitTest() const
-    {
-    return *iHitTest;
-    }
-
-// -----------------------------------------------------------------------------
 // CXnUiEngineImpl::GetThemeResource
 // -----------------------------------------------------------------------------
 //
@@ -9882,11 +9877,15 @@ void CXnUiEngineImpl::ReportScreenDeviceChangeL()
 // -----------------------------------------------------------------------------
 void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
     {
-    DisableRenderUiLC();
     CXnNode* editorplugin = FindPlugin( aNode );
-
-    if ( aEnable ) 
+    if ( !editorplugin )
+        {
+        User::Leave( KErrNotFound );
+        }
     
+    DisableRenderUiLC();
+
+    if ( aEnable )    
         {        
         iSplitScreenState.iPartialScreenOpen = ETrue;           
         iSplitScreenState.iPartialScreenEditorNode = &aNode;           
@@ -9896,6 +9895,25 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
             iViewManager.ActiveViewData().ViewNode()->Control() );            
                    
         control->ResetGrabbing();  
+         
+        // Block progression must be bottom-to-top when partial screen is open
+        // Previous value needs to be stored first
+        CXnProperty* prop( 
+                editorplugin->Parent()->GetPropertyL( 
+                        XnPropertyNames::style::common::KBlockProgression ) );                
+        if ( prop )
+            {
+            iSplitScreenState.iPartialScreenBlock = &prop->StringValue();
+            }
+        else
+            {
+            iSplitScreenState.iPartialScreenBlock = 
+                    &XnPropertyNames::style::common::block_progression::KTB();
+            }
+
+        SetPartialScreenBlockProgressionL( 
+                editorplugin->Parent(), 
+                XnPropertyNames::style::common::block_progression::KBT );
 
         // Hide all plugins except the one that contains given editor node
         RPointerArray< CXnNode >& plugins( *Plugins() );                   
@@ -9907,13 +9925,6 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
                 SetNodeVisibleL(pluginNode, EFalse);
                 }      
              }
-         
-        // Block progression must be bottom-to-top when partial screen is open
-        // Previous value needs to be stored first
-        StorePartialScreenBlockProgressionL();
-           
-        SetPartialScreenBlockProgressionL( 
-            XnPropertyNames::style::common::block_progression::KBT );
         
         // Hide statuspane
         iAppUiAdapter.StatusPane()->MakeVisible( EFalse );
@@ -9922,30 +9933,23 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
     else
         { 
         // Show plugin nodes again
-        RPointerArray< CXnNode >& plugins( *Plugins() );                   
+        RPointerArray< CXnNode >& plugins( *Plugins() );
 
         for( TInt i=0; i<plugins.Count(); i++ )
            {           
-           CXnNode* pluginNode = plugins[i];               
+           CXnNode* pluginNode = plugins[i];
            
            if ( pluginNode != editorplugin )
                 {
                 SetNodeVisibleL(pluginNode, ETrue);
-                }           
+                }
            }
-            
-        if( iSplitScreenState.iPartialScreenBlock == NULL )
-            {
-            SetPartialScreenBlockProgressionL( 
-                        XnPropertyNames::style::common::block_progression::KTB );
-            }
-        else
-            {
-            SetPartialScreenBlockProgressionL(iSplitScreenState.iPartialScreenBlock->Des());
-            delete iSplitScreenState.iPartialScreenBlock; 
-            iSplitScreenState.iPartialScreenBlock = NULL;
-            }
+
+        SetPartialScreenBlockProgressionL( 
+                editorplugin->Parent(),
+                *iSplitScreenState.iPartialScreenBlock );
         
+        iSplitScreenState.iPartialScreenBlock = NULL;
         iSplitScreenState.iPartialScreenEditorNode = NULL;
         iSplitScreenState.iPartialScreenOpen = EFalse;
                  
@@ -10096,59 +10100,23 @@ void CXnUiEngineImpl::SetNodeVisibleL( CXnNode* aNode , TBool aVisible )
 // -----------------------------------------------------------------------------
 // SetPartialScreenBlockProgressionL
 // -----------------------------------------------------------------------------
-void CXnUiEngineImpl::SetPartialScreenBlockProgressionL( const TDesC8& aBlockProgression )
+void CXnUiEngineImpl::SetPartialScreenBlockProgressionL( 
+        CXnNode* aParent, const TDesC8& aBlockProgression )
     {
-    CXnNode* plugin = FindPlugin( *iSplitScreenState.iPartialScreenEditorNode );
-    CXnNode* parent( NULL );    
-    if( plugin )
-        {
-        parent = plugin->Parent();
-        }
-    
-    CXnDomStringPool* sp( iUiEngine->ODT()->DomDocument().StringPool());   
-    if(parent)
-        {
+    CXnDomStringPool* sp( iUiEngine->ODT()->DomDocument().StringPool());
+    if( aParent && sp )
+        {        
         CXnProperty* block_progression = CXnProperty::NewL(
-        XnPropertyNames::style::common::KBlockProgression,
-        aBlockProgression,
-        CXnDomPropertyValue::EString, *sp );
-        
-        CleanupStack::PushL( block_progression );            
-        parent->SetPropertyL(block_progression);            
-        CleanupStack::Pop( block_progression );
+                XnPropertyNames::style::common::KBlockProgression,
+                aBlockProgression,
+                CXnDomPropertyValue::EString, *sp );
+        if ( block_progression )
+            {
+            CleanupStack::PushL( block_progression );            
+            aParent->SetPropertyL(block_progression);            
+            CleanupStack::Pop( block_progression );
+            }
         }
-    }
-
-// -----------------------------------------------------------------------------
-// SetPartialScreenBlockProgressionL
-// -----------------------------------------------------------------------------
-void CXnUiEngineImpl::StorePartialScreenBlockProgressionL()
-    {    
-    CXnNode* parent = iSplitScreenState.iPartialScreenEditorNode->Parent();
-    
-    if(parent)
-        {
-        CXnProperty* blocProgressionProperty( 
-          parent->GetPropertyL( XnPropertyNames::style::common::KBlockProgression ) );               
-        if ( !blocProgressionProperty )
-            {
-            User::Leave( KErrNotFound );
-            }
-        HBufC* blocProgressionValue (blocProgressionProperty->StringValueL());
-        if ( !blocProgressionValue )
-            {
-            User::Leave( KErrNotFound );
-            }
-        CleanupStack::PushL( blocProgressionValue );
-        if(iSplitScreenState.iPartialScreenBlock)
-            {
-            delete iSplitScreenState.iPartialScreenBlock;
-            iSplitScreenState.iPartialScreenBlock = NULL;
-            }
-        iSplitScreenState.iPartialScreenBlock =
-                CnvUtfConverter::ConvertFromUnicodeToUtf8L(blocProgressionValue->Des() );
-        CleanupStack::PopAndDestroy( blocProgressionValue );
-        }    
     }
 
 // -----------------------------------------------------------------------------

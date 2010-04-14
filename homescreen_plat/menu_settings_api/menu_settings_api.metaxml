@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <api id="3f80fb289efe39ff2107c2f067d360f6" dataversion="2.0">
   <name>Menu Settings API</name>
-  <description>Provides infromation about Menu current state.</description>
+  <description>Provides infromation about the current state of Menu application.</description>
   <type>c++</type>
   <collection>menufw</collection>
   <libs/>

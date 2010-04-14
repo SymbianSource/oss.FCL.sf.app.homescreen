@@ -65,11 +65,6 @@ SOURCE    xncomposer.cpp
 SOURCE    xneditmode.cpp
 SOURCE    xneditor.cpp
 SOURCE    xnpropertysubscriber.cpp
-SOURCE    xngesturehelper.cpp
-SOURCE    xngesture.cpp
-SOURCE    xngesturerecogniser.cpp
-SOURCE    xnpointarray.cpp
-SOURCE    xnhittest.cpp
 SOURCE    xnplugindata.cpp
 SOURCE    xnviewdata.cpp
 SOURCE    xnrootdata.cpp
@@ -86,6 +81,8 @@ SOURCE    xnfocuscontrol.cpp
 SOURCE    xnextrenderingpluginwrapper.cpp
 SOURCE    xnbackgroundmanager.cpp
 SOURCE    xnviewcontroladapter.cpp
+SOURCE    xnspbgcleaner.cpp
+SOURCE    xnwaitdialog.cpp
 
 START RESOURCE  xnuiengine.rss
 HEADER
@@ -113,6 +110,7 @@ LIBRARY    cone.lib
 LIBRARY    bafl.lib
 LIBRARY    eikcoctl.lib
 LIBRARY    eikcore.lib
+LIBRARY    eikdlg.lib
 LIBRARY    egul.lib
 LIBRARY    fbscli.lib
 LIBRARY    ws32.lib
@@ -156,6 +154,7 @@ LIBRARY    extrenderingplugin.lib
 LIBRARY    disknotifyhandler.lib
 LIBRARY	   platformenv.lib
 LIBRARY    hspluginsettings.lib
+LIBRARY    akntouchgesturefw.lib
 
 #if defined(_XN3_DEBUG_) || defined(AI3_DEBUG_PERFORMANCE)
 LIBRARY    flogger.lib

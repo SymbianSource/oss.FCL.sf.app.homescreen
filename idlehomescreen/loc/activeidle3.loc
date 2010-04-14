@@ -303,3 +303,9 @@
 // w:
 // r: TB9.2
 #define qtn_hs_error_content_removed "Critical error occurred. Content removed."
+
+// d: Wait/progress note text that is shown when backup or restore process is ongoing.
+// l: popup_note_wait_window
+// w:
+// r: TB9.2
+#define qtn_hs_backup_use_prevented  "Home screen is not in use during backup or restore operation. Wait to finish."

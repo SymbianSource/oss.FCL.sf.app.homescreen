@@ -105,6 +105,7 @@ public:
      */
     IMPORT_C TUid ForegroundAppUidL( TInt aType );
 
+public:
     /**
      * Callback for rotation completion. Takes ownership of a given
      * bitmap.
@@ -166,17 +167,6 @@ private:
      * @return  application uid
      */
     TUid AppUidForWgIdL( TInt aWgId );
-
-    /**
-     * Finds out the application name.
-     * @param   aWindowName window group name or NULL
-     * @param   aAppUId     application uid
-     * @param   aWgId       window group id
-     * @return  application name, ownership transferred to caller
-     */
-    HBufC* FindAppNameLC( CApaWindowGroupName* aWindowName,
-            const TUid& aAppUid,
-            TInt aWgId );
 
     /**
      * Makes a copy of the bitmap with the given handle.

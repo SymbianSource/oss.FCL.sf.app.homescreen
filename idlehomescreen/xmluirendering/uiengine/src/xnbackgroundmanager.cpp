@@ -141,6 +141,7 @@ CXnBackgroundManager::~CXnBackgroundManager()
     delete iBgImage;
     delete iBgImagePath;
     delete iOomSysHandler;
+    delete iSpMask;   
     }
 
 // -----------------------------------------------------------------------------
@@ -182,7 +183,7 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
             {
             SystemGc().DrawBitmap( iRect, wallpaper );
             }
-	        DrawStatusPaneMask();		
+        DrawStatusPaneMask();
         }
     
     // Skin bg is used by default
@@ -220,6 +221,34 @@ void CXnBackgroundManager::SizeChanged()
             }
         }
     iBgContext->SetRect( iRect );
+    
+    // create status pane mask image and set size
+    if( iSpMask )
+        {
+        delete iSpMask;
+        iSpMask = NULL;
+        }
+    
+    TRect spRect;
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EStatusPane, spRect );
+    
+    TInt err( KErrNone );    
+    
+    if( Layout_Meta_Data::IsLandscapeOrientation() )
+        {
+        TRAP( err, iSpMask = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnGrafBgLscTopMaskIcon ) );
+        }
+    else
+        {
+        TRAP( err, iSpMask = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnGrafBgPrtTopMaskIcon ) );        
+        }
+    
+    if( iSpMask )
+        {
+        AknIconUtils::SetSize( iSpMask, spRect.Size(), EAspectRatioNotPreserved );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -511,7 +540,7 @@ void CXnBackgroundManager::SetWallpaperL()
             }
         else if ( selectedIndex == 1 )
             {
-            if ( CXnOomSysHandler::HeapAvailable( CXnOomSysHandler::EMem2MB ) )
+            if ( CXnOomSysHandler::HeapAvailable( CXnOomSysHandler::EMem6MB ) )
                 {
             CXnAppUiAdapter& appui( iViewManager.AppUiAdapter() );
             
@@ -674,7 +703,7 @@ void CXnBackgroundManager::RemovableDiskInsertedL()
             if( path != KNullDesC && !bitmap )
                 {
                 TInt err = CacheWallpaperL( path, *viewData );
-                if( err == KErrNone )
+                if( err == KErrNone && viewData == &iViewManager.ActiveViewData() )
                     {
                     drawingNeeded = ETrue;
                     }
@@ -683,6 +712,13 @@ void CXnBackgroundManager::RemovableDiskInsertedL()
         if( drawingNeeded )
             {
             UpdateScreen();
+            
+            TInt err = AknsWallpaperUtils::SetIdleWallpaper( 
+                iViewManager.ActiveViewData().WallpaperImagePath(), NULL );
+            if( err == KErrNone )
+                {
+                iIntUpdate++;
+                }   
             }    
         }
     else
@@ -948,34 +984,11 @@ TInt CXnBackgroundManager::TimerCallback(TAny *aPtr)
 //
 void CXnBackgroundManager::DrawStatusPaneMask() const
     {
-    TRect spRect;
-    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EStatusPane, spRect );
-    
-    CFbsBitmap* maskBmp( NULL );
-    TInt err( KErrNone );
-    
-    if( Layout_Meta_Data::IsLandscapeOrientation() )
+    if( iSpMask )
         {
-        TRAP( err, maskBmp = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
-                KAknsIIDQgnGrafBgLscTopMaskIcon ) );
-        }
-    else
-        {
-        TRAP( err, maskBmp = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
-                KAknsIIDQgnGrafBgPrtTopMaskIcon ) );        
-        }
-    
-    if( err )
-        {
-        return;
-        }
-    
-    // draw mask
-    if( maskBmp )
-        {
-        AknIconUtils::SetSize( maskBmp, spRect.Size(), EAspectRatioNotPreserved );
-        SystemGc().DrawBitmap( spRect, maskBmp );
-        delete maskBmp;        
+        TSize bmpSize = iSpMask->SizeInPixels();
+        TRect spRect( 0, 0, bmpSize.iWidth, bmpSize.iHeight );
+        SystemGc().DrawBitmap( spRect, iSpMask );
         }
     }
 

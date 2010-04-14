@@ -148,6 +148,12 @@ class CXnMenuAdapter : public CXnControlAdapter, public MEikMenuObserver
         CXnNodePluginIf* SoftKeyL( XnMenuInterface::MXnMenuInterface::TSoftKeyPosition aPos );
 
         /**
+        * Returns softkey node, which should handle key event.     
+        * @return softkey node which should handle key event, NULL if not available. 
+        */                   
+        CXnNodePluginIf* KeyEventNode();
+        
+        /**
          * Finds softkey node by given position
          * @since Series 60 5.0         
          */
@@ -155,10 +161,11 @@ class CXnMenuAdapter : public CXnControlAdapter, public MEikMenuObserver
 
         /**
          * Tries to display menubar        
-         * @since Series 60 5.1    
+         * @since Series 60 5.2
          * @param aMenuNodeId the menu node id
+         * @param aContextMenu ETrue if context menu should be displayed, EFalse otherwise
          */        
-        void TryDisplayingMenuL( const TDesC& aMenuNodeId );
+        void TryDisplayingMenuL( const TDesC& aMenuNodeId, TBool aContextMenu );
        
     public: // from CCoeControl
 
@@ -384,6 +391,7 @@ class CXnMenuAdapter : public CXnControlAdapter, public MEikMenuObserver
         TBool                               iUpdateLskAppearance;
         TBool                               iUpdateMskAppearance;
         TBool                               iUpdateRskAppearance;
+        TBool                               iContextMenu;
         CXnSoftkeyItem*                     iVisibleLSK;
         CXnSoftkeyItem*                     iVisibleRSK;
         CXnSoftkeyItem*                     iVisibleMSK;

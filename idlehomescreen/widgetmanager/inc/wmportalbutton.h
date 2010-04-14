@@ -20,6 +20,8 @@
 #define ___WMPORTALBUTTON_H__
 
 #include <aknbutton.h>	// CAknButton
+#include <AknServerApp.h> //MAknServerAppExitObserver
+
 #include "wmimageconverter.h"
 #include "wmcommon.h"
 
@@ -28,6 +30,7 @@ class CWmMainContainer;
 class CFbsBitmap;
 class CWmConfiguration;
 class CWmProcessMonitor;
+class CBrowserLauncher;
 
 /**
  * Portal button ( ovi, operator ) class for Wm
@@ -36,7 +39,8 @@ class CWmProcessMonitor;
  */
 NONSHARABLE_CLASS( CWmPortalButton ) : public CAknButton,
                                        public MConverterObserver,
-                                       public MCoeControlObserver
+                                       public MCoeControlObserver,
+                                       public MAknServerAppExitObserver
     {
 public:
     /*
@@ -83,6 +87,11 @@ protected: // from MCoeControlObserver
     /** Observes the button's own activity  */
     void HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType );
     
+protected: // from MAknServerAppExitObserver
+
+    /** Observes when browser is exited  */
+    void HandleServerAppExit( TInt aReason );
+    
 protected: // from CCoeControl
 
     /** Handles pointer events.  */
@@ -110,14 +119,25 @@ private:
                    const TDesC& aText, 
                    TAknTextComponentLayout& aLayout,
                    TInt aMargin ) const;
-    /** Runs operator button action */
-    void RunOperatorL( CWmConfiguration& aConf );
     
     /** Runs ovi store launcher */
     void RunOviL( CWmConfiguration& aConf );
     
     /**  Starts browser */ 
-    void StartBrowserL( CWmConfiguration& aConf  );
+    void StartBrowserL( const TDesC& aUrl );
+    
+	/** Starts operator application */
+    void RunOperatorApplicationL( CWmConfiguration& aConf );
+    
+	/** Starts rprocess by given values */
+    void StartProcessL( TUid aUid, const TDesC& aParam );
+    	
+    /**
+     * Opens cwrt/wrt widget to fullscreen. 
+     * @param aAppUid Uid of the widget
+     * @param aParams Optional parameters
+     * */
+    void StartWidgetL( TUid aAppUid, const TDesC& aParams );
     
 private: //data members
 
@@ -142,8 +162,16 @@ private: //data members
     /** icon mask */
     CFbsBitmap* iButtonIconMask;
 	
-    /** Monitors process */
-    CWmProcessMonitor* iProcessMonitor; 
+    /**
+     * Monitors process 
+     */
+    CWmProcessMonitor* iProcessMonitor;
+
+    /** 
+     * Broswer launcher. 
+     */
+    CBrowserLauncher* iBrowserLauncher;
+
  	};
 
 #endif //___WMPORTALBUTTON_H__

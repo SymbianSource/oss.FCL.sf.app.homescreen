@@ -139,14 +139,6 @@ public:
     IMPORT_C void RefreshMenuL();
 
     /**
-     * Activate a view
-     *
-     * @since Series 60 3.1
-     * @param aViewNode View node
-     */
-    IMPORT_C void ActivateViewL( CXnNodeAppIf& aViewNode );
-
-    /**
      * Returns the active view
      *
      * @since Series 60 3.1

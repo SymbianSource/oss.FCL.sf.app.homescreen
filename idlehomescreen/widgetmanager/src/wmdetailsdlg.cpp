@@ -180,12 +180,11 @@ void CWmDetailsDlg::PreLayoutDynInitL()
                     EEikEdwinAvkonDisableCursor |
                     EEikEdwinDisplayOnly |
                     EEikEdwinReadOnly );
+    iRtEditor->EnableKineticScrollingL( ETrue );
 
     CEikScrollBarFrame* scrollBarFrame = iRtEditor->CreateScrollBarFrameL();
     scrollBarFrame->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
-                                             CEikScrollBarFrame::EOff ); // set to EAuto 
-                                             // when layout fixed. ~wk04_2010
-                                             // currently scrollbar overlaps cba.
+                                             CEikScrollBarFrame::EAuto );
     
     iMarquee = CAknMarqueeControl::NewL();
     TCallBack callback( RedrawCallback, this );
@@ -225,18 +224,12 @@ void CWmDetailsDlg::InsertAndFormatContentL()
     TCharFormatMask charFormatMask;
     CParaFormat paraFormat;
     TParaFormatMask paraFormatMask;
-    if ( Layout_Meta_Data::IsMirrored() )
-        {
-        paraFormat.iHorizontalAlignment = CParaFormat::ERightAlign;
-        }
-    else
-        {
-        paraFormat.iHorizontalAlignment = CParaFormat::ELeftAlign;
-        }
+    paraFormat.iHorizontalAlignment = CParaFormat::ELeftAlign;
     charFormat.iFontPresentation.iTextColor = color;
     paraFormatMask.SetAttrib(EAttAlignment);
     charFormatMask.SetAttrib(EAttFontTypeface);
     charFormatMask.SetAttrib(EAttFontHeight);
+    paraFormatMask.SetAttrib(EAttLineSpacing);
     charFormatMask.SetAttrib(EAttColor);
     iRtEditor->ApplyParaFormatL(&paraFormat, paraFormatMask);
     iRtEditor->ApplyCharFormatL(charFormat, charFormatMask);
@@ -401,7 +394,6 @@ void CWmDetailsDlg::Draw( const TRect& /*aRect*/ ) const
     TRect rect = Rect();
     TRect innerRect( rect );
     TRgb color = KRgbBlack;
-    const TInt offSet = 5;
 
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
@@ -478,22 +470,6 @@ void CWmDetailsDlg::Draw( const TRect& /*aRect*/ ) const
     const TInt KBorderWidth = 2;
     gc.SetPenSize( TSize( KBorderWidth, KBorderWidth ) );    
     gc.DrawRoundRect( innerRect, TSize( KFrameRoundRadius, KFrameRoundRadius ) );
-    
-    // draw shadow
-    gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
-    gc.SetPenStyle( CGraphicsContext::ESolidPen );
-    gc.SetBrushColor( color );
-    gc.SetPenColor( color );
-    TRect rightShadowArea = Rect();
-    rightShadowArea.iTl.iX = rightShadowArea.iBr.iX - offSet;
-    rightShadowArea.iTl.iY += offSet/2;
-    gc.DrawRect(rightShadowArea);
-    TRect bottomShadowArea = Rect();
-    bottomShadowArea.iTl.iX += offSet/2;
-    bottomShadowArea.iTl.iY += bottomShadowArea.iBr.iY - offSet;
-    gc.DrawRect( bottomShadowArea );
-    gc.SetBrushStyle( CGraphicsContext::ENullBrush );
-    gc.SetPenStyle( CGraphicsContext::ENullPen );
     }
 
 // ---------------------------------------------------------

@@ -32,6 +32,7 @@ class CXnAppUiAdapter;
 class CXnUiEngine;
 class TVwsViewId;
 class CPeriodic;
+class CXnSpBgCleaner;
 
 // Constants
 const TUid KWallpaperViewUid = { 0x200286DB };
@@ -139,6 +140,13 @@ private: // data
      * Resource file offset
      */
     TInt iResourceOffset;    
+    
+    /** 
+     * Statuspane background cleaner. 
+     * Own.
+     */
+	CXnSpBgCleaner* iXnSpBgCleaner;
+
     };
 
 #endif      // CXNWALLPAPERVIEW_H

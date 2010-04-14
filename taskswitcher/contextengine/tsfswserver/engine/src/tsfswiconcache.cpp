@@ -23,8 +23,8 @@
 #include <avkon.mbg>
 
 // size for the created app icons
-const TInt KAppIconWidth = 96;
-const TInt KAppIconHeight = 96;
+const TInt KAppIconWidth = 300;
+const TInt KAppIconHeight = 300;
 
 // --------------------------------------------------------------------------
 // CTsFswIconCache::NewL

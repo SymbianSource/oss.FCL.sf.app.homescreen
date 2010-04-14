@@ -94,17 +94,26 @@ private:
 
 private:
     /**
-     * From CActive.
-     * Handle completion
+     * Handles an active object's request completion event.
+     * 
+     * @see CActive::RunL
      */
     void RunL();
 
     /**
-     * From CActive.
-     * How to cancel me
+     * Implements cancellation of an outstanding request.
+     * 
+     * @see CActive::DoCancel
      */
     void DoCancel();
 
+    /**
+     * RunError
+     * 
+     * @see CActive::RunError
+     */
+    TInt RunError(TInt aError);
+    
 private:
     // Data
 

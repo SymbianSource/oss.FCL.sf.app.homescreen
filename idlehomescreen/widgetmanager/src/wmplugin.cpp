@@ -118,10 +118,17 @@ void CWmPlugin::Activate()
             iViewAppUi->View( TUid::Uid(EWmMainContainerViewId) ) );
     if ( !IsActive() && view && iHsContentController )
         {
+        // stop displaying menubar before starting fullscreen effects
+        CEikMenuBar* menuBar = CEikonEnv::Static()->AppUiFactory()->MenuBar();
+        if ( menuBar && menuBar->IsDisplayed() )
+            {
+            menuBar->StopDisplayingMenuBar();
+            }
+
         TRAP_IGNORE( 
             iEffectManager->BeginFullscreenEffectL( 
                 KAppStartEffectStyle );
-            iViewAppUi->ActivateLocalViewL( 
+            iViewAppUi->ActivateLocalViewL(
                 TUid::Uid( EWmMainContainerViewId ) );
             );
         }

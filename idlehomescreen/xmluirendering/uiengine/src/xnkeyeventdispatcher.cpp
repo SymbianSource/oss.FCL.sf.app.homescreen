@@ -192,6 +192,9 @@ void CXnKeyEventDispatcher::MonitorWsMessage( const TWsEvent& aEvent )
         CCoeControl* destination = reinterpret_cast< CCoeControl* >( handle );        
                                        
         TPointerEvent& event( *aEvent.Pointer() );
+        
+        // Store event
+        iPointerEvent = *aEvent.Pointer();
                 
         if ( iCbaContainer )
             {
@@ -225,6 +228,16 @@ void CXnKeyEventDispatcher::MonitorWsMessage( const TWsEvent& aEvent )
     }
 
 // -----------------------------------------------------------------------------
+// CXnKeyEventDispatcher::PointerEvent()
+//
+// -----------------------------------------------------------------------------
+//
+const TPointerEvent& CXnKeyEventDispatcher::PointerEvent() const
+    {
+    return iPointerEvent;
+    }
+
+// -----------------------------------------------------------------------------
 // CXnKeyEventDispatcher::OfferKeyEventL
 // Handles key events.
 // -----------------------------------------------------------------------------
@@ -234,9 +247,7 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
     TEventCode aType )
     {
     TKeyResponse resp( EKeyWasNotConsumed );
-    
-    iEventCode = aType;
-    
+           
     CXnNode* node( NULL );
     
     TBool keyYesNoApps( EFalse );
@@ -249,7 +260,7 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
         // When menu is focused or LSK/RSK is pressed,
         // then forward events to menuadapter.
         // Note that MSK is handled directly in the base class as it used only
-        // for activating
+        // for activation
         node = iMenuNode;
         }
     else if ( aKeyEvent.iScanCode == EStdKeyApplication0 ||
@@ -259,8 +270,9 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
         keyYesNoApps = ETrue;
         
         iFocusChanged = EFalse;
+        
         // AppsKey, YesKey, NoKey events must be always handled, and if we don't
-        // have a focused node, then let the view node do the job
+        // have a focused node, then let the view handle the event
         node = ( !iNode ) ? iUiEngine.ActiveView() : iNode;
         }
     else
@@ -309,6 +321,10 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
         
         if ( editmode->OfferKeyEventL( aKeyEvent, aType ) == EKeyWasConsumed )
             {
+            iFocusChanged = EFalse;
+            iKeyEventNode = NULL;
+            iEventCode = EEventNull;
+            
             return EKeyWasConsumed;
             }
         
@@ -324,8 +340,7 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
 
         if ( iFocusChanged && ( aType == EEventKeyUp ) )
             {
-            // Pass keyup event to
-            // previously focused node
+            // Pass keyup event to the previously focused node            
             node = iKeyEventNode;
             }
         }
@@ -336,7 +351,9 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
             {    
             // We are waiting for down event
             return resp;
-            }        
+            }
+        
+        iEventCode = aType;
         }
         
     if ( !node )

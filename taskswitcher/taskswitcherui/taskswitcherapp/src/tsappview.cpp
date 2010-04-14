@@ -457,6 +457,10 @@ void CTsAppView::HandleSwitchToForegroundEvent()
     TSLOG_CONTEXT( CTsAppView::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
     TSLOG_IN();
     
+    // Forward event to interested controls
+    iFastSwapArea->HandleSwitchToForegroundEvent();
+    iFastSwapArea->UpdateComponentVisibility();
+    
     // Check for layout updates
     CTsAppUi* appUi = static_cast<CTsAppUi*>(iCoeEnv->AppUi());
     if ( iViewRect != appUi->ApplicationRect() &&
@@ -476,10 +480,6 @@ void CTsAppView::HandleSwitchToForegroundEvent()
 
     // Focus jumps back to fsw
     ChangeFocus( iFastSwapArea );
-
-    // Forward event to interested controls
-    iFastSwapArea->HandleSwitchToForegroundEvent();
-    iFastSwapArea->UpdateComponentVisibility();
 
     // Start animation
     CTsAppUi* appui =
@@ -614,9 +614,8 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
         {
 		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
 				ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
-		if ( !( iFastSwapArea->Rect().Contains(aPointerEvent.iParentPosition) ||
-		        iAppsHeading->Rect().Contains(aPointerEvent.iParentPosition)
-		       ) )
+
+		if( !DragArea().Contains(aPointerEvent.iParentPosition))
 		    {
 		    //move task switcher to background
 		    iEvtHandler->EnableEventHandling(EFalse);
@@ -730,13 +729,7 @@ void CTsAppView::LongTapL(const TPoint& aPoint)
 //
 void CTsAppView::DragL(const MAknTouchGestureFwDragEvent& aEvent)
     {
-	if( aEvent.State() == EAknTouchGestureFwStop )
-		{
-		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
-				ETouchFeedbackVibra | ETouchFeedbackAudio), TPointerEvent());
-		}
-    if( iFastSwapArea->Rect().Contains(aEvent.StartPosition()) ||
-		iAppsHeading->Rect().Contains(aEvent.StartPosition()) )
+    if(DragArea().Contains(aEvent.StartPosition()))
         {
 		iFastSwapArea->DragL(aEvent);
         }
@@ -778,6 +771,34 @@ void CTsAppView::LaunchFeedback( TTouchLogicalFeedback aLogicalType,
 	}
 
 
+// -----------------------------------------------------------------------------
+// CTsAppView::AppCloseInProgress()
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppView::AppCloseInProgress( TInt aWgId )
+    {
+    return iFastSwapArea->IsAppClosing(aWgId);
+    }
+// -----------------------------------------------------------------------------
+// CTsAppView::DragArea
+// -----------------------------------------------------------------------------
+//
+TRect CTsAppView::DragArea()
+	{
+	TRect dragArea;
+	if (Layout_Meta_Data::IsLandscapeOrientation())
+		{
+		dragArea.SetRect(iAppsHeading->Rect().iTl.iX,
+				iAppsHeading->Rect().iTl.iY, iFastSwapArea->Rect().iBr.iX,
+				iFastSwapArea->Rect().iBr.iY);
+		}
+	else
+		{
+		dragArea.SetRect(Rect().iTl.iX, iAppsHeading->Rect().iTl.iY,
+				Rect().iBr.iX, iFastSwapArea->Rect().iBr.iY);
+		}
+	return dragArea;
+	}    
 
 
 // End of file

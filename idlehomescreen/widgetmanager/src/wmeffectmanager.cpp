@@ -131,7 +131,7 @@ void CWmEffectManager::DoBeginFullscreenEffect( TWmEffect& aEffect )
     // fullscreen effect may contain unwanted parts (dialog, note, etc.)
     // which was shown when fullscreen effect is about to be started
     iCoeEnv.WsSession().Finish();
-    User::After( 1000 );
+    User::After( 1 );
 
     const TInt flags( AknTransEffect::TParameter::EActivateExplicitCancel );
     const TUid targetAppUid( iAvkonAppUi->Application()->AppDllUid() );

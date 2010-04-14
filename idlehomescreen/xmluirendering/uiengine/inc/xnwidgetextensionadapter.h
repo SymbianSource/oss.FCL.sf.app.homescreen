@@ -81,12 +81,17 @@ private:
     /**
     * see CCoeControl 
     */
-    void HandlePointerEventL(const TPointerEvent& aPointerEvent);
+    void HandlePointerEventL( const TPointerEvent& aPointerEvent );
 
     /**
     * see CCoeControl 
     */
-    void Draw(const TRect& aRect) const;        
+    void Draw( const TRect& aRect ) const;        
+
+    /**
+    * @see CXnControlAdapter
+    */
+    void DoHandlePropertyChangeL( CXnProperty* aProperty = NULL );
 
 private:
     // from MXnUiStateObserver
@@ -135,7 +140,9 @@ private:
     // New functions
     
     void HidePopupL();
-        
+
+    void ChangePopupPosition();
+
     void CalculatePosition();
     
 private:    

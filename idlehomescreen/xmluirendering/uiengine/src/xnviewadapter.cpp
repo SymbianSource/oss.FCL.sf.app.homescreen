@@ -367,6 +367,8 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
     
     iFlags.Set( EIsActivated );
     
+    // State must be cleared before adding to stack
+    iEventDispatcher->ClearStateL();
     iAppUiAdapter.AddToStackL( *this, iEventDispatcher );
 
     // enable statuspane transparancy 
@@ -484,18 +486,20 @@ void CXnViewAdapter::DoDeactivate()
 // -----------------------------------------------------------------------------
 //
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
-    TBool aEnterEditState )
-    {   
-    if ( iContainer == &aContainer || iFlags.IsSet( EIsDestructionRunning ) )   
-        {            
+    TBool aEnterEditState, TBool aForceActivation )
+    {
+    // Returns if the container remains the same and activation is not forced
+    // Otherwise the old container is deactivated and the new is activated
+    if ( iFlags.IsSet( EIsDestructionRunning ) ||
+        ( ( !aForceActivation ) &&  ( iContainer == &aContainer ) ) )
+        {
         return;
         }
 
+    // Find previous container and then deactivate it
     const CXnViewData* previous( iContainer );
-    
-    // Deactivate previous
     DeactivateContainerL();
-    
+
     if ( iFlags.IsClear( EIsActivated ) )
         {
         // Some other view than this in this appui is currently active,
@@ -569,17 +573,15 @@ void CXnViewAdapter::ActivateDefaultContainerL( TBool aEnterEditState )
         return;
         }    
     
-    // Deactivate container even though it hasn't changed to close all popups
-    // and other windows
-    DeactivateContainerL();
-    
     // first view is default
     CXnViewData* viewData = static_cast<CXnViewData*>( views[0] );
     
     if ( viewData )
         {
         EnterEditStateL( *viewData, aEnterEditState );
-        ActivateContainerL( *viewData, aEnterEditState );
+        // Deactivate container even though it hasn't changed to close all 
+        // popups and other windows
+        ActivateContainerL( *viewData, aEnterEditState, ETrue );
         }
     }
 

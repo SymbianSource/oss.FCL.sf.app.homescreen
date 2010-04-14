@@ -68,6 +68,9 @@
 #include "wmconfiguration.h"
 #include "wminstaller.h"
 
+#include <hscontentcontroller.h> // content control api
+#include <hscontentinfoarray.h> // content control api
+
 // CONSTANTS
 const TInt KTextLimit = 40; // Text-limit for find-field
 const TInt KMinWidgets = 1; // minimum number of widgets to show findpane
@@ -93,6 +96,8 @@ CWmMainContainer::CWmMainContainer( CWmPlugin& aWmPlugin ) :
 //
 CWmMainContainer::~CWmMainContainer()
 	{
+    TRAP_IGNORE(DeactivateFindPaneL(EFalse));
+    
     delete iWidgetLoader;
 
     RemoveCtrlsFromStack();
@@ -222,8 +227,18 @@ void CWmMainContainer::LayoutControls()
                 ::wgtman_btn_pane( variety ).LayoutLine();
         TAknWindowLineLayout operatorBtnLayout = AknLayoutScalable_Apps
                 ::wgtman_btn_pane_cp_01( variety ).LayoutLine();
-        AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, oviBtnLayout );
-        AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, operatorBtnLayout );
+        
+        // button placement
+        if ( iConfiguration->PortalButtonsMirrored() )
+            {
+            AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, operatorBtnLayout );
+            AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, oviBtnLayout );
+            }
+        else
+            {
+            AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, oviBtnLayout );
+            AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, operatorBtnLayout );
+            }
 	    }
     
 	// layout iWidgetsList
@@ -256,12 +271,15 @@ TKeyResponse CWmMainContainer::OfferKeyEventL(
 
     // This is a bug fix for ou1cimx1#217716 & ou1cimx1#217667.
     // For some weird reason homescreen is genarating one extra EEventKey 
-    // when using Nokia SU-8W bluetooth keyboard & backspace key. This if is to 
+    // when using bluetooth keyboard & backspace key. This if is to 
     // ignore that event. Extra event allways has iModifiers set to 
-    // EModifierAutorepeatable.
+    // EModifierAutorepeatable, EModifierKeyboardExtend and 
+    // EModifierNumLock.
     if ( aType == EEventKey && 
-             aKeyEvent.iScanCode == EStdKeyBackspace && 
-             aKeyEvent.iModifiers == EModifierAutorepeatable )
+         aKeyEvent.iScanCode == EStdKeyBackspace &&
+         aKeyEvent.iModifiers&EModifierKeyboardExtend &&
+         aKeyEvent.iModifiers&EModifierNumLock &&
+         aKeyEvent.iModifiers&EModifierAutorepeatable )
         {
         return EKeyWasConsumed;
         }
@@ -441,7 +459,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list top -> up -> ovi button (portrait)
             if ( aType == EEventKey )
-                SetFocusToPortalButton( 0 );
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
             keyResponse = EKeyWasConsumed;
             }
         else if ( !iLandscape &&
@@ -451,7 +469,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list bottom -> down -> ovi button (portrait)
             if ( aType == EEventKey )
-                SetFocusToPortalButton( 0 );
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLandscape && !iMirrored &&
@@ -459,7 +477,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list -> right -> ovi button (landscape normal)
             if ( aType == EEventKey )
-                SetFocusToPortalButton( 0 );
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLandscape && iMirrored &&
@@ -493,8 +511,20 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             keyResponse = EKeyWasConsumed;
             }
         else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // right portal -> left -> left portal
+            // (portrait, operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && !iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow &&
-                iConfiguration->PortalButtonCount() > 1 )
+                iConfiguration->PortalButtonCount() > 1 && 
+                !iConfiguration->PortalButtonsMirrored() )
             {
             // left portal -> right -> right portal (portrait normal)
             if ( aType == EEventKey )
@@ -527,8 +557,20 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow &&
+                iConfiguration->PortalButtonCount() > 1 &&
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // lower portal -> up -> upper portal 
+            // (landscape, operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape &&
                 aKeyEvent.iScanCode == EStdKeyDownArrow &&
-                iConfiguration->PortalButtonCount() > 1 )
+                iConfiguration->PortalButtonCount() > 1 && 
+                !iConfiguration->PortalButtonsMirrored() )
             {
             // upper portal -> down -> lower portal (landscape)
             if ( aType == EEventKey )
@@ -558,8 +600,20 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             keyResponse = EKeyWasConsumed;
             }
         else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1  && 
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // left portal -> right -> right portal
+            // (portrait, operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && !iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyLeftArrow &&
-                iConfiguration->PortalButtonCount() > 1 )
+                iConfiguration->PortalButtonCount() > 1  && 
+                !iConfiguration->PortalButtonsMirrored() )
             {
             // right portal -> left -> left portal (portrait normal)
             if ( aType == EEventKey )
@@ -592,7 +646,18 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             keyResponse = EKeyWasConsumed;
             }
         else if ( iLandscape &&
-                aKeyEvent.iScanCode == EStdKeyUpArrow )
+                aKeyEvent.iScanCode == EStdKeyDownArrow &&
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // upper portal -> down -> lower portal 
+            // ( landscape operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow &&
+                !iConfiguration->PortalButtonsMirrored() )
             {
             // lower portal -> up -> upper portal (landscape)
             if ( aType == EEventKey )
@@ -618,6 +683,28 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
         }
 
     return keyResponse;
+    }
+
+
+// ---------------------------------------------------------
+// CWmMainContainer::OperatorButtonHigherPriority
+// ---------------------------------------------------------
+//
+TInt CWmMainContainer::OperatorButtonHigherPriority( TInt aIndex )
+    {
+    TInt ret = aIndex;
+    if ( iConfiguration->PortalButtonsMirrored() )
+        {
+        if ( aIndex == 0 )
+            {
+            ret = 1;
+            }
+        else if ( aIndex == 1 )
+            {
+            ret = 0;
+            }
+        }
+    return ret;
     }
 
 // ---------------------------------------------------------
@@ -1060,7 +1147,7 @@ void CWmMainContainer::AddWidgetToHomeScreenL()
         {
         if ( iFindbox && iFindPaneIsVisible )
             {
-            DeactivateFindPaneL();
+            DeactivateFindPaneL(EFalse);
             }
         
         if ( data && !data->IsUninstalling() )
@@ -1160,10 +1247,10 @@ void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdaptive )
 // CWmMainContainer::DeactivateFindPaneL
 // ---------------------------------------------------------------------------
 //
-void CWmMainContainer::DeactivateFindPaneL()
+void CWmMainContainer::DeactivateFindPaneL(TBool aLayout)
     {
     if( iFindbox && iFindPaneIsVisible )
-	    {
+        {
         // notify search field we're shutting down
         TKeyEvent keyEvent = { EKeyNo, EStdKeyNo, 0, 0  };
         iFindbox->OfferKeyEventL( keyEvent, EEventKey );
@@ -1186,20 +1273,23 @@ void CWmMainContainer::DeactivateFindPaneL()
         iFindPaneIsVisible = EFalse;        
         iWidgetsList->SetFindPaneIsVisible( EFalse );       
         
-        LayoutControls();
-
-        // set soft key set
-        CEikButtonGroupContainer* cbaGroup =
-            CEikButtonGroupContainer::Current();
-        TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
-                                    R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
-                                    R_AVKON_SOFTKEYS_OPTIONS_BACK );
-
-        cbaGroup->SetCommandSetL( cbaResourceId );
-        cbaGroup->DrawNow();
-
-        UpdateFocusMode();
-        DrawNow();
+        if (aLayout) //no need to draw UI if exiting list
+            {
+            LayoutControls();
+    
+            // set soft key set
+            CEikButtonGroupContainer* cbaGroup =
+                CEikButtonGroupContainer::Current();
+            TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
+                                        R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
+                                        R_AVKON_SOFTKEYS_OPTIONS_BACK );
+    
+            cbaGroup->SetCommandSetL( cbaResourceId );
+            cbaGroup->DrawNow();
+    
+            UpdateFocusMode();
+            DrawNow();
+            }
         }
     }
 
@@ -1351,9 +1441,20 @@ void CWmMainContainer::LaunchDetailsDialogL()
         const CFbsBitmap* mask = ( data->LogoImageMask() ) ? 
                     data->LogoImageMask() : iWidgetsList->DefaultMask();
         
+        // Find out if HS is full
+        TBool hsFull = ETrue;
+        MHsContentController& controller = iWmPlugin.ContentController();
+        CHsContentInfo* activeView = CHsContentInfo::NewLC();
+        if ( controller.ActiveViewL( *activeView ) == KErrNone )
+            {
+            hsFull = activeView->IsFull();
+            }
+        CleanupStack::PopAndDestroy( activeView );
+        
         CWmDetailsDlg* dlg = CWmDetailsDlg::NewL(
-                data->Name(), data->Description(), 
-                data->HsContentInfo().CanBeAdded(),
+                data->Name(), 
+                data->Description(), 
+                !hsFull,
                 logo, mask );
 
         if ( dlg && dlg->ExecuteLD() == ECbaAddToHs )
@@ -1465,6 +1566,25 @@ CWmListBox& CWmMainContainer::WmListBox()
     {
     return *iWidgetsList;
     }
+
+// ----------------------------------------------------
+// CWmMainContainer::FocusChanged
+// ----------------------------------------------------
+//
+void CWmMainContainer::FocusChanged( TDrawNow aDrawNow )
+    {
+    CCoeControl::FocusChanged( aDrawNow );
+
+    if ( iFindbox && iFindPaneIsVisible && 
+        !iFindbox->IsFocused() && IsFocused() )
+        {
+        // reset focus to find pane if its lost ( ou1cimx1#308019 )
+        ResetFocus();
+        iFindbox->SetFocus( ETrue );
+        UpdateFocusMode();
+        }
+    }
+
 
 // End of File
 

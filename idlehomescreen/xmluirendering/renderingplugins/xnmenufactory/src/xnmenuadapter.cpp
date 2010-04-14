@@ -57,7 +57,10 @@
 
 _LIT8( KEditMode, "Menu/EditMode" );
 _LIT8( KNormalMode, "Menu/NormalMode" );
+_LIT8( KContextEditMode, "ContextMenu/EditMode" );
+_LIT8( KContextNormalMode, "ContextMenu/NormalMode" );
 _LIT8( KAlwaysShown, "Menu/AlwaysShown" );
+
 _LIT8( KHsShowHelp, "hs_show_help" );
 
 const TInt KMenuCommandFirst         = 6000;
@@ -1479,19 +1482,24 @@ void CXnMenuAdapter::PopulateMenuL()
     CleanupClosePushL( groups );
                
     if ( !iUiEngine->IsTextEditorActive() )
-        {    
-        if( iUiEngine->EditMode() )
+        {  
+        if( iUiEngine->EditMode() )        
             {
-            groups.AppendL( &KEditMode );
+            groups.AppendL( 
+                iContextMenu ? &KContextEditMode : &KEditMode );
             }
         else
             {
-            groups.Append( &KNormalMode );
+            groups.AppendL( 
+                iContextMenu ? &KContextNormalMode : &KNormalMode );
             }
         }
-    
-    groups.AppendL( &KAlwaysShown );
-         
+
+    if ( !iContextMenu )
+        {
+        groups.AppendL( &KAlwaysShown );
+        }
+            
     // Recursively add menuitems
     AddMenuItemL( -1, iMenuBarNode, groups );
     
@@ -1514,40 +1522,45 @@ TKeyResponse CXnMenuAdapter::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCod
         
         return resp;
         }        
-
-    const TDesC8* pos( &KNullDesC8 );
     
+    TInt pos( KErrNotFound );
+           
     if( aKeyEvent.iScanCode == EStdKeyDevice0 )
         {
-        pos = &XnPropertyNames::softkey::type::KLeft;
+        pos = CEikButtonGroupContainer::ELeftSoftkeyPosition;
         }
     else if( aKeyEvent.iScanCode == EStdKeyDevice1 )
         {
-        pos = &XnPropertyNames::softkey::type::KRight;
+        pos = CEikButtonGroupContainer::ERightSoftkeyPosition;
         }
     else if( aKeyEvent.iScanCode == EStdKeyDevice3 )
         {
-        pos = &XnPropertyNames::softkey::type::KMiddle;
+        pos = CEikButtonGroupContainer::EMiddleSoftkeyPosition;
         }            
     
-    if( aType == EEventKeyDown )
-        {                                  
-        iKeyEventNode = FindSoftkeyNodeL( *pos );           
-        }
-            
-    if( aKeyEvent.iScanCode == EStdKeyDevice0 || 
-        aKeyEvent.iScanCode == EStdKeyDevice1 || 
-        aKeyEvent.iScanCode == EStdKeyDevice3 )
+    CXnSoftkeyItem* softkey( NULL );
+    
+    if ( pos != KErrNotFound )
         {
-        CXnNodePluginIf* node(  FindSoftkeyNodeL( *pos ) );
+        softkey = SoftkeyItemL( pos );
+        }
         
+    if ( softkey )
+        {
+        CXnNodePluginIf* node( softkey->iNode );
+        
+        if( aType == EEventKeyDown )
+            {                                  
+            iKeyEventNode = node;           
+            }
+                       
         if( node && node == iKeyEventNode )
             {
             // Let base class handle the event           
             resp = CXnControlAdapter::OfferKeyEventL( aKeyEvent, aType );                                        
             }            
         }
-        
+            
     if( aType == EEventKeyUp )
         {
         iKeyEventNode = NULL;
@@ -1725,8 +1738,7 @@ void CXnMenuAdapter::ProcessCommandL( TInt aCommand )
 // -----------------------------------------------------------------------------
 //
 void CXnMenuAdapter::SetContainerL( CEikButtonGroupContainer& aContainer )
-    {
-    
+    {    
     User::LeaveIfNull( &aContainer );
     
     TBool updateNeeded( EFalse );
@@ -1769,15 +1781,18 @@ TBool CXnMenuAdapter::IsMenuFocused()
 
 // -----------------------------------------------------------------------------
 // CXnMenuAdapter::TryDisplayingMenuL
-// Displays options menu if it is defined for the softkey item
+// Displays options menu 
 // -----------------------------------------------------------------------------
 //
-void CXnMenuAdapter::TryDisplayingMenuL( const TDesC& aMenuNodeId )
+void CXnMenuAdapter::TryDisplayingMenuL( const TDesC& aMenuNodeId, 
+    TBool aContextMenu )
     {
     HBufC8* id = CnvUtfConverter::ConvertFromUnicodeToUtf8L( aMenuNodeId );
     CleanupStack::PushL( id );
     CXnNodePluginIf* node( iUiEngine->FindNodeByIdL( *id, iRootNode->Namespace() ) );
     CleanupStack::PopAndDestroy( id );
+    
+    iContextMenu = aContextMenu;
     
     if( node && node->Type()->Type() == KXnMenu )
         {
@@ -1817,8 +1832,8 @@ void CXnMenuAdapter::TryDisplayingMenuL()
 // -----------------------------------------------------------------------------
 //
 void CXnMenuAdapter::StopDisplayingMenu()
-    {
-    if( iMenuShown && iMenuBar )
+    {       
+    if( iMenuBar )
         {
         iMenuBar->StopDisplayingMenuBar();
         }
@@ -2094,6 +2109,16 @@ CXnNodePluginIf* CXnMenuAdapter::SoftKeyL( XnMenuInterface::MXnMenuInterface::TS
         node = item->iNode;
         }
     return node;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnMenuAdapter::KeyEventNode
+// 
+// -----------------------------------------------------------------------------
+//
+CXnNodePluginIf* CXnMenuAdapter::KeyEventNode()
+    {
+    return iKeyEventNode;
     }
 
 // -----------------------------------------------------------------------------

@@ -102,7 +102,7 @@ static HBufC* ItemValueL( CHspsConfiguration& aConfiguration,
 // @return    returns pointer to desired node, NULL if nothing found 
 // ---------------------------------------------------------------------------
 //
-CXnDomNode* FindNodeByName( CXnDomNode* aNode, const TDesC8& aName )
+static CXnDomNode* FindNodeByName( CXnDomNode* aNode, const TDesC8& aName )
     {
     if ( !aNode )
         {        
@@ -131,12 +131,57 @@ CXnDomNode* FindNodeByName( CXnDomNode* aNode, const TDesC8& aName )
     }
 
 // ---------------------------------------------------------------------------
+// Finds template publisher name
+//  
+// ---------------------------------------------------------------------------
+//
+static const TDesC8& FindTemplatePublisherName( CXnDomNode* aNode )
+    {
+    if ( !aNode )
+        {        
+        return KNullDesC8();
+        }
+
+    CXnDomList& list( aNode->ChildNodes() );
+    
+    for ( TInt i = 0; i < list.Length(); i++ )
+        {
+        CXnDomNode* node = static_cast< CXnDomNode* >( list.Item( i ) );
+
+        // Find <configuration> element
+        if ( node->Name() == KConfigurationModel )
+            {
+            CXnDomList& attributes( node->AttributeList() );
+    
+            CXnDomAttribute* name(
+                static_cast< CXnDomAttribute* >(
+                    attributes.FindByName( XnPropertyNames::action::KName ) ) );
+        
+            // Find attribute name="publisher" 
+            if ( name && name->Value() == KPublisher )
+                {
+                CXnDomAttribute* value(
+                    static_cast< CXnDomAttribute* >(
+                        attributes.FindByName( XnPropertyNames::action::KValue ) ) );
+                
+                if ( value )
+                    {                    
+                    return value->Value();
+                    }
+                }            
+            }
+        }
+    
+    return KNullDesC8();
+    }
+
+// ---------------------------------------------------------------------------
 // FindNodeById
 // Finds recursively node by id
 // @return    returns pointer to desired node, NULL if nothing found 
 // ---------------------------------------------------------------------------
 //
-CXnDomNode* FindNodeById( CXnDomNode* aNode, const TDesC8& aId )
+static CXnDomNode* FindNodeById( CXnDomNode* aNode, const TDesC8& aId )
     {
     if ( !aNode )
         {        
@@ -595,12 +640,16 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
         if( bgManager.WallpaperType() == CXnBackgroundManager::EPageSpecific )
             {
             HBufC* bgImage = ItemValueL( *configuration, KWallpaper, KPath );
-            CleanupStack::PushL( bgImage );
-            if( bgImage && bgImage->Length() > 0 )
+            if ( bgImage )
                 {
-                bgManager.CacheWallpaperL( bgImage->Des(), aViewData );
+                CleanupStack::PushL( bgImage );
+                bgImage->Des().Trim();
+                if( bgImage && bgImage->Length() > 0 )
+                    {                
+                    bgManager.CacheWallpaperL( bgImage->Des(), aViewData );
+                    }
+                CleanupStack::PopAndDestroy( bgImage );
                 }
-            CleanupStack::PopAndDestroy( bgImage );
             }
         if ( pluginNode )
             {            
@@ -736,20 +785,9 @@ TInt CXnComposer::ComposeWidgetL( CXnPluginData& aPluginData )
         
         if ( info.Type() == KKeyTemplate )
             {
-            CXnDomNode* node( FindNodeByName( widgetRoot, KContentSourceNode ) );
+            const TDesC8& name( FindTemplatePublisherName( widgetRoot ) );
             
-            if ( node )
-                {
-                CXnDomList& attributes( node->AttributeList() );
-                 
-                CXnDomAttribute* attribute( static_cast< CXnDomAttribute* >(
-                    attributes.FindByName( KName ) ) );
-                
-                if ( attribute )
-                    {
-                    aPluginData.SetPublisherNameL( attribute->Value() );
-                    }
-                }
+            aPluginData.SetPublisherNameL( name );
             }
                 
         retval = KErrNone;                       

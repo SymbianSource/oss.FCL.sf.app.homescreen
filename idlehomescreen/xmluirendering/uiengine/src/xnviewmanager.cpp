@@ -277,9 +277,7 @@ CXnViewManager::CXnViewManager( CXnAppUiAdapter& aAdapter )
 // -----------------------------------------------------------------------------
 //
 CXnViewManager::~CXnViewManager()
-    {
-    delete iUiStartupPhase;
-    
+    {        
     delete iStabilityTimer;
     
     iObservers.Reset();
@@ -303,33 +301,6 @@ CXnViewManager::~CXnViewManager()
     delete iOomSysHandler;
     }
 
-// -----------------------------------------------------------------------------
-// CXnViewManager::PropertyChangedL()
-// 
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::PropertyChangedL( const TUint32 aKey, const TInt aValue )
-    {
-    if ( aKey == KPSStartupUiPhase && aValue == EStartupUiPhaseAllDone )
-        {
-	    iUiStartupPhaseAllDone = ETrue;
-				
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( ActiveViewData() );    
-        }
-    
-    iUiStartupPhaseAllDone = ETrue;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::UiStartupPhaseAllDone()
-// 
-// -----------------------------------------------------------------------------
-//
-TBool CXnViewManager::UiStartupPhaseAllDone() const
-    {
-    return iUiStartupPhaseAllDone;        
-    }
-    
 // -----------------------------------------------------------------------------
 // CXnViewManager::ConstructL()
 // 2nd phase constructor
@@ -374,14 +345,8 @@ void CXnViewManager::LoadUiL()
            
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
     
-    // Determine UI startup phase
-    delete iUiStartupPhase;
-    iUiStartupPhase = NULL;
-    
-    iUiStartupPhaseAllDone = EFalse;
-                   
-    iUiStartupPhase = CXnPropertySubscriber::NewL( 
-        KPSUidStartup, KPSStartupUiPhase, *this );
+    // Activate initial view already here to get publishers loaded        
+    ActiveViewData().SetActive( ETrue );    
     }
 
 // -----------------------------------------------------------------------------

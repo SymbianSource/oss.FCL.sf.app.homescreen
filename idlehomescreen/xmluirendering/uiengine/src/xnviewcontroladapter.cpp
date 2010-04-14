@@ -59,9 +59,9 @@ CXnViewControlAdapter* CXnViewControlAdapter::NewL( CXnNodePluginIf& aNode )
 //
 void CXnViewControlAdapter::ConstructL( CXnNodePluginIf& aNode )
     {
-    CXnControlAdapter::ConstructL( aNode );
-            
     CreateWindowL();
+    
+    CXnControlAdapter::ConstructL( aNode );
 
     if( Window().SetTransparencyAlphaChannel() == KErrNone )      
         {       

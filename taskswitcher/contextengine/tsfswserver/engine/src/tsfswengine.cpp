@@ -380,55 +380,6 @@ TUid CTsFswEngine::AppUidForWgIdL( TInt aWgId )
     }
 
 // --------------------------------------------------------------------------
-// CTsFswEngine::FindAppNameLC
-// --------------------------------------------------------------------------
-//
-HBufC* CTsFswEngine::FindAppNameLC( CApaWindowGroupName* aWindowName,
-                                  const TUid& aAppUid,
-                                  TInt aWgId )
-    {
-    //Retrieve the app name
-    TApaAppInfo info;
-    iAppArcSession.GetAppInfo( info, aAppUid );
-    TPtrC caption = info.iShortCaption;
-
-    HBufC* tempName = 0;
-    if ( !caption.Length() && aWindowName ) // if not set - use thread name instead
-        {
-        if ( aWindowName->Caption().Length() )
-            {
-            tempName = aWindowName->Caption().AllocL();
-            //put on cleanupstack after the if
-            }
-        else
-            {
-            TThreadId threadId;
-            TInt err = iWsSession.GetWindowGroupClientThreadId(
-                    aWgId, threadId );
-            if ( err == KErrNone )
-                {
-                RThread thread;
-                CleanupClosePushL( thread );
-                err = thread.Open ( threadId );
-                if ( err==KErrNone )
-                    {
-                    tempName = thread.Name().AllocL(); // codescanner::forgottoputptroncleanupstack
-                    // tempName put on cleanupstack after the if
-                    }
-                CleanupStack::PopAndDestroy( &thread );
-                }
-            }
-        }
-    else
-        {
-        tempName = caption.AllocL();
-        //put on cleanupstack after the if
-        }
-    CleanupStack::PushL( tempName );
-    return tempName;
-    }
-
-// --------------------------------------------------------------------------
 // CTsFswEngine::CopyBitmapL
 // --------------------------------------------------------------------------
 //

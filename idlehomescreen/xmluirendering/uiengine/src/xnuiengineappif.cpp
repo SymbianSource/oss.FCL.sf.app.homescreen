@@ -197,16 +197,6 @@ EXPORT_C CXnDomStringPool& TXnUiEngineAppIf::StringPool()
     }
 
 // -----------------------------------------------------------------------------
-// TXnUiEngineAppIf::ActivateViewL
-// Activate a view
-// -----------------------------------------------------------------------------
-//
-EXPORT_C void TXnUiEngineAppIf::ActivateViewL( CXnNodeAppIf& aViewNode )
-    {
-    iUiEngine->ActivateViewL( aViewNode.Node() );
-    }
-
-// -----------------------------------------------------------------------------
 // TXnUiEngineAppIf::ActiveView
 // Return the active view
 // -----------------------------------------------------------------------------

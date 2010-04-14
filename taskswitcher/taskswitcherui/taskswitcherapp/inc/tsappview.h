@@ -108,6 +108,15 @@ public:
      * background redraw.
      */
     void EnableDragEvents( TBool aEnable );
+    
+    /**
+     * Checks if app with the given wg id is closing
+     * 
+     * @param  aWgId  id of window group which is checked
+     *                if it is closing
+     * @return  ETrue if application is being closed, EFalse otherwise
+     */
+    TBool AppCloseInProgress( TInt aWgId );
 
 protected:
     // from MCoeControlObserver
@@ -192,8 +201,11 @@ private:
 		TTouchFeedbackType aFeedbackType,
 		const TPointerEvent& aPointerEvent);
     
-
-    
+    /**
+     * Area, where drag events are being handled.
+     */
+    TRect DragArea();
+        
 public://From MTsEventControlerObserver
     /**
      * Declare drag gesture handling.

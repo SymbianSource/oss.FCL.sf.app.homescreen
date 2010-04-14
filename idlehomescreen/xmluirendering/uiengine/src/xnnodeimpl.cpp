@@ -43,7 +43,6 @@
 #include "xneditmode.h"
 #include "xneditor.h"
 #include "xntext.h"
-#include "xnhittest.h"
 #include "xnscrollablecontroladapter.h"
 #include "xnviewdata.h"
 #include "xnrootdata.h"
@@ -266,8 +265,6 @@ static void RunAppUiNotificationL( CXnUiEngine& aEngine, CXnNode& aNode,
     CXnDomNode& aEventNode, CXnDomNode& aTriggerNode, CXnNode& aEventData );
 static void RunFullScreenEffectL(
     CXnUiEngine& aEngine, CXnDomNode& aEventNode );
-static void RunActivateViewL(
-    CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunActivateNextViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunActivatePreviousViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
 static void RunAddViewL( CXnUiEngine& aEngine, CXnDomNode& aEventNode );
@@ -2773,39 +2770,6 @@ static void RunFullScreenEffectL( CXnUiEngine& aEngine, CXnDomNode& aEventNode )
     }
 
 // -----------------------------------------------------------------------------
-// RunActivateViewL
-// -----------------------------------------------------------------------------
-//
-static void RunActivateViewL(
-    CXnNodeImpl* aThis,
-    CXnUiEngine& aEngine,
-    CXnDomNode& aEventNode )
-    {
-    CXnDomList& children( aEventNode.ChildNodes() );
-
-    TInt count( children.Length() );
-
-    for ( TInt i = 0; i < count; ++i )
-        {
-        CXnDomNode* node = static_cast< CXnDomNode* >( children.Item( i ) );
-
-        const TDesC8& type( node->Name() );
-
-        if ( type == XnPropertyNames::action::KProperty )
-            {
-            const TDesC8& id( node->AttributeValue( XnPropertyNames::action::KValue ) );
-
-            CXnNode* viewNode( aEngine.FindNodeByIdL( id, aThis->Namespace() ) );
-
-            if ( viewNode )
-                {
-                aEngine.ActivateViewL( *viewNode );
-                }
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // RunActivateNextViewL
 // -----------------------------------------------------------------------------
 //
@@ -3560,7 +3524,8 @@ static void RunTryDisplayingMenuL( CXnUiEngine& aEngine, CXnDomNode& aEventNode 
 
                     if ( menuIf )
                         {
-                        menuIf->TryDisplayingMenuBarL( *menuId );
+                        aEngine.Editor()->SetTargetPlugin( aEngine.FocusedNode() );
+                        menuIf->TryDisplayingMenuBarL( *menuId, EFalse );
                         }
 
                     CleanupStack::PopAndDestroy( menuId );
@@ -3946,10 +3911,6 @@ static TBool RunEventL(
     else if ( nameString == XnPropertyNames::action::event::KRemoveView )
         {
         RunRemoveViewL( aEngine, aEventNode );
-        }
-    else if ( nameString == XnPropertyNames::action::event::KActivateView )
-        {
-        RunActivateViewL( aThis, aEngine, aEventNode );
         }
     else if ( nameString == XnPropertyNames::action::event::KActivate )
         {

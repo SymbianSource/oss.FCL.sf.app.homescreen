@@ -182,9 +182,11 @@ private:
      * @since S60 5.0
      * @param aContainer Container to activate
      * @param aEnterEditState ETrue if activated container should be set to edit state.
+     * @param aForceActivation if ETrue forces deactivation and then activation even if
+     *        the conntainer remains the same 
      */
     void ActivateContainerL( CXnViewData& aContainer, 
-        TBool aEnterEditState = EFalse );
+        TBool aEnterEditState = EFalse, TBool aForceActivation = EFalse );
 
     /**
      * Deactivates the current container from view.      

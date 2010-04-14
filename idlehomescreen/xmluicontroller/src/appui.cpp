@@ -27,6 +27,7 @@
 #include <aknconsts.h>
 #include <akntitle.h>
 #include <StringLoader.h>
+#include <csxhelp/hmsc.hlp.hrh>
 
 // User includes
 #include <hspublisherinfo.h>
@@ -640,6 +641,32 @@ void CAppUi::SetTitlePaneTextL( const TDesC& aText )
     
     // redraw statuspane
     sp->DrawNow();
+    }
+
+// -----------------------------------------------------------------------------
+// CAppUi::HelpContextL
+// Returns the help context
+// -----------------------------------------------------------------------------
+//
+CArrayFix<TCoeHelpContext>* CAppUi::HelpContextL() const
+    {
+	TUid fwUid = TUid::Uid( AI_UID3_AIFW_COMMON );
+	TCoeContextName helpString;
+	if( iUiCtl.UiEngineL()->IsEditMode()) 
+	    {
+	    helpString.Copy( KSET_HLP_HOME_SCREEN_EDIT );
+	    }
+    else
+	    {
+	    helpString.Copy( KSET_HLP_HOME_SCREEN );
+	    }
+    
+    CArrayFixFlat<TCoeHelpContext>* array =
+                   new( ELeave ) CArrayFixFlat<TCoeHelpContext>( 1 );
+    CleanupStack::PushL( array );
+    array->AppendL( TCoeHelpContext( fwUid, helpString  ) );
+    CleanupStack::Pop( array );
+    return array;
     }
 
 // End of File.

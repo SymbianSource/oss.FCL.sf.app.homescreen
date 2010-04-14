@@ -95,7 +95,6 @@ enum
 // ====================== LOCAL FUNTION PROTOTYPES ============================
 static void DeletePluginInfos( TAny* aObject );
 static void DeleteItemMaps( TAny* aObject );
-static void DeleteWidgetInfo( TAny* aObject );
 
 static TPtrC ParseWidgetName( const CHsContentInfo& aContentInfo );
 static void SetPropertyL( CXnNode& aNode, const TDesC8& aAttribute, 
@@ -129,16 +128,6 @@ static void DeleteItemMaps( TAny* aObject )
     reinterpret_cast<
         RPointerArray< hspswrapper::CItemMap >* >(
             aObject )->ResetAndDestroy();
-    }
-
-// ---------------------------------------------------------------------------
-// DeleteWidgetInfo
-// ---------------------------------------------------------------------------
-// 
-static void DeleteWidgetInfo( TAny* aObject )    
-    {
-    reinterpret_cast<
-        RPointerArray< CHsContentInfo >* >( aObject )->ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
@@ -641,6 +630,7 @@ TInt CXnEditor::IdFromCrep (TDes8& aUid) const
     return iRepository->Get( KAICCPluginUIDKey, aUid );
     }
 
+// ---------------------------------------------------------------------------
 // CXnEditor::AddWidgetL
 // ---------------------------------------------------------------------------
 //
@@ -1050,10 +1040,14 @@ TBool CXnEditor::WidgetsVisible() const
 //
 void CXnEditor::SetTargetPlugin( CXnNode* aNode )
     {
-    iTargetPlugin = aNode;
+    TBool editState( iViewManager.UiEngine().EditMode()->EditState() );
+    
+    if ( editState )
+        {
+        iTargetPlugin = aNode;
+        }    
     }
 
-// ---------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 // CXnEditor::NotifyViewActivatedL
 // -----------------------------------------------------------------------------
@@ -1138,9 +1132,7 @@ void CXnEditor::NotifyConfigureWidgetL( const CHsContentInfo& aContentInfo,
     HBufC8* publisherId = CnvUtfConverter::ConvertFromUnicodeToUtf8L(
         info->PublisherId() );
     CleanupStack::PushL( publisherId );
-
-    aPluginData.SetPublisherNameL( info->PublisherId() );
-
+    
     CItemMap* itemMap( 0 );
     CPropertyMap* property( 0 );
     CPropertyMap* propertyIn( 0 );
@@ -1945,44 +1937,44 @@ TInt CXnEditor::ActiveViewL( CHsContentInfo& aInfo )
     {
 
     TInt err( KErrNone );
-    
-    // Get active application configuration
-    CHspsConfiguration* app( iHspsWrapper->GetAppConfigurationL() );
-    CleanupStack::PushL( app );
-
-    // Get list of views included in active application configuration
-    RPointerArray< CPluginMap >& plugins( app->PluginMaps() );
-    CPluginMap* plugin( NULL );
-    
-    // Find active view
-    for ( TInt i = 0; i < plugins.Count() && !plugin; i++ )
-        {
-        if ( plugins[ i ]->ActivationState() )
-            {
-            plugin = plugins[ i ];
-            }
-        }
-    
-    if ( plugin )
-        {
-        CHspsConfiguration* view( iHspsWrapper->GetPluginConfigurationL( plugin->PluginId() ) );
-        CleanupStack::PushL( view );
         
+    CXnViewData& viewData( iViewManager.ActiveViewData() );
+    
+    CHspsConfiguration* view( iHspsWrapper->GetPluginConfigurationL( viewData.PluginId() ) );
+    CleanupStack::PushL( view );
+    if ( view )
+        {
         aInfo.SetNameL( view->PluginInfo().Name() );
-        aInfo.SetPluginIdL( plugin->PluginId() );
+        aInfo.SetPluginIdL( viewData.PluginId() );
         aInfo.SetUidL( view->PluginInfo().Uid() );
         aInfo.SetTypeL( view->PluginInfo().Type() );
         aInfo.SetDescriptionL( view->PluginInfo().Description() );
         aInfo.SetIconPathL( view->PluginInfo().LogoIcon() );
-        
-        CleanupStack::PopAndDestroy( view );
+
+        // Check if there is empty space
+        RPointerArray< CXnNode > nodes;
+        viewData.PluginNodesL( nodes );
+        TBool isFull( ETrue );
+        for ( TInt i = 0; i < nodes.Count(); i++ )
+            {
+            CXnNode* node( nodes[i] );
+            CXnPluginData* plugin = viewData.Plugin( node );
+
+            if ( plugin && !plugin->Occupied() )
+                {
+                isFull = EFalse;
+                break;
+                }
+            }
+        aInfo.SetIsFull( isFull );
         }
     else
         {
         err = KErrNotFound;
         }
+        
+    CleanupStack::PopAndDestroy( view );
     
-    CleanupStack::PopAndDestroy( app );
     return err;     
     }
 
@@ -1992,7 +1984,7 @@ TInt CXnEditor::ActiveViewL( CHsContentInfo& aInfo )
 //
 TInt CXnEditor::ActiveAppL( CHsContentInfo& aInfo )
     {
-
+    
     TInt err( KErrNone );
     CHspsConfiguration* app = iHspsWrapper->GetAppConfigurationL();
     CleanupStack::PushL( app );
@@ -2004,6 +1996,16 @@ TInt CXnEditor::ActiveAppL( CHsContentInfo& aInfo )
         aInfo.SetTypeL( app->PluginInfo().Type() );
         aInfo.SetDescriptionL( app->PluginInfo().Description() );
         aInfo.SetIconPathL( app->PluginInfo().LogoIcon() );
+
+        CXnRootData& appData( iViewManager.ActiveAppData() );
+        if ( appData.PluginData().Count() < appData.MaxPages() )
+            {
+            aInfo.SetIsFull( EFalse );
+            }
+        else
+            {
+            aInfo.SetIsFull( ETrue );
+            }
         }
     else
         {

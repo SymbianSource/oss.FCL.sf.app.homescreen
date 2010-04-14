@@ -193,7 +193,7 @@ public: // methods to read the content
     inline const CHsContentInfo& HsContentInfo() const;
 
     /** widget name */
-    inline const TDesC& Name() const;
+    const TDesC& Name() const;
 
     /** widget uid */
     inline TUid Uid() const;
@@ -229,7 +229,7 @@ public: // methods to read the content
     void VisualizeUninstallL();
 	
     /** stop uninstallation animation */
-    void StopUninstallAnimationL();
+    void StopUninstallAnimation();
     
 protected: // from MConverterObserver
 

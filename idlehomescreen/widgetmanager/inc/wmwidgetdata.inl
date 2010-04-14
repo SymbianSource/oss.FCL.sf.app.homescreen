@@ -27,10 +27,6 @@
     inline const CHsContentInfo& CWmWidgetData::HsContentInfo() const
         { return *iHsContentInfo; }
 
-    /** widget name */
-    inline const TDesC& CWmWidgetData::Name() const
-        { return iHsContentInfo->Name(); }
-
     /** widget uid */
     inline TUid CWmWidgetData::Uid() const
         { return UidFromString( iHsContentInfo->Uid() ); };

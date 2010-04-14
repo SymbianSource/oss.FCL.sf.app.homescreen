@@ -135,6 +135,12 @@
                     <property name="hs_remove_view"/>
                     <property name="hs_change_wallpaper"/>
                 </menuitemgroup>
+                <menuitemgroup id="ContextMenu/EditMode">
+                    <property name="hs_remove_widget"/>
+                    <property name="hs_widget_settings"/>
+                    <property name="hs_widget_general_1"/>
+                    <property name="hs_widget_general_2"/>
+                </menuitemgroup>                
                 <!-- These items are always shown, if not otherwise changed in the declaration -->
                 <menuitemgroup id="Menu/AlwaysShown">
                     <property name="hs_show_help"/>

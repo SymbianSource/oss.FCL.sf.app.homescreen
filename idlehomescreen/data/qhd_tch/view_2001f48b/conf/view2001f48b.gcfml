@@ -68,7 +68,7 @@
 								<xsl:attribute name="template_id"><xsl:value-of select="TemplateIdentifier"/></xsl:attribute>
 								<xsl:attribute name="locking_status"><xsl:value-of select="LockingStatus"/></xsl:attribute>
 								<xsl:if test="ShortcutWidget = 1">
-								    <intial_settings>
+								    <initial_settings>
 								      <settings>
 								        <xsl:if test="Customize1Shortcut = 1">
 								          <item>
@@ -127,7 +127,7 @@
 								          </item>
 				                </xsl:if>
 				              </settings>
-				            </intial_settings>
+				            </initial_settings>
 			            </xsl:if>
 							</plugin>
 						</xsl:for-each>

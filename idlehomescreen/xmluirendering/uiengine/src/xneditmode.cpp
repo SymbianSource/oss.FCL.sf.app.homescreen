@@ -335,41 +335,51 @@ void CXnEditMode::Draw( const TRect& aRect ) const
 // -----------------------------------------------------------------------------
 //
 void CXnEditMode::MakeVisible( TBool aVisible )
-    {        
-    TBool visible( IsVisible() ? ETrue : EFalse );
+    {                
+    CXnAppUiAdapter& appui( iUiEngine.AppUiAdapter() );
+    CXnViewControlAdapter* control = 
+        static_cast< CXnViewControlAdapter* >(
+            appui.ViewManager().ActiveViewData().ViewNode()->Control() );
+    RWindow& window( Window() );
     
+    TBool visible( IsVisible() ? ETrue : EFalse );
     if ( aVisible == visible )
         {
-        return;
+        if( aVisible )
+            {
+            // If a new Homescreen page has been added in Edit mode, bring the control back to the front       
+            control->DrawableWindow()->SetPointerGrab( EFalse );
+        
+        	window.SetOrdinalPosition( 0 );
+    	    window.SetPointerGrab( ETrue );
+	        window.ClaimPointerGrab();   
+            }
+    
+        return;    
         }
         
     CCoeControl::MakeVisible( aVisible );
-
-    CXnAppUiAdapter& appui( iUiEngine.AppUiAdapter() );
     
     // Remove focus
     appui.HideFocus();
-    
-    CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(
-        appui.ViewManager().ActiveViewData().ViewNode()->Control() );
-            
+                    
     if ( aVisible )
         {
         control->DrawableWindow()->SetPointerGrab( EFalse );
         
-        Window().SetOrdinalPosition( 0 );
-        Window().SetPointerGrab( ETrue );
-        Window().ClaimPointerGrab();      
+        window.SetOrdinalPosition( 0 );
+        window.SetPointerGrab( ETrue );
+        window.ClaimPointerGrab();      
         
         TRAP_IGNORE( appui.HandleEnterEditModeL( ETrue ) );                                
         }
     else
         {
-        Window().SetPointerGrab( EFalse );
+        window.SetPointerGrab( EFalse );
         
         control->DrawableWindow()->SetPointerGrab( ETrue );               
         
-        TRAP_IGNORE( appui.HandleEnterEditModeL( EFalse ) );                                                
+        TRAP_IGNORE( appui.HandleEnterEditModeL( EFalse ) );               
         }
     
     // Update background
@@ -646,7 +656,7 @@ TKeyResponse CXnEditMode::OfferKeyEventL( const TKeyEvent& aKeyEvent,
         CXnNode* focused( iUiEngine.FocusedNode() );
         
         if ( focused && ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-            aKeyEvent.iScanCode == EStdKeyEnter ) )
+            aKeyEvent.iCode == EKeyEnter ) )
             {
             CXnPluginData* plugin( iUiEngine.ViewManager()->
                     ActiveViewData().Plugin( focused ) );
@@ -670,7 +680,7 @@ TKeyResponse CXnEditMode::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                         
                         if ( menuIf )
                             {
-                            menuIf->TryDisplayingMenuBarL( *id );
+                            menuIf->TryDisplayingMenuBarL( *id, ETrue );
                             iUiEngine.Editor()->SetTargetPlugin( focused );
                             }                        
                         }
@@ -831,6 +841,8 @@ void CXnEditMode::SetEditModeL( CXnEditMode::TEditState aState )
         {                
         iDraggingNode = NULL;
         iTargetNode = NULL;
+                
+        iUiEngine.Editor()->SetTargetPlugin( NULL );
         
         iState = aState;
                 

@@ -29,13 +29,13 @@ CHARACTER_SET UTF8
 //d: Displayed in Status Pane.
 //l: title_pane_t2/opt9
 //r: 1.0
-#define qtn_org_root_editing_title "Organizing Menu"
+#define qtn_org_root_editing_title "Editing Menu"
 
 //d: Title of a folder in Edit Mode.
 //d: Displayed in Status Pane. %U is the name of the opened folder.
 //l: title_pane_t2/opt9
 //r: 1.0
-#define qtn_org_folder_editing_title "Organizing %U"
+#define qtn_org_folder_editing_title "Editing %U"
 
 //d: Label of the menu item.
 //d: Opens selected item.

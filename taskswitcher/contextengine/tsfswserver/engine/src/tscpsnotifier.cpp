@@ -18,10 +18,10 @@
 
 #include "tscpsnotifier.h"
 #include "tsfswengine.h"
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
-#include <Liwcommon.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
+#include <liwcommon.h>
 #include <liwcommon.hrh>
 
 _LIT8( KCPService, "Service.ContentPublishing" );

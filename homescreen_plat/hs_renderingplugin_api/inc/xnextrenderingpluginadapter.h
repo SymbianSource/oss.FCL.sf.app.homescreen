@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  External rendering plugin adapter header
+* Description:  External rendering plugin adapter
 *
 */
 
@@ -28,7 +28,12 @@
 class MXnExtEventHandler;
 
 /**
- *  CXnExtRenderingPluginAdapter class
+ *  Base class for the external rendering plug-ins. Widget developer
+ *  can implement own rendering plug-in if stock plug-ins do not
+ *  provide sufficient functionality. Baddly written plug-in can 
+ *  ruin the Homescreen performance as it runs in the Homescreen
+ *  process. Power save mode must be obeyed in order to maximize
+ *  the standby times of the device.
  *
  *
  *  @code
@@ -36,61 +41,72 @@ class MXnExtEventHandler;
  *  @endcode
  *
  *  @lib extrenderingplugin.lib
- *  @since S60 v5.0
+ *  @since S60 v5.2
  */
 class CXnExtRenderingPluginAdapter : public CCoeControl
     {
 public: // Constructor and destructor
     /**
      * Two-phased constructor.
+     *
+     * @since Series 60 5.2
      */
     IMPORT_C static CXnExtRenderingPluginAdapter* NewL( TUid aImplUid );
 
     /**
      * Destructor.
+     *
+     * @since Series 60 5.2
      */
     IMPORT_C virtual ~CXnExtRenderingPluginAdapter();  
-
-private: // Constructors
-    /**
-     * Constructor
-     */
-    // CXnExtRenderingPluginAdapter();
-
-    /** 
-     * Second phase constructor 
-     */
-    // void ConstructL();
 
 public: // New functions,
 
     /**
-     * Returns the implementation uid.
+     * Returns the ECOM implementation uid.
+     *
+     * @since Series 60 5.2
      */
     IMPORT_C TUid ImplUid() const;
 
     /**
-     * Enters power save mode.
+     * Is called when Homescreen enters power save mode.
+     * In power save mode all the timers, outstanding requests and animations
+     * must be cancelled in order to save battery.
+     *
+     * @since Series 60 5.2
      */
     IMPORT_C virtual void EnterPowerSaveModeL();
 
     /**
-     * Exits power save mode.
+     * Is called when Homescreen exists power save mode.
+     *
+     * @since Series 60 5.2
      */    
     IMPORT_C virtual void ExitPowerSaveModeL();
 
     /**
-     * Informs skin change.
+     * Informs skin change. If plug-in is responsible of loading skin
+     * graphics, all the graphics must be reloaded.
+     *
+     * @since Series 60 5.2
      */    
     IMPORT_C virtual void SkinChanged();
     
     /**
-     * Informs focuschange.
+     * Informs that plug-in element has gained a focus and highlight must be
+     * drawn if appropriate.
+     *
+     * @since Series 60 5.2
+     * @param aDrawNow whether plug-in should draw itself.
      */
     IMPORT_C virtual void FocusChanged( TDrawNow aDrawNow );
     
     /**
-     * Informs size change.
+     * Informs that plug-in element size has changed. Size can change if the
+     * plug-in element is declared relatively to parent element.
+     *
+     * @since Series 60 5.2
      */
     IMPORT_C virtual void SizeChanged();
     

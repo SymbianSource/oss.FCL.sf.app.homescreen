@@ -166,6 +166,26 @@ void CWmListItemDrawer::ResizeDefaultBitmaps()
         iDefaultLogoImageMask, size, EAspectRatioPreserved );
     }
 	
+
+// ---------------------------------------------------------
+// CWmListItemDrawer::UpdateItemHeight
+// ---------------------------------------------------------
+//
+void CWmListItemDrawer::UpdateItemHeight()
+    {
+    // sets item height according to layout
+    TAknWindowLineLayout listPane = AknLayoutScalable_Apps
+        ::list_wgtman_pane().LayoutLine();
+    TAknLayoutRect listPaneRect;
+    listPaneRect.LayoutRect( iListBox->Rect(), listPane );
+    TAknWindowLineLayout listRowPane = AknLayoutScalable_Apps
+        ::listrow_wgtman_pane().LayoutLine();
+    TAknLayoutRect listRowPaneRect;
+    listRowPaneRect.LayoutRect( listPaneRect.Rect(), listRowPane );
+    iListBox->View()->SetItemHeight( listRowPaneRect.Rect().Height() );
+    iListBox->View()->ItemDrawer()->SetItemCellSize( listRowPaneRect.Rect().Size() );
+    }
+
 // ---------------------------------------------------------
 // CWmListItemDrawer::DrawItem
 // ---------------------------------------------------------
@@ -571,7 +591,8 @@ void CWmListBox::SizeChanged()
                     static_cast <CWmListItemDrawer*>( iItemDrawer );
     if ( itemDrawer )
         {
-        return itemDrawer->ResizeDefaultBitmaps();
+        itemDrawer->UpdateItemHeight();
+        itemDrawer->ResizeDefaultBitmaps();
         }
     }
 

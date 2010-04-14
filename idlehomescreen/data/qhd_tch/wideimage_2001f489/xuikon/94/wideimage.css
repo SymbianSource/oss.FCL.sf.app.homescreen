@@ -16,7 +16,7 @@ box#default_container
    display: block;
 }
 
-image#default_image
+image#w_default_image
 {
     padding-top:9px;
     padding-bottom:9px;
@@ -26,7 +26,7 @@ image#default_image
     width: 64px;
 }
 
-text#default_text
+text#w_default_text
 {
     padding-left:9px;
     padding-right:9px;

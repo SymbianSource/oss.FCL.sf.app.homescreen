@@ -119,19 +119,19 @@ void CWmInstaller::DoCancel()
 void CWmInstaller::RunL()
     {
     // if error has occurred, stop uninstallation animation.
-    if ( iStatus.Int() != KErrNone )
+    CWmWidgetData* widget = 
+            iWmPlugin.GetUninstalledWidgetByUid( iUid );
+    if ( widget )
         {
-        CWmWidgetData* widget = 
-                iWmPlugin.GetUninstalledWidgetByUid( iUid );
-        if ( widget )
-            {
-            widget->StopUninstallAnimationL();
-            }
-        
-        // display error note
+        widget->StopUninstallAnimation();
+        }
+
+    if ( KErrNone !=  iStatus.Int() )
+        {
+        // display error note incase of error
         CEikonEnv::Static()->HandleError( iStatus.Int() );
         }
-    
+
     // close SWI session
     if ( iIdle && iIdle->IsActive() )
         {
@@ -163,7 +163,14 @@ TInt CWmInstaller::CloseSwiSession( TAny* aPtr )
 // ---------------------------------------------------------
 //
 TInt CWmInstaller::RunError(TInt /*aError*/)
-    {   
+    {
+     // if error has occurred, stop uninstallation animation.
+    CWmWidgetData* widget = 
+            iWmPlugin.GetUninstalledWidgetByUid( iUid );
+    if ( widget )
+        {
+        widget->StopUninstallAnimation();
+        }
     // close SWI session
     if ( iIdle && iIdle->IsActive() )
         {
@@ -193,6 +200,9 @@ void CWmInstaller::UninstallL( CWmWidgetData* aData )
         {
         delete iMime;
         iMime = NULL;
+        CloseSwiSession( this );
+        
+        // re-open session to swi server
         User::LeaveIfError( iInstaller.Connect() );
         iMime = ( ( aData->WrtType() == CWmWidgetData::EWgt ) ?
             KCWrtMime().AllocL() : KWrtMime().AllocL() );

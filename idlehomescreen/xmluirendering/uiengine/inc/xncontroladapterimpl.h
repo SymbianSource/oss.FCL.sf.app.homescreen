@@ -25,9 +25,7 @@
 #include <AknIconUtils.h>
 #include <AknsEffectAnim.h>
 #include <AknsItemID.h>
-
-// User includes
-#include "xngesturehelper.h"
+#include <akntouchgesturefw.h>
 
 // Forward declarations
 class CXnNodePluginIf;
@@ -45,19 +43,7 @@ _LIT8( KMenuBarNode, "menubar" );
 const TInt KSpaceChar = 32;
 const TInt KRightParenthesis = ')';
 
-/**
- * XnGestureHelper namespace
- * Used for the whole gesture family - Gesture recognizer, gesture helper, 
- * Point array
- */
-namespace XnGestureHelper
-    {
-    class CXnGestureHelper;
-    }
-
-using XnGestureHelper::CXnGestureHelper;
-
-
+using namespace AknTouchGestureFw;
 // Class declaration
 
 /**
@@ -68,7 +54,8 @@ using XnGestureHelper::CXnGestureHelper;
 *  @since Series 60 3.1
 */
 NONSHARABLE_CLASS( CXnControlAdapterImpl ) : public CBase, 
-    public MAknsEffectAnimObserver
+    public MAknsEffectAnimObserver,
+    public MAknTouchGestureFwObserver
     {
 public:
     
@@ -444,12 +431,11 @@ public:
         CXnProperty* aProperty );
 
     /**
-     * Forwards event to gesture helper
+     * Sets up gesture on buttondown event
      * 
      * @param aPointerEvent Event to be forwarded
-     * @return ETrue when swipe took place, EFalse otherwise
      */
-    TBool PassEventToGestureHelperL(
+    void InitializeGestureL(
         const TPointerEvent& aPointerEvent );
 
     /*
@@ -463,6 +449,14 @@ public:
      * @return Returns child adapters 
      */
     RPointerArray< CXnControlAdapter >& ChildAdapters();
+
+private: // from MAknTouchGestureFwObserver
+    /**
+     * Implements gesture handling
+     * 
+     * @see MAknTouchGestureFwObserver
+     */
+    void HandleTouchGestureL( MAknTouchGestureFwEvent& aEvent );
 
 protected:
     // New functions
@@ -493,6 +487,7 @@ private:
     void DrawBackgroundImageL( const TRect& aRect, CXnNode& aNode,
         CWindowGc& aGc, CFbsBitmap* aBitmap, CFbsBitmap* aMask );
     RFs& FsSession();
+    TBool IsDragThresholdExceeded( const TPoint& aPoint );
 
 private:
     // Data 
@@ -551,14 +546,16 @@ private:
     TAknsItemID iAnimIID;
     /** flag: skin animation id is resolved from the CSS property */
     TBool iAnimIDResolved;
-    /** pointer to gesturehelper */
-    CXnGestureHelper* iGestureHelper;
     /** flag: for storing blank state */
     TBool iBlank;
     /** flag: to detect whether longtap occured */
     TBool iLongtap;    
-    /** record right softkey node of menubar when keydown event happened */
-    mutable CXnNode* iKeyDownNode;
+    /** Gesture framework, owned. */
+    CAknTouchGestureFw* iGestureFw;
+    /** Gesture destination, Not owned. */        
+    CXnNode* iGestureDestination;
+    /** Starting point of button down event. */        
+    TPoint iButtonDownStartPoint;
     };
 
 #endif //__XNCONTROLADAPTERIMPL_H__

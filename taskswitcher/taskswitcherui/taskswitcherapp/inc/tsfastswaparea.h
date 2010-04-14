@@ -218,6 +218,11 @@ public:
      */
     TPoint ViewPos()const;
     
+    /**
+     * Checks if the app with the given window group id is closing
+     */
+    TBool IsAppClosing( TInt aWgId );
+    
 public:    
     // from CCoeControl    
     TInt CountComponentControls() const;
@@ -268,6 +273,11 @@ private:
      * Creates the ganes grid control.
      */
     void ReCreateGridL();
+    
+    /**
+     * Setup grid layout
+     */
+    void LayoutGridL();
     
     /**
      * Returns rectangles for fast swap area controls
@@ -431,6 +441,7 @@ private: // Data
     // Key event handling
     TBool iConsumeEvent;
     TBool iKeyEvent;
+    RArray<TInt> iIsClosing;
     };
 
 #endif // TSFASTSWAPAREA_H

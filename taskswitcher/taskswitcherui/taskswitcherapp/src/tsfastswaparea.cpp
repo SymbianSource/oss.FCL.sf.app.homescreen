@@ -115,6 +115,7 @@ CTsFastSwapArea::CTsFastSwapArea(CCoeControl& aParent,
 CTsFastSwapArea::~CTsFastSwapArea()
     {
     iArray.ResetAndDestroy();
+    iIsClosing.Close();
     delete iGrid;
     delete iFSClient;
     delete iPopup;
@@ -134,7 +135,7 @@ void CTsFastSwapArea::ConstructL( const TRect& aRect )
 
     SetRect( aRect );
 
-    // setup ganes grid
+    // setup grid
     ReCreateGridL();
 
     // create stylus popup instance
@@ -188,6 +189,44 @@ void CTsFastSwapArea::ReCreateGridL()
     
     AknListBoxLayouts::SetupStandardGrid( *iGrid );
     
+    // Setup layout
+    LayoutGridL();
+    
+    if( wasHighlight )
+        {
+        iGrid->ShowHighlight();
+        }
+    else
+        {
+        iGrid->HideHighlight();
+        }
+    
+    // Setup empty text
+    HBufC* text = StringLoader::LoadLC( R_TS_FSW_NO_APPS );
+    iGrid->SetEmptyGridTextL( *text );
+    CleanupStack::PopAndDestroy( text );
+    
+    // Setup grid observers
+    if ( obs )
+        {
+        iGrid->SetObserver( obs );
+        }
+    iGrid->SetListBoxObserver(this);
+    iGrid->SetFastSwapGridObserver(this);
+    iGrid->SetContainerWindowL(*this);
+	
+    // Make sure that there is an ActivateL call even when we are not
+    // called from ConstructL. (in order to have the grid's parent ptr set properly)
+    ActivateL();
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsFastSwapArea::LayoutGridL
+// --------------------------------------------------------------------------
+//
+void CTsFastSwapArea::LayoutGridL()
+    {
     RArray<TAknLayoutRect> rects;
     CleanupClosePushL(rects);
     rects.ReserveL(KLayoutItemCount);
@@ -222,21 +261,12 @@ void CTsFastSwapArea::ReCreateGridL()
     AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), highlightTextColor,
             KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG11 );
     CFormattedCellListBoxData::TColors colors;
-    colors.iText =  textColor;
+    colors.iText = textColor;
     colors.iBack = iGrid->ItemDrawer()->BackColor();
     colors.iHighlightedText = highlightTextColor;
     colors.iHighlightedBack = iGrid->ItemDrawer()->HighlightedBackColor();
     iGrid->ItemDrawer()->FormattedCellData()->SetSubCellColorsL(1, colors);
     iGrid->SetStrokeColors(textColor, highlightTextColor);
-    
-    // Setup grid observers
-    if ( obs )
-        {
-        iGrid->SetObserver( obs );
-        }
-    iGrid->SetListBoxObserver(this);
-    iGrid->SetFastSwapGridObserver(this);
-    iGrid->SetContainerWindowL(*this);
     
     if ( AknLayoutUtils::LayoutMirrored() )
         {
@@ -258,24 +288,11 @@ void CTsFastSwapArea::ReCreateGridL()
         }
     iGridItemWidth = gridItem.Rect().Width();
     
+    // Update item drawer
+    iGrid->UpdateItemDrawerLayoutDataL();
+    
     // Update state
     HandleDeviceStateChanged( EDeviceType );
-    if( wasHighlight )
-        {
-        iGrid->ShowHighlight();
-        }
-    else
-        {
-        iGrid->HideHighlight();
-        }
-    
-	HBufC* text = StringLoader::LoadLC( R_TS_FSW_NO_APPS );
-	iGrid->SetEmptyGridTextL( *text );
-	CleanupStack::PopAndDestroy( text );
-	
-    // Make sure that there is an ActivateL call even when we are not
-    // called from ConstructL. (in order to have the grid's parent ptr set properly)
-    ActivateL();
     }
 
 
@@ -333,11 +350,11 @@ void CTsFastSwapArea::SizeChanged()
         // data with new layout values
         TInt selIdx = SelectedIndex();
         TRAPD(err, 
-              ReCreateGridL();
-              /*iEvtHandler.ReInitPhysicsL(GridWorldSize(), ViewSize(), ETrue);*/);
+              /*ReCreateGridL()*/
+              LayoutGridL() );
         if ( err != KErrNone )
             {
-            TSLOG1( TSLOG_INFO, "ReCreateGridL leaves with %d", err );
+            TSLOG1( TSLOG_INFO, "LayoutGridL leaves with %d", err );
             }
         HandleFswContentChanged();
         iGrid->SetCurrentDataIndex(selIdx);
@@ -380,6 +397,7 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
     if ( aIndex >= 0 && aIndex < iArray.Count() )
         {
         TInt wgId = iArray[aIndex]->WgId();
+        TUid appUid = iArray[aIndex]->AppUid();
         // Move other app to foreground and then move ourselves to background.
         // Order is important and cannot be reversed.
         iFSClient->SwitchToApp( wgId );
@@ -389,7 +407,7 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
         iIgnoreLayoutSwitch = ETrue;
         CTsAppUi* appui =
             static_cast<CTsAppUi*>( iEikonEnv->AppUi() );
-        appui->MoveAppToBackground( CTsAppUi::EActivationTransition );
+        appui->MoveAppToBackground( CTsAppUi::EActivationTransition, appUid, wgId );
         iIgnoreLayoutSwitch = EFalse;
         
         // Orientation update
@@ -418,6 +436,7 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
             }
         TInt wgId = iArray[aIndex]->WgId();
         iFSClient->CloseApp( wgId );
+        iIsClosing.Append(wgId);
         // The fsw content will change sooner or later
         // but the updated content (without the closed app) will not
         // come very fast. It looks better to the user if the item
@@ -689,9 +708,9 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
         }
     
     // refresh the items in the grid
-    iGrid->HandleItemAdditionL();
     iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
     UpdateGrid( ETrue, !aSuppressAnimation );
+    iGrid->HandleItemAdditionL();
     
     TSLOG_OUT();
     }
@@ -753,6 +772,11 @@ void CTsFastSwapArea::HandleSwitchToBackgroundEvent()
     {
     // stop listening for changes in fsw content
     iFSClient->CancelSubscribe();
+    // Hide highlight
+    if ( iGrid->GridBehaviour() == CTsFastSwapGrid::ETouchOnly )
+        {
+        iGrid->HideHighlight();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -764,8 +788,20 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     TSLOG_CONTEXT( CTsFastSwapArea::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
     TSLOG_IN();
     
+    iIsClosing.Reset();
+    
+    CTsGridItemDrawer* itemDrawer =
+        static_cast<CTsGridItemDrawer*>( iGrid->ItemDrawer() );
+    itemDrawer->SetRedrawBackground(ETrue);
+    
+    // Update Layout
+    CTsAppUi* appUi = static_cast<CTsAppUi*>(iEikonEnv->AppUi());
+    if ( appUi && appUi->EffectsEnabled() )
+        {
+        TRAP_IGNORE( LayoutGridL() );
+        }
+    
     // Reset grid
-    TRAP_IGNORE( ReCreateGridL() );
     if ( iDeviceState.DeviceType() == CTsDeviceState::EFullTouch )
         {
         iGrid->HideHighlight();
@@ -785,6 +821,8 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     
     iRedrawTimer->Cancel();
     iRedrawTimer->After(KRedrawTime);
+    
+    itemDrawer->SetRedrawBackground(EFalse);
     
     // give feedback
     LaunchPopupFeedback();
@@ -923,6 +961,9 @@ void CTsFastSwapArea::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     if(aPointerEvent.iType == TPointerEvent::EButton1Down)
         {
         iTapEvent = aPointerEvent;
+        iGrid->EnableAknEventHandling(EFalse);
+        iGrid->HandlePointerEventL(aPointerEvent);
+        iGrid->EnableAknEventHandling(ETrue);
         }
     }
 
@@ -1667,6 +1708,26 @@ TInt CTsFastSwapArea::GetCurrentScreenOrientation()
     TPixelsAndRotation availableRect;
     iEikonEnv->ScreenDevice()->GetDefaultScreenSizeAndRotation(availableRect);
     return availableRect.iPixelSize.iWidth > availableRect.iPixelSize.iHeight;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::IsAppClosing
+// -----------------------------------------------------------------------------
+//
+TBool CTsFastSwapArea::IsAppClosing( TInt aWgId )
+    {
+    TBool retVal(EFalse);
+    if ( iIsClosing.Count() )
+        {
+        TInt idx = iIsClosing.Find(aWgId);
+        retVal = idx != KErrNotFound;
+        if ( retVal )
+            {
+            iIsClosing.Remove(idx);
+            }
+        }
+    return retVal;
     }
 
 // End of file

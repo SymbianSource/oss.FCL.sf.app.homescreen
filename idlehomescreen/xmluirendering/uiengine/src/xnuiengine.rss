@@ -185,4 +185,24 @@ RESOURCE TBUF r_qtn_hs_operation_failed_no_disk
     buf = qtn_hs_operation_failed_no_disk; 
     }
 
+RESOURCE DIALOG r_backup_restore_wait_dialog
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_hs_backup_use_prevented;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+
 // End of file

@@ -75,6 +75,11 @@ public:
     void ResizeDefaultBitmaps();
     
     /**
+     * sets item height according to layout 
+     */
+    void UpdateItemHeight();
+    
+    /**
      * Responds to skin changed event.
      */
     void HandleSkinChanged();
