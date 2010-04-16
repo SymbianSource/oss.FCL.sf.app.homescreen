@@ -27,6 +27,8 @@ inline const QString collectionTypeName();
 inline const QString collectionDownloadedTypeName();
 inline const QString menuCollectionsTypeName();
 inline const QString widgetTypeName();
+inline const QString templatedApplicationTypeName();
+inline const QString widgetParam();
 inline const QString openActionIdentifier();
 inline const QString removeActionIdentifier();
 inline const QString itemIdKey();
@@ -53,6 +55,13 @@ enum HsMenuMode {
     NormalHsMenuMode,
     AddHsMenuMode
 };
+
+const int taskSwitcherUid  = 0x2002677D;
+const int taskSwitcherPropertyValue = 1;
+
+const char LIBRARY[] = "library";
+const char URI[] = "uri";
+const char PREFERENCES[] = "preferences";
 
 #include "hsapp_defs.inl"
 

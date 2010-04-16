@@ -29,6 +29,8 @@ data=\epoc32\data\z\resource\qt\plugins\tsserviceplugin.qtplugin    resource\qt\
 file=ABI_DIR\BUILD_DIR\tsdefaultruntimeplugin.dll					       SHARED_LIB_DIR\tsdefaultruntimeplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\tsdefaultruntimeplugin.qtplugin    resource\qt\plugins\tsdefaultruntimeplugin.qtplugin
 
+data=\epoc32\data\z\resource\qt\crml\tsexternalactivation.qcrml             resource\qt\crml\tsexternalactivation.qcrml
+
 // stub sis
 data=ZSYSTEM/install/taskswitcher_stub.sis                  system/install/taskswitcher_stub.sis
 

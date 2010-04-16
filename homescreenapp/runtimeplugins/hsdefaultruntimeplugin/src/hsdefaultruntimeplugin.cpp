@@ -33,7 +33,7 @@ QObject *HsDefaultRuntimePlugin::createInstance(const QServiceInterfaceDescripto
     Q_UNUSED(context);
     Q_UNUSED(session);
 
-    if (descriptor.interfaceName() == QLatin1String("com.nokia.homescreen.runtime.HsRuntime")) {
+    if (descriptor.interfaceName() == QLatin1String("com.nokia.symbian.IHomeScreenRuntime")) {
         return new HsDefaultRuntime(this);
     } else {
         return 0;

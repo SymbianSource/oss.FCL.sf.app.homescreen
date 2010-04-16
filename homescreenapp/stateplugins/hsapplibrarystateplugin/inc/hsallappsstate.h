@@ -86,6 +86,8 @@ public slots:
 
 private slots:
 
+    bool openTaskSwitcher();
+
     /**
      * Slot connected to List widget in normal mode.
      *

@@ -24,7 +24,7 @@
 
 #include <HbWidget>
 
-#include "hswidgetdata.h"
+#include "hsdomainmodeldatastructures.h"
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
@@ -40,8 +40,19 @@ class HSDOMAINMODEL_EXPORT HsWidgetHost : public HbWidget
     Q_OBJECT
 
 public:
-    static HsWidgetHost *createInstance(const HsWidgetData &widgetData, 
-                                        const QVariantMap &preferences = QVariantMap());
+    enum State {
+        Constructed,
+        Initialized,
+        Visible,
+        Hidden,
+        Uninitialized,
+        Finished,
+        Faulted
+    };
+
+public:
+    static HsWidgetHost *createInstance(HsWidgetData &widgetData, 
+                                        const QVariantHash &preferences = QVariantHash());
 
     HsWidgetHost(int databaseId, QGraphicsItem *parent = 0);
     
@@ -55,6 +66,8 @@ public:
     bool isValid() const;
 
     int databaseId() const;
+
+    State state() const { return mState; }
 
     bool deleteFromDatabase();
     
@@ -102,6 +115,7 @@ private:
     QMetaMethod mOnHideMethod;
     QMetaMethod mOnUninitializeMethod;
     QMetaProperty mIsOnlineProperty;
+    State mState;
     
     int mDatabaseId;
     QString mUri;

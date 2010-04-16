@@ -81,22 +81,11 @@ private:
      */
     void construct();
 
-    /*
-     * Fulfills collection list.
-     */
-    void fulfillEntriesList();
+    void fulfillEntriesList(HbListWidget& listWidget);
 
-    /**
-     * Appends new order of items to ids list.
-     */
-    void getArrangedEntriesIds();
+    void getArrangedEntriesIds(const HbListWidget& listWidget);
 
-    /**
-     * Saves data in content arsenal(selected applications in collection).
-     *
-     * @since S60 ?S60_version.
-     */
-    void save();
+    void save(const HbListWidget& listWidget);
 
 private:
 
@@ -134,6 +123,8 @@ private:
      * Collection list.
      */
     QList<int> mArrangedCollIdList;
+    
+    QObjectList mObjectList;
 
 };
 

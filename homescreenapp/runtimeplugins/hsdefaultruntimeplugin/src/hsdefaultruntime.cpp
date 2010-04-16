@@ -29,6 +29,7 @@
 
 #include "homescreendomainpskeys.h"
 #include "hsdefaultruntime.h"
+#include "hsdatabase.h"
 #include "hscontentservice.h"
 #include "hsshortcutservice.h"
 #include "hsmenueventtransition.h"
@@ -62,9 +63,20 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     : QStateMachine(parent),
       mContentService(0),	  
 	  mHomeScreenActive(false),
-	  mIdleStateActive(false)
+	  mIdleStateActive(false),
+	  mPublisher(NULL)
 {
     HSTEST_FUNC_ENTRY("HS::HsDefaultRuntime::HsDefaultRuntime");
+
+    HsDatabase *db = new HsDatabase;
+    db->setConnectionName("homescreen.dbc");
+#ifdef Q_OS_SYMBIAN
+    db->setDatabaseName("c:/private/20022f35/homescreen.db");
+#else
+    db->setDatabaseName("homescreen.db");
+#endif    
+    db->open();
+    HsDatabase::setInstance(db);
 
     HsWidgetPositioningOnOrientationChange::setInstance(
         new HsAdvancedWidgetPositioningOnOrientationChange);
@@ -72,6 +84,7 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
 
+    createStatePublisher();
     createContentServiceParts();
     createStates();
     assignServices();
@@ -86,6 +99,7 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 HsDefaultRuntime::~HsDefaultRuntime()
 {
     HsWidgetPositioningOnOrientationChange::setInstance(0);
+	delete mPublisher;
 }
 
 /*!
@@ -121,6 +135,21 @@ bool HsDefaultRuntime::eventFilter(QObject *watched, QEvent *event)
 }
 
 /*!
+    Creates Home screen state publisher.
+*/
+void HsDefaultRuntime::createStatePublisher()
+{
+    mPublisher = new QValueSpacePublisher(QValueSpace::PermanentLayer, HsStatePSKeyPath);
+
+    if (!mPublisher->isConnected()){
+    	// No permanent layer available
+    	mPublisher = new QValueSpacePublisher(HsStatePSKeyPath);
+    }
+
+    mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenInactive);
+}
+
+/*!
     Creates content service parts.
 */
 void HsDefaultRuntime::createContentServiceParts()
@@ -147,20 +176,24 @@ void HsDefaultRuntime::createStates()
 
     guiRootState->addTransition(this, SIGNAL(event_exit()), finalState);
 
-    // Workaround to QtSF bug. Create in stack after the bug is fixed.
-    QServiceManager *manager = new QServiceManager(this);
+    QServiceManager manager;
+
     QServiceFilter filter;
 
     filter.setInterface("com.nokia.homescreen.state.HsLoadSceneState");
-    QList<QServiceInterfaceDescriptor> interfaces = manager->findInterfaces(filter);
-    QObject *loadSceneStateObj = manager->loadInterface(interfaces.first().interfaceName());
+#ifdef HSDEFAULTRUNTIMEPLUGIN_UNITTEST
+    filter.setServiceName("mockstateplugins");
+#endif    
+    QList<QServiceInterfaceDescriptor> interfaces = manager.findInterfaces(filter);
+
+    QObject *loadSceneStateObj = manager.loadInterface(interfaces.first());
     QState *loadSceneState = qobject_cast<QState *>(loadSceneStateObj);
     loadSceneState->setParent(guiRootState);
     loadSceneState->setObjectName(interfaces.first().interfaceName());
 
     filter.setInterface("com.nokia.homescreen.state.HsIdleState");
-    interfaces = manager->findInterfaces(filter);
-    QObject *idleStateObj = manager->loadInterface(interfaces.first().interfaceName());
+    interfaces = manager.findInterfaces(filter);
+    QObject *idleStateObj = manager.loadInterface(interfaces.first());
     QState *idleState = qobject_cast<QState *>(idleStateObj);
     idleState->setParent(guiRootState);
     idleState->setObjectName(interfaces.first().interfaceName());
@@ -176,16 +209,16 @@ void HsDefaultRuntime::createStates()
     QState *menuRootState = new QState(menuParallelState);
 
     filter.setInterface("com.nokia.homescreen.state.HsAppLibraryState");
-    interfaces = manager->findInterfaces(filter);
-    QObject *appLibraryStateObj = manager->loadInterface(interfaces.first().interfaceName());
+    interfaces = manager.findInterfaces(filter);
+    QObject *appLibraryStateObj = manager.loadInterface(interfaces.first());
     QState *appLibraryState = qobject_cast<QState *>(appLibraryStateObj);
     appLibraryState->setParent(menuRootState);
     appLibraryState->setObjectName(interfaces.first().interfaceName());
     menuRootState->setInitialState(appLibraryState);
 
     filter.setInterface("com.nokia.homescreen.state.HsMenuWorkerState");
-    interfaces = manager->findInterfaces(filter);
-    QObject *menuWorkerStateObj = manager->loadInterface(interfaces.first().interfaceName());
+    interfaces = manager.findInterfaces(filter);
+    QObject *menuWorkerStateObj = manager.loadInterface(interfaces.first());
     QState *menuWorkerState = qobject_cast<QState *>(menuWorkerStateObj);
     menuWorkerState->setParent(menuParallelState);
     menuWorkerState->setObjectName(interfaces.first().interfaceName());
@@ -205,7 +238,7 @@ void HsDefaultRuntime::createStates()
             HsMenuEvent::OpenHomeScreen, appLibraryState, idleState);
     appLibraryState->addTransition(appLibToIdleTransition);
 
-    HbMainWindow *window = hbInstance->allMainWindows().at(0);
+    HbMainWindow *window = hbInstance->allMainWindows().first();
 
     // key driven transition from idle to menu
     QKeyEventTransition *idleToMenuRootTransition =
@@ -270,24 +303,26 @@ void HsDefaultRuntime::assignServices()
 }
 
 /*!
-    
+    Publishes Home screen states via Publish & Subscribe.
 */
 void HsDefaultRuntime::updatePSKeys()
-{
-	QValueSpacePublisher publisher(HsStatePSKeyPath);   
-    		
-    if (mHomeScreenActive && mIdleStateActive){
+{	
+	if (!mPublisher){
+		createStatePublisher();
+	}
+
+	if (mHomeScreenActive && mIdleStateActive){
     	qDebug() << "HsDefaultRuntime::updatePSKeys: EHomeScreenIdleState";
-    	publisher.setValue(HsStatePSKeySubPath, EHomeScreenIdleState);
+    	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenIdleState);
     }
     else{
     	qDebug() << "HsDefaultRuntime::updatePSKeys: EHomeScreenInactive";
-    	publisher.setValue(HsStatePSKeySubPath, EHomeScreenInactive);
-    }    
+    	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenInactive);
+    }	
 }
 
 /*!
-    
+    Called when state machine is in Idle state.
 */
 void HsDefaultRuntime::onIdleStateEntered()
 {
@@ -296,7 +331,7 @@ void HsDefaultRuntime::onIdleStateEntered()
 }
 
 /*!
-    
+    Called when state machine leaves the Idle state.
 */
 void HsDefaultRuntime::onIdleStateExited()
 {

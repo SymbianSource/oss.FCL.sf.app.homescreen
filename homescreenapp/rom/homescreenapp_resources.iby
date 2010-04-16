@@ -14,8 +14,8 @@
 * Description:
 *
 */
-#ifndef __HOMESCREENAPP_LANGUAGE_IBY__
-#define __HOMESCREENAPP_LANGUAGE_IBY__
+#ifndef __HOMESCREENAPP_RESOURCE_IBY__
+#define __HOMESCREENAPP_RESOURCE_IBY__
 
 #include <data_caging_paths_for_iby.hrh> 
 

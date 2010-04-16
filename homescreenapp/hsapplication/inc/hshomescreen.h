@@ -20,10 +20,19 @@
 
 #include <QObject>
 #include "hstest_global.h"
+#ifdef Q_OS_SYMBIAN
+#include "hshomescreenclientserviceprovider.h"
+#endif
 
 HOMESCREEN_TEST_CLASS(t_hsapplication)
 
 class QStateMachine;
+
+namespace QtMobility {
+    class QServiceManager;
+}
+using QtMobility::QServiceManager;
+
 
 class HsHomeScreen : public QObject
 {
@@ -44,8 +53,8 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
-    void registerServicePlugins();
-    void registerServicePlugins(const QString &root);
+    void registerServicePlugins(QServiceManager &serviceManager);
+    void registerServicePlugins(const QString &root, QServiceManager &serviceManager);
 
 private slots:
     void onRuntimeStarted();
@@ -56,7 +65,10 @@ private:
 
 private:
     QStateMachine *mRuntime;
-
+#ifdef Q_OS_SYMBIAN
+    //Service provider for QtHighway 
+    HsHomeScreenClientServiceProvider *mHomeScreenClientServiceProvider;
+#endif
     HOMESCREEN_TEST_FRIEND_CLASS(t_hsapplication)
 };
 

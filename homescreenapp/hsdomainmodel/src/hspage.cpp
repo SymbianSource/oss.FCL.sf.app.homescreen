@@ -16,16 +16,15 @@
 */
 
 #include <QPainter>
+#include <QRectF>
 #include <QGraphicsLinearLayout>
 #include <HbInstance>
 
+#include "hsdomainmodeldatastructures.h"
 #include "hspage.h"
 #include "hsscene.h"
 #include "hsdatabase.h"
 #include "hswidgethost.h"
-#include "hswidgetdata.h"
-#include "hswidgetpresentationdata.h"
-#include "hspagedata.h"
 #include "hswallpaper.h"
 #include "hswidgetpositioningonwidgetadd.h"
 
@@ -51,6 +50,9 @@ HsPage::HsPage(QGraphicsItem* parent)
     setFlag(QGraphicsItem::ItemHasNoContents);
     setSizePolicy(QSizePolicy(QSizePolicy::Ignored, 
                               QSizePolicy::Ignored));
+                              
+    mStartPoint["portrait"] = QPointF();                              
+    mStartPoint["landscape"] = QPointF();                              
 }
 
 /*!
@@ -81,35 +83,31 @@ void HsPage::setDatabaseId(int id)
 */
 bool HsPage::load()
 {
-    HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
-
-    HsPageData pageData;
-    if (!db->page(mDatabaseId, pageData, true)) {
+    if (mDatabaseId < 0) {
         return false;
     }
 
-    QList<HsWidgetData> widgetDatas = pageData.widgets();
-    foreach (HsWidgetData widgetData, widgetDatas) {
-        HsWidgetHost *widget = new HsWidgetHost(widgetData.id());
-        connectWidget(widget);
-        widget->load();
-
-		if (!widget->isValid()) {
-			qDebug() << "HsPage: Widget loading failed.";
-			continue;
-		}
-
-        widget->setPage(this);
-        mWidgets << widget;
+    HsDatabase *db = HsDatabase::instance();
+    
+    QList<HsWidgetData> datas;
+    if (!db->widgets(mDatabaseId, datas)) {
+        return false;
     }
 
-    foreach (HsWidgetHost *widget, mWidgets) {
+    foreach (HsWidgetData data, datas) {
+        QScopedPointer<HsWidgetHost> widget(new HsWidgetHost(data.id));
+        if(!widget->load() || !widget->isValid()) {
+            continue;
+		}
+        connectWidget(widget.data());
+        widget->setPage(this);
         widget->initializeWidget();
         widget->showWidget();
+        mWidgets.append(widget.data());
         widget->setParentItem(this);
+        widget.take(); // now this page owns widget
     }
-    
+
     return true;    
 }
 
@@ -171,17 +169,16 @@ bool HsPage::addNewWidget(HsWidgetHost* widgetHost)
 
     HsWidgetPresentationData presentation;
     if (!widgetHost->widgetPresentationData(key, presentation)) {
-        presentation.setKey(key);
-        presentation.setPosition(QPointF());
+        presentation.key = key;
+        presentation.setPos(QPointF());
         presentation.setSize(widgetHost->preferredSize());
-        presentation.setZValue(0);       
+        presentation.zValue = 0;
         widgetHost->setWidgetPresentationData(presentation);
     }
 
     widgetHost->hide();
-    widgetHost->setGeometry(QRectF(presentation.position(), 
-                                   presentation.size()));
-    widgetHost->setZValue(presentation.zValue());   
+    widgetHost->setGeometry(presentation.geometry());
+    widgetHost->setZValue(presentation.zValue);
     
     connectWidget(widgetHost);
     mNewWidgets << widgetHost;
@@ -194,29 +191,39 @@ bool HsPage::addNewWidget(HsWidgetHost* widgetHost)
 */
 void HsPage::layoutNewWidgets()
 {
-    QList<QRectF> oldWidgetGeometries;
-
-    foreach(HsWidgetHost *widget, mNewWidgets) {
-        oldWidgetGeometries << widget->rect();
+    if (mNewWidgets.isEmpty()) {
+        return;
     }
+    
+    QString key = HsScene::orientation() == Qt::Horizontal ? 
+        "landscape" : "portrait";
 
-    QList<QRectF> newWidgetGeometries = 
-        HsWidgetPositioningOnWidgetAdd::instance()->convert(
-        rect().adjusted(10, 10, -10, -10),
-        oldWidgetGeometries);
+    QList<QRectF> rects;
 
+    foreach (HsWidgetHost *newWidget, mNewWidgets) {
+        rects << newWidget->rect();
+    }
+    
+    HsWidgetPositioningOnWidgetAdd *algorithm = 
+        HsWidgetPositioningOnWidgetAdd::instance();
+   
+    QList<QRectF> calculatedRects = 
+        algorithm->convert(HsScene::mainWindow()->layoutRect(), rects, mStartPoint[key]);
+    
     updateZValues();
 
-    HsWidgetHost *widget = NULL;
-    for(int i = 0; i < mNewWidgets.count(); ++i) {  
-        widget = mNewWidgets[i];
-        widget->setGeometry(newWidgetGeometries[i]);
+    HsWidgetHost *widget = 0;
+    for (int i = 0; i < mNewWidgets.count(); ++i) {
+        widget = mNewWidgets.at(i);
+        widget->setGeometry(calculatedRects.at(i));
         widget->setWidgetPresentation();
         widget->setPage(this);
         widget->setParentItem(this);
         widget->show();
-        mWidgets << widget;
     }
+    mStartPoint[key] = widget->geometry().bottomRight();
+    mWidgets << mNewWidgets;
+    mNewWidgets.clear();
 }
 
 /*!
@@ -229,24 +236,18 @@ void HsPage::resetNewWidgets()
 
 bool HsPage::deleteFromDatabase()
 {
-    HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
-
-    db->transaction();
-
+    HsDatabase *db = HsDatabase::instance();    
+    
     foreach (HsWidgetHost *widget, mWidgets) {
-        if (!widget->deleteFromDatabase()) {
-            db->rollback();
+        if (!widget->deleteFromDatabase()) {            
             return false;
         }
     }
 
     if (!db->deletePage(mDatabaseId))  {
-        db->rollback();
         return false;
     }
 
-    db->commit();
     return true;
 }
 
@@ -274,39 +275,79 @@ void HsPage::setRemovable(bool removable)
 
 bool HsPage::updateZValues()
 {
-    if (mWidgets.isEmpty()) {
-        return true;
-    }
-    
-    QMultiMap<qreal, HsWidgetHost *> map;
-    foreach (HsWidgetHost *widget, mWidgets) {
-        map.insert(widget->zValue(), widget);
-    }
-    
-    QList<HsWidgetHost *> sortedWidgets = map.values();
-            
-    HsWidgetHost *activeWidget = HsScene::instance()->activeWidget();    
-    if (sortedWidgets.contains(activeWidget)) {
-        sortedWidgets.removeOne(activeWidget);
-        sortedWidgets.append(activeWidget);        
-    }
-
     int z = 0;
-    foreach (HsWidgetHost *widget, sortedWidgets) {
-        widget->setZValue(z++);
-        widget->setWidgetPresentation();
+
+    if (!mWidgets.isEmpty()) {
+        QMultiMap<qreal, HsWidgetHost *> map;
+        foreach (HsWidgetHost *widget, mWidgets) {
+            map.insert(widget->zValue(), widget);
+        }
+        
+        QList<HsWidgetHost *> sortedWidgets = map.values();
+                
+        HsWidgetHost *activeWidget = HsScene::instance()->activeWidget();    
+        if (sortedWidgets.contains(activeWidget)) {
+            sortedWidgets.removeOne(activeWidget);
+            sortedWidgets.append(activeWidget);        
+        }
+        
+        foreach (HsWidgetHost *widget, sortedWidgets) {
+            widget->setZValue(z++);
+            widget->setWidgetPresentation();
+        }
     }
 
-    foreach (HsWidgetHost *widget, mNewWidgets) {
-        widget->setZValue(z++);
-        widget->setWidgetPresentation();
+    if (!mNewWidgets.isEmpty()) {
+        foreach (HsWidgetHost *widget, mNewWidgets) {
+            widget->setZValue(z++);
+            widget->setWidgetPresentation();
+        }
     }
 
     return true;
 }
+
+HsPage *HsPage::createInstance(const HsPageData &pageData)
+{
+    HsDatabase *db = HsDatabase::instance();
+    Q_ASSERT(db);
+    
+    HsPageData data(pageData);    
+    if (db->insertPage(data)) {
+        HsPage *page = new HsPage;
+        page->setDatabaseId(data.id);
+        return page;
+    }
+
+    return 0;
+}
+
+/*!
+    Calls onShow() for contained widgets.
+*/
+void HsPage::showWidgets()
+{
+    foreach (HsWidgetHost *widget, mWidgets) {
+        if (widget->parentItem() == this) {
+            widget->showWidget();
+        }
+    }
+}
+ 
+/*!
+    Calls onHide() for contained widgets.
+*/
+void HsPage::hideWidgets()
+{
+    foreach (HsWidgetHost *widget, mWidgets) {
+        if (widget->parentItem() == this) {
+            widget->hideWidget();
+        }
+    }
+}
+
 /*!
     Propogate online state to widgets.
-
 */
 void HsPage::setOnline(bool online)
 {
@@ -316,21 +357,6 @@ void HsPage::setOnline(bool online)
     foreach (HsWidgetHost *widget, mWidgets) {
         widget->setOnline(online);
     }
-}
-
-HsPage *HsPage::createInstance(const HsPageData &pageData)
-{
-    HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
-    
-    HsPageData data(pageData);    
-    if (!db->insertPage(data)) {
-        return 0;
-    }
-
-    HsPage *page = new HsPage;
-    page->setDatabaseId(data.id());
-    return page;
 }
 
 void HsPage::connectWidget(HsWidgetHost *widget)
@@ -346,14 +372,13 @@ void HsPage::disconnectWidget(HsWidgetHost *widget)
 
 void HsPage::onWidgetFinished(HsWidgetHost *widget)
 {
-    if (mNewWidgets.contains(widget)) {
-        mNewWidgets.removeOne(widget);
-    } else if (mWidgets.contains(widget)) {
-        mWidgets.removeOne(widget);        
-    } else {
-        return;
+    Q_ASSERT(widget);
+    // It can be in new widget list if we haven't layouted it yet
+    // or layouted new widget and widget list
+    if (!mNewWidgets.removeOne(widget)) {
+        mWidgets.removeOne(widget);
     }
-
+   
     disconnectWidget(widget);
     widget->uninitializeWidget();
     widget->deleteFromDatabase();

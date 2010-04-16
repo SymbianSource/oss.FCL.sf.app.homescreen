@@ -19,13 +19,13 @@
 #include "hsshortcutservice.h"
 #include "hsshortcutservice_p.h"
 #include "hsdatabase.h"
-#include "hswidgetdata.h"
+#include "hsdomainmodeldatastructures.h"
 #include "hsmenueventfactory.h"
 
 namespace
 {
-    const char SHORTCUT_ID[] = "mcsId";
-    const char SHORTCUT_WIDGET_URI[] = "hsshortcutwidgetplugin";
+    const char gShortcutId[]        = "mcsId";
+    const char gShortcutWidgetUri[] = "hsshortcutwidgetplugin";
 }
 
 HsShortcutServicePrivate::HsShortcutServicePrivate(QStateMachine *stateMachine, QObject *parent)
@@ -52,12 +52,12 @@ bool HsShortcutServicePrivate::isItemShortcutWidget(int itemId)
     HsDatabase *db = HsDatabase::instance();
     Q_ASSERT(db);
 
-	QList<int> ids;
-	if (db->widgetIds(SHORTCUT_WIDGET_URI, ids)) {
-		for (int i = 0; i < ids.count(); ++i) {
-            QString id;
-            if (db->widgetPreferenceForKey(ids.at(i), SHORTCUT_ID, id) 
-				&& id.toInt() == itemId) {
+	QList<HsWidgetData> widgetDatas;
+	if (db->widgets(gShortcutWidgetUri, widgetDatas)) {
+        for (int i = 0; i < widgetDatas.count(); ++i) {
+            QVariant id;
+            if (db->widgetPreference(widgetDatas.at(i).id, gShortcutId, id) && 
+                id.toInt() == itemId) {
                 return true;
             }
         }

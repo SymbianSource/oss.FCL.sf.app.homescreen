@@ -15,12 +15,13 @@
 *
 */
 
+#include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsLinearLayout>
 #include <QDir>
 
 #include <HbMainWindow>
-#include <HbInputMethod>
+#include <HbVkbHost>
 
 #include "hsidlewidget.h"
 #include "hsscene.h"
@@ -30,13 +31,14 @@
 #include "hstrashbinwidget.h"
 #include "hspageindicator.h"
 #include "hsdocumentloader.h"
+#include "hshomescreenstatecommon.h"
 
 namespace
 {
-    const char CONTROL_LAYER_DOCML_FILE[] = "controllayer.docml";
-    const char CONTROL_LAYER[] = "controlLayer";
-    const char TRASH_BIN[] = "trashBin";
-    const char PAGE_INDICATOR[] = "pageIndicator";
+    const char gControlLayerDocmlName[] = "controllayer.docml";
+    const char gControlLayerName[]      = "controlLayer";
+    const char gTrashBinName[]          = "trashBin";
+    const char gPageIndicatorName[]     = "pageIndicator";
 }
 
 /*!
@@ -109,7 +111,7 @@ void HsIdleWidget::setGeometry(const QRectF &rect)
     int n = HsScene::instance()->pages().count();
     mControlLayer->resize(rect.size());
     mPageLayer->resize(n * rect.width(), rect.height());
-    mSceneLayer->resize(2 * rect.width(), rect.height());
+    mSceneLayer->resize(2 * rect.width() + HSBOUNDARYEFFECT, rect.height());
     HbWidget::setGeometry(rect);
 }
 
@@ -153,7 +155,7 @@ void HsIdleWidget::clearDelayedPress()
 */
 void HsIdleWidget::setActivePage(int index)
 {
-    mPageIndicator->setCurrentIndex(index);
+    mPageIndicator->setActiveItemIndex(index);
 }
 
 /*!
@@ -265,8 +267,7 @@ bool HsIdleWidget::eventFilter(QObject *object, QEvent *event)
 {
     Q_UNUSED(object)
 
-    if (HbInputMethod::activeInputMethod() &&
-        HbInputMethod::activeInputMethod()->focusObject()) {
+    if (HbVkbHost::activeVkbHost()) {
         setFiltersChildEvents(false);
         return false;
     }
@@ -338,8 +339,7 @@ void HsIdleWidget::polishEvent()
     HsWallpaper *wallpaper = HsScene::instance()->wallpaper();
     layout->addItem(wallpaper);
            
-    mPageIndicator->setItemCount(pages.count());
-    setActivePage(scene->activePageIndex());
+    mPageIndicator->initialize(pages.count(), scene->activePageIndex());    
     showPageIndicator();
 
     HsScene::mainWindow()->scene()->installEventFilter(this);
@@ -359,8 +359,8 @@ void HsIdleWidget::loadControlLayer()
     QString path = "c:";
 #endif
 
-    QString file = path + "/hsresources/" + CONTROL_LAYER_DOCML_FILE;
-    QString fallbackPath = QString(":/") + CONTROL_LAYER_DOCML_FILE;
+    QString file = path + "/hsresources/" + gControlLayerDocmlName;
+    QString fallbackPath = QString(":/") + gControlLayerDocmlName;
 
     if (QFile::exists(file)) {
         loader.load(file, &loaded);
@@ -372,14 +372,14 @@ void HsIdleWidget::loadControlLayer()
     }
 
     if (loaded) {
-        mControlLayer = qobject_cast<HbWidget *>(loader.findWidget(CONTROL_LAYER));
+        mControlLayer = qobject_cast<HbWidget *>(loader.findWidget(gControlLayerName));
         mControlLayer->setZValue(2);
         mControlLayer->setParentItem(this);
 
-        mTrashBin = qobject_cast<HsTrashBinWidget *>(loader.findWidget(TRASH_BIN));
+        mTrashBin = qobject_cast<HsTrashBinWidget *>(loader.findWidget(gTrashBinName));
         mTrashBin->setZValue(1e6);
 
-        mPageIndicator = qobject_cast<HsPageIndicator *>(loader.findWidget(PAGE_INDICATOR));
+        mPageIndicator = qobject_cast<HsPageIndicator *>(loader.findWidget(gPageIndicatorName));
         mPageIndicator->setZValue(1e6);
     } else {
         // TODO: Handle error.
@@ -393,18 +393,33 @@ void HsIdleWidget::loadControlLayer()
 void HsIdleWidget::setItemsUnfocusable(QGraphicsSceneMouseEvent *event)
 {
     mFocusableItems.clear();
-    QList<QGraphicsItem *> items = 
-        HsScene::mainWindow()->scene()->items(event->scenePos());
+
+    if (!scene()) {
+        return;
+    }
+
+    QList<QGraphicsItem *> items = scene()->items(event->scenePos());
+    if (items.isEmpty()) {
+        return;
+    }
+
     int i = 0;
-    while (!mPageLayer->isAncestorOf(items[i++])) {}
+    for (; i < items.count(); ++i) {
+        if (mPageLayer->isAncestorOf(items[i])) {
+            ++i;
+            break;
+        }
+    }
+ 
     HsPage *page = HsScene::instance()->activePage();
     QList<HsWidgetHost *> widgets = page->widgets();
+    
     for (; i < items.count(); ++i) {
         QGraphicsItem *item = items.at(i);
         if (page->isAncestorOf(item)) {
             foreach (HsWidgetHost *widget, widgets) {
                 if ((item == widget || widget->isAncestorOf(item))&& item->isEnabled() && (item->flags() & QGraphicsItem::ItemIsFocusable)) {
-                    if (!item->isWidget() || static_cast<QGraphicsWidget*>(item)->focusPolicy() & Qt::ClickFocus) {
+                    if (!item->isWidget() || static_cast<QGraphicsWidget *>(item)->focusPolicy() & Qt::ClickFocus) {
                         item->setFlag(QGraphicsItem::ItemIsFocusable, false);
                         mFocusableItems.append(item);
                     }

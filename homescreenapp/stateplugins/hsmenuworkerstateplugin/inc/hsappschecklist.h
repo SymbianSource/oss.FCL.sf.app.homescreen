@@ -95,7 +95,12 @@ private:
     HbView *mView;
 
     /**
-     * Action back. Owned.
+     * Previous view. Not owned.
+     */
+    HbView *mPreviousView;
+
+    /**
+     * Confirm action. Owned.
      */
     HbAction *mActionConfirm;
 
@@ -114,6 +119,11 @@ private:
      * Sort order for applications.
      */
     HsSortAttribute mSortAttribute;
+
+	/**
+     * List of objects loaded by document loader. Content owned.
+     */
+    QObjectList mLoadedObjects;
 
 };
 

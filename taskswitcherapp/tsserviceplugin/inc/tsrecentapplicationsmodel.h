@@ -28,15 +28,6 @@
 class CaService;
 class CaNotifier;
 
-/**
- * @ingroup group_tsserviceprovider
- * @brief TsRecentApplicationsModel model with recent application.
- *
- * Loads recent aplications from content arsenal.
- *
- * @lib tsserviceprovider.lib
- * @since S60 ?S60_version
- */
 class TsRecentApplicationsModel : public QAbstractListModel
 {
     Q_OBJECT

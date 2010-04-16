@@ -80,6 +80,9 @@ void HsAllCollectionsState::setMenuOptions()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::setMenuOptions");
     HbMenu *const options = new HbMenu();
+    options->addAction(hbTrId("txt_applib_opt_task_switcher"),
+                        this,
+                        SLOT(openTaskSwitcher()));
     options->addAction(hbTrId("txt_applib_opt_new_collection"),
                        this, SLOT(createNewCollection()));
 
@@ -201,6 +204,15 @@ void HsAllCollectionsState::stateExited()
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::stateExited");
     qDebug("AllCollectionsState::stateExited()");
+}
+
+/*!
+ Open task switcher.
+ \retval true if operation is successful.
+ */
+bool HsAllCollectionsState::openTaskSwitcher()
+{
+    return HsMenuService::launchTaskSwitcher();
 }
 
 // ---------------------------------------------------------------------------

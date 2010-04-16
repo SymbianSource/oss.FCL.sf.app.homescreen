@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/xml" >
-        <file alias="hsmenuworkerstateplugin.docml">resource/hsmenuworkerstateplugin.docml</file>
+        <file alias="hsappchecklist.docml">resource/hsappchecklist.docml</file>
+        <file alias="hswidgetpreviewdialog.docml">resource/hswidgetpreviewdialog.docml</file>
+        <file alias="hsarrangedialog.docml">resource/hsarrangedialog.docml</file>
     </qresource>
 </RCC>

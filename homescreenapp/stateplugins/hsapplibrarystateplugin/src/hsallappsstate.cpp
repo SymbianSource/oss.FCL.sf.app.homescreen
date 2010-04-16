@@ -80,6 +80,9 @@ void HsAllAppsState::setMenuOptions()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::setMenuOptions");
     HbMenu *const mOptions = new HbMenu();
+    mOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
+                        this,
+                        SLOT(openTaskSwitcher()));
     mOptions->addAction(hbTrId("txt_applib_opt_add_to_collection"),
                         this,
                         SLOT(addToCollection()));
@@ -188,6 +191,15 @@ void HsAllAppsState::stateExited()
     qDebug("AllAppsState::stateExited()");
 }
 
+/*!
+ Open task switcher.
+ \retval true if operation is successful.
+ */
+bool HsAllAppsState::openTaskSwitcher()
+{
+    return HsMenuService::launchTaskSwitcher();
+}
+
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
@@ -233,7 +245,6 @@ void HsAllAppsState::addActivated(const QModelIndex &index)
  Handles long-item-pressed event in all apps view by showing context menu
  \param item the event pertains to
  \param position at which context menu is shown
- \retval void
  */
 void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
         const QPointF &coords)
@@ -322,11 +333,16 @@ void HsAllAppsState::addToHomeScreen(const QModelIndex &index)
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addToHomeScreen");
     const CaEntry *entry = mAllAppsModel->entry(index);
-
+    
+    QMap<QString, QString> attributes = entry->attributes();
+    
     machine()-> postEvent(HsMenuEventFactory::createAddToHomeScreenEvent(
-                              entry->id(), entry->entryTypeName(), entry->attribute(
-                                  widgetUriAttributeName()), entry->attribute(
-                                  widgetLibraryAttributeName())));
+                              entry->id(),
+                              entry->entryTypeName(),
+                              entry->attribute(widgetUriAttributeName()),
+                              entry->attribute(widgetLibraryAttributeName()),
+                              &attributes));
+
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::addToHomeScreen");
 }
 

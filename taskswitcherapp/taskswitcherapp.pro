@@ -16,13 +16,13 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += taskswitcherappecom
+symbian:SUBDIRS += taskswitcherappecom
 SUBDIRS += tsserviceplugin
 SUBDIRS += runtimeplugins
 SUBDIRS += tsapplication
 
 tests {
-    SUBDIRS += taskswitcherappecom\tsrc
+    symbian:SUBDIRS += taskswitcherappecom\tsrc
     SUBDIRS += tsserviceplugin\tsrc
     SUBDIRS += runtimeplugins\tsdefaultruntimeplugin\tsrc
     SUBDIRS += tsapplication\tsrc

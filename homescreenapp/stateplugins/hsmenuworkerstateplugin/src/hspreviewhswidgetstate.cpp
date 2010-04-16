@@ -21,14 +21,15 @@
 #include <hbmessagebox.h>
 #include <qstatemachine.h>
 #include <hbaction.h>
+#include <HbDocumentLoader>
 #include <hbdialog.h>
 #include <hbwidget.h>
 #include <hbscrollarea.h>
 #include <hbscrollbar.h>
+#include <QtAlgorithms>
 
 #include "hsmenueventfactory.h"
 #include "hsmenuservice.h"
-#include "hswidgetdata.h"
 #include "hswidgethost.h"
 #include "hspreviewhswidgetstate.h"
 #include "hsmenuevent.h"
@@ -43,13 +44,16 @@
 #include "hsdomainmodel_global.h"
 #include <hscontentservice.h>
 
+
+const char HS_PREVIEW_HS_WIDGET_STATE[] = "HsPreviewHSWidgetState";
+
 /*!
  Constructor
  \param parent: parent state
  \retval void
  */
 HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
-    HsMenuBaseState("HsPreviewHSWidgetState", parent),
+    HsMenuBaseState(HS_PREVIEW_HS_WIDGET_STATE, parent),
     mPopupDialog(0),
     mNotifier(0)
 {
@@ -64,9 +68,6 @@ HsPreviewHSWidgetState::~HsPreviewHSWidgetState()
 {
     if (mNotifier) {
         delete mNotifier;
-    }
-    if (mPopupDialog) {
-        delete mPopupDialog;
     }
 }
 
@@ -94,64 +95,59 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
 
     const int entryId = data.value(itemIdKey()).toInt();
 
-    QVariantMap widgetData;
-    widgetData.insert("library", data.value(widgetLibraryAttributeName()).toString());
-    widgetData.insert("uri", data.value(widgetUriAttributeName()).toString());
-    HsWidgetHost *widget = contentService()->createWidgetForPreview(widgetData);
+    QVariantHash widgetData;
+    widgetData.insert(LIBRARY, data.value(widgetLibraryAttributeName()).toString());
+    widgetData.insert(URI, data.value(widgetUriAttributeName()).toString());
+    QScopedPointer<HsWidgetHost> widget(
+        contentService()->createWidgetForPreview(widgetData));
 
     if (widget) {
         widget->setMinimumSize(widget->preferredWidth(),widget->preferredHeight());
-        HbScrollArea *scrollArea = new HbScrollArea();
-        scrollArea->setClampingStyle(HbScrollArea::StrictClamping);
-        scrollArea->setScrollingStyle(HbScrollArea::Pan);
-        scrollArea->setHorizontalScrollBarPolicy(HbScrollArea::ScrollBarAsNeeded);
-        scrollArea->setHorizontalScrollBarPolicy(HbScrollArea::ScrollBarAutoHide);//
-        scrollArea->setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAsNeeded);
-        scrollArea->setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAutoHide);//
-        scrollArea->verticalScrollBar()->setInteractive(true);
-        scrollArea->horizontalScrollBar()->setInteractive(true);
-        // this sets up the scroll area to scroll in both directions
-        scrollArea->setScrollDirections(Qt::Vertical | Qt::Horizontal);
-        scrollArea->setContentWidget(widget);   //ownership transferred
-        scrollArea->setAlignment(Qt::AlignCenter);
 
-        // Instantiate a popup
-        mPopupDialog = new HbDialog();
+        HbDocumentLoader loader;
 
-        // Set dismiss policy that determines what tap events will cause the dialog
-        // to be dismissed
-        mPopupDialog->setDismissPolicy(HbDialog::NoDismiss);
-        mPopupDialog->setTimeout(HbDialog::NoTimeout);
+        bool loadStatusOk = false;
+        mObjectList = 
+            loader.load(HS_WIDGET_PREVIEW_DIALOG_LAYOUT, &loadStatusOk);
+        Q_ASSERT_X(loadStatusOk,
+            HS_WIDGET_PREVIEW_DIALOG_LAYOUT,
+               "Error while loading docml file.");
 
-        // Set content widget
-        mPopupDialog->setContentWidget(scrollArea); //ownership transferred
-
-        // Sets the primary action and secondary action
-        mPopupDialog->setPrimaryAction(new HbAction(hbTrId("txt_applib_button_add_to_homescreen"),mPopupDialog));
-        mPopupDialog->setSecondaryAction(new HbAction(hbTrId("txt_common_button_close"),mPopupDialog));
-
-        subscribeForMemoryCardRemove(entryId);
-        widget->initializeWidget();
-        widget->showWidget();
-        // Launch popup syncronously
-        HbAction *result = mPopupDialog->exec();
-
-        disconnect(mNotifier,
-                   SIGNAL(entryChanged(const CaEntry &, ChangeType)),
-                   this, SLOT(memoryCardRemoved()));
-
-        if (result == mPopupDialog->primaryAction()) {
-            // take it back from scrollarea
+        mPopupDialog = 
+            qobject_cast<HbDialog*>(
+                loader.findWidget(HS_WIDGET_PREVIEW_DIALOG_NAME));
+        
+        HbScrollArea *const scrollArea( 
+            qobject_cast<HbScrollArea*>(
+                loader.findWidget(HS_WIDGET_PREVIEW_SCROLL_AREA_NAME)));
+        
+        if (mPopupDialog != NULL && scrollArea != NULL) {
+            mPopupDialog->setContentWidget(scrollArea); //ownership transferred
+            mPopupDialog->setTimeout(HbPopup::NoTimeout);
+            scrollArea->verticalScrollBar()->setInteractive(true);
+            scrollArea->horizontalScrollBar()->setInteractive(true);
+            scrollArea->setContentWidget(widget.data());
             scrollArea->takeContentWidget();
-            widget->hideWidget();
-            widget->uninitializeWidget();
-            HsScene::instance()->activePage()->addNewWidget(widget);
-        } else {
-            widget->deleteFromDatabase();
+            
+            subscribeForMemoryCardRemove(entryId);
+            widget->initializeWidget();
+            widget->showWidget();
+            // Launch popup syncronously
+            const HbAction *const action(mPopupDialog->exec());
+    
+            disconnect(mNotifier,
+                       SIGNAL(entryChanged(CaEntry,ChangeType)),
+                       this, SLOT(memoryCardRemoved()));
+    
+            if (action == mPopupDialog->primaryAction()) {
+                widget->hideWidget();
+                HsScene::instance()->activePage()->addNewWidget(
+                    widget.take()); // ownership transferred
+            } else {
+                widget->uninitializeWidget();
+                widget->deleteFromDatabase();
+            }
         }
-
-        delete result;
-        result = NULL;
 
     } else {
         showMessageWidgetCorrupted(entryId);
@@ -171,15 +167,14 @@ void HsPreviewHSWidgetState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsPreviewHSWidgetState::stateExited");
 
-    if (mNotifier) {
-        delete mNotifier;
-        mNotifier = NULL;
-    }
 
-    if (mPopupDialog) {
-        delete mPopupDialog;
-        mPopupDialog = NULL;
-    }
+    delete mNotifier;
+    mNotifier = NULL;
+
+    qDeleteAll(mObjectList);
+    mObjectList.clear();
+    
+    mPopupDialog = NULL;
 
     HSMENUTEST_FUNC_EXIT("HsPreviewHSWidgetState::stateExited");
     qDebug("HsPreviewHSWidgetState::stateExited()");
@@ -210,7 +205,7 @@ void HsPreviewHSWidgetState::subscribeForMemoryCardRemove(int entryId)
     mNotifier = CaService::instance()->createNotifier(filter);
     mNotifier->setParent(this);
     connect(mNotifier,
-            SIGNAL(entryChanged(const CaEntry &, ChangeType)),
+            SIGNAL(entryChanged(CaEntry,ChangeType)),
             SLOT(memoryCardRemoved()));
 }
 

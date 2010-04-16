@@ -73,10 +73,13 @@ private:
 
     void showMessageWidgetCorrupted(int itemId);
 
-    void addWidget(HsContentService &service, const QString &library,
-                   const QString &uri, int entryId);
+    void addWidget(HsContentService &service, const QString &uri,
+                    int entryId);
 
     void addShortcut(HsContentService &contentService, int entryId);
+
+    void addTApplication(HsContentService &contentService, int entryId,
+                QVariantMap &data);
 
     void logActionResult(QString operationName, int entryId,
                          bool operationSucceded);

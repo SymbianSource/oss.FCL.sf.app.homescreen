@@ -122,6 +122,9 @@ void HsCollectionState::stateEntered()
 
     if (!mOptions) {
         mOptions = new HbMenu();
+        mOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
+                            this,
+                            SLOT(openTaskSwitcher()));
 
         EntryFlags flags =
             mCollectionModel->root().data(CaItemModel::FlagsRole).value<
@@ -170,13 +173,9 @@ void HsCollectionState::stateEntered()
         mOptions->setParent(this);
         mMenuView.view()->setMenu(mOptions);
     }
-
-    HbMainWindow *hbMainWindow =
-        HbInstance::instance()->allMainWindows().value(0);
-    // add BackStepping action
-
-    hbMainWindow->addSoftKeyAction(Hb::SecondarySoftKey,
-                                   mSecondarySoftkeyAction);
+    mOldNavigationAction = mMenuView.view()->navigationAction();
+    mMenuView.view()->setNavigationAction(mSecondarySoftkeyAction);
+    
     makeConnect();
     HSMENUTEST_FUNC_EXIT("HsCollectionState::stateEntered");
 }
@@ -194,12 +193,9 @@ void HsCollectionState::stateExited()
     mMenuView.view()->setMenu(NULL);
     mMenuView.setLabelVisible(false);
 
-    HbMainWindow *hbW = HbInstance::instance()->allMainWindows().value(0);
-    if (hbW) {
-        //remove BackStepping action
-        hbW->removeSoftKeyAction(Hb::SecondarySoftKey,
-                                 mSecondarySoftkeyAction);
-    }
+    // revert navigation action
+    mMenuView.view()->setNavigationAction(mOldNavigationAction);
+
     HSMENUTEST_FUNC_EXIT("HsCollectionState::stateExited");
     qDebug("CollectionState::stateExited()");
 }
@@ -234,6 +230,15 @@ void HsCollectionState::makeDisconnect()
 
     disconnect(&mMenuView, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
                this, SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
+}
+
+/*!
+ Open task switcher.
+ \retval true if operation is successful.
+ */
+bool HsCollectionState::openTaskSwitcher()
+{
+    return HsMenuService::launchTaskSwitcher();
 }
 
 // ---------------------------------------------------------------------------
@@ -386,14 +391,16 @@ void HsCollectionState::updateLabel()
 void HsCollectionState::addElementToHomeScreen(const QModelIndex &index)
 {
     const CaEntry *entry = mCollectionModel->entry(index);
+    
+    QMap<QString, QString> attributes = entry->attributes();
 
-    machine()->
-    postEvent(
+    machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(
             entry->id(),
             entry->entryTypeName(),
             entry->attribute(widgetUriAttributeName()),
-            entry->attribute(widgetLibraryAttributeName())));
+            entry->attribute(widgetLibraryAttributeName()),
+            &attributes));
 }
 
 /*!

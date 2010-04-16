@@ -133,8 +133,8 @@ QString HsCollectionNameDialog::newName(const QString &name,
 //
 void HsCollectionNameDialog::makeConnect()
 {
-    /*connect(lineEdit(), SIGNAL(textChanged(const QString &text)),
-     SLOT(onTextChanged(const QString &text)));*/
+    /*connect(lineEdit(), SIGNAL(textChanged(QString&text)),
+     SLOT(onTextChanged(QString&text)));*/
 
     connect(lineEdit(), SIGNAL(contentsChanged()),
             SLOT(onContentsChanged()));
@@ -145,8 +145,8 @@ void HsCollectionNameDialog::makeConnect()
 //
 void HsCollectionNameDialog::makeDisconnect()
 {
-    /*disconnect(lineEdit(), SIGNAL(textChanged(const QString &text)),
-     this, SLOT(onTextChanged(const QString &text)));*/
+    /*disconnect(lineEdit(), SIGNAL(textChanged(QString&text)),
+     this, SLOT(onTextChanged(QString&text)));*/
     disconnect(lineEdit(), SIGNAL(contentsChanged()),
                this, SLOT(onContentsChanged()));
 }

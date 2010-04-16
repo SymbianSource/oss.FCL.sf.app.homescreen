@@ -19,7 +19,7 @@
 #include "hsdatabase.h"
 #include "hsscene.h"
 #include "hspage.h"
-#include "hswidgetdata.h"
+#include "hsdomainmodeldatastructures.h"
 #include "hswidgethost.h"
 
 
@@ -34,7 +34,7 @@ HsContentService::~HsContentService()
 }
 
 
-bool HsContentService::createWidget(const QVariantMap &params)
+bool HsContentService::createWidget(const QVariantHash &params)
 {
     HsWidgetHost *widget = createWidgetForPreview(params);
     if (!widget) {
@@ -44,14 +44,14 @@ bool HsContentService::createWidget(const QVariantMap &params)
     return HsScene::instance()->activePage()->addNewWidget(widget);
 }
 
-HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantMap &params)
+HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &params)
 {
     HsWidgetData widgetData;
-    widgetData.setUri(params.value("uri").toString());
+    widgetData.uri = params.value("uri").toString();
 
 
-    HsWidgetHost *widget = HsWidgetHost::createInstance(widgetData,  
-            params.value("preferences").toMap());
+    HsWidgetHost *widget = HsWidgetHost::createInstance(widgetData,
+                                                        params.value("preferences").toHash());
 
     if (!widget) {
         return NULL;

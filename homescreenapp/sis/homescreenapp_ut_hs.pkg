@@ -50,7 +50,7 @@
 "/epoc32/data/z/resource/apps/t_hsdomainmodel.rsc"                       - "c:/resource/apps/t_hsdomainmodel.rsc"
 
 
-"../hsdomainmodel/tsrc/t_hsdomainmodel/testdomainmodeldb" - "c:/private/20022F59/testdomainmodeldb"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/hsdomainmodeltest.db" - "c:/private/20022F59/hsdomainmodeltest.db"
 "../hsdomainmodel/tsrc/t_hsdomainmodel/d_landscape.png" - "c:/private/20022F59/d_landscape.png"
 "../hsdomainmodel/tsrc/t_hsdomainmodel/d_portrait.png" - "c:/private/20022F59/d_portrait.png"
 

@@ -31,17 +31,18 @@
 
 #include "hsidlestate.h"
 #include "hsidlewidget.h"
+#include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
 #include "hspage.h"
 #include "hswidgethost.h"
 #include "hswallpaper.h"
-#include "hspagedata.h"
 #include "hsselectbackgroundstate.h"
 #include "hstrashbinwidget.h"
 #include "hspageindicator.h"
 #include "hsapptranslator.h"
 #include "hswidgetpositioningonorientationchange.h"
 #include "hsmenueventfactory.h"
+#include "hshomescreenstatecommon.h"
 
 // Helper macros for connecting state entry and exit actions.
 #define ENTRY_ACTION(state, action) \
@@ -51,31 +52,23 @@
 
 // Helper macros for connecting and disconnecting mouse event handlers.
 #define CONNECT_MOUSE_EVENT_HANDLER(signal, slot) \
-    connect(mUiWidget, SIGNAL(signal(QGraphicsItem*, QGraphicsSceneMouseEvent*, bool&)), \
-        SLOT(slot(QGraphicsItem*, QGraphicsSceneMouseEvent*, bool&)));
+    connect(mUiWidget, SIGNAL(signal(QGraphicsItem*,QGraphicsSceneMouseEvent*,bool&)), \
+        SLOT(slot(QGraphicsItem*,QGraphicsSceneMouseEvent*,bool&)));
 #define DISCONNECT_MOUSE_EVENT_HANDLER(signal, slot) \
-    disconnect(mUiWidget, SIGNAL(signal(QGraphicsItem*, QGraphicsSceneMouseEvent*, bool&)), \
-        this, SLOT(slot(QGraphicsItem*, QGraphicsSceneMouseEvent*, bool&)));
+    disconnect(mUiWidget, SIGNAL(signal(QGraphicsItem*,QGraphicsSceneMouseEvent*,bool&)), \
+        this, SLOT(slot(QGraphicsItem*,QGraphicsSceneMouseEvent*,bool&)));
 
 
 namespace
 {
-    const char APP_LIB_BUTTON[] = 
-        "hs_applib_button.png";
-    /*const char TXT_HOMESCREEN_TITLE_OFFLINE[] = 
-        "txt_homescreen_title_offline";*/
-    const char TXT_HOMESCREEN_OPT_ADD_PAGE[] = 
-        "txt_homescreen_opt_add_page";
-    const char TXT_HOMESCREEN_OPT_REMOVE_PAGE[] = 
-        "txt_homescreen_opt_remove_page";
-    const char TXT_HOMESCREEN_OPT_HOME_SCREEN_TO_ONLINE[] = 
-        "txt_homescreen_opt_home_screen_to_online";
-    const char TXT_HOMESCREEN_OPT_HOME_SCREEN_TO_OFFLINE[] = 
-        "txt_homescreen_opt_home_screen_to_offline";
-    const char TXT_HOMESCREEN_LIST_CHANGE_WALLPAPER[] = 
-        "txt_homescreen_list_change_wallpaper";
-    const char TXT_HOMESCREEN_LIST_ADD_CONTENT[] = 
-        "txt_homescreen_list_add_content";
+    const char gApplicationLibraryIconName[] = "qtg_mono_applications_all";
+    const char gAddPageTextName[]            = "txt_homescreen_opt_add_page";
+    const char gRemovePageTextName[]         = "txt_homescreen_opt_remove_page";
+    const char gToOnlineTextName[]           = "txt_homescreen_opt_home_screen_to_online";
+    const char gToOfflineTextName[]          = "txt_homescreen_opt_home_screen_to_offline";
+    const char gChangeWallpaperTextName[]    = "txt_homescreen_list_change_wallpaper";
+    const char gAddContentTextName[]         = "txt_homescreen_list_add_content";
+    //const char gTitleOfflineTextName[]       = "txt_homescreen_title_offline";
 }
 
 /*!
@@ -94,7 +87,7 @@ namespace
 */
 HsIdleState::HsIdleState(QState *parent)
   : QState(parent),
-    mView(0), mSoftKeyAction(0), mUiWidget(0),
+    mView(0), mNavigationAction(0), mUiWidget(0),
     mTapAndHoldDistance(16),
     mPageChangeZoneWidth(60)
 {
@@ -268,6 +261,7 @@ void HsIdleState::setupStates()
     ENTRY_ACTION(state_moveWidget, action_moveWidget_startWidgetDragAnimation)
     ENTRY_ACTION(state_moveWidget, action_moveWidget_connectMouseEventHandlers)
     ENTRY_ACTION(state_moveWidget, action_moveWidget_connectGestureTimers)
+
     EXIT_ACTION(state_moveWidget, action_moveWidget_reparentToPage)
     EXIT_ACTION(state_moveWidget, action_moveWidget_startWidgetDropAnimation)
     EXIT_ACTION(state_moveWidget, action_moveWidget_disconnectMouseEventHandlers)
@@ -313,7 +307,7 @@ void HsIdleState::startPageChangeAnimation(int targetPageIndex, int duration)
     animationGroup->addAnimation(animation);
 
     animation = new QPropertyAnimation(mUiWidget->sceneLayer(), "x");
-    animation->setEndValue(parallaxFactor() * pageLayerXPos(targetPageIndex));
+    animation->setEndValue((parallaxFactor() * pageLayerXPos(targetPageIndex)) - HSBOUNDARYEFFECT / 2);
     animation->setDuration(duration);
     animationGroup->addAnimation(animation);
         
@@ -362,7 +356,7 @@ bool HsIdleState::isInRightPageChangeZone()
 void HsIdleState::addPageToScene(int pageIndex)
 {
     HsPageData data;
-    data.setIndex(pageIndex);
+    data.indexPosition = pageIndex;
     HsPage *page = HsPage::createInstance(data);
     page->load();
     HsScene::instance()->addPage(page);    
@@ -376,7 +370,7 @@ void HsIdleState::addPageToScene(int pageIndex)
 qreal HsIdleState::parallaxFactor() const
 {
     qreal clw = mUiWidget->controlLayer()->size().width();
-    qreal slw = mUiWidget->sceneLayer()->size().width();
+    qreal slw = mUiWidget->sceneLayer()->size().width() - HSBOUNDARYEFFECT;
     int n = HsScene::instance()->pages().count();
     if (n < 2) {
         return 1;
@@ -412,11 +406,12 @@ void HsIdleState::action_idle_setupView()
         mUiWidget = new HsIdleWidget;
         mView = HsScene::mainWindow()->addView(mUiWidget);
         mView->setContentFullScreen();
-        mView->setTitle("Home Screen"/*hbTrId(TXT_HOMESCREEN_TITLE_OFFLINE)*/);
+        mView->setTitle("Home Screen"/*hbTrId(gTitleOfflineTextName)*/);
         
-        mSoftKeyAction = new HbAction(this);
-        mSoftKeyAction->setIcon(HbIcon(APP_LIB_BUTTON));
-        connect(mSoftKeyAction, SIGNAL(triggered()), SIGNAL(event_applicationLibrary()));
+        mNavigationAction = new HbAction(this);
+        mNavigationAction->setIcon(HbIcon(gApplicationLibraryIconName));
+        connect(mNavigationAction, SIGNAL(triggered()), SIGNAL(event_applicationLibrary()));
+        mView->setNavigationAction(mNavigationAction);
         
 #ifndef Q_OS_SYMBIAN
         connect(HsAppTranslator::instance(), 
@@ -426,7 +421,6 @@ void HsIdleState::action_idle_setupView()
         QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
-    HsScene::mainWindow()->addSoftKeyAction(Hb::SecondarySoftKey, mSoftKeyAction);
     HsScene::mainWindow()->setCurrentView(mView);
 }
 
@@ -452,7 +446,7 @@ void HsIdleState::action_idle_layoutNewWidgets()
     }
 
     page->layoutNewWidgets();
-    page->resetNewWidgets();
+
 }
 
 /*!
@@ -463,7 +457,7 @@ void HsIdleState::action_idle_showActivePage()
 {
     qreal x = pageLayerXPos(HsScene::instance()->activePageIndex());
     mUiWidget->pageLayer()->setX(x);
-    mUiWidget->sceneLayer()->setX(parallaxFactor() * x);
+    mUiWidget->sceneLayer()->setX((parallaxFactor() * x) - HSBOUNDARYEFFECT / 2);
 }
 
 /*!
@@ -481,8 +475,6 @@ void HsIdleState::action_idle_connectOrientationChangeEventHandler()
 */
 void HsIdleState::action_idle_cleanupView()
 {
-    HsScene::mainWindow()->removeSoftKeyAction(
-        Hb::SecondarySoftKey, mSoftKeyAction);
 }
 
 /*!
@@ -500,19 +492,28 @@ void HsIdleState::action_idle_disconnectOrientationChangeEventHandler()
 */
 void HsIdleState::action_waitInput_updateOptionsMenu()
 {
+    HsScene *scene = HsScene::instance();
+
     HbMenu *menu = new HbMenu();
     
-    menu->addAction(hbTrId(TXT_HOMESCREEN_OPT_ADD_PAGE), 
-        this, SIGNAL(event_addPage()));
-    menu->addAction(hbTrId(TXT_HOMESCREEN_OPT_REMOVE_PAGE), 
-        this, SIGNAL(event_removePage()))->setEnabled(
-        HsScene::instance()->activePage()->isRemovable());
-        
-    if (HsScene::instance()->isOnline()) {
-        menu->addAction(hbTrId(TXT_HOMESCREEN_OPT_HOME_SCREEN_TO_OFFLINE),
+    // Add page
+    if (scene->pages().count() < scene->maximumPageCount()) {
+        menu->addAction(hbTrId(gAddPageTextName), 
+            this, SIGNAL(event_addPage()));
+    }
+
+    // Remove page
+    if (scene->activePage()->isRemovable()) {
+        menu->addAction(hbTrId(gRemovePageTextName), 
+            this, SIGNAL(event_removePage()));
+    }
+    
+    // Online / Offline
+    if (scene->isOnline()) {
+        menu->addAction(hbTrId(gToOfflineTextName),
             this, SIGNAL(event_toggleConnection()));
     } else {
-        menu->addAction(hbTrId(TXT_HOMESCREEN_OPT_HOME_SCREEN_TO_ONLINE),
+        menu->addAction(hbTrId(gToOnlineTextName),
             this, SIGNAL(event_toggleConnection())); 
     }
 
@@ -728,9 +729,9 @@ void HsIdleState::action_sceneMenu_showMenu()
     HbMenu menu;
 
     HbAction *changeWallpaperAction = 
-        menu.addAction(hbTrId(TXT_HOMESCREEN_LIST_CHANGE_WALLPAPER));
+        menu.addAction(hbTrId(gChangeWallpaperTextName));
     HbAction *addContentAction = 
-        menu.addAction(hbTrId(TXT_HOMESCREEN_LIST_ADD_CONTENT));
+        menu.addAction(hbTrId(gAddContentTextName));
 
     HbAction *action = menu.exec(mSceneMenuPos);
     if (action == changeWallpaperAction) {
@@ -756,7 +757,8 @@ void HsIdleState::action_addPage_addPage()
     addPageToScene(pageIndex);    
     scene->setActivePageIndex(pageIndex);
     startPageChangeAnimation(pageIndex, 700);
-    mUiWidget->pageIndicator()->addItem(true, true);
+    mUiWidget->pageIndicator()->addItem(pageIndex);
+    mUiWidget->showPageIndicator();
 }
 
 /*!
@@ -770,7 +772,6 @@ void HsIdleState::action_removePage_removePage()
 
     mUiWidget->removePage(pageIndex);
     scene->removePage(page);
-    page->deleteFromDatabase();
     delete page;
 
     pageIndex = pageIndex == 0 ? 0 : pageIndex - 1;
@@ -778,8 +779,9 @@ void HsIdleState::action_removePage_removePage()
 
     startPageChangeAnimation(pageIndex, 200);
 
-    mUiWidget->pageIndicator()->removeItem();
+    mUiWidget->pageIndicator()->removeItem(pageIndex);
     mUiWidget->setActivePage(pageIndex);
+    mUiWidget->showPageIndicator();
 }
 
 /*!
@@ -843,7 +845,7 @@ void HsIdleState::widgetInteraction_onMouseMoved(
     }
 
     QPointF point = 
-        event->screenPos() - event->buttonDownScreenPos(Qt::LeftButton);
+        event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
     if (mTapAndHoldDistance < point.manhattanLength()) {
         mTimer.stop();
         mUiWidget->sendDelayedPress();
@@ -892,7 +894,7 @@ void HsIdleState::sceneInteraction_onMouseMoved(
     }
 
     QPointF point = 
-        event->screenPos() - event->buttonDownScreenPos(Qt::LeftButton);
+        event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
     if (mTapAndHoldDistance < point.manhattanLength()) {
         mTimer.stop();
         mUiWidget->clearDelayedPress();
@@ -936,7 +938,7 @@ void HsIdleState::moveWidget_onMouseMoved(
     HsWidgetHost *widget = HsScene::instance()->activeWidget();
     Q_ASSERT(widget);
 
-    QPointF delta(event->screenPos() - event->lastScreenPos());
+    QPointF delta(event->scenePos() - event->lastScenePos());
     QRectF region =  mView->rect().adjusted(10, 55, -10, -10);
     QPointF position = widget->geometry().center() + delta;
     if (!region.contains(position)) {
@@ -962,7 +964,7 @@ void HsIdleState::moveWidget_onMouseMoved(
         mUiWidget->trashBin()->deactivate();
     }
 
-    if (!mUiWidget->pageIndicator()->isAnimatingCurrentItemChange()) {
+    if (!mUiWidget->pageIndicator()->isAnimationRunning()) {
         mUiWidget->showTrashBin();
     }
 }
@@ -1023,14 +1025,14 @@ void HsIdleState::moveScene_onMouseMoved(
     
     HsScene *scene = HsScene::instance();
     qreal delta = 
-        event->screenPos().x() - event->buttonDownScreenPos(Qt::LeftButton).x();
-    
-    qreal x = qBound(pageLayerXPos(scene->pages().count() - 1),
+        event->scenePos().x() - event->buttonDownScenePos(Qt::LeftButton).x();
+
+    qreal x = qBound(pageLayerXPos(scene->pages().count() - 1) - HSBOUNDARYEFFECT / 2 / parallaxFactor(),
                      pageLayerXPos(scene->activePageIndex()) + delta,
-                     pageLayerXPos(0));
-    
+                     pageLayerXPos(0) + (HSBOUNDARYEFFECT / 2 / parallaxFactor()) - qreal(0.5));
+
     mUiWidget->pageLayer()->setX(x);
-    mUiWidget->sceneLayer()->setX(parallaxFactor() * x);
+    mUiWidget->sceneLayer()->setX((parallaxFactor() * x) - HSBOUNDARYEFFECT / 2);
 }
 
 /*!
@@ -1051,10 +1053,10 @@ void HsIdleState::moveScene_onMouseReleased(
     int pageIndex = HsScene::instance()->activePageIndex();
 
     QPointF delta(
-        event->screenPos() - event->buttonDownScreenPos(Qt::LeftButton));
-    if (delta.x() < -pageSize.width() / 2) {
+        event->scenePos() - event->buttonDownScenePos(Qt::LeftButton));
+    if (delta.x() < -pageSize.width() / 3) {
         pageIndex = qMin(pageIndex + 1, pages.count() - 1);
-    } else if(pageSize.width() / 2 < delta.x()) {
+    } else if (pageSize.width() / 3 < delta.x()) {
         pageIndex = qMax(pageIndex - 1, 0);
     }
 
@@ -1075,22 +1077,25 @@ void HsIdleState::onOrientationChanged(Qt::Orientation orientation)
     QList<HsWidgetHost *> widgets;
     HsWidgetHost *widget = 0;
     
+    const int KChromeHeight = 64; // TODO: get this somewhere
+    const int KWidgetAdjust = 10; // TODO: get this somewhere
+    
     for (int i = 0; i < pages.count(); ++i) {        
         widgets = pages[i]->widgets();
         for (int j = 0; j < widgets.count(); ++j) {
             widget = widgets[j];
             HsWidgetPresentationData presentation = widget->widgetPresentation(orientation);
-            if (presentation.id() < 0) {
+            if (presentation.widgetId < 0) {
                 QList<QRectF> geometries = 
                     HsWidgetPositioningOnOrientationChange::instance()->convert(
-                        pages[i]->rect().adjusted(10, 10, -10, -10), QList<QRectF>() << widget->geometry(),
-                        QRectF(0, 0, pages[i]->rect().height() + 40, 
-                        pages[i]->rect().width() - 40).adjusted(10, 10, -10, -10));
+                        QRectF(0, KChromeHeight, pages[i]->rect().height(), pages[i]->rect().width()-KChromeHeight).adjusted(KWidgetAdjust, KWidgetAdjust, -KWidgetAdjust, -KWidgetAdjust),
+                        QList<QRectF>() << widget->geometry(),
+                        QRectF(0, KChromeHeight, pages[i]->rect().width(), pages[i]->rect().height()-KChromeHeight).adjusted(KWidgetAdjust, KWidgetAdjust, -KWidgetAdjust, -KWidgetAdjust));
                 widget->setGeometry(geometries.first());
                 widget->setWidgetPresentation();
             } else {
-                widget->setGeometry(QRectF(presentation.position(), presentation.size()));
-                widget->setZValue(presentation.zValue());
+                widget->setGeometry(presentation.geometry());
+                widget->setZValue(presentation.zValue);
             }
         }
     }
@@ -1138,10 +1143,12 @@ void HsIdleState::moveWidget_onHoldTimeout()
     if (pageIndex == scene->pages().count()) {
         if (scene->pages().last()->widgets().isEmpty()) {
             return;
-        } else {
+        } else if (scene->pages().count() < scene->maximumPageCount()) {
             addPageToScene(pageIndex);
             mUiWidget->showPageIndicator();
-            mUiWidget->pageIndicator()->addItem(true);
+            mUiWidget->pageIndicator()->addItem(pageIndex);
+        } else {
+            return; 
         }
     }
 
@@ -1192,7 +1199,7 @@ void HsIdleState::switchLanguage()
 */
 void HsIdleState::translateUi()
 {
-    mView->setTitle("Home Screen"/*hbTrId(TXT_HOMESCREEN_TITLE_OFFLINE)*/);
+    mView->setTitle("Home Screen"/*hbTrId(gTitleOfflineTextName)*/);
     action_waitInput_updateOptionsMenu();
 }
 #ifdef COVERAGE_MEASUREMENT

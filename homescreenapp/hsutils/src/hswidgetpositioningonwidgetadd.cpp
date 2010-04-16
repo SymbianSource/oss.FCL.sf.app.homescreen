@@ -64,7 +64,8 @@ HsWidgetPositioningOnWidgetAdd *HsWidgetPositioningOnWidgetAdd::mInstance = 0;
 */
 QList<QRectF> HsAnchorPointInBottomRight::convert(
     const QRectF &contentArea,
-    const QList<QRectF> &widgets)
+    const QList<QRectF> &rects,
+    const QPointF &startPoint)
 {
     QList<QRectF> toGeometries;
 
@@ -74,29 +75,48 @@ QList<QRectF> HsAnchorPointInBottomRight::convert(
     qreal offset_y = k*offset_x;
     QPointF offsetPoint(offset_x, offset_y);
     
-    QLineF diagonal(contentArea.topLeft(), contentArea.bottomRight());
-    QLineF widgetRight(contentArea.center().x()+ widgets.at(0).width()/2,
-                       contentArea.top(),
-                       contentArea.center().x()+ widgets.at(0).width()/2,
-                       contentArea.bottom());
-
     QPointF anchorPoint;
-    if(QLineF::BoundedIntersection != diagonal.intersect(widgetRight, &anchorPoint)) {
-        return widgets; //Return original since undefined error.
-                        //In this case widget's must be wider than the content area.
+   
+    if(startPoint.isNull()){
+
+        QLineF diagonal(contentArea.topLeft(), contentArea.bottomRight());
+        QLineF widgetRightSide(contentArea.center().x()+ rects.at(0).width()/2,
+                           contentArea.top(),
+                           contentArea.center().x()+ rects.at(0).width()/2,
+                           contentArea.bottom());
+
+        // right side line intersection with diagonal will be bottom right position
+        // for the first rect
+        if(QLineF::BoundedIntersection != 
+            diagonal.intersect(widgetRightSide, &anchorPoint)) {
+            return rects; //Return original since undefined error.
+                            //In this case widget's must be wider than the content area.
+        }
+    }else{
+        anchorPoint = startPoint - offsetPoint;
     }
 
-    //First widget to the center of the content area
-    foreach (QRectF g, widgets) {
-        g.moveBottomRight(anchorPoint);
-        toGeometries << g;
-        anchorPoint -= offsetPoint;
-        if(!contentArea.contains(anchorPoint)) {
-            anchorPoint = contentArea.bottomRight();
+    QRectF widgetRect;
+    for(int i=0;i<rects.count();++i) {
+        widgetRect = rects.at(i);
+        widgetRect.moveBottomRight(anchorPoint);
+        //if widget rect doesn't fit, try to move it
+        if(!contentArea.contains(widgetRect)) {
+            /*! precondition is that
+             widget's max height < content area height
+             widget's max widht < content area width
+            */
+            widgetRect.moveBottomRight(contentArea.bottomRight());
+            // anchorPoin is always previous bottom right
+            anchorPoint = widgetRect.bottomRight();
         }
+        toGeometries << widgetRect;
+        anchorPoint -= offsetPoint;
+        
     }
     return toGeometries;
 }
+
 
 /*!
     \class HsAnchorPointInCenter
@@ -110,8 +130,11 @@ QList<QRectF> HsAnchorPointInBottomRight::convert(
 #endif //COVERAGE_MEASUREMENT
 QList<QRectF> HsAnchorPointInCenter::convert(
     const QRectF &contentArea,
-    const QList<QRectF> &widgets)
+    const QList<QRectF> &rects,
+    const QPointF &startPoint )
 {
+    Q_UNUSED(startPoint)
+
     QList<QRectF> toGeometries;
 
     //Offset for widgets' centers position to each other
@@ -122,7 +145,7 @@ QList<QRectF> HsAnchorPointInCenter::convert(
 
     //First widget to the center of the content area
     QPointF anchorPoint = contentArea.center();
-    foreach (QRectF g, widgets) {
+    foreach (QRectF g, rects) {
         g.moveCenter(anchorPoint);
         toGeometries << g;
         anchorPoint -= offsetPoint;
@@ -132,6 +155,7 @@ QList<QRectF> HsAnchorPointInCenter::convert(
     }
     return toGeometries;
 }
+
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP

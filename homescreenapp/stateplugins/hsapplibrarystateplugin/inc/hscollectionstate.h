@@ -89,6 +89,8 @@ signals:
 
 private slots:
 
+    bool openTaskSwitcher();
+
     /**
      * Slot connected to List widget.
      *
@@ -237,6 +239,13 @@ private:
      * Own.
      */
     HbAction *mSecondarySoftkeyAction;
+
+    /**
+     * Old navigation icon.
+     * Not own.
+     */
+    HbAction *mOldNavigationAction;
+   
 
     /**
      * Item Model for the List.

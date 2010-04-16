@@ -103,7 +103,7 @@ symbian: plugin { # copy qtstub and manifest
     message(Remove "contains(MOBILITY, serviceframework)" after the QtSF refactorig is done!)
         
     !contains(MOBILITY, serviceframework):qtplugins.sources += resource/$${TARGET}.manifest
-    contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.s60xml z:$$qtplugins.path/$${TARGET}.xml"
+    contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.xml z:$$qtplugins.path/$${TARGET}.xml"
     
     for(qtplugin, qtplugins.sources):BLD_INF_RULES.prj_exports += "./$$qtplugin z:$$qtplugins.path/$$basename(qtplugin)"
 }

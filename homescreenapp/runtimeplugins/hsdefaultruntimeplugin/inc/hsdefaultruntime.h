@@ -19,6 +19,7 @@
 #define HSDEFAULTRUNTIME_H
 
 #include <QStateMachine>
+#include <qmobilityglobal.h>
 
 #ifndef HSDEFAULTRUNTIMEPLUGIN_UNITTEST
 	#define TEST_CLASS_FWD
@@ -29,6 +30,11 @@
 #endif
 
 class HsContentService;
+QTM_BEGIN_NAMESPACE
+class QValueSpacePublisher;
+QTM_END_NAMESPACE
+
+QTM_USE_NAMESPACE
 
 TEST_CLASS_FWD
 
@@ -49,6 +55,7 @@ protected:
 private:
     Q_DISABLE_COPY(HsDefaultRuntime)
 
+    void createStatePublisher();
     void createContentServiceParts();
     void createStates();
     void assignServices();
@@ -63,6 +70,8 @@ private:
 	
 	bool mHomeScreenActive;
 	bool mIdleStateActive;
+
+	QValueSpacePublisher *mPublisher;
     
     TEST_FRIEND
 };

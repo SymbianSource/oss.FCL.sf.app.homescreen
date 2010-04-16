@@ -18,9 +18,21 @@
 #include "tsactivation.h"
 
 #include "tslongpresswatcher.h"
+#include "tsexternalactivationwatcher.h"
 
+/*!
+    \class TsActivation
+    \ingroup group_tsserviceplugin
+    \brief Activation service.
+    
+    Service responsible for observing all events that might show TS. When any of them
+    occurs it is emiting activation signal.
+*/
 TsActivation::TsActivation(QObject *parent) : TsActivationInterface(parent)
 {
-    TsLongPressWatcher *watcher = new TsLongPressWatcher(this);
-    connect(watcher, SIGNAL(applicationKeyLongPress()), this, SIGNAL(activated()));
+    TsLongPressWatcher *longPressWatcher = new TsLongPressWatcher(this);
+    connect(longPressWatcher, SIGNAL(applicationKeyLongPress()), this, SIGNAL(activated()));
+    
+    TsExternalActivationWatcher *externalActivationWatcher = new TsExternalActivationWatcher(this);
+    connect(externalActivationWatcher, SIGNAL(activationRequested()), this, SIGNAL(activated()));    
 }

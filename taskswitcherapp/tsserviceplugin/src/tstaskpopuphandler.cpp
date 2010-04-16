@@ -21,6 +21,12 @@
 
 #include "tsdataroles.h"
 
+/*!
+    \class TsTaskPopupHandler
+    \ingroup group_tsserviceplugin
+    \brief Create popup with options for TS app.
+*/
+
 TsTaskPopupHandler::TsTaskPopupHandler(QObject *parent) : QObject(parent)
 {
 }

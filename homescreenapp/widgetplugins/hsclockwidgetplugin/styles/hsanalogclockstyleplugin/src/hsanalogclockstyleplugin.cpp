@@ -38,24 +38,21 @@ int HsAnalogClockStylePlugin::primitiveCount() const
 /*!
     @copydoc HbStyleInterface::createPrimitive()
  */
-HbWidgetBase* HsAnalogClockStylePlugin::createPrimitive(HbStyle::Primitive primitive, QGraphicsItem *parent) const
+QGraphicsItem* HsAnalogClockStylePlugin::createPrimitive(HbStyle::Primitive primitive, QGraphicsItem *parent) const
 {
     if (primitive == backgroundItemIndex) {
         HbIconItem *item = new HbIconItem("qtg_graf_clock_day_bg", parent);
         HbStyle::setItemName(item, "clock_background");
-        item->setZValue(1);
         return item;
     }
     else if (primitive == hourHandItemIndex) {
         HbIconItem *item = new HbIconItem("qtg_graf_clock_day_hour", parent);
         HbStyle::setItemName(item, "clock_hour_hand");
-        item->setZValue(3); // hour hand is on top of minute hand
         return item;
     }
     else if (primitive == minuteHandItemIndex) {
         HbIconItem *item = new HbIconItem("qtg_graf_clock_day_min", parent);
         HbStyle::setItemName(item, "clock_minute_hand");
-        item->setZValue(2); // minute hand is below hour hand
         return item;
     }
     return 0;

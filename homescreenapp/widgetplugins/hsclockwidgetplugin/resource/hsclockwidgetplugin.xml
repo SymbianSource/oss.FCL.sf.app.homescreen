@@ -4,7 +4,7 @@
     <filepath>hsclockwidgetplugin</filepath>
     <description>Themable clock widget.</description>
     <interface>
-        <name>com.nokia.IHomeScreenWidget</name>
+        <name>com.nokia.symbian.IHomeScreenWidget</name>
         <version>1.0</version>
         <description>The clock widget displays current time.</description>
         <capabilities></capabilities>

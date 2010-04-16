@@ -26,6 +26,16 @@
 #include "tsdeactivation.h"
 #include "tspresentation.h"
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+
+/*!
+    \class TsServicePlugin
+    \ingroup group_tsserviceplugin
+    \brief Plugin implementation.
+*/
+
 QObject *TsServicePlugin::createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session)
 {
     Q_UNUSED(context);
@@ -45,3 +55,7 @@ QObject *TsServicePlugin::createInstance(const QServiceInterfaceDescriptor &desc
 }
 
 Q_EXPORT_PLUGIN2(tsserviceplugin, TsServicePlugin)
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

@@ -4,7 +4,7 @@
     <filepath>hsshortcutwidgetplugin</filepath>
     <description>Shortcut widget</description>
     <interface>
-        <name>com.nokia.IHomeScreenWidget</name>
+        <name>com.nokia.symbian.IHomeScreenWidget</name>
         <version>1.0</version>
         <description></description>
         <capabilities></capabilities>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<confml:configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:confml="http://www.s60.com/xml/confml/2" xsi:schemaLocation="http://www.s60.com/xml/confml/2 http://www.s60.com/xml/confml/1#//confml2" name="data">
+  <confml:data>
+    <confml:HomeScreenDbSettings>
+      <confml:landscapeWallpaper/>
+      <confml:portraitWallpaper/>
+      <confml:maximumPageCount>8</confml:maximumPageCount>
+      <confml:defaultPageId map="HomeScreenDbSettings/Pages[@key='1']"/>
+      <confml:Widgets extensionPolicy="replace"><confml:id>1</confml:id><confml:uri>hsclockwidgetplugin</confml:uri><confml:pageId>1</confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>2</confml:id><confml:uri>hsdialerwidgetplugin</confml:uri><confml:pageId>1</confml:pageId></confml:Widgets>
+      <confml:Pages extensionPolicy="replace"><confml:id>1</confml:id><confml:indexPosition>0</confml:indexPosition></confml:Pages>
+      <confml:Pages><confml:id>2</confml:id><confml:indexPosition>1</confml:indexPosition></confml:Pages>
+      <confml:Pages><confml:id>3</confml:id><confml:indexPosition>2</confml:indexPosition></confml:Pages>
+      <confml:WidgetPresentations extensionPolicy="append"><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:width>150</confml:width><confml:height>150</confml:height><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='1']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>landscape</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:width>150</confml:width><confml:height>150</confml:height><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='1']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>136</confml:x><confml:y>276</confml:y><confml:width>81</confml:width><confml:height>81</confml:height><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='2']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>landscape</confml:key><confml:x>136</confml:x><confml:y>176</confml:y><confml:width>81</confml:width><confml:height>81</confml:height><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='2']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPreferences extensionPolicy="replace"><confml:key>clockType</confml:key><confml:value>Analog</confml:value><confml:widgetId>1</confml:widgetId></confml:WidgetPreferences>
+    </confml:HomeScreenDbSettings>
+  </confml:data>
+</confml:configuration>

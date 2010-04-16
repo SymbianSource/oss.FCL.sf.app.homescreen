@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include <QStandardItem>
+#include <qvaluespacepublisher.h>
 
 #include "hsapp_defs.h"
 #include "hsmenuservice.h"
@@ -25,6 +26,8 @@
 #include "caitemmodel.h"
 #include "hsmenuitemmodel.h"
 #include "hsmenucollectionsitemmodel.h"
+
+QTM_USE_NAMESPACE
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -47,6 +50,7 @@ HsMenuItemModel *HsMenuService::getAllApplicationsModel(
     query.addEntryTypeName(applicationTypeName());
     query.addEntryTypeName(urlTypeName());
     query.addEntryTypeName(widgetTypeName());
+    query.addEntryTypeName(templatedApplicationTypeName());
     query.setFlagsOn(VisibleEntryFlag);
     query.setFlagsOff(MissingEntryFlag);
     query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
@@ -165,6 +169,26 @@ bool HsMenuService::executeAction(int entryId, const QString &actionName)
              << "actionName:" << actionName;
 
     return CaService::instance()->executeCommand(entryId, actionName);
+}
+
+/*!
+ Launch task switcher
+ \retval boolean launching status
+ */
+bool HsMenuService::launchTaskSwitcher()
+{
+    qDebug() << "HsMenuService::launchTS";
+    QScopedPointer<CaEntry> tsEntry(new CaEntry);
+    tsEntry->setEntryTypeName(applicationTypeName());
+    tsEntry->setAttribute(
+    		applicationUidEntryKey(), QString::number(taskSwitcherUid)); 
+    int retval = CaService::instance()->executeCommand(*tsEntry, 
+            openActionIdentifier());
+    if(retval) {
+        QValueSpacePublisher publisher("/TaskSwitcher");
+        publisher.setValue("Activation", taskSwitcherPropertyValue);
+    }
+    return retval;
 }
 
 /*!

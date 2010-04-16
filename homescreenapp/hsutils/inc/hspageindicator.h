@@ -11,64 +11,51 @@
 *
 * Contributors:
 *
-* Description:  Page indicator
+* Description:
 *
 */
 
 #ifndef HSPAGEINDICATOR_H
 #define HSPAGEINDICATOR_H
 
-#include <hbwidget.h>
+#include <HbWidget>
 
 #include "hsutils_global.h"
+
 #include "hstest_global.h"
-
-class QGraphicsLinearLayout;
-class QParallelAnimationGroup;
-class HbIconItem;
-
 HOMESCREEN_TEST_CLASS(t_hsUtils)
 
-class HSUTILS_EXPORT HsPageIndicator: public HbWidget
+class HsPageIndicatorItem;
+
+class HSUTILS_EXPORT HsPageIndicator : public HbWidget
 {
     Q_OBJECT
 
 public:
-    HsPageIndicator(QGraphicsItem* parent = 0);
+    HsPageIndicator(QGraphicsItem *parent = 0);
     ~HsPageIndicator();
-       
-signals:
-    void currentItemChangeAnimationFinished();
 
-public slots:
-    void addItem(bool setAsCurrent=false,bool animated=true);
-    void removeItem(bool animated=true);
-    void setCurrentIndex(int currentIndex,bool animated=true);
-
-public:
-    void setItemCount(int itemCount);    
-    int itemCount();
-    int currentIndex();
-    bool isAnimatingCurrentItemChange();
+    void initialize(int itemCount, int activeItemIndex);
     
-private slots:
-    void resetEffect();
-    
-private: 
-    void addItemInternal(bool setAsCurrent,int itemIndex,bool animated=true);
+    int itemCount() const;
 
-    void startItemAnimation();
+    void setActiveItemIndex(int index);
+    int activeItemIndex() const;
+
+    void addItem(int activeItemIndex);
+    void removeItem(int activeItemIndex);
+
+    bool isAnimationRunning() const;
 
 private:
-    int mItemCount;
-    int mCurrentIndex;
-    HbIcon *mNonActiveIcon;
-    HbIcon *mActiveIcon;
-    QSizeF mItemSize;
-    QGraphicsLinearLayout *mPageIndicatorLayout;
-    QParallelAnimationGroup *mIconAnimationGroup;
+    Q_DISABLE_COPY(HsPageIndicator)
+    void layoutItems();    
+
+private:
+    QList<HsPageIndicatorItem *> mItems;    
+    int mActiveItemIndex;
 
     HOMESCREEN_TEST_FRIEND_CLASS(t_hsUtils)
 };
 
-#endif
+#endif // HSPAGEINDICATOR_H

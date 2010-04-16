@@ -16,62 +16,50 @@
 */
 
 #include <HbInstance>
+#include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
-#include "hsscene_p.h"
-#include "hsscenedata.h"
 #include "hspage.h"
-#include "hspagedata.h"
 #include "hswidgethost.h"
 #include "hsdatabase.h"
 #include "hswallpaper.h"
-#ifndef Q_OS_SYMBIAN
-#include "hsipcconnectiondispatcher.h"
-#endif
+#include "hsdatabase.h"
 
-HsScenePrivate::HsScenePrivate()
-    : mDatabaseId(-1),
-      mIsOnline(true),
-      mWallpaper(0),
-      mActivePage(0),
-      mActiveWidget(0)
-#ifndef Q_OS_SYMBIAN
-      ,mIpcConnectionDispatcher(0)
-#endif
-{
-    mWallpaper = new HsWallpaper;
-}
- 
-HsScenePrivate::~HsScenePrivate()
+
+/*!
+    Destructor.
+*/
+HsScene::~HsScene()
 {
     delete mWallpaper;
     qDeleteAll(mPages);
 }
-    
-HsScene::~HsScene()
-{
-}
 
+/*!
+    Return database id.
+*/
 int HsScene::databaseId() const
 {
-    return mD->mDatabaseId;
+    return mDatabaseId;
 }
 
+/*!
+    Load scene from database.
+*/
 bool HsScene::load()
 {
     HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
 
     HsSceneData sceneData;
     if (!db->scene(sceneData)) {
         return false;
     }
 
-    if (sceneData.portraitWallpaper().isEmpty()) {
-        mD->mWallpaper->setImagesById();
+    if (sceneData.portraitWallpaper.isEmpty()) {
+        mWallpaper->setImagesById();
     } else {
-        mD->mWallpaper->setImagesByPaths(
-            sceneData.landscapeWallpaper(), 
-            sceneData.portraitWallpaper());
+        mWallpaper->setImagesByPaths(
+            sceneData.landscapeWallpaper, 
+            sceneData.portraitWallpaper);
     }
 
     QList<HsPageData> pageDatas;
@@ -79,116 +67,197 @@ bool HsScene::load()
         return false;
     }
     
-    HsPage *page = 0;
     foreach (HsPageData pageData, pageDatas) {
-        page = new HsPage;
-        page->setDatabaseId(pageData.id());
+        HsPage *page = new HsPage;
+        page->setDatabaseId(pageData.id);
         if (page->load()) {
-            mD->mPages << page;
+            mPages.append(page);
         } else {
-            qDebug() << "HsScene: Page loading failed.";
-            // TODO
+            delete page;
+            continue;
+        }
+        if (pageData.id == sceneData.defaultPageId) {
+            mActivePage = page;
+            mActivePage->setRemovable(false);
         }
     }
-
-    int defaultPageIndex = sceneData.defaultPage().index();        
-    if(defaultPageIndex > -1){
-        mD->mActivePage = mD->mPages[defaultPageIndex];
-        mD->mActivePage->setRemovable(false);
-    }
-#ifndef Q_OS_SYMBIAN
-    mD->mIpcConnectionDispatcher = new HsIpcConnectionDispatcher("hs_content_publish");
-    mD->mIpcConnectionDispatcher->setParent(this);
-    return mD->mIpcConnectionDispatcher->start();
-#endif    
+   
+    mMaximumPageCount = sceneData.maximumPageCount;
+	return true;
 }
 
+/*!
+    Return wallpaper. 
+*/
 HsWallpaper *HsScene::wallpaper() const
 {
-    return mD->mWallpaper;
+    return mWallpaper;
 }
 
+/*!
+   Return pages array.
+*/
 QList<HsPage *> HsScene::pages() const
 {
-    return mD->mPages;
+    return mPages;
 }
     
+/*!
+    Add page \a page.
+*/
 bool HsScene::addPage(HsPage *page)
 {
     if (!page) {
         return false;
     }
    
-    if (mD->mPages.contains(page)) {
+    if (mPages.contains(page)) {
         return true;
     }
 
     HsDatabase *db = HsDatabase::instance();
-
-    HsPageData pageData;
-    if (!db->page(page->databaseId(), pageData, false)) {
+    
+    HsPageData data;
+    data.id = page->databaseId();
+    if (!db->page(data)) {
         return false;
     }
-    int index = mD->mPages.count();
-    if (pageData.index() != index) {
-        pageData.setIndex(index);
-        if (!db->updatePage(pageData, false)) {
+
+    db->transaction();
+
+    for (int i = data.indexPosition; i < mPages.count(); ++i) {
+        data.id = mPages.at(i)->databaseId();
+        data.indexPosition = i + 1;
+        if (!db->updatePage(data)) {
+            db->rollback();
             return false;
         }
     }
     
-    mD->mPages << page;
+    db->commit();
+    
+    mPages.insert(data.indexPosition, page);
     return true;
 }
     
+/*!
+    Removes page \a page.
+*/
 bool HsScene::removePage(HsPage *page)
 {
     if (!page) {
         return false;
     }
-    return mD->mPages.removeOne(page);
+
+    if (!mPages.contains(page)) {
+        return true;
+    }
+
+    int index = mPages.indexOf(page) + 1;
+
+    HsDatabase *db = HsDatabase::instance();
+    db->transaction();
+
+    HsPageData data;
+    for (int i = index; i < mPages.count(); ++i) {
+        data.id = mPages.at(i)->databaseId();
+        data.indexPosition = i - 1;
+        if (!db->updatePage(data)) {
+            db->rollback();
+            return false;
+        }
+    }
+
+    if (!page->deleteFromDatabase()) {
+        db->rollback();
+        return false;
+    }
+
+    db->commit();
+
+    mPages.removeOne(page);
+    return true;
 }
  
+/*!
+    Set active page \a page.
+*/
 bool HsScene::setActivePage(HsPage *page)
 {
     if (!page) {
         return false;
     }
    
-    if (!mD->mPages.contains(page)) {
+    if (!mPages.contains(page)) {
         return false;
     }
 
-    mD->mActivePage = page;
+    if (page == mActivePage) {
+        return true;
+    }
+
+    mActivePage = page;
+
+    foreach (HsPage *p, mPages) {
+        if (p == mActivePage) {
+            p->showWidgets();
+        } else {
+            p->hideWidgets();
+        }
+    }
+
     return true;
 }
 
+/*!
+    Set active page \a index.
+*/
 bool HsScene::setActivePageIndex(int index)
 {
-    if (index < 0 || mD->mPages.count() <= index) {
+    if (index < 0 || mPages.count() <= index) {
         return false;
     }
-    return setActivePage(mD->mPages[index]);
+    return setActivePage(mPages[index]);
 }
 
+/*!
+    Return active page.
+*/
 HsPage *HsScene::activePage() const
 {
-    return mD->mActivePage;
+    return mActivePage;
 }
 
+/*!
+    Return active page index.
+*/
 int HsScene::activePageIndex() const
 {
-    return mD->mPages.indexOf(mD->mActivePage);
+    return mPages.indexOf(mActivePage);
 }
 
+/*!
+    Return maximum number of pages.
+*/
+int HsScene::maximumPageCount() const
+{
+    return mMaximumPageCount;
+}
+
+/*!
+    Set active widget \a widget.
+*/
 void HsScene::setActiveWidget(HsWidgetHost *widget)
 {
-    mD->mActiveWidget = widget;
+    mActiveWidget = widget;
 }
  
+/*!
+   Return active widget.
+*/
 HsWidgetHost *HsScene::activeWidget() const
 {
-    return mD->mActiveWidget;
+    return mActiveWidget;
 }
 /*!
     Toggle application online state. Defaults 
@@ -196,17 +265,23 @@ HsWidgetHost *HsScene::activeWidget() const
 */
 void HsScene::setOnline(bool online)
 {
-    mD->mIsOnline = online;
-    foreach (HsPage *page, mD->mPages) {
+    mIsOnline = online;
+    foreach (HsPage *page, mPages) {
         page->setOnline(online);
     }
 }
 
+/*!
+    Return current online setting.
+*/
 bool HsScene::isOnline()const
 {
-    return mD->mIsOnline;
+    return mIsOnline;
 }
 
+/*!
+    Singleton. 
+*/
 HsScene *HsScene::instance()
 {
     if (mInstance.isNull()) {
@@ -215,20 +290,39 @@ HsScene *HsScene::instance()
     return mInstance.data();
 }
 
+/*!
+    Return current orientation.
+*/
 Qt::Orientation HsScene::orientation()
 {
-    return hbInstance->orientation();
+    return mainWindow()->orientation();
 }
 
+/*!
+    Return main window.
+*/
 HbMainWindow *HsScene::mainWindow()
 {
     return hbInstance->allMainWindows().first();
 }
 
+/*!
+    Constructor
+*/
 HsScene::HsScene(QObject *parent)
-    : QObject(parent)
+  : QObject(parent),
+    mDatabaseId(-1),
+    mIsOnline(true),
+    mWallpaper(0),
+    mMaximumPageCount(1),
+    mActivePage(0),
+    mActiveWidget(0)
+
 {
-    mD.reset(new HsScenePrivate);
+    mWallpaper = new HsWallpaper;
 }
 
+/*!
+    Points to the scene instance.
+*/
 QScopedPointer<HsScene> HsScene::mInstance(0);

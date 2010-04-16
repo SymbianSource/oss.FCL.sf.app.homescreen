@@ -101,10 +101,12 @@ private:
     void subscribeForMemoryCardRemove(int entryId);
 
 private:
-
+    
     HbDialog *mPopupDialog;
 
     CaNotifier *mNotifier;
+    
+    QObjectList mObjectList;
 
 };
 

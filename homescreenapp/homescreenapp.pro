@@ -23,8 +23,11 @@ SUBDIRS  += hsutils \
             stateplugins \
             widgetplugins \
             hsapplication \
-            hscontentpublishplugin \
-            ./../tsrc
+            hsmenucontentpublish
+
+symbian:SUBDIRS  += hshomescreenclientplugin
+
+SUBDIRS  += ./../tsrc
 
 CONFIG += ordered
 

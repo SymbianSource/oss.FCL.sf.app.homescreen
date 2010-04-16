@@ -28,10 +28,10 @@ SOURCES +=  src/tsdefaultruntime.cpp \
 
 symbian {
     load(data_caging_paths) 
-    TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.CAPABILITY = ALL -TCB
 
     plugin.sources = tsdefaultruntimeplugin.dll
     plugin.path = $$QT_PLUGINS_BASE_DIR     
     DEPLOYMENT += plugin 
 }
+
+include(../../common.pri)

@@ -25,6 +25,12 @@
 #include "tsdataroles.h"
 
 /*!
+    \class TsRecentApplicationsModel
+    \ingroup group_tsserviceplugin
+    \brief Model storing recent application.
+*/
+
+/*!
     Constructor
     \param query used to create model
     \param pointer to parent object

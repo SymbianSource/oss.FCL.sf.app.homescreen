@@ -22,7 +22,7 @@ kqtihswallpapers.files = ./resource_win/bg_1.png \
 
 homescreendb.CONFIG += no_build
 homescreendb.path = $$DESTDIR
-homescreendb.files = ./resource_win/homescreendb
+homescreendb.files = ./resource_win/homescreen.db
 
 wallpapers.CONFIG += no_build
 wallpapers.path = $$DESTDIR/wallpapers

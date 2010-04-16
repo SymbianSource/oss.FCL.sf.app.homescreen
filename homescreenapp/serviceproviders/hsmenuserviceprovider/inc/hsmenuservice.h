@@ -49,6 +49,7 @@ public:
     static QString getName(int entryId);
     static bool executeAction(int entryId, const QString &actionName =
                                   openActionIdentifier());
+    static bool launchTaskSwitcher();
 
     static int createCollection(const QString &name);
     static bool renameCollection(int collectionId,

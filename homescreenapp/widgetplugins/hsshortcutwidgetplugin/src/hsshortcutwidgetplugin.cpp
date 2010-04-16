@@ -46,7 +46,7 @@ QObject *HsShortcutWidgetPlugin::createInstance(const QServiceInterfaceDescripto
     Q_UNUSED(context);
     Q_UNUSED(session);
 
-    if (descriptor.interfaceName() == QLatin1String("com.nokia.IHomeScreenWidget")) {
+    if (descriptor.interfaceName() == QLatin1String("com.nokia.symbian.IHomeScreenWidget")) {
         return new HsShortcutWidget();
     } else {
         return 0;

@@ -34,9 +34,9 @@
 [0x1028315F],0,0,0,{"S60ProductID"}
  
 "/epoc32/release/armv5/urel/helloworldwidgetplugin.dll"                                           - "c:/sys/bin/helloworldwidgetplugin.dll"
-"/epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"  - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"
-"/epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"
-"/epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.xml"       - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.xml"
-"/epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"       - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"  - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"
+"../helloworldwidgetplugin/resource/helloworldwidgetplugin.xml_for_sisx"                          - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.xml"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"       - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"
 
 "/epoc32/release/armv5/urel/helloworldwidgetplugininstaller.exe"                                  - "c:/sys/bin/helloworldwidgetplugininstaller.exe", FR, RB, RW

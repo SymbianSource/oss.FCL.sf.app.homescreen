@@ -16,12 +16,16 @@
 */
 
 #include <QGraphicsLinearLayout>
+
 #include <HbIconItem>
 
 #include "hstrashbinwidget.h"
 
-const char* KTrashBinNormalItemImageName = "qtg_graf_hs_delete_normal";
-const char* KTrashBinHighlightItemImageName = "qtg_graf_hs_delete_highlight";
+namespace
+{
+    const char gNormalIconName[]    = "qtg_graf_hs_delete_normal";
+    const char gHighlightIconName[] = "qtg_graf_hs_delete_highlight";
+}
 
 /*!
     \internal
@@ -43,14 +47,14 @@ HsTrashBinWidget::HsTrashBinWidget(QGraphicsItem *parent)
       mHighlightIcon(0),
       mNormalIconVisible(false)
 {
-    mIconItem = new HbIconItem(this);
-
-    mNormalIcon = new HbIcon(KTrashBinNormalItemImageName);
-    mHighlightIcon = new HbIcon(KTrashBinHighlightItemImageName);
-
+    mNormalIcon = new HbIcon(gNormalIconName);
+    mHighlightIcon = new HbIcon(gHighlightIconName);
+    
+    mIconItem = new HbIconItem;
     mIconItem->setIcon(*mNormalIcon);
-    setPreferredSize(80,80); // workaround for icon updating problem when changing theme
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Horizontal);
+    
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addItem(mIconItem);
     setLayout(layout);
 }
@@ -61,7 +65,6 @@ HsTrashBinWidget::HsTrashBinWidget(QGraphicsItem *parent)
 */
 HsTrashBinWidget::~HsTrashBinWidget()
 {
-
 }
 
 /*!

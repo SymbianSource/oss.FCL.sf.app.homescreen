@@ -16,6 +16,7 @@
 */
 
 #include <QGraphicsLinearLayout>
+#include <QGraphicsSceneMouseEvent>
 
 #include <HbStackedLayout>
 #include <HbIconItem>
@@ -147,7 +148,6 @@ void HsShortcutWidget::onShow()
 */
 void HsShortcutWidget::onHide()
 {
-    hide();
 }
 
 /*!
@@ -156,9 +156,11 @@ void HsShortcutWidget::onHide()
     Executes configured action
 */
 void HsShortcutWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    Q_UNUSED(event)
-    
+{   
+    if (!contains(event->pos())) {
+        return;
+    }
+
     CaEntry *entry = CaService::instance()->getEntry(mMcsId);
     if (!entry) {
         return;
@@ -244,8 +246,8 @@ void HsShortcutWidget::createCaNotifier(int aShortcutId)
     itemNotifier->setParent(this);
 
     connect(itemNotifier,
-        SIGNAL(entryChanged(const CaEntry&, ChangeType)),
-        SLOT(onEntryChanged(const CaEntry&, ChangeType)),Qt::QueuedConnection);
+        SIGNAL(entryChanged(CaEntry,ChangeType)),
+        SLOT(onEntryChanged(CaEntry,ChangeType)),Qt::QueuedConnection);
 }
 
 /*!

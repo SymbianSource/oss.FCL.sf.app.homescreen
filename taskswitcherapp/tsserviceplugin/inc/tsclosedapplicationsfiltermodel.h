@@ -20,15 +20,6 @@
 
 #include <QSortFilterProxyModel>
 
-/**
- * @ingroup group_tsserviceprovider
- * @brief TsClosedApplicationsFilterModel filtering model to hide closed apps.
- *
- * Filter closed apps by task switcher from currently presented.
- *
- * @lib tsserviceprovider.lib
- * @since S60 ?S60_version
- */
 class TsClosedApplicationsFilterModel : public QSortFilterProxyModel
 {
     Q_OBJECT

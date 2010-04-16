@@ -24,11 +24,10 @@
 
 /*!
     \class TsDefaultRuntimePlugin
-    \ingroup group_tsdefaultruntimeprovider
+    \ingroup group_tsdefaultruntimeplugin
     \brief Provides a default implementation of the taskswitcher runtime.
 
     This provider includes a default implementation of the taskswitcher runtime.
-    The runtime is described in the tsdefaultruntimeplugin.xml file.
 */
 
 #ifdef COVERAGE_MEASUREMENT

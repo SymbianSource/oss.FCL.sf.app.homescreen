@@ -17,6 +17,15 @@
 #include "tsclosedapplicationsfiltermodel.h"
 #include "tsdataroles.h"
 
+
+/*!
+    \class TsClosedApplicationsFilterModel
+    \ingroup group_tsserviceplugin
+    \brief Filtering model to hide closed apps.
+	
+	When app is closed from Task Switcher it is hidden from it and will be presented when TS is started once more.
+*/
+
 /*!
     Constructor
     \param pointer to parent object

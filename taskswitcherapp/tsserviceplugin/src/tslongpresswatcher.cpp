@@ -18,6 +18,11 @@
 #include "tslongpresswatcher.h"
 #include "tslongpresswatcher_p.h"
 
+/*!
+    \class TsLongPressWatcher
+    \ingroup group_tsserviceplugin
+    \brief Class watching app key events.
+*/
 TsLongPressWatcher::TsLongPressWatcher(QObject *parent) : QObject(parent)
 {
     d_ptr = new TsLongPressWatcherPrivate(this);

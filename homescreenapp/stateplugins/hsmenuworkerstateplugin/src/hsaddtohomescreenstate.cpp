@@ -31,6 +31,7 @@
 
 const char SHORTCUT_WIDGET_URI[] = "hsshortcutwidgetplugin";
 const char SHORTCUT_ID[] = "mcsId";
+const char ADD_TO_HOMESCREEN_STATE[] = "AddToHomeScreenState";
 
 /*!
  \class HsAddToHomeScreenState
@@ -46,7 +47,7 @@ const char SHORTCUT_ID[] = "mcsId";
  \retval void
  */
 HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
-    HsMenuBaseState("AddToHomeScreenState", parent)
+    HsMenuBaseState(ADD_TO_HOMESCREEN_STATE, parent)
 {
     requestServices(QList<QVariant> () << SHORTCUT_SERVICE_KEY
                     << CONTENT_SERVICE_KEY);
@@ -82,16 +83,16 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
     const int entryId = data.value(itemIdKey()).toInt();
 
     if (entryTypeName == widgetTypeName()) {
-        const QString library =
-            data.value(widgetLibraryAttributeName()).toString();
-
         const QString uri = data.value(widgetUriAttributeName()).toString();
-
-        addWidget(*contentService(), library, uri, entryId);
+        addWidget(*contentService(), uri, entryId);
+        HsMenuService::touch(entryId);
+    } else if (entryTypeName==templatedApplicationTypeName()) {
+        addTApplication(*contentService(), entryId, data);
         HsMenuService::touch(entryId);
     } else {
         addShortcut(*contentService(), entryId);
     }
+
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::onEntry");
 }
 
@@ -104,13 +105,12 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
  \param activePage: active page of home screen
  \retval void
  */
-void HsAddToHomeScreenState::addWidget(HsContentService &contentService,
-                                       const QString &library, const QString &uri, int entryId)
+void HsAddToHomeScreenState::addWidget(HsContentService &contentService, 
+        const QString &uri, int entryId)
 {
     HSMENUTEST_FUNC_ENTRY("HsAddToHomeScreenState::addWidget");
-    QVariantMap params;
-    params["library"] = library;
-    params["uri"] = uri;
+    QVariantHash params;
+    params[URI] = uri;
     bool ok = contentService.createWidget(params);
     if (!ok) {
         showMessageWidgetCorrupted(entryId);
@@ -170,16 +170,54 @@ void HsAddToHomeScreenState::addShortcut(HsContentService &contentService,
         }
     }
     if (!mLibraryPath.isEmpty()) {
-        QVariantMap params;
-        params["library"] = mLibraryPath;
-        params["uri"] = SHORTCUT_WIDGET_URI;
-        QVariantMap preferences;
+        QVariantHash params;
+        params[LIBRARY] = mLibraryPath;
+        params[URI] = SHORTCUT_WIDGET_URI;
+        QVariantHash preferences;
         preferences[SHORTCUT_ID] = QString::number(entryId);
-        params["preferences"] = preferences;
+        params[PREFERENCES] = preferences;
         const bool result = contentService.createWidget(params);
         logActionResult("Adding shortcut", entryId, result);
     }
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::addShortcut");
+}
+
+/*!
+ Adds a tapplication to active page of home screen
+ \param shortcutService: service for adding shortcuts
+ \param entryId: menu entry id
+ \param data: data from event
+ \retval void
+ */
+void HsAddToHomeScreenState::addTApplication(HsContentService &contentService,
+        int entryId, QVariantMap &data)
+{
+    CaEntry* entry = CaService::instance()->getEntry(entryId);
+    
+
+    if (entry->attributes().contains(widgetUriAttributeName())) {
+        QVariantHash params;
+        const QString uri = entry->attribute(widgetUriAttributeName());
+        params[URI] = uri;
+        
+        QVariantHash preferences;
+        QVariantMap widgetParams = data.value(widgetParam()).toMap();
+        QMapIterator<QString, QVariant> i(widgetParams);
+        while (i.hasNext()) {
+            i.next();
+            QString key(i.key());
+            QString value = i.value().toString();
+            preferences.insert(key.remove(widgetParam()), value);
+        }
+        params[PREFERENCES] = preferences;
+
+        bool ok = contentService.createWidget(params);
+        if (!ok) {
+            addShortcut(contentService, entryId);
+        }
+    } else {
+        addShortcut(contentService, entryId);
+    }
 }
 
 /*!

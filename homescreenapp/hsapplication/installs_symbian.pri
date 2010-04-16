@@ -17,7 +17,7 @@
 deploy.path = z:
 
 exports1.path = /private/20022F35
-exports1.sources += resource_s60/homescreendb
+exports1.sources += resource_s60/homescreen.db
 for(export1, exports1.sources):BLD_INF_RULES.prj_exports += "./$$export1 $$deploy.path$$exports1.path/$$basename(export1)"
 
 exports2.path = /private/20022f35/wallpapers

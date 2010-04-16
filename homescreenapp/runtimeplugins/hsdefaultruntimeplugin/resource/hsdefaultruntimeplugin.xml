@@ -4,7 +4,7 @@
     <filepath>hsdefaultruntimeplugin</filepath>
     <description>Homescreen Runtime Plugin</description>
     <interface>
-        <name>com.nokia.homescreen.runtime.HsRuntime</name>
+        <name>com.nokia.symbian.IHomeScreenRuntime</name>
         <version>1.0</version>
         <description>Default implementation for homescreen runtime</description>
         <capabilities></capabilities>

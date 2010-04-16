@@ -39,9 +39,9 @@
 XQAIWGetImageClient::XQAIWGetImageClient():
     mImageGrid(0)
 {
-    mImageGrid = new HsImageGridWidget(QStringList(),0);
-    mBackAction = new HbAction(Hb::BackAction, this);
-
+    mImageGrid = new HsImageGridWidget(QStringList(), 0);
+    mBackAction = new HbAction(Hb::BackNaviAction, this);
+    mImageGrid->setNavigationAction(mBackAction);
 }
 
 // ---------------------------------------------------------------------------
@@ -99,22 +99,20 @@ void XQAIWGetImageClient::fetch( QVariantMap filter, XQAIWMultimediaFlags flag)
 
     QStringList images;
 
-    foreach(QString imageDir, imageDirs)
-    {
+    foreach (QString imageDir, imageDirs) {
         findImages(QDir(imageDir).absolutePath(), filters, images);
     }
 
-    HbMainWindow *window = HbInstance::instance()->allMainWindows().at(0);
-    window->addSoftKeyAction(Hb::SecondarySoftKey, mBackAction);
-
+    HbMainWindow *window = HbInstance::instance()->allMainWindows().first();
+        
     mImageGrid->setContent(images);
 
-    connect(mImageGrid,SIGNAL(imageSelected(const QString&)),this,SLOT(imageSelected(const QString&)));
+    connect(mImageGrid, SIGNAL(imageSelected(QString)), SLOT(imageSelected(QString)));
 
-    HbInstance::instance()->allMainWindows().at(0)->addView(mImageGrid);
-    HbInstance::instance()->allMainWindows().at(0)->setCurrentView(mImageGrid,false);
+    window->addView(mImageGrid);
+    window->setCurrentView(mImageGrid, false);
 
-    connect(mBackAction,SIGNAL(triggered()),this,SLOT(imageSelectionCancelled()));
+    connect(mBackAction, SIGNAL(triggered()), SLOT(imageSelectionCancelled()));
 }
 
 // ---------------------------------------------------------------------------
@@ -128,10 +126,9 @@ void XQAIWGetImageClient::imageSelected(const QString& val)
 
     list << val;
 
-    HbMainWindow *window = HbInstance::instance()->allMainWindows().at(0);
+    HbMainWindow *window = HbInstance::instance()->allMainWindows().first();
     window->removeView(mImageGrid);
-    window->removeSoftKeyAction(Hb::SecondarySoftKey, mBackAction);
-
+    
     emit fetchComplete(list);
     QStringList images;
     mImageGrid->setContent(images);
@@ -149,14 +146,12 @@ void XQAIWGetImageClient::imageSelectionCancelled()
 {
     mImageGrid->disconnect(this);
 
-    HbMainWindow *window = HbInstance::instance()->allMainWindows().at(0);
+    HbMainWindow *window = HbInstance::instance()->allMainWindows().first();
     window->removeView(mImageGrid);
-    window->removeSoftKeyAction(Hb::SecondarySoftKey, mBackAction);
-
+    
     emit fetchFailed(-1);//KErrNotFound
     QStringList images;
     mImageGrid->setContent(images);
-
 }
 
 // ---------------------------------------------------------------------------

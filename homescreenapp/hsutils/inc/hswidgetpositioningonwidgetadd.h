@@ -28,8 +28,9 @@ public:
     virtual ~HsWidgetPositioningOnWidgetAdd() {}
     
     virtual QList<QRectF> convert(const QRectF &contentArea,
-                                  const QList<QRectF> &widgets) = 0;
-
+                                  const QList<QRectF> &rects, 
+                                  const QPointF &startPoint) = 0;
+   
     static void setInstance(HsWidgetPositioningOnWidgetAdd *instance);
     static HsWidgetPositioningOnWidgetAdd *instance();
 
@@ -41,15 +42,18 @@ class HSUTILS_EXPORT HsAnchorPointInBottomRight : public HsWidgetPositioningOnWi
 {
 public:
     QList<QRectF> convert(const QRectF &contentArea,
-                          const QList<QRectF> &widgets);
+                          const QList<QRectF> &rects,
+                          const QPointF &startPoint);
+ 
 };
 
 class HSUTILS_EXPORT HsAnchorPointInCenter : public HsWidgetPositioningOnWidgetAdd
 {
 public:
     QList<QRectF> convert(const QRectF &contentArea,
-                          const QList<QRectF> &widgets);
-};
+                          const QList<QRectF> &rects,
+                          const QPointF &startPoint);
+ };
 
 
 #endif // HSWIDGETPOSITIONINGONWIDGETADD_H

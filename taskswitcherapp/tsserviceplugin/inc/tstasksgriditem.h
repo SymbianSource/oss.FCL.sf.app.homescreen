@@ -24,11 +24,11 @@ class HbPushButton;
 
 class TsTasksGridItem : public HbAbstractViewItem
 {
-
     Q_OBJECT
 
 public:
     TsTasksGridItem();
+    TsTasksGridItem(const TsTasksGridItem& item);
     ~TsTasksGridItem();
 
     HbAbstractViewItem *createItem();

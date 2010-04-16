@@ -18,7 +18,7 @@ TEMPLATE = app
 
 include(../common.pri)
 
-LIBS += -lhsutils
+LIBS += -lhsutils -lhsdomainmodel
 CONFIG += console
 
 QT += xml
@@ -34,7 +34,8 @@ DEPENDPATH += . \
 
 INCLUDEPATH += . \
                ./inc \
-                ../hsutils/inc
+                ../hsutils/inc \
+                ../hsdomainmodel/inc
 
 TRANSLATIONS = homescreen.ts
 
@@ -49,6 +50,11 @@ symbian: {
     appkey:DEFINES += S60APP_KEY
     LIBS += -lefsrv
     include(installs_symbian.pri)
+
+    CONFIG += service
+    LIBS +=  -lxqservice -lxqserviceutil 
+           
+    SERVICE.FILE = ipc_service_conf.xml
 }
 
 win32: {

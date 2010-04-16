@@ -26,7 +26,7 @@ QTM_USE_NAMESPACE
 
 /*!
     \class TsDefaultRuntime
-    \ingroup group_tsdefaultruntimeprovider
+    \ingroup group_tsdefaultruntimeplugin
     \brief Default implementation of the taskswitcher runtime.
 */
 
@@ -80,9 +80,7 @@ TsDefaultRuntime::TsDefaultRuntime(QObject *parent) : QStateMachine(parent)
 QObject *TsDefaultRuntime::createCriticalInterface(QServiceManager *serviceManager, const QString &name)
 {
     QObject *interface = serviceManager->loadInterface(name);
-    if (!interface) {
-        qFatal("Cannot initialize critical %s interafce.", qPrintable(name));
-    }
+    Q_ASSERT_X(interface, "TsDefaultRuntime::createCriticalInterface", qPrintable(QString("Cannot initialize critical %1 interafce").arg(name)));
     interface->setParent(this);
     return interface;
 }

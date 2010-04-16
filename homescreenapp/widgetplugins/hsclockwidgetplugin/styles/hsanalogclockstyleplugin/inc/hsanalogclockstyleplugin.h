@@ -34,7 +34,7 @@ class HsAnalogClockStylePlugin: public QObject, public HbStyleInterface
 
 public:
     int primitiveCount() const;
-    HbWidgetBase *createPrimitive(HbStyle::Primitive primitive, QGraphicsItem *parent = 0) const;
+    QGraphicsItem *createPrimitive(HbStyle::Primitive primitive, QGraphicsItem *parent = 0) const;
     void updatePrimitive(QGraphicsItem *item, HbStyle::Primitive primitive, const QStyleOption *option) const;
     QString layoutPath() const;
 	

@@ -22,7 +22,18 @@
 #include <hbanchorlayout.h>
 #include "tsdataroles.h"
 
+/*!
+    \class TsTasksGridItem
+    \ingroup group_tsserviceplugin
+    \brief Item that should be presented in grid.
+*/
+
+
 TsTasksGridItem::TsTasksGridItem() : HbAbstractViewItem()
+{
+}
+
+TsTasksGridItem::TsTasksGridItem(const TsTasksGridItem &item) : HbAbstractViewItem(item)
 {
     // add screenshot
     mScreenshotLabel = new HbLabel();
@@ -67,7 +78,7 @@ TsTasksGridItem::~TsTasksGridItem()
 
 HbAbstractViewItem *TsTasksGridItem::createItem()
 {
-    TsTasksGridItem *newItem = new TsTasksGridItem();
+    TsTasksGridItem *newItem = new TsTasksGridItem(*this);
     connect(newItem, SIGNAL(deleteClicked(QModelIndex)), itemView(), SIGNAL(deleteButtonClicked(QModelIndex)));
     return newItem;
 }

@@ -62,7 +62,7 @@
         <filepath>helloworldwidgetplugin</filepath>
         <description>Example widget</description>
         <interface>
-            <name>com.nokia.IHomeScreenWidget</name>
+            <name>com.nokia.symbian.IHomeScreenWidget</name>
             <version>1.0</version>
             <description>Example of home screen widget</description>
             <capabilities></capabilities>
@@ -88,9 +88,9 @@
     CONFIG += plugin mobility hb
     MOBILITY = serviceframework
     
-    HEADERS += ./inc/*.h
-    SOURCES += ./src/*.cpp
-    
+    HEADERS += ./inc/ .h
+    SOURCES += ./src/ .cpp
+  
     DESTDIR = $${EPOCROOT}epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E
     
     INCLUDEPATH += ./inc               
@@ -136,7 +136,7 @@ QObject *HelloWorldWidgetPlugin::createInstance(const QServiceInterfaceDescripto
     Q_UNUSED(context);
     Q_UNUSED(session);
 
-    if (descriptor.interfaceName() == QLatin1String("com.nokia.IHomeScreenWidget")) {
+    if (descriptor.interfaceName() == QLatin1String("com.nokia.symbian.IHomeScreenWidget")) {
         return new HelloWorldWidget();
     } else {
         return 0;

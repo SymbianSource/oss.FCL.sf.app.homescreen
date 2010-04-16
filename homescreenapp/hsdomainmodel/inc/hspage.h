@@ -48,7 +48,6 @@ public:
     bool addNewWidget(HsWidgetHost *widgetHost);
     void layoutNewWidgets();
     void resetNewWidgets();    
-
     bool deleteFromDatabase();
 
     QList<HsWidgetHost *> widgets() const;
@@ -57,10 +56,13 @@ public:
     void setRemovable(bool removable);
 
     bool updateZValues();
-    
-    void setOnline(bool online = true);
 
     static HsPage *createInstance(const HsPageData &pageData);
+
+public slots:
+    void showWidgets();
+    void hideWidgets();
+    void setOnline(bool online = true);
 
 private:
     void connectWidget(HsWidgetHost *widget);
@@ -73,8 +75,9 @@ private:
     int mDatabaseId;    
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
-    QList<HsWidgetHost *> mNewWidgets;
-
+    QList<HsWidgetHost*> mNewWidgets;
+    QMap<QString, QPointF> mStartPoint; 
+    
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };
  

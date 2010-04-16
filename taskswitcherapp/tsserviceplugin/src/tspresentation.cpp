@@ -26,10 +26,15 @@
 
 // FIXME: workaround for Orbit bug: not moving to foreground after QWidget::activateWindow();
 #ifdef Q_OS_SYMBIAN
-#include <APGTASK.H>
+#include <apgtask.h>
 #include <eikenv.h>
 #endif    
 
+/*!
+    \class TsPresentation
+    \ingroup group_tsserviceplugin
+    \brief Class providing UI for presenting TS data.
+*/
 TsPresentation::TsPresentation(QObject *parent) : TsPresentationInterface(parent), mDialog(NULL), mGrid(NULL)
 {
     HbMainWindow *mainWindow = HbInstance::instance()->allMainWindows().first();
@@ -92,12 +97,9 @@ void TsPresentation::show()
     // FIXME: workaround for Orbit bug: not moving to foreground after QWidget::activateWindow();
     TApaTaskList taskList(CEikonEnv::Static()->WsSession());
     TApaTask task = taskList.FindApp(RProcess().Type()[2]);
-    if (task.Exists()) {
-        task.BringToForeground();
-    } else {
-        qWarning("Can't bring TaskSwitcher to foreground: task not found");
-    }    
-#endif    
+    Q_ASSERT_X(task.Exists(), "Bringing task switcher to foreground", "Application couldn't find task with its own UID");
+    task.BringToForeground();
+#endif
    
     mDialog->show();
 }

@@ -19,6 +19,14 @@
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
 
+/*!
+    \class TsDocumentLoader
+    \ingroup group_tsserviceplugin
+    \brief Document loader.
+	
+	TS implementation of document loader. It is creating TS objects used in UI
+*/
+
 QObject *TsDocumentLoader::createObject(const QString &type, const QString &name)
 {
     if (type == TsTasksGrid::staticMetaObject.className()) {

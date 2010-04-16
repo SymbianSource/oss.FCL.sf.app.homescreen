@@ -21,14 +21,11 @@ MOBILITY = serviceframework
 HEADERS += ./inc/*.h
 SOURCES += ./src/*.cpp
 
-DESTDIR = $${EPOCROOT}epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E
-win32: PLUGIN_SUBDIR = /hsresources/import/widgetregistry/20022F7E
-symbian: PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F7E
-include(../../../common.pri)
-
 INCLUDEPATH += ./inc               
 
 symbian: {
+
+    DESTDIR = /private/20022F35/import/widgetregistry/20022F7E
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
     TARGET.UID3 = 0x20022F7E
@@ -36,18 +33,32 @@ symbian: {
     TARGET.CAPABILITY = ALL -TCB
     
     plugins.path = $${DESTDIR}
-    plugins.sources = $${TARGET}.dll
+    plugins.sources = $${TARGET}.dll 
     
     widgetResources.path = $${DESTDIR}
     widgetResources.sources += resource/$${TARGET}.xml    
     widgetResources.sources += resource/$${TARGET}.manifest
     widgetResources.sources += resource/$${TARGET}.png
-    
+        
     DEPLOYMENT += plugins \
                   widgetResources
 }
 
+win32: {
 
-exportResources(./resource/*.manifest, $$PLUGIN_SUBDIR)
-exportResources(./resource/*.png, $$PLUGIN_SUBDIR)
-exportResources(./resource/*.xml, $$PLUGIN_SUBDIR)
+    CONFIG(debug, debug|release) {
+      SUBDIRPART = debug
+    } else {
+      SUBDIRPART = release
+    }    
+    
+    PLUGIN_SUBDIR = /hsresources/import/widgetregistry/20022F7E
+    
+    DESTDIR = $$PWD/../../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
+
+    manifest.path = $${DESTDIR}
+    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png
+    
+    INSTALLS += manifest    
+    
+}

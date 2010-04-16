@@ -10,7 +10,8 @@
 # Description:
 
 TEMPLATE = lib
-CONFIG += hb
+CONFIG += hb mobility
+MOBILITY += publishsubscribe
 include (../../common.pri)
 DEPENDPATH += . \
     inc \

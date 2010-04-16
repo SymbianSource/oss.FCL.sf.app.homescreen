@@ -19,14 +19,18 @@
 
 #include "tsdeactivationinterface.h"
 
+class QEvent;
+
 class TsDeactivation : public TsDeactivationInterface
 {
-
     Q_OBJECT
 
 public:
     TsDeactivation(QObject *parent = 0);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+    
 };
 
 #endif // TSDEACTIVATION_H

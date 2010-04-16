@@ -17,6 +17,26 @@
 
 #include "tsdeactivation.h"
 
+#include <QCoreApplication>
+#include <QEvent>
+
+/*!
+    \class TsDeactivation
+    \ingroup group_tsserviceplugin
+    \brief Deactivation service.
+	
+	Service responsible for observation of all events that might hide TS. When any of 
+	them occurs it is emiting signal.
+*/
 TsDeactivation::TsDeactivation(QObject *parent) : TsDeactivationInterface(parent)
 {
+    qApp->installEventFilter(this);
+}
+
+bool TsDeactivation::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::ApplicationDeactivate) {
+        emit deactivated();
+    } 
+    return TsDeactivationInterface::eventFilter(obj, event);  
 }

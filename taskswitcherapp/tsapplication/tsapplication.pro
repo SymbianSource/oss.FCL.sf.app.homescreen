@@ -15,8 +15,6 @@
 #
 
 TEMPLATE = app
-TARGET = tsapplication
-
 CONFIG += hb console mobility
 MOBILITY = serviceframework
 
@@ -31,7 +29,8 @@ HEADERS +=  inc/tstaskswitcher.h \
 RESOURCES += tsapplication.qrc 
 
 symbian {
+    TARGET.EPOCHEAPSIZE = 0x700000 0xF00000    
     TARGET.UID3 = 0x2002677D
-    TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.CAPABILITY = ALL -TCB
 }
+
+include(../common.pri)

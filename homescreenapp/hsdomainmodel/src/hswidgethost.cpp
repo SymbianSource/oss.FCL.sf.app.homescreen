@@ -28,7 +28,7 @@
 
 #include "hswidgethost.h"
 #include "hsdatabase.h"
-#include "hswidgetdata.h"
+#include "hsdomainmodeldatastructures.h"
 #include "hspage.h"
 #include "hsapp_defs.h"
 #include "hsscene.h"
@@ -49,21 +49,18 @@ QTM_USE_NAMESPACE
     homescreen widget has its own host.
 */
 
-HsWidgetHost* HsWidgetHost::createInstance(const HsWidgetData &widgetData, 
-                                           const QVariantMap &preferences)
+HsWidgetHost* HsWidgetHost::createInstance(HsWidgetData &widgetData, 
+                                           const QVariantHash &preferences)
 {
-    HsWidgetHost *host = NULL;
-    
     HsDatabase* db = HsDatabase::instance();
     Q_ASSERT(db);
 
-    int databaseId = -1;
-    if (db->insertWidget(widgetData, databaseId)) {
-        db->setWidgetPreferences(databaseId, preferences);
-        host = new HsWidgetHost(databaseId);
+    if (db->insertWidget(widgetData)) {
+        db->setWidgetPreferences(widgetData.id, preferences);
+        return new HsWidgetHost(widgetData.id);
     }
 
-    return host;                
+    return 0;
 }
 /*!
     Construct a widget host for the given \a databaseId. 
@@ -73,6 +70,7 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
     : HbWidget(parent),
       mWidget(0),
       mPage(0),
+      mState(Constructed),
       mDatabaseId(databaseId)
 {
     CaQuery query;
@@ -81,8 +79,8 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
     CaNotifier *notifier = CaService::instance()->createNotifier(filter);
     notifier->setParent(this);
     connect(notifier,
-            SIGNAL(entryChanged(const CaEntry&, ChangeType)),
-            SLOT(onEntryChanged(const CaEntry&, ChangeType)), Qt::QueuedConnection);
+            SIGNAL(entryChanged(CaEntry,ChangeType)),
+            SLOT(onEntryChanged(CaEntry,ChangeType)), Qt::QueuedConnection);
 
     /* TODO: Uncomment after the Qt bug has been fixed.
     QGraphicsDropShadowEffect *effect = 
@@ -111,22 +109,22 @@ bool HsWidgetHost::load()
     }
 
     HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
-
+    
     // Find the widget data.
-    HsWidgetData widgetData;
-    if (!db->widget(mDatabaseId, widgetData, false)) {
+    HsWidgetData data;
+    data.id = mDatabaseId;
+    if (!db->widget(data)) {
         return false;
     }
 
-    mUri = widgetData.uri();
+    mUri = data.uri;
 
     // Create the hosted widget.
     QServiceManager manager;
-    QServiceFilter filter("com.nokia.IHomeScreenWidget");
-    filter.setServiceName(widgetData.uri());
+    QServiceFilter filter("com.nokia.symbian.IHomeScreenWidget");
+    filter.setServiceName(mUri);
     QList<QServiceInterfaceDescriptor> interfaces = manager.findInterfaces(filter);
-    if(interfaces.isEmpty()) {
+    if (interfaces.isEmpty()) {
         return false;
     }
 
@@ -174,13 +172,14 @@ bool HsWidgetHost::setPage(HsPage *page)
     Q_ASSERT(db);
 
     HsWidgetData data;
-    if (db->widget(mDatabaseId, data, false)) {
+    data.id = mDatabaseId;
+    if (db->widget(data)) {
         if (!page) {
-            data.setPageId(-1);
+            data.pageId = -1;
         } else {
-            data.setPageId(page->databaseId());
+            data.pageId = page->databaseId();
         }
-        if (!db->updateWidget(data, false)) {
+        if (!db->updateWidget(data)) {
             return false;
         }
     } else {
@@ -219,11 +218,14 @@ int HsWidgetHost::databaseId() const
 */
 bool HsWidgetHost::deleteFromDatabase()
 {
-    if (HsDatabase::instance()->deleteWidget(mDatabaseId)) {
-        mDatabaseId = -1;
-        return true;
+    HsDatabase *db = HsDatabase::instance();
+
+    if (!db->deleteWidget(mDatabaseId)) {
+        return false;
     }
-    return false;
+
+    mDatabaseId = -1;
+    return true;
 }
 
 /*!
@@ -235,29 +237,17 @@ bool HsWidgetHost::setWidgetPresentation()
     HsDatabase *db = HsDatabase::instance();
     Q_ASSERT(db);
 
-    QString key = hbInstance->orientation() == Qt::Vertical ? 
+    QString key = HsScene::orientation() == Qt::Vertical ? 
         "portrait" : "landscape";
    
-    HsWidgetPresentationData data;
-    data.setWidgetId(databaseId());
-    data.setKey(key);
-    data.setPosition(pos());
+    HsWidgetPresentationData data;    
+    data.key      = key;
+    data.setPos(pos());
     data.setSize(size());
-    data.setZValue(zValue());
+    data.zValue   = zValue();
+    data.widgetId = databaseId();
     
-    HsWidgetPresentationData temp;
-    if (!db->widgetPresentation(databaseId(), key, temp)) {        
-        if (!db->insertWidgetPresentation(data)) {
-            return false;
-        }
-    } else {
-        data.setId(temp.id());
-        if (!db->updateWidgetPresentation(data)) {
-            return false;
-        }
-    }
-
-    return true;
+    return db->setWidgetPresentation(data);
 }
 
 /*!
@@ -266,18 +256,26 @@ bool HsWidgetHost::setWidgetPresentation()
 */
 bool HsWidgetHost::setWidgetPresentationData(HsWidgetPresentationData &presentationData)
 {
-    presentationData.setWidgetId(mDatabaseId);
-    return HsDatabase::instance()->insertWidgetPresentation(presentationData);
+    HsDatabase *db = HsDatabase::instance();
+    Q_ASSERT(db);
+
+    presentationData.widgetId = mDatabaseId;
+    return db->setWidgetPresentation(presentationData);
 }
+
 /*!
     Get widget presentation data matching given \a key. 
     Data is returned on given empty \a presentationData. Return true if successfull 
 */
-bool HsWidgetHost::widgetPresentationData(
-    const QString &key,
-    HsWidgetPresentationData &presentationData)
+bool HsWidgetHost::widgetPresentationData(const QString &key,
+                                          HsWidgetPresentationData &presentationData)
 {
-    return HsDatabase::instance()->widgetPresentation(mDatabaseId,key,presentationData);
+    HsDatabase *db = HsDatabase::instance();
+    Q_ASSERT(db);
+
+    presentationData.key = key;
+    presentationData.widgetId = mDatabaseId;
+    return db->widgetPresentation(presentationData);
 }
 
 /*!
@@ -292,12 +290,13 @@ HsWidgetPresentationData HsWidgetHost::widgetPresentation(Qt::Orientation orient
         "portrait" : "landscape";
 
     HsWidgetPresentationData data;
-    if (db->widgetPresentation(databaseId(), key, data)) {
+    data.key = key;
+    data.widgetId = mDatabaseId;
+    if (db->widgetPresentation(data)) {
         return data;
     } else {
         return HsWidgetPresentationData();
     }
-
 }
 
 /*!
@@ -306,18 +305,19 @@ HsWidgetPresentationData HsWidgetHost::widgetPresentation(Qt::Orientation orient
 bool HsWidgetHost::loadWidgetPresentation()
 {
     HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
-
-    QString key = hbInstance->orientation() == Qt::Vertical ? 
+    
+    QString key = HsScene::orientation() == Qt::Vertical ?
         "portrait" : "landscape";
 
     HsWidgetPresentationData data;
-    if (!db->widgetPresentation(databaseId(), key, data)) {
+    data.key = key;
+    data.widgetId = mDatabaseId;
+    if (!db->widgetPresentation(data)) {
         return false;
     }
 
-    setGeometry(QRectF(data.position(), data.size()));
-    setZValue(data.zValue());
+    setGeometry(data.geometry());
+    setZValue(data.zValue);
 
     return true;
 }
@@ -333,17 +333,8 @@ bool HsWidgetHost::deleteWidgetPresentation(Qt::Orientation orientation)
 
     QString key = orientation == Qt::Vertical ? 
         "portrait" : "landscape";
-
-    HsWidgetPresentationData data;
-    if (!db->widgetPresentation(databaseId(), key, data)) {
-        return true;
-    } else {
-        if (!db->deleteWidgetPresentation(data.id())) {
-            return false;
-        }
-    }
-
-    return true;
+    
+    return db->deleteWidgetPresentation(mDatabaseId, key);
 }
 
 /*!
@@ -363,10 +354,16 @@ bool HsWidgetHost::deleteWidgetPresentation(Qt::Orientation orientation)
     widget defines it.
 */
 void HsWidgetHost::initializeWidget()
-{    
+{   
+    if (mState != Constructed) {
+        return;
+    }
+
     setPreferencesToWidget();
     setOnline(HsScene::instance()->isOnline());
     mOnInitializeMethod.invoke(mWidget);
+   
+    mState = Initialized;
 }
 
 /*!
@@ -375,7 +372,14 @@ void HsWidgetHost::initializeWidget()
 */
 void HsWidgetHost::showWidget()
 {
+    if (mState != Initialized &&
+        mState != Hidden) {
+        return;
+    }
+
     mOnShowMethod.invoke(mWidget);
+    
+    mState = Visible;
 }
 
 /*!
@@ -384,7 +388,14 @@ void HsWidgetHost::showWidget()
 */
 void HsWidgetHost::hideWidget()
 {
+    if (mState != Initialized &&
+        mState != Visible) {
+        return;
+    }
+
     mOnHideMethod.invoke(mWidget);
+
+    mState = Hidden;
 }
 
 /*!
@@ -393,7 +404,14 @@ void HsWidgetHost::hideWidget()
 */
 void HsWidgetHost::uninitializeWidget()
 {
+    if (mState != Visible &&
+        mState != Hidden) {
+        return;
+    }
+
     mOnUninitializeMethod.invoke(mWidget);
+
+    mState = Uninitialized;
 }
 
 /*!
@@ -511,7 +529,7 @@ bool HsWidgetHost::setPreferencesToWidget()
     HsDatabase *db = HsDatabase::instance();
     Q_ASSERT(db);
 
-    QVariantMap preferences;
+    QVariantHash preferences;
     if (!db->widgetPreferences(mDatabaseId, preferences)) {
         return false;
     }
@@ -539,7 +557,7 @@ void HsWidgetHost::onSetPreferences(const QStringList &names)
         return;
     }
 
-    QVariantMap preferences;
+    QVariantHash preferences;
 
     foreach (QString name, names) {
         QVariant value = mWidget->property(name.toLatin1());
@@ -562,6 +580,7 @@ void HsWidgetHost::onSetPreferences(const QStringList &names)
 */
 void HsWidgetHost::onFinished()
 {
+    mState = Finished;
     emit widgetFinished(this);
 }
 
@@ -572,6 +591,7 @@ void HsWidgetHost::onFinished()
 */
 void HsWidgetHost::onError()
 {
+    mState = Faulted;
     emit widgetError(this);
 }
 

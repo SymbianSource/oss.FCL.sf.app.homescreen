@@ -87,6 +87,8 @@ private slots:
                          QAbstractItemView::PositionAtTop);
 
 private:
+    HbAbstractItemView::ScrollHint convertScrollHint(
+            QAbstractItemView::ScrollHint hint);
     void connectItemViewsSignals();
     void disconnectItemViewsSignals();
 

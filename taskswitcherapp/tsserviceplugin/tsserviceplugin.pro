@@ -15,10 +15,12 @@
 #
 
 TEMPLATE = lib
-TARGET = tsserviceplugin
-
 CONFIG += plugin hb mobility
-MOBILITY = serviceframework
+MOBILITY = serviceframework 
+
+win32 {
+    MOBILITY += publishsubscribe
+}
 
 INCLUDEPATH += . inc
 
@@ -27,6 +29,7 @@ HEADERS +=  inc/tsserviceplugin.h \
             inc/tsactivationinterface.h \
             inc/tsactivation.h \
             inc/tslongpresswatcher.h \
+            inc/tsexternalactivationwatcher.h \
             inc/tsdeactivationinterface.h \
             inc/tsdeactivation.h \
             inc/tsitemproviderinterface.h \
@@ -43,6 +46,7 @@ HEADERS +=  inc/tsserviceplugin.h \
 SOURCES +=  src/tsserviceplugin.cpp \
             src/tsactivation.cpp \
             src/tslongpresswatcher.cpp \
+            src/tsexternalactivationwatcher.cpp \
             src/tsdeactivation.cpp \
             src/tsitemprovider.cpp \
             src/tsclosedapplicationsfiltermodel.cpp \
@@ -60,8 +64,6 @@ RESOURCES += tspresentation.qrc
 
 symbian {
     load(data_caging_paths) 
-    TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.CAPABILITY = ALL -TCB
 
     plugin.sources = tsserviceplugin.dll
     plugin.path = $$QT_PLUGINS_BASE_DIR     
@@ -70,23 +72,37 @@ symbian {
     translation.sources = ./*.qm
     translation.path = $$QT_PLUGINS_BASE_DIR/../translations
 
-    DEPLOYMENT += plugin translation
+    # another ugly hack 
+    crml.sources = ./resource/*.qcrml
+    crml.path = $$QT_PLUGINS_BASE_DIR/../crml
+    
+    DEPLOYMENT += plugin translation crml
 }
 
-symbian: {
+symbian {
     INCLUDEPATH += inc/s60
-    HEADERS += inc/s60/tslongpresswatcher_p.h
-    SOURCES += src/s60/tslongpresswatcher_p.cpp
-    LIBS += -lcone -lapgrfx -lws32
+    HEADERS +=  inc/s60/tslongpresswatcher_p.h \
+                inc/s60/tsexternalactivationwatcher_p.h \
+                
+    SOURCES +=  src/s60/tslongpresswatcher_p.cpp \
+                src/s60/tsexternalactivationwatcher_p.cpp \
+                
+    LIBS += -lcone \
+            -lapgrfx \
+            -lws32 \
+
 }
 
-win32: {
+win32 {
     INCLUDEPATH +=  inc/win
 
-    HEADERS += inc/win/tslongpresswatcher_p.h
-    SOURCES += src/win/tslongpresswatcher_p.cpp                    
-    LIBS += -lUser32
+    HEADERS +=  inc/win/tslongpresswatcher_p.h \
+                inc/win/tsexternalactivationwatcher_p.h \
     
-    INCLUDEPATH += $$PWD/../../../../homescreensrv/homescreensrv_plat/contentstorage_api
-    LIBS += -L$$PWD/../../../../bin/debug    
+    SOURCES +=  src/win/tslongpresswatcher_p.cpp \
+                src/win/tsexternalactivationwatcher_p.cpp \
+                
+    LIBS += -lUser32
 }
+
+include(../common.pri)

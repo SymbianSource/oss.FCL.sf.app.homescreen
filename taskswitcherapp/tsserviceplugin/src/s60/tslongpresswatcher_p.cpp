@@ -26,6 +26,12 @@ const TInt KTaskswitcherBackgroundValue = 1;
 const TInt KTaskswitcherForegroundValue = KTaskswitcherBackgroundValue << 1;
 const TInt KTaskswitcherLongAppKeyPressed = KTaskswitcherForegroundValue << 1;
 
+/*!
+    \class TsLongPressWatcherPrivate
+    \ingroup group_tsserviceplugin
+    \brief Private implementation of long press app key watcher.
+*/
+
 TsLongPressWatcherPrivate::TsLongPressWatcherPrivate(TsLongPressWatcher *parent) : CActive(CActive::EPriorityStandard), mParent(parent)
 {
     CActiveScheduler::Add(this);

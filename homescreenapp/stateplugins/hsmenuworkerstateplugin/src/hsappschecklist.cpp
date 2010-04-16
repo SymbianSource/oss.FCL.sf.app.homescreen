@@ -44,8 +44,8 @@
  \retval void
  */
 HsAppsCheckList::HsAppsCheckList() :
-    mView(0), mActionConfirm(0), mListView(0), mModel(0), mSortAttribute(
-        AscendingNameHsSortAttribute)
+    mView(0), mPreviousView(0), mActionConfirm(0), mListView(0), mModel(0),
+    mSortAttribute(AscendingNameHsSortAttribute)
 {
 }
 
@@ -64,12 +64,14 @@ HsAppsCheckList::~HsAppsCheckList()
 void HsAppsCheckList::cleanUp()
 {
     //clean up
-    delete mListView;
+
+    qDeleteAll(mLoadedObjects);
+    mLoadedObjects.clear();
     mListView = NULL;
+    mView = NULL;
+
     delete mActionConfirm;
     mActionConfirm = NULL;
-    delete mView;
-    mView = NULL;
     delete mModel;
     mModel = NULL;
     mSortAttribute = AscendingNameHsSortAttribute;
@@ -104,15 +106,13 @@ void HsAppsCheckList::showAppsCheckboxList(HsSortAttribute sortOrder)
     // Add mListView to main window
     HbMainWindow *hbMainWindow = mainWindow();
 
-    // add action done
-    hbMainWindow->addSoftKeyAction(Hb::SecondarySoftKey, mActionConfirm);
+    // add confirm action
+    mView->setNavigationAction(mActionConfirm);
 
-    // We need to add the above created view into main window.
-    // We also need to hide the navi pane and turn off switching views.
-    hbMainWindow->setViewSwitchingEnabled(false);
-    hbMainWindow->hideItems(Hb::NaviPaneItem);
     hbMainWindow->addView(mView);
-    hbMainWindow->setCurrentViewIndex(hbMainWindow->viewCount() - 1);
+    // record the current view in order to activate it once done
+    mPreviousView = hbMainWindow->currentView();
+    hbMainWindow->setCurrentView(mView);
     hbMainWindow->show();
     HSMENUTEST_FUNC_EXIT("HsAppsCheckList::showAppsCheckboxList");
 }
@@ -126,32 +126,27 @@ void HsAppsCheckList::constructControls()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::constructControls");
     if (!mActionConfirm) {
-        mActionConfirm = new HbAction(Hb::ConfirmAction, mView);
+        mActionConfirm = new HbAction(Hb::ConfirmNaviAction, mView);
         connect(mActionConfirm, SIGNAL(triggered()),SLOT(selectApplicationsDone()));
     }
 
     if (!mView) { // it implies that mListView is NULL as well
-
         bool loadStatusOk = false;
 
         HbDocumentLoader loader;
-        loader.load(HS_MENU_WORKER_STATE_PROVIDER_LAYOUT, &loadStatusOk);
+        mLoadedObjects = loader.load(HS_APP_CHECK_LIST_LAYOUT, &loadStatusOk);
 
         Q_ASSERT_X(loadStatusOk,
-                   HS_MENU_WORKER_STATE_PROVIDER_LAYOUT,
+                    HS_APP_CHECK_LIST_LAYOUT,
                    "Error while loading docml file.");
 
         static const QString VIEW_WIDGET_NAME("view");
-        mView
-        = qobject_cast<HbView *> (loader.findWidget(VIEW_WIDGET_NAME));
-
+        mView = qobject_cast<HbView *> (loader.findWidget(VIEW_WIDGET_NAME));
         mView->setParent(this);
-        // TODO: configure via docml
-        mView->setTitle(hbTrId("txt_applib_title_select_applications"));
+
         static const QString LIST_VIEW_WIDGET_NAME("listView");
         mListView = qobject_cast<HbListView *> (loader.findWidget(
                 LIST_VIEW_WIDGET_NAME));
-
         mListView->setModel(mModel);
     }
     HSMENUTEST_FUNC_EXIT("HsAppsCheckList::constructControls");
@@ -168,12 +163,9 @@ void HsAppsCheckList::selectApplicationsDone()
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::selectApplicationsDone");
     // Remove mListView from main window and restore previous view.
     HbMainWindow *hbMainWindow = mainWindow();
+    hbMainWindow->setCurrentView(mPreviousView);
     hbMainWindow->removeView(mView);
-    hbMainWindow->setCurrentViewIndex(hbMainWindow->viewCount()-1);
-    hbMainWindow->showItems(Hb::NaviPaneItem);
-    hbMainWindow->setViewSwitchingEnabled(true);
-    hbMainWindow->removeSoftKeyAction(Hb::SecondarySoftKey, mActionConfirm);
-
+    
     QItemSelectionModel *itemSelectionModel = mListView->selectionModel();
     QList<int> itemsList;
     if (itemSelectionModel) {

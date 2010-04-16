@@ -55,9 +55,8 @@ HsAppLibraryState::~HsAppLibraryState()
         HbInstance::instance()->allMainWindows().value(0);
 
     if (hbW) {
+        mMenuView.view()->setNavigationAction(NULL);
         hbW->removeView(mMenuView.view());
-        hbW->removeSoftKeyAction(Hb::SecondarySoftKey,
-                                 mSecondarySoftkeyAction);
     }
 }
 
@@ -155,8 +154,8 @@ void HsAppLibraryState::stateEntered()
     HbMainWindow *hbW = HbInstance::instance()->allMainWindows().value(0);
     if (!hbW->views().contains(mMenuView.view())) {
         hbW->addView(mMenuView.view());
-    }
-    hbW->addSoftKeyAction(Hb::SecondarySoftKey, mSecondarySoftkeyAction);
+        mMenuView.view()->setNavigationAction(mSecondarySoftkeyAction);
+    }    
     hbW->setCurrentView(mMenuView.view());
     HSTEST_FUNC_EXIT("AppLibraryState::stateEntered");
 }
@@ -166,14 +165,7 @@ void HsAppLibraryState::stateEntered()
 //
 void HsAppLibraryState::stateExited()
 {
-    HSTEST_FUNC_ENTRY("AppLibraryState::stateExited");
-    HbMainWindow *hbW = HbInstance::instance()->allMainWindows().value(0);
-
-    //when exiting the pointer can be NULL
-    if (hbW) {
-        hbW->removeSoftKeyAction(Hb::SecondarySoftKey,
-                                 mSecondarySoftkeyAction);
-    }
+    HSTEST_FUNC_ENTRY("AppLibraryState::stateExited");   
     HSTEST_FUNC_EXIT("AppLibraryState::stateExited");
 }
 

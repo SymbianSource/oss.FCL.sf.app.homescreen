@@ -26,7 +26,9 @@
 
 #include "hshomescreen.h"
 #include "hstest_global.h"
-
+#ifdef Q_OS_SYMBIAN
+#include "hshomescreenclientserviceprovider.h"
+#endif
 QTM_USE_NAMESPACE
 
 /*!
@@ -44,24 +46,41 @@ QTM_USE_NAMESPACE
 HsHomeScreen::HsHomeScreen(QObject *parent)
   : QObject(parent),
     mRuntime(0)
+#ifdef Q_OS_SYMBIAN
+    ,mHomeScreenClientServiceProvider(0)
+#endif
 {
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::HsHomeScreen");
 
-    registerServicePlugins();
+    QServiceManager serviceManager;
 
-    QServiceManager manager;
-    QServiceFilter filter("com.nokia.homescreen.runtime.HsRuntime");
-    QList<QServiceInterfaceDescriptor> interfaces = manager.findInterfaces(filter);
-    QObject *interface = manager.loadInterface(interfaces.first().interfaceName());
-    mRuntime = qobject_cast<QStateMachine*>(interface);
+    registerServicePlugins(serviceManager);
+    
+    QServiceFilter filter("com.nokia.symbian.IHomeScreenRuntime");
+    QList<QServiceInterfaceDescriptor> interfaces = serviceManager.findInterfaces(filter);
+
+    if (interfaces.isEmpty()) {
+        emit exit();
+        return;
+    }
+
+    QObject *object = serviceManager.loadInterface(interfaces.first().interfaceName());
+    mRuntime = qobject_cast<QStateMachine *>(object);
+
     if (mRuntime) {
         mRuntime->setParent(this);
         connect(mRuntime, SIGNAL(started()), SLOT(onRuntimeStarted()));
         connect(mRuntime, SIGNAL(stopped()), SLOT(onRuntimeStopped()));
-        hbInstance->allMainWindows().at(0)->installEventFilter(this);
+        hbInstance->allMainWindows().first()->installEventFilter(this);
+#ifdef Q_OS_SYMBIAN
+        mHomeScreenClientServiceProvider = new HsHomeScreenClientServiceProvider;
+        mHomeScreenClientServiceProvider->setParent(this);
+#endif
     } else {
+        delete object;
         emit exit();
     }
+
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::HsHomeScreen");
 }
 
@@ -98,8 +117,11 @@ void HsHomeScreen::start()
 void HsHomeScreen::stop()
 {
 	if (mRuntime && mRuntime->isRunning()) {
-		QMetaObject::invokeMethod(mRuntime, "event_exit");
-	}
+        QEventLoop eventLoop;
+        connect(mRuntime, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+        QMetaObject::invokeMethod(mRuntime, "event_exit", Qt::QueuedConnection);
+        eventLoop.exec();
+    }
 }
 
 /*!
@@ -132,7 +154,7 @@ void HsHomeScreen::onRuntimeStopped()
 /*!
     Registers service plugins pre-installed on the device.
 */
-void HsHomeScreen::registerServicePlugins()
+void HsHomeScreen::registerServicePlugins(QServiceManager &serviceManager)
 {
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::registerServicePlugins()");
     QStringList pluginPaths;
@@ -152,13 +174,13 @@ void HsHomeScreen::registerServicePlugins()
             QString driveLetter = drive.absolutePath();
             QString path = driveLetter + pluginPath;
             if(QDir(path).exists()) {
-                registerServicePlugins(path);
+                registerServicePlugins(path, serviceManager);
             }
         }
 #endif
         //Check plugin path relative to current dir
         if(QDir(pluginPath).exists()) {
-            registerServicePlugins(pluginPath);
+            registerServicePlugins(pluginPath, serviceManager);
         }
     }
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::registerServicePlugins()");
@@ -169,14 +191,14 @@ void HsHomeScreen::registerServicePlugins()
     directory. All directories containing plugins are added to
     application's library paths at the same time.
 */
-void HsHomeScreen::registerServicePlugins(const QString &root)
+void HsHomeScreen::registerServicePlugins(const QString &root, QServiceManager &serviceManager)
 {
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::registerServicePlugins(const QString &)");
-    QDir dir = QDir(root);
+    QDir dir(root);
     QFileInfoList fileInfos = dir.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot);
 
     foreach (QFileInfo fileInfo, fileInfos) {
-        registerServicePlugins(fileInfo.absoluteFilePath());
+        registerServicePlugins(fileInfo.absoluteFilePath(), serviceManager);
     }
 
     fileInfos = dir.entryInfoList(QStringList("*.xml"));
@@ -185,11 +207,13 @@ void HsHomeScreen::registerServicePlugins(const QString &root)
         //Plugin dll and xml are in the same directory
         QApplication::addLibraryPath(root);
         qDebug() << QString("HS::HsHomeScreen::registerServicePlugins - Directory added to application's library paths: ")
-                 << root;
-        QServiceManager manager;
+                 << root;        
         foreach(QFileInfo fileInfo, fileInfos) {
-            manager.addService(fileInfo.absoluteFilePath());
-            qDebug() << QString("HS::HsHomeScreen::registerServicePlugins - Plugin registered: ") + fileInfo.fileName();
+            if (serviceManager.addService(fileInfo.absoluteFilePath())) {
+                qDebug() << QString("HS::HsHomeScreen::registerServicePlugins - Plugin registered: ") + fileInfo.fileName();
+            } else {
+                qDebug() << QString("HS::HsHomeScreen::registerServicePlugins - Plugin FAILED to register: ") + fileInfo.fileName();
+            }
         }
     }
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::registerServicePlugins(const QString &)");

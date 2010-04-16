@@ -31,7 +31,7 @@ class HsWallpaper;
 class HsPage;
 class HsWidgetHost;
 
-class HsScenePrivate;
+
 class HSDOMAINMODEL_EXPORT HsScene : public QObject
 {
     Q_OBJECT
@@ -54,6 +54,7 @@ public:
     bool setActivePageIndex(int index);
     HsPage *activePage() const;
     int activePageIndex() const;
+    int maximumPageCount() const;
 
     void setActiveWidget(HsWidgetHost *widget);
     HsWidgetHost *activeWidget() const;
@@ -70,7 +71,15 @@ private:
     Q_DISABLE_COPY(HsScene)
 
 private:
-    QScopedPointer<HsScenePrivate> mD;
+    int mDatabaseId;
+    bool mIsOnline;
+    HsWallpaper *mWallpaper;
+    QList<HsPage *> mPages;
+    int mMaximumPageCount;
+    HsPage *mActivePage;
+    HsWidgetHost *mActiveWidget;
+
+    
     static QScopedPointer<HsScene> mInstance;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)

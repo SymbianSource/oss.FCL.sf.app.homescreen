@@ -14,5 +14,10 @@
 # Description:
 #
 
-HEADERS += ./inc/*.h
-SOURCES += ./src/*.cpp
+HEADERS += ./inc/hshomescreen.h
+SOURCES += ./src/hshomescreen.cpp \
+           ./src/main.cpp
+symbian:{
+    HEADERS += ./inc/hshomescreenclientserviceprovider.h
+    SOURCES += ./src/hshomescreenclientserviceprovider.cpp 
+}

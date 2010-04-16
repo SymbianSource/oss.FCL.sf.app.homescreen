@@ -18,6 +18,16 @@
 #ifndef HSAPPDEFS_INL_
 #define HSAPPDEFS_INL_
 
+
+/*!
+\return widget path attribute name
+*/
+inline const QString widgetPathAttributeName()
+{
+    static const QString name("widget:path");
+    return name;
+}
+
 /*!
 \return widget library attribute name
 */
@@ -86,6 +96,24 @@ inline const QString menuCollectionsTypeName()
 inline const QString widgetTypeName()
 {
     static const QString name("widget");
+    return name;
+}
+
+/*!
+\return temploated application entry type name
+*/
+inline const QString templatedApplicationTypeName()
+{
+    static const QString name("templatedApplication");
+    return name;
+}
+
+/*!
+\return widget param name
+*/
+inline const QString widgetParam()
+{
+    static const QString name("widgetparam:");
     return name;
 }
 

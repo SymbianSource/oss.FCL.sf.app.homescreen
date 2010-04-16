@@ -287,11 +287,30 @@ void HsMenuView::hideSearchPanel()
   */
 void HsMenuView::scrollToRow(int row, QAbstractItemView::ScrollHint hint)
 {
-    // TODO: remove hint from the interface
-    Q_UNUSED(hint);
     HSMENUTEST_FUNC_ENTRY("HsMenuView::scrollToRow");
-    scrollTo(mModel->index(row), HbAbstractItemView::PositionAtTop);
+    scrollTo(mModel->index(row), convertScrollHint(hint));
     HSMENUTEST_FUNC_EXIT("HsMenuView::scrollToRow");
+}
+
+/*!
+     Converts scroll hints.
+     \param Qt hint Where the target item should be positioned in visible area
+     after scroll.
+     \return Qrbit version of hint
+ */
+HbAbstractItemView::ScrollHint HsMenuView::convertScrollHint(
+        QAbstractItemView::ScrollHint hint)
+{
+    switch (hint) {
+    case QAbstractItemView::EnsureVisible:
+        return HbAbstractItemView::EnsureVisible;
+    case QAbstractItemView::PositionAtTop:
+        return HbAbstractItemView::PositionAtTop;
+    case QAbstractItemView::PositionAtBottom:
+        return HbAbstractItemView::PositionAtBottom;
+    default:
+        return HbAbstractItemView::PositionAtCenter;
+    }
 }
 
 /*!

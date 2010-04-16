@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <hblistwidget.h>
 #include <hbdialog.h>
+#include <HbDocumentLoader>
 #include <hblabel.h>
 #include <hbaction.h>
 #include <hsmenuservice.h>
@@ -52,9 +53,6 @@ HsArrangeState::HsArrangeState(QState *parent) :
  */
 HsArrangeState::~HsArrangeState()
 {
-    if (mEntriesList) {
-        delete mEntriesList;
-    }
     if (mDialog) {
         delete mDialog;
     }
@@ -74,15 +72,16 @@ void HsArrangeState::construct()
     HSMENUTEST_FUNC_EXIT("HsArrangeState::construct");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
-void HsArrangeState::save()
+/*!
+  Send data to storage (selected applications in collection).
+  \param listWidget List of items to be stored. 
+ */
+void HsArrangeState::save(const HbListWidget& listWidget)
 {
     qDebug("HsArrangeState::save()");
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::save");
 
-    getArrangedEntriesIds();
+    getArrangedEntriesIds(listWidget);
     if (mArrangedCollIdList.count() == mCollIdList.count()) {
         for (int i(0); i < mArrangedCollIdList.count(); i++) {
             if (mArrangedCollIdList.at(i) != mCollIdList.at(i)) {
@@ -112,37 +111,45 @@ void HsArrangeState::onEntry(QEvent *event)
 
     mTopItemId = data.value(itemIdKey()).toInt();
 
-    mItemModel = HsMenuService::getAllCollectionsModel();
+    HbDocumentLoader loader;
+    bool loadStatusOk = false;
+    mObjectList = 
+        loader.load(HS_ARRANGE_DIALOG_LAYOUT, &loadStatusOk);
+    Q_ASSERT_X(loadStatusOk,
+        HS_ARRANGE_DIALOG_LAYOUT,
+           "Error while loading docml file.");
+    
+    mEntriesList = qobject_cast<HbListWidget*>(
+        loader.findWidget(HS_ARRANGE_LIST_NAME));
+    
+    mDialog = qobject_cast<HbDialog*>(
+            loader.findWidget(HS_ARRANGE_DIALOG_NAME));
 
-    mEntriesList = new HbListWidget();
-    fulfillEntriesList();
+    
+    if (mEntriesList != NULL && mDialog != NULL) {
 
-    mEntriesList->scrollTo(mTopModelIndex,
-                           HbAbstractItemView::PositionAtTop);
-    mEntriesList->setArrangeMode(true);
-
-    mDialog = new HbDialog();
-    mDialog->setDismissPolicy(HbPopup::NoDismiss);
-    mDialog->setTimeout(HbPopup::NoTimeout);
-
-    mDialog->setPreferredSize(
-        HbInstance::instance()->allMainWindows().at(0)->size());
-
-    HbLabel *label = new HbLabel(hbTrId("txt_applib_title_arrange"));
-    mDialog->setHeadingWidget(label);
-    mDialog->setContentWidget(mEntriesList);
-
-    mDialog->setPrimaryAction(new HbAction(hbTrId("txt_common_button_ok"),
-                                           mDialog));
-
-    HbAction *result = mDialog->exec();
-    mEntriesList->setArrangeMode(false);
-    if (result == mDialog->primaryAction()) {
-        save();
-    }
-    delete result;
-    result = NULL;
-
+        mItemModel = HsMenuService::getAllCollectionsModel();
+        
+        fulfillEntriesList(*mEntriesList);
+    
+        mEntriesList->scrollTo(mTopModelIndex,
+                               HbAbstractItemView::PositionAtTop);
+    
+        mEntriesList->setArrangeMode(true);
+    
+        mDialog->setTimeout(HbPopup::NoTimeout);
+    
+        mDialog->setPreferredSize(
+            HbInstance::instance()->allMainWindows().at(0)->size());
+    
+        HbAction const* action(mDialog->exec());
+        
+        mEntriesList->setArrangeMode(false);
+        
+        if (action == mDialog->primaryAction()) {
+            save(*mEntriesList);
+        }
+    }    
     HSMENUTEST_FUNC_EXIT("HsArrangeState::onEntry");
 }
 #ifdef COVERAGE_MEASUREMENT
@@ -155,10 +162,10 @@ void HsArrangeState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::stateExited");
 
-    mDialog->setHeadingWidget(0); //delete label
-    mDialog->setContentWidget(0); //delete mEntriesList
+    qDeleteAll(mObjectList);
+    mObjectList.clear();
+    
     mEntriesList = NULL;
-    delete mDialog;
     mDialog = NULL;
     delete mItemModel;
     mItemModel = NULL;
@@ -170,10 +177,12 @@ void HsArrangeState::stateExited()
     qDebug("HsArrangeState::stateExited()");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
-void HsArrangeState::fulfillEntriesList()
+
+/*!
+ Put items from model into arrangable list of items represented by \a listWidget
+  \param listWidget Object to be filled with list of items from model.
+ */
+void HsArrangeState::fulfillEntriesList(HbListWidget& listWidget)
 {
     qDebug() << "HsArrangeState::fulfillEntriesList";
 
@@ -190,22 +199,24 @@ void HsArrangeState::fulfillEntriesList()
         widgetItem->setData(mItemModel->data(idx, Qt::DecorationRole),
                             Qt::DecorationRole);
 
-        mEntriesList->addItem(widgetItem);
+        listWidget.addItem(widgetItem);
         if (mTopItemId == itemId) {
-            mEntriesList->indexCount();
-            mEntriesList->setCurrentItem(widgetItem);
-            mTopModelIndex = mEntriesList->currentIndex();
+            listWidget.indexCount();
+            listWidget.setCurrentItem(widgetItem);
+            mTopModelIndex = listWidget.currentIndex();
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
-void HsArrangeState::getArrangedEntriesIds()
+
+/*!
+ Copy items in from \a listWidget to arranged collection id list
+ \param listWidget List of items in the requested order.
+ */
+void HsArrangeState::getArrangedEntriesIds(const HbListWidget& listWidget)
 {
-    for (int i(0); i < mEntriesList->count(); i++) {
-        HbListWidgetItem *widgetItem = mEntriesList->item(i);
+    for (int i(0); i < listWidget.count(); ++i) {
+        HbListWidgetItem *widgetItem = listWidget.item(i);
         QVariant entryId = widgetItem->data(CaItemModel::IdRole);
         mArrangedCollIdList.append(entryId.toInt());
     }

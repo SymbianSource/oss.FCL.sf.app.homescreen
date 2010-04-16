@@ -4,7 +4,7 @@
     <filepath>helloworldwidgetplugin</filepath>
     <description>Example widget</description>
     <interface>
-        <name>com.nokia.IHomeScreenWidget</name>
+        <name>com.nokia.symbian.IHomeScreenWidget</name>
         <version>1.0</version>
         <description>Example of home screen widget</description>
         <capabilities></capabilities>

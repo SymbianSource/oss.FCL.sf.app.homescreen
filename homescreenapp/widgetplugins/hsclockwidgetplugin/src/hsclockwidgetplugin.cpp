@@ -43,7 +43,7 @@ QObject *HsClockWidgetPlugin::createInstance(const QServiceInterfaceDescriptor &
     Q_UNUSED(context);
     Q_UNUSED(session);
 
-    if (descriptor.interfaceName() == QLatin1String("com.nokia.IHomeScreenWidget")) {
+    if (descriptor.interfaceName() == QLatin1String("com.nokia.symbian.IHomeScreenWidget")) {
         return new HsClockWidget();
     } else {
         return 0;

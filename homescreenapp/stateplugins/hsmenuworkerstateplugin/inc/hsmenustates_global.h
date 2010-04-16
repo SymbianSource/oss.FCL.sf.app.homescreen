@@ -33,9 +33,17 @@
 #define HS_STATES_TEST_FRIEND_CLASS(className) friend class className;
 #endif
 
-static const char *const HS_MENU_WORKER_STATE_PROVIDER_LAYOUT =
-    ":/xml/hsmenuworkerstateplugin.docml";
+static const char *const HS_APP_CHECK_LIST_LAYOUT =
+    ":/xml/hsappchecklist.docml";
+static const char *const HS_WIDGET_PREVIEW_DIALOG_LAYOUT =
+    ":/xml/hswidgetpreviewdialog.docml";
+static const char *const HS_WIDGET_PREVIEW_DIALOG_NAME="preview_dialog";
+static const char *const HS_WIDGET_PREVIEW_SCROLL_AREA_NAME="preview_scroll_area";
 
+static const char *const HS_ARRANGE_DIALOG_LAYOUT =
+    ":/xml/hsarrangedialog.docml";
+static const char *const HS_ARRANGE_DIALOG_NAME="arrange_dialog";
+static const char *const HS_ARRANGE_LIST_NAME="arrange_list";
 /*!
  To enable logging of function entry and exit use the following flag for qmake:
  -config nft

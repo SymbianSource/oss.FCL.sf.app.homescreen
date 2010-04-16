@@ -24,7 +24,7 @@ file=ABI_DIR\BUILD_DIR\hsapplication.exe                            PROGRAMS_DIR
 data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc            private\10003a3f\import\apps\hsapplication_reg.rsc
 data=\epoc32\data\z\resource\apps\hsapplication.rsc                 resource\apps\hsapplication.rsc
 data=\epoc32\data\z\resource\apps\hsapplication.mif                 resource\apps\hsapplication.mif
-data=ZPRIVATE\20022f35\homescreendb                                 private\20022f35\homescreendb
+data=ZPRIVATE\20022f35\homescreen.db                                private\20022f35\homescreen.db
 data=ZPRIVATE\20022f35\wallpapers\d_portrait.png                    private\20022f35\wallpapers\d_portrait.png
 data=ZPRIVATE\20022f35\wallpapers\d_landscape.png                   private\20022f35\wallpapers\d_landscape.png
 data=\epoc32\data\z\data\images\kqtihswallpapers\bg_1.png           data\images\kqtihswallpapers\bg_1.png
@@ -38,6 +38,11 @@ file=ABI_DIR\BUILD_DIR\hsutils.dll                                  SHARED_LIB_D
 // ---- hsdomainmodel --------------------------------------------
 
 file=ABI_DIR\BUILD_DIR\hsdomainmodel.dll                              SHARED_LIB_DIR\hsdomainmodel.dll
+
+// -------- hshomescreenclientplugin
+file=ABI_DIR\BUILD_DIR\hshomescreenclientplugin.dll                 SHARED_LIB_DIR\hshomescreenclientplugin.dll
+data=\epoc32\data\z\hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.qtplugin    hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.qtplugin
+data=\epoc32\data\z\hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.xml    hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.xml
 
 // ---- runtimeplugins --------------------------------------------
 
@@ -95,5 +100,13 @@ data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml  
 // -------- hsanalogclockstyleplugin
 file=ABI_DIR\BUILD_DIR\hsanalogclockstyleplugin.dll                                           SHARED_LIB_DIR\hsanalogclockstyleplugin.dll
 data=\epoc32\data\z\hsresources\plugins\styleplugins\hsanalogclockstyleplugin.qtplugin        hsresources\plugins\styleplugins\hsanalogclockstyleplugin.qtplugin
+
+// ---- IMenuClient --------------------------------------------
+
+// -------- hsmenucontentpublish
+file=ABI_DIR\BUILD_DIR\hsmenucontentpublish.dll                                            	  SHARED_LIB_DIR\hsmenucontentpublish.dll 
+data=\epoc32\data\z\hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.qtplugin       hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.qtplugin
+data=\epoc32\data\z\hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.xml      hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.xml
+
 
 #endif //__HOMESCREENAPP_CORE_IBY__

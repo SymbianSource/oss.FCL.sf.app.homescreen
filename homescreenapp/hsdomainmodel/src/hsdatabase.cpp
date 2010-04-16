@@ -11,946 +11,780 @@
 *
 * Contributors:
 *
-* Description:  Implementation for SQLlite content store.
+* Description:
 *
 */
 
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QVariantHash>
+#include <QDir>
+
 #include "hsdatabase.h"
-#include "hsscenedata.h"
-#include "hspagedata.h"
-#include "hswidgetdata.h"
-#include "hswidgetpresentationdata.h"
-#include "hstest_global.h"
+#include "hsdomainmodeldatastructures.h"
 
-namespace 
+namespace
 {
-    const char DATABASE_CONNECTION_NAME[] = "hsdb.connection";
-}
-
-#ifdef Q_OS_SYMBIAN
-QString HsDatabase::mDatabaseName("c:\\private\\20022f35\\homescreendb");
-#else
-QString HsDatabase::mDatabaseName("homescreendb");
-#endif //Q_OS_SYMBIAN
-
-QScopedPointer<HsDatabase> HsDatabase::mInstance(0);
-
-/*!
-    Utility to create variant list from given \a list
-*/
-template<class T>
-QVariantList toVariantList(const QList<T> &list)
-{
-    QVariantList vlist;
-    foreach (T item, list) {
-        vlist << item;
+    template<class T>
+    QVariantList toVariantList(const QList<T> &list)
+    {
+        QVariantList vlist;
+        foreach (T item, list) {
+            vlist << item;
+        }
+        return vlist;
     }
-    return vlist;
-}
 
-/*!
-    Utility to insert given \a item to variant list \a count times
-*/
-template<class T>
-QVariantList toVariantList(const T &item, int count)
-{
-    QVariantList vlist;
-    for (int i = 0; i < count; ++i) {
-        vlist << item;
+    template<class T>
+    QVariantList toVariantList(const T &item, int count)
+    {
+        QVariantList vlist;
+        for (int i = 0; i < count; ++i) {
+            vlist << item;
+        }
+        return vlist;
     }
-    return vlist;
 }
+
 /*!
-    Set name of the database to use
+    Constructs a new database with the given \a parent object.
 */
- void HsDatabase::setDatabaseName(const QString& dbName)
- {
-    mDatabaseName = QDir::toNativeSeparators(dbName);
- }
+HsDatabase::HsDatabase(QObject *parent)
+  : QObject(parent)
+{
+}
 
 /*!
-    \class HsDatabase
-    \ingroup group_hsdatamodel
-    \brief Implementation for SQLlite content store.
+    Destroys this database.
+*/
+HsDatabase::~HsDatabase()
+{
+    close();
+}
 
-    Home screen content store that uses an SQLite database
-    as the data store.
+/*!
+    Sets the connection name to \a name.
+*/
+void HsDatabase::setConnectionName(const QString &name)
+{
+    mConnectionName = name;
+}
+ 
+/*!
+    Returns the connection name.
+*/
+QString HsDatabase::connectionName() const
+{
+    return mConnectionName;
+}
+
+/*!
+    Sets the database name to \a name.
+*/
+void HsDatabase::setDatabaseName(const QString &name)
+{
+    mDatabaseName = QDir::toNativeSeparators(name);
+}
+ 
+/*!
+    Returns the database name.
+*/
+QString HsDatabase::databaseName() const
+{
+    return mDatabaseName;
+}
+
+/*!
+    Opens the database connection using the current connection
+    values. Returns true on success, otherwise returns false.
+*/  
+bool HsDatabase::open()
+{
+    QSqlDatabase database;
+    if (QSqlDatabase::contains(mConnectionName)) {
+        database = QSqlDatabase::database(mConnectionName);
+    } else {
+        database = QSqlDatabase::addDatabase("QSQLITE", mConnectionName);
+        database.setDatabaseName(mDatabaseName);
+    }
+    if (!database.isValid()) {
+        close();
+        return false;
+    }
+    if (!database.isOpen()) {
+        if (!database.open()) {
+            close();
+            return false;
+        }
+    }
+    return true;
+}
+ 
+/*!
+    Closes the database connection.
+*/
+void HsDatabase::close()
+{
+    {
+        QSqlDatabase database = QSqlDatabase::database(mConnectionName);
+        if (database.isValid() && database.isOpen()) {
+            database.close();
+        }
+    }
+    QSqlDatabase::removeDatabase(mConnectionName);
+}
+
+/*!
+    Begins a transaction on the database if the driver 
+    supports transactions. Returns true if the operation 
+    succeeded. Otherwise returns false.
+*/
+bool HsDatabase::transaction()
+{
+    return QSqlDatabase::database(mConnectionName).transaction();
+}
+ 
+/*!
+    Rolls back a transaction on the database, if the driver 
+    supports transactions and a transaction() has been started.
+    Returns true if the operation succeeded. Otherwise returns
+    false.
+*/
+bool HsDatabase::rollback()
+{
+    return QSqlDatabase::database(mConnectionName).rollback();
+}
+ 
+/*!
+    Commits a transaction to the database if the driver supports 
+    transactions and a transaction() has been started. Returns 
+    true if the operation succeeded. Otherwise returns false.
+*/
+bool HsDatabase::commit()
+{
+    return QSqlDatabase::database(mConnectionName).commit();
+}
+
+/*!
 
 */
+bool HsDatabase::scene(HsSceneData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT id, portraitWallpaper, landscapeWallpaper, defaultPageId, maximumPageCount "
+        "FROM Scene";
+    
+    if (query.prepare(statement) && query.exec() && query.next()) {        
+        data.id                 = query.value(0).toInt();
+        data.portraitWallpaper  = query.value(1).toString();
+        data.landscapeWallpaper = query.value(2).toString();
+        data.defaultPageId      = query.value(3).toInt();
+        data.maximumPageCount   = query.value(4).toInt();
+        return true;
+    }
+    
+    return false;
+}
 
 /*!
-    Singleton. 
+
+*/
+bool HsDatabase::updateScene(const HsSceneData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "UPDATE Scene "
+        "SET portraitWallpaper = ?, landscapeWallpaper = ? "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.portraitWallpaper);
+        query.addBindValue(data.landscapeWallpaper);    
+        query.addBindValue(data.id);
+        return  query.exec();
+    }
+    
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::pages(QList<HsPageData> &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT id, indexPosition "
+        "FROM Pages "
+        "ORDER BY indexPosition";
+
+    if (query.prepare(statement) && query.exec()) {
+        data.clear();
+        while (query.next()) {
+            HsPageData d;
+            d.id            = query.value(0).toInt();
+            d.indexPosition = query.value(1).toInt();
+            data.append(d);
+        }
+        return true;
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::page(HsPageData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT indexPosition "
+        "FROM Pages "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.id);
+        if (query.exec() && query.next()) {
+            data.indexPosition = query.value(0).toInt();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::insertPage(HsPageData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "INSERT INTO Pages "
+        "(indexPosition) "
+        "VALUES "
+        "(?)";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.indexPosition);
+        if (query.exec()) {
+            data.id = query.lastInsertId().toInt();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::updatePage(const HsPageData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "UPDATE Pages "
+        "SET indexPosition = ? "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.indexPosition);
+        query.addBindValue(data.id);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::deletePage(int id)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "DELETE FROM Pages "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(id);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::widgets(int pageId, QList<HsWidgetData> &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT id, uri "
+        "FROM Widgets "
+        "WHERE pageId = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(pageId);
+        if (query.exec()) {
+            data.clear();
+            while (query.next()) {
+                HsWidgetData d;
+                d.id     = query.value(0).toInt();
+                d.uri    = query.value(1).toString();
+                d.pageId = pageId;
+                data.append(d);
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::widgets(const QString &uri, QList<HsWidgetData> &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT id, pageId "
+        "FROM Widgets "
+        "WHERE uri = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(uri);
+        if (query.exec()) {
+            data.clear();
+            while (query.next()) {
+                HsWidgetData d;
+                d.id     = query.value(0).toInt();
+                d.uri    = uri;
+                d.pageId = query.value(1).toInt();
+                data.append(d);
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::widget(HsWidgetData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT uri, pageId "
+        "FROM Widgets "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.id);
+        if (query.exec() && query.next()) {
+            data.uri    = query.value(0).toString();
+            data.pageId = query.value(1).toInt();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::insertWidget(HsWidgetData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "INSERT INTO Widgets "
+        "(uri, pageId) "
+        "VALUES "
+        "(?, ?)";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.uri);
+        query.addBindValue(data.pageId);
+        if (query.exec()) {
+            data.id = query.lastInsertId().toInt();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::updateWidget(const HsWidgetData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "UPDATE Widgets "
+        "SET uri = ?, pageId = ? "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.uri);
+        query.addBindValue(data.pageId);
+        query.addBindValue(data.id);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::deleteWidget(int id)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "DELETE FROM Widgets "
+        "WHERE id = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(id);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::deleteWidgets(const QString &uri)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "DELETE FROM Widgets "
+        "WHERE uri = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(uri);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT x, y, width, height, zValue "
+        "FROM WidgetPresentations "
+        "WHERE key = ? AND widgetId = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.key);
+        query.addBindValue(data.widgetId);
+        if (query.exec() && query.next()) {
+            data.x      = query.value(0).toReal();
+            data.y      = query.value(1).toReal();
+            data.width  = query.value(2).toReal();
+            data.height = query.value(3).toReal();
+            data.zValue = query.value(4).toReal();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "REPLACE INTO WidgetPresentations "
+        "(key, x, y, width, height, zValue, widgetId) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(data.key);
+        query.addBindValue(data.x);
+        query.addBindValue(data.y);
+        query.addBindValue(data.width);
+        query.addBindValue(data.height);
+        query.addBindValue(data.zValue);
+        query.addBindValue(data.widgetId);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::deleteWidgetPresentation(int widgetId, const QString &key)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "DELETE FROM WidgetPresentations "
+        "WHERE key = ? AND widgetId = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(key);
+        query.addBindValue(widgetId);
+        return query.exec();
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::widgetPreferences(int widgetId, QVariantHash &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT key, value "
+        "FROM WidgetPreferences "
+        "WHERE widgetId = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(widgetId);
+        if (query.exec()) {
+            data.clear();
+            while (query.next()) {
+                data.insert(query.value(0).toString(), 
+                            query.value(1));
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
+bool HsDatabase::widgetPreference(int widgetId, const QString &key, QVariant &value)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT value "
+        "FROM WidgetPreferences "
+        "WHERE key = ? AND widgetId = ?";
+
+    if (query.prepare(statement)) {
+        query.addBindValue(key);
+        query.addBindValue(widgetId);
+        if (query.exec() && query.next()) {
+            value = query.value(0);
+            return true;
+        }
+    }
+
+    return false;
+}
+ 
+/*!
+
+*/
+bool HsDatabase::setWidgetPreferences(int widgetId, const QVariantHash &data)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QList<QString> deleteKeys = data.keys(QVariant());
+    QVariantHash insertOrReplaceData(data);
+    foreach (QString key, deleteKeys) {
+        insertOrReplaceData.remove(key);
+    }
+
+    if (!deleteKeys.isEmpty()) {
+        QString statement = 
+            "DELETE FROM WidgetPreferences "
+            "WHERE key = ? AND widgetId = ?";
+        
+        if (query.prepare(statement)) {
+            query.addBindValue(toVariantList(deleteKeys));
+            query.addBindValue(toVariantList(widgetId, deleteKeys.count()));
+            if (!query.execBatch()) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    if (!insertOrReplaceData.isEmpty()) {
+        QString statement = 
+            "REPLACE INTO WidgetPreferences "
+            "(key, value, widgetId) "
+            "VALUES (?, ?, ?)";
+            
+        if (query.prepare(statement)) {
+            query.addBindValue(toVariantList(insertOrReplaceData.keys()));
+            query.addBindValue(toVariantList(insertOrReplaceData.values()));
+            query.addBindValue(toVariantList(widgetId, insertOrReplaceData.count()));
+            if (!query.execBatch()) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    return true;
+}
+ 
+/*!
+    Sets the database instance. The existing instance
+    will be deleted.
+*/
+void HsDatabase::setInstance(HsDatabase *instance)
+{
+    mInstance.reset(instance);
+}
+
+/*!
+    Returns the database instance.
 */
 HsDatabase *HsDatabase::instance()
 {
-    if (mInstance.isNull()) {
-        mInstance.reset(new HsDatabase());
-        if(!mInstance->openDatabase(mDatabaseName)){
-            mInstance.reset();  
-        }
-    }
     return mInstance.data();
 }
 
 /*!
-    Closes database and removes it.
+    Returns the current database instance. Callers of this 
+    function take ownership of the instance. The current 
+    database instance will be reset to null.    
 */
-HsDatabase::~HsDatabase()
+HsDatabase *HsDatabase::takeInstance()
 {
-    // Database calls must be in scope, see info from
-    // QSqlDatabase::removeDatabase() documentation.
-    {
-        QSqlDatabase db = database();
-        db.close();
-    }
-
-    QSqlDatabase::removeDatabase(DATABASE_CONNECTION_NAME);
+    return mInstance.take();
 }
-
-bool HsDatabase::transaction()
-{
-    return database().transaction();
-}
-
-bool HsDatabase::rollback()
-{
-    return database().rollback();
-}
-
-bool HsDatabase::commit()
-{
-    return database().commit();
-}
-
-/*!
-    Returns scene data in \a scene
-*/
-bool HsDatabase::scene(HsSceneData &scene)
-{   
-    HsSceneData temp;
-
-    QSqlDatabase db = database();        
-    QSqlQuery query(db);
-
-    query.prepare("SELECT * FROM Scene");
-
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-    
-    temp.setId(columnValue(query, "Id").toInt());
-    temp.setPortraitWallpaper(columnValue(query, "PortraitWallpaper").toString());
-    temp.setLandscapeWallpaper(columnValue(query, "LandscapeWallpaper").toString());
-        
-    int defaultPageId = columnValue(query, "DefaultPageId").toInt();
-
-    query.prepare("SELECT * FROM Pages WHERE Id = ?");
-    query.addBindValue(defaultPageId);
-    
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-    
-    HsPageData page;    
-    if (!parsePage(query, true, page)) {
-        return false;
-    }
-    temp.setDefaultPage(page);
-
-    scene = temp;
-
-    return true;
-}
-
-/*!
-    Updates the scene with \a scene.
-*/
-bool HsDatabase::updateScene(const HsSceneData &scene)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "UPDATE Scene "
-                          "SET PortraitWallpaper = ?, LandscapeWallpaper = ? "
-                          "WHERE Id = ?";
-
   
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(scene.portraitWallpaper());
-    query.addBindValue(scene.landscapeWallpaper());    
-    query.addBindValue(scene.id());
-
-    return query.exec();
-}
-
 /*!
-    Returns page data in \a pages list
+    Checks the connection validity. Returns true if the 
+    connection is valid.
 */
-bool HsDatabase::pages(QList<HsPageData> &pages)
+bool HsDatabase::checkConnection() const
 {
-    QList<HsPageData> temp;
-
-    QSqlDatabase db = database();           
-    QSqlQuery query(db);
-
-    query.prepare("SELECT * FROM Pages ORDER BY PageIndex");
-    
-    if (!query.exec()) {
-        return false;
-    }
-    
-    while (query.next()) {
-        HsPageData page;
-        if (!parsePage(query, true, page)) {
-            return false;
-        }
-        temp << page;
-    }
-
-    pages = temp;
-
-    return true;
+    return QSqlDatabase::database(mConnectionName).isValid();
 }
 
 /*!
-    Returns a\ page data for the page with given \a id. Includes children
-    data if \a getChildren is true
+    Points to the database instance.
 */
-bool HsDatabase::page(int id, HsPageData &page, bool getChildren)
-{
-    QSqlDatabase db = database();           
-    QSqlQuery query(db);
-
-    QString queryString = "SELECT * FROM Pages "
-                          "WHERE Id = ?";
-
-    query.prepare(queryString);
-    query.addBindValue(id);
-    
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-    
-    return parsePage(query, getChildren, page);
-}
-
-/*!
-    Insert page based on given \a page data 
-*/
-bool HsDatabase::insertPage(HsPageData &page)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "INSERT INTO Pages "
-                          "(PageIndex) "
-                          "VALUES(?)";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);    
-    query.addBindValue(page.index());
-    
-    if (!query.exec()) {
-        return false;
-    }
-
-    page.setId(query.lastInsertId().toInt());
-
-    QList<HsWidgetData> &widgets = page.widgets();
-    for (int i = 0; i < widgets.count(); ++i) {
-        widgets[i].setPageId(page.id());
-        if (!insertWidget(widgets[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-/*!
-    Updates a page based on given \a page data. Includes children
-    data if \a getChildren is true
-*/
-bool HsDatabase::updatePage(const HsPageData &page, bool updateChildren)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "UPDATE Pages "
-                          "SET PageIndex = ? "
-                          "WHERE Id = ?";
-
-  
-    QSqlQuery query(db);
-
-    query.prepare(queryString);    
-    query.addBindValue(page.index());    
-    query.addBindValue(page.id());
-
-    if (!query.exec()) {
-        return false;
-    }
-
-    if (!updateChildren) {
-        return true;
-    }
-
-    QList<HsWidgetData> widgets = page.widgets();
-    for (int i = 0; i < widgets.count(); ++i) {
-        if (!updateWidget(widgets[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/*!
-    Deletes page with given \a id
-*/
-bool HsDatabase::deletePage(int id)
-{
-    HsPageData pageToBeDeleted;
-
-    if (!page(id, pageToBeDeleted, false)) {
-        return false;
-    }
-   
-    QSqlDatabase db = database();
-              
-    QString queryString = "DELETE FROM Pages "
-                          "WHERE Id = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(id);
-    
-    if (!query.exec()) {
-        return false;
-    }
-
-    //update other indexes
-    QList<HsPageData> allPages;
-    if (!pages(allPages)) {
-        return false;    
-    }
-
-    HsPageData page;
-    foreach (page, allPages) {
-        if (page.index() > pageToBeDeleted.index()) {
-            page.setIndex(page.index() - 1);
-            if (!updatePage(page, false)) {
-                return false;   
-            }
-        }
-    }
-
-    return true;
-
-}
-
-/*!
-    Returns widget data for the widget with given id. Includes children
-    data if \a getChildren is true
-*/
-bool HsDatabase::widget(int id, HsWidgetData &widget, bool getChildren)
-{
-    QSqlDatabase db = database();
-    QSqlQuery query(db);
-
-    QString queryString = "SELECT * FROM Widgets "
-                          "WHERE Id = ?";
-    
-    query.prepare(queryString);
-    query.addBindValue(id);
-
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-    
-    return parseWidget(query, getChildren, widget);
-}
-
-/*!
-    Insert widget based on given \a widget data
-*/
-bool HsDatabase::insertWidget(HsWidgetData &widget)
-{    
-    QSqlDatabase db = database();
-
-    QString queryString = "INSERT INTO Widgets "
-                          "(Uri, PageId) "
-                          "VALUES(?, ?)";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(widget.uri());
-    query.addBindValue(widget.pageId());
-
-    if (!query.exec()) {
-        return false;
-    }
-
-    widget.setId(query.lastInsertId().toInt());
-
-    QList<HsWidgetPresentationData> &presentations = widget.presentations();
-    for (int i = 0; i < presentations.count(); ++i) {
-        presentations[i].setWidgetId(widget.id());
-        if (!insertWidgetPresentation(presentations[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/*!
-    Insert widget based on given \a widget data. Widget \a databaseId
-    is written on return.
-*/
-bool HsDatabase::insertWidget(const HsWidgetData &widget,
-                              int &databaseId)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "INSERT INTO Widgets "
-                          "(Uri, PageId) "
-                          "VALUES(?, ?)";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(widget.uri());
-    query.addBindValue(widget.pageId());
-
-    if (!query.exec()) {
-        QSqlError err = query.lastError();
-        return false;
-    }
-
-    databaseId = query.lastInsertId().toInt();
-
-    QList<HsWidgetPresentationData> presentations = widget.presentations();
-    for (int i = 0; i < presentations.count(); ++i) {
-        presentations[i].setWidgetId(databaseId);
-        if (!insertWidgetPresentation(presentations[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/*!
-    Updates a widget based on given \a widget data. Includes children
-    if \a getChildren is true
-*/
-bool HsDatabase::updateWidget(const HsWidgetData &widget, 
-                              bool updateChildren)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "UPDATE Widgets "
-                          "SET Uri = ?";
-
-    if (widget.pageId() != -1) {
-        queryString += ", PageId = ?";
-    }
-
-    queryString += " WHERE Id = ?";
-
-  
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(widget.uri());
-    if (widget.pageId() != -1) {
-        query.addBindValue(widget.pageId());
-    }
-    query.addBindValue(widget.id());
-
-    if (!query.exec()) {
-        return false;
-    }
-
-    if (!updateChildren) {
-        return true;
-    }
-
-    QList<HsWidgetPresentationData> presentations = widget.presentations();
-    for (int i = 0; i < presentations.count(); ++i) {
-        if (!updateWidgetPresentation(presentations[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/*!
-    Deletes widget with given \a widget id
-*/
-bool HsDatabase::deleteWidget(int id)
-{
-    QSqlDatabase db = database();
-       
-    QString queryString = "DELETE FROM Widgets "
-                          "WHERE Id = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(id);
-
-    return query.exec();
-}
-
-/*!
-    Deletes all widgets with given \a uri
-*/
-bool HsDatabase::deleteWidgets(const QString &uri)
-{
-    QSqlDatabase db = database();
-       
-    QString queryString = "DELETE FROM Widgets "
-                          "WHERE Uri = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(uri);
-
-    return query.exec();
-}
-
-/*!
-    Returns widget \a presentation data for the widget with given \a widgetId. 
-    Presentations can be distinguished by given \a key.
-*/
-bool HsDatabase::widgetPresentation(int widgetId, 
-                                    const QString &key, 
-                                    HsWidgetPresentationData &presentation)
-{
-    Q_UNUSED(key);
-
-    QSqlDatabase db = database();
-    QSqlQuery query(db);
-    
-    QString queryString = "SELECT * FROM WidgetPresentations "
-                          "WHERE WidgetId = ? "
-                          "AND Key = ?";
-    
-    query.prepare(queryString);
-    query.addBindValue(widgetId);
-    query.addBindValue(key);
-    
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-
-    return parseWidgetPresentation(query, presentation);
-}
-
-/*!
-    Inserts a widget \a presentation. 
-*/
-bool HsDatabase::insertWidgetPresentation(HsWidgetPresentationData &presentation)
-{
-    QSqlDatabase db = database();
- 
-    QString queryString = "INSERT INTO WidgetPresentations "
-                          "(Key, Height, Width, YPosition, XPosition, ZValue, WidgetId) "
-                          "VALUES(?, ?, ?, ?, ?, ?, ?)";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(presentation.key());
-    query.addBindValue(presentation.size().height());
-    query.addBindValue(presentation.size().width());
-    query.addBindValue(presentation.position().y());
-    query.addBindValue(presentation.position().x());
-    query.addBindValue(presentation.zValue()); 
-    query.addBindValue(presentation.widgetId());
-
-    if (!query.exec()) {
-        return false;
-    }
-
-    presentation.setId(query.lastInsertId().toInt());
-
-    return true;
-}
-
-/*!
-    Update a widget \a presentation. 
-*/
-bool HsDatabase::updateWidgetPresentation(const HsWidgetPresentationData &presentation)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "UPDATE WidgetPresentations "
-                          "SET Key = ?, Height = ?, Width = ?, YPosition = ?, XPosition = ?, ZValue = ?";
-    
-    if (presentation.widgetId() != -1) {
-        queryString += ", WidgetId = ?";
-    }
-     
-    queryString += " WHERE Id = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(presentation.key());
-    query.addBindValue(presentation.size().height());
-    query.addBindValue(presentation.size().width());
-    query.addBindValue(presentation.position().y());
-    query.addBindValue(presentation.position().x());
-    query.addBindValue(presentation.zValue()); 
-    if (presentation.widgetId() != -1) {
-        query.addBindValue(presentation.widgetId());
-    }    
-    query.addBindValue(presentation.id());
-
-    return query.exec();
-}
-
-/*!
-    Delete widget \a presentation width given \a id. 
-*/
-bool HsDatabase::deleteWidgetPresentation(int id)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "DELETE FROM WidgetPresentations "
-                          "WHERE Id = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(id);
-
-    return query.exec();
-}
-
-/*!
-    Set widget preference \a value for given \a key for widget with given \a widgetId 
-*/
-bool HsDatabase::setWidgetPreferenceForKey(int widgetId, 
-                                           const QString &key, 
-                                           const QString &value)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "SELECT COUNT() "
-                          "FROM WidgetPreferences "
-                          "WHERE WidgetId = ? "
-                          "AND Key = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(widgetId);
-    query.addBindValue(key);
-
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-
-    int count = query.value(0).toInt();
-
-    if (count) {
-        queryString = "UPDATE WidgetPreferences "
-                      "SET Value = :value "
-                      "WHERE WidgetId = :widgetId "
-                      "AND Key = :key";
-    } else {
-        queryString = "INSERT INTO WidgetPreferences "
-                      "(WidgetId, Key, Value) "
-                      "VALUES(:widgetId, :key, :value)";
-    }
-
-    query.prepare(queryString);
-    query.bindValue(":widgetId", widgetId);
-    query.bindValue(":value", value);
-    query.bindValue(":key", key);
-
-    return query.exec();
-}
-
-/*!
-    Returns widget preference \a value for given \a key for widget with given \a widgetId 
-*/
-bool HsDatabase::widgetPreferenceForKey(int widgetId, 
-                                        const QString &key, 
-                                        QString &value)
-{
-    QSqlDatabase db = database();
-
-    QString queryString = "SELECT Value "
-                          "FROM WidgetPreferences "
-                          "WHERE WidgetId = ? "
-                          "AND Key = ?";
-
-    QSqlQuery query(db);
-
-    query.prepare(queryString);
-    query.addBindValue(widgetId);
-    query.addBindValue(key);
-
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-
-    value = query.value(0).toString();
-
-    return true;
-}
-
-/*!
-    Store widget \a preferences for given \a widgetId. Returns true
-    if successfull.
-*/
-bool HsDatabase::setWidgetPreferences(int widgetId, const QVariantMap &preferences)
-{
-    QSqlDatabase db = database();
-    QSqlQuery query(db);
-
-    QList<QString> deleteNames = preferences.keys(QVariant());
-    QVariantMap insertOrReplaceMap(preferences);
-    foreach (QString deleteName, deleteNames) {
-        insertOrReplaceMap.remove(deleteName);
-    }
-
-    if (!deleteNames.isEmpty()) {
-        QString queryString = "DELETE FROM WidgetPreferences "
-                              "WHERE WidgetId = ? "
-                              "AND Key = ?";
-        
-        if (query.prepare(queryString)) {
-            query.addBindValue(toVariantList(widgetId, deleteNames.count()));
-            query.addBindValue(toVariantList(deleteNames));
-            if (!query.execBatch()) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    if (!insertOrReplaceMap.isEmpty()) {
-        QString queryString = "REPLACE INTO WidgetPreferences "
-                              "(WidgetId, Key, Value) "
-                              "VALUES (?, ?, ?)";
-            
-        if (query.prepare(queryString)) {
-            query.addBindValue(toVariantList(widgetId, insertOrReplaceMap.count()));
-            query.addBindValue(toVariantList(insertOrReplaceMap.keys()));
-            query.addBindValue(toVariantList(insertOrReplaceMap.values()));
-            if (!query.execBatch()) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/*!
-    Fetch widget \a preferences based on given \a widgetId. Returns
-    true if successfull.
-*/
-bool HsDatabase::widgetPreferences(int widgetId, QVariantMap &preferences)
-{
-    QSqlDatabase db = database();
-    QSqlQuery query(db);
-    
-    QString queryString = "SELECT Key, Value "
-                          "FROM WidgetPreferences "
-                          "WHERE WidgetId = ?";
-
-    query.prepare(queryString);
-    query.addBindValue(widgetId);
-  
-    if (query.exec()) {
-        while (query.next()) {
-            preferences.insert(query.value(0).toString(), 
-                               query.value(1));
-        }
-    } else {
-        return false;
-    }
-    return true;
-}
-
-/*!
-    Returns instance \a ids of the widget identified by the given \a uri
-*/
-bool HsDatabase::widgetIds(const QString &uri, QList<int> &ids)
-{
-    QSqlDatabase db = database();
-    QSqlQuery query(db);
-
-    QString queryString = "SELECT Id "
-                          "FROM Widgets "
-                          "WHERE Uri = ?";
-    
-    query.prepare(queryString);
-    query.addBindValue(uri);
-
-    if (!query.exec() || !query.next()) {
-        return false;
-    }
-
-    ids << query.value(0).toInt();
-    while (query.next()) {
-        ids << query.value(0).toInt();        
-    }
-
-    return true;
-}
-
-/*!
-    Constructor
-*/
-HsDatabase::HsDatabase()
-    : QObject()
-{
-}
-/*!
-    Open database from given \a databaseName
-*/
-bool HsDatabase::openDatabase(const QString &databaseName)
-{
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", DATABASE_CONNECTION_NAME);
-    db.setDatabaseName(databaseName);
-    if (!db.open()) {
-        HSDEBUG( db.lastError().text().toLatin1() );
-        return false;
-    }
-    return true;
-}
-
-/*!
-    Parses \a page data from given \a query. Include child 
-    data when \a getChildren is set to true.
-*/
-bool HsDatabase::parsePage(const QSqlQuery &query, 
-                           bool getChildren, 
-                           HsPageData &page)
-{
-    HsPageData temp;
-
-    temp.setId(columnValue(query, "Id").toInt());    
-    temp.setIndex(columnValue(query, "PageIndex").toInt());    
-        
-    if (getChildren) {
-        QSqlDatabase db = database();
-        QSqlQuery q(db);        
-        
-        QString queryString = "SELECT * "
-                              "FROM Widgets "
-                              "WHERE PageId = ?";
-        
-        q.prepare(queryString);
-        q.addBindValue(temp.id());
-
-        if (!q.exec()) {
-            return false;
-        }
-
-        while (q.next()) {
-            HsWidgetData widget;
-            if (!parseWidget(q, true, widget)) {
-                return false;
-            }
-            temp.widgets() << widget;
-        }
-    }
-
-    page = temp;
-
-    return true;
-}
-
-/*!
-    Parses \a widget data from given \a query. Include child data 
-    when \a getChildren is set to true.
-*/
-bool HsDatabase::parseWidget(const QSqlQuery &query, 
-                             bool getChildren, 
-                             HsWidgetData &widget)
-{
-    HsWidgetData temp;
-
-    temp.setId(columnValue(query, "Id").toInt());
-    temp.setUri(columnValue(query, "Uri").toString());
-    temp.setPageId(columnValue(query, "PageId").toInt());
-
-    if (getChildren) {
-        QSqlDatabase db = database();
-        QSqlQuery q(db);
-        
-        QString queryString = "SELECT * "
-                              "FROM WidgetPresentations "
-                              "WHERE WidgetId = ?";
-
-        q.prepare(queryString);
-        q.addBindValue(temp.id());
-
-        if (!q.exec()) {
-            return false;
-        }
-
-        while (q.next()) {
-            HsWidgetPresentationData presentation;
-            if (!parseWidgetPresentation(q, presentation)) {
-                return false;
-            }
-            temp.presentations() << presentation;
-        }
-    }
-
-    widget = temp;
-
-    return true;
-}
-
-/*!
-    Parses widget \a presentation data from given SQL \a query.
-*/
-bool HsDatabase::parseWidgetPresentation(const QSqlQuery &query, 
-                                         HsWidgetPresentationData &presentation)
-{
-    presentation.setId(columnValue(query, "Id").toInt());
-    presentation.setKey(columnValue(query, "Key").toString());
-    presentation.setPosition(QPointF(columnValue(query, "XPosition").toDouble(),
-                                     columnValue(query, "YPosition").toDouble()));
-    presentation.setSize(QSizeF(columnValue(query, "Width").toDouble(),
-                                columnValue(query, "Height").toDouble()));    
-    presentation.setZValue(columnValue(query, "ZValue").toDouble());
-    presentation.setWidgetId(columnValue(query, "WidgetId").toInt());
-
-    return true;
-}
-
-/*!
-    Parses column value with given \a columnName from given SQL \a query.
-*/
-QVariant HsDatabase::columnValue(const QSqlQuery &query, 
-                                 const QString &columnName) const
-{
-    return query.value(query.record().indexOf(columnName));
-}
-
-/*!
-    Returns database connection
-*/
-QSqlDatabase HsDatabase::database() const
-{
-    return QSqlDatabase::database(DATABASE_CONNECTION_NAME);
-}
+QScopedPointer<HsDatabase> HsDatabase::mInstance(0);

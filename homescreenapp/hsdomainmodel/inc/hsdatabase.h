@@ -11,20 +11,18 @@
 *
 * Contributors:
 *
-* Description:  Implementation for SQLite content store.
+* Description:
 *
 */
 
 #ifndef HSDATABASE_H
 #define HSDATABASE_H
 
+#include <QObject>
 #include <QScopedPointer>
-#include <QtSql>
-#include "hsdomainmodel_global.h"
-#include "hstest_global.h"
+#include <QVariantHash>
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
-HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
+#include "hsdomainmodel_global.h"
 
 class HsSceneData;
 class HsPageData;
@@ -34,60 +32,64 @@ class HsWidgetPresentationData;
 class HSDOMAINMODEL_EXPORT HsDatabase : public QObject
 {
     Q_OBJECT
-
+    Q_PROPERTY(QString connectionName READ connectionName WRITE setConnectionName)
+    Q_PROPERTY(QString databaseName READ databaseName WRITE setDatabaseName)
+    
 public:
-    static void setDatabaseName(const QString& dbName);
-    static HsDatabase *instance();
+    HsDatabase(QObject *parent = 0);
     ~HsDatabase();
+
+    void setConnectionName(const QString &name);
+    QString connectionName() const;    
+    void setDatabaseName(const QString &name);
+    QString databaseName() const;
+
+    bool open();
+    void close();
 
     bool transaction();
     bool rollback();
     bool commit();
 
-    bool scene(HsSceneData &scene);
-    bool updateScene(const HsSceneData &scene);
-    
-    bool pages(QList<HsPageData> &pages);
-    bool page(int id, HsPageData &page, bool getChildren = true);
-    bool insertPage(HsPageData &page);
-    bool updatePage(const HsPageData &page, bool updateChildren = true);
-    bool deletePage(int id);
+    bool scene(HsSceneData &data);
+    bool updateScene(const HsSceneData &data);
 
-    bool widget(int id, HsWidgetData &widget, bool getChildren = true);
-    bool insertWidget(HsWidgetData &widget);
-    bool insertWidget(const HsWidgetData &widget,int &databaseId);
-    bool updateWidget(const HsWidgetData &widget, bool updateChildren = true);
+    bool pages(QList<HsPageData> &data);
+    bool page(HsPageData &data);
+    bool insertPage(HsPageData &data);
+    bool updatePage(const HsPageData &data);
+    bool deletePage(int id);
+    
+    bool widgets(int pageId, QList<HsWidgetData> &data);
+    bool widgets(const QString &uri, QList<HsWidgetData> &data);
+    bool widget(HsWidgetData &data);
+    bool insertWidget(HsWidgetData &data);
+    bool updateWidget(const HsWidgetData &data);
     bool deleteWidget(int id);
     bool deleteWidgets(const QString &uri);
 
-    bool widgetPresentation(int widgetId, const QString &key, HsWidgetPresentationData &presentation);
-    bool insertWidgetPresentation(HsWidgetPresentationData &presentation);
-    bool updateWidgetPresentation(const HsWidgetPresentationData &presentation);
-    bool deleteWidgetPresentation(int id);
+    bool widgetPresentation(HsWidgetPresentationData &data);
+    bool setWidgetPresentation(const HsWidgetPresentationData &data);
+    bool deleteWidgetPresentation(int widgetId, const QString &key);
 
-    bool setWidgetPreferenceForKey(int widgetId, const QString &key, const QString &value);
-    bool widgetPreferenceForKey(int widgetId, const QString &key, QString &value);
-    bool setWidgetPreferences(int widgetId, const QVariantMap &preferences);
-    bool widgetPreferences(int widgetId, QVariantMap &preferences);
-    bool widgetIds(const QString &uri, QList<int>& ids);
+    bool widgetPreferences(int widgetId, QVariantHash &data);
+    bool widgetPreference(int widgetId, const QString &key, QVariant &value);
+    bool setWidgetPreferences(int widgetId, const QVariantHash &data);
+            
+public:
+    static void setInstance(HsDatabase *instance);
+    static HsDatabase *instance();
+    static HsDatabase *takeInstance();
 
-private:
-    HsDatabase();
-    bool openDatabase(const QString &databaseName);
+private:    
     Q_DISABLE_COPY(HsDatabase)
-
-    bool parsePage(const QSqlQuery &query, bool getChildren, HsPageData &page);
-    bool parseWidget(const QSqlQuery &query, bool getChildren, HsWidgetData &widget);
-    bool parseWidgetPresentation(const QSqlQuery &query, HsWidgetPresentationData &presentation);
-
-    QVariant columnValue(const QSqlQuery &query, const QString &columnName) const;
-    QSqlDatabase database() const;
+    bool checkConnection() const;
 
 private:
+    QString mConnectionName;
+    QString mDatabaseName;
+
     static QScopedPointer<HsDatabase> mInstance;
-    static QString  mDatabaseName;
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
-    HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };
 
 #endif // HSDATABASE_H

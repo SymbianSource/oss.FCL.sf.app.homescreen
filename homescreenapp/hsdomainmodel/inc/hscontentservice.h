@@ -20,12 +20,11 @@
 
 #include <QObject>
 #include <QMetaType>
-
-#include "hsdomainmodel_global.h"
 #include <QVariant>
 
-class HsWidgetHost;
+#include "hsdomainmodel_global.h"
 
+class HsWidgetHost;
 
 class HSDOMAINMODEL_EXPORT HsContentService : public QObject
 {
@@ -35,8 +34,8 @@ public:
     HsContentService(QObject *parent = 0);
     ~HsContentService();
 
-    bool createWidget(const QVariantMap &params);
-    HsWidgetHost *createWidgetForPreview(const QVariantMap &params);
+    bool createWidget(const QVariantHash &params);
+    HsWidgetHost *createWidgetForPreview(const QVariantHash &params);
 
 private:
     Q_DISABLE_COPY(HsContentService)

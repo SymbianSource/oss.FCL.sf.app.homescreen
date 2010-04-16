@@ -114,8 +114,6 @@ void HsClockWidget::onInitialize()
     mLayout = new QGraphicsLinearLayout(Qt::Vertical);
     mLayout->setContentsMargins(0,0,0,0);
 
-    hide();
-
     mWidget = loadClockWidget();
     mLayout->addItem(mWidget);
     setPreferredSize(mWidget->preferredSize());
@@ -124,7 +122,6 @@ void HsClockWidget::onInitialize()
     mTimer = new QTimer(this);
     connect(mTimer, SIGNAL(timeout()), SLOT(updateTime()));
     setLayout(mLayout);
-
 }
 
 /*!
@@ -136,7 +133,6 @@ void HsClockWidget::onShow()
 {
     mWidgetShown = true;
     mTimer->start(clockUpdateInterval);
-    show();
 }
 
 
@@ -149,7 +145,6 @@ void HsClockWidget::onHide()
 {
     mWidgetShown = false;
     mTimer->stop();
-    hide();
 }
 
 /*!
@@ -158,7 +153,6 @@ void HsClockWidget::onHide()
 void HsClockWidget::onUninitialize()
 {
     mTimer->stop();
-    hide();
 }
 
 /*!
@@ -183,7 +177,10 @@ void HsClockWidget::updateTime()
 */
 void HsClockWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    Q_UNUSED(event);    
+    if (!contains(event->pos())) {
+        return;
+    }
+
 #ifndef Q_OS_SYMBIAN    
     mTimer->stop();
     toggleClockType();
@@ -202,7 +199,6 @@ void HsClockWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     show();
     updateTime();
     update();
-
 
     mTimer->start(clockUpdateInterval);
 #endif    

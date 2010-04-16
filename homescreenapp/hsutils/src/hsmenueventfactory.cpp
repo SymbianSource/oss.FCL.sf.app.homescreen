@@ -41,20 +41,23 @@
     \param entryTypeName Name of the entry type (e.g. application, widget).
     \param uri Widget uri.
     \param library Widget library path and name.
+    \param attributes Widget params.
     \return Event for adding the widget to homescreen.
 */
 QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(
     int entryId,
     const QString &entryTypeName,
     const QString &uri,
-    const QString &library)
+    const QString &library,
+    QMap<QString, QString>* attributes)
 {
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
+    QVariantMap widgetParams;
 
     params.insert(itemIdKey(), entryId);
 
-    if (entryTypeName == widgetTypeName()) {
+    if (entryTypeName == widgetTypeName() || entryTypeName == templatedApplicationTypeName()) {
         params.insert(
             widgetUriAttributeName(),
             uri);
@@ -64,6 +67,19 @@ QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(
             library);
 
         params.insert(entryTypeNameKey(), entryTypeName);
+        
+        if (entryTypeName == templatedApplicationTypeName()) {
+            QMapIterator<QString, QString> i(*attributes);
+            while (i.hasNext()) {
+                i.next();
+                QString key(i.key());
+                QString value(i.value());
+                if (key.contains(widgetParam())) {
+                    widgetParams.insert(key,value);
+                }
+            }
+            params.insert(widgetParam(),widgetParams);
+        }
     }
 
     return new HsMenuEvent(HsMenuEvent::AddToHomeScreen, params);

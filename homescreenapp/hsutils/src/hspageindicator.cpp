@@ -11,240 +11,133 @@
 *
 * Contributors:
 *
-* Description:  Menu Event.
+* Description:
 *
 */
 
 #include <QGraphicsLinearLayout>
-#include <QGraphicsBlurEffect>
-#include <QPropertyAnimation>
-#include <QParallelAnimationGroup>
-#include <QPointer>
-
-#include <HbIconItem>
 
 #include "hspageindicator.h"
-
-const char *KPageIndicatorActiveItemImageName = "qtg_graf_hspage_highlight";
-const char *KPageIndicatorNonActiveItemImageName = "qtg_graf_hspage_normal";
-
-/*! 
-    \class HsPageIndicator
-    \ingroup group_hsutils
-    \brief Page indicator widget.
-*/
+#include "hspageindicatoritem.h"
 
 /*!
-    Constructor.
 
-    \a parent Owner. 
 */
-HsPageIndicator::HsPageIndicator(QGraphicsItem* parent):
-    HbWidget(parent),
-    mItemCount(0),
-    mCurrentIndex(0),
-    mNonActiveIcon(0),
-    mActiveIcon(0),
-    mIconAnimationGroup(0)
+HsPageIndicator::HsPageIndicator(QGraphicsItem *parent)
+  : HbWidget(parent),
+    mActiveItemIndex(-1)
 {
-    mItemSize = QSizeF(30, 15);
-
-    // perf improvement to load icons only once
-    mNonActiveIcon = new HbIcon(KPageIndicatorNonActiveItemImageName);
-    mActiveIcon = new HbIcon(KPageIndicatorActiveItemImageName);
-
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Horizontal);
-    layout->addStretch();
-
-    mPageIndicatorLayout = new QGraphicsLinearLayout(Qt::Horizontal);
-    layout->addItem(mPageIndicatorLayout);
-
-    layout->addStretch();
-    
-    setLayout(layout);
 }
 
 /*!
-    Destructor.
+
 */
 HsPageIndicator::~HsPageIndicator()
 {
-}
-
-/*! 
-    \fn HsPageIndicator::currentItemChangeAnimationFinished()
-    Signaled when current item is changed and animation is finished.
-*/
-
-/*!
-   Add an item and animates if \a animated is true and sets the
-   new page as current if \a setAsCurrent is true
-*/
-void HsPageIndicator::addItem(bool setAsCurrent,bool animated)
-{
-    mItemCount++;
-    addItemInternal(setAsCurrent,mItemCount - 1,animated);
+    qDeleteAll(mItems);
 }
 
 /*!
-   Removes on item and animates if \a animated is true.
+
 */
-void HsPageIndicator::removeItem(bool animated)
+void HsPageIndicator::initialize(int itemCount, int activeItemIndex)
 {
-    if (mItemCount < 1) {
+    qDeleteAll(mItems);
+    mItems.clear();
+    mActiveItemIndex = -1;
+
+    if (itemCount < 1 || activeItemIndex < 0 || 
+        itemCount <= activeItemIndex) {
         return;
     }
 
-    mItemCount--;
-
-    if(mCurrentIndex == mItemCount) {
-        setCurrentIndex(mItemCount-1,animated);
-    }
-    
-    QGraphicsLayoutItem *item = mPageIndicatorLayout->itemAt(mPageIndicatorLayout->count() - 1);
-    mPageIndicatorLayout->removeAt(mPageIndicatorLayout->count() - 1);
-
-    if (mItemCount < 2) {
-        hide();
-    }
-    
-    delete item;
-    layout()->invalidate();
-}
-
-/*!
-    Set \a currentIndex as current item and animates the change if \a animated
-    is true.
-*/
-void HsPageIndicator::setCurrentIndex(int currentIndex,bool animated)
-{
-    if( currentIndex < mPageIndicatorLayout->count() && currentIndex>=0) {
-        if ( mIconAnimationGroup ) {
-            mIconAnimationGroup->disconnect(this);
-            resetEffect();        
-        }
-        
-        QGraphicsLayoutItem *previousItem = mPageIndicatorLayout->itemAt(mCurrentIndex);
-        HbIconItem *previousIconItem = static_cast<HbIconItem*>(previousItem);
-        previousIconItem->setIcon(*mNonActiveIcon);
-        mCurrentIndex = currentIndex;
-
-        if (animated) {
-            startItemAnimation();
-        }
-    }
-}
-
-/*!
-    Sets the item count to \a itemCount. Ie. removes or adds items if 
-    necessary.
-*/
-void HsPageIndicator::setItemCount(int itemCount)
-{
-    if (mItemCount < itemCount) {
-        int count = itemCount - mItemCount;
-        for (int i = 0; i < count; ++i) {
-            addItem(false,false);
-        }
-    } else if (mItemCount > itemCount) {
-        int count = mItemCount - itemCount;
-        for (int i = 0; i < count; ++i) {
-            removeItem(false);
-        }
-    }
-}
-
-/*!
-    Returns the item count
-*/
-int HsPageIndicator::itemCount()
-{
-    return mItemCount;
-}
-
-
-/*!
-    Returns current index.
-*/
-int HsPageIndicator::currentIndex()
-{
-    return mCurrentIndex;
-}
-
-/*!
-    Returns true if current item animation is ongoing.
-*/
-bool HsPageIndicator::isAnimatingCurrentItemChange()
-{
-    return mIconAnimationGroup;
-}
-
-/*!
-    \internal
-*/
-void HsPageIndicator::resetEffect()
-{
-    QGraphicsLayoutItem *item = mPageIndicatorLayout->itemAt(mCurrentIndex);
-    HbIconItem *iconItem = static_cast<HbIconItem*>(item);
-    if ( iconItem ) {
-        QPointer<QGraphicsEffect> iconEffect = iconItem->graphicsEffect();
-        iconItem->setGraphicsEffect(0);
-        if (iconEffect) {
-            delete iconEffect;
-        }
-    }
-    mIconAnimationGroup = 0;
-    emit currentItemChangeAnimationFinished();
-}
-
-/*!
-    \internal    
-*/
-void HsPageIndicator::addItemInternal(bool setAsCurrent,int itemIndex,bool animated)
-{    
-    HbIconItem *iconItem = new HbIconItem();
-    iconItem->setIcon(*mNonActiveIcon);
-    iconItem->setPreferredSize(mItemSize);
-    iconItem->setMinimumSize(mItemSize);
-    iconItem->setMaximumSize(mItemSize);
-    
-    mPageIndicatorLayout->addItem(iconItem);
-    if (setAsCurrent) {
-        setCurrentIndex(itemIndex,animated);
-    }
-    layout()->invalidate();
-
-    if (mItemCount < 2) {
-        hide();
-    } else {
-        show();
+    for (int i = 0; i < itemCount; ++i) {
+        mItems << new HsPageIndicatorItem(i == activeItemIndex);
     }    
+    mActiveItemIndex = activeItemIndex;
+    layoutItems();
+}
+ 
+/*!
+
+*/
+int HsPageIndicator::itemCount() const
+{
+    return mItems.count();
 }
 
 /*!
-    \internal    
+
 */
-void HsPageIndicator::startItemAnimation()
+void HsPageIndicator::setActiveItemIndex(int activeItemIndex)
 {
-    QGraphicsLayoutItem *item = mPageIndicatorLayout->itemAt(mCurrentIndex);
-    HbIconItem *iconItem = static_cast<HbIconItem*>(item);
-    iconItem->setIcon(*mActiveIcon);
-    
-    QGraphicsBlurEffect* iconBlurEffect = new QGraphicsBlurEffect();
-    iconBlurEffect->setBlurRadius(9);
-    iconItem->setGraphicsEffect(iconBlurEffect);
-    iconItem->setTransformOriginPoint(iconItem->rect().center());
-    
-    mIconAnimationGroup = new QParallelAnimationGroup();
+    if (activeItemIndex < 0 || itemCount() <= activeItemIndex) {
+        return;
+    }
 
-    QPropertyAnimation *animation = new QPropertyAnimation(iconItem, "scale");
-    animation->setDuration(1000);
-    animation->setKeyValueAt(0.5, 2);
-    animation->setEndValue(1.0);
-    mIconAnimationGroup->addAnimation(animation);
+    mActiveItemIndex = activeItemIndex;
+    for (int i = 0; i < mItems.count(); ++i) {
+        mItems[i]->setActive(i == activeItemIndex);
+    }
+}
+ 
+/*!
 
-    connect(mIconAnimationGroup, SIGNAL(finished()), SLOT(resetEffect()));
+*/
+int HsPageIndicator::activeItemIndex() const
+{
+    return mActiveItemIndex;
+}
 
-    mIconAnimationGroup->start(QAbstractAnimation::DeleteWhenStopped);
+/*!
 
+*/
+void HsPageIndicator::addItem(int activeItemIndex)
+{
+    if (activeItemIndex < 0 || itemCount() < activeItemIndex) {
+        return;
+    }
+
+    mItems.append(new HsPageIndicatorItem);
+    layoutItems();
+    setActiveItemIndex(activeItemIndex);
+}
+
+/*!
+
+*/
+void HsPageIndicator::removeItem(int activeItemIndex)
+{   
+    if (activeItemIndex < 0 || itemCount() - 1 <= activeItemIndex) {
+        return;
+    }
+
+    delete mItems.last();
+    mItems.removeLast();
+    layoutItems();
+    setActiveItemIndex(activeItemIndex);
+}
+
+/*!
+
+*/
+bool HsPageIndicator::isAnimationRunning() const
+{
+    return mItems.at(mActiveItemIndex)->isAnimationRunning();
+}
+
+/*!
+
+*/
+void HsPageIndicator::layoutItems()
+{
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(8);
+    layout->addStretch();
+    foreach (HsPageIndicatorItem *item, mItems) {
+        layout->addItem(item);
+    }
+    layout->addStretch();
+    setLayout(layout);
 }

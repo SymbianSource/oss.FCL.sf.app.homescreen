@@ -68,6 +68,7 @@ protected:
     void polishEvent();
 
 private:
+    Q_DISABLE_COPY(HsIdleWidget)
     void loadControlLayer();
     void setItemsUnfocusable(QGraphicsSceneMouseEvent *event);
     void setItemsFocusable();

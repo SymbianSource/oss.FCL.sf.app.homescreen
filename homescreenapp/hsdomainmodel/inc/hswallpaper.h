@@ -54,7 +54,10 @@ private:
     Q_DISABLE_COPY(HsWallpaper)
 
 private:
-    QScopedPointer<HsWallpaperPrivate> mD;
+    QPixmap mImage;
+    QString mLImagePath;
+    QString mPImagePath;
+    Qt::Orientation mOrientation;
     
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

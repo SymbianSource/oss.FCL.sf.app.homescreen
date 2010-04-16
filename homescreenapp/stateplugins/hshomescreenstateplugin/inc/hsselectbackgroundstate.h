@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  SelectBackground gui state.
+* Description:
 *
 */
 
@@ -24,10 +24,9 @@
 
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
-class HbView;
-class HsContentService;
-class XQAIWGetImageClient;
 class QImage;
+class HbView;
+class XQAIWGetImageClient;
 
 class HsSelectBackgroundState : public QState
 {
@@ -41,16 +40,18 @@ signals:
     void event_waitInput();
 
 private:
+    Q_DISABLE_COPY(HsSelectBackgroundState)
     bool saveImage(QImage &image, const QString &path, Qt::Orientation orientation);
 
 private slots:
-    void selectPageBackgroundAction();
-    void disconnectImageFetcherAction();
-    void onBackgroundImageFetched(QStringList);
-    void onBackgroundImageFetchFailed(int);
+    void action_selectWallpaper();
+    void action_disconnectImageFetcher();
+
+    void onFetchComplete(QStringList imageStringList);
+    void onFetchFailed(int error);
 
 private:
-    XQAIWGetImageClient *mXQAIWGetImageClient;
+    XQAIWGetImageClient *mImageFetcher;
     HbView *mSourceView;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)

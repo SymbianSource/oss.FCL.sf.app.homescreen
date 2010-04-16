@@ -26,6 +26,15 @@
 #include "tsclosedapplicationsfiltermodel.h"
 #include "tsdataroles.h"
 
+/*!
+    \class TsItemProvider
+    \ingroup group_tsserviceplugin
+    \brief Returns items that should be presented in TS.
+	
+	Service providing information about items that should be presented in TS. It also allows to
+	start some action on it (open/close).
+*/
+
 TsItemProvider::TsItemProvider(QObject *parent) : TsItemProviderInterface(parent), mService(CaService::instance())
 {
     TsRecentApplicationsModel *recentAppModel = new TsRecentApplicationsModel(this);
@@ -63,8 +72,18 @@ void TsItemProvider::closeApplication(const QModelIndex &index)
 
 void TsItemProvider::closeAllApplications()
 {
+    QList<int> closableList;
     for (int row(0); row < mModel->rowCount(); ++row) {
-        closeApplication(mModel->index(row, 0));
+        if (mModel->index(row, 0).data(TsDataRoles::Closable).toBool()) {
+            QVariant entryId = mModel->index(row, 0).data(TsDataRoles::EntryId);
+            if (entryId.isValid()) {
+                closableList.append(entryId.toInt());
+            }
+        }
+    }
+    foreach (int entryId, closableList) {
+        mModel->addId(entryId);
+        mService->executeCommand(entryId, QString("close"));        
     }
 }
 

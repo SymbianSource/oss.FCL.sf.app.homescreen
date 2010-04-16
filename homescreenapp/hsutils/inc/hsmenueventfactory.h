@@ -42,7 +42,8 @@ public:
         int entryId,
         const QString &entryTypeName = QString(),
         const QString &uri = QString(),
-        const QString &library = QString()
+        const QString &library = QString(),
+        QMap<QString, QString>* attributes = NULL
     );
 
     static QEvent *createOpenCollectionEvent(int itemId,

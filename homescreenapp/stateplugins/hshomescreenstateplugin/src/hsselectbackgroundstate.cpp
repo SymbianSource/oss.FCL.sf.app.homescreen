@@ -23,9 +23,10 @@
 
 #include "hsselectbackgroundstate.h"
 #include "hsscene.h"
-#include "hsscenedata.h"
+#include "hsdomainmodeldatastructures.h"
 #include "hswallpaper.h"
 #include "hsdatabase.h"
+#include "hshomescreenstatecommon.h"
 
 #include "xqaiwgetimageclient.h"
 #include "xqaiwcommon.h"
@@ -44,12 +45,12 @@
 */
 HsSelectBackgroundState::HsSelectBackgroundState(QState *parent):
     QState(parent),
-    mXQAIWGetImageClient(0),
+    mImageFetcher(0),
     mSourceView(0)
 {
-    mXQAIWGetImageClient = new XQAIWGetImageClient;
-    connect(this, SIGNAL(entered()), SLOT(selectPageBackgroundAction()));
-    connect(this, SIGNAL(exited()), SLOT(disconnectImageFetcherAction()));
+    mImageFetcher = new XQAIWGetImageClient;
+    connect(this, SIGNAL(entered()), SLOT(action_selectWallpaper()));
+    connect(this, SIGNAL(exited()), SLOT(action_disconnectImageFetcher()));
 }
 
 /*!
@@ -58,7 +59,7 @@ HsSelectBackgroundState::HsSelectBackgroundState(QState *parent):
 */
 HsSelectBackgroundState::~HsSelectBackgroundState()
 {
-    delete mXQAIWGetImageClient;
+    delete mImageFetcher;
 }
 
 /*!
@@ -70,9 +71,9 @@ bool HsSelectBackgroundState::saveImage(QImage &image, const QString &path, Qt::
 {
     QRect rect;
     if (orientation == Qt::Vertical) {
-        rect.setRect(0, 0, 2 * 360, 640);
+        rect.setRect(0, 0, (2* 360) + HSBOUNDARYEFFECT, 640);
     } else {
-        rect.setRect(0, 0, 2 * 640, 360);
+        rect.setRect(0, 0, (2 * 640) + HSBOUNDARYEFFECT, 360);
     }
 
     if (image.rect().contains(rect)) {        
@@ -90,17 +91,16 @@ bool HsSelectBackgroundState::saveImage(QImage &image, const QString &path, Qt::
     Connects to image fetcher and launches "remote" ui from photos
     from which user can select background image
  */
-void HsSelectBackgroundState::selectPageBackgroundAction()
+void HsSelectBackgroundState::action_selectWallpaper()
 {
     mSourceView = HsScene::mainWindow()->currentView();
 
-    connect(mXQAIWGetImageClient, SIGNAL(fetchComplete(QStringList)),
-            SLOT(onBackgroundImageFetched(QStringList)));
-    connect(mXQAIWGetImageClient, SIGNAL(fetchFailed(int)),
-            SLOT(onBackgroundImageFetchFailed(int)));
+    connect(mImageFetcher, SIGNAL(fetchComplete(QStringList)),
+            SLOT(onFetchComplete(QStringList)));
+    connect(mImageFetcher, SIGNAL(fetchFailed(int)),
+            SLOT(onFetchFailed(int)));
     
-    QVariantMap filter;
-    mXQAIWGetImageClient->fetch(filter, SelectionSingle);
+    mImageFetcher->fetch(QVariantMap(), SelectionSingle);
 }
 
 /*!
@@ -108,17 +108,17 @@ void HsSelectBackgroundState::selectPageBackgroundAction()
     disconnects photos image fetcher services slots.
 */
 
-void HsSelectBackgroundState::disconnectImageFetcherAction()
+void HsSelectBackgroundState::action_disconnectImageFetcher()
 {
     HsScene::mainWindow()->setCurrentView(mSourceView);
-    mXQAIWGetImageClient->disconnect(this);
+    mImageFetcher->disconnect(this);
 }
 
 /*!
     \internal
     Called when user has selected an image    
 */
-void HsSelectBackgroundState::onBackgroundImageFetched(QStringList imageStringList)
+void HsSelectBackgroundState::onFetchComplete(QStringList imageStringList)
 {
     HsScene *scene = HsScene::instance();
         
@@ -137,8 +137,8 @@ void HsSelectBackgroundState::onBackgroundImageFetched(QStringList imageStringLi
         fileExtension = fileInfo.suffix();
     }
 
-    QFile::remove(sceneData.portraitWallpaper());
-    QFile::remove(sceneData.landscapeWallpaper()); 
+    QFile::remove(sceneData.portraitWallpaper);
+    QFile::remove(sceneData.landscapeWallpaper); 
 
     QString wallpaperDir = HsWallpaper::wallpaperDirectory();            
     QDir dir(wallpaperDir);
@@ -155,8 +155,8 @@ void HsSelectBackgroundState::onBackgroundImageFetched(QStringList imageStringLi
     
     if (saveImage(image, portraitPath, Qt::Vertical) && 
         saveImage(image, landscapePath, Qt::Horizontal)) {
-        sceneData.setPortraitWallpaper(portraitPath);
-        sceneData.setLandscapeWallpaper(landscapePath);
+        sceneData.portraitWallpaper = portraitPath;
+        sceneData.landscapeWallpaper = landscapePath;
         if (db->updateScene(sceneData)) {
             scene->wallpaper()->setImagesById(QString(), fileInfo.suffix());
         }
@@ -169,7 +169,7 @@ void HsSelectBackgroundState::onBackgroundImageFetched(QStringList imageStringLi
     \internal
     Called when selection of background image fails  
 */
-void HsSelectBackgroundState::onBackgroundImageFetchFailed(int error)
+void HsSelectBackgroundState::onFetchFailed(int error)
 {
     Q_UNUSED(error)
     emit event_waitInput();

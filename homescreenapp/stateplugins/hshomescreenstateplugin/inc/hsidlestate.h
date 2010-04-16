@@ -53,6 +53,7 @@ signals:
     void event_toggleConnection();
 
 private:
+    Q_DISABLE_COPY(HsIdleState)
     void setupStates();
     qreal pageLayerXPos(int pageIndex) const;
     void startPageChangeAnimation(int targetPageIndex, int duration);
@@ -86,6 +87,7 @@ private slots:
     void action_moveWidget_startWidgetDragAnimation();
     void action_moveWidget_connectMouseEventHandlers();
     void action_moveWidget_connectGestureTimers();
+
     void action_moveWidget_reparentToPage();
     void action_moveWidget_startWidgetDropAnimation();
     void action_moveWidget_disconnectMouseEventHandlers();
@@ -129,7 +131,7 @@ private slots:
 
 private:
     HbView *mView;
-    HbAction *mSoftKeyAction;
+    HbAction *mNavigationAction;
     HsIdleWidget *mUiWidget;
     
     QTimer mTimer;
