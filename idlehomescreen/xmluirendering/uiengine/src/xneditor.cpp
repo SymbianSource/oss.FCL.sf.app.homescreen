@@ -95,6 +95,7 @@ enum
 // ====================== LOCAL FUNTION PROTOTYPES ============================
 static void DeletePluginInfos( TAny* aObject );
 static void DeleteItemMaps( TAny* aObject );
+static void DeleteContentInfo( TAny* aObject );
 
 static TPtrC ParseWidgetName( const CHsContentInfo& aContentInfo );
 static void SetPropertyL( CXnNode& aNode, const TDesC8& aAttribute, 
@@ -128,6 +129,16 @@ static void DeleteItemMaps( TAny* aObject )
     reinterpret_cast<
         RPointerArray< hspswrapper::CItemMap >* >(
             aObject )->ResetAndDestroy();
+    }
+
+// ---------------------------------------------------------------------------
+// DeleteContentInfo
+// ---------------------------------------------------------------------------
+// 
+static void DeleteContentInfo( TAny* aObject )    
+    {
+    reinterpret_cast<RPointerArray< CHsContentInfo >* >( 
+        aObject )->ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
@@ -324,21 +335,7 @@ CXnEditor::~CXnEditor()
 //
 TBool CXnEditor::IsCurrentViewFull()
     {
-    TBool viewFull = ETrue;
-    
-    RPointerArray< CXnPluginData >& plugins( 
-        iViewManager.ActiveViewData().PluginData() );
-                
-    for ( TInt i = 0; i < plugins.Count(); i++ )
-        {
-        if ( !plugins[i]->Occupied() )
-            {
-            viewFull = EFalse;
-            break;
-            }
-        }
-    
-    return viewFull;
+    return IsViewFull( iViewManager.ActiveViewData() );
     }
 
 // -----------------------------------------------------------------------------
@@ -419,14 +416,6 @@ TInt CXnEditor::TemplateWidgetCanBeAddedRemovedL(
 		
 		if ( plugin->PublisherName() == aInfo.PublisherId() )
 			{
-			if ( plugin->Removable() )
-			    {
-			    // To enable widget remove
-			    aInfo.SetPluginIdL( plugin->PluginId() );
-			    
-			    retval |= ECanBeRemoved;
-			    }
-			
 			widgetCount++;
 			}
 		}
@@ -468,14 +457,6 @@ TInt CXnEditor::NonTemplateWidgetCanBeAddedRemovedL(
         
         if ( plugin->PluginUid().CompareF( aInfo.Uid() ) == 0 )
             {
-            if ( plugin->Removable() )
-                {
-                // To enable widget remove
-                aInfo.SetPluginIdL( plugin->PluginId() );
-                
-                retval |= ECanBeRemoved;
-                }
-            
             widgetCount++;
             }
         }
@@ -498,40 +479,17 @@ void CXnEditor::FilterViewListL( CHsContentInfoArray& aContentInfoArray )
     {
     RPointerArray< CHsContentInfo >& list( aContentInfoArray.Array() );
     
-    RPointerArray< CXnPluginData >& views( 
-        iViewManager.ActiveAppData().PluginData() );
-
-    TInt viewAmount( iViewManager.ViewAmount() );
-    
-    const TInt KMaxViewAmount( 6 );
+    TBool canBeAdded( EFalse );
+    CXnRootData& appData( iViewManager.ActiveAppData() );
+    if ( appData.PluginData().Count() < appData.MaxPages() )
+        {
+        canBeAdded = ETrue;
+        }    
     
     for ( TInt i = 0; i < list.Count(); i++ )
         {
-        CHsContentInfo* info( list[i] );
-        
-        info->SetCanBeAdded( EFalse );
-        info->SetCanBeRemoved( EFalse );
-
-        for ( TInt j = 0 ; j < views.Count(); j++ )
-            {
-            CXnPluginData* view( views[j] );
-            
-            if ( view->PluginUid().CompareF( info->Uid() ) == 0 )
-                {
-                // To enable view remove
-                info->SetPluginIdL( view->PluginId() );
-                // Last view cannot be removed
-                if ( views.Count() > 1 )
-                    {
-                    info->SetCanBeRemoved( ETrue );
-                    }
-                }
-            }
-        
-        if ( viewAmount < KMaxViewAmount )
-            {
-            info->SetCanBeAdded( ETrue );
-            }
+        CHsContentInfo* info( list[i] );        
+        info->SetCanBeAdded( canBeAdded );
         }
     }
 
@@ -1718,7 +1676,7 @@ TInt CXnEditor::WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray 
         {
         // Get installed widget content infos
         RPointerArray< CHsContentInfo > array;
-        CleanupClosePushL( array );        
+        CleanupStack::PushL( TCleanupItem( DeleteContentInfo, &array ) );
         
         // get installed widgets and template configurations from HSPS
         HspsWidgetPluginsL( array );
@@ -1759,6 +1717,56 @@ TInt CXnEditor::ViewListL( CHsContentInfoArray& aArray )
     FilterViewListL( aArray );
     
     return KErrNone;
+    }
+
+// -----------------------------------------------------------------------------
+// from MHsContentController
+// -----------------------------------------------------------------------------
+//
+TInt CXnEditor::ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray )
+    {
+    TInt err( KErrNone );
+
+    if ( aInfo.Type() == KApplication )
+        {
+        if ( aInfo.Uid().CompareF( iViewManager.ActiveAppData().PluginUid() ) == 0 )
+            {
+            // Get list of views in active application configuration
+            CXnRootData& appData( iViewManager.ActiveAppData() );
+            RPointerArray< CXnPluginData >& views( appData.PluginData() );
+            
+            // Get installed view content infos
+            RPointerArray< CHsContentInfo > array;
+            CleanupStack::PushL( TCleanupItem( DeleteContentInfo, &array ) );
+            HspsViewPluginsL( array );
+                    
+            // Create content info for each found view
+            for ( TInt i = 0; i < views.Count(); i++ )
+                {
+                CHsContentInfo* info = CreateContentInfoLC( *views[i], array );
+                if ( info )
+                    {
+                    CXnViewData* view = static_cast < CXnViewData* >( views[ i ] );
+                    info->SetIsFull( IsViewFull( *view ) );
+                    aArray.Array().AppendL( info );
+                    CleanupStack::Pop( info );
+                    }
+                }
+            CleanupStack::PopAndDestroy(); // array
+            }
+        else
+            {
+            // Invalid application configuration
+            err = KErrArgument;
+            }
+        }
+    else
+        {
+        // Invalid argument
+        err = KErrArgument;
+        }
+    
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1950,23 +1958,7 @@ TInt CXnEditor::ActiveViewL( CHsContentInfo& aInfo )
         aInfo.SetTypeL( view->PluginInfo().Type() );
         aInfo.SetDescriptionL( view->PluginInfo().Description() );
         aInfo.SetIconPathL( view->PluginInfo().LogoIcon() );
-
-        // Check if there is empty space
-        RPointerArray< CXnNode > nodes;
-        viewData.PluginNodesL( nodes );
-        TBool isFull( ETrue );
-        for ( TInt i = 0; i < nodes.Count(); i++ )
-            {
-            CXnNode* node( nodes[i] );
-            CXnPluginData* plugin = viewData.Plugin( node );
-
-            if ( plugin && !plugin->Occupied() )
-                {
-                isFull = EFalse;
-                break;
-                }
-            }
-        aInfo.SetIsFull( isFull );
+        aInfo.SetIsFull( IsViewFull( viewData ) );        
         }
     else
         {
@@ -2036,10 +2028,36 @@ CHsContentInfo* CXnEditor::CreateContentInfoLC( CXnPluginData& aPlugin,
                 contentInfo = info->CloneL();
                 CleanupStack::PushL( contentInfo );
                 contentInfo->SetPluginIdL( aPlugin.PluginId() );
+                contentInfo->SetCanBeRemoved( aPlugin.Removable() );
                 }
             }
         }
     return contentInfo;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnEditor::IsViewFull
+// -----------------------------------------------------------------------------
+//
+TBool CXnEditor::IsViewFull( CXnViewData& aViewData )
+    {
+    TBool isFull( ETrue );
+
+    RPointerArray< CXnPluginData >& plugins( 
+            aViewData.PluginData() );
+
+    for ( TInt i = 0; i < plugins.Count(); i++ )
+        {
+        CXnPluginData* plugin = plugins[ i ];
+
+        if ( !plugin->Occupied() )
+            {
+            isFull = EFalse;
+            break;
+            }
+        }
+    
+    return isFull;
     }
 
 // -----------------------------------------------------------------------------

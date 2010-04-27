@@ -9117,6 +9117,8 @@ void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
     RootNode()->SetDirtyL();
 
     ReportScreenDeviceChangeL();
+    
+    iViewManager.OrientationChanged();
             
     if ( !iControlAdapterList )
         {

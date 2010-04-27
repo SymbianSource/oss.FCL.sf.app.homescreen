@@ -298,6 +298,13 @@
 //
 #define qtn_hs_corrupted_image_note "Unable to select. Image corrupted or format not supported."
 
+// d: Shown when user select too large image file as a wallpaper 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_too_big_image_note "Unable to select. Image size is too large."
+
 // d: Show when default configuration is loaded (critical error case)
 // l: list_single_pane_t1_cp2
 // w:

@@ -123,6 +123,29 @@ public:
      * the first position on conten data list
      */
     void MoveEntryAtStart( TInt aAppId, TBool aWidget );
+    
+    /**
+     * If application uid exists in the contained CTsFsAlwaysShownAppList 
+     * @return   ETrue  application uid exists in the list
+     *           EFalse application uid doesn't exist in the list
+     * @param    TInt aWgId the window group application
+     */
+    TBool IsAlwaysShownAppL( TInt aWgId );
+    
+    /**
+     * Finds out the app uid for the given window group id.
+     * @param   aWgId   a valid window group id
+     * @param   aUid   	requested uid
+     * @return  error code
+     */
+    TInt AppUidForWgId( TInt aWgId, TUid& aUid );
+    
+    /**
+     * Finds out the app uid for the given window group id.
+     * @param   aWgId   a valid window group id
+     * @return  application uid
+     */
+    TUid AppUidForWgIdL( TInt aWgId );
 
 private:
     /**

@@ -53,7 +53,8 @@ CWsGraphicDrawer* CPreviewProviderCRP::CreateL()
 // --------------------------------------------------------------------------
 //    
 void CPreviewProviderCRP::ConstructL()
-    { 
+    {
+    iLastWgIdRedraw = ETrue;
     }
 
 // --------------------------------------------------------------------------
@@ -147,7 +148,8 @@ void CPreviewProviderCRP::ConstructL( MWsGraphicDrawerEnvironment& aEnv,
     
     BaseConstructL( aEnv, aId, aOwner );
     aEnv.RegisterEventHandler( this, this, TWservCrEvent::EWindowGroupChanged |
-                                           TWservCrEvent::EDeviceOrientationChanged );
+                                           TWservCrEvent::EDeviceOrientationChanged |
+                                           TWservCrEvent::EScreenDrawing );
     iScreenChangedTime = 0;
     
     TSLOG_OUT();
@@ -174,7 +176,10 @@ void CPreviewProviderCRP::DoHandleEvent( const TWservCrEvent& aEvent )
             TInt err = currTime.SecondsFrom( iScreenChangedTime, secondsFrom );
             if ( err != KErrNone || secondsFrom.Int() > KMinTimeForOrientationSwitch )
                 {
-                TRAP_IGNORE( ScreenshotL() );
+                if ( iLastWgIdRedraw )
+                    {
+                    TRAP_IGNORE( ScreenshotL() );
+                    }
                 }
             else
                 {
@@ -186,11 +191,19 @@ void CPreviewProviderCRP::DoHandleEvent( const TWservCrEvent& aEvent )
             iPrevReg = 0;
             }
         iPrevId = wgId;
+        iLastWgIdRedraw = EFalse;
         }
     else if ( aEvent.Type() == TWservCrEvent::EDeviceOrientationChanged )
         {
         iScreenChangedTime.HomeTime();
-        TRAP_IGNORE( ScreenshotL() );
+        if ( iLastWgIdRedraw )
+            {
+            TRAP_IGNORE( ScreenshotL() );
+            }
+        }
+    else if ( aEvent.Type() == TWservCrEvent::EScreenDrawing )
+        {
+        iLastWgIdRedraw = ETrue;
         }
     
     TSLOG_OUT();

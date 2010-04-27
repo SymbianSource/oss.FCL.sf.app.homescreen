@@ -27,6 +27,7 @@
 #include <aifwdefs.h>
 #include <gfxtranseffect/gfxtranseffect.h>
 #include <akntransitionutils.h>
+#include <layoutmetadata.cdl.h>
 
 // User includes
 #include "xnapplication.h"
@@ -324,6 +325,8 @@ void CXnViewManager::ConstructL()
     iHspsWrapper = &iEditor->HspsWrapper();
     
     iComposer = CXnComposer::NewL( *iHspsWrapper );
+    
+    iIsLandscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
     
     DoRobustnessCheckL();
     }
@@ -866,7 +869,6 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
         if ( next.Load() == KErrNoMemory )
             {
             next.ShowOutOfMemError();
-            
             return;
             }
         }
@@ -885,21 +887,42 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
         
         TInt ret( GfxTransEffect::BeginGroup() );
         
-        CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+        CFbsBitmap* currentBg( ActiveViewData().WallpaperImage() );
+        CFbsBitmap* nextBg( next.WallpaperImage() );
         
-        GfxTransEffect::Begin( bg, KGfxControlActionAppear );
-
-        GfxTransEffect::SetDemarcation( bg, bg->Position() );
-        GfxTransEffect::End( bg );        
+        if ( currentBg || nextBg )
+            {
+            CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+            
+            if ( !currentBg && nextBg )
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgAnimToImgAppear );
+                }
+            else
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgImgToImgAppear );
+                }
+            
+            GfxTransEffect::SetDemarcation( bg, bg->Position() );
+            GfxTransEffect::End( bg );
+            }
         
-        GfxTransEffect::Begin( thisView, KGfxControlActionDisappear );
+        if ( iIsLandscapeOrientation )
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
+            GfxTransEffect::Begin( nextView, KGfxControlActionAppearLsc );
+            }
+        else
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
+            GfxTransEffect::Begin( nextView, KGfxControlActionAppearPrt );
+            }
         
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
+        TRAP_IGNORE( iAppUiAdapter.ViewAdapter().ActivateContainerL( next ) );
         
         GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
         GfxTransEffect::End( thisView );
-                
-        GfxTransEffect::Begin( nextView, KGfxControlActionAppear );
+        
         GfxTransEffect::SetDemarcation( nextView, nextView->Position() );
         GfxTransEffect::End( nextView );
                                 
@@ -924,7 +947,6 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
         if ( prev.Load() == KErrNoMemory )
             {
             prev.ShowOutOfMemError();
-            
             return;
             }
         }
@@ -942,23 +964,43 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
         GfxTransEffect::Register( prevView, KGfxContextActivatePrevView );
     
         TInt ret( GfxTransEffect::BeginGroup() );
+        
+        CFbsBitmap* currentBg( ActiveViewData().WallpaperImage() );
+        CFbsBitmap* prevBg( prev.WallpaperImage() );
+        
+        if ( currentBg || prevBg )
+            {
+            CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
             
-        CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+            if ( !currentBg && prevBg )
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgAnimToImgAppear );
+                }
+            else
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgImgToImgAppear );
+                }
+            
+            GfxTransEffect::SetDemarcation( bg, bg->Position() );
+            GfxTransEffect::End( bg );
+            }
         
-        GfxTransEffect::Begin( bg, KGfxControlActionAppear );
-    
-        GfxTransEffect::SetDemarcation( bg, bg->Position() );
-        GfxTransEffect::End( bg );        
+        if ( iIsLandscapeOrientation )
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
+            GfxTransEffect::Begin( prevView, KGfxControlActionAppearLsc );
+            }
+        else
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
+            GfxTransEffect::Begin( prevView, KGfxControlActionAppearPrt );
+            }
         
-        GfxTransEffect::Begin( thisView, KGfxControlActionDisappear );
-        
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
+        TRAP_IGNORE( iAppUiAdapter.ViewAdapter().ActivateContainerL( prev ) );
         
         GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
         GfxTransEffect::End( thisView );
-                
-        GfxTransEffect::Begin( prevView, KGfxControlActionAppear );
-                              
+                                      
         GfxTransEffect::SetDemarcation( prevView, prevView->Position() );
         GfxTransEffect::End( prevView );
                                 
@@ -1770,6 +1812,14 @@ void CXnViewManager::DoRobustnessCheckL()
                                 KStabilityInterval,
                                 TCallBack( SystemStabileTimerCallback, this ) );
         }           
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::OrientationChanged 
+// -----------------------------------------------------------------------------
+void CXnViewManager::OrientationChanged()
+    {
+    iIsLandscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();    
     }
 
 // End of file

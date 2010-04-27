@@ -202,7 +202,9 @@ public:
     CXnOomSysHandler& OomSysHandler() const;
     
     void UpdatePageManagementInformationL();
-                  
+
+    void OrientationChanged();
+
 private:
     // new functions
     
@@ -344,6 +346,11 @@ private:
      * Own.
      */
     CPeriodic* iStabilityTimer;
+
+    /**
+     * Flag for current orientation.
+     */    
+    TBool iIsLandscapeOrientation;
     
 private:   
     // Friend classes

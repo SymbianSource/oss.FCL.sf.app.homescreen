@@ -180,7 +180,7 @@ private:
     /**
      * Updates the text in the applications and suggestions heading panes.
      */
-    void UpdateHeadingsL();
+    void UpdateHeadingsL( TInt aNewCount );
     
     /**
      * Disables transition animations for taskswitcher app.

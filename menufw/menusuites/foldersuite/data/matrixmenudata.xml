@@ -105,6 +105,9 @@
                             
           <menu:application uid="0x100058EC"
                             view="0x10283321"
+                            icon_file="aimcsplugin.mif"
+                            icon_id="16392"
+                            mask_id="16393" 
                             long_name="&qtn_apps_installations_list;"/>
 
           <menu:shortcut    uid="0x99999999"

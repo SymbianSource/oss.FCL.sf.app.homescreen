@@ -204,7 +204,9 @@ private:
     TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
 
     TInt ViewListL( CHsContentInfoArray& aArray );
-    
+
+    TInt ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
+
     TInt AppListL( CHsContentInfoArray& aArray );
     
     TInt AddWidgetL( CHsContentInfo& aInfo );
@@ -303,7 +305,12 @@ private:
      * Retrieves publishers from CPS and them with the HSPS's template plugins
      */
     void CpsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets );
-            
+
+    /**
+     * Checks whether the view is full
+     */
+    TBool IsViewFull( CXnViewData& aViewData );
+    
 private:
     // from MXnViewObserver    
     

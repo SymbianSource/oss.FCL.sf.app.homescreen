@@ -172,7 +172,7 @@ EXPORT_C void CTsFswEngine::CloseAppL( TInt aWgId )
         // convert aWgId to an index in the list of running widgets and close widget
         CloseWidgetL( -aWgId -1 );
         }
-    else if( !iDataList->AlwaysShownApps()->IsAlwaysShownApp( AppUidForWgIdL( aWgId ) ) )
+    else if( !iDataList->IsAlwaysShownAppL( aWgId ) )
         {
         // send window group event to kill the app
         TWsEvent event;
@@ -243,12 +243,12 @@ void CTsFswEngine::UpdateTaskList()
 
     // There can be many calls in a row, use a timer to prevent degrading
     // device performance.
+    iDataList->SetDirty();
     if ( !iUpdateStarter->IsActive() )
         {
         iUpdateStarter->Start( KContentRefreshDelay, 0,
                 TCallBack( UpdateStarterCallback, this ) );
         }
-    iDataList->SetDirty();
 
     // screenshot taking support - call Register and Unregister when needed
     UpdatePreviewContent();
@@ -363,20 +363,6 @@ TBool CTsFswEngine::CollectTasksL()
 void CTsFswEngine::HiddenAppListUpdated()
     {
     UpdateTaskList();
-    }
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::AppUidForWgIdL
-// --------------------------------------------------------------------------
-//
-TUid CTsFswEngine::AppUidForWgIdL( TInt aWgId )
-    {
-    CApaWindowGroupName* windowName =
-        CApaWindowGroupName::NewLC( iWsSession, aWgId );
-    TUid appUid = windowName->AppUid();
-    CleanupStack::PopAndDestroy( windowName );
-    return appUid;
-
     }
 
 // --------------------------------------------------------------------------
@@ -496,7 +482,7 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
     TSLOG2_IN( "aWgId = %d aFbsHandle = %d", aWgId, aFbsHandle );
 
     TUid appUid;
-    TRAPD( err, appUid = AppUidForWgIdL( aWgId ) );
+    TInt err = iDataList->AppUidForWgId( aWgId, appUid );
     if ( err || appUid == KTsCameraUid )
         {
         // Dont't assign screenshot to camera app
@@ -511,8 +497,8 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
     iPreviewProvider->AckPreview(aFbsHandle);
     if ( err == KErrNone )
         {
-        StoreScreenshot(aWgId, bmp);
 		iDataList->MoveEntryAtStart(appUid.iUid, EFalse);
+        StoreScreenshot(aWgId, bmp);
         }
 
     TSLOG_OUT();
@@ -767,7 +753,10 @@ void CTsFswEngine::RemoveScreenshot(TInt aWgId)
 void CTsFswEngine::HandleWidgetUpdateL(TInt aWidgetId, TInt aBitmapHandle)
     {
 	TSLOG_CONTEXT( HandleWidgetUpdateL, TSLOG_LOCAL );
-    CFbsBitmap* bmp = 0;
+    
+	iDataList->MoveEntryAtStart(aWidgetId, ETrue);
+    
+	CFbsBitmap* bmp = 0;
     TBool contentChanged(EFalse); 
     if( aBitmapHandle )
     	{
@@ -782,7 +771,6 @@ void CTsFswEngine::HandleWidgetUpdateL(TInt aWidgetId, TInt aBitmapHandle)
 		iObserver.FswDataChanged();
 		}
  
-    iDataList->MoveEntryAtStart(aWidgetId, ETrue);
     TSLOG_OUT();
     }
 

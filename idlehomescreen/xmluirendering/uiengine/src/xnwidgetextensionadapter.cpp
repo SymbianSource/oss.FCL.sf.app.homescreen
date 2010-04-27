@@ -21,6 +21,7 @@
 #include <AknUtils.h>
 #include <gfxtranseffect/gfxtranseffect.h>
 #include <akntransitionutils.h>
+#include <AknPriv.hrh>
 
 // User includes
 #include "xnwidgetextensionadapter.h"
@@ -707,6 +708,11 @@ void CXnWidgetExtensionAdapter::NotifyResourceChanged( TInt aType )
             {
             DrawableWindow()->FadeBehind( ETrue );
             }
+        }
+    
+    else if( iPopup && aType == KAknSplitInputDisabled )
+        {
+        HidePopupL();
         }
     }
 

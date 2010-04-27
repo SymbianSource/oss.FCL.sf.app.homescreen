@@ -38,4 +38,6 @@ EXPORTS
 	_ZN19CMmListBoxContainer20SetDefaultHighlightLEi @ 37 NONAME
 	_ZThn52_N18CMmWidgetContainer23HandleBackgroundGainedLEv @ 38 NONAME
 	_ZThn52_N18CMmWidgetContainer23HandleForegroundGainedLEv @ 39 NONAME
+	_ZN18CMmWidgetContainer19SetTriggerMoveItemLEiP20CLiwGenericParamList @ 40 NONAME
+	_ZNK18CMmWidgetContainer9AllowMoveEv @ 41 NONAME
 

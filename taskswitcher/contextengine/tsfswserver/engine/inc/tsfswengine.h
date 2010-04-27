@@ -161,12 +161,6 @@ private:
      */
     TBool CollectTasksL();
 
-    /**
-     * Finds out the app uid for the given window group id.
-     * @param   aWgId   a valid window group id
-     * @return  application uid
-     */
-    TUid AppUidForWgIdL( TInt aWgId );
 
     /**
      * Makes a copy of the bitmap with the given handle.

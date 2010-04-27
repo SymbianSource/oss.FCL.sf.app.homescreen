@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.67 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.67 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.69 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.69 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -93,7 +93,7 @@ void CMmAppUi::ConstructL()
     iEikonEnv->SetSystem( ETrue );
 
     TInt appUiFlags = AknLayoutUtils::PenEnabled() ?
-    	EAknEnableSkin | EAknSingleClickCompatible :
+      EAknEnableSkin | EAknSingleClickCompatible :
         EAknEnableSkin | EAknEnableMSK;
     BaseConstructL( appUiFlags );
     //hide Menu from TS at startup
@@ -213,11 +213,17 @@ void CMmAppUi::HandleResourceChangeL( TInt aType )
         iIsKastorEffectStarted = ETrue;
         TInt lastItemIndex = iCurrentContainer->NumberOfItems() - 1;
 
-        if ( lastItemIndex >= 0 && iCurrentContainer->ItemIsFullyVisible( lastItemIndex ) &&
-        		!iCurrentContainer->IsHighlightVisible() )
-        	{
-        	iCurrentContainer->SetManualHighlightL( lastItemIndex, EFalse );
-        	}
+        if ( lastItemIndex >= 0 && iCurrentContainer->ItemIsFullyVisible( lastItemIndex )
+                && !iCurrentContainer->IsHighlightVisible() )
+            {
+            iCurrentContainer->SetManualHighlightL( lastItemIndex, EFalse );
+            }
+/*        else if( !iCurrentContainer->IsHighlightVisible()
+                && iCurrentContainer->Widget()->TopItemIndex() > -1)
+            {
+            iCurrentContainer->SetManualHighlightL(
+                    iCurrentContainer->Widget()->TopItemIndex(), EFalse );
+            } */
 
         iCurrentContainer->SetRect( ClientRect() );
         iDummyContainer->SetRect( ClientRect() );
@@ -301,9 +307,9 @@ void CMmAppUi::ProcessCommandL(TInt aCommand)
         }
 
     if ( iCurrentContainer )
-    	{
-    	iCurrentContainer->EndLongTapL();
-    	}
+      {
+      iCurrentContainer->EndLongTapL();
+      }
     }
 
 // ---------------------------------------------------------------------------
@@ -322,18 +328,18 @@ void CMmAppUi::ProcessMessageL( TUid /*aUid*/, const TDesC8& aParams )
     if( !aParams.Compare( KNullDesC8 ) )
         {
         if ( !iAppkeyHandler->IsActive() )
-        	{
+            {
             //make dummy container visible when returning
             //to menu by AppKey
-        	iDummyContainer->MakeVisible( ETrue );
+            iDummyContainer->MakeVisible( ETrue );
             RefreshUiPanesL( ETrue );
             iCurrentContainer->MakeVisible( EFalse );
             iDummyContainer->DrawNow();
             CleanupForExitL( EExitKeyApplication );
-			User::LeaveIfError( iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
-						CEikonEnv::Static()->RootWin().Identifier(), 0 ) );
-			iAppkeyHandler->StartL();
-        	}
+            User::LeaveIfError( iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
+            CEikonEnv::Static()->RootWin().Identifier(), 0 ) );
+            iAppkeyHandler->StartL();
+            }
         }
 
     // first refresh model, show afterwords
@@ -627,61 +633,61 @@ void CMmAppUi::ForwardEventToHNL( TInt aEvent, TInt aItemId,
 // ---------------------------------------------------------------------------
 //
 TInt CMmAppUi::GetKastorEffectL( CHnItemModel* aItemModel )
-	{
-	TInt effect( AknTransEffect::ENone );
+  {
+  TInt effect( AknTransEffect::ENone );
     if ((IsEditMode() || iEditModeStatus == ETransitionFromEditMode)
             && !AknLayoutUtils::PenEnabled())
         {
         return effect;
         }
-	switch( aItemModel->GetItemType() )
-		{
-		case EItemTypeApplication:
-			{
-			if( !IsEditMode() && !aItemModel->IsDrmExpired() )
-				{
-				if( aItemModel->IsRunning() )
-					{
-					effect = AknTransEffect::EApplicationStartSwitchRect;
-					}
-				else
-					{
-					effect = AknTransEffect::EApplicationStartRect;
-					}
-				}
-			break;
-			}
-		case EItemTypeSuite:
-			{
-			if( !IsEditMode() )
-				{
-				effect = EMenuOpenFolderEffect;
-				iIsKastorEffectStarted = ETrue;
-				}
-			break;
-			}
-		case EItemTypeParentFolder:
-		    {
+  switch( aItemModel->GetItemType() )
+    {
+    case EItemTypeApplication:
+      {
+      if( !IsEditMode() && !aItemModel->IsDrmExpired() )
+        {
+        if( aItemModel->IsRunning() )
+          {
+          effect = AknTransEffect::EApplicationStartSwitchRect;
+          }
+        else
+          {
+          effect = AknTransEffect::EApplicationStartRect;
+          }
+        }
+      break;
+      }
+    case EItemTypeSuite:
+      {
+      if( !IsEditMode() )
+        {
+        effect = EMenuOpenFolderEffect;
+        iIsKastorEffectStarted = ETrue;
+        }
+      break;
+      }
+    case EItemTypeParentFolder:
+        {
             effect = EMenuCloseFolderEffect;
             iIsKastorEffectStarted = ETrue;
-		    break;
-		    }
-		case EItemTypeFolder:
-			{
-			if (!(IsEditMode() && aItemModel->IsDeleteLocked()))
+        break;
+        }
+    case EItemTypeFolder:
+      {
+      if (!(IsEditMode() && aItemModel->IsDeleteLocked()))
                 {
                 effect = EMenuOpenFolderEffect;
                 iIsKastorEffectStarted = ETrue;
                 }
-			break;
-			}
-		case EItemTypeUnknown:
-		default:
-			{
-			effect = AknTransEffect::ENone;
-			break;
-			}
-		}
+      break;
+      }
+    case EItemTypeUnknown:
+    default:
+      {
+      effect = AknTransEffect::ENone;
+      break;
+      }
+    }
     return effect;
     }
 
@@ -961,7 +967,7 @@ TKeyResponse CMmAppUi::HandleKeyPressedL( const TKeyEvent &aKeyEvent,
             IsEditMode() && !Layout_Meta_Data::IsPenEnabled() )
         {
         DEBUG(("_Mm_:CMmAppUi::HandleKeyPressedL - enter in edit mode"));
-		HandleCommandL( EAknSoftkeyOk );
+        HandleCommandL( EAknSoftkeyOk );
         resp = EKeyWasConsumed;
         }
 
@@ -1070,29 +1076,29 @@ void CMmAppUi::HandleDraggedIndexUpdatedL( TInt  aModelItemIndex  )
 void CMmAppUi::HandleDragStopL( TInt aModelItemIndex )
     {
     MMPERF(("CMmAppUi::HandleDragStopL - START"));
-    if ( IsEditMode() )
+    if( IsEditMode() )
         {
         TInt itemId = iCurrentSuiteModel->IdByIndex( aModelItemIndex );
         TMcsItemType typeCurr =
             iCurrentSuiteModel->GetItemType( aModelItemIndex );
         TBool isOverFolder = ( AknLayoutUtils::PenEnabled() &&
             ( typeCurr == EItemTypeParentFolder || typeCurr == EItemTypeFolder ) );
-        TBool isDeleteLocked = (itemId != KErrNotFound) ?
-                    iCurrentSuiteModel->GetItemModel( itemId )->IsDeleteLocked():
-                    EFalse;
+        TBool isDeleteLocked = (itemId != KErrNotFound)
+                                ? iCurrentSuiteModel->GetItemModel( itemId )->IsDeleteLocked()
+                                : EFalse;
 
-        TBuf8< KMaxLength > beforeCustomId;
+        TBuf8<KMaxLength> beforeCustomId;
         beforeCustomId.Num( KErrNotFound );
-        if ( aModelItemIndex + 1 < iCurrentContainer->NumberOfItems() )
+        if( aModelItemIndex + 1 < iCurrentContainer->NumberOfItems() )
             {
             beforeCustomId.Num( iCurrentSuiteModel->GetItemModel(
                     iCurrentSuiteModel->IdByIndex( aModelItemIndex + 1 ) )->CustomId() );
             }
 
-        TBuf8< KMaxLength > draggedCustomId;
+        TBuf8<KMaxLength> draggedCustomId;
         draggedCustomId.Num( KErrNotFound );
         CHnItemModel* draggedModel = iCurrentSuiteModel->GetItemModel( iIdDragged );
-        if (draggedModel)
+        if( draggedModel )
             {
             draggedCustomId.Num( iCurrentSuiteModel->GetItemModel( iIdDragged )->CustomId() );
             }
@@ -1116,11 +1122,13 @@ void CMmAppUi::HandleDragStopL( TInt aModelItemIndex )
         tempKeys->ToGenericParamListL( *eventParameters );
         CleanupStack::PopAndDestroy( tempKeys );
 
-        if ( iIdDragged != itemId
-                && isOverFolder && !isDeleteLocked)
+        TBool allowMoveInto = iCurrentContainer->AllowMove();
+
+        if( iIdDragged != itemId && isOverFolder && !isDeleteLocked
+                && allowMoveInto )
             {
             iCurrentSuiteModel->RemoveItemL( iIdDragged );
-            if ( iItemDragged < aModelItemIndex )
+            if( iItemDragged < aModelItemIndex )
                 {
                 // indices of all items after iItemDragged have been
                 // decreased when the dragged item got removed from the
@@ -1136,30 +1144,30 @@ void CMmAppUi::HandleDragStopL( TInt aModelItemIndex )
             iHNInterface->TriggerHnEventL( KKeyIdMoveInto, itemId, eventParameters );
             iMakeHightlightedItemFullyVisible = ETrue;
             }
-        else if ( iIdDragged == itemId )
+        else if( iIdDragged == itemId )
             {
             iCurrentContainer->CancelDragL( ETrue );
-            TBool result = iHNInterface->TriggerHnEventL( KKeyIdMove, itemId, eventParameters );
+            iCurrentContainer->SetTriggerMoveItemL( itemId, eventParameters );
             // fix for: edit->move, then LSK->Up->LSK->LSK FAST... (short options show up)
-            if ( result != KErrNone && !AknLayoutUtils::PenEnabled() )
-				{
-				CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC();
-				TLiwGenericParam command(KHnRequest, TLiwVariant( KEvaluateMdModel));
-				paramList->AppendL(command);
-				HandleRequestL(*paramList);
-				CleanupStack::PopAndDestroy(paramList);
-				}
+            if( !AknLayoutUtils::PenEnabled() )
+                {
+                CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC();
+                TLiwGenericParam command(KHnRequest, TLiwVariant( KEvaluateMdModel));
+                paramList->AppendL( command );
+                HandleRequestL( *paramList );
+                CleanupStack::PopAndDestroy( paramList );
+                }
             }
         else
             {
             iCurrentContainer->CancelDragL( ETrue );
-            if (!AknLayoutUtils::PenEnabled())
+            if( !AknLayoutUtils::PenEnabled() )
                 {
                 CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC();
                 TLiwGenericParam command(KHnRequest, TLiwVariant( KEvaluateMdModel));
-                paramList->AppendL(command);
-                HandleRequestL(*paramList);
-                CleanupStack::PopAndDestroy(paramList);
+                paramList->AppendL( command );
+                HandleRequestL( *paramList );
+                CleanupStack::PopAndDestroy( paramList );
                 }
             }
 
@@ -1213,9 +1221,9 @@ void CMmAppUi::HandleListBoxEventL( CEikListBox* /*aListBox*/,
         HandleHighlightItemSingleClickedL(  iCurrentContainer->Widget()->CurrentItemIndex() );
         }
     else if ( aEventType == MEikListBoxObserver::EEventPanningStarted )
-    	{
-    	iKeyClickLocked = ETrue;
-    	}
+      {
+      iKeyClickLocked = ETrue;
+      }
 
     DEBUG(("_Mm_:CMmAppUi::HandleListBoxEventL OUT"));
     }
@@ -1225,13 +1233,13 @@ void CMmAppUi::HandleListBoxEventL( CEikListBox* /*aListBox*/,
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
-	{
+  {
     TBool popupMenuDisplayed(EFalse);
-	if (iPopupMenu)
-    	{
-    	delete iPopupMenu;
-    	iPopupMenu = NULL;
-    	}
+  if (iPopupMenu)
+      {
+      delete iPopupMenu;
+      iPopupMenu = NULL;
+      }
     iPopupMenu = CAknStylusPopUpMenu::NewL(this,aPenEventLocation);
 
     if ( AknLayoutUtils::LayoutMirrored() )
@@ -1246,71 +1254,71 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
         }
 
     if( iCurrentSuiteModel == iHNInterface->GetLastSuiteModelL()
-    		&& iCurrentContainer->IsHighlightVisible()
-    		&& iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1 )
-    	{
-		MMPERF(("CMmAppUi::DynInitMenuPaneL - START"));
-		//fill the main menu structure, look for cascade menus
-		//reset the helper hash map
-		iCascadeMenuMap.Close();
+        && iCurrentContainer->IsHighlightVisible()
+        && iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1 )
+      {
+    MMPERF(("CMmAppUi::DynInitMenuPaneL - START"));
+    //fill the main menu structure, look for cascade menus
+    //reset the helper hash map
+    iCascadeMenuMap.Close();
 
-		MHnMenuItemModelIterator* menuIterator =
-			iCurrentSuiteModel->GetMenuStructureL(
-				iCurrentSuiteModel->IdByIndex(
-						iCurrentContainer->GetHighlight() ) );
+    MHnMenuItemModelIterator* menuIterator =
+      iCurrentSuiteModel->GetMenuStructureL(
+        iCurrentSuiteModel->IdByIndex(
+            iCurrentContainer->GetHighlight() ) );
 
-		// check if there is a menu structure available
-		// for the specified item
-		if ( menuIterator )
-			{
-			//create item sorting helper objects
-			RArray<TInt> positionArray;
-			CleanupClosePushL( positionArray );
-			RHashMap<TInt, CEikMenuPaneItem::SData> menuItemMap;
-			CleanupClosePushL( menuItemMap );
+    // check if there is a menu structure available
+    // for the specified item
+    if ( menuIterator )
+      {
+      //create item sorting helper objects
+      RArray<TInt> positionArray;
+      CleanupClosePushL( positionArray );
+      RHashMap<TInt, CEikMenuPaneItem::SData> menuItemMap;
+      CleanupClosePushL( menuItemMap );
 
             while ( menuIterator->HasNextSpecific() )
                 {
                 CHnMenuItemModel* childItem = menuIterator->GetNextSpecific();
-				CEikMenuPaneItem::SData childData;
-				childData.iCommandId = childItem->Command();
-				childData.iText = childItem->NameL().
-					Left( CEikMenuPaneItem::SData::ENominalTextLength );
-				childData.iFlags = 0;
-				childData.iCascadeId = 0;
+        CEikMenuPaneItem::SData childData;
+        childData.iCommandId = childItem->Command();
+        childData.iText = childItem->NameL().
+          Left( CEikMenuPaneItem::SData::ENominalTextLength );
+        childData.iFlags = 0;
+        childData.iCascadeId = 0;
 
-				positionArray.AppendL( childItem->Position() );
-				menuItemMap.InsertL( childItem->Position(), childData );
+        positionArray.AppendL( childItem->Position() );
+        menuItemMap.InsertL( childItem->Position(), childData );
                 }
 
-			positionArray.Sort();
+      positionArray.Sort();
 
-			//add items in correct order
-			for ( TInt i = 0; i < positionArray.Count(); ++i )
-				{
-				iPopupMenu->
-					AddMenuItemL(
-						menuItemMap.FindL( positionArray[i] ).iText,
-						menuItemMap.FindL( positionArray[i] ).iCommandId );
-				}
+      //add items in correct order
+      for ( TInt i = 0; i < positionArray.Count(); ++i )
+        {
+        iPopupMenu->
+          AddMenuItemL(
+            menuItemMap.FindL( positionArray[i] ).iText,
+            menuItemMap.FindL( positionArray[i] ).iCommandId );
+        }
 
-			if (positionArray.Count()>0)
-				{
-				iPopupMenu->ShowMenu();
-				popupMenuDisplayed = ETrue;
-				}
-			CleanupStack::PopAndDestroy( &menuItemMap );
-			CleanupStack::PopAndDestroy( &positionArray );
-			}
-		MMPERF(("CMmAppUi::DynInitMenuPaneL - STOP"));
-		}
+      if (positionArray.Count()>0)
+        {
+        iPopupMenu->ShowMenu();
+        popupMenuDisplayed = ETrue;
+        }
+      CleanupStack::PopAndDestroy( &menuItemMap );
+      CleanupStack::PopAndDestroy( &positionArray );
+      }
+    MMPERF(("CMmAppUi::DynInitMenuPaneL - STOP"));
+    }
 
-	if ( !popupMenuDisplayed && iCurrentContainer )
-		{
-		iCurrentContainer->EndLongTapL( ETrue );
-		HandleHighlightItemSingleClickedL(
-				iCurrentContainer->Widget()->CurrentItemIndex() );
-		}
+  if ( !popupMenuDisplayed && iCurrentContainer )
+    {
+    iCurrentContainer->EndLongTapL( ETrue );
+    HandleHighlightItemSingleClickedL(
+        iCurrentContainer->Widget()->CurrentItemIndex() );
+    }
     }
 
 // ---------------------------------------------------------------------------
@@ -1320,7 +1328,7 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
 void CMmAppUi::HandleHighlightItemDoubleClickedL( TInt aIndex )
     {
     if ( iKeyClickLocked )
-    	return;
+      return;
 
     if ( iCurrentSuiteModel->WidgetType() == EListWidget
         && iCurrentContainer->GetPreviousHighlight() == aIndex )
@@ -1439,9 +1447,9 @@ void CMmAppUi::HandleMessageL( const TDesC8& aMessage )
         RefreshCbaL();
         iGarbage.ResetAndDestroy();
         ResetContainerMap();
-	    iCurrentSuiteModel = NULL;
-	    iCurrentContainer = NULL;
-	    }
+      iCurrentSuiteModel = NULL;
+      iCurrentContainer = NULL;
+      }
 
     TRAPD( err, iHNInterface->LoadSuitesFromUriL( aMessage ) );
 
@@ -1476,23 +1484,23 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
                     {
                     TInt itemId( KErrNotFound );
                     TBool suiteModelHasItems = iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1;
-					TBool highlightVisible = iCurrentContainer->IsHighlightVisible();
-					if ( !highlightVisible && suiteModelHasItems )
-						{
+          TBool highlightVisible = iCurrentContainer->IsHighlightVisible();
+          if ( !highlightVisible && suiteModelHasItems )
+            {
 //						if there is no highlight, but there are items, show menuitems for logically
 //						current suite highlight fetched from suite model.
-						TInt suiteHighlight = iCurrentSuiteModel->GetSuiteHighlight();
-						ASSERT( suiteHighlight != KErrNotFound );
-						itemId = iCurrentSuiteModel->IdByIndex( suiteHighlight );
-						ignoreItemSpecific = ETrue;
-						}
-					else
-						{
-	                    TBool idByContainer = highlightVisible && suiteModelHasItems;
-	                    itemId = idByContainer ?
-	                        iCurrentSuiteModel->IdByIndex( iCurrentContainer->GetHighlight() ) :
-	                        iCurrentSuiteModel->IdByIndex( KErrNotFound );
-						}
+            TInt suiteHighlight = iCurrentSuiteModel->GetSuiteHighlight();
+            ASSERT( suiteHighlight != KErrNotFound );
+            itemId = iCurrentSuiteModel->IdByIndex( suiteHighlight );
+            ignoreItemSpecific = ETrue;
+            }
+          else
+            {
+                      TBool idByContainer = highlightVisible && suiteModelHasItems;
+                      itemId = idByContainer ?
+                          iCurrentSuiteModel->IdByIndex( iCurrentContainer->GetHighlight() ) :
+                          iCurrentSuiteModel->IdByIndex( KErrNotFound );
+            }
                     menuIterator = iCurrentSuiteModel->GetMenuStructureL( itemId );
                 }
 
@@ -1524,42 +1532,42 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
                         {
                         CHnMenuItemModel* menuItem = menuIterator->GetNext();
                         if ( (menuItem->MenuItemType() == CHnMenuItemModel::EItemApplication) || !ignoreItemSpecific )
-                        	{
-                        	CEikMenuPaneItem::SData menuData;
-							menuData.iCommandId = menuItem->Command();
-							menuData.iText = menuItem->NameL().
-								Left( CEikMenuPaneItem::SData::ENominalTextLength );
-							menuData.iFlags = 0;
+                          {
+                          CEikMenuPaneItem::SData menuData;
+              menuData.iCommandId = menuItem->Command();
+              menuData.iText = menuItem->NameL().
+                Left( CEikMenuPaneItem::SData::ENominalTextLength );
+              menuData.iFlags = 0;
 
-							//check for children
-							MHnMenuItemModelIterator* childIterator =
-								menuItem->GetMenuStructure();
-							if ( childIterator->HasNext() )
-								{
-								//this is a cascade item
-								//one menu item can contain only one cascade menu
-								//check if there are available cascade menu containers
-								TInt freeResource = GetNextCascadeMenuResourceId();
-								if ( freeResource != KErrNotFound )
-									{
-									//error checking
-									if( !iCascadeMenuMap.Insert( freeResource,
-																childIterator ) )
-										{
-										//add item only if there is an
-										//available resource
-										menuData.iCascadeId = freeResource;
-										}
-									}
-								}
-							else
-								{
-								//normal entry
-								menuData.iCascadeId = 0;
-								}
-							positionArray.AppendL( menuItem->Position() );
-							menuItemMap.InsertL( menuItem->Position(), menuData );
-                        	}
+              //check for children
+              MHnMenuItemModelIterator* childIterator =
+                menuItem->GetMenuStructure();
+              if ( childIterator->HasNext() )
+                {
+                //this is a cascade item
+                //one menu item can contain only one cascade menu
+                //check if there are available cascade menu containers
+                TInt freeResource = GetNextCascadeMenuResourceId();
+                if ( freeResource != KErrNotFound )
+                  {
+                  //error checking
+                  if( !iCascadeMenuMap.Insert( freeResource,
+                                childIterator ) )
+                    {
+                    //add item only if there is an
+                    //available resource
+                    menuData.iCascadeId = freeResource;
+                    }
+                  }
+                }
+              else
+                {
+                //normal entry
+                menuData.iCascadeId = 0;
+                }
+              positionArray.AppendL( menuItem->Position() );
+              menuItemMap.InsertL( menuItem->Position(), menuData );
+                          }
                         }
 
                     aMenuPane->Reset();
@@ -1803,10 +1811,10 @@ void CMmAppUi::HandlePresentationChangeL(
         // grid and list views but no highlight should be visible
         // after opening a folder.
         TBool highlightVisibleBefore =
-            iCurrentContainer &&
-            aWidgetContainer &&
-			iCurrentContainer->IsHighlightVisible() &&
-			iCurrentContainer->WidgetType() != aWidgetContainer->WidgetType();
+                iCurrentContainer &&
+                aWidgetContainer &&
+                iCurrentContainer->IsHighlightVisible() &&
+                iCurrentContainer->WidgetType() != aWidgetContainer->WidgetType();
 
         HandleWidgetChangeRefreshL( aWidgetContainer );
 
@@ -2034,8 +2042,8 @@ void CMmAppUi::UpdateToolbarL()
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::SetEditModeL( TBool aIsEditMode )
-	{
-	MMPERF(("CMmAppUi::SetEditModeL %d - START",aIsEditMode));
+  {
+  MMPERF(("CMmAppUi::SetEditModeL %d - START",aIsEditMode));
     if ( IsEditMode() != aIsEditMode && iCurrentSuiteModel )
         {
 
@@ -2046,20 +2054,20 @@ void CMmAppUi::SetEditModeL( TBool aIsEditMode )
         iCurrentContainer->StopMovingL();
 
         if ( aIsEditMode )
-        	{
-        	iEditModeStatus = ETransitionToEditMode;
-        	}
+          {
+          iEditModeStatus = ETransitionToEditMode;
+          }
         else
-        	{
-        	if ( iEditModeStatus == ETransitionToEditMode )
-        		{
-        		iEditModeStatus = EFastTransitionFromEditMode;
-        		}
-        	else
-        		{
-        		iEditModeStatus = ETransitionFromEditMode;
-        		}
-        	}
+          {
+          if ( iEditModeStatus == ETransitionToEditMode )
+            {
+            iEditModeStatus = EFastTransitionFromEditMode;
+            }
+          else
+            {
+            iEditModeStatus = ETransitionFromEditMode;
+            }
+          }
 
         HandleHighlightOffsetL( aIsEditMode ? EOffsetNext : EOffsetPrevious );
         iCurrentSuiteModel->SetSuiteHighlightL(
@@ -2109,7 +2117,7 @@ void CMmAppUi::HandleWsEventL( const TWsEvent& aEvent,
     TEventCode type = static_cast< TEventCode >( aEvent.Type() );
 
     if ( ( type == EEventFocusLost || type == KAknFullOrPartialForegroundLost )
-    		&& iCurrentContainer )
+        && iCurrentContainer )
         {
         iCurrentContainer->CacheWidgetPosition();
         }
@@ -2131,8 +2139,8 @@ void CMmAppUi::HandleWsEventL( const TWsEvent& aEvent,
         HandleFocusGainedL();
         }
     else if ( type == EEventFocusLost )
-    	{
-    	HandleFocusLostL();
+        {
+        HandleFocusLostL();
         }
     else if ( type == KAknFullOrPartialForegroundGained )
         {
@@ -2235,8 +2243,8 @@ void CMmAppUi::HandleSuiteEventL (
                 }
                 break;
             case ESuiteItemsUpdated:
-            	{
-				ClearTransitionFromEditModeFlag();
+                {
+                ClearTransitionFromEditModeFlag();
                 iCurrentContainer->DrawView();
                 }
                 break;
@@ -2258,13 +2266,13 @@ void CMmAppUi::HandleSuiteEventL (
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::ClearTransitionFromEditModeFlag()
-	{
-	if ( iEditModeStatus == ETransitionFromEditMode ||
-		 iEditModeStatus == EFastTransitionFromEditMode )
-		{
-		iEditModeStatus = ENoEditMode;
-		}
-	}
+  {
+  if ( iEditModeStatus == ETransitionFromEditMode ||
+     iEditModeStatus == EFastTransitionFromEditMode )
+    {
+    iEditModeStatus = ENoEditMode;
+    }
+  }
 
 // ---------------------------------------------------------------------------
 //
@@ -2373,7 +2381,7 @@ void CMmAppUi::HandleSuiteModelInitializedL( CHnSuiteModel* aModel )
         ShowSuiteL();
         iGarbage.ResetAndDestroy();
 
-       	if ( iEditModeStatus == ETransitionToEditMode )
+         if ( iEditModeStatus == ETransitionToEditMode )
             {
             iEditModeStatus = EEditMode;
             }
@@ -2500,8 +2508,8 @@ void CMmAppUi::CleanupForExitL( TExitKeyType aExitKey )
             DEBUG(("\t_Mm_:Top item index reset"));
             iCurrentContainer->ResetWidgetPosition();
             iCurrentContainer->Widget()->UpdateScrollBarsL();
-			iCurrentContainer->MakeVisible( ETrue );
-			iCurrentContainer->DrawNow();
+      iCurrentContainer->MakeVisible( ETrue );
+      iCurrentContainer->DrawNow();
             }
         }
 
@@ -2516,7 +2524,7 @@ void CMmAppUi::ShowHomescreenL( TExitType  aExitType  )
     {
     TInt appToShowUid(0);
     TInt idleid(0);
-    if (aExitType == EExitToIdle)
+    if (aExitType == EExitToIdle || aExitType == EExitToPhone)
         {
         User::LeaveIfError(RProperty::Get(KPSUidAiInformation, KActiveIdleUid,
                 appToShowUid));
@@ -2655,37 +2663,37 @@ void CMmAppUi::SetMiddleSoftKeyL()
     {
     DEBUG(("_Mm_:CMmAppUi::SetMiddleSoftKeyL - IN"));
     if ( iCurrentSuiteModel && !AknLayoutUtils::PenEnabled() && !IsEditMode() )
-    	{
-    	DEBUG(("\t_Mm_:suite highlight: %d",
-    	            iCurrentSuiteModel->GetSuiteHighlight()));
+      {
+      DEBUG(("\t_Mm_:suite highlight: %d",
+                  iCurrentSuiteModel->GetSuiteHighlight()));
 
-		TBool idByContainer = iCurrentContainer->IsHighlightVisible() &&
-				iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1;
-		TInt itemId = idByContainer ?
-			iCurrentSuiteModel->IdByIndex( iCurrentContainer->GetHighlight() ) :
-			iCurrentSuiteModel->IdByIndex( KErrNotFound );
-		CHnItemModel* itemModel = iCurrentSuiteModel->GetItemModel( itemId );
+    TBool idByContainer = iCurrentContainer->IsHighlightVisible() &&
+        iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1;
+    TInt itemId = idByContainer ?
+      iCurrentSuiteModel->IdByIndex( iCurrentContainer->GetHighlight() ) :
+      iCurrentSuiteModel->IdByIndex( KErrNotFound );
+    CHnItemModel* itemModel = iCurrentSuiteModel->GetItemModel( itemId );
 
-		CHnButtonModel* mskModel = NULL;
+    CHnButtonModel* mskModel = NULL;
 
-		if ( itemModel )
-			{
-			mskModel = itemModel->GetMiddleSoftKey();
-			}
+    if ( itemModel )
+      {
+      mskModel = itemModel->GetMiddleSoftKey();
+      }
 
-		if ( mskModel )
-			{
-			TInt event = (mskModel->GetEventId() == KErrNotFound) ?
-					KKeyIdSelect : mskModel->GetEventId();
-			Cba()->SetCommandL( CEikButtonGroupContainer::EMiddleSoftkeyPosition,
-					event, mskModel->GetButtonText());
-			}
-		else
-			{
-			// reset to default
-			RefreshCbaL();
-			}
-    	}
+    if ( mskModel )
+      {
+      TInt event = (mskModel->GetEventId() == KErrNotFound) ?
+          KKeyIdSelect : mskModel->GetEventId();
+      Cba()->SetCommandL( CEikButtonGroupContainer::EMiddleSoftkeyPosition,
+          event, mskModel->GetButtonText());
+      }
+    else
+      {
+      // reset to default
+      RefreshCbaL();
+      }
+      }
     DEBUG(("_Mm_:CMmAppUi::SetMiddleSoftKeyL - OUT"));
     }
 
@@ -2825,6 +2833,16 @@ void CMmAppUi::SkinPackageChanged(const TAknsSkinStatusPackageChangeReason /*aRe
 //
 // ---------------------------------------------------------------------------
 //
+void CMmAppUi::HandleTriggerMoveItemL( const TInt aRecipientId,
+        CLiwGenericParamList* aEventParameters)
+    {
+    iHNInterface->TriggerHnEventL( KKeyIdMove, aRecipientId, aEventParameters);
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void CMmAppUi::RefreshIconsL()
     {
     iSkinChangeNeeded = EFalse;
@@ -2896,133 +2914,133 @@ void CMmAppUi::ApplyHighlightFromModelL()
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::HandleFocusGainedL()
-	{
-	DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
-			"- EEventFocusGained"));
+    {
+    DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
+      "- EEventFocusGained"));
 
-	iHasFocus = ETrue;
+    iHasFocus = ETrue;
 
     // Tricky: lack of iCurrentSuiteModel indicates that suite evaluation is in
     // progress - do not call HandlePresentationChangeL if evalution has not
     // finished.
-	if ( iCurrentContainer && !iCurrentContainer->IsVisible() &&
-	        iCurrentSuiteModel )
-		{
-		HandlePresentationChangeL( iCurrentContainer );
-		}
+    if ( iCurrentContainer && !iCurrentContainer->IsVisible() &&
+          iCurrentSuiteModel )
+        {
+        HandlePresentationChangeL( iCurrentContainer );
+        }
 
-	if ( iCurrentSuiteModel && iCurrentContainer )
-		{
-		iDummyContainer->MakeVisible( EFalse );
-		iCurrentContainer->MakeVisible( ETrue );
-		iCurrentContainer->DrawNow();
-		}
-	if( IsForeground() )
-		{
-		RefreshUiPanesL();
-		}
-	if ( iCurrentContainer )
-	    {
-	    iCurrentContainer->SetHasFocusL( ETrue );
-	    }
-	if ( iCurrentSuiteModel )
+    if ( iCurrentSuiteModel && iCurrentContainer )
+        {
+        iDummyContainer->MakeVisible( EFalse );
+        iCurrentContainer->MakeVisible( ETrue );
+        iCurrentContainer->DrawNow();
+        }
+    if( IsForeground() )
+        {
+        RefreshUiPanesL();
+        }
+    if ( iCurrentContainer )
+        {
+        iCurrentContainer->SetHasFocusL( ETrue );
+        }
+    if ( iCurrentSuiteModel )
         {
         iCurrentSuiteModel->SetVisibleL( ETrue );
         }
-	}
+    }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::HandleFocusLostL()
-	{
-	DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
-			"- EEventFocusLost"));
+  {
+  DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
+      "- EEventFocusLost"));
 
-	iHasFocus = EFalse;
+  iHasFocus = EFalse;
 
-	if( iCurrentContainer )
-		{
-		//This is needed in case some popup is displayed
-		//while touching item in grid. Highlight
-		//should be reset to normal then.
-		if( AknLayoutUtils::PenEnabled() )
-			{
-			if( iCurrentContainer->WidgetType() == EGridWidget && !IsEditMode() )
-				{
-				iCurrentContainer->Widget()->View()->ItemDrawer()->
-					SetFlags( CListItemDrawer::EDisableHighlight );
-				}
-			iCurrentContainer->Widget()->View()->
-			ItemDrawer()->ClearFlags( CListItemDrawer::EPressedDownState );
-			iCurrentContainer->Widget()->View()->DrawItem(
-							  iCurrentContainer->Widget()->CurrentItemIndex() ) ;
-			}
-		if( IsEditMode() && iCurrentContainer->IsDraggable() )
-			{
-			HandleDragStopL( iCurrentContainer->GetHighlight() );
-			iCurrentContainer->DrawNow();
-			}
-		iCurrentContainer->SetHasFocusL( EFalse );
-		}
-	if ( iCurrentSuiteModel )
-		{
-		iCurrentSuiteModel->SetVisibleL( EFalse );
-		}
+  if( iCurrentContainer )
+    {
+    //This is needed in case some popup is displayed
+    //while touching item in grid. Highlight
+    //should be reset to normal then.
+    if( AknLayoutUtils::PenEnabled() )
+      {
+      if( iCurrentContainer->WidgetType() == EGridWidget && !IsEditMode() )
+        {
+        iCurrentContainer->Widget()->View()->ItemDrawer()->
+          SetFlags( CListItemDrawer::EDisableHighlight );
+        }
+      iCurrentContainer->Widget()->View()->
+      ItemDrawer()->ClearFlags( CListItemDrawer::EPressedDownState );
+      iCurrentContainer->Widget()->View()->DrawItem(
+                iCurrentContainer->Widget()->CurrentItemIndex() ) ;
+      }
+    if( IsEditMode() && iCurrentContainer->IsDraggable() )
+      {
+      HandleDragStopL( iCurrentContainer->GetHighlight() );
+      iCurrentContainer->DrawNow();
+      }
+    iCurrentContainer->SetHasFocusL( EFalse );
+    }
+  if ( iCurrentSuiteModel )
+    {
+    iCurrentSuiteModel->SetVisibleL( EFalse );
+    }
 
-	}
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::HandleFullOrPartialForegroundGainedL()
-	{
-		DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
-						"- KAknFullOrPartialForegroundGained"));
+  {
+    DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
+            "- KAknFullOrPartialForegroundGained"));
     //show Menu in TS when launched for the first time
     if( isHiddenFromFS )
         {
         HideApplicationFromFSW( EFalse );
         isHiddenFromFS = EFalse;
         }
-	
-	if (iCurrentContainer && iCurrentSuiteModel )
-		{
-		iCurrentContainer->HandleForegroundGainedL();
-		iDummyContainer->MakeVisible( EFalse );
-		iCurrentContainer->MakeVisible( ETrue );
-		RefreshUiPanesL();
-		}
-	if (iSkinChangeNeeded && !iSkinChangeInProgress)
-		{
-		MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-		if (skinInstance && !skinInstance->IsUpdateInProgress())
-			{
-			RefreshIconsL();
 
-			}
-		}
-	}
+  if (iCurrentContainer && iCurrentSuiteModel )
+    {
+    iCurrentContainer->HandleForegroundGainedL();
+    iDummyContainer->MakeVisible( EFalse );
+    iCurrentContainer->MakeVisible( ETrue );
+    RefreshUiPanesL();
+    }
+  if (iSkinChangeNeeded && !iSkinChangeInProgress)
+    {
+    MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
+    if (skinInstance && !skinInstance->IsUpdateInProgress())
+      {
+      RefreshIconsL();
+
+      }
+    }
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::HandleFullOrPartialForegroundLostL()
-	{
-	DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
-			"- KAknFullOrPartialForegroundLost"));
-	if ( iCurrentContainer )
-		{
-		iCurrentContainer->HandleBackgroundGainedL();
-		if ( IsRootdisplayedL() )
-			{
-			iCurrentContainer->RestoreWidgetPosition();
-			iCurrentContainer->CacheWidgetPosition();
-			}
-		}
-	}
+  {
+  DEBUG(("_Mm_:CMmAppUi::HandleWsEventL "
+      "- KAknFullOrPartialForegroundLost"));
+  if ( iCurrentContainer )
+    {
+    iCurrentContainer->HandleBackgroundGainedL();
+    if ( IsRootdisplayedL() )
+      {
+      iCurrentContainer->RestoreWidgetPosition();
+      iCurrentContainer->CacheWidgetPosition();
+      }
+    }
+  }
 
 // End of File

@@ -30,6 +30,7 @@
 #include <AknsLayeredBackgroundControlContext.h>
 #include <AknsListBoxBackgroundControlContext.h>
 #include <aknlongtapdetector.h>
+#include <liwgenericparam.h>
 
 #include "hnsuiteobserver.h"
 #include "mmvisibilityobserver.h"
@@ -62,7 +63,7 @@ const TInt KDragDelta( 640 );
  * @ingroup group_mmwidgets
  */
 class TMmWidgetPosition
-	{
+  {
 public:
     /**
      * Default constructor.
@@ -71,34 +72,34 @@ public:
     TMmWidgetPosition();
 
 public: // data
-	/**
-	 * The vertical item offset cache.
-	 */
-	TInt iVerticalItemOffset;
+  /**
+   * The vertical item offset cache.
+   */
+  TInt iVerticalItemOffset;
 
-	/**
-	 * The top item index cache.
-	 */
-	TInt iTopItemIndex;
+  /**
+   * The top item index cache.
+   */
+  TInt iTopItemIndex;
 
-	/**
-	 * Tells if the cached values are valid.
-	 */
-	TBool iValid;
+  /**
+   * Tells if the cached values are valid.
+   */
+  TBool iValid;
 
-	/**
-	 * The mode (portrait/landscape) for which the cache is valid.
-	 */
-	TBool iLandscape;
+  /**
+   * The mode (portrait/landscape) for which the cache is valid.
+   */
+  TBool iLandscape;
 
-	/**
-	 * Id from model (not index) of the currently highlighted item.
-	 * It should only be set if the currently highlighted item is
-	 * visible (fully or partially), otherwise it must remain
-	 * initialized to KErrNotFound.
-	 */
-	TInt iHighlightedItemId;
-	};
+  /**
+   * Id from model (not index) of the currently highlighted item.
+   * It should only be set if the currently highlighted item is
+   * visible (fully or partially), otherwise it must remain
+   * initialized to KErrNotFound.
+   */
+  TInt iHighlightedItemId;
+  };
 
 /**
  *  Interface for widget containers.
@@ -114,7 +115,7 @@ NONSHARABLE_CLASS( CMmWidgetContainer ): public CCoeControl,
                                          public MMmVisibilityObserver,
                                          public MEikListBoxObserver,
                                          public MAknLongTapDetectorCallBack
-	{
+  {
 public:
 
     /**
@@ -142,13 +143,13 @@ public:
 
 public: // Highlight related methods
 
-	/**
-	 * Sets the default highlight.
-	 *
+  /**
+   * Sets the default highlight.
+   *
      * @since S60 v3.0
      * @param aRedraw Is highlight to redraw.
      */
-	virtual void SetDefaultHighlightL( TBool aRedraw = ETrue ) = 0;
+  virtual void SetDefaultHighlightL( TBool aRedraw = ETrue ) = 0;
 
     /**
      * Sets the highlight.
@@ -157,7 +158,7 @@ public: // Highlight related methods
      * @param aItemIndex Index to set the highlight at.
      * @param aRedraw Is highlight to redraw.
      */
-	IMPORT_C virtual void SetManualHighlightL(TInt aItemIndex,  TBool aRedraw = ETrue );
+  IMPORT_C virtual void SetManualHighlightL(TInt aItemIndex,  TBool aRedraw = ETrue );
 
     /**
      * Gets the highlight from the widget.
@@ -165,7 +166,7 @@ public: // Highlight related methods
      * @since S60 v3.0
      * @return Current Highlight in the widget.
      */
-	IMPORT_C virtual TInt GetHighlight();
+  IMPORT_C virtual TInt GetHighlight();
 
     /**
      * Gets the highlight from the widget.
@@ -173,7 +174,7 @@ public: // Highlight related methods
      * @since S60 v3.0
      * @return Previous Highlight in the widget.
      */
-	IMPORT_C virtual TInt GetPreviousHighlight();
+  IMPORT_C virtual TInt GetPreviousHighlight();
 
     /**
      * Set highlight visibility.
@@ -181,22 +182,22 @@ public: // Highlight related methods
      * @since S60 v3.0
      * @param aVisible Visibility status.
      */
-	IMPORT_C virtual void SetHighlightVisibilityL( TBool aVisible );
-	
+  IMPORT_C virtual void SetHighlightVisibilityL( TBool aVisible );
+
     /**
      * Set highlight visibility.
      *
      * @since S60 v3.0
      * @return Visibility status.
      */
-	IMPORT_C virtual TBool IsHighlightVisible();
+  IMPORT_C virtual TBool IsHighlightVisible();
 
     /**
      * Handle item addition.
      *
      * @since S60 v3.0
      */
-	IMPORT_C virtual void HandleItemAdditionL();
+  IMPORT_C virtual void HandleItemAdditionL();
 
 
     /**
@@ -204,14 +205,14 @@ public: // Highlight related methods
      *
      * @since S60 v3.0
      */
-	IMPORT_C virtual void HandleItemRemovalL();
+  IMPORT_C virtual void HandleItemRemovalL();
 
     /**
      * Handle item removal.
      *
      * @since S60 v3.0
      */
-	IMPORT_C CHnSuiteModel* GetSuiteModelL();
+  IMPORT_C CHnSuiteModel* GetSuiteModelL();
 
     /**
      * Retrieve type of widget.
@@ -219,40 +220,40 @@ public: // Highlight related methods
      * @since S60 v3.0
      * @return Type of widget.
      */
-	IMPORT_C virtual THnSuiteWidgetType WidgetType();
+  IMPORT_C virtual THnSuiteWidgetType WidgetType();
 
-	/**
-	 * Removes all LIW objects owned by this object.
+  /**
+   * Removes all LIW objects owned by this object.
      *
      * LIW objects owned by non-LIW objects that are owned by
      * this object are also removed.
-	 */
-	virtual void RemoveLiwObjects();
+   */
+  virtual void RemoveLiwObjects();
 
-	/**
-	 * Sets the long tap observer.
+  /**
+   * Sets the long tap observer.
      *
      * @param aObserver Observer to receive long tap events.
-	 */
-	IMPORT_C virtual void SetLongTapObserver( MMmLongTapObserver* aObserver );
+   */
+  IMPORT_C virtual void SetLongTapObserver( MMmLongTapObserver* aObserver );
 
-	/**
-	 * Informs the container that long tap event is finished (e.g. because 
-	 * a command from the context menu has been issued).
-	 * 
-	 * @param aStopTimer ETrue when the highlight timer should be stopped.
-	 */
-	IMPORT_C virtual void EndLongTapL( TBool aStopTimer = ETrue );
+  /**
+   * Informs the container that long tap event is finished (e.g. because
+   * a command from the context menu has been issued).
+   *
+   * @param aStopTimer ETrue when the highlight timer should be stopped.
+   */
+  IMPORT_C virtual void EndLongTapL( TBool aStopTimer = ETrue );
 
 public:
 
-	/**
-	 * Sets suite model.
-	 *
-	 * @since S60 v3.0
-	 * @param aModel Suite model.
-	 */
-	virtual void SetSuiteModelL( CHnSuiteModel* aModel );
+  /**
+   * Sets suite model.
+   *
+   * @since S60 v3.0
+   * @param aModel Suite model.
+   */
+  virtual void SetSuiteModelL( CHnSuiteModel* aModel );
 
     /**
      * Gets Multimedia Menu model.
@@ -260,7 +261,7 @@ public:
      * @since S60 v3.0
      * @return Model.
      */
-	virtual CMmListBoxModel* GetMmModel() = 0;
+  virtual CMmListBoxModel* GetMmModel() = 0;
 
     /**
      * Sets widget observer.
@@ -268,7 +269,7 @@ public:
      * @since S60 v3.0
      * @param aObserver Widget observer.
      */
-	IMPORT_C virtual void SetObserver( MMmWidgetObserver*  aObserver);
+  IMPORT_C virtual void SetObserver( MMmWidgetObserver*  aObserver);
 
     /**
      * Gets item rectangle according to item index.
@@ -277,7 +278,7 @@ public:
      * @param aItemIndex Item index.
      * @return Item rectangle.
      */
-    IMPORT_C TRect GetItemRectL( TInt aItemIndex );
+  IMPORT_C TRect GetItemRectL( TInt aItemIndex );
 
     /**
      * Sets empty text visible when model has no items.
@@ -285,7 +286,7 @@ public:
      * @since S60 v3.0
      * @param aText Text to be shown when view is empty.
      */
-	virtual void SetEmptyTextL(const TDesC& aText) = 0 ;
+  virtual void SetEmptyTextL(const TDesC& aText) = 0 ;
 
     /**
      * Sets flag.
@@ -293,7 +294,7 @@ public:
      * @since S60 v3.0
      * @param Flag Flag.
      */
-	virtual void SetFlag(TInt Flag);
+  virtual void SetFlag(TInt Flag);
 
     /**
      * Gets widget.
@@ -301,7 +302,7 @@ public:
      * @since S60 v3.0
      * @return Widget.
      */
-	virtual CEikListBox* Widget();
+  virtual CEikListBox* Widget();
 
     /**
      * Sets background context for item drawer and view.
@@ -309,8 +310,8 @@ public:
      * @since S60 v3.0
      * @param aBgContext Background context.
      */
-	virtual void SetItemDrawerAndViewBgContext(
-			CAknsBasicBackgroundControlContext * aBgContext ) =0;
+  virtual void SetItemDrawerAndViewBgContext(
+      CAknsBasicBackgroundControlContext * aBgContext ) =0;
 
     /**
      * Sets edit mode so UI is aware.
@@ -318,7 +319,7 @@ public:
      * @since S60 v3.0
      * @param aIsEditMode Is edit mode.
      */
-	virtual void SetEditModeL( TBool aIsEditMode );
+  virtual void SetEditModeL( TBool aIsEditMode );
 
     /**
      * Tells if UI is aware of edit mode.
@@ -326,32 +327,32 @@ public:
      * @since S60 v5.0
      * @return Edit mode status.
      */
-	virtual TBool IsEditMode() const;
+  virtual TBool IsEditMode() const;
 
     /**
      * Sets up widget layout (needed for grid).
      *
      * @since S60 v3.0
      */
-	virtual void SetupWidgetLayoutL() =0;
+  virtual void SetupWidgetLayoutL() =0;
 
     /**
      * Constructor.
      */
-	CMmWidgetContainer();
+  CMmWidgetContainer();
 
     /**
      * Destructor.
      */
     ~CMmWidgetContainer();
-    
+
     /**
      * Enables/disables animation during long tap.
      * Tactile feedback is also enabled and disabled with the animation.
      * Changes made with this method will be effective on the next long
      * tap, i.e. it is not possible to stop an already started animation
      * by using this method.
-     * 
+     *
      * @param aEnable ETrue - enable, EFalse - disable long tap animation
      *                and long tap tactile feedback
      */
@@ -404,7 +405,7 @@ public:
      * @param aPointerEvent Pointer event.
      */
     void HandlePointerEventsInEditModeL(const TPointerEvent& aPointerEvent,
-    		TBool aAbortAnimations );
+        TBool aAbortAnimations );
 
     /**
      * Set draggable.
@@ -655,13 +656,37 @@ public:
      * if marquee animation can be enabled.
      */
     IMPORT_C void SetIsFaded( TBool aIsFaded );
-    
+
     /**
      * Determines if long tap is in progress.
-     * 
+     *
      * @return ETrue if long tap is in progress.
      */
     TBool LongTapInProgress() const;
+
+    /**
+     * Determines if folder can be moved to another one.
+     */
+    IMPORT_C TBool AllowMove() const;
+
+    /**
+     * Sets allow move param.
+     * @param aAllowMove. ETrue if move item is allowed.
+     */
+    void SetAllowMove( TBool aAllowMove );
+
+    /**
+     * Sets parameters for move event.
+     * @param aRecipientId Item id to be moved.
+     * @param aEventParameters Event parameters.
+     */
+    IMPORT_C void SetTriggerMoveItemL( const TInt aRecipientId,
+                CLiwGenericParamList* aEventParameters );
+
+    /**
+     * Calls move event.
+     */
+    void TriggerMoveItemL();
 
 public: // from MMmVisibilityObserver
 
@@ -703,7 +728,7 @@ protected:
      *
      * @since S60 v3.0
      */
-	void ConstructL();
+  void ConstructL();
 
     /**
      * Sets highlight locally.
@@ -712,9 +737,9 @@ protected:
      * @since S60 v3.0
      * @param aItemIndex Index of the item.
      */
-	void SetHighlightL(TInt aItemIndex);
+  void SetHighlightL(TInt aItemIndex);
 
-	/**
+  /**
      * Checks whether given point collides with specific item's re-order area.
      *
      * This function gets called during drag-and-drop operations to
@@ -755,13 +780,13 @@ protected:
 
 private:
 
-	 /**
-	 * Called when the number of items in widget model changed.
-	 * @since S60 v5.0
-	 *
-	 * @param aChange Type of change
-	 */
-	void HandleNumberOfItemsChangedL( TItemsChangeType aChange );
+   /**
+   * Called when the number of items in widget model changed.
+   * @since S60 v5.0
+   *
+   * @param aChange Type of change
+   */
+  void HandleNumberOfItemsChangedL( TItemsChangeType aChange );
 
     /**
      * Manages zooming of folder.
@@ -769,7 +794,7 @@ private:
      * @since S60 v3.0
      * @param aDraggedItemOverIcons Is dragged over icons flag.
      */
-	void ManageFolderZoomingL( TBool aDraggedItemOverIcons );
+  void ManageFolderZoomingL( TBool aDraggedItemOverIcons );
 
     /**
      * Cancels gragging of item if relevant( Edit Mode is activated )
@@ -807,7 +832,7 @@ private:
      * @return Distance between two points in pixels.
      */
     TInt DeltaSquare( const TPoint aTapPoint,
-    		const TPoint aPos );
+        const TPoint aPos );
 
     /**
      * Checks, whether given item is a folder or root folder.
@@ -817,17 +842,17 @@ private:
     TBool IsFolderL( TInt aItemIndex );
 
     /**
-	 * Checks, whether given item has IsDeleteLockedL flag set.
-	 * @param aItemIndex Item index to check.
-	 * @returns IsDeleteLockedL flag
-	 */
-	TBool IsDeleteLockedL( TInt aItemIndex );
+   * Checks, whether given item has IsDeleteLockedL flag set.
+   * @param aItemIndex Item index to check.
+   * @returns IsDeleteLockedL flag
+   */
+  TBool IsDeleteLockedL( TInt aItemIndex );
 
-	/**
-	 * Gets column count in current view.
-	 * @returns Column count in current view.
-	 */
-	virtual TInt ColumnsInCurrentView();
+  /**
+   * Gets column count in current view.
+   * @returns Column count in current view.
+   */
+  virtual TInt ColumnsInCurrentView();
 
     /**
      * Gets row count in current view.
@@ -835,35 +860,35 @@ private:
      */
     virtual TInt RowsInCurrentView();
 
-	/**
-	 * Scrolls the view move mode non-touch so that move indicators are visible.
-	 */
-	void ScrollViewIfNeededL();
+  /**
+   * Scrolls the view move mode non-touch so that move indicators are visible.
+   */
+  void ScrollViewIfNeededL();
 
     /**
      * Scrolls the view in pixels.
      * @param aPixels THe number of pixels to scroll. If negative, the view is scrolled down.
      */
-	void ScrollInPixelsL( TInt aPixels );
+  void ScrollInPixelsL( TInt aPixels );
 
     /**
      * Sets up the scrolling effect movement type.
      * @param aDown True if scrolling is downwards.
      */
-	void SetupScrollingEffectsL( TBool aDown );
+  void SetupScrollingEffectsL( TBool aDown );
 
 protected:
 
 
-	/**
-	 * Own.
-	 */
-	CEikListBox* iWidget;
+  /**
+   * Own.
+   */
+  CEikListBox* iWidget;
 
     /**
      * Key event observer.
      */
-	MMmKeyEventObserver* iKeyEventObserver;
+  MMmKeyEventObserver* iKeyEventObserver;
 
     /**
      * Drag and drop observer.
@@ -888,24 +913,24 @@ protected:
 
 protected:
 
-	/**
-	 * Current Highlight.
-	 */
-	TInt iCurrentHighlight;
+  /**
+   * Current Highlight.
+   */
+  TInt iCurrentHighlight;
 
     /**
      * Has drag occurred.
      */
     TBool iDragOccured;
 
-	/**
-	 * Processed display elelments for better performance.
-	 */
+  /**
+   * Processed display elelments for better performance.
+   */
     CMmPostEvaluationProcessor* iPostProcessor;
 
-	/**
-	 * Set when long tap is in progress (stylus popup displayed over container)
-	 */
+  /**
+   * Set when long tap is in progress (stylus popup displayed over container)
+   */
     TBool iLongTapInProgress;
 
 private:
@@ -915,51 +940,51 @@ private:
      * Background context.
      * Own.
      */
-	CAknsBasicBackgroundControlContext* iBgContext;
+  CAknsBasicBackgroundControlContext* iBgContext;
 
     /**
      * Last drag point.
      */
-	TPoint iLastDragPoint;
+  TPoint iLastDragPoint;
 
     /**
      * First tap point.
      */
-	TPoint iTapPoint;
+  TPoint iTapPoint;
 
     /**
      * First tap point.
      */
-	TPoint iItemRelativeTapPoint;
+  TPoint iItemRelativeTapPoint;
 
-	/**
+  /**
      * Last drag highlight.
      */
-	TInt iLastDragHighlight;
+  TInt iLastDragHighlight;
 
     /**
      * Dragged item index.
      */
-	TBool iDraggedIndex;
+  TBool iDraggedIndex;
 
     /**
      * Edit mode status.
      */
-	TBool iIsEditMode;
+  TBool iIsEditMode;
 
-	/**
+  /**
      * Destination of item index.
      */
-	TInt iItemIndexDestination;
+  TInt iItemIndexDestination;
 
-	/**
+  /**
      * Previous Highlight.
      */
-	TInt iPreviousHighlight;
+  TInt iPreviousHighlight;
 
-	/**
-	 * The current rect of the widget control.
-	 */
+  /**
+   * The current rect of the widget control.
+   */
     TRect iWidgetRect;
 
     /**
@@ -969,9 +994,9 @@ private:
      */
     TBool iAllowLongPress;
 
-	/**
-	 * Cache for widget position.
-	 */
+  /**
+   * Cache for widget position.
+   */
     TMmWidgetPosition iWidgetPositionCache;
 
     /**
@@ -1000,7 +1025,7 @@ private:
      * Observer to notify about long tap events.
      */
     MMmLongTapObserver* iLongTapObserver;
-    
+
     /**
      * Stores previously set highlight visibility.
      * ETrue - hightlight visible, EFalse - highlight disabled.
@@ -1011,6 +1036,21 @@ private:
      */
     TBool iPreviousHighlightVisibility;
 
-	};
+    /**
+     * Defines if move item is allowed.
+     */
+    TBool iAllowMove;
+
+    /**
+     * Defines item id to be moved.
+     */
+    TInt iRecipientId;
+
+    /**
+     * Event parameters for move item.
+     */
+    CLiwGenericParamList *iEventParameters;
+
+  };
 
 #endif // MMMWIDGETCONTAINER_H

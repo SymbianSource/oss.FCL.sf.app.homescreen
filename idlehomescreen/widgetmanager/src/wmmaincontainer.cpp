@@ -485,7 +485,7 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             {
             // widget list -> left -> ovi button (landscape mirrored)
             if ( aType == EEventKey )
-                SetFocusToPortalButton( 0 );
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
             keyResponse = EKeyWasConsumed;
             }
         }
@@ -532,8 +532,19 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             keyResponse = EKeyWasConsumed;
             }
         else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 &&
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // right portal -> left -> left portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }      
+        else if ( !iLandscape && iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyLeftArrow &&
-                iConfiguration->PortalButtonCount() > 1 )
+                iConfiguration->PortalButtonCount() > 1 &&
+                !iConfiguration->PortalButtonsMirrored() )
             {
             // right portal -> left -> left portal (portrait mirrored)
             if ( aType == EEventKey )
@@ -621,8 +632,19 @@ TKeyResponse CWmMainContainer::MoveFocusByKeys(
             keyResponse = EKeyWasConsumed;
             }
         else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // left portal -> right -> right portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && iMirrored &&
                 aKeyEvent.iScanCode == EStdKeyRightArrow &&
-                iConfiguration->PortalButtonCount() > 1 )
+                iConfiguration->PortalButtonCount() > 1 && 
+                !iConfiguration->PortalButtonsMirrored() )
             {
             // left portal -> right -> right portal (portrait mirrored)
             if ( aType == EEventKey )
@@ -929,6 +951,17 @@ void CWmMainContainer::HandleWidgetListChanged()
 //
 void CWmMainContainer::StartLoadingWidgetsL()
     {
+    if ( iFindbox && iFindPaneIsVisible )
+        {
+        iFindbox->ResetL();
+        iFindbox->SetSearchTextL( KNullDesC );
+        CAknFilteredTextListBoxModel* m = 
+                static_cast <CAknFilteredTextListBoxModel*> ( iWidgetsList->Model() );
+        if ( m && m->Filter() )
+            {
+            m->Filter()->ResetFilteringL();
+            }
+        }
     if ( !iWidgetLoader )
         {
         // create the widget loader AO
@@ -954,11 +987,6 @@ void CWmMainContainer::HandleResourceChange( TInt aType )
         
         // notify widgetlist
         iWidgetsList->HandleLayoutChanged();
-        }
-    else if ( KAknsMessageSkinChange == aType )
-        {
-        // notify widgetlist , colored add icon need to be updated 
-        iWidgetsList->HandleSkinChanged();
         }
 	}
 
@@ -1435,12 +1463,7 @@ void CWmMainContainer::LaunchDetailsDialogL()
     {
     CWmWidgetData* data = iWidgetsList->WidgetData();
     if ( data )
-        {
-        const CFbsBitmap* logo = ( data->LogoImage() ) ? 
-                    data->LogoImage() : iWidgetsList->DefaultLogo();
-        const CFbsBitmap* mask = ( data->LogoImageMask() ) ? 
-                    data->LogoImageMask() : iWidgetsList->DefaultMask();
-        
+        {       
         // Find out if HS is full
         TBool hsFull = ETrue;
         MHsContentController& controller = iWmPlugin.ContentController();
@@ -1455,8 +1478,11 @@ void CWmMainContainer::LaunchDetailsDialogL()
                 data->Name(), 
                 data->Description(), 
                 !hsFull,
-                logo, mask );
-
+                data->HsContentInfo().IconPath(),
+                *iWidgetsList->DefaultLogo(),
+                *iWidgetsList->DefaultMask()
+                );
+        
         if ( dlg && dlg->ExecuteLD() == ECbaAddToHs )
             {
             AddWidgetToHomeScreenL();

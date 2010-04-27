@@ -22,11 +22,12 @@
 
 #include <e32base.h>
 #include <e32std.h>
+
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
 #include <aknlistloadertfx.h>
 #include <aknlistboxtfxinternal.h>
 #include <aknlistboxtfx.h>
-#endif 
+#endif
 class CMmListBoxItemDrawer;
 class TMmFloatingItem;
 
@@ -56,11 +57,11 @@ const TReal KZoomStateZoomRatio = 1.25f;
  */
 NONSHARABLE_CLASS( CMmDrawerAnimator ) : public CActive
     {
-    
+
 public:
     /**
      * Two-phased constructor.
-     * 
+     *
      * @since S60 v5.0
      * @param aDrawer Item drawer used to draw item.
      */
@@ -68,15 +69,15 @@ public:
 
     /**
      * Two-phased constructor.
-     * 
+     *
      * @since S60 v5.0
      * @param aDrawer Item drawer used to draw item.
      */
     static CMmDrawerAnimator* NewLC( CMmListBoxItemDrawer& aDrawer );
-    
+
     /**
      * Destructor.
-     * 
+     *
      * @since S60 v5.0
      */
     virtual ~CMmDrawerAnimator();
@@ -90,9 +91,9 @@ public:
      * @since S60 v5.0
      */
     void AnimateDragItemTransitionL( );
-    
+
     /**
-     * Animates an item with index aItemFrom into position 
+     * Animates an item with index aItemFrom into position
      * indexed by aItemTo.
      *
      * @since S60 v5.0
@@ -117,14 +118,14 @@ public:
      * @return Is system ready so new animation can proceed.
      */
     TBool IsReadyForNewAnimation();
-    
+
     /**
      * Cancel currently running or pending animations.
      *
      * @since S60 v5.0
      */
     void CancelAnimationsL();
-    
+
     /**
      * Triggers animation.
      * This methods sets the Activeobject into active state
@@ -134,41 +135,39 @@ public:
      * @return Error code
      */
     TInt Trigger();
-    
-    /**
-     * Marks next redraw to be cancelled.
-     * 
-     * @return Indicates if redraw occured due to cancel.
-     */
-    TBool CancelNextRedrawL();
-    
+
     /**
      * Make the next animation redraw the whole screen;
      */
     void SetNextRedrawToWholeScreen();
-    
+
     /**
      * Indicates that draweranimator is in garbage.
-     * This is used when suite model has been destroyed so there isn't 
-     * anything to draw, therefore any animator attempts should be 
+     * This is used when suite model has been destroyed so there isn't
+     * anything to draw, therefore any animator attempts should be
      * dropped.
      */
     void PrepareForGarbage();
-    
+
+    /**
+     * Calls move event.
+     */
+    void TriggerMoveItemL();
+
 private:
-	
+
     /**
      * Default constructor.
-     * 
+     *
      * @since S60 v3.0
      * @param aDrawer Object used to draw items in widgets.
      */
     CMmDrawerAnimator( CMmListBoxItemDrawer& aDrawer );
-    
+
     /**
      * 2nd phase constructor.
      *
-     * @since S60 v3.0 
+     * @since S60 v3.0
      */
     void ConstructL();
 
@@ -196,10 +195,10 @@ private: // From CActive
      * @return Error code for error handling.
      */
     TInt RunError( TInt aError );
-    
+
     /**
      * Adjusts rect to non touch.
-     * 
+     *
      * @since S60 v3.0
      * @param aRefreshRect Refresh rect.
      * @return Adjusted rect.
@@ -207,67 +206,67 @@ private: // From CActive
     TRect AdjustRefreshRectToNonTouch( const TRect& aRefreshRect );
 
 private: // Data
-	
+
     /**
      * Timer
-     */  
+     */
     RTimer iTimer;
-    
+
     /**
      * Associated item drawer.
-     */  
+     */
     CMmListBoxItemDrawer& iDrawer;
-    
+
     /**
      * Number of animation frames
-     */  
+     */
     TInt iAnimateFrames;
 
     /**
      * Delay between redrawing.
-     */  
+     */
     TTimeIntervalMicroSeconds iDelay;
-   
+
     /**
      * Last redraw time
-     */  
+     */
     TTime iLastRedrawTime;
-      
+
     /**
      * Effects api.
-     */  
+     */
     MAknListBoxTfx *iTransTfx;
-    
+
     /**
      * Effects api.
-     */  
+     */
     MAknListBoxTfxInternal *iTransTfxInternal;
-    
+
     /**
      * Highlight noted when last redraw occured.
      */
     TInt iLastNotedHighlight;
-    
+
     /**
      * Top item index noted when last redraw occured.
      */
     TInt iLastNotedTopItem;
-    
+
     /**
      * Vertical offset noted when last redraw occured.
      */
     TInt iLastNotedVerticalOffset;
-    
+
     /**
      * Holds the previous animation refresh rectangle.
      */
     TRect iPreviousRefreshRect;
-    
+
     /**
      * Holds the number of frames to animate.
      */
     const TInt iUsualAnimationFramesCount;
-    
+
     /**
      * Holds the previous animation refresh rectangle.
      */

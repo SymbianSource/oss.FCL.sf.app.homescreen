@@ -153,8 +153,8 @@ const RTsFswArray& CTsFswDataList::FswDataL()
 TBool CTsFswDataList::CollectTasksL()
     {
     // clear dirty flag
+    TBool changed = iTaskListDirty;
     iTaskListDirty = EFalse;
-    TBool changed = EFalse;
     
     RTsFswArray newAppsList;
     RTsFswArray newWidgetsList;
@@ -280,9 +280,29 @@ void CTsFswDataList::MoveEntryAtStart(TInt aAppId, TBool aWidget)
     {
     TSLOG_CONTEXT( MoveEntryAtStart, TSLOG_LOCAL );
     
+    TInt appId(0);
+    //check embeded case
+    if( !aWidget )
+    	{
+		TInt wgId(0);
+		CApaWindowGroupName::FindByAppUid(TUid::Uid(aAppId), iWsSession, wgId);
+		TInt parentWgId = FindMostTopParentWgId( wgId );
+		if( parentWgId != KErrNotFound )
+			{
+			TUid appUid = TUid::Uid(0);
+			AppUidForWgId(parentWgId, appUid); 
+			appId = appUid.iUid;
+			}
+    	}
+    
+    if( !appId )
+    	{
+		appId = aAppId;
+    	}
+ 
     for ( TInt i = 0; i < iData.Count(); ++i )
         {
-        if( iData[i]->AppUid().iUid == aAppId && iData[i]->Widget() == aWidget)
+        if( iData[i]->AppUid().iUid == appId && iData[i]->Widget() == aWidget)
             {
             CTsFswEntry* entry = iData[i];
             iData.Remove(i);
@@ -301,8 +321,6 @@ void CTsFswDataList::CollectAppsL(RTsFswArray& aAppsList)
     {
     TSLOG_CONTEXT( CollectTasksL, TSLOG_LOCAL );
     TSLOG_IN();
-    // clear dirty flag
-    iTaskListDirty = EFalse;
     
     // update app data if needed
     // (usually on startup and when new apps might have been installed)
@@ -748,6 +766,38 @@ TBool CTsFswDataList::CheckIfExists(const CTsFswEntry& aEntry,
         }
     TSLOG_OUT();
     return exists;
+    }
+
+// --------------------------------------------------------------------------
+// CTsFswDataList::AppUidForWgIdL
+// --------------------------------------------------------------------------
+//
+TBool CTsFswDataList::IsAlwaysShownAppL( TInt aWgId )
+	{
+	return iAlwaysShownAppList->IsAlwaysShownApp( AppUidForWgIdL(aWgId) );
+	}
+
+// --------------------------------------------------------------------------
+// CTsFswDataList::AppUidForWgId
+// --------------------------------------------------------------------------
+//
+TInt CTsFswDataList::AppUidForWgId( TInt aWgId, TUid& aUid )
+    {
+	TRAPD(err, aUid = AppUidForWgIdL( aWgId ) );
+	return err;
+    }
+
+// --------------------------------------------------------------------------
+// CTsFswDataList::AppUidForWgIdL
+// --------------------------------------------------------------------------
+//
+TUid CTsFswDataList::AppUidForWgIdL( TInt aWgId )
+    {
+    CApaWindowGroupName* windowName =
+        CApaWindowGroupName::NewLC( iWsSession, aWgId );
+    TUid appUid = windowName->AppUid();
+    CleanupStack::PopAndDestroy( windowName );
+    return appUid;
     }
 
 // end of file

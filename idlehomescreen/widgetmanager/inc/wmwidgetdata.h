@@ -27,7 +27,6 @@
 #include <bamdesca.h>
 #include <hscontentinfo.h>
 
-#include "wmimageconverter.h"
 
 // FORWARD DECLARATIONS
 class CDictionaryFileStore;
@@ -37,6 +36,7 @@ class CHsContentInfo;
 class CWmPersistentWidgetOrder;
 class RWidgetRegistryClientSession;
 class CWmResourceLoader;
+class CWmImageConverter;
 
 // CLASS DECLARATION
 /**
@@ -46,7 +46,6 @@ class CWmResourceLoader;
  */
 NONSHARABLE_CLASS( CWmWidgetData )
     : public CBase
-    , public MConverterObserver
     {
 
 public: // types
@@ -147,7 +146,7 @@ public: // external handles
     /**
      * Init logo re-creation
      */
-    void ReCreateLogo( const TSize& aSize );
+    void UpdateLogo( const TSize& aSize, TBool aReCreateLogo );
     
     /**
      * returns widget description
@@ -231,11 +230,6 @@ public: // methods to read the content
     /** stop uninstallation animation */
     void StopUninstallAnimation();
     
-protected: // from MConverterObserver
-
-    /** image conversin completed */
-    void NotifyCompletion( TInt aError );
-
 private: // new functions
     
     /** uninstall animation related*/
@@ -254,16 +248,12 @@ private: // new functions
     /** Logo icon string handling */
     void HandleIconString( const TDesC& aIconStr );
     void FireDataChanged();
-    static TInt TimeoutTick( TAny* aPtr );
 
 private: // data members
     
     /* reference to resource loader */
     CWmResourceLoader& iWmResourceLoader;
     
-    /* the image converter utility */
-    CWmImageConverter*    iImageConverter;
-
     /* observes this widget representation (NOT OWNED) */
     MWmWidgetDataObserver* iObserver;
 
@@ -302,30 +292,15 @@ private: // data members
     
     /** timer for updating animation */
     CPeriodic*          iAnimationTimer;
-    
-    /** timer for canceling image convertion */
-    CPeriodic*          iTimeoutTimer;
-    
+        
     /* uninstall animation index */
     TInt                iAnimationIndex;
 
     /** uninstallation switch */
     TBool               iAsyncUninstalling;
-    
-    /** logo changed switch */
-    TBool               iFireLogoChanged;
-
-    /**
-     * ActiveSchedulerWait used to wait while logo image
-     * is being prepaired.
-     */
-    CActiveSchedulerWait* iWait;
-    
-    /**
-     * Holds widget name. Used for restoring widget name 
-     * if error has occurred during uninstallation.
-     */
-    HBufC* iWidgetName;
+        
+    /* the image converter utility */
+    CWmImageConverter*    iImageConverter;
     };
 
 

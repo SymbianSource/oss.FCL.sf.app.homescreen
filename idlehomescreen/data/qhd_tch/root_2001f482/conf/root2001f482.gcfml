@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="rootconfiguration.xml" target="\private\200159c0\install\root_2001f482\hsps\00\">
 	<setting ref="HSViews/MaxPages"/>
 	<setting ref="HSViews/Views"/>
@@ -15,36 +16,6 @@
 							<plugin>
 								<xsl:attribute name="uid"><xsl:value-of select="Uid"/></xsl:attribute>
 								<xsl:attribute name="locking_status"><xsl:value-of select="LockingStatus"/></xsl:attribute>
-								<xsl:choose>
-								<xsl:when test="Background = 1">
-								    <intial_settings>
-								      <settings>
-								      <item>
-								          <xsl:attribute name="id"><xsl:value-of select="ItemIdWallpaper"/></xsl:attribute>
-								            <property>
-								              <xsl:attribute name="name"><xsl:value-of select="WallpaperPropertyName"/></xsl:attribute>								             
-  							              <xsl:attribute name="value"><xsl:value-of select="BackGroundPath"/></xsl:attribute>
-								            </property>
-								       </item>     
-				              </settings>
-				            </intial_settings>
-				        </xsl:when>
-				        <xsl:when test="Background = 2">
-								    <intial_settings>
-								      <settings>
-								      <item>
-								          <xsl:attribute name="id"><xsl:value-of select="ItemIdSlideshow"/></xsl:attribute>
-								            <property>
-								              <xsl:attribute name="name"><xsl:value-of select="SlideshowPropertyName"/></xsl:attribute>								             
-  							              <xsl:attribute name="value"><xsl:value-of select="BackGroundPath"/></xsl:attribute>
-								            </property>
-								       </item>     
-				              </settings>
-				            </intial_settings>
-				        </xsl:when>
-				        <xsl:otherwise>
-				        </xsl:otherwise>
-				        </xsl:choose>
 							</plugin>
 						</xsl:for-each>
 					</plugins>
@@ -54,3 +25,4 @@
 		</xsl:template>
 	</xsl:stylesheet>
 </file>
+</container>

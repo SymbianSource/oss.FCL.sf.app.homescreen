@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_200286e5\hsps\00\">
 	<setting ref="HomescreenPlugins_3/MaxWidgets"/>
 	<setting ref="HomescreenPlugins_3/UseEmptyWidgets"/>
   <setting ref="HomescreenPlugins_3/ItemIdEmptyWidgets"/>
   <setting ref="HomescreenPlugins_3/PropertyEmptyWidgets"/>
-	<setting ref="HomescreenPlugins_3/Background"/>
   <setting ref="HomescreenPlugins_3/BackGroundPath"/>
   <setting ref="HomescreenPlugins_3/ItemIdWallpaper"/>
-  <setting ref="HomescreenPlugins_3/ItemIdSlideshow"/>
   <setting ref="HomescreenPlugins_3/WallpaperPropertyName"/>
-  <setting ref="HomescreenPlugins_3/SlideshowPropertyName"/>
 	<setting ref="HomescreenPlugins_3/Shortcut1ItemId"/>
   <setting ref="HomescreenPlugins_3/Shortcut1ItemName"/>
   <setting ref="HomescreenPlugins_3/Shortcut2ItemId"/>
@@ -20,6 +18,8 @@
   <setting ref="HomescreenPlugins_3/Shortcut4ItemName"/>
   <setting ref="HomescreenPlugins_3/ShortcutPropertyNameType"/>
   <setting ref="HomescreenPlugins_3/ShortcutPropertyNameUid"/>
+  <setting ref="HomescreenPlugins_2/ShortcutPropertyNameView"/>
+  <setting ref="HomescreenPlugins_2/ShortcutPropertyNameParam"/>
 	<setting ref="HomescreenPlugins_3/Plugins"/>
 	<xsl:stylesheet version="1.0" 
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
@@ -31,36 +31,21 @@
 				<control>
 				  <settings>
 				    <item>
-					    <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_3/ItemIdEmptyWidgets"/></xsl:attribute>
-						    <property>
-								  <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_3/PropertyEmptyWidgets"/></xsl:attribute>								             
-  							  <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_3/UseEmptyWidgets"/></xsl:attribute>
-								</property>
-						</item> 
-					  <xsl:choose>
-						  <xsl:when test="HomescreenPlugins_3/Background = 1">
-							  <item>
-								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_3/ItemIdWallpaper"/></xsl:attribute>
-								    <property>
-								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_3/WallpaperPropertyName"/></xsl:attribute>								             
-  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_3/BackGroundPath"/></xsl:attribute>
-								    </property>
-								</item>     
-				      </xsl:when>
-				      <xsl:when test="HomescreenPlugins_3/Background = 2">
-						    <item>
-								  <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_3/ItemIdSlideshow"/></xsl:attribute>
-								    <property>
-								      <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_3/SlideshowPropertyName"/></xsl:attribute>								             
-  							      <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_3/BackGroundPath"/></xsl:attribute>
-								    </property>
-								</item>     
-				      </xsl:when>
-				      <xsl:otherwise>
-				      </xsl:otherwise>
-				    </xsl:choose>
-				  </settings>
-					<plugins>
+				      <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_3/ItemIdEmptyWidgets"/></xsl:attribute>
+				        <property>
+					  <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_3/PropertyEmptyWidgets"/></xsl:attribute>								             
+  					  <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_3/UseEmptyWidgets"/></xsl:attribute>
+					</property>
+				      </item>
+				      <item>
+				        <xsl:attribute name="id"><xsl:value-of select="HomescreenPlugins_3/ItemIdWallpaper"/></xsl:attribute>
+					  <property>
+					    <xsl:attribute name="name"><xsl:value-of select="HomescreenPlugins_3/WallpaperPropertyName"/></xsl:attribute>								             
+  					    <xsl:attribute name="value"><xsl:value-of select="HomescreenPlugins_3/BackGroundPath"/></xsl:attribute>
+					  </property>
+					</item>      
+                                      </settings>
+				      <plugins>
 						<xsl:for-each select="HomescreenPlugins_3/Plugins">
 							<plugin>
 								<xsl:attribute name="uid"><xsl:value-of select="Uid"/></xsl:attribute>
@@ -82,6 +67,14 @@
 								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameUid"/></xsl:attribute>
 								              <xsl:attribute name="value"><xsl:value-of select="Shortcut1Uid"/></xsl:attribute>
 								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameView"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut1View"/></xsl:attribute>
+								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameParam"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut1Param"/></xsl:attribute>
+								            </property>
 				                  </item>
 				                </xsl:if>
 				                <xsl:if test="Customize2Shortcut = 1">
@@ -95,6 +88,14 @@
 								            <property>
 								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameUid"/></xsl:attribute>
 								              <xsl:attribute name="value"><xsl:value-of select="Shortcut2Uid"/></xsl:attribute>
+								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameView"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut2View"/></xsl:attribute>
+								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameParam"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut2Param"/></xsl:attribute>
 								            </property>
 				                  </item>
 				                </xsl:if>
@@ -110,6 +111,14 @@
 								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameUid"/></xsl:attribute>
 								              <xsl:attribute name="value"><xsl:value-of select="Shortcut3Uid"/></xsl:attribute>
 								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameView"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut3View"/></xsl:attribute>
+								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameParam"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut3Param"/></xsl:attribute>
+								            </property>
 				                  </item>
 				                </xsl:if>
 				                <xsl:if test="Customize4Shortcut = 1">
@@ -124,6 +133,14 @@
 								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameUid"/></xsl:attribute>
 								              <xsl:attribute name="value"><xsl:value-of select="Shortcut4Uid"/></xsl:attribute>
 								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameView"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut4View"/></xsl:attribute>
+								            </property>
+								            <property>
+								              <xsl:attribute name="name"><xsl:value-of select="ShortcutPropertyNameParam"/></xsl:attribute>
+								              <xsl:attribute name="value"><xsl:value-of select="Shortcut4Param"/></xsl:attribute>
+								            </property>
 								          </item>
 				                </xsl:if>
 				              </settings>
@@ -137,3 +154,4 @@
 		</xsl:template>
 	</xsl:stylesheet>
 </file>
+</container>

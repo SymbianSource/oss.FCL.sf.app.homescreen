@@ -22,7 +22,6 @@
 #include <aknbutton.h>	// CAknButton
 #include <AknServerApp.h> //MAknServerAppExitObserver
 
-#include "wmimageconverter.h"
 #include "wmcommon.h"
 
 // FORWARD DECLARATIONS
@@ -31,6 +30,7 @@ class CFbsBitmap;
 class CWmConfiguration;
 class CWmProcessMonitor;
 class CBrowserLauncher;
+class CWmImageConverter;
 
 /**
  * Portal button ( ovi, operator ) class for Wm
@@ -38,7 +38,6 @@ class CBrowserLauncher;
  * @class   CWmPortalButton wmportalbutton.h
  */
 NONSHARABLE_CLASS( CWmPortalButton ) : public CAknButton,
-                                       public MConverterObserver,
                                        public MCoeControlObserver,
                                        public MAknServerAppExitObserver
     {
@@ -77,11 +76,6 @@ public: // Functions from base class
      */
     void ExecuteL();
     
-protected: // from MConverterObserver
-
-    /** image conversin completed */
-    void NotifyCompletion( TInt aError );
-
 protected: // from MCoeControlObserver
 
     /** Observes the button's own activity  */

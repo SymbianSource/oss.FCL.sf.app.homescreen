@@ -103,7 +103,7 @@ CTsFastSwapArea::CTsFastSwapArea(CCoeControl& aParent,
     CTsDeviceState& aDeviceState,
     CTsEventControler& aEventHandler) :
     iParent(aParent), iDeviceState(aDeviceState), iEvtHandler(aEventHandler),
-    iIgnoreLayoutSwitch(EFalse)
+    iIgnoreLayoutSwitch(EFalse), iWidgetClosingCount(0)
     {
     // no implementation required
     }
@@ -237,8 +237,14 @@ void CTsFastSwapArea::LayoutGridL()
     TAknLayoutRect gridNextItem = rects[3];
     CleanupStack::PopAndDestroy(&rects);
     
-    TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     iGrid->SetRect(gridAppPane.Rect());
+    
+    TInt variety;
+    TBool disable = GetVariety(variety);
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL());
+        }
     TAknLayoutScalableParameterLimits gridParams = 
         AknLayoutScalable_Apps::cell_tport_appsw_pane_ParamLimits( variety );
     TPoint empty( ELayoutEmpty, ELayoutEmpty );
@@ -293,6 +299,11 @@ void CTsFastSwapArea::LayoutGridL()
     
     // Update state
     HandleDeviceStateChanged( EDeviceType );
+    
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->DisablePopUpL());
+        }
     }
 
 
@@ -307,7 +318,12 @@ void CTsFastSwapArea::GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects )
     TAknLayoutRect gridImage;
     TAknLayoutRect gridNextItem;
     
-    TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
+    TInt variety;
+    TBool disable = GetVariety(variety);
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL());
+        }
     
     gridAppPane.LayoutRect( Rect(), 
             AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
@@ -323,6 +339,11 @@ void CTsFastSwapArea::GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects )
     gridNextItem.LayoutRect( gridAppPane.Rect(),
             AknLayoutScalable_Apps::cell_tport_appsw_pane_cp03( variety ) );
     aRects.Append(gridNextItem);
+    
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->DisablePopUpL());
+        }
     }
 
 
@@ -437,6 +458,10 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
         TInt wgId = iArray[aIndex]->WgId();
         iFSClient->CloseApp( wgId );
         iIsClosing.Append(wgId);
+        if ( iArray[aIndex]->Widget() )
+            {
+            iWidgetClosingCount++;
+            }
         // The fsw content will change sooner or later
         // but the updated content (without the closed app) will not
         // come very fast. It looks better to the user if the item
@@ -574,6 +599,20 @@ void CTsFastSwapArea::HandleFswContentChangedL()
         TSLOG4( TSLOG_INFO, "[%d]: %d %d %S", i, e->WgId(), e->AppUid(), &name );
         }
 #endif
+    
+    // Update closing widget count if necessary
+    if ( iWidgetClosingCount )
+        {
+        TInt widgetCount(0);
+        for ( TInt i = 0, ie = iArray.Count(); i != ie; ++i )
+            {
+            if ( iArray[i]->Widget() )
+                {
+                widgetCount++;
+                }
+            }
+        iWidgetClosingCount = widgetCount;
+        }
 
     // draw
     RenderContentL();
@@ -604,7 +643,6 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     RArray<TInt> strokeItemArray;
     CleanupClosePushL(strokeItemArray);
     
-    TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     RArray<TAknLayoutRect> rects;
     CleanupClosePushL(rects);
     rects.ReserveL(KLayoutItemCount);
@@ -789,6 +827,7 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     TSLOG_IN();
     
     iIsClosing.Reset();
+    iWidgetClosingCount = 0;
     
     CTsGridItemDrawer* itemDrawer =
         static_cast<CTsGridItemDrawer*>( iGrid->ItemDrawer() );
@@ -1712,6 +1751,22 @@ TInt CTsFastSwapArea::GetCurrentScreenOrientation()
 
 
 // -----------------------------------------------------------------------------
+// CTsFastSwapArea::GetVariety
+// -----------------------------------------------------------------------------
+//
+TBool CTsFastSwapArea::GetVariety( TInt& aVariety )
+    {
+    aVariety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
+    TInt screenOrientation = GetCurrentScreenOrientation();
+    if ( aVariety != screenOrientation )
+        {
+        aVariety = screenOrientation;
+        return ETrue;
+        }
+    return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
 // CTsFastSwapArea::IsAppClosing
 // -----------------------------------------------------------------------------
 //
@@ -1725,6 +1780,23 @@ TBool CTsFastSwapArea::IsAppClosing( TInt aWgId )
         if ( retVal )
             {
             iIsClosing.Remove(idx);
+            }
+        else if ( iWidgetClosingCount )
+            {
+            retVal = ETrue;
+            iWidgetClosingCount--;
+            }
+        }
+    else
+        {
+        // Check current item list
+        for ( TInt i = 0; i < iArray.Count(); i++ )
+            {
+            TInt wgId = iArray[i]->WgId();
+            if ( wgId == aWgId )
+                {
+                retVal = ETrue;
+                }
             }
         }
     return retVal;

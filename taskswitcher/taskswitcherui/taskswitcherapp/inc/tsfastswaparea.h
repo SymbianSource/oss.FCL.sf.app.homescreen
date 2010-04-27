@@ -386,7 +386,17 @@ private:
      * @return  1 if landscape, 0 if portait 
      */
     TInt GetCurrentScreenOrientation();
-
+    
+    /**
+     * Retrieves variety value, based on current screen resolution.
+     * 
+     * @param  aVariety  result of the function, 0 value means portrait
+     *                   value of 1 indicates landscape
+     * @return  ETrue if screen resolution differs from vale returned by
+     *          layout meta data functions.
+     */
+    TBool GetVariety( TInt& aVariety );
+        
 private: // Data
     
     // parent control
@@ -441,7 +451,10 @@ private: // Data
     // Key event handling
     TBool iConsumeEvent;
     TBool iKeyEvent;
+    
+    // App closing handling
     RArray<TInt> iIsClosing;
+    TInt iWidgetClosingCount;
     };
 
 #endif // TSFASTSWAPAREA_H

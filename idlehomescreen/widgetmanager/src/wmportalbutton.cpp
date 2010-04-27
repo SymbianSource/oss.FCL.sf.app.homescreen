@@ -35,6 +35,7 @@
 #include <browserlauncher.h>
 #include <centralrepository.h>
 
+#include "wmimageconverter.h"
 #include "wmportalbutton.h"
 #include "wmcommon.h"
 #include "wmplugin.h"
@@ -139,10 +140,13 @@ void CWmPortalButton::ConstructL(
             KAknsIIDQsnFrButtonCenterInactive );
     
     // start image converter for the icon
-    iImageConverter = CWmImageConverter::NewL( this );
+    iImageConverter = CWmImageConverter::NewL();
     TSize iconsize( LayoutIconSize() );
     iImageConverter->HandleIconString(
-            iconsize.iWidth, iconsize.iHeight, aIcon );
+            iconsize, 
+            aIcon, 
+            iButtonIcon, 
+            iButtonIconMask );
     // observe our own press events
     SetObserver( this );
     
@@ -351,53 +355,17 @@ void CWmPortalButton::SizeChanged()
     // resize icon
     if ( iButtonIcon && iButtonIconMask )
         {
-        TSize size = LayoutIconSize();
-        AknIconUtils::SetSize( 
-            iButtonIcon, size, EAspectRatioPreserved );
-        AknIconUtils::SetSize( 
-            iButtonIconMask, size, EAspectRatioPreserved );
+        iImageConverter->UpdateImageSize(
+            LayoutIconSize(),
+            iWmMainContainer->Configuration().PortalButtonIcon(
+                    iPortalButtonIndex ),
+            *iButtonIcon, 
+            *iButtonIconMask );
         }
         
     TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
     SetTextAndIconAlignment( 
             landscape ? CAknButton::EIconOverText : CAknButton::EIconBeforeText );
-    }
-
-// ---------------------------------------------------------
-// CWmPortalButton::NotifyCompletion
-// ---------------------------------------------------------
-//
-void CWmPortalButton::NotifyCompletion( TInt aError )
-    {
-    if ( KErrNone == aError )
-        {
-        // take ownership of icon
-        delete iButtonIcon;
-        iButtonIcon = NULL;
-        iButtonIcon = iImageConverter->Bitmap();
-        delete iButtonIconMask;
-        iButtonIconMask = NULL;
-        iButtonIconMask = iImageConverter->Mask();
-        if ( iButtonIcon && iButtonIconMask )
-            {
-            TSize size = LayoutIconSize();
-            if ( iButtonIcon->SizeInPixels() != size )
-                {
-                AknIconUtils::SetSize( 
-                    iButtonIcon, size, EAspectRatioPreserved );
-                }
-            if ( iButtonIconMask->SizeInPixels() != size )
-                {
-                AknIconUtils::SetSize( 
-                    iButtonIconMask, size, EAspectRatioPreserved );
-                }
-            DrawDeferred();
-            }
-        }
-    else
-        {
-        // no image available. Do nothing.
-        }
     }
 
 // ---------------------------------------------------------
@@ -468,7 +436,13 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
                 imageLayout.LayoutRect( rect, AknLayoutScalable_Apps
                         ::wgtman_btn_pane_g1( variety ).LayoutLine() );
                 }
-            imageLayout.DrawImage( gc, iButtonIcon, iButtonIconMask );
+            
+            gc.DrawBitmapMasked(
+                imageLayout.Rect(),
+                iButtonIcon,
+                TRect(TPoint( 0, 0 ), iButtonIcon->SizeInPixels() ),
+                iButtonIconMask,
+                EFalse );
             }
         
         // draw text if portrait        

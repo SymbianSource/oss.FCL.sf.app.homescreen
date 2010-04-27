@@ -249,7 +249,7 @@ void CTsAppView::CreateControlsL()
     
     CleanupStack::PopAndDestroy( &rects );
     
-    UpdateHeadingsL();
+    UpdateHeadingsL(0);
     }
 
 // -----------------------------------------------------------------------------
@@ -629,28 +629,22 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
 // CTsAppView::DataChanged
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::DataChanged( CCoeControl* /*aWhere*/, TInt /*aNewCount*/ )
+void CTsAppView::DataChanged( CCoeControl* /*aWhere*/, TInt aNewCount )
     {
-    TRAP_IGNORE( UpdateHeadingsL() );
+    TRAP_IGNORE( UpdateHeadingsL( aNewCount ) );
     }
 
 // -----------------------------------------------------------------------------
 // CTsAppView::UpdateHeadingsL
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::UpdateHeadingsL()
+void CTsAppView::UpdateHeadingsL( TInt aNewCount )
     {
-#ifndef TASKSWITCHER_USE_CUSTOM_LAYOUT
     HBufC* text = StringLoader::LoadLC(
-        R_TASK_SWITCHER_HEADING_APPLICATIONS );
-#else
-    _LIT( KTitle, "Task switcher" );
-    HBufC* text = KTitle().AllocLC();
-#endif
+        R_TASK_SWITCHER_HEADING_APPLICATIONS, aNewCount );
     iAppsHeading->SetTextL( *text );
     iAppsHeading->DrawDeferred();
     CleanupStack::PopAndDestroy( text );
-
     }
 
 

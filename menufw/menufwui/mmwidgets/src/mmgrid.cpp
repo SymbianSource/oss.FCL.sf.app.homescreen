@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_102 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_103 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -485,12 +485,6 @@ void CMmGrid::HandlePointerEventL(const TPointerEvent& aPointerEvent)
     else
         {
         HandlePointerEventInNormalModeL( aPointerEvent );
-        }
-
-    if ( iMmDrawer->GetFloatingItemCount() > 0 &&
-            iMmDrawer->GetAnimator()->IsActive() )
-        {
-        iMmDrawer->GetAnimator()->CancelNextRedrawL();
         }
     }
 

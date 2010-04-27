@@ -75,9 +75,6 @@ TInt CWmUnitTest::RunMethodL(
         ENTRY( "ImageConverterCreate", CWmUnitTest::ImageConverterCreateL ),
         ENTRY( "ImageConverterDelete", CWmUnitTest::ImageConverterDeleteL ),
         ENTRY( "ImageConverterConvert", CWmUnitTest::ImageConverterConvertL ),
-        ENTRY( "ImageConverterWaitResult", CWmUnitTest::ImageConverterWaitResultL ),
-        ENTRY( "ImageConverterConversionMethod", CWmUnitTest::ImageConverterConversionMethodL ),
-        ENTRY( "CancelConvert", CWmUnitTest::CancelConvertL ),
         
         // uninstall
         ENTRY( "Uninstall", CWmUnitTest::UninstallL ),

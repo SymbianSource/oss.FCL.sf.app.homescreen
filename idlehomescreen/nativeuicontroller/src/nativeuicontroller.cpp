@@ -26,7 +26,8 @@
 #include <aipspropertyobserver.h>
 #include <eikstart.h>
 #include <avkondomainpskeys.h>
-#include <AknDlgShut.h> 
+#include <AknDlgShut.h>
+#include <aidevicestatuscontentmodel.h>
 
 // User includes
 #include <aifwstatehandler.h>
@@ -38,7 +39,6 @@
 #include "appui.h"
 #include "aiutility.h"
 #include "aistrparser.h"
-#include "aidevicestatuscontentmodel.h"
 #include "aistatuspanel.h"
 #include "ainativerenderer.h"
 #include "aititlepanerenderer.h"

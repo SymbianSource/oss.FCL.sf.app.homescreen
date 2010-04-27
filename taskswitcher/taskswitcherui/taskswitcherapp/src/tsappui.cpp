@@ -274,7 +274,7 @@ void CTsAppUi::StartAppActivateTransition( TUid aNextAppUid, TInt aWgId )
     if ( aWgId == iUnderAppWgId )
         {
         // App under task switcher was launched
-        StartTransition( EActivationTransition, 
+        StartTransition( EBackgroundTransition, 
                          EFalse, 
                          ETrue, 
                          CAknTransitionUtils::EForceInvisible );
@@ -290,7 +290,7 @@ void CTsAppUi::StartAppActivateTransition( TUid aNextAppUid, TInt aWgId )
                  EActivationAppShowTransition, ApplicationRect(),
                  AknTransEffect::EParameterType,
                  AknTransEffect::GfxTransParam( aNextAppUid , KTsAppUid ) );
-        GfxTransEffect::Begin( iAppView, EActivationTransition );
+        GfxTransEffect::Begin( iAppView, EBackgroundTransition );
         GfxTransEffect::SetDemarcation( iAppView, iAppView->Rect() );
         GfxTransEffect::NotifyExternalState( ECaptureComponentsBegin, ptr );
         iAppView->MakeVisible( EFalse );

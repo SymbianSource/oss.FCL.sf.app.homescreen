@@ -23,8 +23,8 @@
 #include <e32base.h>
 
 // User includes
-#include "aidevicestatuscontentmodel.h"
-#include "aiprofileplugincontentmodel.h"
+#include <aidevicestatuscontentmodel.h>
+#include <aiprofileplugincontentmodel.h>
 
 // Forward declarations
 class CHsContentPublisher;

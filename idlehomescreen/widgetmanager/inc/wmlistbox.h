@@ -70,22 +70,11 @@ public:
     const CFbsBitmap* DefaultLogoMask();
 
     /**
-     * re-size bitmaps to size provided by layout
-     */
-    void ResizeDefaultBitmaps();
-    
-    /**
      * sets item height according to layout 
      */
     void UpdateItemHeight();
-    
-    /**
-     * Responds to skin changed event.
-     */
-    void HandleSkinChanged();
 
 public:
-
     /**
      * from CFormattedCellListBoxItemDrawer:
      * draws a single list box item
@@ -106,9 +95,8 @@ private:
 
     /** 2nd phase constructor */
     void ConstructL();
-
+    
 private: // data members
-
     /** 
      * the plugin root (not owned) 
      */
@@ -135,7 +123,6 @@ private: // data members
     CFbsBitmap*         iDefaultLogoImageMask;
     
 	};
-
 
 
 // CLASS DECLARATIONS
@@ -267,11 +254,6 @@ public: // API for manipulating list content
      * Responds to layout switched.
      */
     void HandleLayoutChanged();
-
-    /**
-     * Responds to skin changed.
-     */
-    void HandleSkinChanged();
 
     /**
      * Returns size of logo 

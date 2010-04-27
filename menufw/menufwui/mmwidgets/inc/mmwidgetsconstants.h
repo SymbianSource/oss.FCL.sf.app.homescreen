@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Constants for the matrixmenu
-*  Version     : %version: 33.1.12 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 33.1.13 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -27,256 +27,256 @@
  * Grid constants' namespace.
  */
 namespace MmGrid
-	{
-	/**
-	 * X component of the 4x3 layout.
-	 */
-	const TInt K4By3LayoutX = 4;
+  {
+  /**
+   * X component of the 4x3 layout.
+   */
+  const TInt K4By3LayoutX = 4;
 
-	/**
-	 * Y component of the 4x3 layout.
-	 */
-	const TInt K4By3LayoutY = 3;
+  /**
+   * Y component of the 4x3 layout.
+   */
+  const TInt K4By3LayoutY = 3;
 
-	/**
-	 * X component of the 3x4 layout.
-	 */
+  /**
+   * X component of the 3x4 layout.
+   */
 
-	const TInt K3By4LayoutX = 3;
+  const TInt K3By4LayoutX = 3;
 
-	/**
-	 * Y component of the 3x4 layout.
-	 */
-	const TInt K3By4LayoutY = 4;
+  /**
+   * Y component of the 3x4 layout.
+   */
+  const TInt K3By4LayoutY = 4;
 
-	/**
-	 * X component of the 4x5 layout.
-	 */
-	const TInt K4By5LayoutX = 4;
+  /**
+   * X component of the 4x5 layout.
+   */
+  const TInt K4By5LayoutX = 4;
 
-	/**
-	 * Y component of the 5x4 layout.
-	 */
-	const TInt K4By5LayoutY = 5;
+  /**
+   * Y component of the 5x4 layout.
+   */
+  const TInt K4By5LayoutY = 5;
 
-	/**
-	 * X component of the 5x4 layout.
-	 */
-	const TInt K5By4LayoutX = 5;
+  /**
+   * X component of the 5x4 layout.
+   */
+  const TInt K5By4LayoutX = 5;
 
-	/**
-	 * Y component of the 5x4 layout.
-	 */
-	const TInt K5By4LayoutY = 4;
+  /**
+   * Y component of the 5x4 layout.
+   */
+  const TInt K5By4LayoutY = 4;
 
-	/**
-	 * Below this value, default highlight in 3x4 grid
-	 * is set up on the first item. Otherwize, on the default
-	 * highlight.
-	 */
-	const TInt K3By4Threshold(5);
+  /**
+   * Below this value, default highlight in 3x4 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K3By4Threshold(5);
 
-	/**
-	 * Below this value, default highlight in 4x3 grid
-	 * is set up on the first item. Otherwize, on the default
-	 * highlight.
-	 */
-	const TInt K4By3Threshold(6);
+  /**
+   * Below this value, default highlight in 4x3 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K4By3Threshold(6);
 
-	/**
-	 * Below this value, default highlight in 5x4 grid
-	 * is set up on the first item. Otherwize, on the default
-	 * highlight.
-	 */
-	const TInt K5By4Threshold(8);
+  /**
+   * Below this value, default highlight in 5x4 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K5By4Threshold(8);
 
-	/**
-	 * Below this value, default highlight in 4x5 grid
-	 * is set up on the first item. Otherwize, on the default
-	 * highlight.
-	 */
-	const TInt K4By5Threshold(10);
+  /**
+   * Below this value, default highlight in 4x5 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K4By5Threshold(10);
 
-	/**
-	 * Default highlight in 3x4 grid.
-	 */
-	const TInt K3By4DefaultHighlight(4);
+  /**
+   * Default highlight in 3x4 grid.
+   */
+  const TInt K3By4DefaultHighlight(4);
 
-	/**
-	 * Default highlight in 4x3 grid.
-	 */
-	const TInt K4By3DefaultHighlight(5);
+  /**
+   * Default highlight in 4x3 grid.
+   */
+  const TInt K4By3DefaultHighlight(5);
 
-	/**
-	 * Default highlight in 5x4 grid.
-	 */
-	const TInt K5By4DefaultHighlight(7);
+  /**
+   * Default highlight in 5x4 grid.
+   */
+  const TInt K5By4DefaultHighlight(7);
 
-	/**
-	 * Default highlight in 4x5 grid.
-	 */
-	const TInt K4By5DefaultHighlight(8);
+  /**
+   * Default highlight in 4x5 grid.
+   */
+  const TInt K4By5DefaultHighlight(8);
 
-	/**
-	 * Number of rows in portrait/non-zoom mode;
-	 */
-	const TInt KRowsPortraitZoomNormal(4);
+  /**
+   * Number of rows in portrait/non-zoom mode;
+   */
+  const TInt KRowsPortraitZoomNormal(4);
 
-	/**
-	 * Number of columns in landscape/non-zoom mode;
-	 */
-	const TInt KColsPortraitZoomNormal(3);
+  /**
+   * Number of columns in landscape/non-zoom mode;
+   */
+  const TInt KColsPortraitZoomNormal(3);
 
-	/**
-	 * Number of rows in portrait/non-zoom mode;
-	 */
-	const TInt KRowsLandscapeZoomNormal(3);
+  /**
+   * Number of rows in portrait/non-zoom mode;
+   */
+  const TInt KRowsLandscapeZoomNormal(3);
 
-	/**
-	 * Number of columns in landscape/non-zoom mode;
-	 */
-	const TInt KColsLandscapeZoomNormal(4);
-	
+  /**
+   * Number of columns in landscape/non-zoom mode;
+   */
+  const TInt KColsLandscapeZoomNormal(4);
+
     /**
      * Focus based scrolling item threshold for grid.
      */
     const TReal KFocusScrollingThreshold( 0.27 );
-	}
+  }
 
 /**
  * Listbox constants' namespace.
  */
 namespace MmListBox
-	{
-	/**
-	 * Threshold value, determinign if a partial should
-	 * be shown in a list.
-	 */
-	const TInt KPartialItemShowThreshold (0);
+    {
+    /**
+     * Threshold value, determinign if a partial should
+     * be shown in a list.
+     */
+    const TInt KPartialItemShowThreshold( 0 );
 
-	/**
-	 * Default highlight in 4x5 grid.
-	 */
-	const TInt KCols(1);
-	
+    /**
+     * Default highlight in 4x5 grid.
+     */
+    const TInt KCols( 1 );
+
     /**
      * Focus based scrolling item threshold for list.
      */
     const TReal KFocusScrollingThreshold( 0.55 );
-	}
+    }
 
 /**
  * Drag and drop related constants.
  */
 namespace MmEffects
-	{
-	/**
-	 * Threshold for items shift.
-	 */
-	const TReal KShiftRatio(0.25);
+  {
+    /**
+     * Threshold for items shift.
+     */
+    const TReal KShiftRatio( 0.25 );
 
-	/**
-	 * Drag and drop speed limit.
-	 */
-	const TInt KDragSpeedIgnoreThreshold(15 * 15);
+    /**
+     * Drag and drop speed limit.
+     */
+    const TInt KDragSpeedIgnoreThreshold( 15 * 15 );
 
-	/**
-	 * Number of frames to animate.
-	 */
-	const TInt KMaximumAnimationFramesCount( 6 );
+    /**
+     * Number of frames to animate.
+     */
+    const TInt KMaximumAnimationFramesCount( 6 );
 
-	/**
-	 * Number of frames to animate.
-	 */
-	const TInt KUsualAnimationFramesCount( 3 );
+    /**
+     * Number of frames to animate.
+     */
+    const TInt KUsualAnimationFramesCount( 3 );
 
-	/**
-	 * Number of frames to animate on non-touch devices.
-	 */
-	const TInt KUsualAnimationFramesCountNonTouch( 2 );
+    /**
+     * Number of frames to animate on non-touch devices.
+     */
+    const TInt KUsualAnimationFramesCountNonTouch( 2 );
 
-	/**
-	 * No animation frames count.
-	 */
-	const TInt KNoAnimationFramesCount( 1 );
+    /**
+     * No animation frames count.
+     */
+    const TInt KNoAnimationFramesCount( 1 );
 
-	/**
-	 * Delay between redrawing frames.
-	 */
-	const TInt KAnimationFrameDelay( 40000 );
+    /**
+     * Delay between redrawing frames.
+     */
+    const TInt KAnimationFrameDelay( 35000 );
 
-	/**
-	 * Text alpha during drag.
-	 */
-	const TInt KDragTextAlpha( 50 );
+    /**
+     * Text alpha during drag.
+     */
+    const TInt KDragTextAlpha( 50 );
 
-	/**
-	 * Value of drag ignore.
-	 */
-	const TInt KDragIgnoreRectValue(200);
+    /**
+     * Value of drag ignore.
+     */
+    const TInt KDragIgnoreRectValue( 200 );
 
-	/**
-	 * Time between two butto repeat events.
-	 */
-	const TInt KDragRepeatRespawn(2);
+    /**
+     * Time between two butto repeat events.
+     */
+    const TInt KDragRepeatRespawn( 2 );
 
-	/**
-	 * Determines the speed of focus-based scrolling in edit mode.
-	 */
-	const TInt KEditModeScrollingDelayFactor = 4000;
-	}
+    /**
+     * Determines the speed of focus-based scrolling in edit mode.
+     */
+    const TInt KEditModeScrollingDelayFactor = 4000;
+    }
 
 /**
  * Templates' related constants.
  */
 namespace MmTemplateContants
-	{
-	/**
-	 * If a custom (non LCT) template is used, this is
-	 * its default scrollbar width.
-	 */
-	const TInt KCustomTemplateScrolbarWidth (25);
+  {
+  /**
+   * If a custom (non LCT) template is used, this is
+   * its default scrollbar width.
+   */
+  const TInt KCustomTemplateScrolbarWidth (25);
 
-	const TInt KTemplateChildTextLength (64);
+  const TInt KTemplateChildTextLength (64);
 
-	const TInt KSubCellsCount (6);
+  const TInt KSubCellsCount (6);
 
-	const TInt KItemSubCellsText (300);
+  const TInt KItemSubCellsText (300);
 
-	const TInt KMoveIndicatorStartingPos ( 32 );
+  const TInt KMoveIndicatorStartingPos ( 32 );
 
-	}
+  }
 
 /**
  * Shortcut constants.
  */
 namespace MmShortcutConstants
-	{
-	/**
-	 * Possible scancodes when interpreting shortcut key.
-	 */
-	const TInt KScanCodes[] = { '1','2','3','4','5','6','7','8','9',
+  {
+  /**
+   * Possible scancodes when interpreting shortcut key.
+   */
+  const TInt KScanCodes[] = { '1','2','3','4','5','6','7','8','9',
 #ifndef __WINS__
         '*',
 #else
         EStdKeyNkpAsterisk,
 #endif
-	    '0', EStdKeyHash };
+      '0', EStdKeyHash };
 
-	/**
-	 * Number of available scancodes.
-	 */
-	const TInt KScanCodeCount = 12;
-	}
+  /**
+   * Number of available scancodes.
+   */
+  const TInt KScanCodeCount = 12;
+  }
 
 namespace MmMarqueeConstants
-	{
-	const TInt KTextTrimmingThreshold (80);
-	const TInt KClippingBufLength (80);
-	const TInt KLoops (1);
-	const TInt KScrollAmount (6);
-	const TInt KScrollDelay (1000000);
-	}
+  {
+  const TInt KTextTrimmingThreshold (80);
+  const TInt KClippingBufLength (80);
+  const TInt KLoops (1);
+  const TInt KScrollAmount (6);
+  const TInt KScrollDelay (1000000);
+  }
 /**
  * Matrix Template Library panic notice.
  */
@@ -306,7 +306,7 @@ _LIT8( KTextVisual8,        	"textvisual"           );
 _LIT8( KImageVisual8,        	"imagevisual"           );
 _LIT8( KImagePath8,        		"imagepath"           );
 _LIT8( KGridLayout8,        	"gridlayout"           );
-_LIT8( KEnabled8,        	"enabled"           );
+_LIT8( KEnabled8,        	    "enabled"           );
 _LIT8( KRow8,        			"row"           );
 _LIT8( KCol8,        			"col"           );
 _LIT8( KPositionX8,        		"positionx"           );
@@ -373,18 +373,18 @@ _LIT8( KUiaccelAagridCellImagePaneG28,        "uiaccel_aagrid_cell_image_pane_g2
 _LIT8( KUiaccelAagridCellImagePaneG38,        "uiaccel_aagrid_cell_image_pane_g3"           );
 _LIT8( KUiaccelAagridCellImagePaneG48,        "uiaccel_aagrid_cell_image_pane_g4"           );
 
-_LIT8( KCellHcAppsPane8,        "cell_hc_apps_pane"           );
+_LIT8( KCellHcAppsPane8,           "cell_hc_apps_pane"           );
 _LIT8( KCellHcAppsPaneT18,        "cell_hc_apps_pane_t1"           );
 _LIT8( KCellHcAppsPaneG18,        "cell_hc_apps_pane_g1"           );
 _LIT8( KCellHcAppsPaneG28,        "cell_hc_apps_pane_g2"           );
 _LIT8( KCellHcAppsPaneG38,        "cell_hc_apps_pane_g3"           );
 
-_LIT8( KCellAppPane8,        "cell_app_pane"           );
+_LIT8( KCellAppPane8,           "cell_app_pane"           );
 _LIT8( KCellAppsPaneG18,        "cell_app_pane_g1"           );
 _LIT8( KCellAppsPaneT18,        "cell_app_pane_t1"           );
 _LIT8( KCellAppsPaneG28,        "cell_app_pane_g2"           );
 
-_LIT8( KListSingleHcAppsPane8,        "list_single_hc_apps_pane"           );
+_LIT8( KListSingleHcAppsPane8,          "list_single_hc_apps_pane"           );
 _LIT8( KListSingleHcAppsPaneT18,        "list_single_hc_apps_pane_t1"           );
 _LIT8( KListSingleHcAppsPaneG18,        "list_single_hc_apps_pane_g1"           );
 _LIT8( KListSingleHcAppsPaneG28,        "list_single_hc_apps_pane_g2"           );
@@ -443,7 +443,7 @@ enum TManualAlign
 /**
  * The minimal drag vector y-length that can trigger kinetic scrolling.
  * This is just a rough estimation of the actual trigger value used by AVKON,
- * but it is sufficient for our purposes.  
+ * but it is sufficient for our purposes.
  */
 const TInt KDragTreshold = 18;
 

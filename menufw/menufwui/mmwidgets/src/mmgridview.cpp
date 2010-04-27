@@ -243,7 +243,7 @@ void CMmGridView::DoDraw(const TRect* aClipRect) const
 
     if ( !itemDrawer->IsEditMode() )
         {
-        itemDrawer->DrawBackgroundAndSeparatorLines(ViewRect());
+        itemDrawer->DrawBackground(ViewRect());
         itemDrawer->SetRedrawItemBackground( EFalse );
         CAknGridView::Draw( aClipRect );
         itemDrawer->SetRedrawItemBackground( ETrue );

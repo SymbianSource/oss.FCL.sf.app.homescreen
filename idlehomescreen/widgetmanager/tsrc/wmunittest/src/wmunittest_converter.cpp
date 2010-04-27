@@ -36,7 +36,7 @@ TInt CWmUnitTest::ImageConverterCreateL( CStifItemParser& /*aItem*/ )
     if ( iImageConverter != 0 ) User::Leave( KErrArgument );
     TInt ret = KErrNone;
     _CLEANUPCHECK_BEGIN
-    iImageConverter = CWmImageConverter::NewL( this );
+    iImageConverter = CWmImageConverter::NewL();
     _CLEANUPCHECK_END
     _RETURN("ImageConverterCreateL End", ret);
     }
@@ -64,101 +64,24 @@ TInt CWmUnitTest::ImageConverterConvertL( CStifItemParser& aItem )
     TInt ret = KErrNone;
     iConversionReady = EFalse;
     TPtrC inputStr;
-
+    
     aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
     User::LeaveIfError( aItem.GetNextString( inputStr ) );
     if ( inputStr.Length() == 0 ) User::Leave( KErrArgument );
 
-    TInt err = iImageConverter->HandleIconString( 40, 40, inputStr );
-    if ( err != KErrNone )
+    TInt expectedResult;
+    User::LeaveIfError( aItem.GetNextInt( expectedResult ) ); 
+    
+    CFbsBitmap* bitmap = NULL;
+    CFbsBitmap* mask = NULL;
+    TInt err = iImageConverter->HandleIconString( 
+            TSize (40, 40), inputStr, bitmap, mask );
+    if ( err != KErrNone && expectedResult == -1 )
         {
-        _LOG("ImageConverterConvertL:HandleIconString returns Error!!!");
-        iConversionReady = ETrue;
-        iConversionError = err;
+        err = KErrNone;
         }
 
     _RETURN("ImageConverterConvertL End", ret );
     }
 
-// -----------------------------------------------------------------------------
-// CWmUnitTest::ImageConverterWaitResultL
-// -----------------------------------------------------------------------------
-//
-TInt CWmUnitTest::ImageConverterWaitResultL( CStifItemParser& aItem )
-    {
-    if ( iImageConverter == 0 ) User::Leave( KErrArgument );
-    TInt ret = KErrNone;
-    TInt expectedResult;
-
-    User::LeaveIfError( aItem.GetNextInt( expectedResult ) );    
-
-    iWaiting = EFalse;
-    if ( !iConversionReady )
-        {
-        iWaiting = ETrue;
-        CActiveScheduler::Start();
-        iWaiting = EFalse;
-        }
-
-    // check conversion error
-    if ( expectedResult == KErrNone && iConversionError != KErrNone )
-        {
-        _LOG("ImageConverterWaitResultL: expected ok, returns error");
-        ret = iConversionError;
-        }
-    else if ( expectedResult != KErrNone && iConversionError == KErrNone )
-        {
-        _LOG("ImageConverterWaitResultL: expected error, returns ok");
-        ret = KErrGeneral;
-        }
-
-    _RETURN("ImageConverterWaitResultL End", ret);
-    }
-
-// -----------------------------------------------------------------------------
-// CWmUnitTest::NotifyCompletion
-// -----------------------------------------------------------------------------
-//
-void CWmUnitTest::NotifyCompletion( TInt aError )
-    {
-    if ( !iConversionReady )
-        {
-        iConversionReady = ETrue;
-        iConversionError = aError;
-        if ( iWaiting )
-            {
-            CActiveScheduler::Stop();
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CWmUnitTest::ImageConverterConversionMethodL
-// -----------------------------------------------------------------------------
-//
-TInt CWmUnitTest::ImageConverterConversionMethodL( CStifItemParser& aItem )
-    {
-    if ( iImageConverter == 0 ) User::Leave( KErrArgument );
-    TInt ret = KErrNone;
-    TInt conversionMethod;
-
-    User::LeaveIfError( aItem.GetNextInt( conversionMethod ) );    
-
-    // check conversion method
-    if ( conversionMethod != iImageConverter->ConversionMethod() )
-        ret = KErrGeneral;
-
-    _RETURN("ImageConverterConversionMethodL End", ret);
-    }
-
-// -----------------------------------------------------------------------------
-// CWmUnitTest::CancelConvertL
-// -----------------------------------------------------------------------------
-//
-TInt CWmUnitTest::CancelConvertL( CStifItemParser& /*aItem*/ )
-    {
-    if ( iImageConverter == 0 ) User::Leave( KErrArgument );
-    iImageConverter->Cancel();
-    _RETURN("CancelConvertL End", KErrNone);
-    }
 // End of File

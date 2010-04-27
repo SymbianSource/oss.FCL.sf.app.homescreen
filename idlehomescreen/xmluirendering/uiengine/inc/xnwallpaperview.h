@@ -33,21 +33,10 @@ class CXnUiEngine;
 class TVwsViewId;
 class CPeriodic;
 class CXnSpBgCleaner;
+class CAknWaitDialog;
 
 // Constants
 const TUid KWallpaperViewUid = { 0x200286DB };
-
-/**
-*  Data structure to be used with timer callback.
-*
-*  @since S60 v5.0
-*/
-NONSHARABLE_STRUCT( TXnWallpaperViewData )
-    {
-    TBool iMultiple;
-    TUid iAppUid;
-    TUid iViewUid;    
-    };
 
 // CLASS DECLARATION
 
@@ -59,6 +48,13 @@ NONSHARABLE_STRUCT( TXnWallpaperViewData )
 */
 NONSHARABLE_CLASS( CXnWallpaperView ) : public CAknView 
     {
+    /** View states */
+    enum TViewState 
+        {
+        EIdle,
+        EImageSelection,
+        EViewDeactivation
+        };
 public:
 
     /**
@@ -103,8 +99,16 @@ private:
     /**
      * Callback function to be used with CPeriodic.
      */
-    static TInt TimerCallbackL( TAny *aPtr );
+    static TInt TimerCallback( TAny *aPtr );
+    void DoHandleCallBackL();
 
+    /**
+     * Show error dialog
+     * 
+     * @param aResourceId Resource id to string to be displayed.
+     */
+    static void ShowErrorDialogL( const TInt aResourceId );
+    
 private: // data
 
     /**
@@ -126,9 +130,19 @@ private: // data
     CXnAppUiAdapter& iAppUi;
     
     /**
-     * Data structure, that is transferred to TimerCallback.
+     * Switch for multiple image selection.
      */
-    TXnWallpaperViewData iData;
+    TBool iMultiple;
+    
+    /**
+     * Previous view id
+     */
+    TVwsViewId iPreviousViewUid;
+
+    /**
+     * States of wallpaperview
+     */
+    TViewState iViewState;
     
     /**
      * Periodic timer.
@@ -146,7 +160,12 @@ private: // data
      * Own.
      */
 	CXnSpBgCleaner* iXnSpBgCleaner;
-
+    
+    /** 
+     * Wait dialog. 
+     * Own.
+     */
+	CAknWaitDialog* iWaitDialog;    
     };
 
 #endif      // CXNWALLPAPERVIEW_H

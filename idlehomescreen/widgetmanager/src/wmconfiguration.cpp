@@ -282,19 +282,19 @@ void CWmConfiguration::ReadOperatorApplicationInfoL()
                 {
                 iOperatorAppType = ES60;
                 iOperatorAppIdUid = StringToUid( appId );
-                SetOperatorIcon( iOperatorAppIdUid );
+                SetOperatorIconL( iOperatorAppIdUid );
                 }
             else if ( !type.Compare( KOpAppTypeCwrt ) )
                 {
                 iOperatorAppType = ECwrt;
                 iOperatorAppIdUid = FetchWidgetUidFromRegistryL( appId );
-                SetOperatorIcon( iOperatorAppIdUid );
+                SetOperatorIconL( iOperatorAppIdUid );
                 }
             else if ( !type.Compare( KOpAppTypeWrt ) )
                 {
                 iOperatorAppType = EWrt;
                 iOperatorAppIdUid = FetchWidgetUidFromRegistryL( appId );
-                SetOperatorIcon( iOperatorAppIdUid );
+                SetOperatorIconL( iOperatorAppIdUid );
                 }
             else if ( !type.Compare( KOpAppTypeJava ) )
                 {
@@ -307,7 +307,7 @@ void CWmConfiguration::ReadOperatorApplicationInfoL()
                 {
                 iOperatorAppType = EQt;
                 iOperatorAppIdUid = StringToUid( appId );
-                SetOperatorIcon( iOperatorAppIdUid );
+                SetOperatorIconL( iOperatorAppIdUid );
                 }
             }
         CleanupStack::PopAndDestroy( applicationInfo );
@@ -318,15 +318,15 @@ void CWmConfiguration::ReadOperatorApplicationInfoL()
 // CWmConfiguration::SetOperatorIcon
 // ---------------------------------------------------------
 //
-void CWmConfiguration::SetOperatorIcon( TUid aUid )
+void CWmConfiguration::SetOperatorIconL( TUid aUid )
     {
     if ( iOperatorButtonIcon &&
         !iOperatorButtonIcon->Des().Length() )
         {
         delete iOperatorButtonIcon;
         iOperatorButtonIcon = NULL;
-        TRAP_IGNORE( iOperatorButtonIcon = HBufC::NewL(
-                KMaxUidName + KOperatorIcon().Length() ) );
+        iOperatorButtonIcon = HBufC::NewL(
+                KMaxUidName + KOperatorIcon().Length() );
         iOperatorButtonIcon->Des().Format(
                 KOperatorIcon(), aUid );
         }

@@ -144,7 +144,7 @@ private: // New functions
     TUid FetchWidgetUidFromRegistryL( const TDesC& aBundleId );
     
     /** sets operator icon to button if not already defined */
-    void SetOperatorIcon( TUid aUid );
+    void SetOperatorIconL( TUid aUid );
 	
 private:
 

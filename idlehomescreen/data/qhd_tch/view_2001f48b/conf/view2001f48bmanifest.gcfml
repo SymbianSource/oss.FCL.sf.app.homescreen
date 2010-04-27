@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="manifest.dat" target="\private\200159c0\install\view_2001f48b\hsps\00\">
 	<setting ref="Homescreen1manifest/PackageVersion"/>
 	<setting ref="Homescreen1manifest/DeviceFamily"/>
@@ -56,3 +57,4 @@
   </xsl:template>
 	</xsl:stylesheet>
 </file>
+</container>

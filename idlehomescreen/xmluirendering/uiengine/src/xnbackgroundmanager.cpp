@@ -780,14 +780,15 @@ TInt CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
     // Add new to the cache
     if( aFileName != KNullDesC )
         {
-        if( CacheWallpaperL( aFileName, viewData ) == KErrNone )
+        err = CacheWallpaperL( aFileName, viewData ); 
+    
+        if( err == KErrNone )
             {
             SaveWallpaperL(); // to HSPS
             }
         else
             {
-            // image is corrupted or format is not supported
-            return KErrCACorruptContent;
+            return err;
             }
         }
     // WallpaperImage changed back to default. Update view data.
@@ -832,13 +833,13 @@ TInt CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
         {
         iBgImagePath = aFileName.AllocL();
     
-        TBool err( KErrNone );
+        err = KErrNone;
         TRAP( err, iSkinSrv.AddWallpaperL( aFileName, iRect.Size() ) );
-        if( err )
+        if( err != KErrNone )
             {
-            // image is corrupted or format is not supported
-            return KErrCACorruptContent;
+            return err;
             }
+        
         TRAP( err, iBgImage = iSkinSrv.WallpaperImageL( aFileName ) );
         if( err )
             {

@@ -37,4 +37,6 @@ EXPORTS
 	?CacheWidgetPosition@CMmWidgetContainer@@QAEXXZ @ 36 NONAME ; void CMmWidgetContainer::CacheWidgetPosition(void)
 	?SetIsFaded@CMmWidgetContainer@@QAEXH@Z @ 37 NONAME ; void CMmWidgetContainer::SetIsFaded(int)
 	?CancelDragL@CMmWidgetContainer@@QAEXH@Z @ 38 NONAME ; void CMmWidgetContainer::CancelDragL(int)
+	?AllowMove@CMmWidgetContainer@@QBEHXZ @ 39 NONAME ; int CMmWidgetContainer::AllowMove(void) const
+	?SetTriggerMoveItemL@CMmWidgetContainer@@QAEXHPAVCLiwGenericParamList@@@Z @ 40 NONAME ; void CMmWidgetContainer::SetTriggerMoveItemL(int, class CLiwGenericParamList *)
 

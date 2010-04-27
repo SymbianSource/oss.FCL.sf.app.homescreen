@@ -17,7 +17,7 @@
 
 
 #include "ainativeuimodel.h"
-#include "aidevicestatuscontentmodel.h"
+#include <aidevicestatuscontentmodel.h>
 
 namespace AiNativeUiController
     {
