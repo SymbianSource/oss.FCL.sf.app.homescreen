@@ -20,8 +20,6 @@
 
 #include <HbWidget>
 
-class QPushButton;
-
 class HelloWorldWidget : public HbWidget
 {
     Q_OBJECT
@@ -40,7 +38,6 @@ public slots:
 
 private:
     Q_DISABLE_COPY(HelloWorldWidget)
-    QPushButton *mButton;
 };
 
 #endif // HELLOWORLDWIDGET_H

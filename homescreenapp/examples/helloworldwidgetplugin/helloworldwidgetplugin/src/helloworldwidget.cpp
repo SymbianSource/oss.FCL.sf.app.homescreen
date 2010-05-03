@@ -15,8 +15,8 @@
 *
 */
 
-#include <QGraphicsProxyWidget>
-#include <QPushButton>
+#include <QGraphicsLinearLayout>
+#include <HbLabel>
 #include "helloworldwidget.h"
 
 /*!
@@ -32,12 +32,14 @@
     Constructs a widget which is a child of \a parent, with widget flags set to \a flags.
 */
 HelloWorldWidget::HelloWorldWidget(QGraphicsItem* parent, Qt::WindowFlags flags)
-    : HbWidget(parent, flags),
-      mButton(0)
+    : HbWidget(parent, flags)
 {
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(this);
-    mButton = new QPushButton("Hello World");
-    proxy->setWidget(mButton);        
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+    setLayout(layout);
+    HbLabel *helloWorld = new HbLabel("Hello World!");
+    helloWorld->setPreferredSize(QSizeF(130.0,20.0));
+    layout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
+    layout->addItem(helloWorld);
 }
 
 /*!

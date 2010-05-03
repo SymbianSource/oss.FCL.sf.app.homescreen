@@ -28,7 +28,7 @@ class HsShortcutService;
 class HsContentService;
 
 /**
- * @ingroup group_hsmenustateplugin
+ * @ingroup group_hsworkerstateplugin
  * @brief Menu Base State
  *
  * Menu Base state is the base class for states used in Menu.

@@ -85,4 +85,43 @@ void HsHomescreenClientPluginTest::testAddInvalidWidget()
     delete client;
 }
 
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsHomescreenClientPluginTest::testSetWallpaper()
+{  
+    HsHomescreenClient *client = new HsHomescreenClient;
+    
+    QSignalSpy requestFinishedSpy(client, SIGNAL(requestFinished()));
+    
+    bool result = client->setWallpaper("wallpaper");
+    
+    // but emit correct signals
+    connect(this, SIGNAL(onRequestCompletedTest(QVariant)), client, SLOT(onRequestCompleted(QVariant)));
+    emit onRequestCompletedTest(true);
+    
+    QVERIFY(requestFinishedSpy.count());
+    QVERIFY(client->mRequestResult);
+    
+    delete client;    
+}
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsHomescreenClientPluginTest::testOnRequestError()
+{  
+    HsHomescreenClient *client = new HsHomescreenClient;
+    
+    QSignalSpy requestFinishedSpy(client, SIGNAL(requestFinished()));
+    
+    client->onRequestError(-1);
+    
+    QVERIFY(requestFinishedSpy.count());
+    QVERIFY(!client->mRequestResult);
+    
+    delete client;    
+}
+
+
 QTEST_MAIN(HsHomescreenClientPluginTest)

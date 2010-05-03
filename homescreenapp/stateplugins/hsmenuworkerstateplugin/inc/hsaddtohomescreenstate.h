@@ -25,9 +25,11 @@
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 
+class CaEntry;
+
 
 /**
- * @ingroup group_hsmenustateplugin
+ * @ingroup group_hsworkerstateplugin
  * @brief Application Library State.
  *
  * Parent state for Application Library functionality (browsing applications and collections)
@@ -78,8 +80,7 @@ private:
 
     void addShortcut(HsContentService &contentService, int entryId);
 
-    void addTApplication(HsContentService &contentService, int entryId,
-                QVariantMap &data);
+    void addApplication(HsContentService &contentService, CaEntry &entryId);
 
     void logActionResult(QString operationName, int entryId,
                          bool operationSucceded);

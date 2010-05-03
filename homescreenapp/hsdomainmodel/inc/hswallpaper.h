@@ -25,7 +25,6 @@
 
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
-class HsWallpaperPrivate;
 class HSDOMAINMODEL_EXPORT HsWallpaper : public HbWidget
 {
     Q_OBJECT

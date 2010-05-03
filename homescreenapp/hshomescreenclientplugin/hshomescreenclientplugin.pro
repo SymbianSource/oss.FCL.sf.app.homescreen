@@ -16,11 +16,11 @@
 
 
 TEMPLATE = lib
-CONFIG += plugin hb mobility console
+CONFIG += plugin hb mobility console hs_public_plugin
 MOBILITY = serviceframework
 
-PLUGIN_SUBDIR = /hsresources/plugins/homescreenclientplugin
-
+PLUGIN_SUBDIR = /resource/qt/plugins
+                
 include (../common.pri)
 
 DEPENDPATH += 	./inc \
@@ -31,6 +31,7 @@ INCLUDEPATH += 	./inc
 symbian: {
     TARGET.UID3 = 0x20022F72
     LIBS += -lxqservice
+    LIBS += -lxqserviceutil
 }
 
 win32: {

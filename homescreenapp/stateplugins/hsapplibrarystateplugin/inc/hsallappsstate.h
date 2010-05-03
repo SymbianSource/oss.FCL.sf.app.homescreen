@@ -51,144 +51,49 @@ class HsAllAppsState: public QState
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 
 public:
-
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param containerView Container view.
-     * @param parent Owner.
-     */
     HsAllAppsState(HsMenuView &menuView, QState *parent = 0);
-
-    /**
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     ~HsAllAppsState();
 
 public slots:
-    /**
-     * Populates all applications
-     *
-     * @since S60 ?S60_version.
-     */
     void scrollToBeginning();
-
-    /**
-     * Sets collections sort order
-     *
-     * @since S60 ?S60_version.
-     * @param sortOrder sort order.
-     */
     void collectionsSortOrder(HsSortAttribute sortAttribute);
 
 private slots:
 
     bool openTaskSwitcher();
 
-    /**
-     * Slot connected to List widget in normal mode.
-     *
-     * @since S60 ?S60_version.
-     * @param index Model index of the activated item.
-     */
+    bool checkSoftwareUpdates();
+
     void listItemActivated(const QModelIndex &index);
 
-    /**
-     * Slot connected to List widget in add mode.
-     *
-     * @since S60 ?S60_version.
-     * @param index Model index of the activated item.
-     */
     void addActivated(const QModelIndex &index);
 
-    /**
-     * Slot connected to List widget in normal mode.
-     * Called when item long pressed.
-     *
-     * @since S60 ?S60_version.
-     * @param item View item.
-     * @param coords Press point coordinates.
-     */
     void listItemLongPressed(HbAbstractViewItem *item,
                              const QPointF &coords);
 
-    /**
-     * Slot connected to List widget in add mode.
-     * Called when item long pressed.
-     *
-     * @since S60 ?S60_version.
-     * @param item View item.
-     * @param coords Press point coordinates.
-     */
     void addLongPressed(HbAbstractViewItem *item,
                         const QPointF &coords);
 
-    /**
-     * Slot called when application is adding to collection.
-     *
-     * @since S60 ?S60_version.
-     */
     void addToCollection();
 
-    /**
-     * Menu ascending sort action slot.
-     *
-     * @since S60 ?S60_version.
-     */
+    void openInstalledView();
+
     void ascendingMenuAction();
 
-    /**
-     * Menu descending sort action slot.
-     *
-     * @since S60 ?S60_version.
-     */
     void descendingMenuAction();
 
-    /**
-     * Slot invoked when a state is entered.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateEntered();
 
-    /**
-     * Slot invoked when add mode entered.
-     *
-     * @since S60 ?S60_version.
-     */
     void addModeEntered();
 
-    /**
-     * Slot invoked when normal mode entered.
-     *
-     * @since S60 ?S60_version.
-     */
     void normalModeEntered();
 
-    /**
-     * Slot invoked when a state is exited.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateExited();
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
-    /**
-     * Creates and installs menu options for the view
-     *
-     * @since S60 ?S60_version.
-     */
     void setMenuOptions();
 
     void addToHomeScreen(const QModelIndex &index);
@@ -207,7 +112,6 @@ private:
 
     /**
      * The View widget.
-     * Own.
      */
     HsMenuView &mMenuView;
 

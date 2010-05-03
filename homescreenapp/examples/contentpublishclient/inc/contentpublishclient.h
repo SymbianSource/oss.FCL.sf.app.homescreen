@@ -31,8 +31,15 @@ public:
     bool load();
     
 public slots:
-    void addWidget();
+    void addHelloworldWidget();
+    void addClockWidget();
+    void setWallpaper1();
+    void setWallpaper2();
 
+protected:
+    bool addWidget(QString widgetUri);
+    bool setWallpaper(QString fileName);
+    
 private:
     QObject* mService;
     QServiceManager* mManager;    

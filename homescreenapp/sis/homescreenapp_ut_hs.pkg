@@ -56,7 +56,7 @@
 
 "/epoc32/release/armv5/urel/mockwidgetplugin.dll" - "c:/sys/bin/mockwidgetplugin.dll"
 "/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin"
-"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.s60xml" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.s60xml"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.xml" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.xml"
 
 
 ;--------------- runtimeplugins ---------------
@@ -66,7 +66,7 @@
 "/epoc32/data/z/resource/apps/t_hsdefaultruntimeplugin.rsc"                - "c:/resource/apps/t_hsdefaultruntimeplugin.rsc"
 "/epoc32/release/armv5/urel/mockstateplugins.dll"     - "c:/sys/bin/mockstateplugins.dll"
 "/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"     - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"
-"/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.s60xml"  - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.s60xml"
+"/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.xml"  - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.xml"
 
 ;--------------- serviceproviders ---------------
 
@@ -84,15 +84,9 @@
 "/epoc32/release/armv5/urel/t_hsshortcutwidget.exe"                         - "c:/sys/bin/t_hsshortcutwidget.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/t_hsshortcutwidget_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsshortcutwidget_reg.rsc"
 "/epoc32/data/z/resource/apps/t_hsshortcutwidget.rsc"                       - "c:/resource/apps/t_hsshortcutwidget.rsc"
-"../widgetplugins/hsshortcutwidgetplugin/tsrc/t_hsshortcutwidget/foundicon.png"    - "c:/private/20022F64/foundicon.png"
 
 ;hsclockwidgetplugin
 ;t_hsclockwidgetplugin:
 "/epoc32/release/armv5/urel/t_hsclockwidgetplugin.exe"                      - "c:/sys/bin/t_hsclockwidgetplugin.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/t_hsclockwidgetplugin_reg.rsc" - "c:/private/10003a3f/import/apps/t_hsclockwidgetprovider_reg.rsc"
 "/epoc32/data/z/resource/apps/t_hsclockwidgetplugin.rsc"                    - "c:/resource/apps/t_hsclockwidgetprovider.rsc"
-
-;t_hsanalogclockstyleplugin
-"/epoc32/release/armv5/urel/t_hsanalogclockstyleplugin.exe"                     - "c:/sys/bin/t_hsanalogclockstyleplugin.exe"
-"/epoc32/data/z/private/10003a3f/import/apps/t_hsanalogclockstyleplugin_reg.rsc" - "c:/private/10003a3f/import/apps/t_hsanalogclockstyleplugin_reg.rsc"
-"/epoc32/data/z/resource/apps/t_hsanalogclockstyleplugin.rsc"                   - "c:/resource/apps/t_hsanalogclockstyleplugin.rsc"

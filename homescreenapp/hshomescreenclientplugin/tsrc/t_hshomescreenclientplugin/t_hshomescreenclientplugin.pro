@@ -50,6 +50,7 @@ symbian: {
     TARGET.CAPABILITY = CAP_APPLICATION AllFiles
     TARGET.EPOCHEAPSIZE = 0x20000 0x1000000 // 128kB - 16MB
     LIBS += -lxqservice
+    LIBS += -lxqserviceutil
 } else {
     error("Only Symbian supported!")
 }

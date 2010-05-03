@@ -27,7 +27,7 @@
 
 /*!
  \class HsCollectionsListDialog
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Hs List Dialog
  Hs List Dialog
  */

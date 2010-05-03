@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/" >
-        <file alias="tsdefaultruntimeplugin.xml">../../tsdefaultruntimeplugin.xml</file>
-    </qresource>
-</RCC>

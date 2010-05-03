@@ -25,7 +25,7 @@
 
 /*!
  \class HsCollectionNameState
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Rename Collection State.
  Collection name state
  */

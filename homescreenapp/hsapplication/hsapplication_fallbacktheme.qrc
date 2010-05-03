@@ -7,8 +7,7 @@
         <file>themes/icons/hbdefault/scalable/qtg_large_applications_download.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_large_applications_user.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_large_super_new.svg</file>
-        
-        
+                
         <file>themes/icons/hbdefault/scalable/qtg_graf_hspage_normal.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_graf_hspage_highlight.svg</file>
         <file>themes/icons/hbdefault/scalable/hs_shortcut_bg.svg</file>
@@ -21,5 +20,36 @@
         <file>themes/icons/hbdefault/scalable/qtg_graf_clock_day_hour.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_graf_clock_day_min.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_graf_hs_dialer.svg</file>
+        
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_b.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_bl.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_br.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_c.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_l.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_r.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_t.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_tl.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsshortcut_normal_tr.svg</file>
+        
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_b.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_bl.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_br.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_c.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_l.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_r.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_t.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_tl.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_tr.svg</file>
+        
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_0.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_1.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_2.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_3.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_4.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_5.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_6.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_7.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_8.svg</file>
+        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_9.svg</file>
     </qresource>    
 </RCC>

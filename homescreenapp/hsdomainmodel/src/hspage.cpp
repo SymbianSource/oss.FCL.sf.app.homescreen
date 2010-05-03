@@ -50,9 +50,6 @@ HsPage::HsPage(QGraphicsItem* parent)
     setFlag(QGraphicsItem::ItemHasNoContents);
     setSizePolicy(QSizePolicy(QSizePolicy::Ignored, 
                               QSizePolicy::Ignored));
-                              
-    mStartPoint["portrait"] = QPointF();                              
-    mStartPoint["landscape"] = QPointF();                              
 }
 
 /*!
@@ -171,13 +168,12 @@ bool HsPage::addNewWidget(HsWidgetHost* widgetHost)
     if (!widgetHost->widgetPresentationData(key, presentation)) {
         presentation.key = key;
         presentation.setPos(QPointF());
-        presentation.setSize(widgetHost->preferredSize());
         presentation.zValue = 0;
         widgetHost->setWidgetPresentationData(presentation);
     }
 
     widgetHost->hide();
-    widgetHost->setGeometry(presentation.geometry());
+    widgetHost->setPos(presentation.x, presentation.y);
     widgetHost->setZValue(presentation.zValue);
     
     connectWidget(widgetHost);
@@ -208,7 +204,7 @@ void HsPage::layoutNewWidgets()
         HsWidgetPositioningOnWidgetAdd::instance();
    
     QList<QRectF> calculatedRects = 
-        algorithm->convert(HsScene::mainWindow()->layoutRect(), rects, mStartPoint[key]);
+        algorithm->convert(HsScene::mainWindow()->layoutRect(), rects, QPointF());
     
     updateZValues();
 
@@ -221,18 +217,10 @@ void HsPage::layoutNewWidgets()
         widget->setParentItem(this);
         widget->show();
     }
-    mStartPoint[key] = widget->geometry().bottomRight();
     mWidgets << mNewWidgets;
     mNewWidgets.clear();
 }
 
-/*!
-    Resets the new widgets list
-*/
-void HsPage::resetNewWidgets()
-{
-    mNewWidgets.clear();
-}
 
 bool HsPage::deleteFromDatabase()
 {
@@ -271,40 +259,6 @@ bool HsPage::isRemovable() const
 void HsPage::setRemovable(bool removable)
 {
     mRemovable = removable; 
-}
-
-bool HsPage::updateZValues()
-{
-    int z = 0;
-
-    if (!mWidgets.isEmpty()) {
-        QMultiMap<qreal, HsWidgetHost *> map;
-        foreach (HsWidgetHost *widget, mWidgets) {
-            map.insert(widget->zValue(), widget);
-        }
-        
-        QList<HsWidgetHost *> sortedWidgets = map.values();
-                
-        HsWidgetHost *activeWidget = HsScene::instance()->activeWidget();    
-        if (sortedWidgets.contains(activeWidget)) {
-            sortedWidgets.removeOne(activeWidget);
-            sortedWidgets.append(activeWidget);        
-        }
-        
-        foreach (HsWidgetHost *widget, sortedWidgets) {
-            widget->setZValue(z++);
-            widget->setWidgetPresentation();
-        }
-    }
-
-    if (!mNewWidgets.isEmpty()) {
-        foreach (HsWidgetHost *widget, mNewWidgets) {
-            widget->setZValue(z++);
-            widget->setWidgetPresentation();
-        }
-    }
-
-    return true;
 }
 
 HsPage *HsPage::createInstance(const HsPageData &pageData)
@@ -356,6 +310,38 @@ void HsPage::setOnline(bool online)
     }
     foreach (HsWidgetHost *widget, mWidgets) {
         widget->setOnline(online);
+    }
+}
+
+void HsPage::updateZValues()
+{
+    int z = 0;
+
+    if (!mWidgets.isEmpty()) {
+        QMultiMap<qreal, HsWidgetHost *> map;
+        foreach (HsWidgetHost *widget, mWidgets) {
+            map.insert(widget->zValue(), widget);
+        }
+        
+        QList<HsWidgetHost *> sortedWidgets = map.values();
+                
+        HsWidgetHost *activeWidget = HsScene::instance()->activeWidget();    
+        if (sortedWidgets.contains(activeWidget)) {
+            sortedWidgets.removeOne(activeWidget);
+            sortedWidgets.append(activeWidget);        
+        }
+        
+        foreach (HsWidgetHost *widget, sortedWidgets) {
+            widget->setZValue(z++);
+            widget->setWidgetPresentation();
+        }
+    }
+
+    if (!mNewWidgets.isEmpty()) {
+        foreach (HsWidgetHost *widget, mNewWidgets) {
+            widget->setZValue(z++);
+            widget->setWidgetPresentation();
+        }
     }
 }
 

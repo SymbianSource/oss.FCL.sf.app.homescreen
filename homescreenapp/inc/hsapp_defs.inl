@@ -226,4 +226,50 @@ inline const QString menuModeType()
     return name;
 }
 
+/*!
+    \return sw type key
+*/
+inline const QString swTypeKey()
+{
+    static const QString key("apptype");
+    return key;
+}
+
+/*!
+    \return package entry type name
+*/
+inline const QString packageTypeName()
+{
+    static const QString name("package");
+    return name;
+}
+
+/*!
+    \return java sw type
+*/
+inline const QString javaSwType()
+{
+    static const QString value("java");
+    return value;
+}
+
+/*!
+    \return application settings plugin
+*/
+inline const QString appSettingsPlugin()
+{
+    static const QString key("app_settings_plugin");
+    return key;
+}
+
+/*!
+    \return application group name
+*/
+inline const QString groupNameAttributeName()
+{
+    static const QString key("appgroup_name");
+    return key;
+}
+
+
 #endif

@@ -18,7 +18,7 @@ TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
 
-PLUGIN_SUBDIR = /hsresources/plugins/stateplugins
+PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
 
 include(../../common.pri)
 

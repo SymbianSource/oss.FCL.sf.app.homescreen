@@ -20,7 +20,6 @@
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include "hshomescreen.h"
-#include "hsapptranslator.h"
 #include "hstest_global.h"
 
 namespace
@@ -38,24 +37,12 @@ namespace
 #include <apgwgnam.h>
 
 
-void loadTranslationFilesOnSymbian(QTranslator &hsTranslator, QTranslator &alTranslator);
+void loadTranslationFilesOnSymbian(QTranslator &commonTranslator, 
+                                    QTranslator &hsTranslator, 
+                                    QTranslator &alTranslator);
 void copyWallpapersFromRom();
 void copyHsDatabaseFileFromRom();
 void createPrivateFolder();
-
-// it is temporary class used for getting notifcation about APA messages
-// it is used for processing message send by AVKON to activate Menu
-class HsMessageObserver: public MCoeMessageObserver {
-
-TMessageResponse HandleMessageL(TUint32 /*aClientHandleOfTargetWindowGroup*/,
-                                TUid /*aMessageUid*/,
-                                const TDesC8& /*aMessageParameters*/)
-    {
-    // move application to foreground
-    QApplication::topLevelAt(0,0)->raise();
-    return EMessageHandled;
-    }
-};
 
 void setHomescreenAsSystemAppL(CEikonEnv* eikonEnv)
 {
@@ -111,15 +98,13 @@ int main(int argc, char *argv[])
     HSDEBUG(debugMsg);
 #endif //Q_OS_SYMBIAN
 
-    HsAppTranslator *appTranslator = HsAppTranslator::instance();
-    appTranslator->setLanguage();
-    
     // add translator for homescreen and application library
     QTranslator hsTranslator;
     QTranslator alTranslator;
+    QTranslator commonTranslator;
 #ifdef Q_OS_SYMBIAN
     // TRAP is must here, otherwise it crashes
-    TRAP_IGNORE( loadTranslationFilesOnSymbian(hsTranslator, alTranslator) );
+    TRAP_IGNORE( loadTranslationFilesOnSymbian(commonTranslator, hsTranslator, alTranslator) );
 #else
     QString locale = QLocale::system().name();
     QString hsTrFile = QString("homescreen_") + locale;
@@ -127,6 +112,7 @@ int main(int argc, char *argv[])
     QString alTrFile = QString("hsapplibrary_") + locale;
     alTranslator.load(alTrFile, QString(TR_FILE_PATH) );
 #endif //Q_OS_SYMBIAN
+    qApp->installTranslator(&commonTranslator);
     qApp->installTranslator(&hsTranslator);
     qApp->installTranslator(&alTranslator);
     
@@ -143,16 +129,9 @@ int main(int argc, char *argv[])
     QObject::connect(&hs, SIGNAL(exit()), &app, SLOT(quit()),Qt::QueuedConnection);
     hs.start();
 
-    app.installEventFilter(appTranslator);
-
 #ifdef Q_OS_SYMBIAN
     CEikonEnv * env = CEikonEnv::Static();
-#ifdef S60APP_KEY
-    env->RootWin().CaptureKeyUpAndDowns( EStdKeyApplication0, 0, 0 );
-#endif //S60APP_KEY
     TRAP_IGNORE(setHomescreenAsSystemAppL(env));
-    HsMessageObserver observer;
-    TRAP_IGNORE( env->AddMessageObserverL(observer));
 #endif //Q_OS_SYMBIAN
 
     HSTEST("HS::main() call app.exec");
@@ -251,10 +230,18 @@ void copyWallpapersFromRom()
 /*!
  * Load translation files.
  */
-void loadTranslationFilesOnSymbian(QTranslator &hsTranslator, QTranslator &alTranslator)
+void loadTranslationFilesOnSymbian(QTranslator &commonTranslator, 
+                                   QTranslator &hsTranslator, 
+                                   QTranslator &alTranslator)
 {
-    bool hsLoaded(false);
     QString locale = QLocale::system().name();
+    bool commonLoaded(false);
+    QString commonTrFile = QString("common_") + locale;
+    commonLoaded = commonTranslator.load(commonTrFile, QString("z:/") + TR_FILE_PATH);
+    if (!commonLoaded) {
+        commonTranslator.load(commonTrFile, QString("c:/") + TR_FILE_PATH);
+    }
+    bool hsLoaded(false);
     QString hsTrFile = QString("homescreen_") + locale;
     hsLoaded = hsTranslator.load(hsTrFile, QString("z:/") + TR_FILE_PATH);
     if (!hsLoaded) {

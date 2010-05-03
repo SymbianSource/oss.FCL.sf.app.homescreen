@@ -27,7 +27,7 @@
 
 /*!
  \class HsAppsCheckList
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Application Library State.
  State responsible for selecting a group of applications to be added to
  a collection.

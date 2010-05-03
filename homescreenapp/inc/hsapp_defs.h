@@ -40,6 +40,11 @@ inline const QString applicationUidEntryKey();
 inline const QString urlEntryKey();
 inline const QString defaultCollectionIconId();
 inline const QString menuModeType();
+inline const QString swTypeKey();
+inline const QString javaSwType();
+inline const QString packageTypeName();
+inline const QString appSettingsPlugin();
+inline const QString groupNameAttributeName();
 
 // Sort attribute
 enum HsSortAttribute {
@@ -56,12 +61,14 @@ enum HsMenuMode {
     AddHsMenuMode
 };
 
-const int taskSwitcherUid  = 0x2002677D;
-const int taskSwitcherPropertyValue = 1;
+const char TS_DEVICE_DIALOG_URI[] = 
+    "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
 
 const char LIBRARY[] = "library";
 const char URI[] = "uri";
 const char PREFERENCES[] = "preferences";
+
+const int softwareUpdateApplicationUid  = 0x2001FE2F;
 
 #include "hsapp_defs.inl"
 

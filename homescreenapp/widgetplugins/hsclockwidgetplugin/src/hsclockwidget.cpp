@@ -21,29 +21,30 @@
 #include <QGraphicsLinearLayout>
 #include <hblabel.h>
 #include <hbextendedlocale.h>
+#include <hbdeviceprofile.h> // temp
 
 #include "hsclockwidget.h"
 #include "hsanalogclockwidget.h"
 #include "hsdigitalclockwidget.h"
-#include "hsclockwidgetdocumentloader.h"
 
 #ifdef Q_OS_SYMBIAN    
 #include "hsclockwidgettype_symbian.h"
-#endif
+#include <apgtask.h>
+#include <eikenv.h>
+#endif //Q_OS_SYMBIAN
 
 namespace
 {
     const char ANALOG[] = "analog";
     const char DIGITAL[] = "digital";
 
-    const char DIGITAL_CLOCK_DOCML[] = ":/xml/hsdigitalclockwidget.docml";
-    const char ANALOG_CLOCK_DOCML[] = ":/xml/hsanalogclockwidget.docml";
-
-    const char DIGITAL_CLOCK_WIDGET[] = "timeLabel";
-    const char ANALOG_CLOCK_WIDGET[] = "analogClockWidget";
-
     const int clockUpdateInterval = 1000; // msec
 }
+
+#ifdef Q_OS_SYMBIAN
+#define KClockAppUid TUid::Uid(0x10005903)
+_LIT (KClockAppExe, "clock.exe");
+#endif //Q_OS_SYMBIAN
 
 /*!
     \class HsClockWidget
@@ -201,9 +202,26 @@ void HsClockWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     update();
 
     mTimer->start(clockUpdateInterval);
-#endif    
+#else //Q_OS_SYMBIAN
+    TApaTaskList taskList(CEikonEnv::Static()->WsSession());    
+    TApaTask task = taskList.FindApp(KClockAppUid);    
+    if (task.Exists()){
+        task.BringToForeground();
+    }    
+    else {
+        RProcess process;
+        TInt error = process.Create(KClockAppExe, KNullDesC, EOwnerThread);
+    
+        if (error == KErrNone){
+            // start the process running.
+            process.Resume();
+            process.Close();
+        }
+    }
+#endif //Q_OS_SYMBIAN   
 }
 
+  
 /*!
     Toggles the clock type.
 */
@@ -223,35 +241,22 @@ HbWidget *HsClockWidget::loadClockWidget()
 {
     HbWidget *clockWidget = 0;
 
-    QString docmlFile;
     if (mClockType == DIGITAL) {
-        docmlFile = DIGITAL_CLOCK_DOCML;
+        clockWidget = new HsDigitalClockWidget();
+        clockWidget->setBackgroundItem(HbStyle::P_Fade_background);
     } else {
-        docmlFile = ANALOG_CLOCK_DOCML;
+        clockWidget = new HsAnalogClockWidget();
     }
 
-    HsClockWidgetDocumentLoader loader;
-    bool loaded = false;
-    loader.load(docmlFile, &loaded);
-
-    if (loaded) {
-        if (mClockType == DIGITAL) {
-            clockWidget = qobject_cast<HsDigitalClockWidget *>(loader.findWidget(DIGITAL_CLOCK_WIDGET));
-            clockWidget->setBackgroundItem(HbStyle::P_Fade_background);
-        } else {
-            clockWidget = qobject_cast<HsAnalogClockWidget *>(loader.findWidget(ANALOG_CLOCK_WIDGET));
-        }
-
-    } else {
-        qWarning() << "Unable to load clock widget from docml: " << docmlFile;
-        // TODO: We must handle this error situation once error handling strategy is clear!
-    }
+    qreal unit = HbDeviceProfile::current().unitValue(); 
+    clockWidget->setPreferredSize(QSizeF(25 * unit, 25 * unit)); // TODO: temp workaround
 
     return clockWidget;
 }
 
 void HsClockWidget::onTypeChanged(QString type)
 {
+  Q_UNUSED(type);
 #if 0
     if (mClockType != type) {
         mTimer->stop();

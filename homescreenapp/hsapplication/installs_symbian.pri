@@ -24,9 +24,3 @@ exports2.path = /private/20022f35/wallpapers
 exports2.sources += resource_s60/d_landscape.png
 exports2.sources += resource_s60/d_portrait.png
 for(export2, exports2.sources):BLD_INF_RULES.prj_exports += "./$$export2 $$deploy.path$$exports2.path/$$basename(export2)"
-
-exports3.path = /data/images/kqtihswallpapers
-exports3.sources += resource_s60/bg_1.png
-exports3.sources += resource_s60/bg_2.png
-exports3.sources += resource_s60/bg_3.png
-for(export3, exports3.sources):BLD_INF_RULES.prj_exports += "./$$export3 $$deploy.path$$exports3.path/$$basename(export3)"

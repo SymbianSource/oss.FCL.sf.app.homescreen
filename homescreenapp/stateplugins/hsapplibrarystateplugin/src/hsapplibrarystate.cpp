@@ -31,24 +31,25 @@
 #include "hsallappsstate.h"
 #include "hsallcollectionsstate.h"
 #include "hscollectionstate.h"
+#include "hsinstalledappsstate.h"
 #include "hsovistorehandler.h"
 #include "hsmenuview.h"
 #include "hsmenumodetransition.h"
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructor.
+ \param parent Owner.
+ */
 HsAppLibraryState::HsAppLibraryState(QState *parent) :
     QState(parent), mSecondarySoftkeyAction(0), mAllAppsState(0),
-    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0),
-    mMenuView(HbInstance::instance()->allMainWindows().value(0))
+    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0)
 {
     construct();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Destructor.
+ */
 HsAppLibraryState::~HsAppLibraryState()
 {
     HbMainWindow *const hbW =
@@ -60,9 +61,9 @@ HsAppLibraryState::~HsAppLibraryState()
     }
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsAppLibraryState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::construct");
@@ -107,6 +108,19 @@ void HsAppLibraryState::construct()
                                   mCollectionState, mAllCollectionsState);
     mCollectionState->addTransition(collectionToAppLibTransition);
 
+    HsInstalledAppsState *installedAppsState = new HsInstalledAppsState(
+        mMenuView, this);
+
+    HsMenuEventTransition *installedToAppLibTransition =
+        new HsMenuEventTransition(HsMenuEvent::OpenApplicationLibrary,
+                                  installedAppsState, mAllAppsState);
+    installedAppsState->addTransition(installedToAppLibTransition);
+
+    HsMenuEventTransition *allViewToInstalledTransition =
+        new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
+                                  mAllAppsState, installedAppsState);
+    mAllAppsState->addTransition(allViewToInstalledTransition);
+
     constructToolbar();
 
     connect(this, SIGNAL(entered()),SLOT(stateEntered()));
@@ -124,9 +138,10 @@ void HsAppLibraryState::construct()
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::construct");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Sets entry event.
+ \param event entry event.
+ */
 void HsAppLibraryState::onEntry(QEvent *event)
 {
     qDebug("HsCollectionState::onEntry()");
@@ -145,9 +160,9 @@ void HsAppLibraryState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::onEntry");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when a state is entered.
+ */
 void HsAppLibraryState::stateEntered()
 {
     HSTEST_FUNC_ENTRY("AppLibraryState::stateEntered");
@@ -155,23 +170,23 @@ void HsAppLibraryState::stateEntered()
     if (!hbW->views().contains(mMenuView.view())) {
         hbW->addView(mMenuView.view());
         mMenuView.view()->setNavigationAction(mSecondarySoftkeyAction);
-    }    
+    }
     hbW->setCurrentView(mMenuView.view());
     HSTEST_FUNC_EXIT("AppLibraryState::stateEntered");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when a state is exited.
+ */
 void HsAppLibraryState::stateExited()
 {
-    HSTEST_FUNC_ENTRY("AppLibraryState::stateExited");   
+    HSTEST_FUNC_ENTRY("AppLibraryState::stateExited");
     HSTEST_FUNC_EXIT("AppLibraryState::stateExited");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Sets up Toolbar.
+ */
 void HsAppLibraryState::constructToolbar()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::constructToolbar");
@@ -205,9 +220,9 @@ void HsAppLibraryState::constructToolbar()
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::constructToolbar");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Clear toolbar latch
+*/
 void HsAppLibraryState::clearToolbarLatch()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::clearToolbarLatch");
@@ -220,9 +235,9 @@ void HsAppLibraryState::clearToolbarLatch()
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::clearToolbarLatch");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ All apps stete entered.
+ */
 void HsAppLibraryState::allAppsStateEntered()
 {
     if (mMenuView.getHsMenuMode() == NormalHsMenuMode) {
@@ -230,9 +245,9 @@ void HsAppLibraryState::allAppsStateEntered()
     }
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ All collections state entered.
+ */
 void HsAppLibraryState::allCollectionsStateEntered()
 {
     if (mMenuView.getHsMenuMode() == NormalHsMenuMode) {

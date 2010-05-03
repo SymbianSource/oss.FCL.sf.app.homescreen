@@ -26,7 +26,7 @@
 /*!
     \ingroup group_content_publish_client
     \class ContentPublishClient
-    \brief Example implementation for home screen content publish client.
+    \brief Example implementation for home screen client api usage.
 
     ContentPublishClient is derived from QObject and implements 
     needed functions for the home screen content publish client. 
@@ -63,7 +63,7 @@ bool ContentPublishClient::load()
     }
     qDebug() << interfaces.first().interfaceName()
              << interfaces.first().serviceName()
-             <<  interfaces.first().isValid();
+             << interfaces.first().isValid();
 
     mService = mManager->loadInterface(interfaces.first());
         
@@ -71,27 +71,118 @@ bool ContentPublishClient::load()
 }
 
 /*!
-    Adds widget utilizing service interface and invoke call
+    Adds hello world widget 
 */
-void ContentPublishClient::addWidget()
+void ContentPublishClient::addHelloworldWidget()
+{
+    if ( addWidget("helloworldwidgetplugin")) {
+        qDebug() << "HelloWorld added"; 
+    } else {
+        qDebug() << "adding HelloWorld failed"; 
+    }
+}
+
+/*!
+    Adds clock world widget 
+*/
+void ContentPublishClient::addClockWidget()
+{
+    if ( addWidget("hsclockwidgetplugin")) {
+        qDebug() << "Clock widget added"; 
+    } else {
+        qDebug() << "adding Clock widget failed"; 
+    }
+}
+
+/*!
+    Adds widget \a widgetUri utilizing service interface and invokeMethod call
+*/
+// Start of snippet 1
+bool ContentPublishClient::addWidget(QString widgetUri)
 {   
-    QByteArray signature = QMetaObject::normalizedSignature("addWidget(QString,QVariantHash)");
+    // find interface IHomeScreenClient from service hshomescreenclientplugin 
+    QServiceManager manager;
+    QServiceFilter filter("com.nokia.symbian.IHomeScreenClient");
+    filter.setServiceName("hshomescreenclientplugin");
+    QList<QServiceInterfaceDescriptor> interfaces = manager.findInterfaces(filter);
+
+    if(interfaces.isEmpty()) {
+        QServiceManager::Error error = manager.error();
+        return false;
+    }
+    
+    QObject* service = manager.loadInterface(interfaces.first());
+
+    // access service's addWidget function
+    bool retVal = false;
+    bool ret = QMetaObject::invokeMethod( 
+        service, 
+        "addWidget",
+        Qt::DirectConnection,
+        Q_RETURN_ARG(bool, retVal),
+        Q_ARG(QString,widgetUri),
+        Q_ARG(QVariantHash,QVariantHash()));
+        
+    if(!ret){
+        // invokeMethod returned error
+        return false;
+    }
+    if(!retVal){
+        // addWidget returned error
+        return false;
+    }
+    return true;
+}
+// End of snippet 1
+
+/*!
+    Sets home screen wallpaper as testwallpaper.png 
+*/
+void ContentPublishClient::setWallpaper1()
+{
+    QString wallpaper = "c:/data/images/kqtihswallpapers/testwallpaper.jpg";
+    setWallpaper(wallpaper);
+}
+
+/*!
+    Sets home screen wallpaper as testwallpaper2.png 
+*/
+void ContentPublishClient::setWallpaper2()
+{
+    QString wallpaper = "c:/data/images/kqtihswallpapers/testwallpaper2.jpg";
+    setWallpaper(wallpaper);
+}
+
+/*!
+    Changes home screen wallpaper to \a wallpaper image.
+    Note. load function needs to be called before this, it creates mService object.
+    
+*/
+// Start of snippet 2
+bool ContentPublishClient::setWallpaper(QString wallpaper)
+{   
+    QByteArray signature = QMetaObject::normalizedSignature("setWallpaper(QString)");
     int methodIndex = mService->metaObject()->indexOfMethod(signature);   
+    if (methodIndex<0) {
+        return false;
+    }
     QMetaMethod method = mService->metaObject()->method(methodIndex);
     bool retVal(false);
 
-    QString widget = "hsclockwidgetplugin";
-    
     bool ret = method.invoke( mService,
                               Qt::DirectConnection,
                               Q_RETURN_ARG(bool, retVal),
-                              Q_ARG(QString,widget),
-                              Q_ARG(QVariantHash,QVariantHash()));
+                              Q_ARG(QString,wallpaper));
                     
     if(!ret){
-        qDebug()<< "method invoke failed!";
+        // invokeMethod returned error
+        return false;
     }
     if(!retVal){
-        qDebug() << "addWidget() failed!!";
+        // setWallpaper returned error
+        return false;
     }
+    return true;
 }
+
+// End of snippet 2

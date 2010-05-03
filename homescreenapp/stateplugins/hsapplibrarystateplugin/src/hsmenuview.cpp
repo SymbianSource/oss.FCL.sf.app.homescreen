@@ -52,16 +52,21 @@
 
  \param window Main window.
  */
-HsMenuView::HsMenuView(HbMainWindow *window):
+HsMenuView::HsMenuView():
     mBuilder(),
-    mWindow(window),
     mModel(NULL),
-    mMenuSearch(this),
+    mFirstVisibleIndex(),
+    mLastVisibleIndex(),
     mToolBarActionGroup(new QActionGroup(mBuilder.toolBar())),
-    mMenuMode(NormalHsMenuMode)
+    mMenuMode(NormalHsMenuMode),
+    mProxyModel(new QSortFilterProxyModel(this))
 {
     setUpToolBar();
     connectItemViewsSignals();
+
+    mProxyModel->setFilterRole(CaItemModel::TextRole);
+    mProxyModel->setFilterKeyColumn(1);
+    mProxyModel->setSortRole(CaItemModel::TextRole);
 }
 
 /*!
@@ -98,13 +103,17 @@ void HsMenuView::setModel(HsMenuItemModel *model)
 }
 
 /*!
- Sets model for item view.
+ Sets model for item view without connecting scroll signals
 
- \return Model shown by item view.
+ \param model Model to show by item view
  */
-const HsMenuItemModel *HsMenuView::model() const
+void HsMenuView::setModelToView(QAbstractItemModel *model)
 {
-    return mModel;
+    HSMENUTEST_FUNC_ENTRY("HsMenuView::setModelToView");
+
+    mBuilder.listView()->setModel(model);
+
+    HSMENUTEST_FUNC_EXIT("HsMenuView::setModelToView");
 }
 
 /*!
@@ -136,22 +145,6 @@ void HsMenuView::scrollTo(const QModelIndex &index,
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::scrollTo");
 }
 
-/*!
-     Scrolls item view to requested item.
-     Does not close search panel.
-     \param index The index of the item the view is to be scrolled.
-     \param hint Where the target item should be positioned in visible area
-     after scroll.
- */
-void HsMenuView::scrollToWithoutHidingSearchPanel(const QModelIndex &index,
-        HbAbstractItemView::ScrollHint hint)
-{
-    HSMENUTEST_FUNC_ENTRY("HsMenuView::scrollToWithoutHidingSearchPanel");
-    hideSearchPanelOnScrolling(false);
-    scrollTo(index, hint);
-    hideSearchPanelOnScrolling(true);
-    HSMENUTEST_FUNC_EXIT("HsMenuView::scrollToWithoutHidingSearchPanel");
-}
 
 /*!
     Makes the UI to show or hide view label.
@@ -176,20 +169,18 @@ void HsMenuView::setSearchPanelVisible(bool visible)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::setSearchPanelVisible");
     if (mBuilder.searchPanel()->isVisible() != visible) {
-        const static Hb::SceneItems statusPaneItems(
-            Hb::SecondarySoftKeyItem
-            | Hb::TitlePaneItem
-            | Hb::IndicatorItems);
-
         if (visible) {
-            mWindow->hideItems(statusPaneItems);
+            mFirstVisibleIndex = firstVisibleItemIndex();
+            mBuilder.setSearchPanelVisible(visible);
+            mBuilder.view()->hideItems(Hb::AllItems);
             connectSearchPanelSignals();
+
         } else {
-            mWindow->showItems(statusPaneItems);
+            mLastVisibleIndex = firstVisibleItemIndex();
+            mBuilder.view()->showItems(Hb::AllItems);
+            mBuilder.setSearchPanelVisible(visible);
             disconnectSearchPanelSignals();
         }
-
-        mBuilder.setSearchPanelVisible(visible);
     }
     HSMENUTEST_FUNC_EXIT("HsMenuView::setSearchPanelVisible");
 }
@@ -267,6 +258,9 @@ void HsMenuView::showSearchPanel()
     setSearchPanelVisible(true);
     HSMENUTEST_FUNC_EXIT("HsMenuView::showSearchPanel");
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT skipped: it doubles other method
 
 /*!
  * Makes search panel visible.
@@ -278,6 +272,9 @@ void HsMenuView::hideSearchPanel()
     setSearchPanelVisible(false);
     HSMENUTEST_FUNC_EXIT("HsMenuView::hideSearchPanel");
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  Scrolls item view to requested row.
@@ -294,8 +291,8 @@ void HsMenuView::scrollToRow(int row, QAbstractItemView::ScrollHint hint)
 
 /*!
      Converts scroll hints.
-     \param Qt hint Where the target item should be positioned in visible area
-     after scroll.
+     \param Qt hint Where the target item should be positioned in
+     visible area after scroll.
      \return Qrbit version of hint
  */
 HbAbstractItemView::ScrollHint HsMenuView::convertScrollHint(
@@ -343,6 +340,36 @@ void HsMenuView::disconnectItemViewsSignals()
 }
 
 /*!
+ Connects \a activated and \a longPressed signals coming from search list
+ view to emit corresponding signal of this object with translated model index
+*/
+void HsMenuView::connectSearchItemViewsSignals()
+{
+    const HbListView *const listView = mBuilder.listView();
+
+    connect(listView, SIGNAL(activated(QModelIndex)),
+            this, SLOT(activatedProxySlot(QModelIndex)));
+    connect(listView, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
+            this, SLOT(longPressedProxySlot(HbAbstractViewItem *, QPointF)));
+
+}
+
+/*!
+ Disconnects \a activated and \a longPressed signals coming from list
+ view from to emit corresponding signal
+ of this object with translated model index
+*/
+void HsMenuView::disconnectSearchItemViewsSignals()
+{
+    const HbListView *const listView = mBuilder.listView();
+
+    disconnect(listView, SIGNAL(activated(QModelIndex)),
+               this, SLOT(activatedProxySlot(QModelIndex)));
+    disconnect(listView, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
+               this, SLOT(longPressedProxySlot(HbAbstractViewItem *, QPointF)));
+}
+
+/*!
  Connects model's \a scrollTo signal with the object \a scrollToRow slot.
 */
 void HsMenuView::connectModelSignals()
@@ -366,47 +393,39 @@ void HsMenuView::disconnectModelSignals()
 */
 void HsMenuView::connectSearchPanelSignals()
 {
+    disconnectModelSignals();    
+    disconnectItemViewsSignals();
+
+    searchBegins();
+    connectSearchItemViewsSignals();
+
     connect(mBuilder.searchPanel(), SIGNAL(exitClicked()),
             this, SLOT(hideSearchPanel()));
-
     connect(mBuilder.searchPanel(), SIGNAL(criteriaChanged(QString)),
-            &mMenuSearch, SLOT(findItem(QString)));
+            this, SLOT(findItem(QString)));
+    scrollTo(mProxyModel->mapFromSource(mFirstVisibleIndex),
+             HbAbstractItemView::PositionAtTop);
 
-    hideSearchPanelOnScrolling(true);
 }
 
 /*!
  Disconnects signals \a exitClicked and \a criteriaChanged emitted
  by search panel from handling slots of the object or its members
+ Scrolls view to state before connections
 */
 void HsMenuView::disconnectSearchPanelSignals()
 {
+    disconnectSearchItemViewsSignals();
+
     disconnect(mBuilder.searchPanel(), SIGNAL(exitClicked()),
                this, SLOT(hideSearchPanel()));
 
     disconnect(mBuilder.searchPanel(), SIGNAL(criteriaChanged(QString)),
-               &mMenuSearch, SLOT(findItem(QString)));
+               this, SLOT(findItem(QString)));
 
-    hideSearchPanelOnScrolling(false);
-}
-
-/*!
-  Connects or disconnects item views' (list) \a scrollingStarted
-  signal with the object \a hideSearchPanel slot.
-  \param hide When true connects the signals with the slots, otherwise
-  disconnects them.
- */
-void HsMenuView::hideSearchPanelOnScrolling(bool hide)
-{
-    const HbListView *const listView = mBuilder.listView();
-
-    if (hide) {
-        connect(listView, SIGNAL(scrollingStarted()),
-                this, SLOT(hideSearchPanel()));
-    } else {
-        disconnect(listView, SIGNAL(scrollingStarted()),
-                   this, SLOT(hideSearchPanel()));
-    }
+    searchFinished();
+    connectModelSignals();
+    connectItemViewsSignals();
 }
 
 /*!
@@ -427,6 +446,20 @@ void HsMenuView::setUpToolBar()
     HSMENUTEST_FUNC_EXIT("HsMenuView::construct()");
 }
 
+void HsMenuView::hideToolBar()
+{
+    HSMENUTEST_FUNC_ENTRY("HsMenuView::hideToolBar()");
+    mBuilder.view()->hideItems(Hb::ToolBarItem);
+    HSMENUTEST_FUNC_EXIT("HsMenuView::hideToolBar()");
+}
+
+void HsMenuView::showToolBar()
+{
+    HSMENUTEST_FUNC_ENTRY("HsMenuView::showToolBar()");
+    mBuilder.view()->showItems(Hb::ToolBarItem);
+    HSMENUTEST_FUNC_EXIT("HsMenuView::showToolBar()");
+}
+
 HsMenuMode HsMenuView::getHsMenuMode()
 {
     return mMenuMode;
@@ -436,3 +469,80 @@ void HsMenuView::setHsMenuMode(HsMenuMode menuMode)
 {
     mMenuMode = menuMode;
 }
+/*!
+ Looks up for item and if found scrolls to it.
+ \param criteriaStr The item name to find.
+ */
+void HsMenuView::findItem(QString criteriaStr)
+{
+    qDebug
+        () << QString("hsmenuview::findItem: %1").arg(criteriaStr);
+    HSMENUTEST_FUNC_ENTRY("hsmenuview::findItem");
+
+    if ("" != criteriaStr) {
+        mProxyModel->setFilterRegExp(QRegExp(criteriaStr,
+            Qt::CaseInsensitive, QRegExp::FixedString));
+    }
+    else {
+        mProxyModel->setFilterRegExp(QRegExp(QString(".*"),
+            Qt::CaseInsensitive, QRegExp::RegExp));
+        // scroll to first item in model
+        mBuilder.listView()->scrollTo(
+                mProxyModel->mapFromSource(mModel->index(0)),
+                HbAbstractItemView::PositionAtTop);
+    }
+    HSMENUTEST_FUNC_EXIT("hsmenuview::findItem");
+}
+
+/*!
+ Initializes search.
+ */
+void HsMenuView::searchBegins()
+{
+    HSMENUTEST_FUNC_ENTRY("hsmenuview::searchBegins");
+    mProxyModel->invalidate();
+    mProxyModel->setSourceModel(mModel);
+    mProxyModel->setFilterRegExp(QRegExp(QString(".*"), Qt::CaseInsensitive,
+        QRegExp::RegExp));
+    setModelToView(mProxyModel);
+    HSMENUTEST_FUNC_EXIT("hsmenuview::searchBegins");
+}
+
+/*!
+ Ends search, scrolls view to last visible item in search view
+ */
+void HsMenuView::searchFinished()
+{
+    HSMENUTEST_FUNC_ENTRY("hsmenuview::searchFinished");
+    QModelIndex temp = mProxyModel->mapToSource(mLastVisibleIndex);
+    setModel(mModel);    
+    mBuilder.listView()->scrollTo(temp, HbAbstractItemView::PositionAtTop);
+    HSMENUTEST_FUNC_EXIT("hsmenuview::searchFinished");
+}
+
+/*!
+ * Slot used to translate activated signal from proxy model to normal model
+ */
+void HsMenuView::activatedProxySlot(const QModelIndex &index)
+{
+    emit activated(mProxyModel->mapToSource(index));
+}
+
+/*!
+ * Slot used to translate longPressed signal from proxy model to normal model
+ */
+void HsMenuView::longPressedProxySlot(HbAbstractViewItem *item,
+                                      const QPointF &coords)
+{
+    /*
+      this is a kind of hack, introduced for reasons:
+      item object should be reusable later, but orbit (or qt) prevents setting
+      its index model to previous state
+      */
+    mSearchIndex = mProxyModel->mapToSource(item->modelIndex());
+    HbAbstractViewItem* itemNew = item->createItem();
+    itemNew->setModelIndex(mSearchIndex);
+    emit longPressed(itemNew, coords);
+    delete itemNew;
+}
+

@@ -16,17 +16,20 @@
 
 TEMPLATE = subdirs
 
-symbian:SUBDIRS += taskswitcherappecom
-SUBDIRS += tsserviceplugin
-SUBDIRS += runtimeplugins
-SUBDIRS += tsapplication
+SUBDIRS += tsdevicedialogplugin
 
 tests {
-    symbian:SUBDIRS += taskswitcherappecom\tsrc
-    SUBDIRS += tsserviceplugin\tsrc
-    SUBDIRS += runtimeplugins\tsdefaultruntimeplugin\tsrc
-    SUBDIRS += tsapplication\tsrc
     SUBDIRS += internal\tstestrunner    
+    SUBDIRS += tsdevicedialogplugin\tsrc
+    SUBDIRS += ..\..\homescreensrv\activityfw\activityserviceplugin\unittests
+    SUBDIRS += ..\..\homescreensrv\activityfw\activitydatabase\hsactivitydbclient\t_hsactivitydbclient
+    SUBDIRS += ..\..\homescreensrv\hsappkeyhandler\tsrc\t_hsappkeyhandler
+    SUBDIRS += ..\..\homescreensrv\activityfw\activityserviceplugin\s60\tsrc
+}
+
+coverage {
+    SUBDIRS += ..\..\homescreensrv\activityfw
+    SUBDIRS += ..\..\homescreensrv\hsappkeyhandler
 }
 
 symbian:include(rom.pri)

@@ -22,7 +22,7 @@
 
 /*!
     \class HsMenuEventFactory
-    \ingroup group_hsmenustateplugin
+    \ingroup group_hsutils
 
     \brief Menu event factory class.
 
@@ -44,44 +44,11 @@
     \param attributes Widget params.
     \return Event for adding the widget to homescreen.
 */
-QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(
-    int entryId,
-    const QString &entryTypeName,
-    const QString &uri,
-    const QString &library,
-    QMap<QString, QString>* attributes)
+QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(int entryId)
 {
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
-    QVariantMap widgetParams;
-
     params.insert(itemIdKey(), entryId);
-
-    if (entryTypeName == widgetTypeName() || entryTypeName == templatedApplicationTypeName()) {
-        params.insert(
-            widgetUriAttributeName(),
-            uri);
-
-        params.insert(
-            widgetLibraryAttributeName(),
-            library);
-
-        params.insert(entryTypeNameKey(), entryTypeName);
-        
-        if (entryTypeName == templatedApplicationTypeName()) {
-            QMapIterator<QString, QString> i(*attributes);
-            while (i.hasNext()) {
-                i.next();
-                QString key(i.key());
-                QString value(i.value());
-                if (key.contains(widgetParam())) {
-                    widgetParams.insert(key,value);
-                }
-            }
-            params.insert(widgetParam(),widgetParams);
-        }
-    }
-
     return new HsMenuEvent(HsMenuEvent::AddToHomeScreen, params);
 }
 
@@ -150,6 +117,16 @@ QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(HsMenuMode menuMode)
     QVariantMap params;
     params.insert(menuModeType(), menuMode);
     return new HsMenuEvent(HsMenuEvent::OpenApplicationLibrary, params);
+}
+
+/*!
+    Creates an HsMenuEvent::OpenApplicationLibrary event.
+
+    \return Open Applications Library event.
+ */
+QEvent *HsMenuEventFactory::createOpenInstalledViewEvent()
+{
+	return new HsMenuEvent(HsMenuEvent::OpenInstalledView);
 }
 
 /*!
@@ -271,6 +248,19 @@ QEvent *HsMenuEventFactory::createPreviewHSWidgetEvent(
     params.insert(entryTypeNameKey(), entryTypeName);
 
     return new HsMenuEvent(HsMenuEvent::PreviewHSWidget, params);
+}
+
+/*!
+    Creates an HsMenuEvent::ShowAppSettings event.
+    \param entryId Id of an item.
+    \return Event for view the Application Settings.
+*/
+QEvent *HsMenuEventFactory::createAppSettingsViewEvent(int entryId)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), entryId);
+
+    return new HsMenuEvent(HsMenuEvent::ShowAppSettings, params);
 }
 
 /*!

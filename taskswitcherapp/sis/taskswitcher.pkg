@@ -18,7 +18,7 @@
 &EN
 
 ; standard SIS file header
-#{"taskswitcher"},(0x2002677D),1,0,0,TYPE=SA, RU
+#{"taskswitcher"},(0x2002677F),1,0,0,TYPE=SA, RU
 
 ;Localized Vendor Name
 %{"Nokia"}
@@ -26,18 +26,8 @@
 ;Unique Vendor name
 :"Nokia"
 
-"/epoc32/release/armv5/urel/tsapplication.exe"-"!:\sys\bin\tsapplication.exe"
-"/epoc32/data/z/resource/apps/tsapplication.rsc" -"!:\resource\apps\tsapplication.rsc"
-"/epoc32/data/z/private/10003a3f/import/apps/tsapplication_reg.rsc"-"!:\private\10003a3f\import\apps\tsapplication_reg.rsc"
-
-"/epoc32/release/armv5/urel/tsappecom.dll"-"!:\sys\bin\tsappecom.dll"
-"/epoc32/data/z/resource/plugins/tsappecom.rsc"-"!:\resource\plugins\tsappecom.rsc"
-
-"/epoc32/release/armv5/urel/tsserviceplugin.dll"-"!:\sys\bin\tsserviceplugin.dll"
-"/epoc32/data/z/resource/qt/plugins/tsserviceplugin.qtplugin"-"!:\resource\qt\plugins\tsserviceplugin.qtplugin"
-
-"/epoc32/release/armv5/urel/tsdefaultruntimeplugin.dll"-"!:\sys\bin\tsdefaultruntimeplugin.dll"
-"/epoc32/data/z/resource/qt/plugins/tsdefaultruntimeplugin.qtplugin"-"!:\resource\qt\plugins\tsdefaultruntimeplugin.qtplugin"
-
 "/epoc32/data/z/resource/qt/translations/taskswitcher.qm"-"!:\resource\qt\translations\taskswitcher.qm"
 "/epoc32/data/z/resource/qt/crml/tsexternalactivation.qcrml"-"!:\resource\qt\crml\tsexternalactivation.qcrml"
+
+"/epoc32/release/armv5/urel/tsdevicedialogplugin.dll"-"!:\sys\bin\tsdevicedialogplugin.dll"
+"/epoc32/data/z/resource/plugins/devicedialogs/tsdevicedialogplugin.qtplugin"-"!:\resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin"

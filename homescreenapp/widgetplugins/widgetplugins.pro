@@ -17,6 +17,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS  = hsshortcutwidgetplugin \
-           hsclockwidgetplugin \
-           hsclockwidgetplugin/styles/hsanalogclockstyleplugin 
+           hsclockwidgetplugin 
                             

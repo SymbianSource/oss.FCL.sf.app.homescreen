@@ -27,9 +27,12 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
 class QGraphicsItem;
 class QGraphicsSceneMouseEvent;
+class QPropertyAnimation;
 class HbView;
 class HbAction;
 class HsIdleWidget;
+class HsTitleResolver;
+class QParallelAnimationGroup;
 
 class HsIdleState : public QState
 {
@@ -51,12 +54,16 @@ signals:
     void event_addPage();
     void event_removePage();
     void event_toggleConnection();
+    
+protected:
+    bool eventFilter(QObject *watched, QEvent *event);    
 
 private:
     Q_DISABLE_COPY(HsIdleState)
     void setupStates();
     qreal pageLayerXPos(int pageIndex) const;
     void startPageChangeAnimation(int targetPageIndex, int duration);
+    void startPageChangeZoneAnimation(int duration);
     bool isInPageChangeZone();
     bool isInLeftPageChangeZone();
     bool isInRightPageChangeZone();
@@ -70,8 +77,10 @@ private slots:
     void action_idle_layoutNewWidgets();
     void action_idle_showActivePage();
     void action_idle_connectOrientationChangeEventHandler();
+    void action_idle_installEventFilter();
     void action_idle_cleanupView();
     void action_idle_disconnectOrientationChangeEventHandler();    
+    void action_idle_uninstallEventFilter();
     void action_waitInput_updateOptionsMenu();
     void action_waitInput_connectMouseEventHandlers();
     void action_waitInput_disconnectMouseEventHandlers();    
@@ -86,18 +95,18 @@ private slots:
     void action_moveWidget_reparentToControlLayer();
     void action_moveWidget_startWidgetDragAnimation();
     void action_moveWidget_connectMouseEventHandlers();
-    void action_moveWidget_connectGestureTimers();
 
     void action_moveWidget_reparentToPage();
     void action_moveWidget_startWidgetDropAnimation();
     void action_moveWidget_disconnectMouseEventHandlers();
-    void action_moveWidget_disconnectGestureTimers();
     void action_moveScene_connectMouseEventHandlers();
     void action_moveScene_disconnectMouseEventHandlers();
     void action_sceneMenu_showMenu();
     void action_addPage_addPage();
     void action_removePage_removePage();
     void action_toggleConnection_toggleConnection();
+    void action_idle_setupTitle();
+    void action_idle_cleanupTitle();
 
     void waitInput_onMousePressed(
         QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
@@ -122,12 +131,13 @@ private slots:
 
     void widgetInteraction_onTapAndHoldTimeout();
     void sceneInteraction_onTapAndHoldTimeout();
-    void moveWidget_onHoldTimeout();
 
-#ifndef Q_OS_SYMBIAN
-    void switchLanguage();
-    void translateUi();
-#endif
+    void onTitleChanged(QString title);
+
+    void onAddContentActionTriggered();
+
+	  bool openTaskSwitcher();
+	  void zoneAnimationFinished();
 
 private:
     HbView *mView;
@@ -139,7 +149,11 @@ private:
     qreal mPageChangeZoneWidth;
 
     QPointF mSceneMenuPos;
-
+    HsTitleResolver *mTitleResolver;
+    QPropertyAnimation *mZoneAnimation;
+    bool mPageChanged;
+    bool mAllowZoneAnimation;
+    QParallelAnimationGroup *mPageChangeAnimation;
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };
 

@@ -20,10 +20,11 @@
 
 #include <QGraphicsSvgItem>
 #include <hbwidget.h>
-#include "hsanalogclockstyleoption.h"
 #include <hstest_global.h>
 
 HOMESCREEN_TEST_CLASS(TestClockWidget)
+
+class HbIconItem;
 
 class HsAnalogClockWidget : public HbWidget
 {
@@ -31,7 +32,7 @@ class HsAnalogClockWidget : public HbWidget
 
 public:
 
-    explicit HsAnalogClockWidget(const QString &stylePluginName = QString(), QGraphicsItem *parent = 0);
+    explicit HsAnalogClockWidget(QGraphicsItem *parent = 0);
     virtual ~HsAnalogClockWidget();
 
 public slots:
@@ -45,21 +46,17 @@ protected:
 
 private:
 
-    void createPrimitives();
     void updatePrimitives();
 
 private:
 
-    QGraphicsItem *mClockBackground;
-    QGraphicsItem *mClockHourHand;
-    QGraphicsItem *mClockMinuteHand;
+    HbIconItem *mClockBackground;
+    HbIconItem *mClockHourHand;
+    HbIconItem *mClockMinuteHand;
     
-    QString mStylePluginName;
-
     Q_DISABLE_COPY(HsAnalogClockWidget)
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestClockWidget)
-
 };
 
 

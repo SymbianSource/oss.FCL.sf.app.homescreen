@@ -11,25 +11,24 @@
 *
 * Contributors:
 *
-* Description:  Shortcut widget
+* Description: Home screen shortcut widget.
 *
 */
 
 #ifndef HSSHORTCUTWIDGET_H
 #define HSSHORTCUTWIDGET_H
 
-#include <QVariant>
-#include <QMap>
-
 #include <HbWidget>
 
-#include "hstest_global.h"
 #include "cadefs.h"
 
+#include "hstest_global.h"
 HOMESCREEN_TEST_CLASS(TestShortcutWidget)
 
+class HbFrameItem;    
 class HbIconItem;
 class HbTextItem;
+class HbTouchArea;
 class CaEntry;
 
 class HsShortcutWidget : public HbWidget
@@ -41,41 +40,41 @@ public:
     HsShortcutWidget(QGraphicsItem *parent = 0, Qt::WindowFlags flags = 0);
     ~HsShortcutWidget();
 
-    int mcsId() const;
     void setMcsId(int mcsId);
+    int mcsId() const;
+
+    bool eventFilter(QObject *watched, QEvent *event);
 
 signals:
     void finished();
 
 public slots:
-    void onEntryChanged(const CaEntry &entry, ChangeType changeType);
-
     void onInitialize();
     void onShow();
     void onHide();
 
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void onEntryChanged(const CaEntry &entry, ChangeType changeType);
 
 private:
-    void constructUI();
+    Q_DISABLE_COPY(HsShortcutWidget)
 
-    HbIcon fetchIcon(int aShortcutId);
-    QString fetchText(int aShortcutId);
+    void handleMousePressEvent(QGraphicsSceneMouseEvent *event);
+    void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
-    void executeCollectionAction(int shortcutId, const QString& collectionType);
-    void createCaNotifier(int aShortcutId);
+    void updatePrimitives();
+    void createCaNotifier();
+    void updateVisibility();
+
+private:
+    HbFrameItem *mBackground;
+    HbIconItem *mIcon;
+    HbTextItem *mText;
+    HbTouchArea *mTouchArea;
     
-    void hideOrShowWidget(EntryFlags aEntryFlags);
-    EntryFlags fetchEntryFlags(int aShortcutId);
-
-private:    
-    HbIconItem *mShortcutBackgroundItem;
-    HbIconItem *mShortcutIconItem;
-    HbTextItem *mShortcutTextItem;
+    bool mIsPressed;
 
     int mMcsId;
+    QSharedPointer<CaEntry> mCaEntry;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestShortcutWidget)
 };

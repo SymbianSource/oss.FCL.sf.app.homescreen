@@ -19,6 +19,7 @@
 #include <QFinalState>
 #include <QSignalTransition>
 #include <QKeyEventTransition>
+#include <QKeyEvent>
 
 #include <qvaluespacepublisher.h>
 #include <qservicemanager.h>
@@ -26,6 +27,8 @@
 #include <qserviceinterfacedescriptor.h>
 
 #include <HbInstance>
+#include <HbIconAnimationManager>
+#include <HbIconAnimationDefinition>
 
 #include "homescreendomainpskeys.h"
 #include "hsdefaultruntime.h"
@@ -39,11 +42,21 @@
 
 QTM_USE_NAMESPACE
 
-#ifdef S60APP_KEY
-int applicationKey = Qt::Key_Launch0;
+
+#ifdef Q_OS_SYMBIAN
+const static Qt::Key applicationKey = Qt::Key_Menu;
 #else
-int applicationKey = Qt::Key_Any;
+const static Qt::Key applicationKey = Qt::Key_Home;
 #endif
+
+namespace
+{
+    const char KHsLoadSceneStateInterface[] = "com.nokia.homescreen.state.HsLoadSceneState";
+    const char KHsIdleStateInterface[] = "com.nokia.homescreen.state.HsIdleState";
+    const char KHsAppLibraryStateInterface[] = "com.nokia.homescreen.state.HsAppLibraryState";
+    const char KHsMenuWorkerStateInterface[] = "com.nokia.homescreen.state.HsMenuWorkerState";
+}
+
 
 /*!
     \class HsDefaultRuntime
@@ -65,6 +78,9 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 	  mHomeScreenActive(false),
 	  mIdleStateActive(false),
 	  mPublisher(NULL)
+#ifdef Q_OS_SYMBIAN
+	  ,keyCapture()
+#endif
 {
     HSTEST_FUNC_ENTRY("HS::HsDefaultRuntime::HsDefaultRuntime");
 
@@ -73,7 +89,7 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 #ifdef Q_OS_SYMBIAN
     db->setDatabaseName("c:/private/20022f35/homescreen.db");
 #else
-    db->setDatabaseName("homescreen.db");
+    db->setDatabaseName("private/20022f35/homescreen.db");
 #endif    
     db->open();
     HsDatabase::setInstance(db);
@@ -83,6 +99,8 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
+    
+    registerAnimations();
 
     createStatePublisher();
     createContentServiceParts();
@@ -116,22 +134,42 @@ bool HsDefaultRuntime::eventFilter(QObject *watched, QEvent *event)
 
     switch (event->type()) {
 		case QEvent::ApplicationActivate:
-		{			
-			qDebug() << "HsDefaultRuntime::eventFilter: QEvent::ApplicationActivate";
-			mHomeScreenActive = true;
-			updatePSKeys();
-		}
-		break;
+            qDebug() << "HsDefaultRuntime::eventFilter: QEvent::ApplicationActivate";
+#ifdef Q_OS_SYMBIAN
+			keyCapture.captureKey(applicationKey);
+#endif
+            mHomeScreenActive = true;
+            updatePSKeys();
+            break;
 		case QEvent::ApplicationDeactivate:
-		{		
-			qDebug() << "HsDefaultRuntime::eventFilter: QEvent::ApplicationDeactivate";
+            qDebug() << "HsDefaultRuntime::eventFilter: QEvent::ApplicationDeactivate";
+#ifdef Q_OS_SYMBIAN
+			keyCapture.cancelCaptureKey(applicationKey);
+#endif
 			mHomeScreenActive = false;
-            updatePSKeys();			
-		}
-		break;
+            updatePSKeys();
+            break;
+        default:
+            break;
 	}
-    
-	return QStateMachine::eventFilter(watched, event);
+   
+    bool result =  QStateMachine::eventFilter(watched, event);
+    // temporary hack as we should not register twice for events
+	if (event->type() == QEvent::KeyPress ) {
+        QKeyEvent* ke = static_cast<QKeyEvent *>(event);         
+        // Key_Launch0 should be removed when QT starts to send Key_Menu
+        result = (ke->key() == applicationKey) || ke->key() == Qt::Key_Launch0;        
+	}
+	return result;
+}
+
+/*!
+    Registers framework animations.
+*/
+void HsDefaultRuntime::registerAnimations()
+{
+    HbIconAnimationManager *manager = HbIconAnimationManager::global();
+    manager->addDefinitionFile(QLatin1String(":/resource/tapandhold.axml"));
 }
 
 /*!
@@ -178,25 +216,16 @@ void HsDefaultRuntime::createStates()
 
     QServiceManager manager;
 
-    QServiceFilter filter;
-
-    filter.setInterface("com.nokia.homescreen.state.HsLoadSceneState");
-#ifdef HSDEFAULTRUNTIMEPLUGIN_UNITTEST
-    filter.setServiceName("mockstateplugins");
-#endif    
-    QList<QServiceInterfaceDescriptor> interfaces = manager.findInterfaces(filter);
-
-    QObject *loadSceneStateObj = manager.loadInterface(interfaces.first());
+    
+    QObject *loadSceneStateObj = manager.loadInterface(KHsLoadSceneStateInterface);
     QState *loadSceneState = qobject_cast<QState *>(loadSceneStateObj);
     loadSceneState->setParent(guiRootState);
-    loadSceneState->setObjectName(interfaces.first().interfaceName());
+    loadSceneState->setObjectName(KHsLoadSceneStateInterface);
 
-    filter.setInterface("com.nokia.homescreen.state.HsIdleState");
-    interfaces = manager.findInterfaces(filter);
-    QObject *idleStateObj = manager.loadInterface(interfaces.first());
+    QObject *idleStateObj = manager.loadInterface(KHsIdleStateInterface);
     QState *idleState = qobject_cast<QState *>(idleStateObj);
     idleState->setParent(guiRootState);
-    idleState->setObjectName(interfaces.first().interfaceName());
+    idleState->setObjectName(KHsIdleStateInterface);
 	connect(idleState, SIGNAL(entered()), SLOT(onIdleStateEntered()));
 	connect(idleState, SIGNAL(exited()), SLOT(onIdleStateExited()));
 
@@ -208,20 +237,16 @@ void HsDefaultRuntime::createStates()
             QState::ParallelStates, guiRootState);
     QState *menuRootState = new QState(menuParallelState);
 
-    filter.setInterface("com.nokia.homescreen.state.HsAppLibraryState");
-    interfaces = manager.findInterfaces(filter);
-    QObject *appLibraryStateObj = manager.loadInterface(interfaces.first());
+    QObject *appLibraryStateObj = manager.loadInterface(KHsAppLibraryStateInterface);
     QState *appLibraryState = qobject_cast<QState *>(appLibraryStateObj);
     appLibraryState->setParent(menuRootState);
-    appLibraryState->setObjectName(interfaces.first().interfaceName());
+    appLibraryState->setObjectName(KHsAppLibraryStateInterface);
     menuRootState->setInitialState(appLibraryState);
 
-    filter.setInterface("com.nokia.homescreen.state.HsMenuWorkerState");
-    interfaces = manager.findInterfaces(filter);
-    QObject *menuWorkerStateObj = manager.loadInterface(interfaces.first());
+    QObject *menuWorkerStateObj = manager.loadInterface(KHsMenuWorkerStateInterface);
     QState *menuWorkerState = qobject_cast<QState *>(menuWorkerStateObj);
     menuWorkerState->setParent(menuParallelState);
-    menuWorkerState->setObjectName(interfaces.first().interfaceName());
+    menuWorkerState->setObjectName(KHsMenuWorkerStateInterface);
 
     // root state transitions
     idleState->addTransition(idleState, SIGNAL(event_applicationLibrary()), menuRootState);
@@ -243,15 +268,29 @@ void HsDefaultRuntime::createStates()
     // key driven transition from idle to menu
     QKeyEventTransition *idleToMenuRootTransition =
         new QKeyEventTransition(
-                window, QEvent::KeyRelease, applicationKey, idleState);
+                window, QEvent::KeyPress, applicationKey);
     idleToMenuRootTransition->setTargetState(menuRootState);
     idleState->addTransition(idleToMenuRootTransition);
     // key driven transition from menu to idle
     QKeyEventTransition *menuToIdleTransition =
         new QKeyEventTransition(
-                window, QEvent::KeyRelease, applicationKey, idleState);
+                window, QEvent::KeyPress, applicationKey);
     menuToIdleTransition->setTargetState(idleState);
     menuRootState->addTransition(menuToIdleTransition);
+    
+    // transition for Key_Launch0 should be removed 
+    // when OT starts to send Key_Menu (maybe wk14)
+    QKeyEventTransition *idleToMenuRootTransition2 =
+        new QKeyEventTransition(
+                window, QEvent::KeyPress, Qt::Key_Launch0);
+    idleToMenuRootTransition2->setTargetState(menuRootState);
+    idleState->addTransition(idleToMenuRootTransition2);
+    // key driven transition from menu to idle
+    QKeyEventTransition *menuToIdleTransition2 =
+        new QKeyEventTransition(
+                window, QEvent::KeyPress, Qt::Key_Launch0);
+    menuToIdleTransition2->setTargetState(idleState);
+    menuRootState->addTransition(menuToIdleTransition2);
 
     // transitions to child states
     // opening shortcut to a colleciton

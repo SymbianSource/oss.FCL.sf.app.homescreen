@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgetprovider>
+    <widget library="localisedhellowidgetplugin"
+            uri="localisedhellowidgetplugin"
+            title="Hello"
+            iconuri="localisedhellowidgetplugin.png"
+	    description="Localised widget example."/>
+</widgetprovider>

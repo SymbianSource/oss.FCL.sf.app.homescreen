@@ -22,20 +22,21 @@ DEPENDPATH += ./inc \
 INCLUDEPATH += ./inc \
                 ../../hsutils/inc \
                 ../../hsdomainmodel/inc \
-                ../../hsapplication/inc
+                ../../hsapplication/inc \
+                ../../serviceproviders/hsmenuserviceprovider/inc
 
 QT += xml sql
 
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
 
-PLUGIN_SUBDIR = /hsresources/plugins/stateplugins
+PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
 
 include(../../common.pri)
 
 LIBS += -lhsutils \
         -lhsdomainmodel \
-        -lhswidgetmodel
+        -lhsmenuserviceprovider
 
 RESOURCES += hshomescreenstateplugin.qrc
 
@@ -44,5 +45,3 @@ symbian: {
 }
 
 include(hshomescreenstateplugin.pri)
-
-win32:exportResources(./tsrc/loc_win/*.qm, hsresources/loc)

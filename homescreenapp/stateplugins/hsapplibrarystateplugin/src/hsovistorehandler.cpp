@@ -25,6 +25,14 @@ const QString DefaultOviStoreIcon("qtg_mono_ovistore");
 const QString DefaultOviStoreLink("https://store.ovi.com/applications");
 #endif
 
+/*!
+    \class HsOviStoreHandler
+    \ingroup group_hsmenustateplugin
+
+    \brief 
+
+    \sa 
+*/
 
 /*!
  Constructor

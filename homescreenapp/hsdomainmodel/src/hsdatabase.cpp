@@ -30,7 +30,8 @@ namespace
     QVariantList toVariantList(const QList<T> &list)
     {
         QVariantList vlist;
-        foreach (T item, list) {
+        for (int i=0; i<list.count(); ++i) {
+            T item = list.at(i);
             vlist << item;
         }
         return vlist;
@@ -178,15 +179,21 @@ bool HsDatabase::scene(HsSceneData &data)
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
-        "SELECT id, portraitWallpaper, landscapeWallpaper, defaultPageId, maximumPageCount "
+        "SELECT id, portraitWallpaper, landscapeWallpaper, defaultPageId, "
+        "maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, "
+        "minimumWidgetHeight, minimumWidgetWidth "
         "FROM Scene";
     
     if (query.prepare(statement) && query.exec() && query.next()) {        
-        data.id                 = query.value(0).toInt();
-        data.portraitWallpaper  = query.value(1).toString();
-        data.landscapeWallpaper = query.value(2).toString();
-        data.defaultPageId      = query.value(3).toInt();
-        data.maximumPageCount   = query.value(4).toInt();
+        data.id                  = query.value(0).toInt();
+        data.portraitWallpaper   = query.value(1).toString();
+        data.landscapeWallpaper  = query.value(2).toString();
+        data.defaultPageId       = query.value(3).toInt();
+        data.maximumPageCount    = query.value(4).toInt();
+        data.maximumWidgetHeight = query.value(5).toInt();
+        data.maximumWidgetWidth  = query.value(6).toInt();
+        data.minimumWidgetHeight = query.value(7).toInt();
+        data.minimumWidgetWidth  = query.value(8).toInt();
         return true;
     }
     
@@ -456,7 +463,9 @@ bool HsDatabase::insertWidget(HsWidgetData &data)
     if (!checkConnection()) {
         return false;
     }
-
+    if (data.uri.isEmpty()) {
+        return false;
+    }
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
@@ -561,7 +570,7 @@ bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
-        "SELECT x, y, width, height, zValue "
+        "SELECT x, y, zValue "
         "FROM WidgetPresentations "
         "WHERE key = ? AND widgetId = ?";
 
@@ -571,9 +580,7 @@ bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
         if (query.exec() && query.next()) {
             data.x      = query.value(0).toReal();
             data.y      = query.value(1).toReal();
-            data.width  = query.value(2).toReal();
-            data.height = query.value(3).toReal();
-            data.zValue = query.value(4).toReal();
+            data.zValue = query.value(2).toReal();
             return true;
         }
     }
@@ -594,15 +601,13 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
 
     QString statement =
         "REPLACE INTO WidgetPresentations "
-        "(key, x, y, width, height, zValue, widgetId) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        "(key, x, y, zValue, widgetId) "
+        "VALUES (?, ?, ?, ?, ?)";
 
     if (query.prepare(statement)) {
         query.addBindValue(data.key);
         query.addBindValue(data.x);
         query.addBindValue(data.y);
-        query.addBindValue(data.width);
-        query.addBindValue(data.height);
         query.addBindValue(data.zValue);
         query.addBindValue(data.widgetId);
         return query.exec();
@@ -707,8 +712,8 @@ bool HsDatabase::setWidgetPreferences(int widgetId, const QVariantHash &data)
 
     QList<QString> deleteKeys = data.keys(QVariant());
     QVariantHash insertOrReplaceData(data);
-    foreach (QString key, deleteKeys) {
-        insertOrReplaceData.remove(key);
+    for (int i=0; i<deleteKeys.count(); ++i) {
+        insertOrReplaceData.remove(deleteKeys.at(i));
     }
 
     if (!deleteKeys.isEmpty()) {

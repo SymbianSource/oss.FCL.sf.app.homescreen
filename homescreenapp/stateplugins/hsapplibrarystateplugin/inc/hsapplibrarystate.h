@@ -56,68 +56,28 @@ class HsAppLibraryState: public QState
 
 public:
 
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param parent Owner.
-     */
     HsAppLibraryState(QState *parent = 0);
 
-    /**
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     virtual ~HsAppLibraryState();
 
 signals:
 
-    /**
-     * Signal emitted when leaving the state,
-     *  i.e when the back softkey is pressed.
-     *
-     * @since S60 ?S60_version.
-     */
     void toHomescreenState();
 
-    /**
-     * Signal emitted when entering the state
-     *
-     * @since S60 ?S60_version.
-     */
     void initialize();
 
 public slots:
 
     void clearToolbarLatch();
 
-    /**
-     * All apps stete entered.
-     * @since S60 ?S60_version.
-     */
     void allAppsStateEntered();
 
-    /**
-     * All collections state entered.
-     * @since S60 ?S60_version.
-     */
     void allCollectionsStateEntered();
 
 private slots:
 
-    /**
-     * Slot invoked when a state is entered.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateEntered();
 
-    /**
-     * Slot invoked when a state is exited.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateExited();
 
 
@@ -127,18 +87,8 @@ protected:
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
-    /**
-     * Sets up Toolbar.
-     *
-     * @since S60 ?S60_version.
-     */
     void constructToolbar();
 
 private:

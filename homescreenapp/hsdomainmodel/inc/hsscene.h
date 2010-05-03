@@ -20,6 +20,8 @@
 
 #include <QObject>
 #include <QScopedPointer>
+#include <QSizeF>
+
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
@@ -30,7 +32,7 @@ class HbMainWindow;
 class HsWallpaper;
 class HsPage;
 class HsWidgetHost;
-
+class HsSceneData;
 
 class HSDOMAINMODEL_EXPORT HsScene : public QObject
 {
@@ -55,7 +57,10 @@ public:
     HsPage *activePage() const;
     int activePageIndex() const;
     int maximumPageCount() const;
-
+    QSizeF maximumWidgetSizeInPixels() const;
+    QSizeF minimumWidgetSizeInPixels() const;
+    QSizeF maximumWidgetSizeInUnits() const;
+    QSizeF minimumWidgetSizeInUnits() const;
     void setActiveWidget(HsWidgetHost *widget);
     HsWidgetHost *activeWidget() const;
 
@@ -66,20 +71,26 @@ public:
     static HbMainWindow *mainWindow();
     static Qt::Orientation orientation();
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event);
+
 private:
     HsScene(QObject *parent = 0);
+    void calculateWidgetSizeLimitations(HsSceneData &sceneData);
     Q_DISABLE_COPY(HsScene)
 
 private:
-    int mDatabaseId;
-    bool mIsOnline;
+    int mDatabaseId;    
     HsWallpaper *mWallpaper;
     QList<HsPage *> mPages;
-    int mMaximumPageCount;
     HsPage *mActivePage;
     HsWidgetHost *mActiveWidget;
-
-    
+    bool mIsOnline;
+    int mMaximumPageCount;
+    QSizeF mMaximumWidgetSizeInPixels;
+    QSizeF mMinimumWidgetSizeInPixels;
+    QSizeF mMaximumWidgetSizeInUnits;
+    QSizeF mMinimumWidgetSizeInUnits;
     static QScopedPointer<HsScene> mInstance;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)

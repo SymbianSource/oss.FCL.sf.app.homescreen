@@ -20,7 +20,7 @@
 
 /*!
  \class HsMenuModeTransition
- \ingroup group_applibrarystateplugin
+ \ingroup group_hsmenustateplugin
  \brief Transition to normal or add mode
  */
 

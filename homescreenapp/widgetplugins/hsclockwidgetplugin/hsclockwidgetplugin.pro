@@ -17,11 +17,8 @@
 TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
-win32: PLUGIN_SUBDIR = /hsresources/import/widgetregistry/20022F6C
-symbian: PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F6C
+PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F6C
 include(../../common.pri)
-
-LIBS += -lhswidgetmodel
 
 DEPENDPATH += ./inc \
               ./src
@@ -30,7 +27,7 @@ INCLUDEPATH += ./inc
 
 symbian: {
     TARGET.UID3 = 0x20022F6C
-    LIBS += -lbafl
+    LIBS += -lbafl -lapgrfx -lcone
     
     
 }

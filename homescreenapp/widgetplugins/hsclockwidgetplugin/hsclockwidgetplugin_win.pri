@@ -14,17 +14,13 @@
 # Description:
 #
 
-HEADERS +=  ./inc/hsanalogclockstyleoption.h \
-            ./inc/hsanalogclockwidget.h \
+HEADERS +=  ./inc/hsanalogclockwidget.h \
             ./inc/hsclockwidget.h \
-            ./inc/hsclockwidgetdocumentloader.h \
             ./inc/hsclockwidgetplugin.h \
             ./inc/hsdigitalclockwidget.h 
 
-SOURCES +=  ./src/hsanalogclockstyleoption.cpp \
-            ./src/hsanalogclockwidget.cpp \
+SOURCES +=  ./src/hsanalogclockwidget.cpp \
             ./src/hsclockwidget.cpp \
-            ./src/hsclockwidgetdocumentloader.cpp \
             ./src/hsclockwidgetplugin.cpp \
             ./src/hsdigitalclockwidget.cpp 
 

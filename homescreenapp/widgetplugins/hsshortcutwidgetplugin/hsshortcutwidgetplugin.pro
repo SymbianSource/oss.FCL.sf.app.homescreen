@@ -18,10 +18,14 @@ TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
 
-win32: PLUGIN_SUBDIR = /hsresources/import/widgetregistry/20022F46
-symbian: PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F46
+PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F46
 
 include(../../common.pri)
+
+RESOURCES += hsshortcutwidgetplugin.qrc
+
+HEADERS += ./inc/*.h
+SOURCES += ./src/*.cpp
 
 LIBS += -lhsdomainmodel \
         -lcaclient
@@ -35,8 +39,5 @@ INCLUDEPATH += ./inc \
 symbian: {
     TARGET.UID3 = 0x20022F46
 }
-
-
-include(hsshortcutwidgetplugin.pri)
 
 exportResources(./resource/*.manifest, $$PLUGIN_SUBDIR)

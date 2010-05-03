@@ -23,14 +23,19 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hsshortcutservice.h \
            ./inc/hsshortcutservice_p.h \
            ./inc/hswallpaper.h \
-           ./inc/hswidgethost.h
-                               
+           ./inc/hswidgethost.h \
+           ./inc/hswidgetcomponentregistry.h \
+					 ./inc/hswidgetcomponent.h                               
+					 
 SOURCES += ./src/hscontentservice.cpp   \           
            ./src/hsdatabase.cpp  \                        
            ./src/hspage.cpp  \
            ./src/hsscene.cpp \                        
            ./src/hsshortcutservice.cpp \   
            ./src/hswallpaper.cpp \ 
-           ./src/hswidgethost.cpp
+           ./src/hswidgethost.cpp \
+           ./src/hswidgetcomponentregistry.cpp \
+					 ./src/hswidgetcomponent.cpp                               
+
                               
 

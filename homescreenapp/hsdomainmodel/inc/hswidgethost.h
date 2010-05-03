@@ -28,10 +28,10 @@
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
-#include "cadefs.h"
 
+class HbIconItem;
 class HsPage;
-class CaEntry;
+
 
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
@@ -93,18 +93,27 @@ public slots:
     void startDragAnimation();
     void startDropAnimation();
     
+    void startTapAndHoldAnimation();
+    void stopTapAndHoldAnimation();
+
+protected:    
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }    
+    bool eventFilter(QObject *obj, QEvent *event);
+    
 private:
     bool setProperty(const char *name, QMetaProperty &property); 
     bool setMethod(const char *signature, QMetaMethod &method);    
     bool hasSignal(const char *signature);
     bool setPreferencesToWidget();
+    void setNewSize(const QSizeF &newSize);
 
 private slots:
     void onSetPreferences(const QStringList &names);
     void onFinished();
     void onError();
-
-    void onEntryChanged(const CaEntry &entry, ChangeType changeType);
     
 private:
     Q_DISABLE_COPY(HsWidgetHost)
@@ -115,10 +124,12 @@ private:
     QMetaMethod mOnHideMethod;
     QMetaMethod mOnUninitializeMethod;
     QMetaProperty mIsOnlineProperty;
+	QMetaProperty mRootPathProperty;
     State mState;
-    
-    int mDatabaseId;
     QString mUri;
+    int mDatabaseId;
+
+    HbIconItem *mTapAndHoldIcon;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

@@ -36,6 +36,12 @@ symbian: {
     TARGET.CAPABILITY = CAP_APPLICATION AllFiles TrustedUI
     TARGET.EPOCHEAPSIZE = 0x20000 0x1000000 // 128kB - 16MB
     LIBS += -lefsrv
+    
+    testwallpaperimages.path = /data/images/kqtihswallpapers
+    testwallpaperimages.sources += ./resource/*.jpg
+    
+    DEPLOYMENT += testwallpaperimages
+    
 } else {
     error("Only Symbian supported!")
 }

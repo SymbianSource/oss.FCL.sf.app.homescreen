@@ -28,7 +28,7 @@ class QStandardItemModel;
 class HsAppsCheckList;
 
 /**
- * @ingroup group_hsmenustateplugin
+ * @ingroup group_hsworkerstateplugin
  * @brief Application Library State.
  *
  * State responsible for adding new applications to collections.

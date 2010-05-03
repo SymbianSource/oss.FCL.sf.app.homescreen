@@ -37,9 +37,14 @@ public:
     bool createWidget(const QVariantHash &params);
     HsWidgetHost *createWidgetForPreview(const QVariantHash &params);
 
-private:
-    Q_DISABLE_COPY(HsContentService)
+    bool addWidget(const QString &uri, const QVariantHash &preferences);
 
+    static HsContentService *instance();
+
+private:
+    static QScopedPointer<HsContentService> mInstance;
+
+    Q_DISABLE_COPY(HsContentService)
 };
 
 Q_DECLARE_METATYPE(HsContentService*)

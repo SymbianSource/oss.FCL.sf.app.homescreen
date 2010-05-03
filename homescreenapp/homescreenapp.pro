@@ -23,7 +23,7 @@ SUBDIRS  += hsutils \
             stateplugins \
             widgetplugins \
             hsapplication \
-            hsmenucontentpublish
+            hsmenuclientplugin
 
 symbian:SUBDIRS  += hshomescreenclientplugin
 

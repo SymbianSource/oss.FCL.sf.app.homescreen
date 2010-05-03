@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Homescreen widget plugin
+* Description: Homescreen shortcut widget plugin.
 *
 */
 
@@ -26,18 +26,14 @@
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
 
-/**
+/*!
     \class HsShortcutWidgetPlugin
     \ingroup group_hsshortcutwidgetplugin
-    \brief Homescreen shortcut widget plugin collects ready-made homescreen shortcut widget(s).
-
-    This library includes homescreen shortcut widgets implemented by homescreen scrum team.
-    This plugin provides widgets that are described in the  hsshortcutwidgetplugin.xml plugin
-    xml file.
+    \brief The plugin part of the homescreen shortcut widget.
 */
 
 /*!
-    Creates widget object.
+    Instantiates and returns new shortcut widget.
 */
 QObject *HsShortcutWidgetPlugin::createInstance(const QServiceInterfaceDescriptor &descriptor,
                                                 QServiceContext *context,

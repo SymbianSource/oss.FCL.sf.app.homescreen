@@ -8,7 +8,11 @@
         <confml:setting ref="HomeScreenDbSettings/portraitWallpaper"/>
         <confml:setting ref="HomeScreenDbSettings/landscapeWallpaper"/>
         <confml:setting ref="HomeScreenDbSettings/maximumPageCount"/>
-        <confml:setting ref="HomeScreenDbSettings/defaultPageId"/>        
+        <confml:setting ref="HomeScreenDbSettings/defaultPageId"/>
+        <confml:setting ref="HomeScreenDbSettings/maximumWidgetHeight"/>   
+        <confml:setting ref="HomeScreenDbSettings/maximumWidgetWidth"/>   
+        <confml:setting ref="HomeScreenDbSettings/minimumWidgetHeight"/>   
+        <confml:setting ref="HomeScreenDbSettings/minimumWidgetWidth"/>                           
       </confml:group>
       <confml:group name="Pages">
         <confml:desc>Sample Description</confml:desc>

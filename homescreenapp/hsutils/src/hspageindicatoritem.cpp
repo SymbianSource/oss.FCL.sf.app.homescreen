@@ -87,7 +87,6 @@ bool HsPageIndicatorItem::isActive() const
     return mIsActive;
 }
 
-
 /*!
 
 */

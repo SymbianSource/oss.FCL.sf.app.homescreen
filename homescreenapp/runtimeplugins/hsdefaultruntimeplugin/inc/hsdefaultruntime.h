@@ -21,6 +21,10 @@
 #include <QStateMachine>
 #include <qmobilityglobal.h>
 
+#ifdef Q_OS_SYMBIAN
+#include <xqkeycapture.h>
+#endif
+
 #ifndef HSDEFAULTRUNTIMEPLUGIN_UNITTEST
 	#define TEST_CLASS_FWD
 	#define TEST_FRIEND
@@ -55,6 +59,8 @@ protected:
 private:
     Q_DISABLE_COPY(HsDefaultRuntime)
 
+    void registerAnimations();
+
     void createStatePublisher();
     void createContentServiceParts();
     void createStates();
@@ -72,6 +78,10 @@ private:
 	bool mIdleStateActive;
 
 	QValueSpacePublisher *mPublisher;
+	
+#ifdef Q_OS_SYMBIAN
+    XqKeyCapture keyCapture;
+#endif
     
     TEST_FRIEND
 };

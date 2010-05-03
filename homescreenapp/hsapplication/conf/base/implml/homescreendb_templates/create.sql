@@ -4,7 +4,11 @@ CREATE TABLE Scene (
   portraitWallpaper TEXT,
   landscapeWallpaper TEXT,
   defaultPageId INTEGER,
-  maximumPageCount INTEGER);
+  maximumPageCount INTEGER,
+  maximumWidgetHeight INTEGER,
+  maximumWidgetWidth INTEGER,
+  minimumWidgetHeight INTEGER,
+  minimumWidgetWidth INTEGER);
 
 DROP TABLE IF EXISTS Pages;
 CREATE TABLE Pages (
@@ -22,8 +26,6 @@ CREATE TABLE WidgetPresentations (
   key TEXT,
   x REAL,
   y REAL,
-  width REAL,
-  height REAL,
   zValue REAL,	
   widgetId INTEGER,
   UNIQUE(widgetId, key) ON CONFLICT REPLACE,

@@ -11,21 +11,18 @@
 *
 * Contributors:
 *
-* Description:  Homescreen widget plugin
+* Description: Homescreen shortcut widget plugin.
 *
 */
-
 
 #ifndef HSSHORTCUTWIDGETPLUGIN_H
 #define HSSHORTCUTWIDGETPLUGIN_H
 
 #include <QObject>
 #include <qserviceplugininterface.h>
-#include <hstest_global.h>
 
 QTM_USE_NAMESPACE
 
-HOMESCREEN_TEST_CLASS(TestShortcutWidgetPlugin)
 class HsShortcutWidgetPlugin : public QObject, public QServicePluginInterface
 {
     Q_OBJECT
@@ -35,7 +32,6 @@ public:
     QObject *createInstance(const QServiceInterfaceDescriptor &descriptor,
                             QServiceContext *context,
                             QAbstractSecuritySession *session);
-HOMESCREEN_TEST_FRIEND_CLASS(TestShortcutWidgetPlugin)
 };
 
 #endif //HSSHORTCUTWIDGETPLUGIN_H

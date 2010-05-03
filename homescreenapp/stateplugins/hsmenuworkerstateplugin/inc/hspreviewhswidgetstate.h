@@ -27,10 +27,11 @@ HS_STATES_TEST_CLASS(MenuStatesTest)
 class HbDialog;
 class HsWidgetHost;
 class CaNotifier;
-
+class HbAction;
+class HbScrollArea;
 
 /**
- * @ingroup group_hsmenustateprovider
+ * @ingroup group_hsworkerstateplugin
  * @brief Application Library State.
  *
  * Parent state for Application Library functionality (browsing applications and collections)
@@ -66,6 +67,19 @@ public:
 private slots:
 
     /**
+     * Slot invoked when preview dialog is dismissed.
+     *
+     * @since S60 ?S60_version.
+     */
+    void previewDialogFinished(HbAction* finishedAction);
+
+    /**
+     * Slot invoked when message for corrupted widget is dismissed
+     *
+     * @since S60 ?S60_version.
+     */
+    void messageWidgetCorruptedFinished(HbAction* finishedAction);
+    /**
      * Inherited from HsMenuBaseState.
      *
      * @since S60 ?S60_version.
@@ -73,40 +87,38 @@ private slots:
     void onEntry(QEvent *event);
 
     /**
-     * Slot invoked when a state is exited.
-     *
-     * @since S60 ?S60_version.
-     */
-    void stateExited();
-
-    /**
      * Memory card removed.
      */
     void memoryCardRemoved();
+
 
 private:
 
     /**
      * Show message widget corrupted.
      *
-     * @param itemId Widget id.
      */
-    void showMessageWidgetCorrupted(int itemId);
+    void showMessageWidgetCorrupted();
 
     /**
      * Subscribe for memory card remove.
      *
-     * @param entryId Widget id.
      */
-    void subscribeForMemoryCardRemove(int entryId);
+    void subscribeForMemoryCardRemove();
 
 private:
     
     HbDialog *mPopupDialog;
 
     CaNotifier *mNotifier;
-    
+
+    HbScrollArea *mScrollArea;
+
+    HsWidgetHost *mWidget;
+
     QObjectList mObjectList;
+
+    int mEntryId;
 
 };
 

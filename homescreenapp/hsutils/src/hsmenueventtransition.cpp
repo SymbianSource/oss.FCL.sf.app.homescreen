@@ -21,7 +21,7 @@
 
 /*!
     \class HsMenuEventTransition
-    \ingroup group_hsmenustateplugin
+    \ingroup group_hsutils
     \brief Transition that happens when specifc event occurs.
 
     \sa HsMenuEvent

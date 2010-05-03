@@ -20,6 +20,8 @@
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QGraphicsDropShadowEffect>
+#include <QGraphicsSceneResizeEvent>
+
 #include <qservicemanager.h>
 #include <qservicefilter.h>
 #include <qserviceinterfacedescriptor.h>
@@ -32,12 +34,8 @@
 #include "hspage.h"
 #include "hsapp_defs.h"
 #include "hsscene.h"
-#include "cadefs.h"
-#include "canotifier.h"
-#include "canotifierfilter.h"
-#include "caservice.h"
-#include "caquery.h"
-#include "caentry.h"
+#include "hswidgetcomponentregistry.h"
+#include "hswidgetcomponent.h"
 
 QTM_USE_NAMESPACE
 
@@ -71,16 +69,10 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
       mWidget(0),
       mPage(0),
       mState(Constructed),
-      mDatabaseId(databaseId)
+      mDatabaseId(databaseId),
+      mTapAndHoldIcon(0)
 {
-    CaQuery query;
-    query.setEntryTypeNames(QStringList(widgetTypeName()));
-    CaNotifierFilter filter(query);    
-    CaNotifier *notifier = CaService::instance()->createNotifier(filter);
-    notifier->setParent(this);
-    connect(notifier,
-            SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SLOT(onEntryChanged(CaEntry,ChangeType)), Qt::QueuedConnection);
+    setFlags(QGraphicsItem::ItemClipsChildrenToShape);
 
     /* TODO: Uncomment after the Qt bug has been fixed.
     QGraphicsDropShadowEffect *effect = 
@@ -98,6 +90,7 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
 HsWidgetHost::~HsWidgetHost()
 {
 }
+
 /*!
     Load hosted widget from plugin and validate it.
     Returns true if widget construction is successfull.
@@ -117,8 +110,7 @@ bool HsWidgetHost::load()
         return false;
     }
 
-    mUri = data.uri;
-
+	mUri = data.uri;
     // Create the hosted widget.
     QServiceManager manager;
     QServiceFilter filter("com.nokia.symbian.IHomeScreenWidget");
@@ -140,6 +132,8 @@ bool HsWidgetHost::load()
     }
     
     setProperty("isOnline", mIsOnlineProperty);
+	setProperty("rootPath", mRootPathProperty);
+
     setMethod("onInitialize()", mOnInitializeMethod);    
     setMethod("onUninitialize()", mOnUninitializeMethod);
        
@@ -155,13 +149,18 @@ bool HsWidgetHost::load()
         connect(mWidget, SIGNAL(error()),
                 SLOT(onError()));
     }
+    
+    mWidget->installEventFilter(this);    
 
-    loadWidgetPresentation();
+	loadWidgetPresentation();
 
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout;
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addItem(mWidget);
-    setLayout(layout);
+    HsScene *scene = HsScene::instance();
+    setMaximumSize(scene->maximumWidgetSizeInPixels());
+    setMinimumSize(scene->minimumWidgetSizeInPixels());
+
+    mWidget->setParentItem(this);
+    
+    setNewSize(mWidget->size());
     
     return true;
 }
@@ -243,7 +242,6 @@ bool HsWidgetHost::setWidgetPresentation()
     HsWidgetPresentationData data;    
     data.key      = key;
     data.setPos(pos());
-    data.setSize(size());
     data.zValue   = zValue();
     data.widgetId = databaseId();
     
@@ -251,8 +249,7 @@ bool HsWidgetHost::setWidgetPresentation()
 }
 
 /*!
-    Set widget presentation data. Return true if successfull
-
+    Set widget presentation data. Return true if successfull.
 */
 bool HsWidgetHost::setWidgetPresentationData(HsWidgetPresentationData &presentationData)
 {
@@ -316,7 +313,7 @@ bool HsWidgetHost::loadWidgetPresentation()
         return false;
     }
 
-    setGeometry(data.geometry());
+    setPos(data.x, data.y);
     setZValue(data.zValue);
 
     return true;
@@ -358,7 +355,12 @@ void HsWidgetHost::initializeWidget()
     if (mState != Constructed) {
         return;
     }
-
+	// bind component to instance
+	HsWidgetComponent *component = HsWidgetComponentRegistry::instance()->component(mUri);
+	Q_ASSERT(component);
+    connect(component, SIGNAL(aboutToUninstall()), SLOT(onFinished()),Qt::QueuedConnection);
+	mRootPathProperty.write(mWidget, component->rootPath());
+	
     setPreferencesToWidget();
     setOnline(HsScene::instance()->isOnline());
     mOnInitializeMethod.invoke(mWidget);
@@ -405,7 +407,8 @@ void HsWidgetHost::hideWidget()
 void HsWidgetHost::uninitializeWidget()
 {
     if (mState != Visible &&
-        mState != Hidden) {
+        mState != Hidden &&
+        mState != Finished) {
         return;
     }
 
@@ -480,6 +483,40 @@ void HsWidgetHost::startDropAnimation()
 }
 
 /*!
+    Starts the tap-and-hold animation.
+*/
+void HsWidgetHost::startTapAndHoldAnimation()
+{
+    mTapAndHoldIcon = new HbIconItem("tapandhold_animation");
+    mTapAndHoldIcon->setZValue(1e6);
+    mTapAndHoldIcon->setParentItem(this);
+}
+ 
+/*!
+    Stops the tap-and-hold animation.
+*/
+void HsWidgetHost::stopTapAndHoldAnimation()
+{
+    delete mTapAndHoldIcon;
+    mTapAndHoldIcon = 0;
+}
+
+/*!
+    Filters resize events from widgets and resizes inside max/min size boundaries if needed.
+*/
+bool HsWidgetHost::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::GraphicsSceneResize ) {
+        QGraphicsSceneResizeEvent *resizeEvent = static_cast<QGraphicsSceneResizeEvent*>(event);
+        setNewSize(resizeEvent->newSize());
+        return true;
+    } else {
+         // standard event processing
+         return HbWidget::eventFilter(obj, event);
+    }
+}
+
+/*!
     Checks if a property with the given \a name
     in the contained widget. If the property exists the \a
     metaProperty is made to reference to it. Returns true if
@@ -544,6 +581,15 @@ bool HsWidgetHost::setPreferencesToWidget()
 }
 
 /*!
+    Resizes and sets preferred size for widget layouts
+*/
+void HsWidgetHost::setNewSize(const QSizeF &newSize)
+{
+    resize(newSize);
+    setPreferredSize(newSize);
+}
+
+/*!
     This slot is connected to the contained widget's
     setPreferences() signal, if it was defined for
     the widget. The widget emits the signal for persisting
@@ -595,18 +641,4 @@ void HsWidgetHost::onError()
     emit widgetError(this);
 }
 
-/*!
-    This slot reacts to \a entry change that is described with 
-    \a changeType. On remove change type, onFinished() signal is
-    emitted.
-*/
-void HsWidgetHost::onEntryChanged(const CaEntry &entry, 
-                                  ChangeType changeType)
-{
-    if (changeType == RemoveChangeType) {
-        QString uri = entry.attribute(widgetUriAttributeName());
-        if (uri == mUri) {
-            onFinished();
-        }
-    }
-}
+

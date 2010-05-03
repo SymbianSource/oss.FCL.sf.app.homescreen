@@ -95,7 +95,7 @@ QString HsWallpaper::wallpaperDirectory()
         QDir::toNativeSeparators("c:/private/20022f35/wallpapers/");
 #else
     static QString directory = 
-        QDir::toNativeSeparators(QDir::currentPath() + "/wallpapers/");
+        QDir::toNativeSeparators(QDir::currentPath() + "/private/20022f35/wallpapers/");
 #endif
 
     return directory;

@@ -18,7 +18,8 @@ TEMPLATE = lib
 
 include (../common.pri)
 
-CONFIG += hb 
+CONFIG += hb mobility
+MOBILITY = systeminfo
 QT += sql
 
 DEFINES += HSUTILS_LIB
@@ -32,6 +33,7 @@ INCLUDEPATH += . \
 
 symbian: {
     TARGET.UID3 = 0x20022F3C
+    LIBS+=-lxqservice -lxqserviceutil
 }
 
 include(hsutils.pri)

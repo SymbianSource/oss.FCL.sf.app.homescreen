@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/xml" >
-        <file alias="snsrbigclockscreensaverdigital.docml">resource/snsrbigclockscreensaverdigital.docml</file>
-        <file alias="snsrbigclockscreensaveranalog.docml">resource/snsrbigclockscreensaveranalog.docml</file>
-        <file alias="snsrbigclockscreensaveroledanalog.docml">resource/snsrbigclockscreensaveroledanalog.docml</file>
-        <file alias="snsrbigclockscreensaveroleddigital.docml">resource/snsrbigclockscreensaveroleddigital.docml</file>
-    </qresource>
-</RCC>

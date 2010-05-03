@@ -24,7 +24,7 @@
 
 /*!
  \class HsDeleteCollectionItemState
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Delete Collection Item State.
  Deletes app from collection.
  */

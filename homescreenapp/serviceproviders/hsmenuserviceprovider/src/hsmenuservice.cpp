@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QStandardItem>
 #include <qvaluespacepublisher.h>
+#include <HbDeviceDialog>
 
 #include "hsapp_defs.h"
 #include "hsmenuservice.h"
@@ -84,6 +85,29 @@ HsMenuItemModel *HsMenuService::getAllCollectionsModel(
 }
 
 /*!
+ Returns native and java applications.
+ \param sortAttribute :: SortAttribute
+ \retval HsMenuItemModel: installed model
+ */
+HsMenuItemModel *HsMenuService::getInstalledModel(
+    HsSortAttribute sortAttribute)
+{
+    //TODO get proper items 
+    qDebug() << "HsMenuService::getInstalledModel" << "sortAttribute:"
+             << sortAttribute;
+    HSMENUTEST_FUNC_ENTRY("HsMenuService::getInstalledModel");
+    CaQuery query;
+    query.addEntryTypeName(packageTypeName());
+    query.setFlagsOn(VisibleEntryFlag | RemovableEntryFlag);
+    query.setFlagsOff(MissingEntryFlag);
+    query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
+                  HsMenuServiceUtils::sortOrder(sortAttribute));
+    HsMenuItemModel *model = new HsMenuItemModel(query);
+    HSMENUTEST_FUNC_EXIT("HsMenuService::getInstalledModel");
+    return model;
+}
+
+/*!
  Returns collection model
  \param collectionId ::  id of this collection
  \param sortAttribute ::  SortAttribute
@@ -122,12 +146,10 @@ QStringList HsMenuService::getCollectionNames()
     query.setParentId(allCollectionsId());
     query.setFlagsOn(VisibleEntryFlag);
     query.setFlagsOff(MissingEntryFlag);
-    QList<CaEntry *> collections = CaService::instance()->getEntries(query);
+    QList< QSharedPointer<CaEntry> > collections = CaService::instance()->getEntries(query);
     QStringList resultList;
-    while (!collections.isEmpty()) {
-        CaEntry *entry = collections.takeFirst();
+    foreach(QSharedPointer<CaEntry> entry, collections) {
         resultList << entry->text();
-        delete entry;
     }
 
     qDebug() << "HsMenuService::getCollectionNames resultList:"
@@ -145,12 +167,11 @@ QString HsMenuService::getName(int entryId)
 {
     qDebug() << "HsMenuService::getName entryId:" << entryId;
     HSMENUTEST_FUNC_ENTRY("HsMenuService::getName");
-    CaEntry *entry = CaService::instance()->getEntry(entryId);
+    QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(entryId);
 
     QString name;
-    if (entry) {
+    if (!entry.isNull()) {
         name = entry->text();
-        delete entry;
     }
     qDebug() << "HsMenuService::getName name: " << name;
     HSMENUTEST_FUNC_EXIT("HsMenuService::getName");
@@ -177,18 +198,10 @@ bool HsMenuService::executeAction(int entryId, const QString &actionName)
  */
 bool HsMenuService::launchTaskSwitcher()
 {
-    qDebug() << "HsMenuService::launchTS";
-    QScopedPointer<CaEntry> tsEntry(new CaEntry);
-    tsEntry->setEntryTypeName(applicationTypeName());
-    tsEntry->setAttribute(
-    		applicationUidEntryKey(), QString::number(taskSwitcherUid)); 
-    int retval = CaService::instance()->executeCommand(*tsEntry, 
-            openActionIdentifier());
-    if(retval) {
-        QValueSpacePublisher publisher("/TaskSwitcher");
-        publisher.setValue("Activation", taskSwitcherPropertyValue);
-    }
-    return retval;
+    qDebug() << "HsMenuService::launchTaskSwitcher";
+    HbDeviceDialog deviceDialog;
+    QVariantMap params;
+    return deviceDialog.show(TS_DEVICE_DIALOG_URI, params);
 }
 
 /*!
@@ -204,14 +217,14 @@ int HsMenuService::createCollection(const QString &name)
     CaEntry collection(GroupEntryRole);
     collection.setEntryTypeName(collectionTypeName());
     collection.setText(name);
+    collection.setAttribute(groupNameAttributeName(),name);
     CaIconDescription iconDescription;
     iconDescription.setFilename(defaultCollectionIconId());
     collection.setIconDescription(iconDescription);
-    CaEntry *entry = CaService::instance()->createEntry(collection);
-    if (entry) {
+    QSharedPointer<CaEntry> entry = CaService::instance()->createEntry(collection);
+    if (!entry.isNull()) {
         qDebug() << "HsMenuService::addCollection entry" << entry;
         entryId = entry->id();
-        delete entry;
         CaService::instance()->appendEntryToGroup(allCollectionsId(),
                 entryId);
     }
@@ -232,14 +245,13 @@ bool HsMenuService::renameCollection(int collectionId,
              << collectionId << "newCollectionName" << newCollectionName;
     HSMENUTEST_FUNC_ENTRY("HsMenuService::renameCollection");
     bool result(false);
-    CaEntry *collection = CaService::instance()->getEntry(collectionId);
+    QSharedPointer<CaEntry> collection = CaService::instance()->getEntry(collectionId);
     if (collection) {
         qDebug() << "HsMenuService::renameCollection collection"
                  << collection;
 
         collection->setText(newCollectionName);
         result = CaService::instance()->updateEntry(*collection);
-        delete collection;
     }
     HSMENUTEST_FUNC_EXIT("HsMenuService::renameCollection");
     return result;
@@ -341,6 +353,22 @@ int HsMenuService::allCollectionsId()
  */
 bool HsMenuService::touch(int entryId)
 {
-    CaEntry *entry = CaService::instance()->getEntry(entryId);
+    QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(entryId);
     return CaService::instance()->touch(* entry);
+}
+
+/*!
+ Launch SoftwareUpdateApplication
+ \retval boolean launching status
+ */
+bool HsMenuService::launchSoftwareUpdate()
+{
+    qDebug() << "HsMenuService::launchSoftwareUpdate";
+    QScopedPointer<CaEntry> tsEntry(new CaEntry);
+    tsEntry->setEntryTypeName(applicationTypeName());
+    tsEntry->setAttribute(
+            applicationUidEntryKey(), QString::number(softwareUpdateApplicationUid)); 
+    int retval = CaService::instance()->executeCommand(*tsEntry, 
+            openActionIdentifier());
+    return retval;
 }

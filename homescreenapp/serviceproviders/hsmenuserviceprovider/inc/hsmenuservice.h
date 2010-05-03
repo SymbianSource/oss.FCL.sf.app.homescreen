@@ -42,6 +42,8 @@ public:
         HsSortAttribute sortAttribute = DescendingNameHsSortAttribute);
     static HsMenuItemModel *getAllCollectionsModel(
         HsSortAttribute sortAttribute = LatestOnTopHsSortAttribute);
+    static HsMenuItemModel *getInstalledModel(
+        HsSortAttribute sortAttribute = DescendingNameHsSortAttribute);
     static HsMenuItemModel *getCollectionModel(int collectionId,
             HsSortAttribute sortAttribute = LatestOnTopHsSortAttribute,
             const QString &collectionType = collectionTypeName());
@@ -65,6 +67,8 @@ public:
     static int allCollectionsId();
 
     static bool touch(int entryId);
+    
+    static bool launchSoftwareUpdate();
 
 private:
     // data

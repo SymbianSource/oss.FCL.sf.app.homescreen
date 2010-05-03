@@ -25,7 +25,6 @@
 #include <QImage>
 #include <hbwidget.h>
 #include <hstest_global.h>
-#include "hsanalogclockstyleoption.h"
 
 HOMESCREEN_TEST_CLASS(TestClockWidget)
 

@@ -25,7 +25,9 @@ class HSDOMAINMODEL_EXPORT HsSceneData
 {
 public:
     HsSceneData() 
-      : id(-1), defaultPageId(-1), maximumPageCount(-1)
+      : id(-1), defaultPageId(-1), maximumPageCount(-1),
+        maximumWidgetHeight(-1), maximumWidgetWidth(-1),
+        minimumWidgetHeight(-1), minimumWidgetWidth(-1)
     {}
     
     int     id;
@@ -33,6 +35,10 @@ public:
     QString landscapeWallpaper;
     int     defaultPageId;
     int     maximumPageCount;
+    int     maximumWidgetHeight;
+    int     maximumWidgetWidth;
+    int     minimumWidgetHeight;
+    int     minimumWidgetWidth;
 };
 
 class HSDOMAINMODEL_EXPORT HsPageData
@@ -63,22 +69,9 @@ class HSDOMAINMODEL_EXPORT HsWidgetPresentationData
 {
 public:
     HsWidgetPresentationData()
-        : x(0), y(0), width(0), height(0), zValue(0), 
+        : x(0), y(0), zValue(0), 
           widgetId(-1)
     {}
-
-    QRectF geometry() const
-    {
-        return QRectF(x, y, width, height);
-    }
-
-    void setGeometry(const QRectF &geometry)
-    {
-        x      = geometry.x();
-        y      = geometry.y();
-        width  = geometry.width();
-        height = geometry.height();
-    }
 
     void setPos(const QPointF &pos)
     {
@@ -86,17 +79,9 @@ public:
         y = pos.y();
     }
 
-    void setSize(const QSizeF &size)
-    {
-        width  = size.width();
-        height = size.height();
-    }
-
     QString key;
     qreal   x;
     qreal   y;
-    qreal   width;
-    qreal   height;
     qreal   zValue;
     int     widgetId;
 };

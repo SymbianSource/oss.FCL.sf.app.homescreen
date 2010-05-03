@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<stateprovider>
-    <state library="snsrdefaultstateprovider.dll" uri="screensaver.nokia.com/state/foreground"/>
-    <state library="snsrdefaultstateprovider.dll" uri="screensaver.nokia.com/state/background"/>
-</stateprovider>

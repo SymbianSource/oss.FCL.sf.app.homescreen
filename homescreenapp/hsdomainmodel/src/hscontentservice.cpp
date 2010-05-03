@@ -64,3 +64,45 @@ HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &param
 
     return widget;
 }
+
+/*!
+
+*/
+bool HsContentService::addWidget(const QString &uri, const QVariantHash &preferences)
+{
+    HsWidgetData widgetData;
+    widgetData.uri = uri;
+
+    QScopedPointer<HsWidgetHost> widget(HsWidgetHost::createInstance(widgetData, preferences));
+    if (!widget.data()) {
+        return false;
+    }
+
+    HsPage *activePage = HsScene::instance()->activePage();
+    if (!widget->load() || !activePage->addNewWidget(widget.data())) {
+        widget->deleteFromDatabase();
+        return false;
+    }
+
+    HsWidgetHost *taken = widget.take();
+    taken->initializeWidget();
+    taken->showWidget();
+    activePage->layoutNewWidgets();
+    return true;
+}
+
+/*!
+
+*/
+HsContentService *HsContentService::instance()
+{
+    if (!mInstance) {
+        mInstance.reset(new HsContentService);
+    }
+    return mInstance.data();
+}
+
+/*!
+    Points to the content service instance.
+*/
+QScopedPointer<HsContentService> HsContentService::mInstance(0);

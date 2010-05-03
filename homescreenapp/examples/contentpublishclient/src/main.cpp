@@ -19,46 +19,59 @@
 #include <HbMainWindow>
 #include <HbView>
 #include <HbPushButton>
-
+#include <QGraphicsLinearLayout>
 #include <QDir>
 
 #include "contentpublishclient.h"
 
 int main(int argc, char *argv[])
 {
-	// Initialization
+    // Initialization
     HbApplication app(argc, argv);
-
-    QString path = QDir::toNativeSeparators(QDir("z:\\hsresources\\plugins\\homescreenclientplugin\\").absolutePath());
-    QString fullFileName = path + "\\hshomescreenclientplugin.xml";
-    
+        
     QServiceManager manager;
     
-    if(QFile::exists(fullFileName)) {
-        QCoreApplication::addLibraryPath(path);
-        manager.addService(fullFileName);
-    }
-    
     // Create main window.
-    HbMainWindow* mainWindow = new HbMainWindow();
+    HbMainWindow mainWindow;
 
     // Create content publisher client
 	ContentPublishClient contentPublishClient(manager);
-	
-    QString buttonString = "Create widget";
-    if(!contentPublishClient.load()) {
+
+    QString buttonString = "Add HelloWorld";
+    bool clientOk = contentPublishClient.load(); 
+    if (!clientOk) {
         buttonString = "Open failed";
     }
 
-    HbPushButton* button = new HbPushButton(buttonString);
+    HbWidget *myView = new HbWidget();
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+    
+    HbPushButton* button1 = new HbPushButton(buttonString);
+    layout->addItem(button1);
+    contentPublishClient.connect(button1, SIGNAL(pressed()), SLOT(addHelloworldWidget()));
+    
+    if (clientOk) {
+        HbPushButton* button2 = new HbPushButton("Add Clock widget");
+        HbPushButton* button3 = new HbPushButton("Set wallpaper1");
+        HbPushButton* button4 = new HbPushButton("Set wallpaper2");
+        
+        layout->addItem(button2);
+        layout->addItem(button3);
+        layout->addItem(button4);
+        
+        contentPublishClient.connect(button2, SIGNAL(pressed()), SLOT(addClockWidget()));
+        contentPublishClient.connect(button3, SIGNAL(pressed()), SLOT(setWallpaper1()));
+        contentPublishClient.connect(button4, SIGNAL(pressed()), SLOT(setWallpaper2()));
+    }
+    
+    
+    myView->setLayout(layout);
 
 	// Add view
-    mainWindow->addView(button);
-    
-    contentPublishClient.connect(button, SIGNAL(pressed()), SLOT(addWidget()));
+    mainWindow.addView(myView);
     
     // Show main window
-    mainWindow->show();
+    mainWindow.show();
 
     return app.exec();
 }

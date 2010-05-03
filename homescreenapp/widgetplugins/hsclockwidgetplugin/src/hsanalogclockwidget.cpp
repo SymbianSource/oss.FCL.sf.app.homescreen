@@ -19,11 +19,8 @@
 #include <QGraphicsGridLayout>
 #include <QTime>
 #include <QDir>
-
-namespace
-{
-    const char PLUGIN_PATH[] = "/hsresources/plugins/styleplugins/hsanalogclockstyleplugin.dll";
-}
+#include <HbIconItem>
+#include <HbStyleLoader>
 
 /*!
     \class HsAnalogClockWidget
@@ -37,20 +34,15 @@ namespace
 
     Constructs widget.
 */
-HsAnalogClockWidget::HsAnalogClockWidget(const QString &stylePluginName, QGraphicsItem *parent)
+HsAnalogClockWidget::HsAnalogClockWidget(QGraphicsItem *parent)
     : HbWidget(parent),
       mClockBackground(0), 
       mClockHourHand(0), 
       mClockMinuteHand(0)
 {
-    if (stylePluginName.isEmpty()) {
-        mStylePluginName = QDir::currentPath() + PLUGIN_PATH;
-    } else {
-        mStylePluginName = stylePluginName;
-    }
-    setPluginBaseId(style()->registerPlugin(mStylePluginName));
+    HbStyleLoader::registerFilePath(":/hsanalogclockwidget.widgetml");
+    HbStyleLoader::registerFilePath(":/hsanalogclockwidget.css");
 
-    createPrimitives();
     updatePrimitives();
 }
 
@@ -65,7 +57,8 @@ HsAnalogClockWidget::~HsAnalogClockWidget()
     delete mClockHourHand;
     delete mClockMinuteHand;
 
-    style()->unregisterPlugin(mStylePluginName);    
+    HbStyleLoader::registerFilePath(":/hsanalogclockwidget.widgetml");
+    HbStyleLoader::registerFilePath(":/hsanalogclockwidget.css");
 }
 
 /*!
@@ -78,52 +71,47 @@ void HsAnalogClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
 }
 
 /*!
-    Creates all widget primitives.
- */
-void HsAnalogClockWidget::createPrimitives()
-{
-    if (pluginBaseId()==-1) {
-        return;
-    }
-    if (!mClockBackground) {
-        mClockBackground = style()->createPrimitive((HbStyle::Primitive)(pluginBaseId()), this);
-    }
-    if (!mClockHourHand) {
-        mClockHourHand = style()->createPrimitive((HbStyle::Primitive)(pluginBaseId()+hourHandItemIndex), this);
-    }
-    if (!mClockMinuteHand) {
-        mClockMinuteHand = style()->createPrimitive((HbStyle::Primitive)(pluginBaseId()+minuteHandItemIndex), this);
-    }
-}
-
-/*!
     @copydoc HbWidget::updatePrimitives()
  */
 void HsAnalogClockWidget::updatePrimitives()
 {
-    if (pluginBaseId()==-1) {
-        return;
+    if (!mClockBackground) {
+        mClockBackground = new HbIconItem(QLatin1String("qtg_graf_clock_day_bg"), this);
+        HbStyle::setItemName(mClockBackground, QLatin1String("clock_background"));
     }
 
     // Calculate angles for clock hands.
     QTime time = QTime::currentTime();
     qreal s = 6 * time.second();
     qreal m = 6 * (time.minute() + s/360);
-    qreal h = 30 * ((time.hour() % 12) + m/360)-90;
-    HsAnalogClockStyleOption option;
-    initStyleOption(&option);
-    option.mM = m;
-    option.mH = h;
+    qreal h = 30 * ((time.hour() % 12) + m/360);
 
-    if (mClockBackground) {
-        style()->updatePrimitive(mClockBackground, (HbStyle::Primitive)(pluginBaseId()), &option);
+	if (!mClockHourHand) {
+        mClockHourHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_hour"), this);
+        HbStyle::setItemName(mClockHourHand, QLatin1String("clock_hour_hand"));
     }
-    if (mClockHourHand) {
-        style()->updatePrimitive(mClockHourHand, (HbStyle::Primitive)(pluginBaseId()+hourHandItemIndex), &option);
+
+    // these should work but don't
+    //int x = mClockHourHand->iconItemSize().width()/2;
+    //int y = mClockHourHand->iconItemSize().height()/2;
+    // workaround
+    int x = mClockHourHand->preferredSize().width()/2;
+    int y = mClockHourHand->preferredSize().height()/2;
+    mClockHourHand->setTransform(QTransform().translate(x, y).rotate(h).translate(-x, -y));
+
+	if (!mClockMinuteHand) {
+        mClockMinuteHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_min"), this);
+        HbStyle::setItemName(mClockMinuteHand, QLatin1String("clock_minute_hand"));
     }
-    if (mClockMinuteHand) {
-        style()->updatePrimitive(mClockMinuteHand, (HbStyle::Primitive)(pluginBaseId()+minuteHandItemIndex), &option);
-    }
+
+    // these should work but don't
+    //int x = mClockMinuteHand->iconItemSize().width()/2;
+    //int y = mClockMinuteHand->iconItemSize().height()/2;
+    // workaround
+    x = mClockMinuteHand->preferredSize().width()/2;
+    y = mClockMinuteHand->preferredSize().height()/2;
+    mClockMinuteHand->setTransform(QTransform().translate(x, y).rotate(m).translate(-x, -y));
+
 }
 
 /*!

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<runtimeprovider>
-    <runtime library="snsrdefaultruntimeprovider.dll"
-             uri="screensaver.nokia.com/runtime/defaultruntime"/>
-</runtimeprovider>

@@ -52,7 +52,7 @@ win32: {
       SUBDIRPART = release
     }    
     
-    PLUGIN_SUBDIR = /hsresources/import/widgetregistry/20022F7E
+    PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F7E
     
     DESTDIR = $$PWD/../../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
 

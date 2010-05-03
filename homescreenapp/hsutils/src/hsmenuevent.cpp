@@ -20,7 +20,7 @@
 
 /*!
     \class HsMenuEvent
-    \ingroup group_hsmenustateplugin
+    \ingroup group_hsutils
     \brief Represents class of events in menu application state machine.
 
     \sa HsMenuEventFactory

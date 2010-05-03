@@ -32,9 +32,11 @@
 #include "hsaddappstocollectionstate.h"
 #include "hsmenumodetransition.h"
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructor.
+ \param menuView Menu view.
+ \param parent Owner.
+ */
 HsAllCollectionsState::HsAllCollectionsState(
     HsMenuView &menuView, QState *parent) :
     QState(parent), mSortAttribute(CustomHsSortAttribute),
@@ -43,9 +45,9 @@ HsAllCollectionsState::HsAllCollectionsState(
     construct();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsAllCollectionsState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::construct");
@@ -65,7 +67,9 @@ void HsAllCollectionsState::construct()
     initialState->addTransition(new HsMenuModeTransition(
                                     mMenuView, AddHsMenuMode, addModeState));
 
-    setObjectName(this->parent()->objectName() + "/allcollectionsstate");
+    const QString parentName =
+        parent() != 0 ? parent()->objectName() : QString("");
+    setObjectName(parentName + "/allcollectionsstate");
     connect(this, SIGNAL(entered()),SLOT(stateEntered()));
     connect(this, SIGNAL(exited()),SLOT(stateExited()));
     mAllCollectionsModel = HsMenuService::getAllCollectionsModel(
@@ -73,16 +77,16 @@ void HsAllCollectionsState::construct()
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::construct");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Creates and installs menu options for the view
+ */
 void HsAllCollectionsState::setMenuOptions()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::setMenuOptions");
     HbMenu *const options = new HbMenu();
     options->addAction(hbTrId("txt_applib_opt_task_switcher"),
-                        this,
-                        SLOT(openTaskSwitcher()));
+                       this,
+                       SLOT(openTaskSwitcher()));
     options->addAction(hbTrId("txt_applib_opt_new_collection"),
                        this, SLOT(createNewCollection()));
 
@@ -129,25 +133,25 @@ void HsAllCollectionsState::setMenuOptions()
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::setMenuOptions");
 }
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Destructor.
+ */
 HsAllCollectionsState::~HsAllCollectionsState()
 {
     delete mAllCollectionsModel;
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Populates all folders
+ */
 void HsAllCollectionsState::scrollToBeginning()
 {
     mBookmark = mAllCollectionsModel->index(0);
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when a state is entered.
+ */
 void HsAllCollectionsState::stateEntered()
 {
     qDebug("AllCollectionsState::stateEntered()");
@@ -159,9 +163,9 @@ void HsAllCollectionsState::stateEntered()
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::stateEntered");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when normal mode is entered.
+*/
 void HsAllCollectionsState::normalModeEntered()
 {
     setMenuOptions();
@@ -172,17 +176,17 @@ void HsAllCollectionsState::normalModeEntered()
             SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when normal mode is exited.
+*/
 void HsAllCollectionsState::normalModeExited()
 {
     mMenuView.view()->setMenu(NULL);
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when add mode is entered.
+ */
 void HsAllCollectionsState::addModeEntered()
 {
     connect(&mMenuView, SIGNAL(activated(QModelIndex)),
@@ -191,12 +195,14 @@ void HsAllCollectionsState::addModeEntered()
             SLOT(addLongPressed(HbAbstractViewItem *, QPointF)));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when a state is exited.
+ */
 void HsAllCollectionsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::stateExited");
+
+    mMenuView.setSearchPanelVisible(false);
 
     mMenuView.disconnect(this);
 
@@ -215,9 +221,10 @@ bool HsAllCollectionsState::openTaskSwitcher()
     return HsMenuService::launchTaskSwitcher();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to List widget in normal mode.
+ \param index Model index of the activated item.
+ */
 void HsAllCollectionsState::listItemActivated(const QModelIndex &index)
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::listItemActivated");
@@ -235,12 +242,12 @@ void HsAllCollectionsState::listItemActivated(const QModelIndex &index)
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::listItemActivated");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to List widget in add mode.
+ \param index Model index of the activated item.
+ */
 void HsAllCollectionsState::addActivated(const QModelIndex &index)
 {
-    mMenuView.setSearchPanelVisible(false);
     const int itemId = index.data(CaItemModel::IdRole).toInt();
     machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(itemId));
@@ -248,14 +255,16 @@ void HsAllCollectionsState::addActivated(const QModelIndex &index)
         HsMenuEventFactory::createOpenHomeScreenEvent());
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to List widget in add mode.
+ Called when item long pressed.
+ \param item View item.
+ \param coords Press point coordinates.
+ */
 void HsAllCollectionsState::addLongPressed(HbAbstractViewItem *item,
         const QPointF &coords)
 {
     Q_UNUSED(coords);
-    mMenuView.setSearchPanelVisible(false);
     const int itemId = item->modelIndex().data(CaItemModel::IdRole).toInt();
     machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(itemId));
@@ -263,15 +272,17 @@ void HsAllCollectionsState::addLongPressed(HbAbstractViewItem *item,
         HsMenuEventFactory::createOpenHomeScreenEvent());
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to List widget in normal mode.
+ Called when item long pressed.
+ \param item View item.
+ \param coords Press point coordinates.
+ */
 void HsAllCollectionsState::listItemLongPressed(HbAbstractViewItem *item,
         const QPointF &coords)
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::listItemLongPressed");
 
-    mMenuView.setSearchPanelVisible(false);
 
     const int itemId = item->modelIndex().data(CaItemModel::IdRole).toInt();
     HbMenu *menu = new HbMenu();
@@ -293,6 +304,7 @@ void HsAllCollectionsState::listItemLongPressed(HbAbstractViewItem *item,
 
     // choose proper action
     if (HbAction *selectedAction = menu->exec(coords)) {
+
         if (selectedAction == addShortcutAction) {
             machine()->postEvent(
                 HsMenuEventFactory::createAddToHomeScreenEvent(itemId));
@@ -303,23 +315,25 @@ void HsAllCollectionsState::listItemLongPressed(HbAbstractViewItem *item,
             machine()->postEvent(
                 HsMenuEventFactory::createDeleteCollectionEvent(itemId));
         }
+
+        mMenuView.setSearchPanelVisible(false);
     }
     delete menu;
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::listItemLongPressed");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to constructMenu.
+ */
 void HsAllCollectionsState::createNewCollection()
 {
     // Adding a new collection via the Collections view
     machine()->postEvent(HsMenuEventFactory::createNewCollectionEvent());
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to constructMenu.
+ */
 void HsAllCollectionsState::createArrangeCollection()
 {
     // Arrange collection via the Arrange view
@@ -329,9 +343,9 @@ void HsAllCollectionsState::createArrangeCollection()
         HsMenuEventFactory::createArrangeCollectionEvent(topItemId));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu custom sort action slot.
+ */
 void HsAllCollectionsState::customMenuAction()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::customMenuAction");
@@ -342,9 +356,9 @@ void HsAllCollectionsState::customMenuAction()
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::customMenuAction");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu ascending sort action slot.
+ */
 void HsAllCollectionsState::ascendingMenuAction()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::ascendingMenuAction");
@@ -355,9 +369,9 @@ void HsAllCollectionsState::ascendingMenuAction()
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::ascendingMenuAction");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu descending sort action slot.
+ */
 void HsAllCollectionsState::descendingMenuAction()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::descendingMenuAction");

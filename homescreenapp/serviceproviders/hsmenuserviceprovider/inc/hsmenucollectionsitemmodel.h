@@ -42,7 +42,7 @@ public:
 private:
 
     // Function declarations
-    QString getSecondLine(CaEntry *entry) const;
+    QString getSecondLine(const CaEntry *entry) const;
 
 };
 

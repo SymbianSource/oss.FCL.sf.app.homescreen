@@ -41,14 +41,19 @@ TRANSLATIONS = homescreen.ts
 
 RESOURCES += hsapplication_fallbacktheme.qrc
 
+LIBS += -lhsutils \
+        -lhsdomainmodel
+
+
 symbian: {
     TARGET.UID3 = 0x20022F35
     TARGET.CAPABILITY = CAP_APPLICATION AllFiles TrustedUI
     TARGET.EPOCHEAPSIZE = 0x20000 0x1600000 // 128kB - 23MB
     ICON = resource_s60/qgn_menu_appsgrid.svg
 
-    appkey:DEFINES += S60APP_KEY
-    LIBS += -lefsrv
+    LIBS +=  -lapgrfx \
+             -lcone \
+             -lefsrv
     include(installs_symbian.pri)
 
     CONFIG += service

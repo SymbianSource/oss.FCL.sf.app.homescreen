@@ -17,19 +17,10 @@
 #ifndef __TSAPP_CORE_IBY__
 #define __TSAPP_CORE_IBY__
 
-file=ABI_DIR\BUILD_DIR\tsapplication.exe                            PROGRAMS_DIR\tsapplication.exe
-data=ZPRIVATE\10003a3f\import\apps\tsapplication_reg.rsc            private\10003a3f\import\apps\tsapplication_reg.rsc
-data=\epoc32\data\z\resource\apps\tsapplication.rsc                 resource\apps\tsapplication.rsc
-
-ECOM_PLUGIN( tsappecom.dll, tsappecom.rsc )
-
-file=ABI_DIR\BUILD_DIR\tsserviceplugin.dll					       SHARED_LIB_DIR\tsserviceplugin.dll
-data=\epoc32\data\z\resource\qt\plugins\tsserviceplugin.qtplugin    resource\qt\plugins\tsserviceplugin.qtplugin
-
-file=ABI_DIR\BUILD_DIR\tsdefaultruntimeplugin.dll					       SHARED_LIB_DIR\tsdefaultruntimeplugin.dll
-data=\epoc32\data\z\resource\qt\plugins\tsdefaultruntimeplugin.qtplugin    resource\qt\plugins\tsdefaultruntimeplugin.qtplugin
-
 data=\epoc32\data\z\resource\qt\crml\tsexternalactivation.qcrml             resource\qt\crml\tsexternalactivation.qcrml
+
+file=ABI_DIR\BUILD_DIR\tsdevicedialogplugin.dll					       SHARED_LIB_DIR\tsdevicedialogplugin.dll
+data=\epoc32\data\z\resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin    resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin
 
 // stub sis
 data=ZSYSTEM/install/taskswitcher_stub.sis                  system/install/taskswitcher_stub.sis

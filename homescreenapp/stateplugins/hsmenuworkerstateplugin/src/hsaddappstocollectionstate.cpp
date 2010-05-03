@@ -160,28 +160,28 @@ void HsAddAppsToCollectionState::createStates()
     // Add a specific item to a collection via collection specific menu.
     // Adding a new collection via the Collections view.
     mSelectCollectionState->addTransition(this,
-                                          SIGNAL(transitToNewCollectionState()), mNewCollectionState);
+    		SIGNAL(transitToNewCollectionState()), mNewCollectionState);
     mSelectCollectionState->addTransition(this,
-                                          SIGNAL(transitToSaveState(int)), saveState);
+    		SIGNAL(transitToSaveState(int)), saveState);
     mNewCollectionState->addTransition(this,
-                                       SIGNAL(transitToSaveState(QString)), saveState);
+    		SIGNAL(transitToSaveState(QString)), saveState);
 
     // Add one/many applications to an existing/a new collection
     // via the All view options menu.
     // Add items to a collection via the collection's view options menu.
     mSelectCollectionState->addTransition(this,
-                                          SIGNAL(transitToAppsCheckListState(int)), mAppsCheckListState);
+    		SIGNAL(transitToAppsCheckListState(int)), mAppsCheckListState);
     mNewCollectionState->addTransition(this,
-                                       SIGNAL(transitToAppsCheckListState(QString)), mAppsCheckListState);
+    		SIGNAL(transitToAppsCheckListState(QString)), mAppsCheckListState);
     mAppsCheckListState->addTransition(this,
-                                       SIGNAL(transitToSaveState(QList<int>)), saveState);
+    		SIGNAL(transitToSaveState(QList<int>)), saveState);
 
     mSelectCollectionState->addTransition(this,
-                                          SIGNAL(transitToFinalState()),finalState);
+    		SIGNAL(transitToFinalState()),finalState);
     mNewCollectionState->addTransition(this,
-                                       SIGNAL(transitToFinalState()), finalState);
+    		SIGNAL(transitToFinalState()), finalState);
     mAppsCheckListState->addTransition(this,
-                                       SIGNAL(transitToFinalState()), finalState);
+    		SIGNAL(transitToFinalState()), finalState);
 
     //transition to final state after save
     saveState->addTransition(finalState);

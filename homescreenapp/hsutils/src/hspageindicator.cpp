@@ -136,8 +136,9 @@ void HsPageIndicator::layoutItems()
     layout->setSpacing(8);
     layout->addStretch();
     foreach (HsPageIndicatorItem *item, mItems) {
+        item->setPreferredSize(preferredHeight(), preferredHeight());
         layout->addItem(item);
-    }
+    }    
     layout->addStretch();
     setLayout(layout);
 }

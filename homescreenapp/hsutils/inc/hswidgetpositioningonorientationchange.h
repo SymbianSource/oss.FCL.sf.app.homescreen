@@ -38,33 +38,7 @@ private:
     static HsWidgetPositioningOnOrientationChange *mInstance;
 };
 
-
-class HSUTILS_EXPORT HsSimpleWidgetPositioningOnOrientationChange : public HsWidgetPositioningOnOrientationChange
-{
-public:
-    QList<QRectF> convert(const QRectF &fromRect, 
-                          const QList<QRectF> &fromGeometries,
-                          const QRectF &toRect);
-};
-
-
 class HSUTILS_EXPORT HsAdvancedWidgetPositioningOnOrientationChange : public HsWidgetPositioningOnOrientationChange
-{
-public:
-    QList<QRectF> convert(const QRectF &fromRect, 
-                          const QList<QRectF> &fromGeometries,
-                          const QRectF &toRect);
-};
-
-class HSUTILS_EXPORT HsRelativePositionWidgetPositioningOnOrientationChange : public HsWidgetPositioningOnOrientationChange
-{
-public:
-    QList<QRectF> convert(const QRectF &fromRect, 
-                          const QList<QRectF> &fromGeometries,
-                          const QRectF &toRect);
-};
-
-class HSUTILS_EXPORT HsKeepCornerPositionWidgetPositioningOnOrientationChange : public HsWidgetPositioningOnOrientationChange
 {
 public:
     QList<QRectF> convert(const QRectF &fromRect, 

@@ -21,29 +21,13 @@ kqtihswallpapers.files = ./resource_win/bg_1.png \
                          ./resource_win/bg_3.png
 
 homescreendb.CONFIG += no_build
-homescreendb.path = $$DESTDIR
+homescreendb.path = $$DESTDIR/private/20022f35
 homescreendb.files = ./resource_win/homescreen.db
 
 wallpapers.CONFIG += no_build
-wallpapers.path = $$DESTDIR/wallpapers
+wallpapers.path = $$DESTDIR/private/20022f35/wallpapers
 wallpapers.files = ./resource_win/d_landscape.png \
                    ./resource_win/d_portrait.png
 
-themeableimagesfortheme11.path = "$$(USERPROFILE)/Application Data/hb/themes/icons/redtheme/scalable"
-themeableimagesfortheme11.files = ./themes/theme1/hs_pageindicatoritem_active.svg \
-                                  ./themes/theme1/hs_pageindicatoritem_nonactive.svg \
-                                  ./themes/theme1/hs_shortcut_bg.svg 
-                                  
-themeableimagesfortheme12.path = "$$(USERPROFILE)/Application Data/hb/themes/icons/redtheme/pixmap"
-themeableimagesfortheme12.files = ./themes/theme1/hs_trashbin_active.png \
-                                  ./themes/theme1/hs_trashbin_nonactive.png
-                                 
-themeableimagesfortheme2.path = "$$(USERPROFILE)/Application Data/hb/themes/icons/bluetheme/scalable"
-themeableimagesfortheme2.files = ./themes/theme2/hs_pageindicatoritem_active.svg \
-                                 ./themes/theme2/hs_pageindicatoritem_nonactive.svg \
-                                 ./themes/theme2/hs_shortcut_bg.svg \
-                                 ./themes/theme2/hs_trashbin_active.svg \
-                                 ./themes/theme2/hs_trashbin_nonactive.svg
-
-INSTALLS += kqtihswallpapers homescreendb wallpapers themeableimagesfortheme11 themeableimagesfortheme12 themeableimagesfortheme2
+INSTALLS += kqtihswallpapers homescreendb wallpapers 
 PRE_TARGETDEPS += install_kqtihswallpapers install_homescreendb install_wallpapers

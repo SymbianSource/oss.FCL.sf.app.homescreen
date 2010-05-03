@@ -31,7 +31,7 @@
 
 /*!
  \class HsArrangeState
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Application Library State.
  State responsible for arrange collection's entries.
  */
@@ -82,14 +82,9 @@ void HsArrangeState::save(const HbListWidget& listWidget)
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::save");
 
     getArrangedEntriesIds(listWidget);
-    if (mArrangedCollIdList.count() == mCollIdList.count()) {
-        for (int i(0); i < mArrangedCollIdList.count(); i++) {
-            if (mArrangedCollIdList.at(i) != mCollIdList.at(i)) {
-                HsMenuService::organizeCollection(
-                    HsMenuService::allCollectionsId(), mArrangedCollIdList);
-                break;
-            }
-        }
+    if (mArrangedCollIdList != mCollIdList) {
+        HsMenuService::organizeCollection(
+            HsMenuService::allCollectionsId(), mArrangedCollIdList);
     }
 
     HSMENUTEST_FUNC_EXIT("HsArrangeState::save");
@@ -129,6 +124,9 @@ void HsArrangeState::onEntry(QEvent *event)
     if (mEntriesList != NULL && mDialog != NULL) {
 
         mItemModel = HsMenuService::getAllCollectionsModel();
+        // as we copy the model contents to the list widget
+        // we do not need the model to auto update
+        mItemModel->setAutoUpdate(false);
         
         fulfillEntriesList(*mEntriesList);
     

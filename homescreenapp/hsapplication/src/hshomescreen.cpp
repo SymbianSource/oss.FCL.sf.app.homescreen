@@ -158,13 +158,9 @@ void HsHomeScreen::registerServicePlugins(QServiceManager &serviceManager)
 {
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::registerServicePlugins()");
     QStringList pluginPaths;
-
+    
+    pluginPaths << "private/20022F35";    
     pluginPaths << "hsresources/plugins";
-#ifdef Q_OS_SYMBIAN
-    pluginPaths << "private/20022F35/import/widgetregistry";
-#else
-    pluginPaths << "hsresources/import/widgetregistry";
-#endif
 
     QFileInfoList drives = QDir::drives();
     foreach(const QString pluginPath, pluginPaths) {

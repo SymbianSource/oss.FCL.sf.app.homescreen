@@ -39,6 +39,8 @@ private slots:
      void testConstruction();
      void testAddWidget();
      void testAddInvalidWidget();
+     void testSetWallpaper();
+     void testOnRequestError();
 
 signals:
      void onRequestCompletedTest(const QVariant &result);

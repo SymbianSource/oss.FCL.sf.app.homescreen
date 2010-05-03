@@ -26,7 +26,7 @@
 
 /*!
  \class HsDeleteCollectionState
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Delete Collection State.
  Deletes collections.
  */

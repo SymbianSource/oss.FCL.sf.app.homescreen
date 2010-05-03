@@ -55,11 +55,7 @@ symbian: OUTPUT_DIR = $$PWD/bin
     coverage {
         DEFINES += COVERAGE_MEASUREMENT
         DEFINES += QT_NO_DEBUG  # omit ASSERTS in coverage measurements
-    }
-    
-    symbian {
-        TARGET.SID = 0x2002677D
-    }
+    }    
 }
 
 # Add the output dirs to the link path too

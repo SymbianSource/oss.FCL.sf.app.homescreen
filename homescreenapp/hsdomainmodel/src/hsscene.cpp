@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,15 +15,18 @@
 *
 */
 
+#include <QApplication>
+
 #include <HbInstance>
+#include <HbMainWindow>
+#include <HbDeviceProfile>
+
 #include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
 #include "hspage.h"
 #include "hswidgethost.h"
 #include "hsdatabase.h"
 #include "hswallpaper.h"
-#include "hsdatabase.h"
-
 
 /*!
     Destructor.
@@ -54,6 +57,10 @@ bool HsScene::load()
         return false;
     }
 
+    mMaximumPageCount = sceneData.maximumPageCount;
+
+    calculateWidgetSizeLimitations(sceneData);
+
     if (sceneData.portraitWallpaper.isEmpty()) {
         mWallpaper->setImagesById();
     } else {
@@ -81,9 +88,28 @@ bool HsScene::load()
             mActivePage->setRemovable(false);
         }
     }
-   
-    mMaximumPageCount = sceneData.maximumPageCount;
+
+    QApplication::instance()->installEventFilter(this);
+
 	return true;
+}
+
+/*!
+    Calculate maximum and minimum widget sizes 
+*/
+void HsScene::calculateWidgetSizeLimitations(HsSceneData &sceneData)
+{
+    // 1un = 6.7px = 2mm
+    mMaximumWidgetSizeInUnits = QSizeF(sceneData.maximumWidgetWidth,
+                                       sceneData.maximumWidgetHeight);
+    mMinimumWidgetSizeInUnits = QSizeF(sceneData.minimumWidgetWidth,
+                                       sceneData.minimumWidgetHeight);
+    HbDeviceProfile profile;
+    qreal unitToPixelFactor = profile.unitValue();
+    mMaximumWidgetSizeInPixels = QSizeF(sceneData.maximumWidgetWidth * unitToPixelFactor,
+                                        sceneData.maximumWidgetHeight * unitToPixelFactor);
+    mMinimumWidgetSizeInPixels = QSizeF(sceneData.minimumWidgetWidth * unitToPixelFactor,
+                                        sceneData.minimumWidgetHeight * unitToPixelFactor);
 }
 
 /*!
@@ -245,6 +271,38 @@ int HsScene::maximumPageCount() const
 }
 
 /*!
+    Return maximum widget size in pixels.
+*/
+QSizeF HsScene::maximumWidgetSizeInPixels() const
+{
+    return mMaximumWidgetSizeInPixels;
+}
+
+/*!
+    Return minimum widget size in pixels.
+*/
+QSizeF HsScene::minimumWidgetSizeInPixels() const
+{
+    return mMinimumWidgetSizeInPixels;
+}
+
+/*!
+    Return maximum widget size in units.
+*/
+QSizeF HsScene::maximumWidgetSizeInUnits() const
+{
+    return mMaximumWidgetSizeInUnits;
+}
+
+/*!
+    Return minimum widget size in units.
+*/
+QSizeF HsScene::minimumWidgetSizeInUnits() const
+{
+    return mMinimumWidgetSizeInUnits;
+}
+
+/*!
     Set active widget \a widget.
 */
 void HsScene::setActiveWidget(HsWidgetHost *widget)
@@ -284,18 +342,10 @@ bool HsScene::isOnline()const
 */
 HsScene *HsScene::instance()
 {
-    if (mInstance.isNull()) {
+    if (!mInstance) {
         mInstance.reset(new HsScene);
     }
     return mInstance.data();
-}
-
-/*!
-    Return current orientation.
-*/
-Qt::Orientation HsScene::orientation()
-{
-    return mainWindow()->orientation();
 }
 
 /*!
@@ -307,17 +357,46 @@ HbMainWindow *HsScene::mainWindow()
 }
 
 /*!
+    Return current orientation.
+*/
+Qt::Orientation HsScene::orientation()
+{
+    return mainWindow()->orientation();
+}
+
+/*!
+    Listens for application background/foreground changes.
+*/
+bool HsScene::eventFilter(QObject *watched, QEvent *event)
+{
+    switch (event->type()) {
+        case QEvent::ApplicationActivate:
+            mActivePage->showWidgets();
+            break;
+		case QEvent::ApplicationDeactivate:
+            mActivePage->hideWidgets();
+            break;
+        default:
+            break;
+	}
+    return QObject::eventFilter(watched, event);
+}
+
+/*!
     Constructor
 */
 HsScene::HsScene(QObject *parent)
   : QObject(parent),
-    mDatabaseId(-1),
-    mIsOnline(true),
-    mWallpaper(0),
-    mMaximumPageCount(1),
+    mDatabaseId(-1),    
+    mWallpaper(0),    
     mActivePage(0),
-    mActiveWidget(0)
-
+    mActiveWidget(0),
+    mIsOnline(true),
+    mMaximumPageCount(1),
+    mMaximumWidgetSizeInPixels(341, 268),
+    mMinimumWidgetSizeInPixels(20, 20),
+    mMaximumWidgetSizeInUnits(51, 40),
+    mMinimumWidgetSizeInUnits(3, 3)
 {
     mWallpaper = new HsWallpaper;
 }

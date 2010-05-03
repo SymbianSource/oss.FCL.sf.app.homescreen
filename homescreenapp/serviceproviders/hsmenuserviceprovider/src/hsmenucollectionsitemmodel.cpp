@@ -52,8 +52,9 @@ QVariant HsMenuCollectionsItemModel::data(const QModelIndex &index,
     QVariant variant;
     if (role == Qt::DisplayRole && secondLineVisibility()) {
         QList<QVariant> text;
-        text << entry(index)->text();
-        text << getSecondLine(entry(index));
+        QSharedPointer<CaEntry> item = entry(index);
+        text << item->text();
+        text << getSecondLine(item.data());
         variant =  QVariant(text);
     } else {
         variant = CaItemModel::data(index, role);
@@ -70,7 +71,7 @@ QVariant HsMenuCollectionsItemModel::data(const QModelIndex &index,
  \retval string with applications names separated by ','
  no longer than 256 bytes
  */
-QString HsMenuCollectionsItemModel::getSecondLine(CaEntry *entry) const
+QString HsMenuCollectionsItemModel::getSecondLine(const CaEntry *entry) const
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuCollectionsItemModel::getSecondLine");
     QString result;
@@ -87,7 +88,7 @@ QString HsMenuCollectionsItemModel::getSecondLine(CaEntry *entry) const
 
     query.setFlagsOff(MissingEntryFlag);
 
-    QList<CaEntry *> entries = CaService::instance()->getEntries(query);
+    QList< QSharedPointer<CaEntry> > entries = CaService::instance()->getEntries(query);
 
     if (!entries.count()) {
         result = QString(hbTrId("txt_applib_dblist_downloaded_val_empty"));
@@ -118,7 +119,6 @@ QString HsMenuCollectionsItemModel::getSecondLine(CaEntry *entry) const
             }
         }
     }
-    qDeleteAll(entries);
     HSMENUTEST_FUNC_EXIT("HsMenuCollectionsItemModel::getSecondLine");
     return result;
 }

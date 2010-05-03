@@ -41,10 +41,12 @@ public:
         AddAppsToCollection,
         RemoveAppFromCollection,
         OpenApplicationLibrary,
+        OpenInstalledView,
         OpenHomeScreen,
         ArrangeCollection,
         CreateCollection,
         PreviewHSWidget,
+        ShowAppSettings,
         Unknown
     };
 

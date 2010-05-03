@@ -18,13 +18,15 @@ TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework publishsubscribe
 
-PLUGIN_SUBDIR = /hsresources/plugins/runtimeplugins
+RESOURCES += hsdefaultruntimeplugin.qrc
+
+PLUGIN_SUBDIR = /private/20022F35/plugins/runtimeplugins
 
 include (../../common.pri)
 
 LIBS += -lhsdomainmodel \
         -lhsutils
-
+        
 QT += xml sql
 
 DEPENDPATH += ./inc \
@@ -35,7 +37,7 @@ INCLUDEPATH += ./inc \
 
 symbian: {
     TARGET.UID3 = 0x20022F3E
-    appkey:DEFINES += S60APP_KEY
+    LIBS += -lxqkeycapture
 }
 
 

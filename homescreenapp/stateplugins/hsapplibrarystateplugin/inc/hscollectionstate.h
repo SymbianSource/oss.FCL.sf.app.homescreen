@@ -53,30 +53,12 @@ class HsCollectionState: public QState
 
 public:
 
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param containerView Container view.
-     * @param parent Owner.
-     */
     HsCollectionState(HsMenuView &menuView, QState *parent = 0);
 
-    /**
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     ~HsCollectionState();
 
 public slots:
 
-    /**
-     * Sets collections sort order
-     *
-     * @since S60 ?S60_version.
-     * @param sortOrder sort order.
-     */
     void collectionsSortOrder(HsSortAttribute sortAttribute);
 
 protected:
@@ -91,81 +73,25 @@ private slots:
 
     bool openTaskSwitcher();
 
-    /**
-     * Slot connected to List widget.
-     *
-     * @since S60 ?S60_version.
-     * @param index Model index of the activated item.
-     */
     void listItemActivated(const QModelIndex &index);
 
-    /**
-     * Slot connected to List widget.
-     * Called when item long pressed.
-     *
-     * @since S60 ?S60_version.
-     * @param item View item.
-     * @param coords Press point coordinates.
-     */
     void listItemLongPressed(HbAbstractViewItem *item,
                              const QPointF &coords);
 
-
-    /**
-     * Menu add applications action slot
-     *
-     * @since S60 ?S60_version.
-     */
     void addAppsAction();
 
-    /**
-     * Menu add shortcut action slot
-     *
-     * @since S60 ?S60_version.
-     */
     void addCollectionShortcutToHomeScreenAction();
 
-    /**
-     * Menu rename action slot
-     *
-     * @since S60 ?S60_version.
-     */
     void renameAction();
 
-    /**
-     * Menu delete action slot
-     *
-     * @since S60 ?S60_version.
-     */
     void deleteAction();
 
-    /**
-     * Menu softkey back action slot
-     *
-     * @since S60 ?S60_version.
-     */
     void backSteppingAction();
 
-    /**
-     * Updates label
-     *
-     * @since S60 ?S60_version.
-     */
     void updateLabel();
 
-
-    /**
-     * Slot invoked when a state is entered.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateEntered();
 
-    /**
-     * Slot invoked when a state is exited.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateExited();
 
     void latestOnTopMenuAction();
@@ -174,11 +100,6 @@ private slots:
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
     /**
@@ -189,18 +110,8 @@ private:
      */
     void constructMenu(bool isDynamic);
 
-    /**
-     * Perform all signal connections.
-     *
-     * @since S60 ?S60_version.
-     */
     void makeConnect();
 
-    /**
-     * Perform all signal disconnections.
-     *
-     * @since S60 ?S60_version.
-     */
     void makeDisconnect();
 
     void addElementToHomeScreen(const QModelIndex &index);
@@ -229,7 +140,6 @@ private:
 
     /**
      * The List View widget.
-     * Own.
      */
     HsMenuView &mMenuView;
 

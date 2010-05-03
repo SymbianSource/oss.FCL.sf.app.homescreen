@@ -78,19 +78,16 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    const QString entryTypeName = data.value(entryTypeNameKey()).toString();
-
     const int entryId = data.value(itemIdKey()).toInt();
+    QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(entryId);
+    const QString entryTypeName = entry->entryTypeName();
 
     if (entryTypeName == widgetTypeName()) {
-        const QString uri = data.value(widgetUriAttributeName()).toString();
+        const QString uri = entry->attribute(widgetUriAttributeName());
         addWidget(*contentService(), uri, entryId);
-        HsMenuService::touch(entryId);
-    } else if (entryTypeName==templatedApplicationTypeName()) {
-        addTApplication(*contentService(), entryId, data);
-        HsMenuService::touch(entryId);
+        HsMenuService::touch(entryId);        
     } else {
-        addShortcut(*contentService(), entryId);
+        addApplication(*contentService(), *entry);
     }
 
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::onEntry");
@@ -151,34 +148,14 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted(int itemId)
 void HsAddToHomeScreenState::addShortcut(HsContentService &contentService,
         int entryId)
 {
-    //ShortcutData item_id;
-    //item_id.mShortcutId = entryId;
-
     HSMENUTEST_FUNC_ENTRY("HsAddToHomeScreenState::addShortcut");
-    CaQuery query;
-    query.setEntryTypeNames(QStringList(widgetTypeName()));
-    QList<CaEntry *> entries = CaService::instance()->getEntries(query);
-
-    if (mLibraryPath.isEmpty()) {
-        foreach(CaEntry *entry,entries) {
-            QString uri = entry->attribute(widgetUriAttributeName());
-            if (uri == SHORTCUT_WIDGET_URI) {
-                mLibraryPath = entry->attribute(
-                                   widgetLibraryAttributeName());
-                break;
-            }
-        }
-    }
-    if (!mLibraryPath.isEmpty()) {
-        QVariantHash params;
-        params[LIBRARY] = mLibraryPath;
-        params[URI] = SHORTCUT_WIDGET_URI;
-        QVariantHash preferences;
-        preferences[SHORTCUT_ID] = QString::number(entryId);
-        params[PREFERENCES] = preferences;
-        const bool result = contentService.createWidget(params);
-        logActionResult("Adding shortcut", entryId, result);
-    }
+    QVariantHash params;
+    params[URI] = SHORTCUT_WIDGET_URI;
+    QVariantHash preferences;
+    preferences[SHORTCUT_ID] = QString::number(entryId);
+    params[PREFERENCES] = preferences;
+    const bool result = contentService.createWidget(params);
+    logActionResult("Adding shortcut", entryId, result);
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::addShortcut");
 }
 
@@ -189,34 +166,33 @@ void HsAddToHomeScreenState::addShortcut(HsContentService &contentService,
  \param data: data from event
  \retval void
  */
-void HsAddToHomeScreenState::addTApplication(HsContentService &contentService,
-        int entryId, QVariantMap &data)
-{
-    CaEntry* entry = CaService::instance()->getEntry(entryId);
-    
-
-    if (entry->attributes().contains(widgetUriAttributeName())) {
+void HsAddToHomeScreenState::addApplication(HsContentService &contentService,
+                                             CaEntry& entry)
+{   
+    if (entry.attributes().contains(widgetUriAttributeName())) {
         QVariantHash params;
-        const QString uri = entry->attribute(widgetUriAttributeName());
-        params[URI] = uri;
+        const QString uri = entry.attribute(widgetUriAttributeName());
+        params[URI] = uri;       
         
         QVariantHash preferences;
-        QVariantMap widgetParams = data.value(widgetParam()).toMap();
-        QMapIterator<QString, QVariant> i(widgetParams);
+        QMap<QString, QString> attributes = entry.attributes();
+        QMapIterator<QString, QString> i(attributes);
         while (i.hasNext()) {
             i.next();
             QString key(i.key());
-            QString value = i.value().toString();
-            preferences.insert(key.remove(widgetParam()), value);
+            QString value(i.value());
+            if (key.contains(widgetParam())) {
+                preferences.insert(key.remove(widgetParam()),value);
+            }
         }
         params[PREFERENCES] = preferences;
 
         bool ok = contentService.createWidget(params);
         if (!ok) {
-            addShortcut(contentService, entryId);
+            addShortcut(contentService, entry.id());
         }
     } else {
-        addShortcut(contentService, entryId);
+        addShortcut(contentService, entry.id());
     }
 }
 

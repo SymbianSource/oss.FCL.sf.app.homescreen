@@ -34,9 +34,11 @@
 #include "hsaddappstocollectionstate.h"
 #include "hsapp_defs.h"
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructor.
+ \param menuView Menu view.
+ \param parent Owner.
+*/
 HsCollectionState::HsCollectionState(HsMenuView &menuView, QState *parent) :
     QState(parent),
     mSortAttribute(LatestOnTopHsSortAttribute),
@@ -47,13 +49,15 @@ HsCollectionState::HsCollectionState(HsMenuView &menuView, QState *parent) :
     construct();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsCollectionState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::construct");
-    setObjectName(this->parent()->objectName() + "/collectionstate");
+    const QString parentName =
+        parent() != 0 ? parent()->objectName() : QString("");
+    setObjectName(parentName + "/collectionstate");
 
     //new action for backstepping
     mSecondarySoftkeyAction = new HbAction(Hb::BackAction, this);
@@ -62,18 +66,19 @@ void HsCollectionState::construct()
     HSMENUTEST_FUNC_EXIT("HsCollectionState::construct");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Destructor.
+ */
 HsCollectionState::~HsCollectionState()
 {
     delete mCollectionModel;
 }
 
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Sets entry event.
+ \param event entry event.
+ */
 void HsCollectionState::onEntry(QEvent *event)
 {
     qDebug("HsCollectionState::onEntry()");
@@ -90,9 +95,9 @@ void HsCollectionState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_EXIT("HsCollectionState::onEntry");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when a state is entered.
+ */
 void HsCollectionState::stateEntered()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::stateEntered");
@@ -175,17 +180,19 @@ void HsCollectionState::stateEntered()
     }
     mOldNavigationAction = mMenuView.view()->navigationAction();
     mMenuView.view()->setNavigationAction(mSecondarySoftkeyAction);
-    
+
     makeConnect();
     HSMENUTEST_FUNC_EXIT("HsCollectionState::stateEntered");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot invoked when a state is exited.
+ */
 void HsCollectionState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::stateExited");
+    mMenuView.setSearchPanelVisible(false);
+
     makeDisconnect();
 
     mOptions = NULL;
@@ -200,9 +207,9 @@ void HsCollectionState::stateExited()
     qDebug("CollectionState::stateExited()");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Perform all signal connections.
+ */
 void HsCollectionState::makeConnect()
 {
     connect(mSecondarySoftkeyAction, SIGNAL(triggered()),
@@ -214,9 +221,9 @@ void HsCollectionState::makeConnect()
     connect(mCollectionModel, SIGNAL(modelReset()),SLOT(updateLabel()));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Perform all signal disconnections.
+ */
 void HsCollectionState::makeDisconnect()
 {
     disconnect(mSecondarySoftkeyAction, SIGNAL(triggered()),
@@ -241,14 +248,15 @@ bool HsCollectionState::openTaskSwitcher()
     return HsMenuService::launchTaskSwitcher();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected to List widget.
+ \param index Model index of the activated item.
+ */
 void HsCollectionState::listItemActivated(const QModelIndex &index)
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::listItemActivated");
 
-    const CaEntry *entry = mCollectionModel->entry(index);
+    QSharedPointer<const CaEntry> entry = mCollectionModel->entry(index);
 
     if (entry->entryTypeName() == widgetTypeName()) {
         machine()->postEvent(
@@ -271,7 +279,7 @@ void HsCollectionState::listItemActivated(const QModelIndex &index)
 /*!
  Handles long-item-pressed event in all apps view by showing context menu
  \param item the event pertains to
- \param position at which context menu is shown
+ \param coords press point coordinates.
  \retval void
  */
 void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
@@ -279,7 +287,6 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
 {
     Q_UNUSED(item);
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::listItemLongPressed");
-    mMenuView.setSearchPanelVisible(false);
     int itemId = item->modelIndex().data(CaItemModel::IdRole).toInt();
     // create context menu
     HbMenu *menu = new HbMenu();
@@ -290,6 +297,7 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
                                     "txt_applib_menu_add_to_collection"));
     HbAction *removeAction(NULL);
     HbAction *uninstallAction(NULL);
+    HbAction *appSettingsAction(NULL);
     // we do not add remove option in collection download menu
     // check conditions and hide irrelevant menu items
     if (mCollectionType != collectionDownloadedTypeName()) {
@@ -303,9 +311,15 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
     if ((flags & RemovableEntryFlag)) {
         uninstallAction = menu->addAction(hbTrId("txt_common_menu_delete"));
     }
+    QSharedPointer<const CaEntry> entry = mCollectionModel->entry(item->modelIndex());
 
+    if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
+        appSettingsAction = menu->addAction(hbTrId(
+                                                "txt_common_menu_settings"));
+    }
     // choose proper action
     if (HbAction *selectedAction = menu->exec(coords)) {
+
         if (selectedAction == addShortcutAction) {
             addElementToHomeScreen(item->modelIndex());
         } else if (selectedAction == addToCollection) {
@@ -318,15 +332,23 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
             machine()->postEvent(
                 HsMenuEventFactory::createRemoveAppFromCollectionEvent(
                     itemId, mCollectionId));
+        } else if (selectedAction == appSettingsAction) {
+            const int itemId =
+                item->modelIndex().data(CaItemModel::IdRole).toInt();
+            QMap<QString, QString> attributes = entry->attributes();
+            machine()->postEvent(
+                HsMenuEventFactory::createAppSettingsViewEvent(itemId));
         }
+
+        mMenuView.setSearchPanelVisible(false);
     }
     delete menu;
     HSMENUTEST_FUNC_EXIT("HsCollectionState::listItemLongPressed");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu add applications action slot
+ */
 void HsCollectionState::addAppsAction()
 {
     // Add applications
@@ -335,44 +357,44 @@ void HsCollectionState::addAppsAction()
             mCollectionId));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu add shortcut action slot
+ */
 void HsCollectionState::addCollectionShortcutToHomeScreenAction()
 {
     machine()->postEvent(HsMenuEventFactory::createAddToHomeScreenEvent(
                              mCollectionId));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu rename action slot
+ */
 void HsCollectionState::renameAction()
 {
     machine()->postEvent(HsMenuEventFactory::createRenameCollectionEvent(
                              mCollectionId));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu delete action slot
+ */
 void HsCollectionState::deleteAction()
 {
     machine()->postEvent(HsMenuEventFactory::createDeleteCollectionEvent(
                              mCollectionId));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Menu softkey back action slot
+ */
 void HsCollectionState::backSteppingAction()
 {
     machine()->postEvent(HsMenuEventFactory::createOpenAppLibraryEvent());
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Updates label
+ */
 void HsCollectionState::updateLabel()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::updateLabel");
@@ -390,17 +412,13 @@ void HsCollectionState::updateLabel()
  */
 void HsCollectionState::addElementToHomeScreen(const QModelIndex &index)
 {
-    const CaEntry *entry = mCollectionModel->entry(index);
-    
+    QSharedPointer<const CaEntry> entry = mCollectionModel->entry(index);
+
     QMap<QString, QString> attributes = entry->attributes();
 
     machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(
-            entry->id(),
-            entry->entryTypeName(),
-            entry->attribute(widgetUriAttributeName()),
-            entry->attribute(widgetLibraryAttributeName()),
-            &attributes));
+            entry->id()));
 }
 
 /*!

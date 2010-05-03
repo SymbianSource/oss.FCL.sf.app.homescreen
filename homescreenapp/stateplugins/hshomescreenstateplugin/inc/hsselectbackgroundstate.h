@@ -26,7 +26,11 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
 class QImage;
 class HbView;
+#ifdef Q_OS_SYMBIAN
+class HsImageFetcherClient;
+#else
 class XQAIWGetImageClient;
+#endif
 
 class HsSelectBackgroundState : public QState
 {
@@ -41,17 +45,28 @@ signals:
 
 private:
     Q_DISABLE_COPY(HsSelectBackgroundState)
-    bool saveImage(QImage &image, const QString &path, Qt::Orientation orientation);
 
 private slots:
     void action_selectWallpaper();
     void action_disconnectImageFetcher();
-
+   
     void onFetchComplete(QStringList imageStringList);
     void onFetchFailed(int error);
 
+    // for S60 API
+#ifdef Q_OS_SYMBIAN
+    void fetchCompleted(const QString&);
+    void fetchFailed(int, const QString&);    
+#endif
+
 private:
+    
+#ifdef Q_OS_SYMBIAN
+    HsImageFetcherClient *mImageFetcher;
+#else
     XQAIWGetImageClient *mImageFetcher;
+#endif
+    
     HbView *mSourceView;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)

@@ -18,22 +18,21 @@
 #ifndef HSHOMESCREENCLIENTSERVICEPROVIDER_H
 #define HSHOMESCREENCLIENTSERVICEPROVIDER_H
 
-#include <xqserviceprovider.h>
 #include <QVariant>
+
+#include <xqserviceprovider.h>
 
 class HsHomeScreenClientServiceProvider : public XQServiceProvider
 {
     Q_OBJECT
-public:
-    HsHomeScreenClientServiceProvider( QObject *parent = 0 );
-    ~HsHomeScreenClientServiceProvider();
 
+public:
+    HsHomeScreenClientServiceProvider(QObject *parent = 0);
+    ~HsHomeScreenClientServiceProvider();
     
 public slots:
     bool addWidget(const QString &uri,const QVariantHash &preferences);
-    
-private:
-    
+    bool setWallpaper(const QString &fileName);
 };
 
-#endif
+#endif // HSHOMESCREENCLIENTSERVICEPROVIDER_H

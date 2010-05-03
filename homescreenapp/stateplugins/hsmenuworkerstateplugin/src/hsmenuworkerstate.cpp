@@ -25,9 +25,10 @@
 #include "hscollectionnamestate.h"
 #include "hsarrangestate.h"
 #include "hspreviewhswidgetstate.h"
+#include "hsviewappsettingsstate.h"
 /*!
  \class HsMenuWorkerState
- \ingroup group_hsmenustateplugin
+ \ingroup group_hsworkerstateplugin
  \brief Menu Worker State.
  */
 
@@ -97,6 +98,7 @@ void HsMenuWorkerState::construct()
                                             SIGNAL(finished()), mInitialState);
 
     createChildState<HsPreviewHSWidgetState> (HsMenuEvent::PreviewHSWidget);
+    createChildState<HsViewAppSettingsState> (HsMenuEvent::ShowAppSettings);
 
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::construct");
 }

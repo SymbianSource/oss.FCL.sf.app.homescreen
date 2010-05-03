@@ -20,93 +20,84 @@
 
 // ---- hsapplication --------------------------------------------
 
-file=ABI_DIR\BUILD_DIR\hsapplication.exe                            PROGRAMS_DIR\hsapplication.exe
-data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc            private\10003a3f\import\apps\hsapplication_reg.rsc
-data=\epoc32\data\z\resource\apps\hsapplication.rsc                 resource\apps\hsapplication.rsc
-data=\epoc32\data\z\resource\apps\hsapplication.mif                 resource\apps\hsapplication.mif
-data=ZPRIVATE\20022f35\homescreen.db                                private\20022f35\homescreen.db
-data=ZPRIVATE\20022f35\wallpapers\d_portrait.png                    private\20022f35\wallpapers\d_portrait.png
-data=ZPRIVATE\20022f35\wallpapers\d_landscape.png                   private\20022f35\wallpapers\d_landscape.png
-data=\epoc32\data\z\data\images\kqtihswallpapers\bg_1.png           data\images\kqtihswallpapers\bg_1.png
-data=\epoc32\data\z\data\images\kqtihswallpapers\bg_2.png           data\images\kqtihswallpapers\bg_2.png
-data=\epoc32\data\z\data\images\kqtihswallpapers\bg_3.png           data\images\kqtihswallpapers\bg_3.png
+file=ABI_DIR\BUILD_DIR\hsapplication.exe                  PROGRAMS_DIR\hsapplication.exe
+data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc  private\10003a3f\import\apps\hsapplication_reg.rsc
+data=\epoc32\data\z\resource\apps\hsapplication.rsc       resource\apps\hsapplication.rsc
+data=\epoc32\data\z\resource\apps\hsapplication.mif       resource\apps\hsapplication.mif
+data=ZPRIVATE\20022f35\homescreen.db                      private\20022f35\homescreen.db
+data=ZPRIVATE\20022f35\wallpapers\d_portrait.png          private\20022f35\wallpapers\d_portrait.png
+data=ZPRIVATE\20022f35\wallpapers\d_landscape.png         private\20022f35\wallpapers\d_landscape.png
 
 // ---- hsutils --------------------------------------------
 
-file=ABI_DIR\BUILD_DIR\hsutils.dll                                  SHARED_LIB_DIR\hsutils.dll
+file=ABI_DIR\BUILD_DIR\hsutils.dll  SHARED_LIB_DIR\hsutils.dll
 
 // ---- hsdomainmodel --------------------------------------------
 
-file=ABI_DIR\BUILD_DIR\hsdomainmodel.dll                              SHARED_LIB_DIR\hsdomainmodel.dll
+file=ABI_DIR\BUILD_DIR\hsdomainmodel.dll  SHARED_LIB_DIR\hsdomainmodel.dll
 
 // -------- hshomescreenclientplugin
-file=ABI_DIR\BUILD_DIR\hshomescreenclientplugin.dll                 SHARED_LIB_DIR\hshomescreenclientplugin.dll
-data=\epoc32\data\z\hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.qtplugin    hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.xml    hsresources\plugins\homescreenclientplugin\hshomescreenclientplugin.xml
+file=ABI_DIR\BUILD_DIR\hshomescreenclientplugin.dll                        SHARED_LIB_DIR\hshomescreenclientplugin.dll
+data=\epoc32\data\z\resource\qt\plugins\hshomescreenclientplugin.qtplugin  resource\qt\plugins\hshomescreenclientplugin.qtplugin
+data=ZPRIVATE\20022f35\hshomescreenclientplugin.xml                        private\20022f35\hshomescreenclientplugin.xml
 
 // ---- runtimeplugins --------------------------------------------
 
 // -------- hsdefaultruntimeplugin
-file=ABI_DIR\BUILD_DIR\hsdefaultruntimeplugin.dll                 SHARED_LIB_DIR\hsdefaultruntimeplugin.dll
-data=\epoc32\data\z\hsresources\plugins\runtimeplugins\hsdefaultruntimeplugin.qtplugin    hsresources\plugins\runtimeplugins\hsdefaultruntimeplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\runtimeplugins\hsdefaultruntimeplugin.xml    hsresources\plugins\runtimeplugins\hsdefaultruntimeplugin.xml
+file=ABI_DIR\BUILD_DIR\hsdefaultruntimeplugin.dll                              SHARED_LIB_DIR\hsdefaultruntimeplugin.dll
+data=ZPRIVATE\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.qtplugin  private\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.qtplugin
+data=ZPRIVATE\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.xml       private\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.xml
 
 // ---- serviceproviders --------------------------------------------
 
 // -------- hsmenuserviceprovider
-file=ABI_DIR\BUILD_DIR\hsmenuserviceprovider.dll                                        SHARED_LIB_DIR\hsmenuserviceprovider.dll
+file=ABI_DIR\BUILD_DIR\hsmenuserviceprovider.dll  SHARED_LIB_DIR\hsmenuserviceprovider.dll
 
 // ---- stateplugins --------------------------------------------
 
 // -------- hsapplibrarystateplugin
-file=ABI_DIR\BUILD_DIR\hsapplibrarystateplugin.dll                                            SHARED_LIB_DIR\hsapplibrarystateplugin.dll
-data=\epoc32\data\z\hsresources\plugins\stateplugins\hsapplibrarystateplugin.qtplugin       hsresources\plugins\stateplugins\hsapplibrarystateplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\stateplugins\hsapplibrarystateplugin.xml       hsresources\plugins\stateplugins\hsapplibrarystateplugin.xml
+file=ABI_DIR\BUILD_DIR\hsapplibrarystateplugin.dll                            SHARED_LIB_DIR\hsapplibrarystateplugin.dll
+data=ZPRIVATE\20022f35\plugins\stateplugins\hsapplibrarystateplugin.qtplugin  private\20022f35\plugins\stateplugins\hsapplibrarystateplugin.qtplugin
+data=ZPRIVATE\20022f35\plugins\stateplugins\hsapplibrarystateplugin.xml       private\20022f35\plugins\stateplugins\hsapplibrarystateplugin.xml
 
 // -------- hshomescreenstateplugin
-file=ABI_DIR\BUILD_DIR\hshomescreenstateplugin.dll                                                                  SHARED_LIB_DIR\hshomescreenstateplugin.dll
-data=\epoc32\data\z\hsresources\plugins\stateplugins\hshomescreenstateplugin.qtplugin    hsresources\plugins\stateplugins\hshomescreenstateplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\stateplugins\hshomescreenstateplugin.xml            hsresources\plugins\stateplugins\hshomescreenstateplugin.xml
+file=ABI_DIR\BUILD_DIR\hshomescreenstateplugin.dll                            SHARED_LIB_DIR\hshomescreenstateplugin.dll
+data=ZPRIVATE\20022f35\plugins\stateplugins\hshomescreenstateplugin.qtplugin  private\20022f35\plugins\stateplugins\hshomescreenstateplugin.qtplugin
+data=ZPRIVATE\20022f35\plugins\stateplugins\hshomescreenstateplugin.xml       private\20022f35\plugins\stateplugins\hshomescreenstateplugin.xml
 
 // -------- hsmenuworkerstateplugin
-file=ABI_DIR\BUILD_DIR\hsmenuworkerstateplugin.dll                                            SHARED_LIB_DIR\hsmenuworkerstateplugin.dll
-data=\epoc32\data\z\hsresources\plugins\stateplugins\hsmenuworkerstateplugin.qtplugin       hsresources\plugins\stateplugins\hsmenuworkerstateplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\stateplugins\hsmenuworkerstateplugin.xml       hsresources\plugins\stateplugins\hsmenuworkerstateplugin.xml
+file=ABI_DIR\BUILD_DIR\hsmenuworkerstateplugin.dll                            SHARED_LIB_DIR\hsmenuworkerstateplugin.dll
+data=ZPRIVATE\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.qtplugin  private\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.qtplugin
+data=ZPRIVATE\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.xml       private\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.xml
 
 // ---- widgetplugins --------------------------------------------
 
 // -------- hsshortcutwidgetplugin
-file=ABI_DIR\BUILD_DIR\hsshortcutwidgetplugin.dll                                             SHARED_LIB_DIR\hsshortcutwidgetplugin.dll
-data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.qtplugin         private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.qtplugin
-data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.manifest         private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.manifest
-data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.xml              private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.xml
+file=ABI_DIR\BUILD_DIR\hsshortcutwidgetplugin.dll                                      SHARED_LIB_DIR\hsshortcutwidgetplugin.dll
+data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.qtplugin  private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.qtplugin
+data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.manifest  private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.manifest
+data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.xml       private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.xml
 
 // -------- hsclockwidgetplugin
-file=ABI_DIR\BUILD_DIR\hsclockwidgetplugin.dll                                                SHARED_LIB_DIR\hsclockwidgetplugin.dll
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin            private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest            private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\tclock.png                              private\20022f35\import\widgetregistry\20022F6C\tclock.png
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml                 private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml
+file=ABI_DIR\BUILD_DIR\hsclockwidgetplugin.dll                                         SHARED_LIB_DIR\hsclockwidgetplugin.dll
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\tclock.png                       private\20022f35\import\widgetregistry\20022F6C\tclock.png
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml          private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml
 
 // -------- hsdialerwidgetplugin
-file=ABI_DIR\BUILD_DIR\hsdialerwidgetplugin.dll                                               SHARED_LIB_DIR\hsdialerwidgetplugin.dll
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.qtplugin           private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.qtplugin
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.manifest           private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.manifest
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\qtg_graf_hs_dialer.svg                  private\20022f35\import\widgetregistry\20022F44\qtg_graf_hs_dialer.svg
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml                private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml
-
-// ---- style plugins --------------------------------------------------
-
-// -------- hsanalogclockstyleplugin
-file=ABI_DIR\BUILD_DIR\hsanalogclockstyleplugin.dll                                           SHARED_LIB_DIR\hsanalogclockstyleplugin.dll
-data=\epoc32\data\z\hsresources\plugins\styleplugins\hsanalogclockstyleplugin.qtplugin        hsresources\plugins\styleplugins\hsanalogclockstyleplugin.qtplugin
+file=ABI_DIR\BUILD_DIR\hsdialerwidgetplugin.dll                                        SHARED_LIB_DIR\hsdialerwidgetplugin.dll
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.qtplugin    private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.qtplugin
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.manifest    private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.manifest
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\qtg_graf_hs_dialer.svg           private\20022f35\import\widgetregistry\20022F44\qtg_graf_hs_dialer.svg
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml         private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml
 
 // ---- IMenuClient --------------------------------------------
 
-// -------- hsmenucontentpublish
-file=ABI_DIR\BUILD_DIR\hsmenucontentpublish.dll                                            	  SHARED_LIB_DIR\hsmenucontentpublish.dll 
-data=\epoc32\data\z\hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.qtplugin       hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.qtplugin
-data=\epoc32\data\z\hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.xml      hsresources\plugins\hsmenucontentpublishplugin\hsmenucontentpublish.xml
+// -------- hsmenuclientplugin
+file=ABI_DIR\BUILD_DIR\hsmenuclientplugin.dll                           SHARED_LIB_DIR\hsmenuclientplugin.dll 
+data=\epoc32\data\z\resource\qt\plugins\hsmenuclientplugin.qtplugin     resource\qt\plugins\hsmenuclientplugin.qtplugin
+data=ZPRIVATE\20022f35\hsmenuclientplugin.xml                           private\20022f35\hsmenuclientplugin.xml
 
 
 #endif //__HOMESCREENAPP_CORE_IBY__
