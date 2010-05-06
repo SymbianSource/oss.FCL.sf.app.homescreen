@@ -62,6 +62,7 @@ USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
 
 APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE /epoc32/include/platform/app/loc
 
 LIBRARY         euser.lib
 LIBRARY         ecom.lib

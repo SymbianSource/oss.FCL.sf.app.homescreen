@@ -29,7 +29,7 @@
 #include "../widgetmanager/group/bld.inf"
 
 #ifdef FF_HOMESCREEN_COMMON_IDLEFW
-//#include "../data/group/bld.inf"
+#include "../data/group/bld.inf"
 #endif
 
 PRJ_PLATFORMS

@@ -50,6 +50,7 @@
 #include <AknUtils.h>
 #include <layoutmetadata.cdl.h>
 #include <aknlayoutscalable_avkon.cdl.h>
+#include <publicruntimeids.hrh>
 
 namespace
     {

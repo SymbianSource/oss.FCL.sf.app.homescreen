@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg baseProfile="tiny" height="44" version="1.1" viewBox="-11.328 -11.607 44 44" width="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g>
+<rect fill="none" height="44" width="44" x="-11.328" y="-11.607"/>
+<g>
+<g>
+<g>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_11_" x1="21.1553" x2="21.1553" y1="-1.126" y2="23.874">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<rect fill="url(#XMLID_11_)" height="4.754" width="7.389" x="17.461" y="-2.658"/>
+<rect fill="url(#XMLID_11_)" height="4.754" width="7.389" x="17.461" y="12.906"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_13_" x1="21.1533" x2="21.1533" y1="-1.126" y2="23.874">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<rect fill="url(#XMLID_13_)" height="4.756" width="7.393" x="17.457" y="5.123"/>
+<rect fill="url(#XMLID_14_)" height="4.754" width="7.381" x="6.955" y="-2.658"/>
+<rect fill="url(#XMLID_14_)" height="4.754" width="7.381" x="6.955" y="12.906"/>
+<rect fill="url(#XMLID_14_)" height="4.76" width="7.381" x="6.955" y="20.686"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_17_" x1="10.6445" x2="10.6445" y1="-1.126" y2="23.874">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<rect fill="url(#XMLID_17_)" height="4.756" width="7.383" x="6.953" y="5.123"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_18_" x1="0.1973" x2="0.1973" y1="-1.126" y2="23.874">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<rect fill="url(#XMLID_18_)" height="4.754" width="7.383" x="-3.494" y="-2.658"/>
+<rect fill="url(#XMLID_18_)" height="4.754" width="7.383" x="-3.494" y="12.906"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_20_" x1="0.1934" x2="0.1934" y1="-1.126" y2="23.874">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<rect fill="url(#XMLID_20_)" height="4.756" width="7.391" x="-3.502" y="5.123"/>
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_14_" x1="10.6455" x2="10.6455" y1="-1.126" y2="23.874">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+</defs>
+</g>
+</g>
+</g>
+</g>
+</svg>

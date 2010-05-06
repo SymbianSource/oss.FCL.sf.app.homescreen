@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg baseProfile="tiny" height="44" version="1.1" viewBox="-10.792 -11.607 44 44" width="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g>
+<rect fill="none" height="44" width="44" x="-10.792" y="-11.607"/>
+<g>
+<g>
+<g>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_5_" x1="14.2588" x2="14.2588" y1="-4.126" y2="24.374">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<path d="M2.872,1.023c4.25-4.971,10.727-7.107,16.014-4.822c4.021,1.746,6.408,5.641,6.76,10.162      c-0.83-2.25-2.432-4.086-4.688-5.064C16.833-0.48,11.806,1.137,8.532,4.951L2.872,1.023z" fill="url(#XMLID_5_)"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_6_" x1="8.7363" x2="8.7363" y1="-4.126" y2="24.374">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<path d="M20.124,19.764C15.872,24.73,9.396,26.865,4.11,24.582c-4.02-1.74-6.406-5.637-6.762-10.162      c0.836,2.25,2.434,4.09,4.689,5.068c4.121,1.779,9.154,0.156,12.428-3.652L20.124,19.764z" fill="url(#XMLID_6_)"/>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_7_" x1="1.3906" x2="1.3906" y1="-4.126" y2="24.374">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<path d="M6.099,10.738c-1.203,2.434-4.283,3.5-6.879,2.371c-2.607-1.121-3.734-4.012-2.539-6.451      c1.197-2.439,4.281-3.506,6.879-2.381C6.159,5.404,7.298,8.295,6.099,10.738z" fill="url(#XMLID_7_)"/>
+<g>
+<linearGradient gradientUnits="userSpaceOnUse" id="XMLID_8_" x1="21.8691" x2="21.8691" y1="-4.1265" y2="24.3746">
+<stop offset="0" style="stop-color:#B2B2B2"/>
+<stop offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<path d="M22.763,5.629l-7.906,5.738l6.117,7.418l7.908-5.742L22.763,5.629z M26.229,12.727       c-0.861,0.625-4.061,2.943-4.92,3.572c-0.662-0.813-3.137-3.809-3.803-4.617c0.865-0.619,4.057-2.943,4.916-3.566       C23.089,8.92,25.56,11.918,26.229,12.727z" fill="url(#XMLID_8_)"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>

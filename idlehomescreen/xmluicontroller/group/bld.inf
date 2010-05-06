@@ -43,6 +43,7 @@ PRJ_EXTENSIONS
 START EXTENSION s60/mifconv
 OPTION TARGETFILE activeidle2.mif
 OPTION HEADERFILE activeidle2.mbg
+OPTION SOURCEDIR .
 OPTION SOURCES -c8,8 qgn_indi_tb_appsgrid \
                -c8,8 qgn_indi_tb_dialler \
                -c8,8 qgn_indi_tb_profiles
@@ -50,18 +51,19 @@ END
 
 START EXTENSION s60/mifconv
 OPTION TARGETFILE homescreen_aif.mif
+OPTION SOURCEDIR .
 OPTION SOURCES -c8,8 qgn_menu_idlestate
 END
 
 
 PRJ_MMPFILES
 
-#ifdef __SCALABLE_ICONS
-// gnumakefile icons.mk
-// gnumakefile icons_aif_scalable.mk
-#else
- gnumakefile icons_aif_bitmaps.mk
-#endif
+// #ifdef __SCALABLE_ICONS
+// // gnumakefile icons.mk
+// // gnumakefile icons_aif_scalable.mk
+// #else
+//  gnumakefile icons_aif_bitmaps.mk
+// #endif
 
 aixmluimain.mmp
 

@@ -25,7 +25,7 @@ HEADERDIR=$(EPOCROOT)epoc32\include
 ICONTARGETFILENAME=$(TARGETDIR)\homescreen_aif.mbm
 
 MAKMAKE : 
-	mifconv $(ICONTARGETFILENAME) \
+	mifconv-s3 $(ICONTARGETFILENAME) \
 		/c8,8 qgn_menu_idlestate_lst.bmp \
 		/c8,8 qgn_menu_idlestate_cxt.bmp
 
