@@ -51,6 +51,7 @@ PRJ_EXPORTS
 #ifndef __VIEW_LOC__
 #define __VIEW_LOC__
 ../loc/view.loc APP_LAYER_LOC_EXPORT_PATH(view.loc)
+../loc/view.loc platform/app/loc/view.loc
 #endif // __VIEW_LOC__
 
 // Support for S60 builds

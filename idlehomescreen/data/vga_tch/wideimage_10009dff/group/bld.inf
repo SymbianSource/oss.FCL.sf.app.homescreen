@@ -44,6 +44,7 @@ PRJ_EXPORTS
 #ifndef __WIDEIMAGE_LOC__
 #define __WIDEIMAGE_LOC__
 ../loc/wideimage.loc APP_LAYER_LOC_EXPORT_PATH(wideimage.loc)
+../loc/wideimage.loc platform/app/loc/wideimage.loc
 #endif // __WIDEIMAGE_LOC__
 
 // Dtd-localization

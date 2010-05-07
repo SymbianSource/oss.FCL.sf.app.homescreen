@@ -33,6 +33,7 @@ PRJ_EXPORTS
 ../conf/widgetmanager_20026F53.crml   APP_LAYER_CRML(widgetmanager_20026F53.crml)
 
 ../loc/widgetmanagerview.loc         APP_LAYER_LOC_EXPORT_PATH(widgetmanagerview.loc)
+../loc/widgetmanagerview.loc         platform/app/loc/widgetmanagerview.loc
 
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv

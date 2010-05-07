@@ -45,6 +45,7 @@ PRJ_EXPORTS
 //*****************************
 // export localizable loc files (engineering versions)
 ../loc/profilewidget.loc    APP_LAYER_LOC_EXPORT_PATH(profilewidget.loc)
+../loc/profilewidget.loc    platform/app/loc/profilewidget.loc
 // waiting for localization from platform
 //../loc/profileconfiguration.loc    APP_LAYER_LOC_EXPORT_PATH(profileconfiguration.loc)
 

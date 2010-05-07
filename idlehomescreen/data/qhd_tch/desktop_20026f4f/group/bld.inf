@@ -47,6 +47,7 @@ PRJ_EXPORTS
 #ifndef __DESKTOPCONFIGURATION_LOC__
 #define __DESKTOPCONFIGURATION_LOC__
 ../loc/desktopconfiguration.loc APP_LAYER_LOC_EXPORT_PATH(desktopconfiguration.loc)
+../loc/desktopconfiguration.loc platform/app/loc/desktopconfiguration.loc
 #endif // __DESKTOPCONFIGURATION_LOC__
 
 
