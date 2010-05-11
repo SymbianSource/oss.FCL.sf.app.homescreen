@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+    <widget name="view" type="HbView">
+        <widget name="listView" role="HbView:widget" type="HbListView">
+            <enums name="selectionMode" value="MultiSelection"/>
+            <bool name="visible" value="TRUE"/>
+            <string name="orientation" value="Horizontal"/>
+        </widget>
+        <string locid="txt_applib_title_select_applications" name="title"/>
+    </widget>
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>

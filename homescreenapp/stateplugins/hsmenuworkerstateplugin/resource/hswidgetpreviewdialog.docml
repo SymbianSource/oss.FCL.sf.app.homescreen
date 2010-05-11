@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+    <object name="add_to_homescreen" type="HbAction">
+        <string name="role" value="HbDialog:primaryAction"/>
+        <string locid="txt_applib_button_add_to_homescreen" name="text"/>
+    </object>
+    <object name="close" type="HbAction">
+        <string name="role" value="HbDialog:secondaryAction"/>
+        <string locid="txt_common_button_close" name="text"/>
+    </object>
+    <widget name="preview_dialog" type="HbDialog">
+        <enums name="dismissPolicy" value="HbPopup::NoDismiss"/>
+        <ref object="add_to_homescreen" role="HbDialog:primaryAction"/>
+        <ref object="close" role="HbDialog:secondaryAction"/>
+    </widget>
+    <widget name="container" role="HbDialog:contentWidget" type="HbWidget">
+        <widget name="preview_scroll_area" type="HbScrollArea">
+            <enums name="scrollingStyle" value="Pan"/>
+            <enums name="alignment" value="Qt:AlignCenter"/>
+            <enums name="verticalScrollBarPolicy" value="ScrollBarAutoHide"/>
+            <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+            <enums name="scrollDirections" value="Qt::Horizontal|Qt::Vertical"/>
+            <enums name="clampingStyle" value="StrictClamping"/>
+        </widget>
+        <layout orientation="Vertical" type="linear">
+            <linearitem itemname="preview_scroll_area"/>
+        </layout>
+    </widget>
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>
