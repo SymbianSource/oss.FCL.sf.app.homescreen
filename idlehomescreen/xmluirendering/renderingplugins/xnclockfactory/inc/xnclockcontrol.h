@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Control for xuikon's skinnable clock.
+* Description:  Clock control
 *
 */
 
@@ -19,21 +19,23 @@
 #ifndef _XNCLOCKCONTROL_H
 #define _XNCLOCKCONTROL_H
 
-// INCLUDES
+// System includes
+#include <e32base.h>
 
-// FORWARD DECLARATIONS
+// User includes
+
+// Forward declarations
 class CWindowGc;
 class CXnClockAdapter;
-class CXnClockChangeHandler;
 class CXnClockFace;
 
-// CLASS DECLARATION
+// Class declaration
 /**
 *  @ingroup group_xnclockfactory
 *  @lib xnclockfactory.lib
-*  @since S60
+*  @since S60 5.0
 */
-class CXnClockControl : public CBase
+NONSHARABLE_CLASS( CXnClockControl ) : public CBase
     {
 public: // Constructors and destructor
 
@@ -84,19 +86,14 @@ public: // New functions
     * @return Clock format.
     */    
     TClockFormat Format() const;
-    
-    /**
-    * Updates time and locale state of the clock.
-    */
-    void TimeOrLocaleChanged();
-    
+        
     /**
     * Draws the clock
     *
     * @param aGc Context where to draw
     * @param aRect Rect Clock rect 
     */
-    void Draw( CWindowGc& aGc, const TRect& aRect ) const;
+    void Draw( CWindowGc& aGc, const TRect& aRect );
     
     /**
     * Starts the clock timer.
@@ -141,8 +138,6 @@ private: // data
     CPeriodic*              iTimer;
     // Clock face, owned
     CXnClockFace*           iFace;
-    // Clock change handler, owned
-    CXnClockChangeHandler*  iHandler;
     // Clock adapter, not owned
     CXnClockAdapter*        iAdapter;            
     // Clock format

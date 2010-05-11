@@ -40,4 +40,5 @@ EXPORTS
 	_ZThn52_N18CMmWidgetContainer23HandleForegroundGainedLEv @ 39 NONAME
 	_ZN18CMmWidgetContainer19SetTriggerMoveItemLEiP20CLiwGenericParamList @ 40 NONAME
 	_ZNK18CMmWidgetContainer9AllowMoveEv @ 41 NONAME
+	_ZN18CMmWidgetContainer17SetExDialogOpenedEi @ 42 NONAME
 

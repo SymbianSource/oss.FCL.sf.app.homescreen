@@ -383,7 +383,7 @@ void CXnEditMode::MakeVisible( TBool aVisible )
         }
     
     // Update background
-    appui.ViewAdapter().BgManager().UpdateScreen();
+    appui.ViewAdapter().BgManager().DrawNow();
     }
 
 // -----------------------------------------------------------------------------
@@ -506,7 +506,7 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
             
             if ( plugin && plugin->Occupied() )
                 {
-                StartDragL( *node );
+                StartDragL( *plugin );
                                   
                 iDrawPos = iDraggingNode->BorderRect().iTl;
                 
@@ -550,12 +550,12 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
             TPoint dp( iPreviousPos - aPointerEvent.iPosition );
                                 
             iDrawPos -= dp;
-                    
-            // Update previous position
-            iPreviousPos = aPointerEvent.iPosition;
-            
+                                
             UpdateScreen();
             }
+
+        // Update previous position
+        iPreviousPos = aPointerEvent.iPosition;        
         }
     else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
         {
@@ -724,10 +724,15 @@ void CXnEditMode::SizeChanged()
 //
 // -----------------------------------------------------------------------------
 //
-void CXnEditMode::StartDragL( CXnNode& aNode )
+void CXnEditMode::StartDragL( const CXnPluginData& aPlugin  )
     {  
-    CXnControlAdapter* control( aNode.Control() );
-        
+    CXnNode* node( aPlugin.Owner()->LayoutNode() );
+    
+    CXnControlAdapter* control( node->Control() ); 
+            
+    CXnControlAdapter* parent( 
+        aPlugin.Parent()->Node()->LayoutNode()->Control() );
+    
     TRect rect( control->Rect() );
     
     // Clear first with alpha 
@@ -739,42 +744,28 @@ void CXnEditMode::StartDragL( CXnNode& aNode )
     iMapGc->SetBrushStyle( CGraphicsContext::ESolidBrush );
     iMapGc->SetBrushColor( rgb );
     
-    iMapGc->Clear( rect );
+    iMapGc->Clear();
                          
     iState = CXnEditMode::EShootContent;
         
     CWindowGc* gc( control->CustomGc() );
             
-    control->SetCustomGc( iMapGc );
-
-    TBool focusStateChanged( EFalse );
+    parent->SetCustomGc( iMapGc );
     
-    if( aNode.IsStateSet( XnPropertyNames::style::common::KFocus ) )
-        {        
-        aNode.UnsetStateL( XnPropertyNames::style::common::KFocus );
-        focusStateChanged = ETrue;
-        }
-
     control->DrawNow( rect );
 
-    control->SetCustomGc( gc );
-
-    if( focusStateChanged )
-        {
-        aNode.SetStateL( XnPropertyNames::style::common::KFocus );
-        iUiEngine.RenderUIL( &aNode );
-        }
-
+    parent->SetCustomGc( gc );
+       
     if ( iWidget->SizeInPixels() != rect.Size() )
         {
         iWidget->Resize( rect.Size() );
         }
     
-    User::LeaveIfError( CopyBitmap( *iWidget, *iMainpane, rect.iTl ) );
-
     iState = CXnEditMode::EDragging;
-        
-    iDraggingNode = &aNode;       
+    
+    iDraggingNode = node;
+    
+    User::LeaveIfError( CopyBitmap( *iWidget, *iMainpane, rect.iTl ) );                   
     }
 
 // -----------------------------------------------------------------------------

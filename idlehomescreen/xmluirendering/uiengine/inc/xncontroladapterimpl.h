@@ -327,7 +327,7 @@ public:
      * Initialize or refresh background and border bitmaps
      * This is called when for example the skin or control size is changed
      */
-    void InitializeBackgroundAndBorderBitmapsL();
+    void InitializeBackgroundAndBorderBitmapsL( TBool aForceRecreate = EFalse );
 
     /** 
      * This is called to measure adaptive content dimensions.
@@ -530,16 +530,7 @@ private:
     mutable CXnControlAdapter* iAdapter;
     /** icon provider, for AknIconUtils */
     mutable TIconProvider* iIconProvider;
-    /** scaled content image */
-    mutable CFbsBitmap* iScaledContentBitmap;
-    /** scaled content mask */
-    mutable CFbsBitmap* iScaledContentMask;
-    /** scaled transparent color */
-    mutable CGulIcon* iScaledTransparentColor;
-    /** scaled background skin */
-    mutable CGulIcon* iScaledBackgroundSkin;
-    /** scaled background image */
-    mutable CFbsBitmap* iScaledBackgroundImage;
+    
     /** skin animation object for skin highlight animation */
     CAknsEffectAnim* iAnimation;
     /** skin animation identifier */
@@ -556,6 +547,10 @@ private:
     CXnNode* iGestureDestination;
     /** Starting point of button down event. */        
     TPoint iButtonDownStartPoint;
+    /** Tells is background images are allready created*/
+    TBool iBackgrondInitialized;
+    /** Tells is border images are allready created*/
+    TBool iBorderInitialized;
     };
 
 #endif //__XNCONTROLADAPTERIMPL_H__

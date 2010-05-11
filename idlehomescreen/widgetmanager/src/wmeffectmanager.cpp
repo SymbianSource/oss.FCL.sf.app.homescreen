@@ -21,6 +21,7 @@
 #include <aknappui.h>
 #include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
 #include <akntranseffect.h>                 // For transition effects
+#include <alf/alfcompositionutility.h>
 
 // INCLUDE FILES
 #include "wmeffectmanager.h"
@@ -30,6 +31,9 @@ const TInt KEffectTypeFullscreen = 1;
 
 const TInt KWaitForLayout = 1;
 const TInt KEffectStarted = 2;
+
+const TInt KEffectWaitInterval( 250000 ); //250ms
+const TInt KWaitInterval( 25000 ); // 25ms
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -47,6 +51,7 @@ CWmEffectManager::CWmEffectManager( CCoeEnv& aCoeEnv ): iCoeEnv (aCoeEnv)
 //
 void CWmEffectManager::ConstructL()
     {
+    iObserver = CAlfEffectObserver::NewL(); 
     }
 
 // -----------------------------------------------------------------------------
@@ -68,6 +73,7 @@ CWmEffectManager* CWmEffectManager::NewL( CCoeEnv& aCoeEnv )
 //
 CWmEffectManager::~CWmEffectManager()
     {
+    delete iObserver;
     GfxTransEffect::AbortFullScreen();
     iEffects.ResetAndDestroy();
     }
@@ -87,7 +93,10 @@ void CWmEffectManager::BeginFullscreenEffectL( TInt aId )
     
     CleanupStack::Pop( effect );
 
-    DoBeginFullscreenEffect( *effect );
+    if ( !DoBeginFullscreenEffect( *effect ) )
+        {
+        RemoveEffect( effect );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -117,21 +126,20 @@ void CWmEffectManager::UiRendered()
 // CWmEffectManager::DoBeginFullscreenEffect
 // -----------------------------------------------------------------------------
 //
-void CWmEffectManager::DoBeginFullscreenEffect( TWmEffect& aEffect )
+TBool CWmEffectManager::DoBeginFullscreenEffect( TWmEffect& aEffect )
     {
     if ( iCoeEnv.WsSession().GetFocusWindowGroup() != 
          iCoeEnv.RootWin().Identifier() )
         {
         // Window group is not focused
         RemoveEffect( &aEffect );
-        return;
+        return EFalse;
         }
     
-    // Must give some time before starting effect, because otherwise
-    // fullscreen effect may contain unwanted parts (dialog, note, etc.)
-    // which was shown when fullscreen effect is about to be started
-    iCoeEnv.WsSession().Finish();
-    User::After( 1 );
+    if ( !WaitActiveEffect( KEffectWaitInterval ) )
+        {
+        return EFalse;
+        }
 
     const TInt flags( AknTransEffect::TParameter::EActivateExplicitCancel );
     const TUid targetAppUid( iAvkonAppUi->Application()->AppDllUid() );
@@ -142,6 +150,34 @@ void CWmEffectManager::DoBeginFullscreenEffect( TWmEffect& aEffect )
         targetAppUid, flags ) );
     
     aEffect.iState = KEffectStarted;
+    
+    return ETrue;
+    }
+
+// -----------------------------------------------------------------------------
+// CWmEffectManager::WaitActiveEffect
+// -----------------------------------------------------------------------------
+//
+TBool CWmEffectManager::WaitActiveEffect( TInt aInterval )     
+    {
+    TBool retval( EFalse );
+    TInt loop( aInterval / KWaitInterval );
+    
+    while ( loop >= 0 )
+        {               
+        TInt count( iObserver->ActiveEffectsCount() );
+        
+        if ( count == 0 )
+            {
+            retval = ETrue;
+            break;                        
+            }
+        
+        User::After( KWaitInterval );
+        loop--;
+        }
+
+    return retval;    
     }
 
 // -----------------------------------------------------------------------------
@@ -157,6 +193,18 @@ void CWmEffectManager::RemoveEffect( TWmEffect* aEffect )
         iEffects.Remove( index );
         delete temp;
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnEffectManager::IsEffectActive
+// -----------------------------------------------------------------------------
+//
+TBool CWmEffectManager::IsEffectActive()
+    {
+    TBool retVal( EFalse );
+    if ( iObserver->ActiveEffectsCount() )
+        retVal = ETrue;
+    return retVal;
     }
 
 // End fo file

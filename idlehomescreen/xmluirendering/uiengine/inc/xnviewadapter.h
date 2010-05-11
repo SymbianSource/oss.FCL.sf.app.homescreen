@@ -45,11 +45,7 @@ class CXnFocusControl;
  */
 NONSHARABLE_CLASS( CXnViewAdapter ) : public CAknView,  
     public MXnUiStateObserver
-    {
-private:
-    // friend classes
-    friend class CXnViewManager;
-    
+    {    
 public:
     /**
      * Two-phase constructor
@@ -171,29 +167,30 @@ public:
      */
     void ChangeControlsStateL( TBool aAwake );
     
-private:
-    // new functions
-    
     /**
      * Activates new container ro view. 
      * Deactivates internally previous container if it exists.
-     * This is always called from DoActivateL or from CXnViewManager.
+     * This is always called from DoActivateL or from CXnViewManager when 
+     * active view data is changed.
      * 
      * @since S60 5.0
      * @param aContainer Container to activate
      * @param aEnterEditState ETrue if activated container should be set to edit state.
-     * @param aForceActivation if ETrue forces deactivation and then activation even if
-     *        the conntainer remains the same 
+     * @param aEffect Effect uid, default no effect
      */
     void ActivateContainerL( CXnViewData& aContainer, 
-        TBool aEnterEditState = EFalse, TBool aForceActivation = EFalse );
-
+        TBool aEnterEditState = EFalse, TUid aEffect = TUid::Null() );
+    
+private:
+    // new functions
+    
     /**
      * Deactivates the current container from view.      
      * 
      * @since S60 5.0               
+     * @param aHide ETrue if old container is hidden, EFalse otherwise
      */    
-    void DeactivateContainerL();
+    void DeactivateContainerL( TBool aHide = ETrue );
 
     /**
      * Activates default container to view. 
@@ -253,6 +250,8 @@ private:
     TBitFlags32 iFlags;
     /** Timer to set window group order after default view is activated, owned */
     CPeriodic* iTimer;
+    /** Action to handle in timer callback */
+    TInt iAction;
     };
 
 #endif // XNVIEWADAPTER_H

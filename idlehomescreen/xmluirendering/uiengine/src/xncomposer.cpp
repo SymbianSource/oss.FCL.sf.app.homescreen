@@ -646,7 +646,7 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
                 bgImage->Des().Trim();
                 if( bgImage && bgImage->Length() > 0 )
                     {                
-                    bgManager.CacheWallpaperL( bgImage->Des(), aViewData );
+                    bgManager.ConstructWallpaper( bgImage->Des(), aViewData );
                     }
                 CleanupStack::PopAndDestroy( bgImage );
                 }

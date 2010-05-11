@@ -98,16 +98,22 @@ public:
      * @see CXnPluginData           
      */    
     void PopupNodesL( RPointerArray< CXnNode >& aList ) const;
-            
+
+    /**
+     * @see CXnPluginData           
+     */        
+    void NotifyPublisherReadyL();
+    
 public:   
     // New functions
     
     /**
      * Sets viewdata to active/ not active
      * 
-     * @param aActive ETrue active, EFalse not active    
+     * @param aActive ETrue active, EFalse not active
+     * @return Activation Error code    
      */
-    void SetActive( TBool aActive );
+    TInt SetActive( TBool aActive );
     
     /**
      * Returns if active or not
@@ -205,7 +211,7 @@ public:
     /**
      * Loads publishers to this view           
      */
-    void LoadPublishers();    
+    void LoadPublishers( TInt aReason );    
                    
     /**
      * Destroys all publishers in this view
@@ -213,25 +219,16 @@ public:
      * @param aReason Destroy reason
      */
     void DestroyPublishers( TInt aReason );
-    
-private:
-    // new functions
-    
-    static TInt DoLoadPublishersL( TAny* aAny );
-    
-    void DoDestroyPublishersL( TInt aReason );
-    
+            
 private:
     // data                              
     
     /** Pointer to wallpaper image, Owned */    
     CFbsBitmap* iBgImage;    
     /** Path of the wallpaper image, including filename */    
-    HBufC* iBgImagePath;            
-    /** Publisher load index */
-    TInt iLoadIndex;    
-    /** Flag to indicate whether content removed error should be shown */
-    TBool iShowContentRemoved;    
+    HBufC* iBgImagePath;    
+    /** Load error code */
+    TInt iLoadError;
     };
 
 #include "xnviewdata.inl"

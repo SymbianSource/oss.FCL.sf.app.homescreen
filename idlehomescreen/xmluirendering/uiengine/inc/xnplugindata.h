@@ -23,6 +23,8 @@
 #include <e32base.h>
 #include <babitflags.h>
 
+// User includes
+
 // Forward declarations
 class CXnNode;
 class CXnDomNode;
@@ -31,7 +33,7 @@ class CXnControlAdapter;
 class CXnViewData;
 class CXnODT;
 class CXnViewManager;
-class CPeriodic;
+class CXnPublisherData;
 
 // Constants
 
@@ -310,6 +312,13 @@ public:
     virtual void ContentSourceNodesL( RPointerArray< CXnNode >& aList ) const;
 
     /**
+     * Returns all publishers
+     * 
+     * @param aList List publishers
+     */
+    virtual void PublishersL( RPointerArray< CXnPublisherData >& aList ) const;    
+    
+    /**
      * Adds appearance nodes
      * 
      * @param aNode Node to be added
@@ -402,19 +411,24 @@ public:
     inline RPointerArray< CXnPluginData >& PluginData() const;
 
     /**
-     * Loads publishers, called by CXnViewData
+     * Loads publishers
      * 
      * @param aReason Load reason
      */    
-    TInt LoadPublishers( TInt aReason );
-        
+    void LoadPublishers( TInt aReason );
+
     /**
-     * Queries whether this plugins publishers are virgin
+     * Destroy publishers
      * 
-     * @return ETrue if virgin, EFalse otherwise
-     */
-    TBool VirginPublishers() const;
-        
+     * @param aReason Destroy reason
+     */    
+    void DestroyPublishers( TInt aReason );
+            
+    /**
+     * Notifies a publisher is ready
+     */        
+    virtual void NotifyPublisherReadyL();        
+
     /**
      * Show content removed error note
      */
@@ -432,32 +446,17 @@ public:
      */
     void SetLockingStatus( const TDesC8& aStatus );    
         
-private:
-    // New functions
-            
-    void LoadPublishers();
-    
-    void DestroyPublishers();
-    
-    void DoDestroyPublishersL();
-    
-    void DoShowContentRemovedErrorL();
-    
-    static TInt PeriodicEventL( TAny* aAny );
-    
 protected:
     // data
         
-    /** Data publisher loader, Owned */
-    CPeriodic* iLoader;
     /** Plugins data */
     mutable RPointerArray< CXnPluginData > iPluginsData;
     /** List of plugin resources, Owned */
     CArrayPtrSeg< CXnResource >* iResources;
     /** List of controls, Not owned */
     RPointerArray< CXnControlAdapter > iControls;
-    /** List of content source nodes, Not owned */
-    RPointerArray< CXnNode > iContentSourceNodes;       
+    /** List of publishers, Owned */
+    RPointerArray< CXnPublisherData > iPublishers;
     /** List of appearance nodes, Not owned */
     RPointerArray< CXnNode > iAppearanceNodes;
     /** List of initial focus nodes, Not owned */
@@ -486,8 +485,6 @@ protected:
     HBufC* iPublisherName;
     /** Flags to define this plugin's state */
     TBitFlags32 iFlags;
-    /** Flag to indicate whether this data's publishers are virgins */
-    TBool iVirginPublishers;    
     };
 
 // Inline functions

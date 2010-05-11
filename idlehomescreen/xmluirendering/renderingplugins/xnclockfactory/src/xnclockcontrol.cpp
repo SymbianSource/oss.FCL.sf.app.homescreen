@@ -11,85 +11,25 @@
 *
 * Contributors:
 *
-* Description:  Implementation for xuikon clock.
+* Description:  Clock control
 *
 */
 
 
-// SYSTEM INCLUDE FILES
-#include <e32std.h>         // for RChangeNotifier
-#include <debug.h>
+// System includes
+#include <e32std.h>         
 
-// USER INCLUDE FILES
+// User includes
+#include <debug.h>
 #include "xncontroladapter.h"
 #include "xnclockadapter.h"
 #include "xnclockface.h"
 
 #include "xnclockcontrol.h"
 
-
-// LOCAL CONSTANTS AND MACROS
+// Constants
 static const TInt KIntervalTime( 60000000 ); // in microseconds
 
-
-// MODULE DATA STRUCTURES
-class CXnClockChangeHandler : public CActive
-    {
-    public: // Constructor and destructor
-        static CXnClockChangeHandler* NewL(
-            CXnClockControl& aClient )
-            {
-            CXnClockChangeHandler* self =
-                new (ELeave) CXnClockChangeHandler( aClient );
-            CleanupStack::PushL( self );
-            self->ConstructL();
-            CleanupStack::Pop( self );
-            return self;
-            }
-
-        virtual ~CXnClockChangeHandler()
-            {
-            Cancel();
-            iChangeNotifier.Close();
-            }
-
-    private: // From CActive
-        void DoCancel()
-            {
-            iChangeNotifier.LogonCancel();
-            // Return value is ignored.
-            }
-
-        void RunL()
-            {
-            __PRINTS( "CXnClockChangeHandler::RunL, timer runs" );            
-            if( iStatus.Int() & ( EChangesLocale | EChangesSystemTime ) )
-                {
-                iClient.TimeOrLocaleChanged();
-                }
-
-            User::LeaveIfError( iChangeNotifier.Logon( iStatus ) );
-            SetActive();
-            }
-
-    private: // Private constructors
-        void ConstructL()
-            {
-            User::LeaveIfError( iChangeNotifier.Create() );
-            User::LeaveIfError( iChangeNotifier.Logon( iStatus ) );
-            SetActive();
-            }
-
-        CXnClockChangeHandler( CXnClockControl& aClient )
-            : CActive( EPriorityStandard ), iClient( aClient )
-            {
-            CActiveScheduler::Add( this );
-            }
-
-    private: // Data
-        RChangeNotifier  iChangeNotifier;
-        CXnClockControl& iClient;
-    };
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -117,9 +57,7 @@ void CXnClockControl::ConstructL()
     {           
     iTimer = CPeriodic::NewL( CActive::EPriorityHigh );
             
-    SetFormatL( iFormatFromLocale, iClockFormat );
-
-    iHandler = CXnClockChangeHandler::NewL( *this );
+    SetFormatL( iFormatFromLocale, iClockFormat );   
     }
 
 // -----------------------------------------------------------------------------
@@ -144,11 +82,11 @@ CXnClockControl* CXnClockControl::NewL( CXnClockAdapter* aAdapter,
 
 // -----------------------------------------------------------------------------
 // Destructor
+//
 // -----------------------------------------------------------------------------
 //
 CXnClockControl::~CXnClockControl()
-    {
-    delete iHandler;
+    {    
     delete iTimer;
     delete iFace;
     }
@@ -166,23 +104,6 @@ void CXnClockControl::UpdateDisplay()
         }
             
     iAdapter->UpdateDisplay();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnClockControl::TimeOrLocaleChanged
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-void CXnClockControl::TimeOrLocaleChanged()
-    {
-    TLocale locale;
-
-    if( iFormatFromLocale && ( locale.ClockFormat() != iClockFormat ) )
-        {
-        TRAP_IGNORE( SetFormatL( iFormatFromLocale, locale.ClockFormat() ) );        
-        }
-        
-    UpdateDisplay();        
     }
 
 // -----------------------------------------------------------------------------
@@ -220,7 +141,7 @@ void CXnClockControl::SetFormatL( const TBool aFormatFromLocale,
     else if( format == EClockDigital )
         {
         iFace = CXnClockFaceDigital::NewL();
-        }                
+        }       
     }
 
 // -----------------------------------------------------------------------------
@@ -238,10 +159,15 @@ TClockFormat CXnClockControl::Format() const
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //       
-void CXnClockControl::Draw( CWindowGc& aGc, const TRect& aRect ) const
+void CXnClockControl::Draw( CWindowGc& aGc, const TRect& aRect )
     {
+    // Ensure correct appearance
+    TRAP_IGNORE( SetFormatL( iFormatFromLocale, iClockFormat ) );
+    
     if( iFace && !aRect.IsEmpty() )
         {
+        __PRINT( __DBG_FORMAT( "CXnClockControl::Draw: 0x%X" ), this );
+                
         TTime homeTime;
         homeTime.HomeTime();
 
@@ -256,7 +182,8 @@ void CXnClockControl::Draw( CWindowGc& aGc, const TRect& aRect ) const
 //
 TInt CXnClockControl::TimerCallback( TAny* aThis )
     {
-    __PRINTS( "CXnClockControl::TimerCallback, timer runs" );
+    __PRINT( __DBG_FORMAT( "CXnClockControl::TimerCallback: 0x%X" ), aThis );    
+        
     CXnClockControl* self = static_cast< CXnClockControl* >( aThis );
 
     // Update the clock display
@@ -286,6 +213,8 @@ void CXnClockControl::StartTimer()
     {
     if ( iTimer && !iTimer->IsActive() )
         {
+        __PRINT( __DBG_FORMAT( "CXnClockControl::StartTimer: 0x%X" ), this );
+        
         TTime time;
         time.HomeTime();
         TDateTime dateTime( time.DateTime() );
@@ -308,6 +237,8 @@ void CXnClockControl::StopTimer()
     {
     if ( iTimer && iTimer->IsActive() )
         {
+        __PRINT( __DBG_FORMAT( "CXnClockControl::StopTimer: 0x%X" ), this );
+                       
         iTimer->Cancel();
         }
     }

@@ -15,7 +15,7 @@
  *
 */
 
- 
+
 #include <liwcommon.h>
 
 #include "mmmovetofoldercommand.h"
@@ -89,7 +89,7 @@ CMmMoveToFolderCommand::~CMmMoveToFolderCommand()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CMmMoveToFolderCommand::CMmMoveToFolderCommand()
@@ -97,11 +97,11 @@ CMmMoveToFolderCommand::CMmMoveToFolderCommand()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CMmMoveToFolderCommand::HandleNotifyL(
-        TInt /*aCmdId*/, 
+        TInt /*aCmdId*/,
         TInt aEventId,
         CLiwGenericParamList& /*aEventParamList*/,
         const CLiwGenericParamList& /*aInParamList*/ )
@@ -117,13 +117,13 @@ TInt CMmMoveToFolderCommand::HandleNotifyL(
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmMoveToFolderCommand::ExecuteActionL(
         CLiwGenericParamList* aEventParamList )
     {
-    
+
     //
     // Prepare move to folder operation
     MMPERF(("CMmMoveToFolderCommand::ExecuteActionL - START"));
@@ -131,16 +131,16 @@ void CMmMoveToFolderCommand::ExecuteActionL(
     iParentId = GetIntL( *aEventParamList, KFolderAttrName8 );
     TPtrC widget = GetStringL( *aEventParamList, KWidgetAttrName8 );
     TPtrC currentTempName = GetStringL( *aEventParamList, KName8 );
-    
+
     iItemName.Close();
     iItemName.CreateL( currentTempName );
-    
+
     iWidgetType.Close();
     iWidgetType.CreateL( widget );
-    
+
     CMmFolder* rootFolder = CMmFolder::NewL();
     CleanupStack::PushL( rootFolder );
-   
+
     rootFolder->SetNameL( iSharedResources->GetRootFolder());
     rootFolder->SetId( KRootId );
     iOpenedHierarchy.AppendL( rootFolder );
@@ -149,36 +149,36 @@ void CMmMoveToFolderCommand::ExecuteActionL(
 
     // Excute move to folder operation
     TInt err( KErrNone );
-    
-	// Get folder list form MCS
-	GetFolderListL( CurrentFolder()->Id() );
-	
-	RPointerArray< CMmFolder > folders;
-	CleanupResetAndDestroyPushL( folders );
 
-	// Get folders from GetList output
-	GetFoldersL(folders);
-	
+  // Get folder list form MCS
+  GetFolderListL( CurrentFolder()->Id() );
+
+  RPointerArray< CMmFolder > folders;
+  CleanupResetAndDestroyPushL( folders );
+
+  // Get folders from GetList output
+  GetFoldersL(folders);
+
     // if foler already exists, reopen options menu
     do
-    	{
-    	TRAP( err, ExecuteMoveToFolderL());
-    	}
+      {
+      TRAP( err, ExecuteMoveToFolderL());
+      }
     while ( err == KErrAlreadyExists && folders.Count() > 0 );
-    
+
     // if any different leave was trapped, pass it on
     if ( err != KErrNone )
-    	{
-    	User::Leave( err );
-    	}
-    
+      {
+      User::Leave( err );
+      }
+
     CleanupStack::PopAndDestroy( &folders );
     //MMPERF(("CFolderUiExtPlugin::AddFolderCommandL - END"));
     }
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CMmFolder* CMmMoveToFolderCommand::CurrentFolder()
@@ -188,7 +188,7 @@ CMmFolder* CMmMoveToFolderCommand::CurrentFolder()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmMoveToFolderCommand::MoveToFolderL( TInt aId, TInt aFolderId,
@@ -205,7 +205,7 @@ void CMmMoveToFolderCommand::MoveToFolderL( TInt aId, TInt aFolderId,
         HBufC8* id = HnConvUtils::NumToStr8LC( aId );
         AddSubKeyL( listIds, KIdParam, KKeyTypeBoolean, *id );
         CleanupStack::PopAndDestroy();
-        
+
         inDataKey->AddSubKeyL( listIds );
         HBufC8* folderId = HnConvUtils::NumToStr8LC( aFolderId );
         AddSubKeyL( inDataKey, KFolderId8, KKeyTypeBoolean, *folderId );
@@ -228,7 +228,7 @@ void CMmMoveToFolderCommand::MoveToFolderL( TInt aId, TInt aFolderId,
         list->AppendL( itemCustomId );
         list->AppendL( command );
         iActionRequest->HandleRequestL( *list );
-        CleanupStack::PopAndDestroy( list );  
+        CleanupStack::PopAndDestroy( list );
         }
     else
         {
@@ -249,7 +249,7 @@ void CMmMoveToFolderCommand::MoveToFolderL( TInt aId, TInt aFolderId,
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmMoveToFolderCommand::SelectFolderL(
@@ -265,7 +265,7 @@ void CMmMoveToFolderCommand::SelectFolderL(
     currentFolder.Append( KFolderOpened );
     currentFolder.Append( CurrentFolder()->Name() );
     folders->AppendL( currentFolder );
-    
+
     for( int i( 0 ); i<aFolderContent.Count(); i++ )
         {
         CMmFolder* folder = aFolderContent[ i ];
@@ -277,10 +277,10 @@ void CMmMoveToFolderCommand::SelectFolderL(
         folders->AppendL( name );
         CleanupStack::PopAndDestroy( &name );
         }
-    
+
     TInt selected( SelectFolderFromListL(
         folders, CurrentFolder()->Id() == KRootId ) );
-    
+
     switch( selected )
         {
         case EAknSoftkeyBack:
@@ -318,21 +318,21 @@ void CMmMoveToFolderCommand::SelectFolderL(
             break;
             }
         }
-    
+
     CleanupStack::PopAndDestroy( &currentFolder );
     CleanupStack::PopAndDestroy( folders );
     }
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CMmMoveToFolderCommand::SelectFolderFromListL(
         CDesCArrayFlat* aItems, TBool aIsRoot )
     {
     TInt selected( KErrNotFound );
-    
+
     CAknListQueryDialog* dialog =
         new ( ELeave ) CAknListQueryDialog( &selected );
     if( aIsRoot )
@@ -348,14 +348,14 @@ TInt CMmMoveToFolderCommand::SelectFolderFromListL(
     CArrayPtr<CGulIcon>* icons = GetFolderIconsL();
     dialog->SetIconArrayL( icons );
     dialog->ListBox()->SetCurrentItemIndexAndDraw( 0 );
-    
+
     if( !iLockDialog )
         {
         SetDialogL( dialog );
         TInt softkey ( KErrNotFound );
         softkey = dialog->RunLD();
         SetDialogL( NULL );
-        
+
         if( softkey == KSoftkeyBack )
             {
             selected = EAknSoftkeyBack;
@@ -379,14 +379,14 @@ TInt CMmMoveToFolderCommand::SelectFolderFromListL(
 // ---------------------------------------------------------------------------
 // Action resolving function.
 // ---------------------------------------------------------------------------
-//  
+//
 CArrayPtr<CGulIcon>* CMmMoveToFolderCommand::GetFolderIconsL()
     {
     CArrayPtr<CGulIcon>* icons = new( ELeave )CAknIconArray( 10 );
     CleanupStack::PushL( icons );
     CFbsBitmap* folderClosed     = NULL;
     CFbsBitmap* folderClosedMask = NULL;
-        
+
     AknIconUtils::CreateIconL( folderClosed, folderClosedMask,
             AknIconUtils::AvkonIconFileName(),
             EMbmAvkonQgn_prop_folder_small,
@@ -400,7 +400,7 @@ CArrayPtr<CGulIcon>* CMmMoveToFolderCommand::GetFolderIconsL()
     CFbsBitmap* folderOpenedMask = NULL;
     AknIconUtils::CreateIconL( folderOpened, folderOpenedMask,
             AknIconUtils::AvkonIconFileName(),
-            EMbmAvkonQgn_prop_folder_current, 
+            EMbmAvkonQgn_prop_folder_current,
             EMbmAvkonQgn_prop_folder_current_mask );
     CleanupStack::PushL( folderOpened );
     CleanupStack::PushL( folderOpenedMask );
@@ -413,7 +413,7 @@ CArrayPtr<CGulIcon>* CMmMoveToFolderCommand::GetFolderIconsL()
 // ---------------------------------------------------------------------------
 // Action resolving function.
 // ---------------------------------------------------------------------------
-//  
+//
 HBufC* CMmMoveToFolderCommand::GetFromResourceLC( TInt aIdentifier )
     {
     HBufC* string = StringLoader::LoadLC( aIdentifier );
@@ -424,21 +424,21 @@ HBufC* CMmMoveToFolderCommand::GetFromResourceLC( TInt aIdentifier )
 // ---------------------------------------------------------------------------
 // Action resolving function.
 // ---------------------------------------------------------------------------
-//  
+//
 void CMmMoveToFolderCommand::NotificationMovingCompleteL()
     {
     CDesCArrayFlat* items = new(ELeave) CDesCArrayFlat( 1 );
     CleanupStack::PushL( items );
     items->AppendL( iItemName );
     items->AppendL( iFolderName );
-    
+
     HBufC* msg = StringLoader::LoadLC( R_APPS_NOTE_MOVE_TO_FOLDER, *items );
     CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
             CAknNoteDialog::EConfirmationTone,
             CAknNoteDialog::ELongTimeout );
     dialog->SetTextL( msg->Des() );
     dialog->ExecuteDlgLD( R_MENU_EDIT_MOVING_COMPLETE_NOTIFICATION );
-    
+
     CleanupStack::PopAndDestroy( msg );
     CleanupStack::PopAndDestroy( items );
     }
@@ -447,7 +447,7 @@ void CMmMoveToFolderCommand::NotificationMovingCompleteL()
 // ---------------------------------------------------------------------------
 // Action resolving function.
 // ---------------------------------------------------------------------------
-//  
+//
 void CMmMoveToFolderCommand::NotificationItemAlreadyStoredL()
     {
     HBufC* message = StringLoader::LoadLC( R_APPS_NOTE_ITEM_ALREADY_STORED );
@@ -456,107 +456,107 @@ void CMmMoveToFolderCommand::NotificationItemAlreadyStoredL()
             CAknNoteDialog::ELongTimeout );
     dialog->SetTextL( message->Des() );
     dialog->ExecuteDlgLD( R_MENU_EDIT_MOVING_ABORT_NOTIFICATION );
-    
+
     CleanupStack::PopAndDestroy( message );
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmMoveToFolderCommand::StepBackInHierarchy()
-	{
-	// Remove last folder from iOpenedHierarchy
-	CMmFolder* folder = CurrentFolder();
-	iOpenedHierarchy.Remove( iOpenedHierarchy.Count() - 1 );
-	delete folder;
-	}
+  {
+  // Remove last folder from iOpenedHierarchy
+  CMmFolder* folder = CurrentFolder();
+  iOpenedHierarchy.Remove( iOpenedHierarchy.Count() - 1 );
+  delete folder;
+  }
 
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmMoveToFolderCommand::ExecuteMoveToFolderL()
-	{
+  {
     while (iOpenedHierarchy.Count() > 0)
-    	{
-    	// Get folder list form MCS
-    	GetFolderListL( CurrentFolder()->Id() );
-    	
-    	RPointerArray< CMmFolder > folders;
-    	CleanupResetAndDestroyPushL( folders );
+      {
+      // Get folder list form MCS
+      GetFolderListL( CurrentFolder()->Id() );
 
-    	// Get folders from GetList output
-    	GetFoldersL(folders);
+      RPointerArray< CMmFolder > folders;
+      CleanupResetAndDestroyPushL( folders );
 
-    	// Perform further folder selection or move operation
-    	if( folders.Count() > 0 )
-    		{
-    		SelectFolderL( folders );
-    		}
-    	else
-    		{
-    		iFolderName.Close();
-    		iFolderName.CreateL( CurrentFolder()->Name() );
-    		MoveToFolderL( iItemId, CurrentFolder()->Id() );
-    		}
-    	CleanupStack::PopAndDestroy( &folders );
-    	}
-	}
+      // Get folders from GetList output
+      GetFoldersL(folders);
+
+      // Perform further folder selection or move operation
+      if( folders.Count() > 0 )
+        {
+        SelectFolderL( folders );
+        }
+      else
+        {
+        iFolderName.Close();
+        iFolderName.CreateL( CurrentFolder()->Name() );
+        MoveToFolderL( iItemId, CurrentFolder()->Id() );
+        }
+      CleanupStack::PopAndDestroy( &folders );
+      }
+  }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmMoveToFolderCommand::GetFoldersL(RPointerArray<CMmFolder >& aFolderArray)
-	{
-	TInt pos( 0 );
-	TInt count = iGetListOutParam->FindFirst(
-			pos, KReturnValue8() )->Value().AsList()->Count();
-	TLiwVariant var; var.PushL();
-	
-	// Get propper widget names depending from view type
-	// and append to aFolderArray
-	for( TInt i = 0; i < count; i++ )
-		{
-		HnLiwUtils::GetVariantL( *iGetListOutParam, KIdPath8, i, var );
-		TInt32 id;
-		var.Get( id );
+  {
+  TInt pos( 0 );
+  TInt count = iGetListOutParam->FindFirst(
+      pos, KReturnValue8() )->Value().AsList()->Count();
+  TLiwVariant var; var.PushL();
 
-		if (id != iItemId)
-			{
-			CMmFolder* folder = CMmFolder::NewL();
-			CleanupStack::PushL( folder );
-			
-			folder->SetId( id );
-			
-			TPtrC title;
-			if( !iWidgetType.Compare( KWidgetTypeList ) )
-				{
-				HnLiwUtils::GetVariantL(
-						*iGetListOutParam, KLongNamePath8, i, var );
-				}
-			else if( !iWidgetType.Compare( KWidgetTypeGrid ) )
-				{
-				HnLiwUtils::GetVariantL(
-						*iGetListOutParam, KShortNamePath8, i, var );
-				}
-			else
-				{
-				HnLiwUtils::GetVariantL(
-						*iGetListOutParam, KAppGroupNamePath8, i, var );
-				}
-			var.Get( title );
-			folder->SetNameL( title );
-			aFolderArray.AppendL( folder );
-			
-			CleanupStack::Pop( folder );
-			}
-		}
-	CleanupStack::PopAndDestroy(&var);
-	}
+  // Get propper widget names depending from view type
+  // and append to aFolderArray
+  for( TInt i = 0; i < count; i++ )
+    {
+    HnLiwUtils::GetVariantL( *iGetListOutParam, KIdPath8, i, var );
+    TInt32 id;
+    var.Get( id );
+
+    if (id != iItemId)
+      {
+      CMmFolder* folder = CMmFolder::NewL();
+      CleanupStack::PushL( folder );
+
+      folder->SetId( id );
+
+      TPtrC title;
+      if( !iWidgetType.Compare( KWidgetTypeList ) )
+        {
+        HnLiwUtils::GetVariantL(
+            *iGetListOutParam, KLongNamePath8, i, var );
+        }
+      else if( !iWidgetType.Compare( KWidgetTypeGrid ) )
+        {
+        HnLiwUtils::GetVariantL(
+            *iGetListOutParam, KShortNamePath8, i, var );
+        }
+      else
+        {
+        HnLiwUtils::GetVariantL(
+            *iGetListOutParam, KAppGroupNamePath8, i, var );
+        }
+      var.Get( title );
+      folder->SetNameL( title );
+      aFolderArray.AppendL( folder );
+
+      CleanupStack::Pop( folder );
+      }
+    }
+  CleanupStack::PopAndDestroy(&var);
+  }
 
 // ---------------------------------------------------------------------------
 // Symbian factory function.
@@ -589,7 +589,7 @@ CMmFolder::~CMmFolder()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CMmFolder::CMmFolder()
@@ -597,7 +597,7 @@ CMmFolder::CMmFolder()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmFolder::SetNameL( const TDesC& aName )
@@ -607,7 +607,7 @@ void CMmFolder::SetNameL( const TDesC& aName )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 const TDesC& CMmFolder::Name() const
@@ -616,7 +616,7 @@ const TDesC& CMmFolder::Name() const
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CMmFolder::SetId( TInt aId )
@@ -625,13 +625,13 @@ void CMmFolder::SetId( TInt aId )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CMmFolder::Id()
     {
     return iId;
     }
-    
+
 // end of file
 

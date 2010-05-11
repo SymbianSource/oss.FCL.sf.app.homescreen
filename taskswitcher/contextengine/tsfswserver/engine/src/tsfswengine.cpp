@@ -40,9 +40,6 @@ const TInt KContentRefreshDelay = 50000; // 0.05 sec
 // for screenshots, they are scaled down to (screensize/this_factor).
 const TInt KScreenSizeFactor = 2;
 
-// format to get a lowercase hex string prefixed with 0x
-_LIT( KHexFmt, "0x%x" );
-
 const TUid KTsCameraUid = { 0x101F857a };
 
 //close command for widget
@@ -318,7 +315,7 @@ void CTsFswEngine::PublishFgAppUidL()
     if ( iFgAppUid != newUid && newUid.iUid )
         {
         iFgAppUid = newUid;
-        iFgAppUidStr.Format( KHexFmt, iFgAppUid.iUid );
+        iDataList->MoveEntryAtStart(newUid.iUid, EFalse);
         }
 
     TSLOG_OUT();
@@ -482,7 +479,12 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
     TSLOG2_IN( "aWgId = %d aFbsHandle = %d", aWgId, aFbsHandle );
 
     TUid appUid;
-    TInt err = iDataList->AppUidForWgId( aWgId, appUid );
+    TInt wgId = iDataList->FindMostTopParentWgId(aWgId);
+    if ( wgId == KErrNotFound )
+        {
+        wgId = aWgId;
+        }
+    TInt err = iDataList->AppUidForWgId( wgId, appUid );
     if ( err || appUid == KTsCameraUid )
         {
         // Dont't assign screenshot to camera app
@@ -497,7 +499,6 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
     iPreviewProvider->AckPreview(aFbsHandle);
     if ( err == KErrNone )
         {
-		iDataList->MoveEntryAtStart(appUid.iUid, EFalse);
         StoreScreenshot(aWgId, bmp);
         }
 

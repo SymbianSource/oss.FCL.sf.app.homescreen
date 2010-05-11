@@ -38,6 +38,9 @@
 #include "wminstaller.h"
 #include "wmlistbox.h"
 
+const TInt KExecuteCommandDelay( 50000 ); // 50ms
+const TInt KMaxCmdExecutionCount( 6 );
+
 // ---------------------------------------------------------
 // CWmPlugin::NewL
 // ---------------------------------------------------------
@@ -57,6 +60,12 @@ CWmPlugin* CWmPlugin::NewL()
 //
 CWmPlugin::~CWmPlugin()
     {
+    if ( iLauncher && iLauncher->IsActive() )
+        {
+        iLauncher->Cancel();
+        }
+    delete iLauncher;
+    
     if ( iWmInstaller && 
        iWmInstaller->IsActive() )
         {
@@ -77,6 +86,7 @@ CWmPlugin::~CWmPlugin()
 CWmPlugin::CWmPlugin()
     {
     iPreviousViewUid.iViewUid = KNullUid;
+    iExecutionCount = 0;
     }
 
 // ---------------------------------------------------------
@@ -106,6 +116,9 @@ void CWmPlugin::ConstructL()
     CleanupStack::PushL( mainView );
 	iViewAppUi->AddViewL( mainView );	
 	CleanupStack::Pop( mainView );
+	
+	// laucher for adding widgets.
+	iLauncher = CPeriodic::NewL( CActive::EPriorityIdle );
     }
 
 // ---------------------------------------------------------
@@ -246,12 +259,23 @@ void CWmPlugin::MainViewDeactivated()
         iEffectManager->UiRendered();
         }
 
-    TRAPD( err, ExecuteCommandL(); );
-    if ( KErrNone != err )
+    if ( !iEffectManager->IsEffectActive() )
         {
-        delete iPostponedContent;
-        iPostponedContent = NULL;
-        iPostponedCommand = ENone;
+        // launch effect without delay
+        iExecutionCount = KMaxCmdExecutionCount;
+        iLauncher->Start( 0, 0, TCallBack( ExecuteCommand, this ) );
+        }
+    else
+        {
+        // maximum wait time is 300ms (6 x 50ms)
+        if ( !iLauncher->IsActive() )
+            {
+            iExecutionCount++;
+            iLauncher->Start(
+                KExecuteCommandDelay,
+                KExecuteCommandDelay,
+                TCallBack( ExecuteCommand, this ) );
+            }
         }
     }
 
@@ -285,20 +309,53 @@ void CWmPlugin::SetPostponedCommandL(
     }
 
 // ---------------------------------------------------------
-// CWmPlugin::ExecuteCommandL
+// CWmPlugin::ExecuteCommand
 // ---------------------------------------------------------
 //
-void CWmPlugin::ExecuteCommandL()
+TInt CWmPlugin::ExecuteCommand( TAny* aSelf )
     {
-    if ( iPostponedCommand == EAddToHomescreen )
+    CWmPlugin* plugin = static_cast<CWmPlugin*>( aSelf );
+    plugin->DoExecuteCommand();
+    return 0;
+    }
+
+// ---------------------------------------------------------
+// CWmPlugin::DoExecuteCommand
+// ---------------------------------------------------------
+//
+void CWmPlugin::DoExecuteCommand()
+    {
+    // prevent multiple events
+    if ( iLauncher->IsActive() )
         {
-        TInt err = ContentController().AddWidgetL( *iPostponedContent );
-        if ( err != KErrNone )
-            ShowErrorNoteL( err );
+        iLauncher->Cancel();
         }
-    iPostponedCommand = ENone;
-    delete iPostponedContent;
-    iPostponedContent = NULL;
+    
+    if ( !iEffectManager->IsEffectActive() ||
+        iExecutionCount == KMaxCmdExecutionCount )
+        {
+        if ( iPostponedCommand == EAddToHomescreen )
+            {
+            TRAP_IGNORE(
+                TInt err( KErrNone );
+                err = ContentController().AddWidgetL( *iPostponedContent );
+                if ( KErrNone != err )
+                    ShowErrorNoteL( err );
+                );
+            }
+        iPostponedCommand = ENone;
+        delete iPostponedContent;
+        iPostponedContent = NULL;
+        iExecutionCount = 0; // reset counter
+        }
+    else
+        {
+        iExecutionCount++;
+        iLauncher->Start(
+            KExecuteCommandDelay,
+            KExecuteCommandDelay,
+            TCallBack( ExecuteCommand, this ) );
+        }
     }
 
 // ---------------------------------------------------------

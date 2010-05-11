@@ -110,6 +110,7 @@ LIBRARY     inetprotutil.lib
 LIBRARY     bitgdi.lib // CFbsBitmapDevice
 LIBRARY     charconv.lib
 LIBRARY     browserlauncher.lib
+LIBRARY     alfdecoderserverclient.lib // alf observer
 
 // libraries needed by the test framework
 LIBRARY     stiftestinterface.lib

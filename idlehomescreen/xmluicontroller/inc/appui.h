@@ -23,7 +23,7 @@
 #include <coeview.h>
 
 // User includes
-#include <hspublisherinfo.h>
+#include <aifwpublisherinfo.h>
 #include "xnappuiadapter.h"
 
 // Forward declarations
@@ -71,9 +71,9 @@ private:
     void HandleWsEventL( const TWsEvent& aEvent, 
             CCoeControl* aDestination );
 
-    TInt LoadPublisher( CXnNodeAppIf& aPublisher, TInt aReason );
-                      
-    TInt DestroyPublisher( CXnNodeAppIf& aPublisher, TInt aReason );
+    void LoadPublisher( const TAiFwPublisherInfo& aPublisher ); 
+                             
+    void DestroyPublisher( const TAiFwPublisherInfo& aPublisher );        
                            
     TBool DynInitMenuItemL( const TDesC& aItemType, 
         RPointerArray< CXnNodeAppIf >* aList = NULL );
@@ -82,6 +82,9 @@ private:
        
     void HandleUiReadyEventL();
     
+    TInt PublisherInfo( CXnNodeAppIf& aNode, 
+        THsPublisherInfo& aInfo ); 
+
 private:
     // new functions
     

@@ -953,14 +953,15 @@ void CWmMainContainer::StartLoadingWidgetsL()
     {
     if ( iFindbox && iFindPaneIsVisible )
         {
-        iFindbox->ResetL();
-        iFindbox->SetSearchTextL( KNullDesC );
+        iFindbox->ResetL();        
         CAknFilteredTextListBoxModel* m = 
                 static_cast <CAknFilteredTextListBoxModel*> ( iWidgetsList->Model() );
         if ( m && m->Filter() )
             {
             m->Filter()->ResetFilteringL();
             }
+        iFindbox->SetSearchTextL( KNullDesC );
+        iFindbox->DrawNow();
         }
     if ( !iWidgetLoader )
         {
@@ -1009,12 +1010,12 @@ TTypeUid::Ptr CWmMainContainer::MopSupplyObject( TTypeUid aId )
 // CWmMainContainer::Draw
 // ---------------------------------------------------------
 //
-void CWmMainContainer::Draw( const TRect& /*aRect*/ ) const
+void CWmMainContainer::Draw( const TRect& aRect ) const
 	{
 	CWindowGc& gc = SystemGc();	
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
-    AknsDrawUtils::Background( skin, cc, this, gc, Rect() );
+    AknsDrawUtils::Background( skin, cc, this, gc, aRect );
 	}
 
 // ---------------------------------------------------------
@@ -1301,18 +1302,18 @@ void CWmMainContainer::DeactivateFindPaneL(TBool aLayout)
         iFindPaneIsVisible = EFalse;        
         iWidgetsList->SetFindPaneIsVisible( EFalse );       
         
+
+        // set soft key set
+        CEikButtonGroupContainer* cbaGroup =
+            CEikButtonGroupContainer::Current();
+        TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
+                                    R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
+                                    R_AVKON_SOFTKEYS_OPTIONS_BACK );
+        cbaGroup->SetCommandSetL( cbaResourceId );
+        
         if (aLayout) //no need to draw UI if exiting list
             {
             LayoutControls();
-    
-            // set soft key set
-            CEikButtonGroupContainer* cbaGroup =
-                CEikButtonGroupContainer::Current();
-            TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
-                                        R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
-                                        R_AVKON_SOFTKEYS_OPTIONS_BACK );
-    
-            cbaGroup->SetCommandSetL( cbaResourceId );
             cbaGroup->DrawNow();
     
             UpdateFocusMode();

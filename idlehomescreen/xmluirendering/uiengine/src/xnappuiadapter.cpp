@@ -21,6 +21,7 @@
 #include <avkon.rsg>
 
 // User includes
+#include <hspublisherinfo.h>
 #include "xnappuiadapter.h"
 #include "xnappuiadapterimpl.h"
 #include "xnviewadapter.h"
@@ -28,11 +29,14 @@
 #include "xnfocuscontrol.h"
 #include "hscontentcontrolfactory.h"
 #include "xnviewadapter.h"
+#include "xnnode.h"
 
 #include "xuikon_builds_cfg.hrh"
 #include "debug.h"
 
 _LIT8( KActivateDefaultView, "activatedefault" );
+
+// ============================ LOCAL FUNCTIONS ================================
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -145,6 +149,7 @@ EXPORT_C void CXnAppUiAdapter::HandleXuikonEventL(
     CXnDomNode& /*aTriggerDefinition*/,
     CXnDomNode& /*aEvent*/ )
     {
+    // Default empty implementation
     }
 
 // -----------------------------------------------------------------------------
@@ -152,23 +157,21 @@ EXPORT_C void CXnAppUiAdapter::HandleXuikonEventL(
 //
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TInt CXnAppUiAdapter::LoadPublisher( CXnNodeAppIf& /*aPublisher*/, 
-    TInt /*aReason*/ )
+EXPORT_C void CXnAppUiAdapter::LoadPublisher( 
+    const TAiFwPublisherInfo& /*aPublisher*/ )     
     {
-    // Default empty implementation
-    return KErrNone;
+    // Default empty implementation    
     }
 
 // -----------------------------------------------------------------------------
-// CXnAppUiAdapter::DestroyDataPluginsL
+// CXnAppUiAdapter::DestroyPublisher
 //
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TInt CXnAppUiAdapter::DestroyPublisher( CXnNodeAppIf& /*aPublisher*/, 
-    TInt /*aReason*/ )
+EXPORT_C void CXnAppUiAdapter::DestroyPublisher( 
+    const TAiFwPublisherInfo& /*aPublisher*/ )     
     {
-    // Default empty implementation
-    return KErrNone;
+    // Default empty implementation    
     }
 
 // -----------------------------------------------------------------------------
@@ -212,6 +215,38 @@ EXPORT_C void CXnAppUiAdapter::HandleEventL( const TDesC& /*aEvent*/,
     CXnNodeAppIf& /*aDestination*/ )
     {
     // Default empty implementation
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::PublisherInfo
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C TInt CXnAppUiAdapter::PublisherInfo( CXnNodeAppIf& /*aNode*/, 
+    THsPublisherInfo& /*aInfo*/ )
+    {
+    // Default empty implementation    
+    return KErrNotSupported;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::PublisherInfo
+//
+// -----------------------------------------------------------------------------
+//
+TInt CXnAppUiAdapter::PublisherInfo( CXnNode& aNode, 
+    THsPublisherInfo& aInfo )
+    {
+    CXnNodeAppIf* node( NULL );
+    
+    TRAPD( err, node = &aNode.AppIfL() );
+    
+    if ( node )
+        {
+        err = PublisherInfo( *node, aInfo );    
+        }
+           
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -302,7 +337,7 @@ EXPORT_C void CXnAppUiAdapter::HandleUiReadyEventL()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C void CXnAppUiAdapter::ProcessMessageL( TUid aUid,
-        const TDesC8& /*aParams*/ )
+    const TDesC8& /*aParams*/ )
     {
     if ( aUid.iUid == KUidApaMessageSwitchOpenFileValue )
         {
@@ -394,6 +429,16 @@ CXnEffectManager* CXnAppUiAdapter::EffectManager() const
 MHsContentControl* CXnAppUiAdapter::HsContentControlSrv() const
     {
     return iImpl->HsContentControlSrv();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapter::ItemActivator
+// 
+// -----------------------------------------------------------------------------
+//
+CXnItemActivator& CXnAppUiAdapter::ItemActivator() const
+    {
+    return iImpl->ItemActivator();
     }
 
 // -----------------------------------------------------------------------------

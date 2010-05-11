@@ -22,6 +22,7 @@
 #define CXNWALLPAPERVIEW_H
 
 // System includes
+#include <e32base.h>
 #include <aknview.h>
 
 // User includes
@@ -30,10 +31,7 @@
 class CXnWallpaperContainer;
 class CXnAppUiAdapter;
 class CXnUiEngine;
-class TVwsViewId;
-class CPeriodic;
 class CXnSpBgCleaner;
-class CAknWaitDialog;
 
 // Constants
 const TUid KWallpaperViewUid = { 0x200286DB };
@@ -42,20 +40,14 @@ const TUid KWallpaperViewUid = { 0x200286DB };
 
 /**
 *  Wallpaper view.
-*  Possible to define current Idle background image.
+*  Possible to select background image.
 *
 *  @since S60 v5.0
 */
 NONSHARABLE_CLASS( CXnWallpaperView ) : public CAknView 
     {
-    /** View states */
-    enum TViewState 
-        {
-        EIdle,
-        EImageSelection,
-        EViewDeactivation
-        };
 public:
+    // constructor and destructor
 
     /**
      * Two-phased constructor.
@@ -68,23 +60,30 @@ public:
      */
     ~CXnWallpaperView();
 
+public:
+    // from CAknView
+    
     /**
-     * From CAknView.
-     * Returns view id.
-     * @return An unsigned integer (view id).
-     */
+     * @see CAknView
+     */      
     TUid Id() const;
 
 private:
-
-    /* From CAknView. */
-    void DoActivateL(
-        const TVwsViewId& aPrevViewId,
-        TUid aCustomMessageId,
-        const TDesC8& aCustomMessage );
+    // from CAknView
     
-    /* From CAknView. */
+    /**
+     * @see CAknView
+     */      
+    void DoActivateL( const TVwsViewId& aPrevViewId,        
+        TUid aCustomMessageId, const TDesC8& aCustomMessage );
+            
+    /**
+     * @see CAknView
+     */      
     void DoDeactivate();
+
+private:
+    // private constructors
     
     /**
      * C++ default constructor.
@@ -96,27 +95,39 @@ private:
      */
     void ConstructL();
 
-    /**
-     * Callback function to be used with CPeriodic.
-     */
-    static TInt TimerCallback( TAny *aPtr );
-    void DoHandleCallBackL();
-
-    /**
-     * Show error dialog
-     * 
-     * @param aResourceId Resource id to string to be displayed.
-     */
-    static void ShowErrorDialogL( const TInt aResourceId );
+public:
+    // new functions
     
-private: // data
+    /**
+     * Returns selected wallpaper filename as parameter
+     * 
+     * @since S60 5.2
+     * @param aFileName Selected wallpaper filename
+     */
+    void SelectedWallpaper( TFileName& aFileName ) const;
+    
+private:
+    // new functions
+    
+    static TInt HandleCallback( TAny* aAny );
+    
+    void DoHandleCallbackL();
+         
+private: 
+    // data
 
     /**
      * Wallpaper container.
      * Own.
      */
     CXnWallpaperContainer* iContainer;
-        
+    
+    /**
+     * Image files
+     * Own.
+     */
+    CDesCArrayFlat* iFiles;
+    
     /**
      * UiEngine
      * Not owned.
@@ -133,22 +144,12 @@ private: // data
      * Switch for multiple image selection.
      */
     TBool iMultiple;
-    
+        
     /**
-     * Previous view id
-     */
-    TVwsViewId iPreviousViewUid;
-
-    /**
-     * States of wallpaperview
-     */
-    TViewState iViewState;
-    
-    /**
-     * Periodic timer.
+     * Async callback.
      * Own.
      */
-    CPeriodic* iTimer;
+    CAsyncCallBack* iAsyncCb;
     
     /**
      * Resource file offset
@@ -159,13 +160,12 @@ private: // data
      * Statuspane background cleaner. 
      * Own.
      */
-	CXnSpBgCleaner* iXnSpBgCleaner;
-    
-    /** 
-     * Wait dialog. 
-     * Own.
-     */
-	CAknWaitDialog* iWaitDialog;    
+	CXnSpBgCleaner* iSpBgCleaner;
+	
+	/**
+	 * Selected image filename
+	 */
+	TFileName iFileName;
     };
 
 #endif      // CXNWALLPAPERVIEW_H

@@ -15,7 +15,11 @@
 *
 */
 
+// System includes
+
+
 // User includes
+#include <xnuiengine.rsg>
 #include "xnviewmanager.h"
 #include "xnviewdata.h"
 
@@ -215,7 +219,7 @@ TInt CXnRootData::Load()
         }
     else if ( err == KErrNoMemory )
         {
-        ShowOutOfMemError();
+        TRAP_IGNORE( iManager.ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
         }
 
     // Configuration loading failed totally
@@ -535,7 +539,8 @@ TBool CXnRootData::AllViewsDestroyed() const
             {                       
             if ( toLoad->Load() == KErrNoMemory )
                 {
-                self->ShowOutOfMemError();
+                TRAP_IGNORE( 
+                    self->iManager.ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );                
                 }
             }
         

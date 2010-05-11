@@ -33,7 +33,7 @@ PRJ_EXPORTS
 ../data/suite.xml z:/private/101F4CD2/import/suites/foldersuite/suite.xml
 #ifdef __PEN_SUPPORT
 ../data/items_touch.xml z:/private/101F4CD2/import/suites/foldersuite/items.xml
-#else 
+#else
 ../data/items_nontouch.xml z:/private/101F4CD2/import/suites/foldersuite/items.xml
 #endif
 

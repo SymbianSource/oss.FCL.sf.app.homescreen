@@ -8359,6 +8359,14 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                 {
                 // Mark tree rendered
                 iCurrentView->SetRenderedL();
+                                
+                if ( iAppUiAdapter.EffectManager()->ControlEffectActive( control ) )
+                    {
+                    // control effect is ongoing, no need to draw control yet
+                    redrawRegion.Clear();
+                    continue;
+                    }
+                
                 TInt count( redrawRegion.Count() );
                 
                 if( count > 2 )
@@ -8672,7 +8680,7 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
     iDirtyList.Reset();
 
     iRedrawRegions.ResetAndDestroy();
-
+       
     // Remove previous menubar and stylus popup node
     iMenuNode = NULL;
     iStylusPopupNode = NULL;
@@ -8711,19 +8719,15 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
             }
         }
 
-    // Set menu node even if its NULL, to allow keyevent dispatcher
-    // to handle no softkeys
-    if ( iKeyEventDispatcher )
-        {
-        iKeyEventDispatcher->SetMenuNodeL( iMenuNode );    
-        }
-    
     ReportScreenDeviceChangeL();
             
     SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
     
     RootNode()->SetDirtyL();
+           
     ForceRenderUIL();
+           
+    iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
     }
 
 // -----------------------------------------------------------------------------
@@ -8921,14 +8925,18 @@ CXnNode* CXnUiEngineImpl::ActiveView()
 //
 void CXnUiEngineImpl::RefreshMenuL()
     {
-    if ( iLayoutControl & XnLayoutControl::ERefreshMenu )
+    if ( IsLayoutDisabled() )
+        {
+        return;
+        }
+    
+    if ( iLayoutControl & XnLayoutControl::ERefreshMenu )         
         {
         if ( iKeyEventDispatcher )
             {
+            iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
             iKeyEventDispatcher->RefreshMenuL();        
-            }
-        
-        iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
+            }               
         }
     }
 
@@ -9118,7 +9126,7 @@ void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
 
     ReportScreenDeviceChangeL();
     
-    iViewManager.OrientationChanged();
+    iAppUiAdapter.EffectManager()->OrientationChanged();
             
     if ( !iControlAdapterList )
         {

@@ -24,6 +24,7 @@
 #include <appinfo.rh>
 #include <avkon.mbg>
 #include <activeidle3.loc>
+#include <drmcommon.loc>
 
 //  RESOURCE IDENTIFIER
 NAME    XNWP // 4 letter ID
@@ -63,7 +64,27 @@ RESOURCE TBUF r_qtn_hs_too_big_image_note
     {
     buf = qtn_hs_too_big_image_note;
     }
-    
+
+// ----------------------------------------------------
+// r_qtn_hs_drm_protected_image_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_drm_protected_image_note 
+    {
+    buf = qtn_drm_mgr_det_exp;
+    }
+
+// ----------------------------------------------------
+// r_qtn_hs_processing_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_processing_note
+    {
+    buf = qtn_gen_note_processing;
+    }
+
 // ----------------------------------------------------
 // r_change_wallpaper_wait_dialog
 //

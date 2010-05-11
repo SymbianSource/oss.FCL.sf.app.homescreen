@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.69 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.69 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.75 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.75 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -46,6 +46,7 @@
 #include <AknDlgShut.h>
 #include <mmenuinternalPSkeys.h>
 #include <aknstyluspopupmenu.h> //stylus popup for long tap event
+#include <APGWGNAM.H>
 
 #include "mmgui.hrh"
 #include "mmguiconstants.h"
@@ -218,12 +219,12 @@ void CMmAppUi::HandleResourceChangeL( TInt aType )
             {
             iCurrentContainer->SetManualHighlightL( lastItemIndex, EFalse );
             }
-/*        else if( !iCurrentContainer->IsHighlightVisible()
+        else if( !iCurrentContainer->IsHighlightVisible()
                 && iCurrentContainer->Widget()->TopItemIndex() > -1)
             {
             iCurrentContainer->SetManualHighlightL(
                     iCurrentContainer->Widget()->TopItemIndex(), EFalse );
-            } */
+            }
 
         iCurrentContainer->SetRect( ClientRect() );
         iDummyContainer->SetRect( ClientRect() );
@@ -1277,19 +1278,19 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
       RHashMap<TInt, CEikMenuPaneItem::SData> menuItemMap;
       CleanupClosePushL( menuItemMap );
 
-            while ( menuIterator->HasNextSpecific() )
-                {
-                CHnMenuItemModel* childItem = menuIterator->GetNextSpecific();
-        CEikMenuPaneItem::SData childData;
-        childData.iCommandId = childItem->Command();
-        childData.iText = childItem->NameL().
-          Left( CEikMenuPaneItem::SData::ENominalTextLength );
-        childData.iFlags = 0;
-        childData.iCascadeId = 0;
+      while ( menuIterator->HasNextSpecific() )
+          {
+          CHnMenuItemModel* childItem = menuIterator->GetNextSpecific();
+          CEikMenuPaneItem::SData childData;
+          childData.iCommandId = childItem->Command();
+          childData.iText = childItem->NameL().
+                  Left( CEikMenuPaneItem::SData::ENominalTextLength );
+          childData.iFlags = 0;
+          childData.iCascadeId = 0;
 
-        positionArray.AppendL( childItem->Position() );
-        menuItemMap.InsertL( childItem->Position(), childData );
-                }
+          positionArray.AppendL( childItem->Position() );
+          menuItemMap.InsertL( childItem->Position(), childData );
+          }
 
       positionArray.Sort();
 
@@ -1313,12 +1314,12 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
     MMPERF(("CMmAppUi::DynInitMenuPaneL - STOP"));
     }
 
-  if ( !popupMenuDisplayed && iCurrentContainer )
-    {
-    iCurrentContainer->EndLongTapL( ETrue );
-    HandleHighlightItemSingleClickedL(
-        iCurrentContainer->Widget()->CurrentItemIndex() );
-    }
+    if ( !popupMenuDisplayed && iCurrentContainer )
+        {
+        iCurrentContainer->EndLongTapL( ETrue );
+        HandleHighlightItemSingleClickedL(
+            iCurrentContainer->Widget()->CurrentItemIndex() );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -1807,6 +1808,10 @@ void CMmAppUi::HandlePresentationChangeL(
 
     if( iCurrentContainer != aWidgetContainer )
         {
+        // During open new folder cancel longTap. 
+        if( iCurrentContainer && iCurrentContainer->IsEditMode() )
+            iCurrentContainer->EnableLongTapAnimation( EFalse );
+
         // We want a highlight to be visible while switching between
         // grid and list views but no highlight should be visible
         // after opening a folder.
@@ -1822,6 +1827,26 @@ void CMmAppUi::HandlePresentationChangeL(
             {
             iCurrentContainer->SetHighlightVisibilityL( ETrue );
             }
+
+        // force scroll view to highlighted item in case we've been backing back
+        // and change presentation mode (to list view) had been done.
+        if( iCurrentContainer->WidgetType() == EListWidget )
+            {
+            TInt offsetBottom =
+                    iCurrentContainer->Widget()->View()->ItemPos(
+                        iCurrentSuiteModel->GetSuiteHighlight() ).iY
+                        + iCurrentContainer->Widget()->ItemHeight()
+                        - iCurrentContainer->Widget()->View()->ViewRect().Height();
+            TInt offsetTop = iCurrentContainer->Widget()->View()->ItemPos(
+                    iCurrentSuiteModel->GetSuiteHighlight() ).iY;
+            TBool takeTop = Abs( offsetTop ) < Abs( offsetBottom );
+            TInt offset = ( takeTop ) ? offsetTop : offsetBottom;
+            if( offset != 0 )
+                {
+                iCurrentContainer->Widget()->HandlePhysicsScrollEventL(
+                        offset );
+                }
+            }
         }
     else
         {
@@ -1832,7 +1857,7 @@ void CMmAppUi::HandlePresentationChangeL(
         {
         iCurrentContainer->SetRect(ClientRect());
         iDummyContainer->SetRect(ClientRect());
-        if( IsForeground() )
+        if( IsForeground() || IsFaded() )
             {
             // should be called before MakeVisible (and after SetRect or SetupLayout,
             // so that default highlight is displayed correctly when zoomed)
@@ -1913,6 +1938,7 @@ void CMmAppUi::OfferToolbarEventL( TInt aCommand )
 TInt CMmAppUi::ExecuteExtensionActionL( const TUid aUid , const TDesC& aCommand,
                 CLiwGenericParamList* aEventParamList )
     {
+    iCurrentContainer->SetExDialogOpened( ETrue );
     return iMmExtManager->ExecuteActionL( aUid, aCommand, aEventParamList);
     }
 // ---------------------------------------------------------------------------
@@ -2451,7 +2477,7 @@ void CMmAppUi::ExitMatrix( TExitType aExitType )
         // displayed and then the menu would appear again on the screen for
         // a fraction of second causing an ugly and confusing flicker effect.
         TRAP_IGNORE( PrepareHomescreenForMatrixExitL() );
-//        ShowHomescreenL( aExitType );
+        //ShowHomescreenL( aExitType );
         //if we got exit cmd from OS, let's really exit.
         Exit();
         }
@@ -2508,8 +2534,8 @@ void CMmAppUi::CleanupForExitL( TExitKeyType aExitKey )
             DEBUG(("\t_Mm_:Top item index reset"));
             iCurrentContainer->ResetWidgetPosition();
             iCurrentContainer->Widget()->UpdateScrollBarsL();
-      iCurrentContainer->MakeVisible( ETrue );
-      iCurrentContainer->DrawNow();
+            iCurrentContainer->MakeVisible( ETrue );
+            iCurrentContainer->DrawNow();
             }
         }
 
@@ -2524,29 +2550,49 @@ void CMmAppUi::ShowHomescreenL( TExitType  aExitType  )
     {
     TInt appToShowUid(0);
     TInt idleid(0);
-    if (aExitType == EExitToIdle || aExitType == EExitToPhone)
+    switch( aExitType )
         {
-        User::LeaveIfError(RProperty::Get(KPSUidAiInformation, KActiveIdleUid,
-                appToShowUid));
-        OpenAppL(TUid::Uid(appToShowUid));
-        }
-    else if (KErrNone == RProperty::Get(KPSUidUikon, KUikVideoCallTopApp,
-            idleid))
-        {
-        // Possible error code not relevant, as we have valid id anyway
-        if (idleid != KVideoCallAppUid) // idle or phone
+        case EExitToIdle:
             {
-            OpenAppL(TUid::Uid(KPhoneAppUid));
+            User::LeaveIfError( RProperty::Get( KPSUidAiInformation,
+                    KActiveIdleUid, appToShowUid ) );
+            OpenAppL( TUid::Uid( appToShowUid ) );
             }
-        else
+            break;
+        case EExitToPhone:
             {
-            CreateActivateViewEventL(TVwsViewId(TUid::Uid(idleid),
-                    TUid::Uid(idleid)), KNullUid, KNullDesC8());
+            if( !RProperty::Get( KPSUidUikon, KUikVideoCallTopApp, idleid ) )
+                {
+                // Possible error code not relevant, as we have valid id anyway
+                if( idleid == KVideoCallAppUid )
+                    {
+                    CreateActivateViewEventL( TVwsViewId(
+                            TUid::Uid( idleid ), TUid::Uid( idleid ) ),
+                            KNullUid, KNullDesC8() );
+                    break;
+                    }
+                }
+            CAknTaskList* taskList = CAknTaskList::NewL(
+                    iCoeEnv->WsSession() );
+            TApaTask task = taskList->FindRootApp( TUid::Uid( KPhoneAppUid ) );
+            delete taskList;
+            if( task.Exists() )
+                {
+                CApaWindowGroupName* windowName = CApaWindowGroupName::NewLC(
+                                iCoeEnv->WsSession(), task.WgId() );
+                TBool hidden = windowName->Hidden();
+                CleanupStack::PopAndDestroy( windowName );
+                if( !hidden )
+                    {
+                    OpenAppL( TUid::Uid( KPhoneAppUid ) );
+                    break;
+                    }
+                }
+            ShowHomescreenL( EExitToIdle );
             }
-        }
-    else
-        {
-        OpenAppL(TUid::Uid(KPhoneAppUid));
+            break;
+        default:
+            ShowHomescreenL( EExitToPhone );
         }
     }
 
@@ -2562,10 +2608,16 @@ void CMmAppUi::PrepareHomescreenForMatrixExitL()
     TApaTask task = taskList->FindRootApp( TUid::Uid( KPhoneAppUid ) );
     delete taskList;
 
-    if ( task.Exists() )
+    if( task.Exists() )
         {
-        succeeded = !iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
-                    task.WgId(), 1 );
+        CApaWindowGroupName* windowName = CApaWindowGroupName::NewLC(
+                iCoeEnv->WsSession(), task.WgId() );
+        if( !windowName->Hidden() )
+            {
+            succeeded = !iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
+                            task.WgId(), 1 );
+            }
+        CleanupStack::PopAndDestroy( windowName );
         }
 
     if( !succeeded )

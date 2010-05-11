@@ -11,8 +11,8 @@
 *
 * Contributors:
 *
-* Description:  
-*  Version     : %version: MM_12.1.7 % << Don't touch! Updated by Synergy at check-out.
+* Description:
+*  Version     : %version: MM_12.1.8 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -23,20 +23,20 @@
 // INCLUDES
 #include <e32std.h>
 #include <e32base.h>
-#include <eikfrlb.h> 
+#include <eikfrlb.h>
 
 // CLASS DECLARATION
 
 /**
  *  Multimedia Menu Listbox view.
- *  
+ *
  *  @code
  *  @endcode
  *  @lib mmwidgets
  *  @since S60 v3.0
  *  @ingroup group_mmwidgets
  */
-NONSHARABLE_CLASS( CMmListBoxView ) : public CFormattedCellListBoxView 
+NONSHARABLE_CLASS( CMmListBoxView ) : public CFormattedCellListBoxView
     {
 public:
     // Constructors and destructor
@@ -55,149 +55,120 @@ public:
      * Two-phased constructor.
      */
     static CMmListBoxView* NewLC();
-	
-	/**
-	 * Calculate the bottom item index.
-	 * 
-	 * @since S60 v3.0
-	 */
+
+  /**
+   * Calculate the bottom item index.
+   *
+   * @since S60 v3.0
+   */
     void CalcBottomItemIndex();
-	
-	/**
-	 * Draw the view.
-	 * 
-	 * @since S60 v3.0
-	 * @param clipRect Clipping rectangle.
-	 */
+
+  /**
+   * Draw the view.
+   *
+   * @since S60 v3.0
+   * @param clipRect Clipping rectangle.
+   */
     void Draw(const TRect* clipRect) const;
-    
-	/**
-	 * Draws the listbox within the given clipping rect.
-	 * 
-	 * @since S60 v3.0
-	 * @param clipRect Clipping rectangle.
-	 */
+
+  /**
+   * Draws the listbox within the given clipping rect.
+   *
+   * @since S60 v3.0
+   * @param clipRect Clipping rectangle.
+   */
     void DoDraw(const TRect* aClipRect) const;
-    
-	/**
-	 * Draw item in view. It is possible that it
-	 * calls drawing of more than one item.
-	 * 
-	 * @since S60 v3.0
-	 * @param aItemIndex Item index.
-	 */
+
+  /**
+   * Draw item in view. It is possible that it
+   * calls drawing of more than one item.
+   *
+   * @since S60 v3.0
+   * @param aItemIndex Item index.
+   */
     void DrawItem(TInt aItemIndex) const;
-    
-	/**
-	 * Draw a single item in view.
-	 * 
-	 * @since S60 v3.0
-	 * @param aItemIndex Item index.
-	 */
+
+  /**
+   * Draw a single item in view.
+   *
+   * @since S60 v3.0
+   * @param aItemIndex Item index.
+   */
     void DrawSingleItem (TInt aItemIndex) const;
-    
-	/**
-	 * Get the number of items that fit in rectangle.
-	 * 
-	 * @since S60 v3.0
-	 * @param aRect Clipping rectangle.
-	 * @return Number of items that fit in rectangle.
-	 */
-    TInt NumberOfItemsThatFitInRect(const TRect& aRect) const;
-	
-	/**
-	 * Get the number of items that fit in rectangle (with option to include
-	 * partial item at bottom of view).
-	 * 
-	 * @since S60 v3.0
-	 * @param aRect Rect for calculations.
-	 * @param aIncludePartialItem Should partial item be included.
-	 * @return Number of items that fit in rectangle.
-	 */
-    TInt GetNumberOfItemsThatFitInRect (const TRect& aRect, TBool aIncludePartialItem ) const;
-	
-	/**
-	 * Get item size.
-	 * 
-	 * @since S60 v3.0
-	 * @param aItemIndex Item index.
-	 * @return Size of item.
-	 */
-    TSize ItemSize(TInt aItemIndex) const;
-	
-	/**
-	 * Sets aItemIndex to the index of the item whose bounding box contains aPosition.
-	 * 
-	 * @since S60 v3.0
-	 * @param aPosition Item position.
-	 * @param aItemIndex Item index.
-	 * @return Was item found.
-	 */
+
+  /**
+   * Sets aItemIndex to the index of the item whose bounding box contains aPosition.
+   *
+   * @since S60 v3.0
+   * @param aPosition Item position.
+   * @param aItemIndex Item index.
+   * @return Was item found.
+   */
     TBool XYPosToItemIndex(TPoint aPosition, TInt& aItemIndex) const;
-    
-	/**
-	 * Gets item position.
-	 * 
-	 * @since S60 v3.0
-	 * @param aItemIndex Item index.
-	 * @return Item position.
-	 */
+
+  /**
+   * Gets item position.
+   *
+   * @since S60 v3.0
+   * @param aItemIndex Item index.
+   * @return Item position.
+   */
     TPoint ItemPos(TInt aItemIndex) const;
-	
-	/**
-	 * Sets item height.
-	 * 
-	 * @since S60 v3.0
-	 * @param aItemHeight Item height.
-	 */
+
+  /**
+   * Sets item height.
+   *
+   * @since S60 v3.0
+   * @param aItemHeight Item height.
+   */
     void SetItemHeight(TInt aItemHeight);
-	
-	/**
-	 * Calculates new top item index so item is visible.
-	 * 
-	 * @since S60 v3.0
-	 * @param aItemIndex Item to be visible.
-	 * @return New top item index.
-	 */
+
+  /**
+   * Calculates new top item index so item is visible.
+   *
+   * @since S60 v3.0
+   * @param aItemIndex Item to be visible.
+   * @return New top item index.
+   */
     TInt CalcNewTopItemIndexSoItemIsVisible(TInt aItemIndex) const;
-	
-	/**
-	 * Draw background between rects.
-	 * 
-	 * @since S60 v3.0
-	 * @param aUsedPortionOfViewRect Inner rect.
-	 * @param aSmallerViewRect Outer rect.
-	 */
+
+  /**
+   * Draw background between rects.
+   *
+   * @since S60 v3.0
+   * @param aUsedPortionOfViewRect Inner rect.
+   * @param aSmallerViewRect Outer rect.
+   */
     void RedrawBackground( TRect aUsedPortionOfViewRect, TRect aSmallerViewRect) const;
-	
-	/**
-	 * Draws background in list which is not covered by vivible items.
-	 * 
-	 * @since S60 v3.0
-	 */
+
+  /**
+   * Draws background in list which is not covered by vivible items.
+   *
+   * @since S60 v3.0
+   */
     void RedrawBackground() const;
-	
-	/**
-	 * Gets total height of items within range.
-	 * 
-	 * @since S60 v3.0
-	 * @param aStartIndex Start item index.
-	 * @param aEndIndex End item index.
-	 * @return Total height of items starting from aStartIndex, ending with aEndIndex.
-	 */
+
+  /**
+   * Gets total height of items within range.
+   *
+   * @since S60 v3.0
+   * @param aStartIndex Start item index.
+   * @param aEndIndex End item index.
+   * @return Total height of items starting from aStartIndex, ending with aEndIndex.
+   */
     TInt GetTotalHeight( TInt aStartIndex, TInt aEndIndex ) const;
 
     /**
      * Gets the current widget vertical item offset.
-     * 
+     *
      * @since S60 v5.0
      * @return The current widget vertical item offset.
      */
     TInt VerticalItemOffset() const;
-    
+
     /**
      * Overridden to allow for disabling this method in certain situations.
-     * 
+     *
      * @param aItemIndex Item index.
      */
     TBool ScrollToMakeItemVisible(TInt aItemIndex);
@@ -205,7 +176,7 @@ public:
     /**
      * Disables ScrollToMakeItemVisible.
      * When disabled, ScrollToMakeItemVisible does nothing.
-     * 
+     *
      * @param aDisable Self-explanatory.
      */
     void DisableScrollToItem( TBool aDisable );
@@ -229,47 +200,47 @@ private:
      */
     void ConstructL();
 
-	/**
-	 * Updates average item height.
-	 * 
-	 * @since S60 v3.0
-	 */
-   	void UpdateAverageItemHeight();
+  /**
+   * Updates average item height.
+   *
+   * @since S60 v3.0
+   */
+     void UpdateAverageItemHeight();
 
-	/**
-	 * Gets last item index depending on height.
-	 * 
-	 * @since S60 v3.0
-	 * @param aStartIndex Start item index.
-	 * @param aHeight Height of area.
-	 * @return Last item index.
-	 */
+  /**
+   * Gets last item index depending on height.
+   *
+   * @since S60 v3.0
+   * @param aStartIndex Start item index.
+   * @param aHeight Height of area.
+   * @return Last item index.
+   */
     TInt GetLastIndexInHeight( const TInt aStartIndex, TInt aHeight ) const;
-    
-	/**
-	 * Sets the previously drawn current item index.
-	 * 
-	 * @since S60 v3.0
-	 * @param aIndex Current Item index.
-	 */
+
+  /**
+   * Sets the previously drawn current item index.
+   *
+   * @since S60 v3.0
+   * @param aIndex Current Item index.
+   */
     void SetPreviouslyDrawnCurrentItemIndex( TBool aIndex );
-    
+
 private:
 
-	/**
-	 * Scrollbar visibility flag.
-	 */
-	TBool iScrollbarIsVisible;
-	
-	/**
-	 * iCurrentItemIndex
-	 */
-	TInt iPreviouslyDrawnCurrentItemIndex;
-	
-	/**
-	 * When ETrue, disables ScrollToMakeItemVisible method.
-	 */
-	TBool iScrollToItemDisabled;
+  /**
+   * Scrollbar visibility flag.
+   */
+  TBool iScrollbarIsVisible;
+
+  /**
+   * iCurrentItemIndex
+   */
+  TInt iPreviouslyDrawnCurrentItemIndex;
+
+  /**
+   * When ETrue, disables ScrollToMakeItemVisible method.
+   */
+  TBool iScrollToItemDisabled;
     };
 
 #endif // MMLISTBOXVIEW_H

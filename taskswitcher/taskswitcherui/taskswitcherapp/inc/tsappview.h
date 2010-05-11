@@ -117,6 +117,15 @@ public:
      * @return  ETrue if application is being closed, EFalse otherwise
      */
     TBool AppCloseInProgress( TInt aWgId );
+    
+    /**
+     * Checks if app with the given window group id is present on taskswitcher
+     * list.
+     * 
+     * @param  aWgId  window group of the application to be checked
+     * @return  ETrue if there is application with the given id is on the list
+     */
+    TBool WgOnTaskList( TInt aWgId );
 
 protected:
     // from MCoeControlObserver
@@ -278,6 +287,11 @@ private: // Data
     TRect iBgContextOuterRect;
     TRect iBgContextInnerRect;
     CTsEventControler* iEvtHandler; //own
+    
+    /**
+     * Flag for marking exit on pointer events
+     */
+    TBool iExitOnPointerUp;
     };
 
 #endif // TSAPPVIEW_H

@@ -156,7 +156,10 @@ public: // plugin services
     RFs& FileServer();
     
     /** prestored action to be executed. */
-    void ExecuteCommandL();
+    void DoExecuteCommand();
+    
+    /** callback function for launcher */
+    static TInt ExecuteCommand( TAny* aSelf );
     
     /**
      * reference to iWmInstaller
@@ -237,6 +240,16 @@ private: // data members
      * Handles installation
      */
     CWmInstaller* iWmInstaller;
+    
+    /**
+     * Used for adding widgets to homescreen.
+     */
+    CPeriodic* iLauncher;
+    
+    /**
+     * Counter for execute command delay.
+     */
+    TInt iExecutionCount;
     
 #ifdef _WM_UNIT_TEST
     friend class CWmUnitTest;

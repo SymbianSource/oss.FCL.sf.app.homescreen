@@ -31,6 +31,7 @@
 #include <touchfeedback.h>
 #include <akntransitionutils.h>
 #include <akntranseffect.h>
+#include <aknlongtapanimation.h>
 
 #include "tsfastswaparea.h"
 #include "tsapplogging.h"
@@ -63,8 +64,13 @@ const TInt KRedrawTimeForLayoutSwitch = 700000; // 0.7 sec
 const TInt KHighlighActivationTime = 100000; // 100 ms
 const TInt KUpdateGridTime = 0; // imediately
 const TInt KOrientationSwitchTime = 1000000; // 1 sec
+const TInt KLongTapAnimationInitTime = 150000; // 0.15 sec
+const TInt KLongTapAnimationTimeout = 1000000; // 1 sec
 
 const TInt KMaxGranularity = 4;
+
+const TUid KTsMenuUid = { 0x101f4cd2 };
+const TUid KTsHomescreenUid = { 0x102750f0 };
 
 // -----------------------------------------------------------------------------
 // CTsFastSwapArea::NewL
@@ -103,7 +109,7 @@ CTsFastSwapArea::CTsFastSwapArea(CCoeControl& aParent,
     CTsDeviceState& aDeviceState,
     CTsEventControler& aEventHandler) :
     iParent(aParent), iDeviceState(aDeviceState), iEvtHandler(aEventHandler),
-    iIgnoreLayoutSwitch(EFalse), iWidgetClosingCount(0)
+    iIgnoreLayoutSwitch(EFalse), iWidgetClosingCount(0), iLongTapAnimationRunning(EFalse)
     {
     // no implementation required
     }
@@ -123,6 +129,8 @@ CTsFastSwapArea::~CTsFastSwapArea()
     delete iRedrawTimer;
     delete iUpdateGridTimer;
     delete iOrientationSignalTimer;
+    delete iLongTapAnimation;
+    delete iLongTapAnimationTimer;
     }
 
 // -----------------------------------------------------------------------------
@@ -160,6 +168,12 @@ void CTsFastSwapArea::ConstructL( const TRect& aRect )
     
     iOrientationSignalTimer = new (ELeave) CTsFastSwapTimer( *this ); 
     iOrientationSignalTimer->ConstructL();
+    
+    iLongTapAnimationTimer = new (ELeave) CTsFastSwapTimer( *this ); 
+    iLongTapAnimationTimer->ConstructL();
+    
+    iActivateOnPointerRelease = TPoint();
+    iHandlePointerCandidate = EFalse;
     
     ActivateL();
     }
@@ -419,23 +433,56 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
         {
         TInt wgId = iArray[aIndex]->WgId();
         TUid appUid = iArray[aIndex]->AppUid();
-        // Move other app to foreground and then move ourselves to background.
-        // Order is important and cannot be reversed.
-        iFSClient->SwitchToApp( wgId );
-        // We do not want to come back to ts if the activated app is closed.
-        // Therefore ts must be moved to background. Ignore orientation updates, it
-        // will be done after task switcher is sent to background
-        iIgnoreLayoutSwitch = ETrue;
-        CTsAppUi* appui =
-            static_cast<CTsAppUi*>( iEikonEnv->AppUi() );
-        appui->MoveAppToBackground( CTsAppUi::EActivationTransition, appUid, wgId );
-        iIgnoreLayoutSwitch = EFalse;
-        
-        // Orientation update
-        iPrevScreenOrientation = -1; // force orientation reinit
-        iOrientationSignalTimer->Cancel();
-        iOrientationSignalTimer->After(KOrientationSwitchTime);
+        SwitchToApp( wgId, appUid );
         }
+    }
+
+// --------------------------------------------------------------------------
+// CTsFastSwapArea::SwitchToApp
+// --------------------------------------------------------------------------
+//
+void CTsFastSwapArea::SwitchToApp( const TUid& aUid )
+    {
+    TApaTaskList taskList( iEikonEnv->WsSession() );
+    TApaTask task = taskList.FindApp( aUid );
+    TInt wgId = task.WgId();
+    SwitchToApp( wgId, aUid );
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsFastSwapArea::SwitchToApp
+// --------------------------------------------------------------------------
+//
+void CTsFastSwapArea::SwitchToApp( TInt aWgId, const TUid& aUid )
+    {
+    CTsAppUi* appui =
+        static_cast<CTsAppUi*>( iEikonEnv->AppUi() );
+    TBool effectsEnabled = appui->EffectsEnabled();
+
+    // Move other app to foreground
+    if ( !effectsEnabled )
+        {
+        iFSClient->SwitchToApp( aWgId );
+        }
+    
+    // We do not want to come back to ts if the activated app is closed.
+    // Therefore ts must be moved to background. Ignore orientation updates, it
+    // will be done after task switcher is sent to background
+    iIgnoreLayoutSwitch = ETrue;
+    appui->MoveAppToBackground( CTsAppUi::EActivationTransition, aUid, aWgId );
+    iIgnoreLayoutSwitch = EFalse;
+    
+    // Move other app to foreground
+    if ( effectsEnabled )
+        {
+        iFSClient->SwitchToApp( aWgId );
+        }
+    
+    // Orientation update
+    iPrevScreenOrientation = -1; // force orientation reinit
+    iOrientationSignalTimer->Cancel();
+    iOrientationSignalTimer->After(KOrientationSwitchTime);
     }
 
 // --------------------------------------------------------------------------
@@ -499,6 +546,8 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
         iPrevScreenOrientation = GetCurrentScreenOrientation();
         iOrientationSignalTimer->Cancel();
         iOrientationSignalTimer->After(KOrientationSwitchTime);
+        
+        iPrevAppCount = iArray.Count();
         }
 
     TSLOG_OUT();
@@ -536,7 +585,10 @@ void CTsFastSwapArea::TryCloseAllL()
 TBool CTsFastSwapArea::CanClose( TInt aIndex ) const
     {
     CTsFswEntry* e = iArray[aIndex];
-    return !e->AlwaysShown() && !e->SystemApp();
+    TBool canClose = !e->AlwaysShown() && !e->SystemApp();
+    // Special cases: Menu
+    canClose |= e->AppUid() == KTsMenuUid;
+    return canClose;
     }
 
 // --------------------------------------------------------------------------
@@ -815,6 +867,7 @@ void CTsFastSwapArea::HandleSwitchToBackgroundEvent()
         {
         iGrid->HideHighlight();
         }
+    CancelLongTapAnimation();
     }
 
 // -----------------------------------------------------------------------------
@@ -828,6 +881,7 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     
     iIsClosing.Reset();
     iWidgetClosingCount = 0;
+    iHandlePointerCandidate = EFalse;
     
     CTsGridItemDrawer* itemDrawer =
         static_cast<CTsGridItemDrawer*>( iGrid->ItemDrawer() );
@@ -865,6 +919,8 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     
     // give feedback
     LaunchPopupFeedback();
+    
+    iPrevAppCount = iArray.Count();
 
     TSLOG_OUT();
     }
@@ -900,6 +956,8 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
         const TKeyEvent& aKeyEvent,
         TEventCode aType )
     {
+    CancelLongTapAnimation();
+    
     iKeyEvent = ETrue;
     // handle the 'clear' key
     if ( aType == EEventKey && aKeyEvent.iCode == EKeyBackspace )
@@ -922,7 +980,8 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
     // pass the event to grid
     // do not pass down and up arrow key events
     if ( aKeyEvent.iScanCode != EStdKeyUpArrow &&
-         aKeyEvent.iScanCode != EStdKeyDownArrow )
+         aKeyEvent.iScanCode != EStdKeyDownArrow &&
+         aKeyEvent.iScanCode != EStdKeyApplication0 )
         {
         TBool animate(ETrue);
         TBool redraw(EFalse);
@@ -999,10 +1058,26 @@ void CTsFastSwapArea::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     iKeyEvent = EFalse;
     if(aPointerEvent.iType == TPointerEvent::EButton1Down)
         {
+        iHandlePointerCandidate = ETrue;
         iTapEvent = aPointerEvent;
         iGrid->EnableAknEventHandling(EFalse);
         iGrid->HandlePointerEventL(aPointerEvent);
         iGrid->EnableAknEventHandling(ETrue);
+        // Check if long tap animation should be launched
+        if ( LongTapAnimForPos(aPointerEvent.iParentPosition) )
+            {
+            iLongTapAnimationTimer->Cancel();
+            iLongTapAnimationTimer->After(KLongTapAnimationInitTime);
+            }
+        }
+    else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+        CancelLongTapAnimation( EFalse );
+        if( iActivateOnPointerRelease != TPoint() )
+            {
+            TapL(iActivateOnPointerRelease);
+            iActivateOnPointerRelease = TPoint();
+            }
         }
     }
 
@@ -1137,6 +1212,29 @@ void CTsFastSwapArea::TimerCompletedL( CTsFastSwapTimer* aSource )
             static_cast<CAknAppUi*>(iCoeEnv->AppUi())->HandleResourceChangeL(KEikDynamicLayoutVariantSwitch);
             iRedrawTimer->Cancel();
             iRedrawTimer->After(KRedrawTime);
+            }
+        }
+    else if ( aSource == iLongTapAnimationTimer )
+        {
+        if ( iLongTapAnimationRunning )
+            {
+            CancelLongTapAnimation();
+            }
+        else
+            {
+            static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL();
+            if ( iLongTapAnimation )
+                {
+                delete iLongTapAnimation;
+                iLongTapAnimation = NULL;
+                }
+            iLongTapAnimation = CAknLongTapAnimation::NewL(EFalse);
+            iLongTapAnimation->SetParent( this );
+            iLongTapAnimation->ShowAnimationL( iTapEvent.iParentPosition.iX,
+                                               iTapEvent.iParentPosition.iY );
+            iLongTapAnimationRunning = ETrue;
+            iLongTapAnimationTimer->Cancel();
+            iLongTapAnimationTimer->After(KLongTapAnimationTimeout);
             }
         }
     }
@@ -1397,18 +1495,13 @@ void CTsFastSwapArea::HandleAppKey(TInt aType)
         {
         if( aType == KAppKeyTypeShort )
             {
-            if(iGrid->IsHighlightVisible())
-                {
-                SelectNextItem();
-                }
-            else
-                {
-                iGrid->ShowHighlight();
-                }
+            // Switch to homescreen
+            SwitchToApp( KTsHomescreenUid );
             }
         else if( aType == KAppKeyTypeLong )
             {
-            SwitchToApp( SelectedIndex() );
+            // Dismiss task switcher
+            TRAP_IGNORE( iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit) );
             }
         }
     else
@@ -1427,6 +1520,13 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
     TSLOG2_IN("Old position x: %d, y:%d", ViewPos().iX, ViewPos().iY);
     TSLOG2_IN("New position x: %d, y:%d", aPoint.iX, aPoint.iY);
     TSLOG_OUT();
+    
+    
+    if( iHandlePointerCandidate )
+        {
+		//pointer was pressed and it's being waiting for handling
+        return;
+        }
 
     //postpone center item request in case of being moved
     if(iUpdateGridTimer->IsActive())
@@ -1465,6 +1565,13 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
 //
 void CTsFastSwapArea::TapL(const TPoint& aPoint)
     {
+    CancelLongTapAnimation();
+    
+    if(!iHandlePointerCandidate)
+        {
+        return;
+        }
+    
     if(Rect().Contains(aPoint) && iArray.Count())
         {
         //provide tap pointer event to grid
@@ -1477,6 +1584,7 @@ void CTsFastSwapArea::TapL(const TPoint& aPoint)
         //move task switcher to background
         iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
         }
+	iHandlePointerCandidate = EFalse;
     }
 
 // --------------------------------------------------------------------------
@@ -1485,6 +1593,13 @@ void CTsFastSwapArea::TapL(const TPoint& aPoint)
 //
 void CTsFastSwapArea::LongTapL(const TPoint& aPoint)
     {
+    CancelLongTapAnimation();
+    
+    if(!iHandlePointerCandidate)
+        {
+        return;
+        }
+    
     TInt index(KErrNotFound);
     if( iGrid->GridView()->XYPosToItemIndex(aPoint,index) && iArray.Count() )
         {
@@ -1492,18 +1607,12 @@ void CTsFastSwapArea::LongTapL(const TPoint& aPoint)
         SaveSelectedIndex();
         if ( !ShowPopupL(iSavedSelectedIndex, aPoint) )
             {
-            TapL(aPoint);
+            iActivateOnPointerRelease = aPoint;
             }
-        else
-            {
-            iGrid->ShowHighlight();
-            DrawNow();
-            }
+        iGrid->ShowHighlight();
+        DrawNow();
         }
-    else
-        {
-        TapL(aPoint);
-        }
+	iHandlePointerCandidate = EFalse;
     }
 
 // --------------------------------------------------------------------------
@@ -1513,6 +1622,10 @@ void CTsFastSwapArea::LongTapL(const TPoint& aPoint)
 void CTsFastSwapArea::DragL(
     const MAknTouchGestureFwDragEvent& aEvent)
     {
+    CancelLongTapAnimation();
+    // Reset activation point
+    iActivateOnPointerRelease = TPoint();
+	iHandlePointerCandidate = EFalse;
 	if( aEvent.State() == EAknTouchGestureFwStop)
 		{
 		CenterItem( KUpdateGridTime );
@@ -1757,11 +1870,15 @@ TInt CTsFastSwapArea::GetCurrentScreenOrientation()
 TBool CTsFastSwapArea::GetVariety( TInt& aVariety )
     {
     aVariety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
-    TInt screenOrientation = GetCurrentScreenOrientation();
-    if ( aVariety != screenOrientation )
+    TBool foreground = static_cast<CTsAppUi*>(iEikonEnv->AppUi())->IsForeground();
+    if ( foreground )
         {
-        aVariety = screenOrientation;
-        return ETrue;
+        TInt screenOrientation = GetCurrentScreenOrientation();
+        if ( aVariety != screenOrientation )
+            {
+            aVariety = screenOrientation;
+            return ETrue;
+            }
         }
     return EFalse;
     }
@@ -1787,19 +1904,78 @@ TBool CTsFastSwapArea::IsAppClosing( TInt aWgId )
             iWidgetClosingCount--;
             }
         }
-    else
+    return retVal;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::WgOnTaskList
+// -----------------------------------------------------------------------------
+//
+TBool CTsFastSwapArea::WgOnTaskList( TInt aWgId )
+    {
+    TBool retVal(EFalse);
+    TInt appCount = iArray.Count();
+    if ( iPrevAppCount != appCount )
         {
-        // Check current item list
+        TApaTaskList taskList( iEikonEnv->WsSession() );
+        TApaTask task = taskList.FindApp( KTsHomescreenUid );
+        TInt homescrWgId = task.WgId();
+        
         for ( TInt i = 0; i < iArray.Count(); i++ )
             {
             TInt wgId = iArray[i]->WgId();
-            if ( wgId == aWgId )
+            if ( wgId == aWgId ||
+                 homescrWgId == aWgId )
                 {
                 retVal = ETrue;
                 }
             }
         }
+    iPrevAppCount = appCount;
     return retVal;
+    }
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::CancelLongTapAnimation
+// -----------------------------------------------------------------------------
+//
+void CTsFastSwapArea::CancelLongTapAnimation(TBool aDisablePopup)
+    {
+    iLongTapAnimationRunning = EFalse;
+    iLongTapAnimationTimer->Cancel();
+    if ( iLongTapAnimation )
+        {
+        iLongTapAnimation->HideAnimation();
+        delete iLongTapAnimation;
+        iLongTapAnimation = NULL;
+        }
+    if( aDisablePopup )
+        {
+        TRAP_IGNORE( 
+        static_cast<CTsAppUi*>(iEikonEnv->AppUi())->DisablePopUpL() );
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::LongTapAnimForPos
+// -----------------------------------------------------------------------------
+//
+TBool CTsFastSwapArea::LongTapAnimForPos( const TPoint& aHitPoint )
+    {
+    if ( Rect().Contains(aHitPoint) )
+        {
+        for ( TInt i = 0; i < GridItemCount(); i++ )
+            {
+            TBool isItemHit = iGrid->GridView()->XYPosToItemIndex( aHitPoint, i );
+            if ( isItemHit && ( CanClose( i ) || CanCloseAll( i ) ) )
+                {
+                return ETrue;
+                }
+            }
+        }
+    return EFalse;
     }
 
 // End of file

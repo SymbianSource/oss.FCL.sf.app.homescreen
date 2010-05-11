@@ -41,7 +41,7 @@ RESOURCE RSS_SIGNATURE
 
 RESOURCE AVKON_VIEW r_wm_main_container_view
     {
-    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
     menubar = r_wm_main_container_options_menu;
     toolbar = 0;
     }

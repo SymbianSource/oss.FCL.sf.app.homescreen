@@ -23,6 +23,8 @@
 #include <e32base.h>
 
 class CCoeEnv;
+class CAlfEffectObserver;
+
 // CONSTANTS
 // Effects
 const TInt KAppStartEffectStyle = 1007;
@@ -70,6 +72,11 @@ public:
      */
     void UiRendered();
     
+    /**
+     * Returns true if effect is ongoing.
+     */
+    TBool IsEffectActive();
+    
 private:    
     /**
      * C++ default constructor.
@@ -85,8 +92,16 @@ private:
     /**
      * Starts fullscreen effect.
      * @param aEffect effect data
+     * @return ETrue if effect is started, EFalse otherwise.
      */
-    void DoBeginFullscreenEffect( TWmEffect& aEffect );
+    TBool DoBeginFullscreenEffect( TWmEffect& aEffect );
+    
+    /**
+     * Waits ongoing effect to complete.
+     * @param aInterval Time to wait for complete.
+     * @return ETrue if effect completed in given time, EFalse otherwise.
+     */
+    TBool WaitActiveEffect( TInt aInterval );
     
     /**
      * Removes and destroys effect from effect list.
@@ -104,6 +119,11 @@ private: // data
      * COE env
      */
     CCoeEnv& iCoeEnv;
+    
+    /**
+     * Effect observer
+     */
+    CAlfEffectObserver* iObserver;
     };
 
 #endif // WMEFFECTMANAGER_H

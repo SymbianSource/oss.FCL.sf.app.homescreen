@@ -40,7 +40,6 @@ class CXnAppUiAdapter;
 class CHsContentInfo;
 class CXnViewAdapter;
 class CXnOomSysHandler;
-class CIdle;
 
 namespace hspswrapper
     {
@@ -202,9 +201,11 @@ public:
     CXnOomSysHandler& OomSysHandler() const;
     
     void UpdatePageManagementInformationL();
-
-    void OrientationChanged();
-
+                  
+    void ShowErrorL( TInt aResource ) const;
+    
+    void PublishersReadyL( CXnViewData& aViewData, TInt aResult );
+        
 private:
     // new functions
     
@@ -235,9 +236,7 @@ private:
     void UpdateCachesL();
           
     void ReportWidgetAmountL( const CXnViewData& aViewData );
-    
-    void ShowDiskFullMessageL() const;
-          
+                
     TInt ResolveIconIndex( TInt aPageCount, TInt aPageNum ) const;
     
     /**
@@ -252,14 +251,11 @@ private:
      * Reset crash count
      */
     void ResetCrashCount();    
-
-    /**
-     * Show error note from resource.
-     */
-    void ShowErrorNoteL();   
     
     void DoRobustnessCheckL();
     
+    static TInt ContainerActivated( TAny* aAny );
+              
 private:
     // data
 
@@ -348,9 +344,15 @@ private:
     CPeriodic* iStabilityTimer;
 
     /**
-     * Flag for current orientation.
-     */    
-    TBool iIsLandscapeOrientation;
+     * Flag to indicate first view activation
+     */
+    TBool iUiReady;
+    	
+    /**
+     * Async callback
+     * Own. 
+     */
+    CPeriodic* iAsyncCb;
     
 private:   
     // Friend classes

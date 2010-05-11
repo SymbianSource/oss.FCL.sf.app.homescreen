@@ -698,6 +698,8 @@ TInt CXnNewstickerAdapter::PeriodicEventL( TAny* aPtr )
 //
 void CXnNewstickerAdapter::MakeVisible( TBool aVisible )
     {
+    CCoeControl::MakeVisible( aVisible );
+
     if( aVisible )
         {
         Start();
@@ -706,8 +708,6 @@ void CXnNewstickerAdapter::MakeVisible( TBool aVisible )
         {
         Stop();
         }
-    
-    CCoeControl::MakeVisible( aVisible );
     }
 
 // -----------------------------------------------------------------------------

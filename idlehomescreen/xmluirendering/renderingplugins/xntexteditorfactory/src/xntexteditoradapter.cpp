@@ -230,8 +230,8 @@ void CXnTextEditorAdapter::ConstructL()
     // for RTL languages
     iEditor->SetAknEditorLocalLanguage( User::Language() );
     ( AknLayoutUtils::LayoutMirrored() ? 
-                        iEditor->SetAlignment( EHRightVCenter ) : 
-                        iEditor->SetAlignment( EHLeftVCenter ) );
+                        iEditor->SetAlignment( EAknEditorAlignRight ) : 
+                        iEditor->SetAlignment( EAknEditorAlignLeft ) );
 
     iEditor->SetObserver( this );
                                         

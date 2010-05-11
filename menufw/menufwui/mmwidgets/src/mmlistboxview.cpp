@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_52 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_53 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -39,164 +39,126 @@
 #endif
 
 CMmListBoxView::CMmListBoxView ()
-	{
-	// No implementation required
-	}
+  {
+  // No implementation required
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 CMmListBoxView::~CMmListBoxView ()
-	{
-	}
+  {
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 CMmListBoxView* CMmListBoxView::NewLC ()
-	{
-	CMmListBoxView* self = new (ELeave)CMmListBoxView();
-	CleanupStack::PushL (self);
-	self->ConstructL ();
-	return self;
-	}
+  {
+  CMmListBoxView* self = new (ELeave)CMmListBoxView();
+  CleanupStack::PushL (self);
+  self->ConstructL ();
+  return self;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 CMmListBoxView* CMmListBoxView::NewL ()
-	{
-	CMmListBoxView* self=CMmListBoxView::NewLC ();
-	CleanupStack::Pop( self );
-	return self;
-	}
+  {
+  CMmListBoxView* self=CMmListBoxView::NewLC ();
+  CleanupStack::Pop( self );
+  return self;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::ConstructL ()
-	{
-	iScrollbarIsVisible = ETrue;
-	iPreviouslyDrawnCurrentItemIndex = KErrNotFound;
-	}
+  {
+  iScrollbarIsVisible = ETrue;
+  iPreviouslyDrawnCurrentItemIndex = KErrNotFound;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::UpdateAverageItemHeight ()
-	{
-	TInt count( iModel->NumberOfItems() );
-	if ( !count )
-	    {
-	    SetItemHeight( 2 );
-	    }
-	else
-	    {
-	    TInt totalHeight = GetTotalHeight( 0, count - 1 );
-	    TInt averageItemHeight = totalHeight / count;
-	    if ( totalHeight % count )
-	        {
-	        ++averageItemHeight;
-	        // this ensures that it is always possible to
-	        // scroll to the very bottom of the view by
-	        // using scrollbar.
-	        }
-	    SetItemHeight( averageItemHeight );
-	    }
-	}
+  {
+  TInt count( iModel->NumberOfItems() );
+  if ( !count )
+      {
+      SetItemHeight( 2 );
+      }
+  else
+      {
+      TInt totalHeight = GetTotalHeight( 0, count - 1 );
+      TInt averageItemHeight = totalHeight / count;
+      if ( totalHeight % count )
+          {
+          ++averageItemHeight;
+          // this ensures that it is always possible to
+          // scroll to the very bottom of the view by
+          // using scrollbar.
+          }
+      SetItemHeight( averageItemHeight );
+      }
+  }
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmListBoxView::GetTotalHeight (const TInt aStartIndex, TInt aEndIndex) const
-	{
-	TInt totalHeight = 0;
+  {
+  TInt totalHeight = 0;
 
-	if ( aEndIndex >= 0)
-		{
-		TInt itemCount = iModel->NumberOfItems ();
-		aEndIndex = (aEndIndex >= itemCount ) ? itemCount-1 : aEndIndex;
-		CMmListBoxItemDrawer* drawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer);
-		for (TInt i(aStartIndex); i <= aEndIndex; i++)
-			{
-			totalHeight += drawer->GetItemHeight (i, CurrentItemIndex () == i);
-			}
-		}
+  if ( aEndIndex >= 0)
+    {
+    TInt itemCount = iModel->NumberOfItems ();
+    aEndIndex = (aEndIndex >= itemCount ) ? itemCount-1 : aEndIndex;
+    CMmListBoxItemDrawer* drawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer);
+    for (TInt i(aStartIndex); i <= aEndIndex; i++)
+      {
+      totalHeight += drawer->GetItemHeight (i, CurrentItemIndex () == i);
+      }
+    }
 
-	return totalHeight;
-	}
+  return totalHeight;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmListBoxView::GetLastIndexInHeight (const TInt aStartIndex, TInt aHeight) const
-	{
-	TInt i = aStartIndex;
-	TInt totalHeight = 0;
+  {
+  TInt i = aStartIndex;
+  TInt totalHeight = 0;
 
-	TInt itemCount(iModel->NumberOfItems () );
-	CMmListBoxItemDrawer* drawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer);
+  TInt itemCount(iModel->NumberOfItems () );
+  CMmListBoxItemDrawer* drawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer);
 
-	for (; (i > -1) && (i < itemCount); i++)
-		{
-		totalHeight += drawer->GetItemHeight (i, CurrentItemIndex () == i);
-		if ( totalHeight > aHeight)
-			break;
-		}
+  for (; (i > -1) && (i < itemCount); i++)
+    {
+    totalHeight += drawer->GetItemHeight (i, CurrentItemIndex () == i);
+    if ( totalHeight > aHeight)
+      break;
+    }
 
-	TInt ret(i - aStartIndex);
+  TInt ret(i - aStartIndex);
 
-	if ( !AknLayoutUtils::PenEnabled() && totalHeight > aHeight )
-		{
-		ret--; // exclude partial item
-		}
+  if ( !AknLayoutUtils::PenEnabled() && totalHeight > aHeight )
+    {
+    ret--; // exclude partial item
+    }
 
-	return ret;
-	}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-TInt CMmListBoxView::NumberOfItemsThatFitInRect(const TRect& aRect) const
-	{
-	return GetNumberOfItemsThatFitInRect( aRect, EFalse );
-	}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-TInt CMmListBoxView::GetNumberOfItemsThatFitInRect (const TRect& aRect,
-		TBool aIncludePartialItem ) const
-	{
-	TInt i = iTopItemIndex;
-	TInt totalHeight = iVerticalOffset;
-
-	TInt itemCount( iModel->NumberOfItems () );
-	CMmListBoxItemDrawer* drawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer);
-	while (totalHeight < aRect.Height ())
-		{
-		totalHeight += ((i > -1) && (i < itemCount )) ? drawer->GetItemHeight (
-				i, CurrentItemIndex () == i) : iItemHeight;
-		++i;
-		}
-
-	TInt ret(i - iTopItemIndex);
-
-	if ( !AknLayoutUtils::PenEnabled() && !aIncludePartialItem && totalHeight > aRect.Height() )
-		{
-		ret--; // exclude partial item
-		}
-
-	return ret;
-	}
+  return ret;
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -213,49 +175,49 @@ TInt CMmListBoxView::ModelItemsCount()
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::CalcBottomItemIndex ()
-	{
+  {
 
-	TInt numberOfVisibleItems = NumberOfItemsThatFitInRect( iViewRect );
-	iBottomItemIndex = Min( iTopItemIndex + numberOfVisibleItems - 1,
-	        iModel->NumberOfItems() );
+  TInt numberOfVisibleItems = NumberOfItemsThatFitInRect( iViewRect );
+  iBottomItemIndex = Min( iTopItemIndex + numberOfVisibleItems - 1,
+          iModel->NumberOfItems() );
 
-	// The next piece of code removes filtering from find box when
-	// new list items are added.
-	if ( Flags () & CListBoxView::EItemCountModified)
-		{
-		CAknFilteredTextListBoxModel *model= STATIC_CAST(CAknFilteredTextListBoxModel*,iModel);
-		CAknListBoxFilterItems *filter = model ? model->Filter () : 0;
-		if ( filter)
-			{
-			TRAP_IGNORE(filter->ResetFilteringL());
-			}
-		}
-	}
+  // The next piece of code removes filtering from find box when
+  // new list items are added.
+  if ( Flags () & CListBoxView::EItemCountModified)
+    {
+    CAknFilteredTextListBoxModel *model= STATIC_CAST(CAknFilteredTextListBoxModel*,iModel);
+    CAknListBoxFilterItems *filter = model ? model->Filter () : 0;
+    if ( filter)
+      {
+      TRAP_IGNORE(filter->ResetFilteringL());
+      }
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::Draw (const TRect* aClipRect) const
-	{
+  {
     TBool drawingInitiated(EFalse);
     if ( CAknEnv::Static()->TransparencyEnabled() &&
-    		iWin && iWin->GetDrawRect() == TRect::EUninitialized )
-    	{
-    	TRect a(ViewRect());
-    	if (!aClipRect || *aClipRect == TRect(0,0,0,0) )
-    		{
-    		aClipRect = &a;
-    		}
-    	drawingInitiated=ETrue;
-		iWin->Invalidate( *aClipRect );
-		iWin->BeginRedraw( *aClipRect );
-    	}
+        iWin && iWin->GetDrawRect() == TRect::EUninitialized )
+      {
+      TRect a(ViewRect());
+      if (!aClipRect || *aClipRect == TRect(0,0,0,0) )
+        {
+        aClipRect = &a;
+        }
+      drawingInitiated=ETrue;
+    iWin->Invalidate( *aClipRect );
+    iWin->BeginRedraw( *aClipRect );
+      }
 
-	DoDraw(aClipRect);
+  DoDraw(aClipRect);
 
-	CMmListBoxItemDrawer* itemDrawer =
-			static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
+  CMmListBoxItemDrawer* itemDrawer =
+      static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
     if (aClipRect)
         {
         TRect rect(*aClipRect);
@@ -269,77 +231,77 @@ void CMmListBoxView::Draw (const TRect* aClipRect) const
         }
 
     if ( CAknEnv::Static()->TransparencyEnabled() &&
-    		iWin && drawingInitiated )
-    	{
-    	drawingInitiated = EFalse;
-    	iWin->EndRedraw( );
-    	}
-	}
+        iWin && drawingInitiated )
+      {
+      drawingInitiated = EFalse;
+      iWin->EndRedraw( );
+      }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::DoDraw(const TRect* aClipRect) const
-	{
-	CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
-	view->UpdateAverageItemHeight ();
+  {
+  CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
+  view->UpdateAverageItemHeight ();
 
-	CMmListBoxModel* model = static_cast< CMmListBoxModel* > ( iModel );
-	if ( model && model->GetSuiteModel()
-			&& !model->GetSuiteModel()->GetItemsOrder()->IsSuiteReadyToShow() )
-		{
-		return;
-		}
+  CMmListBoxModel* model = static_cast< CMmListBoxModel* > ( iModel );
+  if ( model && model->GetSuiteModel()
+      && !model->GetSuiteModel()->GetItemsOrder()->IsSuiteReadyToShow() )
+    {
+    return;
+    }
 
-	if ( RedrawDisabled () || !IsVisible () )
-		{
-		return;
-		}
+  if ( RedrawDisabled () || !IsVisible () )
+    {
+    return;
+    }
 
-	TInt i = iTopItemIndex;
-	CMmListBoxItemDrawer* itemDrawer =
-			static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
-	MAknsSkinInstance *skin = AknsUtils::SkinInstance ();
-	CCoeControl* control = itemDrawer->FormattedCellData()->Control ();
-	MAknsControlContext *cc = AknsDrawUtils::ControlContext (control);
+  TInt i = iTopItemIndex;
+  CMmListBoxItemDrawer* itemDrawer =
+      static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
+  MAknsSkinInstance *skin = AknsUtils::SkinInstance ();
+  CCoeControl* control = itemDrawer->FormattedCellData()->Control ();
+  MAknsControlContext *cc = AknsDrawUtils::ControlContext (control);
 
-	if ( !cc)
-		{
-		cc = itemDrawer->FormattedCellData()->SkinBackgroundContext ();
-		}
+  if ( !cc)
+    {
+    cc = itemDrawer->FormattedCellData()->SkinBackgroundContext ();
+    }
 
-	itemDrawer->SetTopItemIndex (iTopItemIndex);
+  itemDrawer->SetTopItemIndex (iTopItemIndex);
 
-	if ( iModel->NumberOfItems () > 0)
-		{
-		TBool drawingInitiated = ETrue;
-		if ( CAknEnv::Static()->TransparencyEnabled () )
-			{
-			if ( iWin && iWin->GetDrawRect () == TRect::EUninitialized)
-				{
+  if ( iModel->NumberOfItems () > 0)
+    {
+    TBool drawingInitiated = ETrue;
+    if ( CAknEnv::Static()->TransparencyEnabled () )
+      {
+      if ( iWin && iWin->GetDrawRect () == TRect::EUninitialized)
+        {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-								MAknListBoxTfxInternal* transApi =
-									CAknListLoader::TfxApiInternal( iGc );
-								drawingInitiated = transApi && !transApi->EffectsDisabled();
+                MAknListBoxTfxInternal* transApi =
+                  CAknListLoader::TfxApiInternal( iGc );
+                drawingInitiated = transApi && !transApi->EffectsDisabled();
 #else
-				drawingInitiated = EFalse;
+        drawingInitiated = EFalse;
 #endif
-				}
+        }
 
-			if ( !drawingInitiated)
-				{
-				iWin->Invalidate ( *aClipRect);
-				iWin->BeginRedraw ( *aClipRect);
-				}
-			}
+      if ( !drawingInitiated)
+        {
+        iWin->Invalidate ( *aClipRect);
+        iWin->BeginRedraw ( *aClipRect);
+        }
+      }
 
-		TInt lastPotentialItemIndex = Min (iModel->NumberOfItems (),
-				iTopItemIndex + GetNumberOfItemsThatFitInRect( ViewRect (), ETrue ) );
+    TInt lastPotentialItemIndex = Min( iModel->NumberOfItems(),
+                iTopItemIndex + NumberOfItemsThatFitInRect( ViewRect() ) );
 
-		if ( !itemDrawer->IsEditMode() )
-		    {
-		    itemDrawer->DrawBackground( ViewRect() );
+    if ( !itemDrawer->IsEditMode() )
+        {
+        itemDrawer->DrawBackground( ViewRect() );
             itemDrawer->SetRedrawItemBackground( EFalse );
             itemDrawer->SetDrawSeparatorLines( ETrue );
             while (i < lastPotentialItemIndex)
@@ -348,111 +310,92 @@ void CMmListBoxView::DoDraw(const TRect* aClipRect) const
                 }
             itemDrawer->SetRedrawItemBackground( ETrue );
             itemDrawer->SetDrawSeparatorLines( EFalse );
-		    }
-		else
-		    {
-		    while (i < lastPotentialItemIndex)
+        }
+    else
+        {
+        while (i < lastPotentialItemIndex)
                 {
                 DrawItem(i++);
                 }
-		    // this redraws background in the view portion not covered by items
-		    RedrawBackground();
-		    }
+        // this redraws background in the view portion not covered by items
+        RedrawBackground();
+        }
 
 
-		if ( CAknEnv::Static()->TransparencyEnabled () && !drawingInitiated)
-			{
-			iWin->EndRedraw ();
-			}
-		}
+    if ( CAknEnv::Static()->TransparencyEnabled () && !drawingInitiated)
+      {
+      iWin->EndRedraw ();
+      }
+    }
 
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::DrawItem (TInt aItemIndex) const
-	{
-	CMmListBoxItemDrawer* itemDrawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
-	TBool currentChanged( CurrentItemIndex() != iPreviouslyDrawnCurrentItemIndex );
-	TBool redrawConsumed(EFalse);
-	if ( currentChanged )
-		{
-		CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
-		redrawConsumed =
-			static_cast<CMmListBox*> (itemDrawer->Widget())->RedrawIfNecessary(
-								iPreviouslyDrawnCurrentItemIndex,
-								CurrentItemIndex());
-		view->SetPreviouslyDrawnCurrentItemIndex( CurrentItemIndex() );
-		}
-
-	if ( !redrawConsumed )
-		{
-        itemDrawer->SetDrawSeparatorLines( ETrue );
-	    DrawSingleItem ( aItemIndex );
-        itemDrawer->SetDrawSeparatorLines( EFalse );
-		}
-	}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-TSize CMmListBoxView::ItemSize (TInt aItemIndex) const
-	{
-	CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
-	view->UpdateAverageItemHeight ();
-
+    {
     CMmListBoxItemDrawer* itemDrawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
-    TSize size(CFormattedCellListBoxView::ItemSize(aItemIndex).iWidth, itemDrawer->GetItemHeight (aItemIndex,
-            CurrentItemIndex () == aItemIndex) );
+    TBool currentChanged( CurrentItemIndex() != iPreviouslyDrawnCurrentItemIndex );
+    TBool redrawConsumed(EFalse);
+    if ( currentChanged )
+        {
+        CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
+        redrawConsumed =
+                static_cast<CMmListBox*> (itemDrawer->Widget())->RedrawIfNecessary(
+                        iPreviouslyDrawnCurrentItemIndex,
+                        CurrentItemIndex());
+        view->SetPreviouslyDrawnCurrentItemIndex( CurrentItemIndex() );
+        }
 
-    if ( size.iHeight < 2)
-        size.iHeight = 2;
-
-    return size;
-	}
+    if ( !redrawConsumed )
+        {
+        itemDrawer->SetDrawSeparatorLines( ETrue );
+        DrawSingleItem ( aItemIndex );
+        itemDrawer->SetDrawSeparatorLines( EFalse );
+        }
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TPoint CMmListBoxView::ItemPos (TInt aItemIndex) const
-	{
-	TInt vRealPos = CFormattedCellListBoxView::ItemPos(TopItemIndex()).iY;
-	TInt totalHeight = 0;
-	if ( aItemIndex > iTopItemIndex )
-	    {
-	    totalHeight = GetTotalHeight( iTopItemIndex, aItemIndex - 1 );
-	    }
-	else if ( aItemIndex < iTopItemIndex )
-	    {
-	    totalHeight = -GetTotalHeight( aItemIndex, iTopItemIndex - 1 );
-	    }
+  {
+  TInt vRealPos = CFormattedCellListBoxView::ItemPos(TopItemIndex()).iY;
+  TInt totalHeight = 0;
+  if ( aItemIndex > iTopItemIndex )
+      {
+      totalHeight = GetTotalHeight( iTopItemIndex, aItemIndex - 1 );
+      }
+  else if ( aItemIndex < iTopItemIndex )
+      {
+      totalHeight = -GetTotalHeight( aItemIndex, iTopItemIndex - 1 );
+      }
 
-	return TPoint (-iHScrollOffset + iViewRect.iTl.iX, iViewRect.iTl.iY
-			+ totalHeight + vRealPos);
-	}
+  return TPoint (-iHScrollOffset + iViewRect.iTl.iX, iViewRect.iTl.iY
+      + totalHeight + vRealPos);
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TBool CMmListBoxView::XYPosToItemIndex (TPoint aPosition, TInt& aItemIndex) const
-	{
-	// returns ETrue and sets aItemIndex to the index of the item whose bounding box contains aPosition
-	// returns EFalse if no such item exists
-	TBool itemFound = EFalse;
-	if ( iViewRect.Contains (aPosition))
-		{
-		TInt vRealPos = CFormattedCellListBoxView::ItemPos(TopItemIndex()).iY;
-		// aPosition is inside the display area
-		TInt numberOfVisibleItems = GetLastIndexInHeight (iTopItemIndex,
-				aPosition.iY - iViewRect.iTl.iY - vRealPos );
-		TInt itemAtSpecifiedPos = iTopItemIndex + numberOfVisibleItems;
-		aItemIndex = itemAtSpecifiedPos;
-		itemFound = ( GetTotalHeight( iTopItemIndex, iBottomItemIndex )
+  {
+  // returns ETrue and sets aItemIndex to the index of the item whose bounding box contains aPosition
+  // returns EFalse if no such item exists
+  TBool itemFound = EFalse;
+  if ( iViewRect.Contains (aPosition))
+    {
+    TInt vRealPos = CFormattedCellListBoxView::ItemPos(TopItemIndex()).iY;
+    // aPosition is inside the display area
+    TInt numberOfVisibleItems = GetLastIndexInHeight (iTopItemIndex,
+        aPosition.iY - iViewRect.iTl.iY - vRealPos );
+    TInt itemAtSpecifiedPos = iTopItemIndex + numberOfVisibleItems;
+    aItemIndex = itemAtSpecifiedPos;
+    itemFound = ( GetTotalHeight( iTopItemIndex, iBottomItemIndex )
             >= aPosition.iY ) && ( iModel->NumberOfItems() > itemAtSpecifiedPos );
 //        if ( itemFound )
 //            {
@@ -462,42 +405,42 @@ TBool CMmListBoxView::XYPosToItemIndex (TPoint aPosition, TInt& aItemIndex) cons
 //            TInt itemAtSpecifiedPos = iTopItemIndex + numberOfVisibleItems;
 //            aItemIndex = itemAtSpecifiedPos;
 //            }
-		}
-	return itemFound;
-	}
+    }
+  return itemFound;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::SetItemHeight (TInt aItemHeight)
-	{
-	//	we need to update the iItemHeight member in widget also (there are two different item height value holders - in widget and here in widget view)
-	iItemHeight = aItemHeight;
+  {
+  //	we need to update the iItemHeight member in widget also (there are two different item height value holders - in widget and here in widget view)
+  iItemHeight = aItemHeight;
 
-	CMmListBoxItemDrawer* itemDrawer =
-			STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
-	static_cast<CMmListBox*>(itemDrawer->Widget())->SetItemHeight( aItemHeight );
+  CMmListBoxItemDrawer* itemDrawer =
+      STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
+  static_cast<CMmListBox*>(itemDrawer->Widget())->SetItemHeight( aItemHeight );
 
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
-	{
-	CMmListBoxItemDrawer* itemDrawer =
+  {
+  CMmListBoxItemDrawer* itemDrawer =
             static_cast<CMmListBoxItemDrawer*>( iItemDrawer );
 
-	TInt newTopItemIndex = iTopItemIndex;
+  TInt newTopItemIndex = iTopItemIndex;
 
-	TInt itemHeight = itemDrawer->
-		GetItemHeight( aItemIndex, aItemIndex == CurrentItemIndex() );
+  TInt itemHeight = itemDrawer->
+    GetItemHeight( aItemIndex, aItemIndex == CurrentItemIndex() );
 
-	// ItemIsPartiallyVisible uses fixed iItemHeight, but we have to support
-	// variable item height in lists, unfortunately ItemIsPartiallyVisible
-	// is not virtual
+  // ItemIsPartiallyVisible uses fixed iItemHeight, but we have to support
+  // variable item height in lists, unfortunately ItemIsPartiallyVisible
+  // is not virtual
     TPoint itemPosition( ItemPos( aItemIndex ) );
     TBool itemPartiallyVisible =
         ( itemPosition.iY < iViewRect.iTl.iY &&
@@ -505,24 +448,24 @@ TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
         ( itemPosition.iY <= iViewRect.iBr.iY &&
           itemPosition.iY + itemHeight > iViewRect.iBr.iY );
 
-	TBool itemIsFullyVisible = ItemIsVisible( aItemIndex ) &&
-            !itemPartiallyVisible;
+    TBool itemIsFullyVisible = ItemIsVisible( aItemIndex ) &&
+        !itemPartiallyVisible;
 
-	TBool itemIsAboveVisibleArea = !itemIsFullyVisible &&
+    TBool itemIsAboveVisibleArea = !itemIsFullyVisible &&
             ItemPos( aItemIndex ).iY < ViewRect().iTl.iY;
 
-	TBool itemIsBeneathVisibleArea = !itemIsFullyVisible &&
+    TBool itemIsBeneathVisibleArea = !itemIsFullyVisible &&
             !itemIsAboveVisibleArea && ItemPos( aItemIndex ).iY + itemDrawer->
             GetItemHeight( aItemIndex, aItemIndex == CurrentItemIndex() ) >
             ViewRect().iBr.iY;
 
-	if ( itemIsAboveVisibleArea )
-	    {
-	    newTopItemIndex = aItemIndex;
-	    const_cast<CMmListBoxView*>( this )->SetItemOffsetInPixels( 0 );
-	    }
+    if ( itemIsAboveVisibleArea )
+        {
+        newTopItemIndex = aItemIndex;
+        const_cast<CMmListBoxView*>( this )->SetItemOffsetInPixels( 0 );
+        }
 
-	if ( itemIsBeneathVisibleArea )
+    if ( itemIsBeneathVisibleArea )
         {
         const TInt viewHeight = ViewRect().Height();
         newTopItemIndex = aItemIndex;
@@ -539,16 +482,16 @@ TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
             }
         }
 
-	return newTopItemIndex;
-	}
+  return newTopItemIndex;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::RedrawBackground (TRect aUsedPortionOfViewRect,
-		TRect aSmallerViewRect) const
-	{
+    TRect aSmallerViewRect) const
+  {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
         MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(iGc);
     if (transApi)
@@ -557,12 +500,12 @@ void CMmListBoxView::RedrawBackground (TRect aUsedPortionOfViewRect,
         }
 #endif
 
-	CMmListBoxItemDrawer* itemDrawer = STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
+  CMmListBoxItemDrawer* itemDrawer = STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
     MAknsSkinInstance *skin = AknsUtils::SkinInstance();
     CCoeControl* control = itemDrawer->FormattedCellData()->Control();
     MAknsControlContext *cc = AknsDrawUtils::ControlContext(control);
 
-	if (control)
+  if (control)
         {
         AknsDrawUtils::BackgroundBetweenRects(skin, cc, control, *iGc,
                 aSmallerViewRect, aUsedPortionOfViewRect);
@@ -580,7 +523,7 @@ void CMmListBoxView::RedrawBackground (TRect aUsedPortionOfViewRect,
         transApi->StopDrawing();
         }
 #endif
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -607,62 +550,62 @@ void CMmListBoxView::RedrawBackground () const
 
     RedrawBackground(usedPortionOfViewRect, iViewRect);
 #endif
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::SetPreviouslyDrawnCurrentItemIndex( TBool aIndex )
-	{
-	iPreviouslyDrawnCurrentItemIndex = aIndex;
-	}
+  {
+  iPreviouslyDrawnCurrentItemIndex = aIndex;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::DrawSingleItem (TInt aItemIndex) const
-	{
-	CMmListBoxItemDrawer* itemDrawer =
+  {
+  CMmListBoxItemDrawer* itemDrawer =
             STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
-	TBool highlightVisible = !( itemDrawer->Flags()
-	        & CListItemDrawer::ESingleClickDisabledHighlight );
-	TSize size = itemDrawer->GetItemSize( aItemIndex, highlightVisible &&
-	        CurrentItemIndex() == aItemIndex );
-	itemDrawer->SetItemCellSize( size );
+  TBool highlightVisible = !( itemDrawer->Flags()
+          & CListItemDrawer::ESingleClickDisabledHighlight );
+  TSize size = itemDrawer->GetItemSize( aItemIndex, highlightVisible &&
+          CurrentItemIndex() == aItemIndex );
+  itemDrawer->SetItemCellSize( size );
 
-	// CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
-	// view->SetItemHeight( size.iHeight );
-	// The above line (currently commented-out) was originaly needed to correct
-	// some drawing-related error which used to occur when moving highlight with
-	// rocker keys. It seems that this is no longer needed. If anything should
-	// change, please note that now the SetItemHeight method does much more than
-	// it used to, so simply uncommenting this line would be a bad idea (consider
-	// setting the iItemHeight member variable directly).
+  // CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
+  // view->SetItemHeight( size.iHeight );
+  // The above line (currently commented-out) was originaly needed to correct
+  // some drawing-related error which used to occur when moving highlight with
+  // rocker keys. It seems that this is no longer needed. If anything should
+  // change, please note that now the SetItemHeight method does much more than
+  // it used to, so simply uncommenting this line would be a bad idea (consider
+  // setting the iItemHeight member variable directly).
 
-	CFormattedCellListBoxView::DrawItem (aItemIndex);
+  CFormattedCellListBoxView::DrawItem (aItemIndex);
 
-	//To eliminate the effect of undrawn fragment of background, when the last
-	//is drawn, background is refreshed
-	if ( aItemIndex == ( iModel->NumberOfItems()-1 ) && ItemIsVisible( iModel->NumberOfItems()-1 ) )
-		{
-		CMmListBoxItemDrawer* itemDrawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
-		if ( !itemDrawer->IsEditMode() )
-			{
-			RedrawBackground();
-			}
-		}
-	}
+  //To eliminate the effect of undrawn fragment of background, when the last
+  //is drawn, background is refreshed
+  if ( aItemIndex == ( iModel->NumberOfItems()-1 ) && ItemIsVisible( iModel->NumberOfItems()-1 ) )
+    {
+    CMmListBoxItemDrawer* itemDrawer= STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
+    if ( !itemDrawer->IsEditMode() )
+      {
+      RedrawBackground();
+      }
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmListBoxView::VerticalItemOffset() const
-	{
-	return iVerticalOffset;
-	}
+  {
+  return iVerticalOffset;
+  }
 
 // -----------------------------------------------------------------------------
 //

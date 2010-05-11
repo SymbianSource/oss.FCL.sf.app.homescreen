@@ -162,6 +162,7 @@ namespace XnPropertyNames
         _LIT8(KMaskInverted, "maskinverted");
         _LIT8(KS60AspectRatio, "_s60-aspect-ratio");
         _LIT8(KPreserve, "preserve");
+        _LIT8(KNone, "none");
         }
     namespace clock
         {

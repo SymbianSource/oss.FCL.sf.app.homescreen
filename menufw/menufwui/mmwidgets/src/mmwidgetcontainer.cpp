@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.59 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.64 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -105,9 +105,12 @@ CMmWidgetContainer::CMmWidgetContainer()
     , iIsFaded( EFalse )
     , iHasFocus( ETrue )
     , iInForeground( ETrue )
+    , iLongTapDetector( NULL )
     , iAllowMove( EFalse )
     , iRecipientId( KErrNotFound )
     , iEventParameters( NULL )
+    , iDialogOpened( EFalse )
+    , iHighlightVisibleBeforeLongTap( EFalse )
     {
     iWidgetPositionCache.iValid = EFalse;
     }
@@ -135,6 +138,11 @@ EXPORT_C void CMmWidgetContainer::EnableLongTapAnimation( TBool aEnable )
     if( iLongTapDetector )
         {
         iLongTapDetector->EnableLongTapAnimation( aEnable );
+        // cancel longTap timer, avoid showing popupmenu
+        if( !aEnable )
+            {
+            iLongTapDetector->PointerEventL( TPointerEvent() );
+            }
         }
     }
 
@@ -236,6 +244,19 @@ void CMmWidgetContainer::HandleResourceChange( TInt aType )
         }
 
     TBool highlightVisibleBefore = iWidget->IsVisible() && IsHighlightVisible();
+
+    // fix ou1cimx1#344006 error; when we close dialog - if highlight had been
+    // visible/invisible before dialog has been opened, we restore highlight visibility flag.
+    if( !iIsFaded && iDialogOpened)
+        {
+        iDialogOpened = EFalse;
+        if(highlightVisibleBefore != iHighlightVisibleBeforeLongTap)
+            {
+            SetHighlightVisibilityL( iHighlightVisibleBeforeLongTap);
+            }
+        highlightVisibleBefore = iHighlightVisibleBeforeLongTap;
+        }
+
     CCoeControl::HandleResourceChange( aType );
     if( highlightVisibleBefore )
         {
@@ -517,6 +538,15 @@ void CMmWidgetContainer::TriggerMoveItemL()
         iRecipientId = KErrNotFound;
         iEventParameters->Reset();
         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void CMmWidgetContainer::SetExDialogOpened( TBool aOpened )
+    {
+    iDialogOpened = aOpened;
     }
 
 // -----------------------------------------------------------------------------
@@ -956,7 +986,7 @@ void CMmWidgetContainer::SetHighlightL( TInt aItemIndex )
         iPreviousHighlight = iCurrentHighlight;
         iCurrentHighlight = aItemIndex;
 
-        if( iPreviousHighlight != iCurrentHighlight )
+        if( IsHighlightVisible() && iPreviousHighlight != iCurrentHighlight )
             {
             HideOptionsMenuIfDisplayed();
             }
@@ -1583,7 +1613,7 @@ EXPORT_C void CMmWidgetContainer::CacheWidgetPosition()
             && suiteModel->GetSuiteHighlight() == highlightedItemIndex
             && ItemIsVisible( highlightedItemIndex ) )
         {
-      iWidgetPositionCache.iHighlightedItemId =
+        iWidgetPositionCache.iHighlightedItemId =
             suiteModel->IdByIndex( highlightedItemIndex );
         }
 
@@ -1612,7 +1642,7 @@ EXPORT_C void CMmWidgetContainer::RestoreWidgetPosition()
                 // effect.
                 }
 
-      Widget()->View()->SetTopItemIndex(iWidgetPositionCache.iTopItemIndex);
+            Widget()->View()->SetTopItemIndex(iWidgetPositionCache.iTopItemIndex);
             SetVerticalItemOffset( iWidgetPositionCache.iVerticalItemOffset );
             TRAP_IGNORE( AlignBottomOfViewL() );
 
@@ -1624,11 +1654,11 @@ EXPORT_C void CMmWidgetContainer::RestoreWidgetPosition()
             if( suiteModel && IsHighlightVisible() )
                 {
                 TInt highlightedItemIndex = suiteModel->GetSuiteHighlight();
-          TInt highlightedItemId = highlightedItemIndex != KErrNotFound ?
-              suiteModel->IdByIndex( highlightedItemIndex ) : KErrNotFound;
-          if ( highlightedItemId != KErrNotFound
-                  && highlightedItemId == iWidgetPositionCache.iHighlightedItemId
-                  && !ItemIsVisible( highlightedItemIndex ) )
+                TInt highlightedItemId = highlightedItemIndex != KErrNotFound ?
+                        suiteModel->IdByIndex( highlightedItemIndex ) : KErrNotFound;
+                if ( highlightedItemId != KErrNotFound
+                        && highlightedItemId == iWidgetPositionCache.iHighlightedItemId
+                        && !ItemIsVisible( highlightedItemIndex ) )
                     {
                     TRAP_IGNORE( ScrollToItemL( highlightedItemIndex ) );
                     }
@@ -1823,10 +1853,10 @@ EXPORT_C TBool CMmWidgetContainer::ScrollToItemL( TInt aIndex )
     if( aIndex >= 0 && aIndex <= NumberOfItems() )
         {
         scrollConsumed = AlignBottomOfViewL();
-    if ( !scrollConsumed && Widget()->View()->ItemIsPartiallyVisible(aIndex))
+        if ( !scrollConsumed && Widget()->View()->ItemIsPartiallyVisible(aIndex))
             {
             //			the case when the item is partially visible at top or
-            //			bottom of screen. Th e view is scrolled the offset to
+            //			bottom of screen. The view is scrolled the offset to
             //			make the item entirely visible.
             TInt offsetBottom = Widget()->View()->ItemPos( aIndex ).iY
                     + Widget()->ItemHeight()
@@ -1901,6 +1931,7 @@ void CMmWidgetContainer::HandleLongTapEventL( const TPoint& aPenEventLocation,
     TInt index( KErrNotFound );
     if( iWidget->View()->XYPosToItemIndex( aPenEventLocation, index ) )
         {
+        iHighlightVisibleBeforeLongTap = iPreviousHighlightVisibility;
         SetHighlightVisibilityL( ETrue );
         iLongTapInProgress = ETrue;
         if( iLongTapObserver )
@@ -1928,7 +1959,7 @@ EXPORT_C void CMmWidgetContainer::EndLongTapL( TBool aStopTimer )
     if( iLongTapInProgress )
         {
         iLongTapInProgress = EFalse;
-        if( aStopTimer )
+        if( aStopTimer && !iIsFaded )
             {
             SetHighlightVisibilityL( EFalse );
             }

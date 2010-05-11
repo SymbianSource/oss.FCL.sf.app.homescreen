@@ -98,6 +98,9 @@ public:
     IMPORT_C static TGulAlignmentValue TextAlignment( CXnNodePluginIf& aNode );
 
     /**
+    * Avoid using this method. Produces low quality bitmaps. Rather use
+    * CWindowGc::DrawBitmap and DrawBitmapMasked. These methods will scale 
+    * images on fly and they support HW acceleration.
     * Scales the source bitmap into a given rectangle of the target bitmap.
     * Source and target bitmaps must have the same display mode.
     *

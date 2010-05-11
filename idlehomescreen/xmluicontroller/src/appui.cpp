@@ -83,6 +83,10 @@ void CAppUi::ConstructL()
     {
     __TICK( "CAppUi::ConstructL" );
     
+    iUiCtl.SetAppUi( *this );
+    
+    iUiCtl.NotifyAppEnvReadyL();
+           
     // Always reset the phoneforward P&S key on startup just in case
     RProperty::Set( KPSUidAiInformation,
       KActiveIdleForwardNumericKeysToPhone, EPSAiForwardNumericKeysToPhone );
@@ -116,17 +120,13 @@ void CAppUi::ConstructL()
     iUiCtl.SetObserver( *iContentRenderer );
     
     iContentRenderer->SetEventHandler( *iUiCtl.FwEventHandler() );
-    
-    iUiCtl.SetAppUi( *this );
-    
+           
     iEventHandler = iUiCtl.CreateXuikonEventHandlerL( *iContentRenderer );
     
     TAiIdleKeySoundConfig keySoundConfig;
     keySoundConfig.iKeySounds = KeySounds();
     keySoundConfig.iContextResId = R_XUI_DEFAULT_SKEY_LIST;
-    
-    iUiCtl.NotifyAppEnvReadyL();
-    
+           
     iHelper = COnlineOfflineHelper::NewL( iUiCtl );
     
     iIdleIntegration = CAiUiIdleIntegration::NewL
@@ -180,8 +180,10 @@ void CAppUi::ActivateUi()
         iDeviceStatusInfo = THsPublisherInfo( KDeviceStatusPluginUid, 
             KDeviceStatusPluginName, KNs ); 
                            
-        iUiCtl.FwStateHandler()->LoadPlugin( 
-            iDeviceStatusInfo, EAiFwSystemStartup );                                           
+        TAiFwPublisherInfo info( iDeviceStatusInfo,
+            TAiFwCallback(), EAiFwSystemStartup );
+        
+        iUiCtl.FwStateHandler()->LoadPlugin( info );
         }        
     
     __PRINTS( "*** CAppUi::ActivateUi - done" );
@@ -200,6 +202,17 @@ void CAppUi::HandleUiReadyEventL()
     __PRINTS( "*** CAppUi::HandleUiReadyEventL - done" );    
     }
 
+// ----------------------------------------------------------------------------
+// CAppUi::PublisherInfo()
+// ----------------------------------------------------------------------------
+//
+TInt CAppUi::PublisherInfo( CXnNodeAppIf& aNode, THsPublisherInfo& aInfo )
+    {
+    TRAPD( err, iUiCtl.PublisherInfoL( aNode, aInfo ) );
+    
+    return err;
+    }
+     
 // ----------------------------------------------------------------------------
 // CAppUi::PrepareToExit()
 // ----------------------------------------------------------------------------
@@ -334,45 +347,36 @@ void CAppUi::HandleEventL( const TDesC& aEvent, CXnNodeAppIf& aDestination )
     {
     THsPublisherInfo info;
     
-    iUiCtl.PublisherInfoL( aDestination, info );
-    
-    iUiCtl.FwEventHandler()->HandlePluginEventL( info, aEvent );
+    TInt ret( PublisherInfo( aDestination, info ) );
+        
+    if ( ret == KErrNone )
+        {
+        iUiCtl.FwEventHandler()->HandlePluginEventL( info, aEvent );
+        }    
     }
 
 // ----------------------------------------------------------------------------
-// CAppUi::LoadDataPluginsL()
+// CAppUi::LoadPublisher()
 // ----------------------------------------------------------------------------
 //
-TInt CAppUi::LoadPublisher( CXnNodeAppIf& aPublisher, TInt aReason )
-    {
-    THsPublisherInfo info;
-    
-    TRAP_IGNORE( iUiCtl.PublisherInfoL( aPublisher, info ) );
-
-    if ( info.Uid() == KDeviceStatusPluginUid )
+void CAppUi::LoadPublisher( const TAiFwPublisherInfo& aPublisher )         
+    {          
+    if ( aPublisher.Info().Uid() == KDeviceStatusPluginUid )
         {
         // Update device status info
-        iDeviceStatusInfo = info;
+        iDeviceStatusInfo = aPublisher.Info();
         }
     
-    return iUiCtl.FwStateHandler()->LoadPlugin( 
-        info, (TAiFwLoadReason) aReason );        
+    iUiCtl.FwStateHandler()->LoadPlugin( aPublisher );                
     }
 
 // ----------------------------------------------------------------------------
 // CAppUi::DestroyPublisher()
 // ----------------------------------------------------------------------------
 //
-TInt CAppUi::DestroyPublisher( CXnNodeAppIf& aPublisher, TInt aReason )
-    {
-    THsPublisherInfo info;
-           
-    TRAP_IGNORE( iUiCtl.PublisherInfoL( aPublisher, info ) );
-            
-    iUiCtl.FwStateHandler()->DestroyPlugin( 
-        info, (TAiFwDestroyReason) aReason );
-    
-    return KErrNone;
+void CAppUi::DestroyPublisher( const TAiFwPublisherInfo& aPublisher )        
+    {                           
+    iUiCtl.FwStateHandler()->DestroyPlugin( aPublisher );                
     }
 
 // ----------------------------------------------------------------------------
@@ -512,7 +516,7 @@ void CAppUi::HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId,
         {
         if ( iInEditMode )
             {
-            TRAP_IGNORE( SetTitlePaneTextL( KNullDesC ) );
+            //TRAP_IGNORE( SetTitlePaneTextL( KNullDesC ) );
             }
         else
             {
@@ -620,7 +624,7 @@ void CAppUi::SetTitlePaneTextL( const TDesC& aText )
     if ( !sp ) { return; }
     
     // make sure status pane is transparent.
-    sp->EnableTransparent( ETrue );
+    //sp->EnableTransparent( ETrue );
     
     TUid titlePaneUid( TUid::Uid( EEikStatusPaneUidTitle ) );
            
@@ -640,7 +644,7 @@ void CAppUi::SetTitlePaneTextL( const TDesC& aText )
         }
     
     // redraw statuspane
-    sp->DrawNow();
+    //sp->DrawNow();
     }
 
 // -----------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Wrapper class for CAknSkinnableClock
+* Description:  Clock rendering plugin
 *
 */
 
@@ -20,25 +20,28 @@
 #ifndef _XNCLOCKADAPTER_H
 #define _XNCLOCKADAPTER_H
 
-//  INCLUDES
-#include "xncontroladapter.h"
+// System includes
 #include <e32base.h>
+#include <hwrmlight.h>
 
-// FORWARD DECLARATIONS
+// User includes
+#include "xncontroladapter.h"
+
+// Forward declarations
 class CXnNodePluginIf;
 class CXnClockControl;
 class CAknLayoutFont;
 class CFont;
 class TRgb;
 
-// CLASS DECLARATION
+// Class declaration
 /**
 *  @ingroup group_xnclockfactory
 *  @lib xnclockfactory.lib
-*  @since S60
+*  @since S60 5.0
 */
-class CXnClockAdapter : public CXnControlAdapter, 
-                        public MCoeMessageMonitorObserver
+NONSHARABLE_CLASS( CXnClockAdapter ) : public CXnControlAdapter, 
+    public MCoeMessageMonitorObserver, public MHWRMLightObserver
     {
 public:
     enum TClockFont
@@ -48,7 +51,9 @@ public:
         EDateFont
         };
     
-public: // constructor and destructor
+public: 
+    // constructor and destructor
+    
 	/**
 	 * 2 phase construction.
 	 */
@@ -59,7 +64,8 @@ public: // constructor and destructor
 	 */
 	~CXnClockAdapter();
 
-public: // New functions
+public: 
+	// New functions
 
     /** 
     * Gets font based on type
@@ -94,7 +100,8 @@ public: // New functions
     */        
     void UpdateDisplay() const;
 
-public: // from base classes
+public: 
+    // from base classes
 
     /**
     * @see CXnControlAdapter documentation
@@ -126,13 +133,25 @@ public: // from base classes
     */    	            
     void MakeVisible( TBool aVisible );
 
-private: // from MCoeMessageMonitorObserver
+private: 
+    // from MCoeMessageMonitorObserver
+    
     /**
     * @see MCoeMessageMonitorObserver documentation
     */
     void MonitorWsMessage( const TWsEvent& aEvent );
     
-private: // constructors
+private:
+    // from MHWRMLightObserver
+    
+    /**
+     * @see MHWRMLightObserver     
+     */    
+    void LightStatusChanged( TInt aTarget, 
+        CHWRMLight::TLightStatus aStatus );
+    
+private: 
+    // constructors
 
     /**
     * C++ default constructor.
@@ -156,6 +175,16 @@ private: // New functions
      */        
     void CreateColorL();
         
+    /**
+     * Starts clock
+     */
+    void StartClock();
+    
+    /**
+     * Stops clock
+     */
+    void StopClock();
+    
 private:
     // Parent control, not owned
     CXnControlAdapter*  		iParent;        
@@ -165,6 +194,8 @@ private:
     CXnNodePluginIf*            iDate;
     // Analog clock day information, not owned
     CXnNodePluginIf*            iDay;
+    // Light observer, owned
+    CHWRMLight*                 iLightObserver;
     // Clock control, owned    
     CXnClockControl*            iClockControl;  
     // Digital clock font, not owned
@@ -179,6 +210,8 @@ private:
     TBool                       iColorSet;
     // Flag indicating foreground state
     TBool                       iForeground;
+    // Flag indicating lights status
+    TBool                       iLightsOn;
     };
 
 #endif      // _XNCLOCKADAPTER_H

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -68,18 +68,18 @@ RPointerArray<CHnMdAction> CHnMdEventMapping::GetActionsForEventId(
     if ( eventIdFound )
         return eventMappingElement->Actions();
     else
-        return emptyActions;  
+        return emptyActions;
     }
-    
+
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnMdEventMapping::ConstructL( TXmlEngElement aElement, THnMdCommonPointers* aCmnPtrs )
     {
     // construction...
     iCmnPtrs = aCmnPtrs;
-    
+
     RXmlEngNodeList< TXmlEngElement > children;
     CleanupClosePushL(children);
 
@@ -103,10 +103,10 @@ void CHnMdEventMapping::ConstructL( TXmlEngElement aElement, THnMdCommonPointers
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnMdEventMapping* CHnMdEventMapping::NewL( TXmlEngElement aElement, 
+CHnMdEventMapping* CHnMdEventMapping::NewL( TXmlEngElement aElement,
         THnMdCommonPointers* aCmnPtrs )
     {
     CHnMdEventMapping* self = CHnMdEventMapping::NewLC( aElement,
@@ -116,7 +116,7 @@ CHnMdEventMapping* CHnMdEventMapping::NewL( TXmlEngElement aElement,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CHnMdEventMapping::Count() const
@@ -125,10 +125,10 @@ TInt CHnMdEventMapping::Count() const
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-CHnMdEventMapping* CHnMdEventMapping::NewLC( TXmlEngElement aElement, 
+CHnMdEventMapping* CHnMdEventMapping::NewLC( TXmlEngElement aElement,
         THnMdCommonPointers* aCmnPtrs )
     {
     CHnMdEventMapping* self = new( ELeave ) CHnMdEventMapping;
@@ -138,7 +138,7 @@ CHnMdEventMapping* CHnMdEventMapping::NewLC( TXmlEngElement aElement,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnMdEventMapping::CHnMdEventMapping()
@@ -146,7 +146,7 @@ CHnMdEventMapping::CHnMdEventMapping()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnMdEventMapping::~CHnMdEventMapping()
@@ -155,17 +155,17 @@ CHnMdEventMapping::~CHnMdEventMapping()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-void CHnMdEventMapping::AddActionL( 
-        RHashMap<TInt,CArrayPtr<CHnActionModel> *> & aActions, 
+void CHnMdEventMapping::AddActionL(
+        RHashMap<TInt,CArrayPtr<CHnActionModel> *> & aActions,
         CHnActionModel *& aActionModel, TInt aEventId )
     {
     CArrayPtr<CHnActionModel>** actionsContainer = aActions.Find( aEventId );
     if ( !actionsContainer )
         {
-        CArrayPtr<CHnActionModel>* newActionsContainer = new( 
+        CArrayPtr<CHnActionModel>* newActionsContainer = new(
             ELeave ) CArrayPtrFlat<CHnActionModel>( KDefaultGranularity );
         CleanupStack::PushL( newActionsContainer );
         aActions.InsertL( aEventId, newActionsContainer );
@@ -176,24 +176,24 @@ void CHnMdEventMapping::AddActionL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-void CHnMdEventMapping::FillActionsL( 
+void CHnMdEventMapping::FillActionsL(
         RHashMap< TInt, CArrayPtr<CHnActionModel>* >& aActions,
         const CLiwGenericParamList& aQueriesResultsList, TInt aPos )
     {
     RArray< TInt > eventIds;
     CleanupClosePushL( eventIds );
     GetEventIdsL( eventIds );
-    
+
     for ( TInt i( 0 ); i < eventIds.Count(); i++ )
         {
-        RPointerArray< CHnMdAction > actions = GetActionsForEventId( 
+        RPointerArray< CHnMdAction > actions = GetActionsForEventId(
                 eventIds[ i ] );
         for ( TInt j( 0 ); j < actions.Count(); j++ )
             {
-            if ( !actions[ j ] || !actions[ j ]->IsValidL( 
+            if ( !actions[ j ] || !actions[ j ]->IsValidL(
                     aQueriesResultsList, aPos ) )
                 {
                 continue;
@@ -209,13 +209,13 @@ void CHnMdEventMapping::FillActionsL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnMdEventMapping::GetEventIdsL( RArray< TInt >& aIds ) const
     {
     TInt mappingCount = Count();
-        
+
     for( TInt i = 0; i < mappingCount; i++ )
         {
         CHnMdEventMappingElement* eme = iMappings[ i ];

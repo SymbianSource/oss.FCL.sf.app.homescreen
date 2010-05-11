@@ -33,6 +33,7 @@ class CAknStylusPopUpMenu;
 class CAknQueryDialog;
 class CTsEventControler;
 class MTsDataChangeObserver;
+class CAknLongTapAnimation;
 
 /**
  * Taskswitcher Fast Swap area UI.
@@ -108,6 +109,11 @@ public:
      * Brings the app corresponding to the item at given index into foreground.
      */
     void SwitchToApp( TInt aIndex );
+    
+    /**
+     * Brings the app with the give Uid into foreground
+     */
+    void SwitchToApp( const TUid& aUid );
     
     /**
      * Sends close msg to given app.
@@ -223,6 +229,12 @@ public:
      */
     TBool IsAppClosing( TInt aWgId );
     
+    /**
+     * Checks if app with the given window group id is present on taskswitcher
+     * list.
+     */
+    TBool WgOnTaskList( TInt aWgId );
+    
 public:    
     // from CCoeControl    
     TInt CountComponentControls() const;
@@ -252,6 +264,11 @@ private:
 	
 // new functions    
 
+    /**
+     * Switches to another application.
+     */
+    void SwitchToApp( TInt aWgId, const TUid& aUid );
+    
     /**
      * Makes a copy of the given bitmap.
      * Also scaled to the given size, but maintains aspect ratio,
@@ -396,7 +413,21 @@ private:
      *          layout meta data functions.
      */
     TBool GetVariety( TInt& aVariety );
-        
+    
+    /**
+     * Cancels long tap animation.
+     */
+    void CancelLongTapAnimation( TBool aDisablePopup = ETrue );
+    
+    /**
+     * Checks if long tap animation should be shown in
+     * a given point.
+     * 
+     * @param  aHitPoint  point where tapped event is registered
+     * @return  ETrue if long animation is allowed for that position
+     */
+    TBool LongTapAnimForPos( const TPoint& aHitPoint );
+    
 private: // Data
     
     // parent control
@@ -434,6 +465,8 @@ private: // Data
     // Tap event
     TPointerEvent iTapEvent;
     CTsFastSwapTimer* iHighlightTimer;
+    TPoint iActivateOnPointerRelease;
+    TBool iHandlePointerCandidate;
     
     // View offset position, used by animation physics
     TInt iLogicalViewPosOffset;
@@ -455,6 +488,12 @@ private: // Data
     // App closing handling
     RArray<TInt> iIsClosing;
     TInt iWidgetClosingCount;
+    TInt iPrevAppCount;
+    
+    // Long tap animation
+    CAknLongTapAnimation* iLongTapAnimation;
+    CTsFastSwapTimer* iLongTapAnimationTimer;
+    TBool iLongTapAnimationRunning;
     };
 
 #endif // TSFASTSWAPAREA_H

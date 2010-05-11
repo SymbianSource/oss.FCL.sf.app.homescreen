@@ -52,21 +52,21 @@ TBool HBuf16Ident( HBufC8* const & aL, HBufC8* const & aR )
 // ---------------------------------------------------------------------------
 //:
 CMmTemplateLibrary::CMmTemplateLibrary()
-	: iWidgetType(EWidgetTypeNone),
-	iTemplateSizesMap( &HBuf16Hash, &HBuf16Ident ),
-	iTemplateChildrenMap( &HBuf16Hash, &HBuf16Ident ),
-	iMoveIndicatorRectsMap( &HBuf16Hash, &HBuf16Ident )
-	{
-	// No implementation required
-	}
+  : iWidgetType(EWidgetTypeNone),
+  iTemplateSizesMap( &HBuf16Hash, &HBuf16Ident ),
+  iTemplateChildrenMap( &HBuf16Hash, &HBuf16Ident ),
+  iMoveIndicatorRectsMap( &HBuf16Hash, &HBuf16Ident )
+  {
+  // No implementation required
+  }
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 CMmTemplateLibrary::~CMmTemplateLibrary()
-	{
-	CleanAndClearCache();
-	}
+  {
+  CleanAndClearCache();
+  }
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -74,27 +74,27 @@ CMmTemplateLibrary::~CMmTemplateLibrary()
 void CMmTemplateLibrary::CleanAndClearCache( )
     {
 
-	THashMapIter<HBufC8*, TSize> iter( iTemplateSizesMap );
-	while ( HBufC8* const * ptr = iter.NextKey() )
-		{
-		delete *ptr;
-		}
-	iTemplateSizesMap.Close();
+  THashMapIter<HBufC8*, TSize> iter( iTemplateSizesMap );
+  while ( HBufC8* const * ptr = iter.NextKey() )
+    {
+    delete *ptr;
+    }
+  iTemplateSizesMap.Close();
 
-	THashMapIter<HBufC8*, RArray<TTemplateChild> > iter2( iTemplateChildrenMap );
-	while ( HBufC8* const * ptr = iter2.NextKey() )
-		{
-		iter2.CurrentValue()->Close();
-		delete *ptr;
-		}
-	iTemplateChildrenMap.Close();
+  THashMapIter<HBufC8*, RArray<TTemplateChild> > iter2( iTemplateChildrenMap );
+  while ( HBufC8* const * ptr = iter2.NextKey() )
+    {
+    iter2.CurrentValue()->Close();
+    delete *ptr;
+    }
+  iTemplateChildrenMap.Close();
 
-	THashMapIter<HBufC8*, TRect> iter4( iMoveIndicatorRectsMap );
-	while ( HBufC8* const * ptr = iter4.NextKey() )
-		{
-		delete *ptr;
-		}
-	iMoveIndicatorRectsMap.Close();
+  THashMapIter<HBufC8*, TRect> iter4( iMoveIndicatorRectsMap );
+  while ( HBufC8* const * ptr = iter4.NextKey() )
+    {
+    delete *ptr;
+    }
+  iMoveIndicatorRectsMap.Close();
 
     }
 
@@ -103,11 +103,11 @@ void CMmTemplateLibrary::CleanAndClearCache( )
 // ---------------------------------------------------------------------------
 //
 EXPORT_C CMmTemplateLibrary* CMmTemplateLibrary::NewL()
-	{
-	CMmTemplateLibrary* self = CMmTemplateLibrary::NewLC();
-	CleanupStack::Pop( self );
-	return self;
-	}
+  {
+  CMmTemplateLibrary* self = CMmTemplateLibrary::NewLC();
+  CleanupStack::Pop( self );
+  return self;
+  }
 
 // ---------------------------------------------------------------------------
 //
@@ -126,22 +126,22 @@ EXPORT_C CMmTemplateLibrary* CMmTemplateLibrary::NewLC()
 // ---------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::ConstructL()
-	{
-	//No implementation needed.
-	}
+  {
+  //No implementation needed.
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 TSize CMmTemplateLibrary::GetSize(  TMmWidgetType aWidgetType, const TDesC8& aTemplate,
-		TBool aLandscapeOrientation, TBool aHighlighted, TRect aParentRect )
-	{
-	TSize result;
-	GetSize(result, aWidgetType, aTemplate, aLandscapeOrientation,
-			aHighlighted, aParentRect );
-	return result;
-	}
+    TBool aLandscapeOrientation, TBool aHighlighted, TRect aParentRect )
+  {
+  TSize result;
+  GetSize(result, aWidgetType, aTemplate, aLandscapeOrientation,
+      aHighlighted, aParentRect );
+  return result;
+  }
 
 // ---------------------------------------------------------------------------
 //
@@ -152,7 +152,7 @@ TInt CMmTemplateLibrary::GetSize(  TSize& aItemSize,
         TBool aLandscapeOrientation, TBool aHighlighted, TRect aParentRect )
     {
     if ( KNullDesC8()== aTemplate || aParentRect == TRect(TPoint(0,0), TPoint(0,0))
-    		|| !aTemplate.Compare( KEmpty8 ) )
+        || !aTemplate.Compare( KEmpty8 ) )
         {
         return KErrNotFound;
         }
@@ -169,10 +169,10 @@ TInt CMmTemplateLibrary::GetSize(  TSize& aItemSize,
         if ( err == KErrNone )
             {
             itemSize = iTemplateSizesMap.Find( lookup_string );
-        	if( !itemSize )
-        		{
+          if( !itemSize )
+            {
                 User::Panic( KMtlPanic, KErrNotFound );
-        		}
+            }
             aItemSize = *itemSize;
             }
         }
@@ -189,7 +189,7 @@ TInt CMmTemplateLibrary::GetSize(  TSize& aItemSize,
             }
         aItemSize = *itemSize;
         }
-	delete lookup_string;
+  delete lookup_string;
 
     return err;
     }
@@ -199,144 +199,146 @@ TInt CMmTemplateLibrary::GetSize(  TSize& aItemSize,
 // ---------------------------------------------------------------------------
 //
 TSize CMmTemplateLibrary::GetLayoutSizeL( TMmWidgetType aWidgetType, const TDesC8& aTemplate,
-		TBool aLandscapeOrientation )
-	{
-	if ( KNullDesC8()== aTemplate )
-		{
-		User::Leave( -1 );
-		}
-	TSize* layoutSize = NULL;
-	switch ( aWidgetType )
-		{
-		case EGrid:
-			{
-		    HBufC8* lookup_string = LookupLayoutText( aWidgetType,
+    TBool aLandscapeOrientation )
+  {
+  if ( KNullDesC8()== aTemplate )
+    {
+    User::Leave( -1 );
+    }
+  TSize* layoutSize = NULL;
+  switch ( aWidgetType )
+    {
+    case EGrid:
+      {
+        HBufC8* lookup_string = LookupLayoutText( aWidgetType,
                 aTemplate, aLandscapeOrientation );
-			CleanupStack::PushL( lookup_string );
-		    layoutSize = iTemplateSizesMap.Find( lookup_string );
-		    if (!layoutSize)
-		        {
-		        LoadTemplateL( aWidgetType, aTemplate, aLandscapeOrientation );
-		        layoutSize = iTemplateSizesMap.Find( lookup_string );
-		        if( !layoutSize )
-		            User::Panic( KMtlPanic, -1);
-		        }
-			CleanupStack::PopAndDestroy( lookup_string );
-			}
+      CleanupStack::PushL( lookup_string );
+        layoutSize = iTemplateSizesMap.Find( lookup_string );
+        if (!layoutSize)
+            {
+            LoadTemplateL( aWidgetType, aTemplate, aLandscapeOrientation );
+            layoutSize = iTemplateSizesMap.Find( lookup_string );
+            if( !layoutSize )
+                User::Panic( KMtlPanic, -1);
+            }
+      CleanupStack::PopAndDestroy( lookup_string );
+      }
 
-			break;
-		case EListbox:
-			return TSize( MmListBox::KCols,0 );
-		default:
-			User::Panic( KMtlPanic, -1);
-		}
-	return *layoutSize;
-	}
+      break;
+    case EListbox:
+      return TSize( MmListBox::KCols,0 );
+    default:
+      User::Panic( KMtlPanic, -1);
+    }
+  return *layoutSize;
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 TRect CMmTemplateLibrary::GetMoveIndicatorRect(TMmWidgetType aWidgetType,
-		const TDesC8& aTemplate, TBool aLandscapeOrientation,
-		TBool aHighlighted)
-	{
-	ASSERT( KNullDesC8() != aTemplate && aTemplate.Compare( KEmpty8 ) );
+    const TDesC8& aTemplate, TBool aLandscapeOrientation,
+    TBool aHighlighted)
+  {
+  ASSERT( KNullDesC8() != aTemplate && aTemplate.Compare( KEmpty8 ) );
 
-	HBufC8* lookup_string = LookupText(aTemplate, aWidgetType,
+  HBufC8* lookup_string = LookupText(aTemplate, aWidgetType,
         aLandscapeOrientation, aHighlighted );
-	HBufC8* lookup_indicator_string = LookupIndicatorText( *lookup_string );
+  HBufC8* lookup_indicator_string = LookupIndicatorText( *lookup_string );
 
-	TRect* itemRect = iMoveIndicatorRectsMap.Find( lookup_indicator_string );
+  TRect* itemRect = iMoveIndicatorRectsMap.Find( lookup_indicator_string );
     if (!itemRect)
         {
-    	TSize itemSize;
-    	GetSize( itemSize, aWidgetType, aTemplate, aLandscapeOrientation, EFalse, GetParentRect( aLandscapeOrientation ) );
-    	TRAPD( err, SetupMoveIndicatorTemplateChildrenL(
-    	        *lookup_indicator_string, itemSize ) );
-    	if ( KErrNone == err )
-    	    {
+      TSize itemSize;
+      GetSize( itemSize, aWidgetType, aTemplate, aLandscapeOrientation, EFalse, GetParentRect( aLandscapeOrientation ) );
+      TRAPD( err, SetupMoveIndicatorTemplateChildrenL(
+              *lookup_indicator_string, itemSize ) );
+      if ( KErrNone == err )
+          {
             itemRect = iMoveIndicatorRectsMap.Find( lookup_indicator_string );
             if (!itemRect)
                 {
                 User::Panic( KMtlPanic, -1);
                 }
-    	    }
+          }
         }
 
     delete lookup_indicator_string;
     delete lookup_string;
     return *itemRect;
-	}
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::GetChildrenL(TMmWidgetType aWidgetType, RArray<
-		TTemplateChild>& aArray, const TDesC8& aTemplate,
-		TBool aLandscapeOrientation, TBool aHighlighted, TBool aIsEditMode)
-	{
-	ASSERT( KNullDesC8() != aTemplate && aTemplate.Compare( KEmpty8 ) );
+    TTemplateChild>& aArray, const TDesC8& aTemplate,
+    TBool aLandscapeOrientation, TBool aHighlighted, TBool aIsEditMode)
+    {
+    ASSERT( KNullDesC8() != aTemplate && aTemplate.Compare( KEmpty8 ) );
 
-	HBufC8* lookup_string = LookupText( aTemplate, aWidgetType,
-        aLandscapeOrientation, aHighlighted );
-	CleanupStack::PushL( lookup_string );
+    HBufC8* lookup_string = LookupText( aTemplate, aWidgetType,
+            aLandscapeOrientation, aHighlighted );
+    CleanupStack::PushL( lookup_string );
     RArray<TTemplateChild>* children = iTemplateChildrenMap.Find( lookup_string );
     if ( !children )
         {
         LoadTemplateL( aWidgetType, aTemplate, aLandscapeOrientation );
         children = iTemplateChildrenMap.Find( lookup_string );
         if (!children)
-        	{
+            {
             User::Panic( KMtlPanic, -1);
-        	}
+            }
         }
     CleanupStack::PopAndDestroy( lookup_string );
     for (TInt i = 0; i < children->Count(); i++)
-    	aArray.AppendL((*children)[i]);
+        aArray.AppendL((*children)[i]);
     if ( aIsEditMode )
-    	{
-    	TSize size = GetSize( aWidgetType, aTemplate, aLandscapeOrientation, aHighlighted, GetParentRect(aLandscapeOrientation) );
-        AppendEditModeTemplateL( aArray, size );
-    	}
-	}
+        {
+          TSize size = GetSize( aWidgetType, aTemplate, aLandscapeOrientation, aHighlighted, GetParentRect(aLandscapeOrientation) );
+          AppendEditModeTemplateL( aArray, size );
+        }
+    }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::GetMoveIndicatorChildrenL(TMmWidgetType aWidgetType,
-		RArray<TTemplateChild>& aArray, const TDesC8& aTemplate,
-		TBool aLandscapeOrientation, TBool aHighlighted)
-	{
-	ASSERT( KNullDesC8() != aTemplate && aTemplate.Compare( KEmpty8 ) );
+    RArray<TTemplateChild>& aArray, const TDesC8& aTemplate,
+    TBool aLandscapeOrientation, TBool aHighlighted)
+    {
+    ASSERT( KNullDesC8() != aTemplate && aTemplate.Compare( KEmpty8 ) );
 
-	HBufC8* lookup_string = LookupText(aTemplate, aWidgetType,
-        aLandscapeOrientation, aHighlighted );
-	CleanupStack::PushL( lookup_string );
-	HBufC8* lookup_indicator_string = LookupIndicatorText( *lookup_string );
-	CleanupStack::PushL( lookup_indicator_string );
+    HBufC8* lookup_string = LookupText(aTemplate, aWidgetType,
+            aLandscapeOrientation, aHighlighted );
+    CleanupStack::PushL( lookup_string );
+    HBufC8* lookup_indicator_string = LookupIndicatorText( *lookup_string );
+    CleanupStack::PushL( lookup_indicator_string );
 
-    RArray<TTemplateChild>* children = iTemplateChildrenMap.Find( lookup_indicator_string );
+    RArray<TTemplateChild>* children = iTemplateChildrenMap.Find(
+            lookup_indicator_string );
     if ( !children )
-    	{
-    	TSize itemSize;
-    	GetSize( itemSize, aWidgetType, aTemplate, aLandscapeOrientation, EFalse, GetParentRect( aLandscapeOrientation ) );
+        {
+        TSize itemSize;
+        GetSize( itemSize, aWidgetType, aTemplate, aLandscapeOrientation,
+                EFalse, GetParentRect( aLandscapeOrientation ) );
         SetupMoveIndicatorTemplateChildrenL( *lookup_indicator_string, itemSize );
         children = iTemplateChildrenMap.Find( lookup_indicator_string );
         if (!children)
-        	User::Panic( KMtlPanic, -1);
-    	}
+            User::Panic( KMtlPanic, -1);
+        }
 
     CleanupStack::PopAndDestroy( lookup_indicator_string );
-	CleanupStack::PopAndDestroy( lookup_string );
+    CleanupStack::PopAndDestroy( lookup_string );
 
     for (TInt i = 0; i < children->Count(); i++)
-    	{
-    	aArray.AppendL((*children)[i]);
-    	}
-	}
+        {
+        aArray.AppendL((*children)[i]);
+        }
+    }
 
 // ---------------------------------------------------------------------------
 //
@@ -347,25 +349,25 @@ HBufC8* CMmTemplateLibrary::LookupText( const TDesC8& aTemplate,
     {
     HBufC8* lookup_string = HBufC8::New( MmTemplateContants::KTemplateChildTextLength );
     if (lookup_string)
-    	{
-		TPtr8 lookup_string_ptr( lookup_string->Des() );
-		lookup_string_ptr.Append( aTemplate );
-		lookup_string_ptr.Append( KColon8 );
-		switch ( aWidgetType )
-			{
-			case EListbox:
-				lookup_string_ptr.Append( KListbox8 );
-				break;
-			case EGrid:
-				lookup_string_ptr.Append( KGrid8 );
-				break;
-			}
-		lookup_string_ptr.Append( KColon8 );
-		lookup_string_ptr.AppendNum( aLandscapeOrientation );
-		lookup_string_ptr.Append( KColon8 );
-		lookup_string_ptr.AppendNum( aHighlighted );
-		lookup_string_ptr.Append( KColon8 );
-    	}
+      {
+    TPtr8 lookup_string_ptr( lookup_string->Des() );
+    lookup_string_ptr.Append( aTemplate );
+    lookup_string_ptr.Append( KColon8 );
+    switch ( aWidgetType )
+      {
+      case EListbox:
+        lookup_string_ptr.Append( KListbox8 );
+        break;
+      case EGrid:
+        lookup_string_ptr.Append( KGrid8 );
+        break;
+      }
+    lookup_string_ptr.Append( KColon8 );
+    lookup_string_ptr.AppendNum( aLandscapeOrientation );
+    lookup_string_ptr.Append( KColon8 );
+    lookup_string_ptr.AppendNum( aHighlighted );
+    lookup_string_ptr.Append( KColon8 );
+      }
     return lookup_string;
     }
 
@@ -375,59 +377,59 @@ HBufC8* CMmTemplateLibrary::LookupText( const TDesC8& aTemplate,
 //
 HBufC8* CMmTemplateLibrary::LookupLayoutText( TMmWidgetType aWidgetType,
         const TDesC8& aTemplate, TBool aLandscapeOrientation )
-	{
+  {
     HBufC8* lookup_string = HBufC8::New( MmTemplateContants::KTemplateChildTextLength );
     if (lookup_string)
-    	{
-		TPtr8 lookup_string_ptr( lookup_string->Des() );
-		switch ( aWidgetType )
-			{
-			case EListbox:
-				lookup_string_ptr.Append( KListbox8 );
-				break;
-			case EGrid:
-				lookup_string_ptr.Append( KGrid8 );
-				break;
-			}
-		lookup_string_ptr.Append( KColon8 );
+      {
+    TPtr8 lookup_string_ptr( lookup_string->Des() );
+    switch ( aWidgetType )
+      {
+      case EListbox:
+        lookup_string_ptr.Append( KListbox8 );
+        break;
+      case EGrid:
+        lookup_string_ptr.Append( KGrid8 );
+        break;
+      }
+    lookup_string_ptr.Append( KColon8 );
         lookup_string_ptr.Append( KColon8 );
-		lookup_string_ptr.Append( aTemplate );
-		lookup_string_ptr.Append( KColon8 );
-		lookup_string_ptr.AppendNum( aLandscapeOrientation );
-    	}
+    lookup_string_ptr.Append( aTemplate );
+    lookup_string_ptr.Append( KColon8 );
+    lookup_string_ptr.AppendNum( aLandscapeOrientation );
+      }
     return lookup_string;
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 HBufC8* CMmTemplateLibrary::LookupIndicatorText( const TDesC8& aLookupText )
-	{
-	HBufC8* lookup_string = HBufC8::New( MmTemplateContants::KTemplateChildTextLength );
-	if (lookup_string)
-		{
-		TPtr8 lookup_string_ptr( lookup_string->Des() );
-		lookup_string_ptr.Append( KMI8 );
-		lookup_string_ptr.Append( KColon8 );
-		lookup_string_ptr.Append( aLookupText );
-		}
+  {
+  HBufC8* lookup_string = HBufC8::New( MmTemplateContants::KTemplateChildTextLength );
+  if (lookup_string)
+    {
+    TPtr8 lookup_string_ptr( lookup_string->Des() );
+    lookup_string_ptr.Append( KMI8 );
+    lookup_string_ptr.Append( KColon8 );
+    lookup_string_ptr.Append( aLookupText );
+    }
 
-	return lookup_string;
-	}
+  return lookup_string;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::LoadTemplateL( TMmWidgetType aWidgetType,
-		const TDesC8& aTemplate, TBool aLandscapeOrientation )
-	{
-	iWidgetType = aWidgetType;
-	DEBUG(("_Mm_:CMmTemplateLibrary::LoadTemplateL IN"));
-	TMmTemplateType mmTemplateType;
-	HBufC8* content = GetTemplateContentL( aTemplate, aWidgetType, mmTemplateType );
-	CleanupStack::PushL( content );
+    const TDesC8& aTemplate, TBool aLandscapeOrientation )
+  {
+  iWidgetType = aWidgetType;
+  DEBUG(("_Mm_:CMmTemplateLibrary::LoadTemplateL IN"));
+  TMmTemplateType mmTemplateType;
+  HBufC8* content = GetTemplateContentL( aTemplate, aWidgetType, mmTemplateType );
+  CleanupStack::PushL( content );
     RXmlEngDOMImplementation domImpl;
     CleanupClosePushL( domImpl );
     RXmlEngDOMParser domParser;
@@ -456,9 +458,9 @@ void CMmTemplateLibrary::LoadTemplateL( TMmWidgetType aWidgetType,
             if (orientationElement.AttributeValueL(KId8) == KLandscape8)
                 landscapeOrientation = ETrue;
             if ( landscapeOrientation != aLandscapeOrientation )
-            	{
-            	continue;
-            	}
+              {
+              continue;
+              }
             RXmlEngNodeList<TXmlEngElement> elements;
             orientationElement.GetChildElements( elements );
             CleanupClosePushL( elements );
@@ -466,8 +468,8 @@ void CMmTemplateLibrary::LoadTemplateL( TMmWidgetType aWidgetType,
             while ( elements.HasNext() )
                 {
                 element = elements.Next();
-            	DEBUG(("_Mm_:iMmTemplateType != EMmTemplateMoveIndicator"));
-            	if (element.AttributeValueL(KId8) == KHighlight8)
+              DEBUG(("_Mm_:iMmTemplateType != EMmTemplateMoveIndicator"));
+              if (element.AttributeValueL(KId8) == KHighlight8)
                     {
                     DEBUG(("_Mm_:AttributeValueL - id == highlight"));
                     ProcessElementL( mmTemplateType, element, aTemplate, landscapeOrientation, ETrue );
@@ -503,20 +505,20 @@ void CMmTemplateLibrary::LoadTemplateL( TMmWidgetType aWidgetType,
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::ProcessElementL(TMmTemplateType aMmTemplateType,
-										 TXmlEngElement aElement,
+                     TXmlEngElement aElement,
                                          const TDesC8& aTemplate,
                                          TBool aLandscapeOrientation,
                                          TBool aHighlighted )
     {
     switch ( aMmTemplateType )
-	    {
-	    case ETemplateTypeLCT:
-	    	ProcessLCTTemplateElementL(aElement, aTemplate, aLandscapeOrientation, aHighlighted );
-	    	break;
-	    case ETemplateTypeCustom:
-	    	ProcessCustomTemplateElementL(aElement, aTemplate, aLandscapeOrientation, aHighlighted );
-	    	break;
-	    }
+      {
+      case ETemplateTypeLCT:
+        ProcessLCTTemplateElementL(aElement, aTemplate, aLandscapeOrientation, aHighlighted );
+        break;
+      case ETemplateTypeCustom:
+        ProcessCustomTemplateElementL(aElement, aTemplate, aLandscapeOrientation, aHighlighted );
+        break;
+      }
     }
 
 // -----------------------------------------------------------------------------
@@ -527,64 +529,64 @@ void CMmTemplateLibrary::ProcessLCTTemplateElementL(TXmlEngElement aElement,
                                          const TDesC8& aTemplate,
                                          TBool aLandscapeOrientation,
                                          TBool aHighlighted )
-	{
-	RXmlEngNodeList<TXmlEngElement> layoutElements;
-	CleanupClosePushL( layoutElements );
-	aElement.GetChildElements( layoutElements );
-	TXmlEngElement layoutElement;
-	TSize itemSize;
-	while ( layoutElements.HasNext() )
-		{
-		layoutElement = layoutElements.Next();
+  {
+  RXmlEngNodeList<TXmlEngElement> layoutElements;
+  CleanupClosePushL( layoutElements );
+  aElement.GetChildElements( layoutElements );
+  TXmlEngElement layoutElement;
+  TSize itemSize;
+  while ( layoutElements.HasNext() )
+    {
+    layoutElement = layoutElements.Next();
 
-		if ( !layoutElement.Name().Compare( KLayout8 ) )
-			{
-			TPtrC8 lctAtt = layoutElement.AttributeValueL(KLct8);
+    if ( !layoutElement.Name().Compare( KLayout8 ) )
+      {
+      TPtrC8 lctAtt = layoutElement.AttributeValueL(KLct8);
 
-			// set layout for grid
-			TInt variety;
-			HnConvUtils::Str8ToInt(layoutElement.AttributeValueL(KVariety8), variety);
+      // set layout for grid
+      TInt variety;
+      HnConvUtils::Str8ToInt(layoutElement.AttributeValueL(KVariety8), variety);
 
-			TSize layoutSize;
-			if ( iWidgetType == EGrid )
-				{
-				layoutSize = MmLCTUtils::GetLayoutSize( lctAtt, variety );
-				CacheLayoutSizeL( layoutSize, aTemplate, aLandscapeOrientation );
-				}
-			else
-				{
-				layoutSize = GetLayoutSizeL( iWidgetType, aTemplate, aLandscapeOrientation );
-				}
+      TSize layoutSize;
+      if ( iWidgetType == EGrid )
+        {
+        layoutSize = MmLCTUtils::GetLayoutSize( lctAtt, variety );
+        CacheLayoutSizeL( layoutSize, aTemplate, aLandscapeOrientation );
+        }
+      else
+        {
+        layoutSize = GetLayoutSizeL( iWidgetType, aTemplate, aLandscapeOrientation );
+        }
 
-			TAknWindowLineLayout layout;
-			TSize itemSize = GetLCTSize( lctAtt, variety, layout, aLandscapeOrientation );
+      TAknWindowLineLayout layout;
+      TSize itemSize = GetLCTSize( lctAtt, variety, layout, aLandscapeOrientation );
 
-			AdjustItemSize( itemSize, layoutSize, aLandscapeOrientation );
-			HBufC8* lookup_string = LookupText( aTemplate, iWidgetType,
+      AdjustItemSize( itemSize, layoutSize, aLandscapeOrientation );
+      HBufC8* lookup_string = LookupText( aTemplate, iWidgetType,
                 aLandscapeOrientation, aHighlighted );
-			iTemplateSizesMap.InsertL( lookup_string, itemSize );
+      iTemplateSizesMap.InsertL( lookup_string, itemSize );
 
-			// setup children
-			RArray< TTemplateChild > childrenDefinition;
-			CleanupClosePushL( childrenDefinition );
-			RXmlEngNodeList<TXmlEngElement> childrenElements;
-			CleanupClosePushL( childrenElements );
-			layoutElement.GetChildElements( childrenElements );
-			TXmlEngElement childElement;
-			while ( childrenElements.HasNext() )
-				{
-				childElement = childrenElements.Next();
-				TPtrC8 name = childElement.Name();
-				if ( !name.Compare( KTextVisual8 ) ||
-						!name.Compare( KImageVisual8 ) )
-					{
-					TTemplateChild childTemplate;
-					childTemplate.iLct = childElement.AttributeValueL(KLct8);
-					TInt variety;
-					HnConvUtils::Str8ToInt(childElement.AttributeValueL(KVariety8), variety);
-					childTemplate.iVariety = variety;
+      // setup children
+      RArray< TTemplateChild > childrenDefinition;
+      CleanupClosePushL( childrenDefinition );
+      RXmlEngNodeList<TXmlEngElement> childrenElements;
+      CleanupClosePushL( childrenElements );
+      layoutElement.GetChildElements( childrenElements );
+      TXmlEngElement childElement;
+      while ( childrenElements.HasNext() )
+        {
+        childElement = childrenElements.Next();
+        TPtrC8 name = childElement.Name();
+        if ( !name.Compare( KTextVisual8 ) ||
+            !name.Compare( KImageVisual8 ) )
+          {
+          TTemplateChild childTemplate;
+          childTemplate.iLct = childElement.AttributeValueL(KLct8);
+          TInt variety;
+          HnConvUtils::Str8ToInt(childElement.AttributeValueL(KVariety8), variety);
+          childTemplate.iVariety = variety;
 
-					TPtrC8 ptr = childElement.AttributeValueL(KHAlign8);
+          TPtrC8 ptr = childElement.AttributeValueL(KHAlign8);
                     if (!ptr.Compare(KNullDesC8))
                         {
                         childTemplate.iHAlign = EManualAlignUndefined;
@@ -602,21 +604,21 @@ void CMmTemplateLibrary::ProcessLCTTemplateElementL(TXmlEngElement aElement,
                         childTemplate.iHAlign = EManualAlignRight;
                         }
 
-					SetupLCTTemplateL( childTemplate, childElement, itemSize );
-					childrenDefinition.AppendL( childTemplate );
-					}
-				}
-			CleanupStack::PopAndDestroy( &childrenElements );
-			// save children defintion in map
-			lookup_string = LookupText(aTemplate, iWidgetType,
+          SetupLCTTemplateL( childTemplate, childElement, itemSize );
+          childrenDefinition.AppendL( childTemplate );
+          }
+        }
+      CleanupStack::PopAndDestroy( &childrenElements );
+      // save children defintion in map
+      lookup_string = LookupText(aTemplate, iWidgetType,
                 aLandscapeOrientation, aHighlighted );
-			iTemplateChildrenMap.InsertL(lookup_string, childrenDefinition);
-			CleanupStack::Pop( &childrenDefinition );
-			break;
-	        }
+      iTemplateChildrenMap.InsertL(lookup_string, childrenDefinition);
+      CleanupStack::Pop( &childrenDefinition );
+      break;
+          }
         }
     CleanupStack::PopAndDestroy( &layoutElements );
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -626,7 +628,7 @@ void CMmTemplateLibrary::ProcessCustomTemplateElementL(TXmlEngElement aElement,
                                          const TDesC8& aTemplate,
                                          TBool aLandscapeOrientation,
                                          TBool aHighlighted )
-	{
+  {
     RXmlEngNodeList<TXmlEngElement> layoutElements;
     CleanupClosePushL( layoutElements );
     aElement.GetChildElements( layoutElements );
@@ -638,25 +640,25 @@ void CMmTemplateLibrary::ProcessCustomTemplateElementL(TXmlEngElement aElement,
             {
             TSize itemSize;
             // set sizes
-        	TInt height;
+          TInt height;
             TInt width;
             HBufC8* lookup_string;
 
             HnConvUtils::Str8ToInt(layoutElement.AttributeValueL(KHeight8), height);
             HnConvUtils::Str8ToInt(layoutElement.AttributeValueL(KWidth8), width);
-        	lookup_string = LookupText( aTemplate, iWidgetType,
+          lookup_string = LookupText( aTemplate, iWidgetType,
                 aLandscapeOrientation, aHighlighted );
-        	itemSize = TSize( width, height );
+          itemSize = TSize( width, height );
 
 
             TSize layoutSize = ( aLandscapeOrientation ) ?
-            		TSize( MmGrid::KColsLandscapeZoomNormal, MmGrid::KRowsLandscapeZoomNormal ):
-            		TSize( MmGrid::KColsPortraitZoomNormal, MmGrid::KRowsPortraitZoomNormal ) ;
+                TSize( MmGrid::KColsLandscapeZoomNormal, MmGrid::KRowsLandscapeZoomNormal ):
+                TSize( MmGrid::KColsPortraitZoomNormal, MmGrid::KRowsPortraitZoomNormal ) ;
             layoutSize = ( iWidgetType == EGrid ) ? layoutSize: TSize(MmListBox::KCols,0);
             CacheLayoutSizeL( layoutSize, aTemplate, aLandscapeOrientation );
 
             AdjustItemWidth( itemSize, layoutSize, aLandscapeOrientation );
-        	iTemplateSizesMap.InsertL(lookup_string, itemSize);
+          iTemplateSizesMap.InsertL(lookup_string, itemSize);
 
             // set children
             RArray< TTemplateChild > childrenDefinition;
@@ -680,122 +682,122 @@ void CMmTemplateLibrary::ProcessCustomTemplateElementL(TXmlEngElement aElement,
                 }
             CleanupStack::PopAndDestroy( &childrenElements );
             // save children defintion in map
-        	lookup_string = LookupText(aTemplate, iWidgetType,
+          lookup_string = LookupText(aTemplate, iWidgetType,
                 aLandscapeOrientation, aHighlighted );
-        	iTemplateChildrenMap.InsertL(lookup_string, childrenDefinition);
-        	CleanupStack::Pop( &childrenDefinition );
+          iTemplateChildrenMap.InsertL(lookup_string, childrenDefinition);
+          CleanupStack::Pop( &childrenDefinition );
             // we found first layout, it is enough
             break;
             }
         }
     CleanupStack::PopAndDestroy( &layoutElements );
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 HBufC8* CMmTemplateLibrary::GetTemplateContentL(const TDesC8& aTemplate,
-		TMmWidgetType aWidgetType, TMmTemplateType& aMmTemplateType)
-	{
-	HBufC8* content;
-	TRAPD( err , GetTemplateFileContentL( content, aTemplate, aWidgetType, aMmTemplateType ) );
-	if ( KErrNone != err || !content )
-		{
+    TMmWidgetType aWidgetType, TMmTemplateType& aMmTemplateType)
+  {
+  HBufC8* content;
+  TRAPD( err , GetTemplateFileContentL( content, aTemplate, aWidgetType, aMmTemplateType ) );
+  if ( KErrNone != err || !content )
+    {
 //		if LCT template was not loaded try to load a custom template
-		TRAPD( err , GetTemplateFileContentL( content, aTemplate, aWidgetType, aMmTemplateType, ETrue ) );
-		if ( KErrNoMemory == err )
-		    {
-		    User::Leave( KErrNoMemory );
-		    }
-		if ( KErrNone != err || !content )
-			{
-			User::Panic(KMtlPanic, -1);
-			}
-		}
-	return content;
-	}
+    TRAPD( err , GetTemplateFileContentL( content, aTemplate, aWidgetType, aMmTemplateType, ETrue ) );
+    if ( KErrNoMemory == err )
+        {
+        User::Leave( KErrNoMemory );
+        }
+    if ( KErrNone != err || !content )
+      {
+      User::Panic(KMtlPanic, -1);
+      }
+    }
+  return content;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::GetTemplateFileContentL( HBufC8*& aContent,
-		const TDesC8& aTemplate, TMmWidgetType aWidgetType,
-		TMmTemplateType& aMmTemplateType, TBool aLoadCustomTemplate )
-	{
+    const TDesC8& aTemplate, TMmWidgetType aWidgetType,
+    TMmTemplateType& aMmTemplateType, TBool aLoadCustomTemplate )
+  {
     DEBUG(("_Mm_:CMmTemplateLibrary::GetTemplateContentL IN"));
     TFileName filename;
 //  create filename  egz: akn_logical_template_3.xml
-	filename.Copy(aTemplate);
-	filename.Insert(0, KUnderline );
-	filename.Insert(0, KAkn );
-	filename.Append( KXmlExt );
+  filename.Copy(aTemplate);
+  filename.Insert(0, KUnderline );
+  filename.Insert(0, KAkn );
+  filename.Append( KXmlExt );
 
 //  append path egz: z:\\resource\\grid\\lct\\akn_logical_template_3.xml
 
-	if ( !aLoadCustomTemplate )
-		{
-		filename.Insert(0, KBslash );
-		filename.Insert(0, KLct );
-		}
-	else
-		{
-		filename.Insert(0, KBslash );
-		filename.Insert(0, KCustom );
-		}
+  if ( !aLoadCustomTemplate )
+    {
+    filename.Insert(0, KBslash );
+    filename.Insert(0, KLct );
+    }
+  else
+    {
+    filename.Insert(0, KBslash );
+    filename.Insert(0, KCustom );
+    }
 
-	switch (aWidgetType)
-		{
-		case EGrid:
-			filename.Insert(0, KBslash );
-			filename.Insert(0, KWidgetTypeGrid);
-			break;
-		case EListbox:
-			filename.Insert(0, KBslash );
-			filename.Insert(0, KWidgetTypeList );
-			break;
-		}
+  switch (aWidgetType)
+    {
+    case EGrid:
+      filename.Insert(0, KBslash );
+      filename.Insert(0, KWidgetTypeGrid);
+      break;
+    case EListbox:
+      filename.Insert(0, KBslash );
+      filename.Insert(0, KWidgetTypeList );
+      break;
+    }
 
-	filename.Insert(0, KZResource );
+  filename.Insert(0, KZResource );
 
-	DEBUG(("\t_Mm_:tail: %S", &filename));
+  DEBUG(("\t_Mm_:tail: %S", &filename));
     DEBUG(("_Mm_:CMmTemplateLibrary::GetTemplateContentL OUT"));
 
 //  load LCT Template or if it does not exist then load custom template
     aContent =  HnUtils::ReadFileLC(filename);
-	CleanupStack::Pop( aContent );
+  CleanupStack::Pop( aContent );
 
-	if ( aLoadCustomTemplate )
-		{
-		aMmTemplateType = ETemplateTypeCustom;
-		}
-	else
-		{
-		aMmTemplateType = ETemplateTypeLCT;
-		}
-	return;
-	}
+  if ( aLoadCustomTemplate )
+    {
+    aMmTemplateType = ETemplateTypeCustom;
+    }
+  else
+    {
+    aMmTemplateType = ETemplateTypeLCT;
+    }
+  return;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TSize CMmTemplateLibrary::GetLCTSize( const TDesC8& aLCTTemplate, TInt aVariety,
-		TAknWindowLineLayout& aWindowLayout, TBool aLandscapeOrientation )
-	{
-	TSize size = MmLCTUtils::GetLCTSize( aLCTTemplate, aVariety,
-			GetParentRect( aLandscapeOrientation ), aWindowLayout );
-	return size;
-	}
+    TAknWindowLineLayout& aWindowLayout, TBool aLandscapeOrientation )
+  {
+  TSize size = MmLCTUtils::GetLCTSize( aLCTTemplate, aVariety,
+      GetParentRect( aLandscapeOrientation ), aWindowLayout );
+  return size;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetupLCTTemplateL(TTemplateChild& aChildTemplate,
-		TXmlEngElement& aChildElement, TSize aItemSize )
-	{
+    TXmlEngElement& aChildElement, TSize aItemSize )
+  {
     TPtrC8 name = aChildElement.Name();
     aChildTemplate.iData = aChildElement.AttributeValueL(KId8);
     SetupTemplateVisualId( aChildTemplate );
@@ -822,17 +824,17 @@ void CMmTemplateLibrary::SetupLCTTemplateL(TTemplateChild& aChildTemplate,
             }
         }
     CleanupStack::PopAndDestroy( &attributeElements );
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetupCustomTemplateL(TTemplateChild& aChildTemplate,
-		TXmlEngElement& aChildElement)
-	{
+    TXmlEngElement& aChildElement)
+  {
     TPtrC8 name = aChildElement.Name();
-	TInt positionx; TInt positiony;
+  TInt positionx; TInt positiony;
     TInt height; TInt width;
 
     HnConvUtils::Str8ToInt(aChildElement.AttributeValueL(KPositionX8), positionx);
@@ -888,42 +890,42 @@ void CMmTemplateLibrary::SetupCustomTemplateL(TTemplateChild& aChildTemplate,
         }
 
     CleanupStack::PopAndDestroy( &attributeElements );
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetupTemplateVisualId(TTemplateChild& aChildTemplate )
-	{
-	if( !aChildTemplate.iData.Compare( KMmBackdropIcon8 ))
+  {
+  if( !aChildTemplate.iData.Compare( KMmBackdropIcon8 ))
         {
         aChildTemplate.iImageVisualId = EImageVisualIdEditMode;
         }
-	else
-		{
-		aChildTemplate.iImageVisualId = EImageVisualIdNormalMode;
-		}
-	}
+  else
+    {
+    aChildTemplate.iImageVisualId = EImageVisualIdNormalMode;
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::AppendEditModeTemplateL(
-		RArray<TTemplateChild>& aTemplateArray, TSize aSize)
-	{
+    RArray<TTemplateChild>& aTemplateArray, TSize aSize)
+    {
     //setup backdrop icon
     TTemplateChild childTemplate;
     childTemplate.iIsImage = ETrue;
     childTemplate.iFontId = EAknLogicalFontSecondaryFont;
     childTemplate.iTextAlign = CGraphicsContext::ELeft;
     childTemplate.iRectAccordingToParent = TRect( TPoint( 0,0 ),
-    		TPoint( aSize.iWidth, aSize.iHeight ) );
+        TPoint( aSize.iWidth, aSize.iHeight ) );
     childTemplate.iData = TBufC8< MmTemplateContants::KTemplateChildTextLength >( KMmBackdropIcon8 );
     SetupTemplateVisualId( childTemplate );
     aTemplateArray.AppendL( childTemplate );
-	}
+  }
 
 
 // -----------------------------------------------------------------------------
@@ -931,78 +933,78 @@ void CMmTemplateLibrary::AppendEditModeTemplateL(
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetupMoveIndicatorTemplateChildrenL(
-		const TDesC8& aLookupString, TSize aItemSize )
-	{
-	RArray< TTemplateChild > childrenDefinition;
+    const TDesC8& aLookupString, TSize aItemSize )
+  {
+  RArray< TTemplateChild > childrenDefinition;
     TTemplateChild childTemplate;
     childTemplate.iIsImage = ETrue;
     childTemplate.iImageVisualId = EImageVisualIdNormalMode;
     childTemplate.iFontId = EAknLogicalFontSecondaryFont;
     childTemplate.iTextAlign = CGraphicsContext::ELeft;
-	TPoint startingPosition = TPoint(
-			MmTemplateContants::KMoveIndicatorStartingPos,
-			MmTemplateContants::KMoveIndicatorStartingPos);
+  TPoint startingPosition = TPoint(
+      MmTemplateContants::KMoveIndicatorStartingPos,
+      MmTemplateContants::KMoveIndicatorStartingPos);
 
     //setup move_indicator_arrow_left
     childTemplate.iRectAccordingToParent = TRect(TPoint(0,aItemSize.iHeight/2 + startingPosition.iY/2),
-    		TPoint(startingPosition.iX,
-    				startingPosition.iY*3/2 + aItemSize.iHeight/2));
+        TPoint(startingPosition.iX,
+            startingPosition.iY*3/2 + aItemSize.iHeight/2));
     childTemplate.iData = TBufC8< MmTemplateContants::KTemplateChildTextLength>(
-    		KMmMoveIndicatorArrowLeft8 );
+        KMmMoveIndicatorArrowLeft8 );
     childrenDefinition.AppendL( childTemplate );
 
     //setup move_indicator_arrow_right
     childTemplate.iRectAccordingToParent = TRect(
-    		TPoint(startingPosition.iX + aItemSize.iWidth , aItemSize.iHeight/2 + startingPosition.iY/2),
-    		TPoint(startingPosition.iX*2 + aItemSize.iWidth,
-    				startingPosition.iY*3/2 + aItemSize.iHeight/2));
+        TPoint(startingPosition.iX + aItemSize.iWidth , aItemSize.iHeight/2 + startingPosition.iY/2),
+        TPoint(startingPosition.iX*2 + aItemSize.iWidth,
+            startingPosition.iY*3/2 + aItemSize.iHeight/2));
     childTemplate.iData = TBufC8< MmTemplateContants::KTemplateChildTextLength>(
-    		KMmMoveIndicatorArrowRight8 );
+        KMmMoveIndicatorArrowRight8 );
     childrenDefinition.AppendL( childTemplate );
 
     //setup move_indicator_arrow_top
     childTemplate.iRectAccordingToParent = TRect(TPoint( aItemSize.iWidth/2 + startingPosition.iX/2, 0 ),
-    		TPoint(aItemSize.iWidth/2 + startingPosition.iX*3/2, startingPosition.iY));
+        TPoint(aItemSize.iWidth/2 + startingPosition.iX*3/2, startingPosition.iY));
     childTemplate.iData = TBufC8< MmTemplateContants::KTemplateChildTextLength >(
-    		KMmMoveIndicatorArrowTop8 );
+        KMmMoveIndicatorArrowTop8 );
     childrenDefinition.AppendL( childTemplate );
 
     //setup move_indicator_arrow_bottom
     childTemplate.iRectAccordingToParent = TRect( TPoint( aItemSize.iWidth/2 + startingPosition.iX/2,
-    		aItemSize.iHeight + startingPosition.iY + 2 ),
-    		TPoint(aItemSize.iWidth/2 + startingPosition.iX*3/2,
-    				aItemSize.iHeight + 2 *startingPosition.iY));
+        aItemSize.iHeight + startingPosition.iY + 2 ),
+        TPoint(aItemSize.iWidth/2 + startingPosition.iX*3/2,
+            aItemSize.iHeight + 2 *startingPosition.iY));
     childTemplate.iData = TBufC8< MmTemplateContants::KTemplateChildTextLength>(
-    		KMmMoveIndicatorArrowBottom8 );
+        KMmMoveIndicatorArrowBottom8 );
     childrenDefinition.AppendL( childTemplate );
 
-	HBufC8* lookup_string = aLookupString.AllocLC();
-	iTemplateChildrenMap.InsertL(lookup_string, childrenDefinition);
-	CleanupStack::Pop( lookup_string );
-	lookup_string = NULL;
+  HBufC8* lookup_string = aLookupString.AllocLC();
+  iTemplateChildrenMap.InsertL(lookup_string, childrenDefinition);
+  CleanupStack::Pop( lookup_string );
+  lookup_string = NULL;
 
     lookup_string = aLookupString.AllocLC();
-	TRect rectAccordingToParent = TRect(
-			TPoint( -startingPosition.iX, -startingPosition.iY),
-			TPoint(2*startingPosition.iX + aItemSize.iWidth ,
-					2*startingPosition.iY + aItemSize.iHeight) );
+  TRect rectAccordingToParent = TRect(
+      TPoint( -startingPosition.iX, -startingPosition.iY),
+      TPoint(2*startingPosition.iX + aItemSize.iWidth ,
+          2*startingPosition.iY + aItemSize.iHeight) );
 
-	iMoveIndicatorRectsMap.InsertL( lookup_string, rectAccordingToParent );
-	CleanupStack::Pop( lookup_string );
-	}
+  iMoveIndicatorRectsMap.InsertL( lookup_string, rectAccordingToParent );
+  CleanupStack::Pop( lookup_string );
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetScrollbarVisibilityL( TBool aIsScrollbarVisible )
-	{
-	if ( iIsScrollbarVisible != aIsScrollbarVisible )
-		{
-		iIsScrollbarVisible = aIsScrollbarVisible;
-		CleanAndClearCache();
-		}
-	}
+  {
+  if ( iIsScrollbarVisible != aIsScrollbarVisible )
+    {
+    iIsScrollbarVisible = aIsScrollbarVisible;
+    CleanAndClearCache();
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -1018,24 +1020,24 @@ TBool CMmTemplateLibrary::GetScrollbarVisibility()
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetScrollbarWidthL( TInt aScrollbarWidth )
-	{
-	if ( iIsScrollbarVisible )
-		{
-		if ( iScrollbarWidth != aScrollbarWidth )
-			{
-			iScrollbarWidth = aScrollbarWidth;
-			CleanAndClearCache();
-			}
-		}
-	else
-		{
-		if ( iScrollbarWidth != 0 )
-			{
-			iScrollbarWidth = 0;
-			CleanAndClearCache();
-			}
-		}
-	}
+  {
+  if ( iIsScrollbarVisible )
+    {
+    if ( iScrollbarWidth != aScrollbarWidth )
+      {
+      iScrollbarWidth = aScrollbarWidth;
+      CleanAndClearCache();
+      }
+    }
+  else
+    {
+    if ( iScrollbarWidth != 0 )
+      {
+      iScrollbarWidth = 0;
+      CleanAndClearCache();
+      }
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -1051,29 +1053,29 @@ TInt CMmTemplateLibrary::ScrollbarWidth()
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::AdjustItemWidth(TSize& aItemSize, TSize aLayoutSize,
-		TBool aLandscapeOrientation)
-	{
-	if ( iIsScrollbarVisible )
-		{
-		aItemSize.iWidth = ( GetParentRect(aLandscapeOrientation).Width() - iScrollbarWidth ) / aLayoutSize.iWidth;
-		}
-	else
-		{
-		aItemSize.iWidth = GetParentRect(aLandscapeOrientation).Width() / aLayoutSize.iWidth;
-		}
-	}
+    TBool aLandscapeOrientation)
+  {
+  if ( iIsScrollbarVisible )
+    {
+    aItemSize.iWidth = ( GetParentRect(aLandscapeOrientation).Width() - iScrollbarWidth ) / aLayoutSize.iWidth;
+    }
+  else
+    {
+    aItemSize.iWidth = GetParentRect(aLandscapeOrientation).Width() / aLayoutSize.iWidth;
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::UpdateParentRect( TRect aParentRect, TBool aLandscapeOrientation )
-	{
+  {
     if( GetParentRect( aLandscapeOrientation ) != aParentRect )
-	    {
-    	SetParentRect( aLandscapeOrientation, aParentRect );
-	    }
-	}
+      {
+      SetParentRect( aLandscapeOrientation, aParentRect );
+      }
+  }
 
 
 // -----------------------------------------------------------------------------
@@ -1081,62 +1083,62 @@ void CMmTemplateLibrary::UpdateParentRect( TRect aParentRect, TBool aLandscapeOr
 // -----------------------------------------------------------------------------
 //
 TRect CMmTemplateLibrary::GetParentRect( TBool aLandscapeOrientation )
-	{
-	if ( aLandscapeOrientation )
-		return iParentRectLandscape;
-	else
-		return iParentRectPortrait;
-	}
+  {
+  if ( aLandscapeOrientation )
+    return iParentRectLandscape;
+  else
+    return iParentRectPortrait;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::SetParentRect( TBool aLandscapeOrientation, TRect aParentRect)
-	{
-	if ( aLandscapeOrientation )
-		iParentRectLandscape = aParentRect;
-	else
-		iParentRectPortrait = aParentRect;
-	}
+  {
+  if ( aLandscapeOrientation )
+    iParentRectLandscape = aParentRect;
+  else
+    iParentRectPortrait = aParentRect;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::AdjustItemSize(TSize& aItemSize, TSize aLayoutSize,
-		TBool aLandscapeOrientation)
-	{
-	switch ( iWidgetType )
-		{
-		case EGrid:
-			aItemSize.iHeight = GetParentRect( aLandscapeOrientation ).Height() / aLayoutSize.iHeight;
-			break;
-		case EListbox:
-			break;
-		}
-	AdjustItemWidth( aItemSize, aLayoutSize, aLandscapeOrientation );
-	}
+    TBool aLandscapeOrientation)
+  {
+  switch ( iWidgetType )
+    {
+    case EGrid:
+      aItemSize.iHeight = GetParentRect( aLandscapeOrientation ).Height() / aLayoutSize.iHeight;
+      break;
+    case EListbox:
+      break;
+    }
+  AdjustItemWidth( aItemSize, aLayoutSize, aLandscapeOrientation );
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmTemplateLibrary::CacheLayoutSizeL(TSize aLayoutSize,
-		const TDesC8& aTemplate, TBool aLandscapeOrientation)
-	{
-	HBufC8* lookup_layout_text = LookupLayoutText( iWidgetType,
+    const TDesC8& aTemplate, TBool aLandscapeOrientation)
+  {
+  HBufC8* lookup_layout_text = LookupLayoutText( iWidgetType,
         aTemplate, aLandscapeOrientation );
 
-	if ( iTemplateSizesMap.Find( lookup_layout_text ) )
-		{
-		delete lookup_layout_text;
-		}
-	else
-		{
-		iTemplateSizesMap.InsertL( lookup_layout_text, aLayoutSize );
-		}
-	}
+  if ( iTemplateSizesMap.Find( lookup_layout_text ) )
+    {
+    delete lookup_layout_text;
+    }
+  else
+    {
+    iTemplateSizesMap.InsertL( lookup_layout_text, aLayoutSize );
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //

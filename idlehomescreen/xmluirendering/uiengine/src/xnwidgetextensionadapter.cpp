@@ -712,7 +712,7 @@ void CXnWidgetExtensionAdapter::NotifyResourceChanged( TInt aType )
     
     else if( iPopup && aType == KAknSplitInputDisabled )
         {
-        HidePopupL();
+        TRAP_IGNORE( HidePopupL() );
         }
     }
 

@@ -36,6 +36,7 @@ class CHsCcProviderClient;
 class CXnEffectManager;
 class MHsContentControl;
 class CXnWaitDialog;
+class CXnItemActivator;
 
 // Constants
 
@@ -49,8 +50,7 @@ class CXnWaitDialog;
 *  @since Series 60 3.1
 */
 NONSHARABLE_CLASS( CXnAppUiAdapterImpl ) : public CBase,
-                                           public MXnPropertyChangeObserver,
-                                           public MProgressDialogCallback    
+    public MXnPropertyChangeObserver, public MProgressDialogCallback                                               
     {
 public:
     // Constructors and destructor
@@ -146,6 +146,14 @@ public:
     MHsContentControl* HsContentControlSrv() const;
 
     /**
+     * Gets the Item activator
+     *
+     * @since S60 5.0
+     * @return Item activator
+     */    
+    CXnItemActivator& ItemActivator() const;
+    
+    /**
      * Reload the UI after application root configuration is changed
      * 
      * @since S60 5.0     
@@ -191,6 +199,7 @@ private:
     
 private:
     // Data
+    
     /** AppUi, Not owned. */
     CXnAppUiAdapter& iAdapter;    
     /** Application uid */
@@ -209,13 +218,16 @@ private:
     CHsCcProviderClient* iCcProviderClient;
     /** Effect manager, Owned */
     CXnEffectManager* iEffectManager;
-    /** Resource offset */
-    TInt iResourceOffset;
-    /** Wait dialog, Owned */
-    CXnWaitDialog* iXnWaitDialog;
+    /** Backup restore wait dialog, Owned */
+    CXnWaitDialog* iBURWaitDialog;
     /** Publish&Subscribe observer for Backup & Restore, Owned */
     CXnPropertySubscriber* iBackupRestoreObserver;  
+    /** Item activator, Owned */
+    CXnItemActivator* iActivator;
+    /** Resource offset */
+    TInt iResourceOffset;
     };
 
-#endif      // XNAPPUIADAPTERIMPL_H
-            
+#endif // XNAPPUIADAPTERIMPL_H
+
+// End of file

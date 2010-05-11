@@ -22,9 +22,14 @@
 // System includes
 #include <aknViewAppUi.h>
 
+// User includes
+
 // Forward declarations
+class TAiFwPublisherInfo;
+class THsPublisherInfo;
 class TXnUiEngineAppIf;
 class CXnNodeAppIf;
+class CXnNode;
 class CXnDomNode;
 class CXnAppUiAdapterImpl;
 class CXnUiEngine;
@@ -34,6 +39,7 @@ class CXnViewAdapter;
 class MHsContentControlUi;
 class CXnEffectManager;
 class MHsContentControl;
+class CXnItemActivator;
 
 // Class declaration
 /**
@@ -100,11 +106,9 @@ public:
      *
      * @since S60 5.0
      * @param aPublisher Publisher to load
-     * @param aReason Load reason
-     * @return KErrNone if succesful, system wide error code otherwise     
      */
-    IMPORT_C virtual TInt LoadPublisher(
-        CXnNodeAppIf& aPublisher, TInt aReason );
+    IMPORT_C virtual void LoadPublisher( 
+        const TAiFwPublisherInfo& aPublisher );         
 
     /**
      * Handles data plugin destroying.
@@ -112,11 +116,9 @@ public:
      *
      * @since S60 5.0
      * @param aPublisher Publisher to destroy     
-     * @param aReason Destroy reason
-     * @return KErrNone if succesful, system wide error code otherwise
      */
-    IMPORT_C virtual TInt DestroyPublisher(
-        CXnNodeAppIf& aPublisher, TInt aReason );
+    IMPORT_C virtual void DestroyPublisher( 
+        const TAiFwPublisherInfo& aPublisher );         
 
     /**
      * Handles dynamic menuitem element initialisation.
@@ -159,6 +161,28 @@ public:
     IMPORT_C virtual void HandleEventL( const TDesC& aEvent, 
         CXnNodeAppIf& aDestination );
     
+    /** 
+     * Constructs THsPublisherInfo from aNode
+     * To be overriden by subclass.
+     * 
+     * @since S60 5.2
+     * @param aNode <contentsource> elements
+     * @param aInfo Publisher info which is constructed from aNode
+     * @return KErrNone if aInfo is succesfully build
+     */
+    EXPORT_C virtual TInt PublisherInfo( CXnNodeAppIf& aNode,
+        THsPublisherInfo& aInfo );
+
+    /** 
+     * Constructs THsPublisherInfo from aNode
+     * 
+     * @since S60 5.2
+     * @param aNode <contentsource> elements
+     * @param aInfo Publisher info which is constructed from aNode
+     * @return KErrNone if aInfo is succesfully build
+     */
+    TInt PublisherInfo( CXnNode& aNode, THsPublisherInfo& aInfo );
+            
     /**
      * This is called when (initial) view is ready
      * To be overriden by subclass.
@@ -263,6 +287,14 @@ public:
      */
     MHsContentControl* HsContentControlSrv() const;
 
+    /**
+     * Gets a Item activator
+     *
+     * @since S60 5.0
+     * @return Item activator
+     */        
+    CXnItemActivator& ItemActivator() const;
+    
     /**
      * Queries whether the focus control is visible
      *

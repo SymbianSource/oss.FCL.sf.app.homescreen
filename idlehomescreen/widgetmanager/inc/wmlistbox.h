@@ -44,6 +44,7 @@ class CWmListModel;
 class CWmWidgetData;
 class CAknStylusPopUpMenu;
 class MEikMenuObserver;
+class CWmListItemDrawer;
 
 // CLASS DECLARATIONS
 
@@ -129,7 +130,7 @@ private: // data members
 /**
  * CWmListBox
  */
-NONSHARABLE_CLASS( CWmListBox ): public CAknDouble2LargeStyleListBox,
+NONSHARABLE_CLASS( CWmListBox ): public CEikFormattedCellListBox,
                       public MWmWidgetDataObserver
 	{
 public:
@@ -291,7 +292,7 @@ private: // from CEikTextListBox
      * @see CEikTextListBox::CreateItemDrawerL
      */
 	void CreateItemDrawerL();
-	
+
 protected: // from base class CCoeControl
     
     /**

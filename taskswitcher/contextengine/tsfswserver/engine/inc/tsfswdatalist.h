@@ -147,6 +147,13 @@ public:
      */
     TUid AppUidForWgIdL( TInt aWgId );
 
+    /**
+     * Returns the most top parent's wg id or KErrNotFound.
+     * @param   aWgId   a valid window group id
+     * @return parent wg id or KErrNotFound if there is no parent
+     */
+    TInt FindMostTopParentWgId( TInt aWgId );
+    
 private:
     /**
      * Adds running apps to the list.
@@ -198,13 +205,6 @@ private:
      * @return parent wg id or KErrNotFound if there is no parent
      */
     TInt FindParentWgId( TInt aWgId );
-
-    /**
-     * Returns the most top parent's wg id or KErrNotFound.
-     * @param   aWgId   a valid window group id
-     * @return parent wg id or KErrNotFound if there is no parent
-     */
-    TInt FindMostTopParentWgId( TInt aWgId );
 
     /**
      * Finds out the application name.

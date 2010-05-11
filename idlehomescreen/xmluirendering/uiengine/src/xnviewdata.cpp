@@ -5,7 +5,6 @@
 * under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
 * Initial Contributors:
 * Nokia Corporation - initial contribution.
 *
@@ -17,14 +16,15 @@
 
 // System includes
 #include <babitflags.h>
-#include <aifwdefs.h>
 
 // User includes
+#include <aifwdefs.h>
 #include "xnappuiadapter.h"
 #include "xncomposer.h"
 #include "xnodtparser.h"
 #include "xnviewmanager.h"
 #include "xnviewdata.h"
+#include "xnpublisherdata.h"
 #include "xncontroladapter.h"
 #include "xndomnode.h"
 #include "xnnode.h"
@@ -34,8 +34,6 @@
 #include "debug.h"
 
 // Constants
-const TInt KLoadDelay( 10000 );
-const TInt KInterval( 10000 );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -102,28 +100,42 @@ void CXnViewData::ConstructL()
 // 
 // -----------------------------------------------------------------------------
 //
-void CXnViewData::SetActive( TBool aActive )
+TInt CXnViewData::SetActive( TBool aActive )
     {    
     TBool active( Active() );
     
-    if ( active == aActive || !Occupied() )
+    TInt err( KErrNone );
+    
+    if ( !Occupied() )
         {
-        return;
-        }
-       
-    if ( aActive )
+        err = KErrGeneral;
+        }    
+    else if ( active == aActive )
         {
-        iFlags.Set( EIsActive );
-        iFlags.Clear( EIsInitial );
-        
-        LoadPublishers();                             
+        err = KErrNone;
         }
     else
-        {                              
-        DestroyPublishers( EAiFwPageShutdown );
-
-        iFlags.Clear( EIsActive );
-        }
+        {
+        if ( aActive )
+            {
+            iFlags.Set( EIsActive );
+            iFlags.Clear( EIsInitial );
+            
+            LoadPublishers( EAiFwPageStartup );
+            
+            err = iLoadError;
+            
+            iLoadError = KErrNone;
+            }
+        else
+            {                              
+            DestroyPublishers( EAiFwPageShutdown );
+    
+            iFlags.Clear( EIsActive );
+            }    
+        }       
+    
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -132,58 +144,57 @@ void CXnViewData::SetActive( TBool aActive )
 // -----------------------------------------------------------------------------
 //
 TInt CXnViewData::Load()
-    {               
+    {   
+    iLoadError = KErrNone;
+    
     if ( Occupied() )
         {
-        return KErrInUse;
-        }
-       
-    if ( !CXnOomSysHandler::HeapAvailable( VIEW_MIN_MEM ) )
+        iLoadError = KErrInUse;
+        }      
+    else if ( !CXnOomSysHandler::HeapAvailable( VIEW_MIN_MEM ) )
         {                                
-        return KErrNoMemory;
+        iLoadError = KErrNoMemory;
         }
-                   
-    TInt err( KErrNone );
-    
-    TRAP( err, err = iManager.Composer().ComposeViewL( *this ) );
-
-    if ( err == KErrNone )
+    else
         {
-        TRAP( err, iManager.Parser().LoadViewL( *this ) );
-        }
+        TInt err( KErrNone );
         
-    if ( err == KErrNone )
-        {    
-        iVirginPublishers = ETrue;
-        
-        // Load view's initial widgets
-        for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+        TRAP( err, err = iManager.Composer().ComposeViewL( *this ) );
+    
+        if ( err == KErrNone )
             {
-            if ( iPluginsData[i]->PluginId() != KNullDesC8 )
-                {                    
-                TInt err2( iPluginsData[i]->Load() );
-                
-                if ( err2 == KXnErrPluginFailure )
-                    {
-                    // Content removed error note must be   
-                    // displayed once when this view is activated
-                    iShowContentRemoved = ETrue;
-                                        
-                    err = err2;                                        
-                    }          
-                else if ( err2 == KErrNoMemory )
-                    {                                          
-                    err = err2;                                                                  
-                    break;
+            TRAP( err, iManager.Parser().LoadViewL( *this ) );
+            }
+                           
+        if ( err == KErrNone )
+            {                  
+            // Load view's initial widgets
+            for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+                {
+                if ( iPluginsData[i]->PluginId() != KNullDesC8 )
+                    {                    
+                    TInt err2( iPluginsData[i]->Load() );
+                    
+                    if ( err2 == KXnErrPluginFailure )
+                        {
+                        err = err2;                                        
+                        }          
+                    else if ( err2 == KErrNoMemory )
+                        {                                          
+                        err = err2;                                                                  
+                        break;
+                        }
                     }
                 }
-            }
-                       
-        // Succesfully enough composed, publishers 
-        // will be loaded when view is activated
+                           
+            // Succesfully enough composed, publishers 
+            // will be loaded when view is activated
+            }    
+        
+        iLoadError = err;
         }
-    
-    return err;
+                       
+    return iLoadError;
     }
 
 // -----------------------------------------------------------------------------
@@ -206,7 +217,9 @@ void CXnViewData::Destroy()
     
     delete iBgImagePath;
     iBgImagePath = NULL;
-              
+    
+    iLoadError = KErrNone;
+    
     Flush();      
     }
 
@@ -315,6 +328,7 @@ CFbsBitmap* CXnViewData::WallpaperImage() const
 
 // -----------------------------------------------------------------------------
 // CXnViewData::SetWallpaperImagePathL
+//
 // -----------------------------------------------------------------------------
 //
 void CXnViewData::SetWallpaperImagePathL( const TDesC& aFileName )
@@ -329,6 +343,7 @@ void CXnViewData::SetWallpaperImagePathL( const TDesC& aFileName )
 
 // -----------------------------------------------------------------------------
 // CXnViewData::WallpaperImagePath
+//
 // -----------------------------------------------------------------------------
 //
 const TDesC& CXnViewData::WallpaperImagePath() const
@@ -462,151 +477,128 @@ void CXnViewData::PluginNodesL( RPointerArray< CXnNode >& aList ) const
 // Loads data plugins associated to the plugin
 // -----------------------------------------------------------------------------
 //
-void CXnViewData::LoadPublishers()
+void CXnViewData::LoadPublishers( TInt aReason )
     {
+    __PRINTS( "*** CXnViewData::LoadPublishers" );
+    
     if( !Active() || !Occupied() )
         {               
+        __PRINTS( "*** CXnViewData::LoadPublishers - done, !Active() || !Occupied()" );
+        
         return;
         }
     
-    iLoader->Cancel();
-    
-    iLoadIndex = 0;
-                                
-    iLoader->Start( TTimeIntervalMicroSeconds32( KLoadDelay ),
-                    TTimeIntervalMicroSeconds32( KInterval ),
-                    TCallBack( DoLoadPublishersL, this ) );           
+    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        CXnPluginData* plugin( iPluginsData[i] );
+        
+        if ( plugin->Occupied() )
+            {            
+            plugin->LoadPublishers( aReason );
+            }
+        }
+        
+    CXnPluginData::LoadPublishers( aReason );
+
+    __PRINTS( "*** CXnViewData::LoadPublishers - done" );
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewData::DoLoadPublishersL()
-// 
+// CXnViewData::NotifyPublisherReadyL
+// Notifies a publisher is ready
 // -----------------------------------------------------------------------------
 //
-/* static */ TInt CXnViewData::DoLoadPublishersL( TAny* aAny )
-    {
-    __PRINTS( "*** CXnViewData::DoLoadPublishersL" );
+void CXnViewData::NotifyPublisherReadyL()
+    {       
+    if ( !Active() )
+        {
+        return;
+        }
+     
+    TBool allready( ETrue );
     
-    CXnViewData* self = static_cast< CXnViewData* >( aAny );
+    RPointerArray< CXnPublisherData > list;
+    CleanupClosePushL( list );
     
-    CXnAppUiAdapter* appui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );         
-    
-    RPointerArray< CXnPluginData >& plugins( self->PluginData() );
-    
-    for ( TInt i = self->iLoadIndex; i < plugins.Count(); i++ )
-        {        
-        if ( !plugins[i]->Occupied() )
+    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        CXnPluginData* plugin( iPluginsData[i] );
+        
+        if ( plugin->Occupied() )
             {
-            self->iLoadIndex++;
+            plugin->PublishersL( list );
             }
-        else
+        }
+    
+    CXnPluginData::PublishersL( list );
+
+    for ( TInt i = 0; i < list.Count(); i++ )
+        {
+        CXnPublisherData* publisher( list[i] );
+        
+        if ( publisher->IsLoading() )
             {
+            allready = EFalse;
             break;
             }
         }
-        
-    if ( self->iLoadIndex < plugins.Count() )
+
+    if ( allready && Active() )
         {
-        CXnPluginData* plugin( plugins[self->iLoadIndex] );
-             
-        self->iLoadIndex++;
+        TInt result( KErrNone );
         
-        TInt reason( plugin->VirginPublishers() ? 
-            EAiFwSystemStartup : EAiFwPageStartup );         
-        
-        TInt ret( plugin->LoadPublishers( reason ) );
-        
-        if ( ret == KErrAlreadyExists )
+        for ( TInt i = 0; i < list.Count(); i++ )
             {
-            ret = KErrNone;
+            CXnPublisherData* publisher( list[i] );
+            
+            if ( publisher->IsFailed() )
+                {
+                CXnPluginData* plugin( publisher->Owner() );
+                
+                if ( plugin != this && plugin->Removable() )
+                    {
+                    iManager.UnloadWidgetFromPluginL( *plugin, ETrue );
+                    
+                    result = KXnErrPluginFailure;
+                    }                              
+                }
             }
         
-        if( ret != KErrNone )
-            {
-            self->iManager.UnloadWidgetFromPluginL( *plugin, ETrue );            
-            self->iShowContentRemoved = ETrue;
-            }        
+        TRAP_IGNORE( iManager.PublishersReadyL( *this, result ) );        
         }
-    else
-        {                
-        TInt reason( self->VirginPublishers() ? 
-            EAiFwSystemStartup : EAiFwPageStartup ); 
         
-        self->iVirginPublishers = EFalse;
-        
-        self->iLoader->Cancel();
-        
-        self->iLoadIndex = 0;
-        
-        for ( TInt i = 0; i < self->iContentSourceNodes.Count(); i++ )
-            {            
-            CXnNodeAppIf& plugin( self->iContentSourceNodes[i]->AppIfL() ); 
-                    
-            appui->LoadPublisher( plugin, reason );                          
-            }                
-                             
-        if ( self->iShowContentRemoved )
-            {
-            self->ShowContentRemovedError();
-            self->iShowContentRemoved = EFalse;
-            }      
-                
-        // Fire UI ready blindly here, it will be handled in AiFw if needed
-        appui->HandleUiReadyEventL();
-        }                  
-            
-    __PRINTS( "*** CXnViewData::DoLoadPublishersL - done" );
-    
-    return KErrNone;       
+    CleanupStack::PopAndDestroy( &list );
     }
 
 // -----------------------------------------------------------------------------
 // CXnViewData::DestroyPublishers
-// Remove data plugins associated to the plugin
+// Destroys data plugins associated to the plugin
 // -----------------------------------------------------------------------------
 //
 void CXnViewData::DestroyPublishers( TInt aReason )
     {
     __PRINTS( "*** CXnViewData::DestroyPublishers" );
     
-    if ( Occupied() )
+    if ( !Occupied() )
         {
-        // If not all plugins loaded yet               
-        iLoader->Cancel();                                  
+        __PRINTS( "*** CXnViewData::DestroyPublishers - done, !Occupied()" );
         
-        TRAP_IGNORE( DoDestroyPublishersL( aReason ) );
-        
-        User::Heap().Compress();        
+        return;
         }
+    
+    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        CXnPluginData* plugin( iPluginsData[i] );
+        
+        if ( plugin->Occupied() )
+            {
+            plugin->DestroyPublishers( aReason );
+            }
+        }
+    
+    CXnPluginData::DestroyPublishers( aReason );
     
     __PRINTS( "*** CXnViewData::DestroyPublishers - done" );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnPluginData::DoDestroyPublishersL
-// Remove data plugins associated to the plugin
-// -----------------------------------------------------------------------------
-//
-void CXnViewData::DoDestroyPublishersL( TInt aReason )
-    {
-    __TIME_MARK( time );
-    
-    // Create list of data plugins to be removed    
-    RPointerArray< CXnNode > publishers;
-    CleanupClosePushL( publishers );
-    
-    TRAP_IGNORE( ContentSourceNodesL( publishers ) );
-    
-    for ( TInt i = 0; i < publishers.Count(); i++ )
-        {
-        // Destruction is synchronous
-        iManager.AppUiAdapter().DestroyPublisher( 
-            publishers[i]->AppIfL(), aReason );        
-        }
-        
-    CleanupStack::PopAndDestroy( &publishers );
-    
-    __TIME_ENDMARK( "CXnViewData::DoDestroyPublishersL, done", time );
     }
 
 // End of file

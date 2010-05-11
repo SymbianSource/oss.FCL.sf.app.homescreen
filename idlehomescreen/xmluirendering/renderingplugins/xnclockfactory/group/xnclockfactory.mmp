@@ -46,11 +46,11 @@ LIBRARY	        xn3layoutengine.lib
 LIBRARY	        xn3utils.lib
 LIBRARY         xn3domdocument.lib
 LIBRARY         avkon.lib
-LIBRARY         cenrepnotifhandler.lib
 LIBRARY         aknskins.lib
 LIBRARY         aknicon.lib
 LIBRARY         fbscli.lib
 LIBRARY         gdi.lib
+LIBRARY         hwrmlightclient.lib
 
 LANG            SC
 

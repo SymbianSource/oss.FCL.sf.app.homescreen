@@ -77,7 +77,7 @@ CWmListItemDrawer::CWmListItemDrawer(
         CWmListBox* aListBox )
     : CFormattedCellListBoxItemDrawer( aTextListBoxModel,aFont,aFormattedCellData ),
     iWmPlugin( aWmPlugin )
-	{    
+	{
     iCellData = aFormattedCellData;
     iListBox = aListBox;
 	}
@@ -160,8 +160,9 @@ void CWmListItemDrawer::UpdateItemHeight()
         ::listrow_wgtman_pane().LayoutLine();
     TAknLayoutRect listRowPaneRect;
     listRowPaneRect.LayoutRect( listPaneRect.Rect(), listRowPane );
-    TRAP_IGNORE( iListBox->SetItemHeightL( listRowPaneRect.Rect().Height() ); );
-    iListBox->View()->ItemDrawer()->SetItemCellSize( listRowPaneRect.Rect().Size() );
+    TRect itemRect = listRowPaneRect.Rect();
+    TRAP_IGNORE( iListBox->SetItemHeightL( itemRect.Height() ); );
+    iListBox->View()->ItemDrawer()->SetItemCellSize( itemRect.Size() );
     }
 
 // ---------------------------------------------------------
@@ -318,7 +319,7 @@ CWmListBox* CWmListBox::NewL(
 // ---------------------------------------------------------
 //
 CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
-    CAknDouble2LargeStyleListBox(),
+    CEikFormattedCellListBox(),
     iWmPlugin( aWmPlugin )
     {
     iFindPaneIsVisible = EFalse;
@@ -557,7 +558,7 @@ TInt CWmListBox::RealIndex( TInt aIndex )
 //
 void CWmListBox::SizeChanged()
     {
-    CAknDouble2LargeStyleListBox::SizeChanged();
+    CEikFormattedCellListBox::SizeChanged();
     
     CWmListItemDrawer* itemDrawer = 
                     static_cast <CWmListItemDrawer*>( iItemDrawer );
@@ -577,7 +578,7 @@ void CWmListBox::Draw( const TRect& aRect ) const
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
     AknsDrawUtils::Background( skin, cc, this, gc, Rect() );
-    CAknDouble2LargeStyleListBox::Draw( aRect );
+    CEikFormattedCellListBox::Draw( aRect );
     }
 
 // ---------------------------------------------------------

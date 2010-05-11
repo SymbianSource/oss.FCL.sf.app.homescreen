@@ -22,7 +22,7 @@
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C CHnItemsOrder* CHnItemsOrder::NewL()
@@ -34,20 +34,20 @@ EXPORT_C CHnItemsOrder* CHnItemsOrder::NewL()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::MarkSuiteUninitialized()
-	{
+  {
     for (TInt i(0); i < iItemsEvaluated.Count(); i++)
          {
          iItemsEvaluated[i] = EFalse;
          }
-    
+
     iSuiteEvaluated = EFalse;
-	}
+  }
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C CHnItemsOrder* CHnItemsOrder::NewLC()
@@ -58,7 +58,7 @@ EXPORT_C CHnItemsOrder* CHnItemsOrder::NewLC()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnItemsOrder::~CHnItemsOrder()
@@ -69,7 +69,7 @@ CHnItemsOrder::~CHnItemsOrder()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::SetSuiteId( TInt aId )
@@ -78,7 +78,7 @@ EXPORT_C void CHnItemsOrder::SetSuiteId( TInt aId )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::GetSuiteId() const
@@ -87,7 +87,7 @@ EXPORT_C TInt CHnItemsOrder::GetSuiteId() const
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::RemoveItemId( TInt aId )
@@ -96,28 +96,28 @@ EXPORT_C void CHnItemsOrder::RemoveItemId( TInt aId )
     if (position != KErrNotFound)
         {
         TInt modelNumber = CountModelNumberFor( position );
-        --iItemsOrderCounts[ modelNumber ] ;    
+        --iItemsOrderCounts[ modelNumber ] ;
         iComplexItemsOrder.Remove( position );
         }
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CHnItemsOrder::InsertItemIdToL( TInt aDataModelItem, 
+EXPORT_C void CHnItemsOrder::InsertItemIdToL( TInt aDataModelItem,
         TInt aIndex, TInt aId )
     {
     TInt position = CountStartIndexFor( aDataModelItem ) + aIndex;
     if (position < iComplexItemsOrder.Count() )
         {
-        iComplexItemsOrder.InsertL( aId, position ); 
+        iComplexItemsOrder.InsertL( aId, position );
         }
     else
         {
         iComplexItemsOrder.AppendL( aId );
         }
-    
+
     TInt modelsCount = iItemsOrderCounts.Count();
     if (modelsCount <= aDataModelItem)
         {
@@ -130,7 +130,7 @@ EXPORT_C void CHnItemsOrder::InsertItemIdToL( TInt aDataModelItem,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::GetItemIdAt( TInt aDataModelItem, TInt aIndex )
@@ -138,34 +138,34 @@ EXPORT_C TInt CHnItemsOrder::GetItemIdAt( TInt aDataModelItem, TInt aIndex )
     TInt globalItemPosition = CountStartIndexFor( aDataModelItem ) + aIndex;
     return (iComplexItemsOrder.Count() > globalItemPosition)
         ? iComplexItemsOrder[globalItemPosition] : KErrNotFound;
-    }  
+    }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::GetItemIdAt( TInt aPosition )
     {
-    return (iComplexItemsOrder.Count() > aPosition) 
+    return (iComplexItemsOrder.Count() > aPosition)
         ? iComplexItemsOrder[aPosition] : KErrNotFound;
-    }  
+    }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::GetIdsForL( TInt aDataModelItem,
         RArray< TInt >& aIds )
     {
-    if ( CountStartIndexFor( aDataModelItem ) == KErrNotFound 
+    if ( CountStartIndexFor( aDataModelItem ) == KErrNotFound
             || iItemsOrderCounts.Count() <= aDataModelItem )
         {
         return;
         }
-    
+
     TInt startIndex = CountStartIndexFor( aDataModelItem );
-    
-    for ( TInt i = 0; 
+
+    for ( TInt i = 0;
             i < iItemsOrderCounts[ aDataModelItem ]; i++ )
         {
         aIds.AppendL( iComplexItemsOrder[ startIndex + i ] );
@@ -173,7 +173,7 @@ EXPORT_C void CHnItemsOrder::GetIdsForL( TInt aDataModelItem,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::SetItemIdAtL( TInt aPosition, TInt aId )
@@ -189,7 +189,7 @@ EXPORT_C void CHnItemsOrder::SetItemIdAtL( TInt aPosition, TInt aId )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::DefineModelItemCountL( TInt aItemCounts )
@@ -207,7 +207,7 @@ EXPORT_C void CHnItemsOrder::DefineModelItemCountL( TInt aItemCounts )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::SuiteEvaluated()
@@ -216,7 +216,7 @@ EXPORT_C void CHnItemsOrder::SuiteEvaluated()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnItemsOrder::ItemEvaluated( TInt aIndex )
@@ -225,7 +225,7 @@ EXPORT_C void CHnItemsOrder::ItemEvaluated( TInt aIndex )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TBool CHnItemsOrder::IsSuiteReadyToShow()
@@ -235,11 +235,11 @@ EXPORT_C TBool CHnItemsOrder::IsSuiteReadyToShow()
          {
          ready = iItemsEvaluated[i];
          }
-    
+
     return ready && iSuiteEvaluated;
     }
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::GetModelItemCount( )
@@ -248,7 +248,7 @@ EXPORT_C TInt CHnItemsOrder::GetModelItemCount( )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::operator[]( TInt aPosition )
@@ -257,16 +257,16 @@ EXPORT_C TInt CHnItemsOrder::operator[]( TInt aPosition )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::GetItemPosition( TInt aId )
     {
     return iComplexItemsOrder.Find( aId );
     }
-    
+
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CHnItemsOrder::CountStartIndexFor( TInt aDataModelItem )
@@ -280,7 +280,7 @@ TInt CHnItemsOrder::CountStartIndexFor( TInt aDataModelItem )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CHnItemsOrder::CountModelNumberFor( TInt aIndex )
@@ -301,7 +301,7 @@ TInt CHnItemsOrder::CountModelNumberFor( TInt aIndex )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt CHnItemsOrder::Count()
@@ -310,20 +310,20 @@ EXPORT_C TInt CHnItemsOrder::Count()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CHnItemsOrder::CHnItemsOrder() : iSuiteId( KErrNotFound )
     {
-    
+
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CHnItemsOrder::ConstructL()
     {
-    
+
     }
 

@@ -3295,64 +3295,6 @@ static CXnNode* BuildTriggerNodeL(
     }
 
 // -----------------------------------------------------------------------------
-// Create scaled bitmap from source bitmap.
-// -----------------------------------------------------------------------------
-//
-void CreateScaledBitmapL(
-    const TRect& aRect,
-    CFbsBitmap*& aTrgBitmap,
-    CFbsBitmap* aSrcBitmap,
-    TBool aPreserveAspectRatio,
-    TBool aForceFallBack )
-    {
-    TRect destRect = aRect;
-
-    if ( aPreserveAspectRatio )
-        {
-        // Calculate the bitmap image dimensions so that it uses maximum space
-        // of the given rectangle and maintains aspect ratio.
-        TInt srcHeight = aSrcBitmap->SizeInPixels().iHeight;
-        TInt srcWidth = aSrcBitmap->SizeInPixels().iWidth;
-        TReal scaleRatio( 1 ); //no scale as defaul
-
-        //If any dimension is 0, then we do not bother to scale
-        if ( aRect.Width() > 0 && aRect.Height() > 0 )
-            {
-            TReal xRatio = ( ( TReal )srcWidth / ( TReal )aRect.Width() );
-            TReal yRatio = ( ( TReal )srcHeight / ( TReal )aRect.Height() );
-            //Find out appropriate scaling factor
-            xRatio > yRatio ? ( scaleRatio = xRatio ) : ( scaleRatio = yRatio );
-            }
-
-        //Scale the size for target bitmap
-        destRect.SetHeight( srcHeight / scaleRatio );
-        destRect.SetWidth( srcWidth / scaleRatio );
-        }
-
-    // see if there's a need to scale. If source and destination size are the same,
-    // then we don't need to duplicate the bitmap. aTrgBitmap will be null.
-    TSize srcSize = aSrcBitmap->SizeInPixels();
-    TSize destSize = destRect.Size();
-    if ( srcSize == destSize )
-        {
-        return;
-        }
-
-    aTrgBitmap = new ( ELeave ) CFbsBitmap;
-    CleanupStack::PushL( aTrgBitmap );
-    //It is allowed to create zero height or width bitmap.
-    TInt err( aTrgBitmap->Create( destRect.Size(), aSrcBitmap->DisplayMode() ) );
-
-    if ( err == KErrNone )
-        {
-        CXnUtils::ScaleBitmapExtL( destRect, aTrgBitmap, aSrcBitmap, aForceFallBack );
-        }
-
-    //we do not own the bitmap so just Pop.
-    CleanupStack::Pop( aTrgBitmap );
-    }
-
-// -----------------------------------------------------------------------------
 // SoftkeyNode
 // Gets the node of softkey according to pointer location
 // -----------------------------------------------------------------------------
@@ -3600,13 +3542,6 @@ CXnControlAdapterImpl::~CXnControlAdapterImpl()
     delete iContentBitmap;
     delete iContentMask;
 
-    delete iScaledContentBitmap;
-    delete iScaledContentMask;
-
-    delete iScaledTransparentColor;
-    delete iScaledBackgroundSkin;
-    delete iScaledBackgroundImage;
-
     iChildren.Reset();
 
     if ( iAnimation )
@@ -3624,7 +3559,9 @@ CXnControlAdapterImpl::~CXnControlAdapterImpl()
 // -----------------------------------------------------------------------------
 //
 CXnControlAdapterImpl::CXnControlAdapterImpl( CXnNodePluginIf& aNode )
-    : iNode( aNode )
+    : iNode( aNode ), 
+      iBackgrondInitialized ( EFalse ),
+      iBorderInitialized ( EFalse )
     {
     }
 
@@ -3705,14 +3642,15 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
 
     if ( aKeyEvent.iScanCode == EStdKeyDevice0 || // RSK
          aKeyEvent.iScanCode == EStdKeyDevice1 || // LSK
-         aKeyEvent.iScanCode == EStdKeyDevice3 )  // MSK
+         aKeyEvent.iScanCode == EStdKeyDevice3 || // MSK
+         aKeyEvent.iCode == EKeyEnter )
         {
         if ( aType == EEventKeyDown )
             {            
             iLongtap = EFalse;
             
             if ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-                aKeyEvent.iScanCode == EStdKeyEnter )
+                 aKeyEvent.iCode == EKeyEnter )
                 {
                 if ( node->IsStateSet( XnPropertyNames::style::common::KFocus ) )
                     {
@@ -3787,7 +3725,7 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
                 }
             
             if ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-                aKeyEvent.iScanCode == EStdKeyEnter )
+                 aKeyEvent.iCode == EKeyEnter )
                 {
                 // Reset "pressed down"
                 node->UnsetStateL( 
@@ -4198,52 +4136,25 @@ void CXnControlAdapterImpl::DrawTransparentColorL(
                 colorProperty->Property()->PropertyValueList().Item( 0 ) );
 
         if ( value->PrimitiveValueType() == CXnDomPropertyValue::ERgbColor )
-            {
-	        TRect paddingRect = aNode.PaddingRect();    
-            aMask->SetDisplayMode( EGray256 );
-
-            aGc.SetBrushColor( NULL );
-            aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
-
-            if ( !iScaledTransparentColor )
-                {
-                CFbsBitmap* bitmap( NULL );
-                CFbsBitmap* mask( NULL );
-
-                mask = new ( ELeave ) CFbsBitmap;
-                CleanupStack::PushL( mask );
-
-                mask->Create( paddingRect.Size(), EGray256 );
-
-                CXnUtils::ScaleBitmapL(
-                    TRect( 0, 0, paddingRect.Width(), paddingRect.Height() ),
-                    mask, aMask );
-
-                CXnDomPropertyValue* value =
-                    static_cast< CXnDomPropertyValue* >(
-                        colorProperty->Property()->PropertyValueList().Item( 0 ) );
-
-                TRgb rgb( value->RgbColorValueL() );
-
-                bitmap = CreateBitmapFromColorL( paddingRect.Size(), rgb );
-                CleanupStack::PushL( bitmap );
-
-                iScaledTransparentColor = CGulIcon::NewL( bitmap, mask );
-
-                CleanupStack::Pop( 2 );
-                }
-
-            aGc.DrawBitmapMasked( paddingRect,
-                iScaledTransparentColor->Bitmap(),
-                TRect( TPoint( 0, 0 ), paddingRect.Size() ),
-                iScaledTransparentColor->Mask(),
+            {            
+            CFbsBitmap* bitmap( NULL );
+            TRgb rgb( value->RgbColorValueL() );
+            bitmap = CreateBitmapFromColorL( aMask->SizeInPixels(), rgb );
+            
+            aGc.DrawBitmapMasked( 
+                aNode.PaddingRect(),
+                bitmap,
+                TRect( TPoint( 0, 0 ), bitmap->SizeInPixels() ),
+                aMask,
                 EFalse );
+            
+            delete bitmap;
             }
         }
     }
 
 // -----------------------------------------------------------------------------
-// CXnControlAdapterImpl::DrawBackgroundSkinL
+// CXnControlAdapterImpl::DrawBackgroundSkin
 // Draws a skin item to the given rect
 // -----------------------------------------------------------------------------
 //
@@ -4295,18 +4206,15 @@ void CXnControlAdapterImpl::DrawBackgroundSkinL(CXnNode& aNode,
                     innerRect.Shrink(
                         KSkinGfxInnerRectShrink,
                         KSkinGfxInnerRectShrink );
-
-                    if ( !iScaledBackgroundSkin )
+                    
+                    if ( !iBackgroundBitmap )
                         {
-                        CFbsBitmap* bitmap = new ( ELeave ) CFbsBitmap;
-                        CleanupStack::PushL( bitmap );
-
-                        CFbsBitmap* mask = new ( ELeave ) CFbsBitmap;
-                        CleanupStack::PushL( mask );
-
-                        bitmap->Create( outerRect.Size(), aGc.Device()->DisplayMode() );
-
-                        CFbsBitmapDevice* device = CFbsBitmapDevice::NewL( bitmap );
+                        iBackgroundBitmap = new ( ELeave ) CFbsBitmap;
+                        iBackgroundBitmap->Create( aMask->SizeInPixels(), 
+                                aGc.Device()->DisplayMode() );
+                        
+                        CFbsBitmapDevice* device = 
+                                CFbsBitmapDevice::NewL( iBackgroundBitmap );
                         CleanupStack::PushL( device );
 
                         CBitmapContext* bc( NULL );
@@ -4323,27 +4231,15 @@ void CXnControlAdapterImpl::DrawBackgroundSkinL(CXnNode& aNode,
                             frameContext, NULL,
                             static_cast< CWindowGc& >( *bc ),
                             outerRect, KAknsDrawParamNoClearUnderImage );
-
-                        aMask->SetDisplayMode( EGray256 );
-
-                        aGc.SetBrushColor( NULL );
-                        aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
-
-                        mask->Create( paddingRect.Size(), EGray256 );
-
-                        CXnUtils::ScaleBitmapL( outerRect, mask, aMask );
-
-                        CleanupStack::PopAndDestroy( 3 );
-
-                        iScaledBackgroundSkin = CGulIcon::NewL( bitmap, mask );
-
-                        CleanupStack::Pop( 2 );
+                        
+                        CleanupStack::PopAndDestroy( 3, device );
                         }
 
-                    CFbsBitmap* bitmap( iScaledBackgroundSkin->Bitmap() );
-                    CFbsBitmap* mask( iScaledBackgroundSkin->Mask() );
-
-                    aGc.BitBltMasked( paddingRect.iTl, bitmap, outerRect, mask, ETrue );
+                    aGc.DrawBitmapMasked( paddingRect, 
+                        iBackgroundBitmap, 
+                        TRect(TPoint(0, 0), iBackgroundBitmap->SizeInPixels()), 
+                        aMask, 
+                        ETrue );
                     }
                 else // draw background skin graphics without mask
                     {
@@ -4476,37 +4372,12 @@ void CXnControlAdapterImpl::DrawBackgroundImageL(
         aGc.SetClippingRect( aRect );
 
         if ( aMask )
-            {
-            aMask->SetDisplayMode( EGray256 );
-
-            aGc.SetBrushColor( NULL );
-            aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
-
-            if ( !iScaledBackgroundImage )
-                {
-                CFbsBitmap* mask( NULL );
-
-                mask = new ( ELeave ) CFbsBitmap;
-                CleanupStack::PushL( mask );
-
-                mask->Create( bitmapRect.Size(), EGray256 );
-
-                CXnUtils::ScaleBitmapL(
-                    TRect(
-                        0,
-                        0,
-                        bitmapRect.Width(),
-                        bitmapRect.Height() ),
-                    mask,
-                    aMask );
-
-                iScaledBackgroundImage = mask;
-
-                CleanupStack::Pop( mask );
-                }
-
-            aGc.DrawBitmapMasked( newRect, aBitmap, bitmapRect,
-                iScaledBackgroundImage, EFalse );
+            {           
+            aGc.DrawBitmapMasked( newRect, 
+                aBitmap, 
+                TRect(TPoint(0, 0), aBitmap->SizeInPixels()), 
+                aMask, 
+                EFalse );
             }
         else
             {
@@ -4984,12 +4855,6 @@ void CXnControlAdapterImpl::SetContentBitmaps(
     delete iContentMask;
     iContentMask = NULL;
 
-    delete iScaledContentBitmap;
-    iScaledContentBitmap = NULL;
-
-    delete iScaledContentMask;
-    iScaledContentMask = NULL;
-
     iContentBitmap = aBitmap;
     iContentMask = aMask;
     }
@@ -5007,12 +4872,6 @@ void CXnControlAdapterImpl::SetContentBitmapsL( const TDesC& aBitmapUrl,
 
     delete iContentMask;
     iContentMask = NULL;
-
-    delete iScaledContentBitmap;
-    iScaledContentBitmap = NULL;
-
-    delete iScaledContentMask;
-    iScaledContentMask = NULL;
 
     CXnNode& node( iNode.Node() );
     CXnUiEngine* engine( node.UiEngine() );
@@ -5083,7 +4942,7 @@ void CXnControlAdapterImpl::DrawContentImageL( CWindowGc& aGc ) const
     TRect rect = iComponent->Node()->Node().Rect();
 
     // Check if the node has a property "preserve image aspect ratio".
-    TBool preserveAspectRatio = EFalse;
+    TBool preserveAspectRatio = ETrue;
     CXnNode& currentNode = iComponent->Node()->Node();
 
     CXnProperty* aspectProperty = currentNode.GetPropertyL(
@@ -5092,130 +4951,52 @@ void CXnControlAdapterImpl::DrawContentImageL( CWindowGc& aGc ) const
         {
         const TDesC8& value = aspectProperty->StringValue();
 
-        if ( value.CompareF( XnPropertyNames::image::KPreserve ) == 0 )
+        if ( value.CompareF( XnPropertyNames::image::KNone ) == 0 )
             {
-            preserveAspectRatio = ETrue;
+            preserveAspectRatio = EFalse;
             }
         }
 
     TRect bitmapRect = rect;
     bitmapRect.Move( -rect.iTl.iX, -rect.iTl.iY );
-
     if ( AknIconUtils::IsMifIcon( iContentBitmap ) )
         {
         if ( preserveAspectRatio )
             {
             AknIconUtils::SetSize(
                 iContentBitmap, bitmapRect.Size(), EAspectRatioPreserved );
+            AknIconUtils::SetSize(
+                iContentMask, bitmapRect.Size(), EAspectRatioPreserved );
             }
         else
             {
             AknIconUtils::SetSize(
                 iContentBitmap, bitmapRect.Size(), EAspectRatioNotPreserved );
-            }
-        //Calculate new point to start draw in order to center bitmap to drawing area
-        rect.iTl.iY +=
-            ( rect.Height() - iContentBitmap->SizeInPixels().iHeight ) / 2;
-        rect.iTl.iX +=
-            ( rect.Width() - iContentBitmap->SizeInPixels().iWidth ) / 2;
-
-        if ( iContentMask )
-            {
-            // Based on the avkon's assumtion that mask is always inverted, the
-            // value of aInvertMask parameter is set to 'ETrue'
-            aGc.BitBltMasked( rect.iTl, iContentBitmap, bitmapRect, iContentMask,
-                ETrue );
-            }
-        else
-            {
-            aGc.BitBlt( rect.iTl, iContentBitmap, bitmapRect );
+            AknIconUtils::SetSize(
+                iContentMask, bitmapRect.Size(), EAspectRatioNotPreserved );
             }
         }
-    else
+    
+    // Calculate new point to start draw 
+    // in order to center bitmap to drawing area
+    rect.iTl.iY +=
+        ( rect.Height() - bitmapRect.Height() ) / 2;
+    rect.iTl.iX +=
+        ( rect.Width() - bitmapRect.Width() ) / 2;
+    
+    if ( iContentBitmap && iContentMask )
         {
-        if ( !iScaledContentBitmap )
-            {
-            TBool forceFallBack = CXnUtils::DoesScaleBitmapUseFallBack(
-                iContentBitmap );
-
-            TRAPD( err, CreateScaledBitmapL( bitmapRect,
-                iScaledContentBitmap,
-                iContentBitmap,
-                preserveAspectRatio,
-                forceFallBack ) );
-            if ( err )
-                {
-                // return if CreateScaledBitmapL() leaves. This prevents the
-                // drawing of the original content bitmap which is wrong size.
-                return;
-                }
-            }
-        if ( iContentMask && !iScaledContentMask )
-            {
-            TBool forceFallBack = CXnUtils::DoesScaleBitmapUseFallBack(
-                iContentMask );
-
-            TRAPD( err, CreateScaledBitmapL( bitmapRect,
-                iScaledContentMask,
-                iContentMask,
-                preserveAspectRatio,
-                forceFallBack ) );
-            if ( err )
-                {
-                // return if CreateScaledBitmapL() leaves. This prevents the
-                // drawing of the original content mask which is wrong size
-                // (and may distort the image).
-                return;
-                }
-            }
-
-        CFbsBitmap* bitmap( 0 );
-        CFbsBitmap* mask( 0 );
-
-        if ( iScaledContentBitmap )
-            {
-            bitmap = iScaledContentBitmap;
-            }
-        else
-            {
-            bitmap = iContentBitmap;
-            }
-
-        if ( iScaledContentMask )
-            {
-            mask = iScaledContentMask;
-            }
-        else
-            {
-            mask = iContentMask;
-            }
-
-        if ( bitmap && mask )
-            {
-            //Calculate new point to start draw in order to center bitmap to
-            // drawing area
-            rect.iTl.iY +=
-                ( rect.Height() - bitmap->SizeInPixels().iHeight ) / 2;
-            rect.iTl.iX +=
-                ( rect.Width() - bitmap->SizeInPixels().iWidth ) / 2;
-
-            // Based on the avkon's assumtion that mask is always inverted, the
-            // value of aInvertMask parameter is set to 'ETrue'
-            aGc.BitBltMasked( rect.iTl, bitmap, bitmapRect, mask, ETrue );
-            }
-        else if ( bitmap )
-            {
-            //Calculate new point to start draw in order to center bitmap to
-            // drawing area
-            rect.iTl.iY +=
-                ( rect.Height() - bitmap->SizeInPixels().iHeight ) / 2;
-            rect.iTl.iX +=
-                ( rect.Width() - bitmap->SizeInPixels().iWidth ) / 2;
-
-            aGc.BitBlt( rect.iTl, bitmap );
-            }
+        aGc.DrawBitmapMasked( rect, 
+            iContentBitmap, 
+            TRect(TPoint(0, 0), iContentBitmap->SizeInPixels()), 
+            iContentMask, 
+            ETrue );
         }
-   }
+    else if ( iContentBitmap )
+        {
+        aGc.DrawBitmap( rect, iContentBitmap );
+        }
+    }
 
 // -----------------------------------------------------------------------------
 // CXnControlAdapterImpl::SizeChanged
@@ -5223,21 +5004,6 @@ void CXnControlAdapterImpl::DrawContentImageL( CWindowGc& aGc ) const
 //
 void CXnControlAdapterImpl::SizeChanged()
     {
-    delete iScaledContentBitmap;
-    iScaledContentBitmap = NULL;
-
-    delete iScaledContentMask;
-    iScaledContentMask = NULL;
-
-    delete iScaledTransparentColor;
-    iScaledTransparentColor = NULL;
-
-    delete iScaledBackgroundSkin;
-    iScaledBackgroundSkin = NULL;
-
-    delete iScaledBackgroundImage;
-    iScaledBackgroundImage = NULL;
-
     TRAP_IGNORE( InitializeBackgroundAndBorderBitmapsL() );
     }
 
@@ -5247,22 +5013,7 @@ void CXnControlAdapterImpl::SizeChanged()
 //
 void CXnControlAdapterImpl::SkinChanged()
     {
-    delete iScaledContentBitmap;
-    iScaledContentBitmap = NULL;
-
-    delete iScaledContentMask;
-    iScaledContentMask = NULL;
-
-    delete iScaledTransparentColor;
-    iScaledTransparentColor = NULL;
-
-    delete iScaledBackgroundSkin;
-    iScaledBackgroundSkin = NULL;
-
-    delete iScaledBackgroundImage;
-    iScaledBackgroundImage = NULL;
-
-    TRAP_IGNORE( InitializeBackgroundAndBorderBitmapsL() );
+    TRAP_IGNORE( InitializeBackgroundAndBorderBitmapsL( ETrue ) );
     }
 
 // -----------------------------------------------------------------------------
@@ -5398,29 +5149,27 @@ void CXnControlAdapterImpl::FocusChangedL( TBool aFocused )
 // CXnControlAdapterImpl::InitializeBackgroundandBorderBitmapsL
 // -----------------------------------------------------------------------------
 //
-void CXnControlAdapterImpl::InitializeBackgroundAndBorderBitmapsL()
+void CXnControlAdapterImpl::InitializeBackgroundAndBorderBitmapsL(
+        TBool aForceRecreate )
     {
     CXnNode& node( iNode.Node() );
     CXnUiEngine* engine( node.UiEngine() );
 
     CXnProperty* backgroundImageProperty( node.BackgroundImageL() );
 
-    if ( backgroundImageProperty )
+    // if skin changed we need recreate icons
+    if ( backgroundImageProperty && aForceRecreate )
+        {
+        iBackgrondInitialized = EFalse;
+        }
+    
+    if ( backgroundImageProperty && !iBackgrondInitialized )
         {
         delete iBackgroundBitmap;
         iBackgroundBitmap = NULL;
 
         delete iBackgroundMask;
         iBackgroundMask = NULL;
-
-        delete iScaledTransparentColor;
-        iScaledTransparentColor = NULL;
-
-        delete iScaledBackgroundSkin;
-        iScaledBackgroundSkin = NULL;
-
-        delete iScaledBackgroundImage;
-        iScaledBackgroundImage = NULL;
 
         InitializeBackgroundBitmapL( *engine, node, iBackgroundBitmapIndex,
             iBackgroundBitmap, iBackgroundMask, iIconProvider, FsSession() );
@@ -5431,13 +5180,19 @@ void CXnControlAdapterImpl::InitializeBackgroundAndBorderBitmapsL()
             {
             iAnimIDResolved = CXnUtils::ResolveSkinItemIDL( *bgPath, iAnimIID );
             }
-
         CleanupStack::PopAndDestroy( bgPath );
+        iBackgrondInitialized = ETrue;
         }
 
     CXnProperty* borderImageProperty( node.BorderImageL() );
 
-    if ( borderImageProperty )
+    // if skin changed we need recreate icons
+    if ( borderImageProperty && aForceRecreate )
+        {
+        iBorderInitialized = EFalse;
+        }
+    
+    if ( borderImageProperty && !iBorderInitialized )
         {
         delete iBorderBitmap;
         iBorderBitmap = NULL;
@@ -5448,6 +5203,8 @@ void CXnControlAdapterImpl::InitializeBackgroundAndBorderBitmapsL()
             iBorderBitmapDividerRight,
             iBorderBitmapDividerBottom, iBorderBitmapDividerLeft,
             iIconProvider, FsSession() );
+        
+        iBorderInitialized = ETrue;
         }
     }
 
@@ -5751,15 +5508,6 @@ CXnControlAdapterImpl::TPropertyChangeResponse CXnControlAdapterImpl::UpdateBack
 
             delete iBackgroundMask;
             iBackgroundMask = NULL;
-
-            delete iScaledTransparentColor;
-            iScaledTransparentColor = NULL;
-
-            delete iScaledBackgroundSkin;
-            iScaledBackgroundSkin = NULL;
-
-            delete iScaledBackgroundImage;
-            iScaledBackgroundImage = NULL;
 
             InitializeBackgroundBitmapL( *( iNode.Node().UiEngine() ), iNode.Node(),
                 iBackgroundBitmapIndex, iBackgroundBitmap, iBackgroundMask,

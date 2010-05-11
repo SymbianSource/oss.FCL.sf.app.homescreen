@@ -1763,12 +1763,7 @@ void CXnMenuAdapter::SetContainerL( CEikButtonGroupContainer& aContainer )
     CEikCba* cba( static_cast< CEikCba* >( aContainer.ButtonGroup() ) );
     cba->SetButtonGroupFlags( cba->ButtonGroupFlags() | EEikCbaFlagSemiTransparent );
 
-    UpdateSoftkeyAppearancesL();
-	    
-	if (iContainer)
-	    {
-        iContainer->DrawNow();        
-	    }
+    UpdateSoftkeyAppearancesL();	    
     }
 
 //--------------------------------------------------------------
@@ -2432,7 +2427,6 @@ void CXnMenuAdapter::ChangeSoftkeyImageL(const CXnSoftkeyItem& aSoftkey)
                 aSoftkey.iBmp,
                 aSoftkey.iBmpM,
                 ETrue );
-        cba->DrawNow();
         }
     }
 

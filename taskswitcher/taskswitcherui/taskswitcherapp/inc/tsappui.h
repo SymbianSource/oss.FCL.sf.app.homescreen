@@ -106,6 +106,11 @@ public: //effects
      */
     TBool LayoutChangeAllowed();
     
+    /**
+     * Checks if task switcher is in foreground
+     */
+    TBool IsForeground() const;
+    
 public:
     /**
      * From MTsCenrepChangeObserver

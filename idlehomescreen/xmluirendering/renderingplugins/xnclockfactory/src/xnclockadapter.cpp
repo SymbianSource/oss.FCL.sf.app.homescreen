@@ -11,17 +11,17 @@
 *
 * Contributors:
 *
-* Description:  Implementation wrapper for CAknSkinnableClock
+* Description:  Clock rendering plugin
 *
 */
 
-// SYSTEM INCLUDE FILES
+// System includes
 #include <e32base.h>
 #include <e32const.h>
 #include <AknLayoutFont.h>
 #include <AknsUtils.h>
 
-// USER INCLUDE FILES
+// User includes
 #include "xndomproperty.h"
 #include "xndomlist.h"
 #include "xnproperty.h"
@@ -33,7 +33,7 @@
 #include "xnclockadapter.h"
 #include "c_xnutils.h"
 
-// CONSTANTS
+// Constants
 _LIT8( KDateInformation, "Clock/DateInformation" );
 _LIT8( KDayInformation, "Clock/DayInformation" );
 
@@ -117,7 +117,8 @@ CXnClockAdapter::CXnClockAdapter( CXnControlAdapter* aParent,
 CXnClockAdapter::~CXnClockAdapter()
     {    
     iCoeEnv->RemoveMessageMonitorObserver( *this );    
-    
+
+    delete iLightObserver;    
     delete iClockControl;
     }
 
@@ -127,9 +128,13 @@ CXnClockAdapter::~CXnClockAdapter()
 // -----------------------------------------------------------------------------
 //
 void CXnClockAdapter::ConstructL()
-    {
-    CXnControlAdapter::ConstructL( iNode );     
-            
+    {          
+    CXnControlAdapter::ConstructL( iNode );   
+    
+    iForeground = iAvkonAppUi->IsForeground();
+    
+    iLightObserver = CHWRMLight::NewL( this );
+    
     RPointerArray< CXnNodePluginIf > children( iNode.ChildrenL() );
     CleanupClosePushL( children );
     
@@ -168,6 +173,7 @@ void CXnClockAdapter::ConstructL()
  
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::DoHandlePropertyChangeL
+//
 // -----------------------------------------------------------------------------
 //
 void CXnClockAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
@@ -239,14 +245,19 @@ void CXnClockAdapter::MakeVisible( TBool aVisible )
     {
     TBool visible( IsVisible() );
     
-    if ( aVisible != visible )
+    if ( visible != aVisible )
         {
         CCoeControl::MakeVisible( aVisible );
-
-        if ( !aVisible )
+        
+        if ( aVisible )
             {
-            iClockControl->StopTimer();
+            // Start clock ensures UI state
+            StartClock();
             }
+        else
+            {
+            StopClock();        
+            }    
         }
     }
 
@@ -270,19 +281,53 @@ void CXnClockAdapter::MonitorWsMessage( const TWsEvent& aEvent )
         iForeground = EFalse;        
         }
 
-    if( foreground != iForeground && IsVisible() )            
+    if( foreground != iForeground )            
         {
         if( iForeground )
-            {
-            UpdateDisplay(); // starts timer after update
-            iClockControl->StartTimer();
+            {   
+            UpdateDisplay();
+            
+            // Start clock ensures UI state
+            StartClock();
             }
         else
             {
-            iClockControl->StopTimer();
+            StopClock();
             }            
         }
     }
+
+// -----------------------------------------------------------------------------
+// CXnClockAdapter::LightStatusChanged
+// 
+// -----------------------------------------------------------------------------
+//    
+void CXnClockAdapter::LightStatusChanged( TInt aTarget, 
+    CHWRMLight::TLightStatus aStatus )
+    {
+    if ( aTarget == CHWRMLight::EPrimaryDisplay )
+        {
+        if ( aStatus == CHWRMLight::ELightOn )
+            {
+            iLightsOn = ETrue;
+            
+            if ( iForeground )
+                {
+                UpdateDisplay();
+                }
+                        
+            // Start clock ensures UI state
+            StartClock();
+            }
+        else if ( aStatus == CHWRMLight::ELightOff )
+            {
+            iLightsOn = EFalse;
+        
+            StopClock();
+            }        
+        }
+    }
+
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::FontL
@@ -551,6 +596,39 @@ void CXnClockAdapter::SizeChanged()
     iColorSet = EFalse;
     
     CXnControlAdapter::SizeChanged();    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnClockAdapter::StartClock
+// 
+// -----------------------------------------------------------------------------
+// 
+void CXnClockAdapter::StartClock()
+    {    
+    if ( iClockControl )
+        {        
+        if ( iForeground && iLightsOn && IsVisible() )
+            {
+            iClockControl->StartTimer();
+            }
+        else
+            {
+            StopClock();
+            }    
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnClockAdapter::StopClock
+// 
+// -----------------------------------------------------------------------------
+// 
+void CXnClockAdapter::StopClock()
+    {
+    if ( iClockControl )
+        {
+        iClockControl->StopTimer();
+        }    
     }
 
 // End of file

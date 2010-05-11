@@ -27,7 +27,6 @@
 #include <aifwdefs.h>
 #include <gfxtranseffect/gfxtranseffect.h>
 #include <akntransitionutils.h>
-#include <layoutmetadata.cdl.h>
 
 // User includes
 #include "xnapplication.h"
@@ -56,6 +55,7 @@
 #include "xnoomsyshandler.h"
 #include "xnbackgroundmanager.h"
 #include "xneffectmanager.h"
+#include "xnkeyeventdispatcher.h"
 
 // Constants
 _LIT8( KEmptyWidgetUid, "0x2001f47f" );
@@ -64,6 +64,7 @@ _LIT8( KTemplateViewUID, "0x20026f50" );
 const TInt KPSCategoryUid( 0x200286E3 );
 const TInt KPSCrashCountKey( 1 );     
 const TInt KStabilityInterval( 60000000 ); // 1 minute
+const TInt KActivationCompleteInterval( 2000000 ); // 2s
 const TInt KCrashRestoreDefaultThreshold( 3 );
 const TInt KCrashRestoreAllTreshold( 4 );
 
@@ -278,7 +279,9 @@ CXnViewManager::CXnViewManager( CXnAppUiAdapter& aAdapter )
 // -----------------------------------------------------------------------------
 //
 CXnViewManager::~CXnViewManager()
-    {        
+    {
+    delete iAsyncCb;
+    
     delete iStabilityTimer;
     
     iObservers.Reset();
@@ -325,9 +328,9 @@ void CXnViewManager::ConstructL()
     iHspsWrapper = &iEditor->HspsWrapper();
     
     iComposer = CXnComposer::NewL( *iHspsWrapper );
-    
-    iIsLandscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
-    
+           
+    iAsyncCb = CPeriodic::NewL( CActive::EPriorityIdle ); 
+                       
     DoRobustnessCheckL();
     }
 
@@ -348,8 +351,8 @@ void CXnViewManager::LoadUiL()
            
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
     
-    // Activate initial view already here to get publishers loaded        
-    ActiveViewData().SetActive( ETrue );    
+    // Load initial view publishers         
+    ActiveViewData().LoadPublishers( EAiFwSystemStartup );    
     }
 
 // -----------------------------------------------------------------------------
@@ -363,6 +366,13 @@ void CXnViewManager::ReloadUiL()
 #endif //_XN_PERFORMANCE_TEST_
     
     NotifyViewDeactivatedL( ActiveViewData() );
+    
+    if ( iAsyncCb->IsActive() )
+        {
+        iAsyncCb->Cancel();
+        
+        ContainerActivated( this );
+        }
     
     delete iWidgetAmountTrigger;
     iWidgetAmountTrigger = NULL;
@@ -388,6 +398,7 @@ void CXnViewManager::ReloadUiL()
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::LoadWidgetToPluginL()
+//
 // -----------------------------------------------------------------------------
 //
 TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
@@ -416,7 +427,7 @@ TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
         
         if( retval == KErrDiskFull )
             {
-            ShowDiskFullMessageL();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_OPERATION_FAILED_NO_DISK ) );            
             }
         }
     else
@@ -435,7 +446,7 @@ TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
             }
         else if( retval == KErrDiskFull )
             {
-            ShowDiskFullMessageL();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_OPERATION_FAILED_NO_DISK ) );            
             }        
         
         CleanupStack::PopAndDestroy( result ); 
@@ -460,11 +471,11 @@ TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
             }  
         else if ( retval == KErrNoMemory )
             {
-            aPluginData.ShowOutOfMemError();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
             }
         else if ( retval == KXnErrPluginFailure )
             {            
-            aPluginData.ShowContentRemovedError();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
             }
         
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC
@@ -475,6 +486,7 @@ TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::UnloadWidgetFromPluginL()
+//
 // -----------------------------------------------------------------------------
 //
 TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData, 
@@ -558,6 +570,7 @@ TInt CXnViewManager::UnloadWidgetFromPluginL( CXnPluginData& aPluginData,
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::ReplaceWidgetToPluginL
+//
 // -----------------------------------------------------------------------------
 //
 TInt CXnViewManager::ReplaceWidgetToPluginL( const CHsContentInfo& aContentInfo,
@@ -606,11 +619,11 @@ TInt CXnViewManager::ReplaceWidgetToPluginL( const CHsContentInfo& aContentInfo,
             }
         else if ( retval == KErrNoMemory )
             {
-            aPluginData.ShowOutOfMemError();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );            
             }
         else if ( retval == KXnErrPluginFailure )
             {            
-            aPluginData.ShowContentRemovedError();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );        
             }
                         
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC
@@ -780,6 +793,7 @@ CArrayPtrSeg< CXnResource >& CXnViewManager::Resources() const
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::AppearanceNodes()
+//
 // -----------------------------------------------------------------------------
 //
 RPointerArray< CXnNode >& CXnViewManager::AppearanceNodes() const
@@ -865,71 +879,29 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
     CXnViewData& next( NextViewData() );
     
     if ( !next.Occupied() )
-        {                
-        if ( next.Load() == KErrNoMemory )
+        {    
+        TInt err( next.Load() );
+        
+        if ( err )
             {
-            next.ShowOutOfMemError();
-            return;
+            if ( err == KErrNoMemory )
+                {
+                TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
+                }
+            else if ( err == KXnErrPluginFailure )
+                {            
+                TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
+                }
+            
+            return;            
             }
         }
         
     // Activate view
     if ( next.Occupied() && !next.Active() )
-        {       
-        CXnControlAdapter* thisView( 
-            ActiveViewData().ViewNode()->Control() );                
-        
-        CXnControlAdapter* nextView( 
-            next.ViewNode()->Control() );
-    
-        GfxTransEffect::Register( thisView, KGfxContextActivateNextView );    
-        GfxTransEffect::Register( nextView, KGfxContextActivateNextView );
-        
-        TInt ret( GfxTransEffect::BeginGroup() );
-        
-        CFbsBitmap* currentBg( ActiveViewData().WallpaperImage() );
-        CFbsBitmap* nextBg( next.WallpaperImage() );
-        
-        if ( currentBg || nextBg )
-            {
-            CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
-            
-            if ( !currentBg && nextBg )
-                {
-                GfxTransEffect::Begin( bg, KGfxControlActionBgAnimToImgAppear );
-                }
-            else
-                {
-                GfxTransEffect::Begin( bg, KGfxControlActionBgImgToImgAppear );
-                }
-            
-            GfxTransEffect::SetDemarcation( bg, bg->Position() );
-            GfxTransEffect::End( bg );
-            }
-        
-        if ( iIsLandscapeOrientation )
-            {
-            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
-            GfxTransEffect::Begin( nextView, KGfxControlActionAppearLsc );
-            }
-        else
-            {
-            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
-            GfxTransEffect::Begin( nextView, KGfxControlActionAppearPrt );
-            }
-        
-        TRAP_IGNORE( iAppUiAdapter.ViewAdapter().ActivateContainerL( next ) );
-        
-        GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
-        GfxTransEffect::End( thisView );
-        
-        GfxTransEffect::SetDemarcation( nextView, nextView->Position() );
-        GfxTransEffect::End( nextView );
-                                
-        GfxTransEffect::EndGroup( ret );
-        
-        GfxTransEffect::Deregister( thisView );
-        GfxTransEffect::Deregister( nextView );
+        {
+        iAppUiAdapter.ViewAdapter().ActivateContainerL( 
+            next, EFalse, KGfxContextActivateNextView );                        
         }
     }
 
@@ -944,70 +916,28 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
 
     if ( !prev.Occupied() )
         {
-        if ( prev.Load() == KErrNoMemory )
+        TInt err( prev.Load() );
+        
+        if ( err )
             {
-            prev.ShowOutOfMemError();
-            return;
-            }
+            if ( err == KErrNoMemory )
+                {
+                TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
+                }
+            else if ( err == KXnErrPluginFailure )
+                {            
+                TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
+                }
+            
+            return;            
+            }    
         }
         
     // Activate view
     if ( prev.Occupied() && !prev.Active() )
         {
-        CXnControlAdapter* thisView( 
-            ActiveViewData().ViewNode()->Control() ); 
-        
-        CXnControlAdapter* prevView( 
-            prev.ViewNode()->Control() );
-
-        GfxTransEffect::Register( thisView, KGfxContextActivatePrevView );    
-        GfxTransEffect::Register( prevView, KGfxContextActivatePrevView );
-    
-        TInt ret( GfxTransEffect::BeginGroup() );
-        
-        CFbsBitmap* currentBg( ActiveViewData().WallpaperImage() );
-        CFbsBitmap* prevBg( prev.WallpaperImage() );
-        
-        if ( currentBg || prevBg )
-            {
-            CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
-            
-            if ( !currentBg && prevBg )
-                {
-                GfxTransEffect::Begin( bg, KGfxControlActionBgAnimToImgAppear );
-                }
-            else
-                {
-                GfxTransEffect::Begin( bg, KGfxControlActionBgImgToImgAppear );
-                }
-            
-            GfxTransEffect::SetDemarcation( bg, bg->Position() );
-            GfxTransEffect::End( bg );
-            }
-        
-        if ( iIsLandscapeOrientation )
-            {
-            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
-            GfxTransEffect::Begin( prevView, KGfxControlActionAppearLsc );
-            }
-        else
-            {
-            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
-            GfxTransEffect::Begin( prevView, KGfxControlActionAppearPrt );
-            }
-        
-        TRAP_IGNORE( iAppUiAdapter.ViewAdapter().ActivateContainerL( prev ) );
-        
-        GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
-        GfxTransEffect::End( thisView );
-                                      
-        GfxTransEffect::SetDemarcation( prevView, prevView->Position() );
-        GfxTransEffect::End( prevView );
-                                
-        GfxTransEffect::EndGroup( ret );
-        
-        GfxTransEffect::Deregister( thisView );
-        GfxTransEffect::Deregister( prevView );        
+        iAppUiAdapter.ViewAdapter().ActivateContainerL( 
+            prev, EFalse, KGfxContextActivatePrevView );                                
         }
     }
 
@@ -1033,7 +963,7 @@ TInt CXnViewManager::AddViewL( const CHsContentInfo& aInfo )
     
     if( retval == KErrDiskFull )
         {
-        ShowDiskFullMessageL();
+        TRAP_IGNORE( ShowErrorL( R_QTN_HS_OPERATION_FAILED_NO_DISK ) );
         }        
     else if ( retval == KErrNone )
         {                             
@@ -1048,9 +978,13 @@ TInt CXnViewManager::AddViewL( const CHsContentInfo& aInfo )
                 
         if ( retval == KErrNoMemory )
             {
-            newView->ShowOutOfMemError();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );            
             }
-        
+        else if ( retval == KXnErrPluginFailure )
+            {            
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
+            }
+                
         if ( newView->Occupied() )
             {
             // Load succeed, add the new view behind the current view               
@@ -1097,18 +1031,9 @@ void CXnViewManager::AddViewL( TInt aEffectId )
     {
     if ( iRootData->PluginData().Count() >= iRootData->MaxPages() ) 
         { 
-        HBufC* msg( StringLoader::LoadLC( 
-            R_QTN_HS_MAX_AMOUNT_OF_PAGES_NOTE ) ); 
-
-        CAknErrorNote* note = new ( ELeave ) CAknErrorNote; 
-        CleanupStack::PushL( note ); 
-               
-        note->ExecuteLD( *msg ); 
-               
-        CleanupStack::Pop( note ); 
-        CleanupStack::PopAndDestroy( msg ); 
-
-        return; 
+        TRAP_IGNORE( ShowErrorL( R_QTN_HS_MAX_AMOUNT_OF_PAGES_NOTE ) );
+        
+        return;        
         }
 
     // Add new view (template view) to hsps
@@ -1121,7 +1046,7 @@ void CXnViewManager::AddViewL( TInt aEffectId )
     
     if( status == KErrDiskFull )
         {
-        ShowDiskFullMessageL();
+        TRAP_IGNORE( ShowErrorL( R_QTN_HS_OPERATION_FAILED_NO_DISK ) );
         }            
     else if ( status == KErrNone )
         {                             
@@ -1136,9 +1061,13 @@ void CXnViewManager::AddViewL( TInt aEffectId )
         
         if ( status == KErrNoMemory )
             {
-            newView->ShowOutOfMemError();
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
+            }        
+        else if ( status == KXnErrPluginFailure )
+            {            
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
             }
-        
+                
         if ( newView->Occupied() )
             {
             // Start transition effect
@@ -1212,6 +1141,7 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
             
                 // Activate the next view, or first if in the last view 
                 CXnViewData& next( NextViewData() );
+                
                 iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
                 }
 
@@ -1221,11 +1151,7 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
             retval = iHspsWrapper->RemovePluginL( view->PluginId() );
             
             // Notify observers of view list change
-            TRAPD( err, NotifyViewRemovalL( *view ) );
-            if ( err != KErrNone )
-                {
-                // ignored
-                }            
+            TRAP_IGNORE( NotifyViewRemovalL( *view ) );
 
             iRootData->DestroyViewData( view );
                                                                    
@@ -1298,11 +1224,8 @@ void CXnViewManager::RemoveViewL( TInt aEffectId )
         iHspsWrapper->RemovePluginL( view->PluginId() );
         
         // Notify observers of view list change
-        TRAPD( err, NotifyViewRemovalL( *view ) );
-        if ( err != KErrNone )
-            {
-            // ignored
-            }   
+        TRAP_IGNORE( NotifyViewRemovalL( *view ) );
+
 
         iRootData->DestroyViewData( view );
         
@@ -1313,6 +1236,7 @@ void CXnViewManager::RemoveViewL( TInt aEffectId )
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::AddObserver()
+//
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::AddObserver( const MXnViewObserver& aObserver )
@@ -1327,6 +1251,7 @@ void CXnViewManager::AddObserver( const MXnViewObserver& aObserver )
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::RemoveObserver()
+//
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::RemoveObserver( const MXnViewObserver& aObserver )
@@ -1435,26 +1360,29 @@ TInt CXnViewManager::MaxPages() const
 // CXnViewManager::NotifyContainerChangedL()
 // Notifies container is changed, this is called always by CXnViewAdapter
 // -----------------------------------------------------------------------------
+//
 void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
     {
+    iAsyncCb->Cancel();
+    
     CXnViewData& viewToDeactivate( ActiveViewData() );
     
+    TInt err( KErrNone );
+        
     if ( &aViewToActivate != &viewToDeactivate )
-        {        
+        {               
         NotifyViewDeactivatedL( viewToDeactivate );
                       
-        viewToDeactivate.SetActive( EFalse );
+        err = viewToDeactivate.SetActive( EFalse );
         aViewToActivate.SetActive( ETrue );
-                             
-        iHspsWrapper->SetActivePluginL( aViewToActivate.PluginId() ); 
-                    
+                                                        
         // Cache update is needed after view activation
         UpdateCachesL();               
         }
     else
         {
         // Activate first view
-        aViewToActivate.SetActive( ETrue );
+        err = aViewToActivate.SetActive( ETrue );
 
         // Cache update is needed after view activation
         UpdateCachesL();
@@ -1463,8 +1391,72 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
         iRootData->LoadRemainingViews();
         }
     
-    NotifyViewActivatedL( aViewToActivate );
-    UpdatePageManagementInformationL();
+    if ( err == KErrNoMemory )
+        {
+        TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
+        }
+    else if ( err == KXnErrPluginFailure )
+        {
+        TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
+        }       
+               
+    NotifyViewActivatedL( aViewToActivate );           
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::PublishersReadyL()
+// Notifies that aViewData activation is complete
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::PublishersReadyL( CXnViewData& aViewData, TInt aResult )
+    {
+    if ( !aViewData.Active() )
+        {
+        return;
+        }
+           
+    iAsyncCb->Cancel();
+    
+    TCallBack cb( ContainerActivated, this ) ;
+    
+    iAsyncCb->Start( KActivationCompleteInterval, 0, cb ); 
+                     
+    if ( !iUiReady )
+        {
+        iAppUiAdapter.HandleUiReadyEventL();
+        iUiReady = ETrue;
+        }
+    
+    if ( aResult == KErrNoMemory )
+        {
+        ShowErrorL( R_QTN_HS_HS_MEMORY_FULL );
+        }
+    else if ( aResult == KXnErrPluginFailure )
+        {
+        ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED );
+        }       
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::ContainerActivated()
+// Notifies that a container activation is complete
+// -----------------------------------------------------------------------------
+//
+/* static */ TInt CXnViewManager::ContainerActivated( TAny* aAny )
+    {
+    CXnViewManager* self = static_cast< CXnViewManager* >( aAny );
+    
+    self->iAsyncCb->Cancel();
+    
+    CXnViewData& active( self->ActiveViewData() );
+    
+    TRAP_IGNORE( self->iHspsWrapper->SetActivePluginL( active.PluginId() ) );
+
+    CXnBackgroundManager& bg( self->iAppUiAdapter.ViewAdapter().BgManager() ); 
+        
+    TRAP_IGNORE( bg.StoreWallpaperL() );
+    
+    return KErrNone;
     }
 
 // -----------------------------------------------------------------------------
@@ -1572,6 +1564,7 @@ void CXnViewManager::NotifyWidgetRemovalL( const CXnPluginData& aPluginData )
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::UpdateCachesL()
+//
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::UpdateCachesL()
@@ -1587,6 +1580,7 @@ void CXnViewManager::UpdateCachesL()
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::ReportWidgetAmountL()
+//
 // -----------------------------------------------------------------------------
 //
 void CXnViewManager::ReportWidgetAmountL( const CXnViewData& aViewData )
@@ -1652,24 +1646,30 @@ void CXnViewManager::ReportWidgetAmountL( const CXnViewData& aViewData )
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewManager::ShowOperationFailedMessageL
+// CXnViewManager::ShowErrorL
+//
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ShowDiskFullMessageL() const
-    {
-    HBufC* msg( StringLoader::LoadLC( R_QTN_HS_OPERATION_FAILED_NO_DISK ) ); 
-
-    CAknErrorNote* note = new ( ELeave ) CAknErrorNote; 
-    CleanupStack::PushL( note ); 
-           
-    note->ExecuteLD( *msg );
-           
-    CleanupStack::Pop( note ); 
-    CleanupStack::PopAndDestroy( msg );     
+void CXnViewManager::ShowErrorL( TInt aResource ) const
+    {       
+    if ( aResource == R_QTN_HS_HS_MEMORY_FULL )
+        {
+        iOomSysHandler->HandlePotentialOomL();
+        }
+    else
+        {
+        HBufC* msg( StringLoader::LoadLC( aResource ) ); 
+    
+        CAknErrorNote* note = new ( ELeave ) CAknErrorNote;                       
+        note->ExecuteLD( *msg );
+                       
+        CleanupStack::PopAndDestroy( msg );             
+        }    
     }
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::OOMSysHandler
+//
 // -----------------------------------------------------------------------------
 //
 CXnOomSysHandler& CXnViewManager::OomSysHandler() const
@@ -1759,6 +1759,7 @@ TInt CXnViewManager::SystemStabileTimerCallback( TAny* aAny )
 
 // -----------------------------------------------------------------------------
 // CXnViewManager::ResetCrashCount 
+//
 // -----------------------------------------------------------------------------
 void CXnViewManager::ResetCrashCount()
     {
@@ -1766,38 +1767,34 @@ void CXnViewManager::ResetCrashCount()
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewManager::ShowErrorNoteL 
-// -----------------------------------------------------------------------------
-void CXnViewManager::ShowErrorNoteL()
-    {        
-    CAknQueryDialog* query = CAknQueryDialog::NewL();
-    query->PrepareLC( R_HS_CONTENT_REMOVED_VIEW );
-
-    HBufC* queryText( StringLoader::LoadLC( R_HS_ERROR_CONTENT_REMOVED ) );    
-    query->SetPromptL( queryText->Des() );    
-    CleanupStack::PopAndDestroy( queryText );
-
-    query->RunLD();   
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::DoRobustnessCheckL 
+// CXnViewManager::DoRobustnessCheckL
+//
 // -----------------------------------------------------------------------------
 void CXnViewManager::DoRobustnessCheckL()
     {
     TInt crashCount = 0;
+    
     RProperty::Get( TUid::Uid( KPSCategoryUid ),
                     KPSCrashCountKey,
                     crashCount );    
     
     if( crashCount == KCrashRestoreDefaultThreshold )
         {    
-        TInt err = iHspsWrapper->RestoreDefaultConfL();         
-        ShowErrorNoteL();
+        iHspsWrapper->RestoreDefaultConfL();
+        
+        CAknQueryDialog* query = CAknQueryDialog::NewL();
+        query->PrepareLC( R_HS_CONTENT_REMOVED_VIEW );
+
+        HBufC* queryText( StringLoader::LoadLC( R_HS_ERROR_CONTENT_REMOVED ) );    
+        query->SetPromptL( queryText->Des() );    
+        CleanupStack::PopAndDestroy( queryText );
+
+        query->RunLD();           
         }
     else if( crashCount >= KCrashRestoreAllTreshold )
         {       
-        TInt err = iHspsWrapper->RestoreRootL();              
+        iHspsWrapper->RestoreRootL();
+        
         ResetCrashCount();
         return;
         }
@@ -1812,14 +1809,6 @@ void CXnViewManager::DoRobustnessCheckL()
                                 KStabilityInterval,
                                 TCallBack( SystemStabileTimerCallback, this ) );
         }           
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::OrientationChanged 
-// -----------------------------------------------------------------------------
-void CXnViewManager::OrientationChanged()
-    {
-    iIsLandscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();    
     }
 
 // End of file

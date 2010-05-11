@@ -52,6 +52,7 @@
 #include "xnviewadapter.h"
 #include "xnbackgroundmanager.h"
 #include "xntexteditor.h"
+#include "xnitemactivator.h"
 
 // Local constants
 _LIT8( KId, "id" );
@@ -348,8 +349,6 @@ static void DoTriggerEventL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnNode& aNode,
     CXnNode& aActionsParent, CXnNode& aEventData, TInt aSource );
 static TBool DoReceiveFocusL( CXnNode& aNode, CXnUiEngine& aEngine );
-static CXnNode* BuildActivateTriggerNodeL( CXnUiEngine& aUiEngine );
-static void DoSetActiveL( CXnNode& aNode, CXnUiEngine& aUiEngine );
 static void InformPropertyChangeL( CXnNode& aNode, CXnProperty* aProperty = NULL );
 static CXnNode* BuildEventTypeNodeL( TEventCode aType, CXnUiEngine& aUiEngine );
 static CXnNode* BuildModifiersNodeL(
@@ -1996,37 +1995,6 @@ static CXnNode* BuildRepeatsNodeL(
     CleanupStack::PushL( value );
     node->SetPropertyL( value );
     CleanupStack::Pop( value );
-    CleanupStack::Pop( node );
-    return node;
-    }
-
-// -----------------------------------------------------------------------------
-// BuildActivateTriggerNodeL
-// -----------------------------------------------------------------------------
-//
-static CXnNode* BuildActivateTriggerNodeL( CXnUiEngine& aUiEngine )
-    {
-    CXnNode* node = CXnNode::NewL();
-    CleanupStack::PushL( node );
-    CXnType* type = CXnType::NewL( XnPropertyNames::action::KTrigger );
-    CleanupStack::PushL( type );
-    CXnNodeImpl* impl = CXnNodeImpl::NewL( type );
-    CleanupStack::Pop( type );
-    node->SetImpl( impl );
-    node->SetUiEngine( aUiEngine );
-    CXnDomPropertyValue* nameValue = CXnDomPropertyValue::NewL(
-        aUiEngine.ODT()->DomDocument().StringPool() );
-    CleanupStack::PushL( nameValue );
-    nameValue->SetStringValueL( CXnDomPropertyValue::EString,
-        XnPropertyNames::action::trigger::name::KActivate );
-    CXnProperty* name = CXnProperty::NewL(
-        XnPropertyNames::action::trigger::KName,
-        nameValue,
-        *aUiEngine.ODT()->DomDocument().StringPool() );
-    CleanupStack::Pop( nameValue );
-    CleanupStack::PushL( name );
-    node->SetPropertyL( name );
-    CleanupStack::Pop( name );
     CleanupStack::Pop( node );
     return node;
     }
@@ -3919,15 +3887,14 @@ static TBool RunEventL(
         }
     else if ( nameString == XnPropertyNames::action::event::KActivateSelectedItem )
         {
-        CXnNode* focusedNode = aEngine.FocusedNode();
+        CXnNode* focusedNode( aEngine.FocusedNode() );
+        
         if ( focusedNode )
             {
-            CXnNode* activate = BuildActivateTriggerNodeL( aEngine );
-            CleanupStack::PushL( activate );
-            focusedNode->ReportXuikonEventL( *activate );
-            CleanupStack::PopAndDestroy( activate );
+            aEngine.AppUiAdapter().ItemActivator().Activate( focusedNode );            
             }
-        return EFalse;
+        
+        return ETrue;
         }
     else if ( nameString == XnPropertyNames::action::event::KDeactivate )
         {
@@ -6267,19 +6234,6 @@ static TBool DoReceiveFocusL( CXnNode& aNode, CXnUiEngine& /*aEngine*/ )
     }
 
 // -----------------------------------------------------------------------------
-// DoSetActiveL
-// -----------------------------------------------------------------------------
-//
-static void DoSetActiveL( CXnNode& aNode, CXnUiEngine& aUiEngine )
-    {
-    CXnNode* activate = BuildActivateTriggerNodeL( aUiEngine );
-    activate->SetUiEngine( aUiEngine );
-    CleanupStack::PushL( activate );
-    aNode.ReportXuikonEventL( *activate );
-    CleanupStack::PopAndDestroy( activate );
-    }
-
-// -----------------------------------------------------------------------------
 // Informs the component about the property change.
 // -----------------------------------------------------------------------------
 //
@@ -7590,7 +7544,7 @@ void CXnNodeImpl::SetStateL( const TDesC8& aState, TInt aSource )
 
     if ( activated )
         {
-        DoSetActiveL( *iNode, *iUiEngine );
+        iUiEngine->AppUiAdapter().ItemActivator().Activate( iNode );
         }
 
     if ( stateChanged )

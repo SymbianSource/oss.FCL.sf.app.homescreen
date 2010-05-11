@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_48.1.38 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_48.1.40 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -688,6 +688,11 @@ public:
      */
     void TriggerMoveItemL();
 
+    /**
+     * Sets if extention dialog is opened.
+     */
+    IMPORT_C void SetExDialogOpened( TBool aOpened );
+
 public: // from MMmVisibilityObserver
 
     /**
@@ -1050,6 +1055,22 @@ private:
      * Event parameters for move item.
      */
     CLiwGenericParamList *iEventParameters;
+
+    /*
+     * Two following flags were added for fix ou1cimx1#344006 error.
+     * iDialogOpened - it's used to mark if any dialog has been opened.
+     * iHighlightVisibleBeforeLongTap - it's used to remember if highlight
+     *          had been visible when dialog has been opened.
+     */
+    /**
+     * ETrue if extension dialog is opend.
+     */
+    TBool iDialogOpened;
+
+    /**
+     * ETrue if highlight was visible before longTap event.
+     */
+    TBool iHighlightVisibleBeforeLongTap;
 
   };
 

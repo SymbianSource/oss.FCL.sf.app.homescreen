@@ -34,6 +34,7 @@
 #include <hal_data.h>
 #include <akntranseffect.h>
 #include <UikonInternalPSKeys.h>
+#include <apgwgnam.h>
 
 
 // AknCapServer UID, used for P&S category
@@ -121,6 +122,9 @@ void CTsAppUi::ConstructL()
     iWg = RWindowGroup(CCoeEnv::Static()->WsSession());
     iWg.Construct((TUint32)&iWg, ETrue);
     iWg.EnableScreenChangeEvents(); 
+    CApaWindowGroupName* rootWgName = CApaWindowGroupName::NewLC( iEikonEnv->WsSession(), iEikonEnv->RootWin().Identifier() );
+    rootWgName->SetWindowGroupName( iWg );
+    CleanupStack::PopAndDestroy( rootWgName );
     
     // Create UI
     iAppView = CTsAppView::NewL( ApplicationRect(), *iDeviceState, iWg );
@@ -756,7 +760,8 @@ void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
         TInt wgId = WgIdOfUnderlyingApp(EFalse);
         if ( iForeground &&
              wgId != iUnderAppWgId &&
-             !iAppView->AppCloseInProgress(iUnderAppWgId) )
+             !iAppView->AppCloseInProgress(iUnderAppWgId) &&
+             !iAppView->WgOnTaskList(wgId) )
             {
             MoveAppToBackground( ENoneTransition );
             }
@@ -834,5 +839,15 @@ TInt CTsAppUi::GetParentWg( TInt aChildWg )
     allWgIds.Close();
 	return retVal;
 	}
+
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::IsForeground
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppUi::IsForeground() const
+    {
+    return iForeground;
+    }
 
 // End of file

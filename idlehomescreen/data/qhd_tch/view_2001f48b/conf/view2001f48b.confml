@@ -26,6 +26,7 @@
       <desc>Widgets in the Homescreen 1</desc>
       <setting ref="Uid" name="Widget" type="selection">
         <desc>Widget name</desc>
+        <!-- S60 Native Widgets -->
         <option name="Empty" value="0x2001f47f"/>
         <option name="PhoneSetup" value="0x20021195"/>
         <option name="ContactsBar" value="0x20022eba"/>
@@ -42,58 +43,41 @@
         <option name="EmailWidget" value="0x2001e272"/>
         <option name="Profile" value="0x2001cb7c"/>
         <option name="ServiceWidget" value="0x20021383"/>
-        <!-- S60WRT on UDA -->
-        <option name="Facebook UDA" value="0x2000dad2"/>
-        <option name="Accuweather UDA" value="0x2000dad3"/>
-        <option name="Reuter UDA" value="0x2000dad4"/>
-        <option name="Amazon UDA" value="0x2000dad5"/>
-        <option name="Ap News UDA" value="0x2000dad6"/>
-        <option name="Bloomberg UDA" value="0x2000dad7"/>
-        <option name="Hi5 UDA" value="0x2000dad8"/>
-        <option name="CNN Video UDA" value="0x2000dad9"/>
-        <option name="E! UDA" value="0x2000dada"/>
-        <option name="Movie Teasers UDA" value="0x2000dadb"/>
-        <option name="Nat Geo UDA" value="0x2000dadc"/>
-        <option name="Chat UDA" value="0x2000dadd"/>
-        <option name="Web TV Demo UDA" value="0x2000dade"/>
-        <option name="Communities UDA" value="0x2000dadf"/>
-        <option name="Ovi Files UDA" value="0x2000dae0"/>
+        <option name="SocialMixer" value="0x2002699f"/>
         <!-- S60WRT on eMMC -->
-        <option name="Facebook eMMC" value="0x2000dcc6"/>
-        <option name="Accuweather eMMC" value="0x2000dcc7"/>
-        <option name="Reuter eMMC" value="0x2000dcc8"/>
-        <option name="Amazon eMMC" value="0x2000dcc9"/>
-        <option name="Ap News eMMC" value="0x2000dcca"/>
-        <option name="Bloomberg eMMC" value="0x2000dccb"/>
-        <option name="Hi5 eMMC" value="0x2000dccc"/>
-        <option name="CNN Video eMMC" value="0x2000dccd"/>
-        <option name="E! eMMC" value="0x2000dcce"/>
-        <option name="Movie Teasers eMMC" value="0x2000dccf"/>
-        <option name="Nat Geo eMMC" value="0x2000dcd0"/>
-        <option name="Chat eMMC" value="0x2000dcd1"/>
-        <option name="Web TV Demo eMMC" value="0x2000dcd2"/>
-        <option name="Communities eMMC" value="0x2000dcd3"/>
-        <option name="Ovi Files eMMC" value="0x2000dcd4"/>
-        <!-- cWRT on UDA -->
-        <option name="SSOUI UDA" value="0x2000dbcc"/>
-        <option name="Timer.A UDA" value="0x2000dbcd"/>
-        
+        <option name="Accuweather eMMC" value="0x2000dd2a"/>
+        <option name="Ap News eMMC" value="0x2000dd2b"/>
+        <option name="Facebook eMMC" value="0x2000dd2c"/>
+        <option name="Bloomberg eMMC" value="0x2000dd2d"/>
+        <option name="Amazon eMMC" value="0x2000dd2e"/>
+        <option name="Hi5 eMMC" value="0x2000dd2f"/>
+        <option name="Reuters eMMC" value="0x2000dd30"/>
+        <option name="CNN Video eMMC" value="0x2000dd31"/>
+        <option name="E! eMMC" value="0x2000dd32"/>
+        <option name="Movie Teasers eMMC" value="0x2000dd33"/>
+        <option name="Nat Geo eMMC" value="0x2000dd34"/>
+        <option name="Chat eMMC" value="0x2000dd35"/>
+        <option name="Web TV Demo eMMC" value="0x2000dd36"/>
+        <option name="Communities eMMC" value="0x2000dd37"/>
+        <option name="Ovi Files eMMC" value="0x2000dd38"/>
+        <option name="YLE Areena eMMC" value="0x2000dd39"/>
+                
         <!-- S60WRT on eMMC -->
-        <option name="SSOUI eMMC" value="0x2000ddc0"/>
-        <option name="Timer.A eMMC" value="0x2000ddc1"/>
+        <option name="SSOUI eMMC" value="0x2000de24"/>
+        <option name="Timer.A eMMC" value="0x2000de25"/>
         
       </setting>
       <setting ref="BundleIdentifier" name="Bundle Identifier" type="selection">
         <desc>Bundle identifier for the (C)WRT widgets. None for the native widgets</desc>
         <!-- Bundle names of WRT -->
         <option name="None" value="0"/>
-        <option name="Facebook" value="com.nokia.facebook.widget.S605th"/>
-        <option name="Reuter" value="com.reuters.widget.news"/>
-        <option name="Amazon" value="com.nokia.widget.amazon"/>
         <option name="AccuWeather" value="com.accuweather.widget.touchNG"/>
-        <option name="Ap News" value="com.nokia.apnews.widget"/>
+        option name="Ap News" value="com.nokia.apnews.widget"/>
+        <option name="Facebook" value="com.nokia.facebook.widget.S605th"/>
         <option name="Bloomberg" value="com.bloomberg.nokia.mobile"/>
+        <option name="Amazon" value="com.nokia.widget.amazon"/>
         <option name="Hi5" value="com.nokia.widget.s605.hi5"/>
+        <option name="Reuters" value="com.reuters.widget.news"/>
         <option name="CNN Video" value="com.cnn"/>
         <option name="E!" value="com.moderati.eonline"/>
         <option name="Movie Teasers" value="com.movieteasers"/>
@@ -102,6 +86,7 @@
         <option name="Web TV Demo" value="com.nokia.forum.webtv.widget"/>
         <option name="Communities" value="com.nokia.socialmixer.v1"/>
         <option name="Ovi Files" value="com.nokia.ss.sas.filesql"/> 
+        <option name="YLE Areena" value="com.tieto.yle"/> 
         <option name="SSOUI" value="ovi.serviceui.SSOUI"/>
         <option name="Timer.A" value="com.nokia.wgt.TIMER.A"/>
         

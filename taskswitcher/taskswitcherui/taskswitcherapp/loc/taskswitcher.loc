@@ -17,13 +17,6 @@
 
 
 //d:Popup menu item text
-//d:Activate selected application
-//l:list_single_touch_menu_pane_t1
-//r:5.0
-//
-#define qtn_task_switcher_popup_open_app "Activate"
-
-//d:Popup menu item text
 //d:Close selected application
 //l:list_single_touch_menu_pane_t1
 //r:5.0
@@ -41,16 +34,10 @@
 //l:heading_pane_t1
 //r:5.0
 //
-#define qtn_task_switcher_heading_applications "Open applications (%d)"
+#define qtn_task_switcher_heading_applications "Open applications (%N)"
 
-//d:Text for no appliactions
-//l:none
+//d:Text seen in taskswitcher if there is no open applications
+//l:main_list_empty_pane
 //r:5.0
 //
-#define qtn_task_switcher_no_apps "No open application"
-
-//d:Text for appliactions that has no name
-//l:none
-//r:5.0
-//
-#define qtn_task_switcher_default_task_name "No name"
+#define qtn_task_switcher_no_apps "No open applications"

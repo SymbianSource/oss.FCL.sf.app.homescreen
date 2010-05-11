@@ -60,22 +60,22 @@
 //
 CMmListBoxItemDrawer::CMmListBoxItemDrawer(
         CMmListBoxModel* aMmListBoxModel,
-	    const CFont* aFont,
-	    CFormattedCellListBoxData* aFormattedCellData,
-	    TMmWidgetType aWidgetType,
-	    CMmTemplateLibrary* aTemplateLibrary )
-	: CFormattedCellListBoxItemDrawer( aMmListBoxModel , aFont, aFormattedCellData),
-	iFont(aFont), iLeftOverAreaUnderAnimatedItem(EFalse)
-	{
-	iWidgetType = aWidgetType;
-	iTemplateLibrary = aTemplateLibrary;
-	iMmModel = aMmListBoxModel;
-	iRedrawBackground = ETrue;
-	iDrawSeparatorLines = EFalse;
-	iZoomIconIndex = -1;
-	iIconAnimationZoomRatio = 1;
-	// this is needed to get iColors initialized on first use:
-	iLastDrawnItemWasFloating = ETrue;
+      const CFont* aFont,
+      CFormattedCellListBoxData* aFormattedCellData,
+      TMmWidgetType aWidgetType,
+      CMmTemplateLibrary* aTemplateLibrary )
+  : CFormattedCellListBoxItemDrawer( aMmListBoxModel , aFont, aFormattedCellData),
+  iFont(aFont), iLeftOverAreaUnderAnimatedItem(EFalse)
+  {
+  iWidgetType = aWidgetType;
+  iTemplateLibrary = aTemplateLibrary;
+  iMmModel = aMmListBoxModel;
+  iRedrawBackground = ETrue;
+  iDrawSeparatorLines = EFalse;
+  iZoomIconIndex = -1;
+  iIconAnimationZoomRatio = 1;
+  // this is needed to get iColors initialized on first use:
+  iLastDrawnItemWasFloating = ETrue;
     SetFlags( CListItemDrawer::EDisableHighlight );
     }
 
@@ -414,8 +414,8 @@ void CMmListBoxItemDrawer::DoDrawItem(TInt aItemIndex, TPoint aItemRectPos,
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
     if( transApi )
         {
-	    transApi->EndRedraw( MAknListBoxTfxInternal::EListItem, aItemIndex );
-		}
+      transApi->EndRedraw( MAknListBoxTfxInternal::EListItem, aItemIndex );
+    }
 #endif
 
 
@@ -505,7 +505,7 @@ void CMmListBoxItemDrawer::DoDrawItemTextL( TInt aItemIndex, const TRect
         }
 #endif
 
-	if( iDrawSeparatorLines )
+  if( iDrawSeparatorLines )
         {
         CMmListBoxView* view = static_cast<CMmListBoxView*>( iWidget->View() );
         if( aItemIndex != ( view->ModelItemsCount() - 1  ))
@@ -616,8 +616,8 @@ void CMmListBoxItemDrawer::SetupSubIcondDragHighlightCellL(
         TTemplateChild aSubCellTemplate, TInt aIndex, TInt aItemIndex ) const
     {
     aSubCellTemplate.iRectAccordingToParent.iBr
-		= TPoint(ItemCellSize().iWidth * iIconAnimationZoomRatio,
-				ItemCellSize().iHeight * iIconAnimationZoomRatio);
+    = TPoint(ItemCellSize().iWidth * iIconAnimationZoomRatio,
+        ItemCellSize().iHeight * iIconAnimationZoomRatio);
 
     aSubCellTemplate.iRectAccordingToParent.iTl = TPoint(0, 0);
     SetupSubCellL( aSubCellTemplate, aIndex, aItemIndex );
@@ -931,16 +931,16 @@ CMmDrawerAnimator* CMmListBoxItemDrawer::GetAnimator()
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxItemDrawer::SetDraggedPointL( TPoint aPoint )
-	{
-	TInt dragFloatingItem = GetFloatingItemIndex(EDrag);
-	if (dragFloatingItem != KErrNotFound )
-		{
-		TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
-		TMmFloatingItem floatingItem( item.GetDrawnItemIndex(),
-				aPoint,	EDrag, MmEffects::KNoAnimationFramesCount, NULL );
-		floatingItem.SetManualDelete( ETrue );
+  {
+  TInt dragFloatingItem = GetFloatingItemIndex(EDrag);
+  if (dragFloatingItem != KErrNotFound )
+    {
+    TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
+    TMmFloatingItem floatingItem( item.GetDrawnItemIndex(),
+        aPoint,	EDrag, MmEffects::KNoAnimationFramesCount, NULL );
+    floatingItem.SetManualDelete( ETrue );
 
-		TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
+    TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
                 item.GetItemPosition(), EPostDragRefreshItem,
                 MmEffects::KNoAnimationFramesCount, iWidget->View() );
 
@@ -1056,13 +1056,13 @@ TRect CMmListBoxItemDrawer::AdjustItemRect( TInt aItemIndex ) const
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxItemDrawer::DrawActualIndicatorItem( TInt aItemIndex, TRect /*actualItemRect*/ )
-	{
-	if ( iDrawMoveIndicators )
-		{
-		iIsIndicatorItem = ETrue;
-		TBool redrawItemBackground =
+  {
+  if ( iDrawMoveIndicators )
+    {
+    iIsIndicatorItem = ETrue;
+    TBool redrawItemBackground =
             IsRedrawItemBackgroundEnabled( );
-		SetRedrawItemBackground( EFalse );
+    SetRedrawItemBackground( EFalse );
 
     DrawActualItem( aItemIndex, AdjustItemRect( aItemIndex ) , EFalse, EFalse, EFalse, EFalse);
 
@@ -1114,9 +1114,9 @@ void CMmListBoxItemDrawer::SetMarqueeAdapter( CMmMarqueeAdapter* aAdapter )
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxItemDrawer::SetMarqueeDrawing( TBool aIsMarqueeBeingDrawn )
-	{
-	iIsMarqueeBeingDrawn = aIsMarqueeBeingDrawn;
-	}
+  {
+  iIsMarqueeBeingDrawn = aIsMarqueeBeingDrawn;
+  }
 
 
 // -----------------------------------------------------------------------------
@@ -1124,12 +1124,12 @@ void CMmListBoxItemDrawer::SetMarqueeDrawing( TBool aIsMarqueeBeingDrawn )
 // -----------------------------------------------------------------------------
 //
 TBool CMmListBoxItemDrawer::IsTextClippedL( TTemplateChild aTemplateChild,
-		const TDesC& aText ) const
-	{
+    const TDesC& aText ) const
+  {
     TBuf< MmMarqueeConstants::KClippingBufLength > clipbuf
-		= aText.Left( MmMarqueeConstants::KTextTrimmingThreshold);
-	TInt maxClipWidth = aTemplateChild.iRectAccordingToParent.Width();
-	const CFont* font = AknLayoutUtils::FontFromId(aTemplateChild.iFontId);
+    = aText.Left( MmMarqueeConstants::KTextTrimmingThreshold);
+  TInt maxClipWidth = aTemplateChild.iRectAccordingToParent.Width();
+  const CFont* font = AknLayoutUtils::FontFromId(aTemplateChild.iFontId);
     return AknBidiTextUtils::ConvertToVisualAndClipL( clipbuf, *font,
             aTemplateChild.iRectAccordingToParent.Width(), maxClipWidth );
     }
@@ -1148,16 +1148,16 @@ void CMmListBoxItemDrawer::SetNumberOfColsInView( TInt aNumberOfColumns )
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxItemDrawer::SetupIconSubcellL(
-		RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
-		RBuf& aItemText, TInt& aSubcellIncrement ) const
-		{
-		CGulIcon* icon = NULL;
-		TTemplateChild child = aTemplateChildArray[aChildIndex];
-		if ( !IsEditMode() &&
-		        child.iImageVisualId == EImageVisualIdEditMode )
-		    {
-		    child.iIsImage = EFalse;
-		    }
+    RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
+    RBuf& aItemText, TInt& aSubcellIncrement ) const
+    {
+    CGulIcon* icon = NULL;
+    TTemplateChild child = aTemplateChildArray[aChildIndex];
+    if ( !IsEditMode() &&
+            child.iImageVisualId == EImageVisualIdEditMode )
+        {
+        child.iIsImage = EFalse;
+        }
 
     if( IsEditMode() && IsDraggable() && aItemIndex == iZoomIconIndex )
         {
@@ -1321,7 +1321,7 @@ void CMmListBoxItemDrawer::SetupBackdropSubcellL(
                 child.iIsImage )
             {
             TSize itemSize = GetItemSize( aItemIndex,
-            		aItemIndex == iWidget->View()->CurrentItemIndex() );
+                aItemIndex == iWidget->View()->CurrentItemIndex() );
             CHnIconHolder* iconHolder = iMmModel->GetAttributeAsRefCountedGraphics( aItemIndex, child.iData, &itemSize );
             icon = iconHolder ? iconHolder->GetGulIcon() : NULL;
             if( icon )
@@ -1386,14 +1386,14 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
     CleanupClosePushL( templateChildArray );
     if( !iIsIndicatorItem )
         {
-    iTemplateLibrary->GetChildrenL( iWidgetType, templateChildArray, mmTemplate,
+        iTemplateLibrary->GetChildrenL( iWidgetType, templateChildArray, mmTemplate,
         landscapeOrientation, aItemIsCurrent,	IsEditMode() );
-    }
+        }
     else if ( !AknLayoutUtils::PenEnabled() )
-    {
-    iTemplateLibrary->GetMoveIndicatorChildrenL( iWidgetType, templateChildArray,
-          mmTemplate, landscapeOrientation, aItemIsCurrent );
-    }
+        {
+        iTemplateLibrary->GetMoveIndicatorChildrenL( iWidgetType, templateChildArray,
+                mmTemplate, landscapeOrientation, aItemIsCurrent );
+        }
 
     iLastSubcellsSetupCode.Clear();
 
@@ -1409,7 +1409,7 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
         iItemHasBackdrop = EFalse;
         }
 
-  for ( TInt i( 0 ) ; i < templateChildArray.Count() && !iLeftOverAreaUnderAnimatedItem; i++ )
+    for ( TInt i( 0 ) ; i < templateChildArray.Count() && !iLeftOverAreaUnderAnimatedItem; i++ )
         {
         TTemplateChild child = templateChildArray[i];
         if ( child.iImageVisualId == EImageVisualIdEditMode && child.iIsImage )
@@ -1417,16 +1417,16 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
             continue;
             }
         else if( !child.iIsImage )
-        {
-        SetupTextSubcellL( templateChildArray, i, aItemIndex, itemText, subcellIncrement );
-        }
-      else
-        {
-        SetupIconSubcellL( templateChildArray, i, aItemIndex, itemText, subcellIncrement );
+            {
+            SetupTextSubcellL( templateChildArray, i, aItemIndex, itemText, subcellIncrement );
+            }
+        else
+            {
+            SetupIconSubcellL( templateChildArray, i, aItemIndex, itemText, subcellIncrement );
             }
         }
     TInt subcellsJustSet = subcellIncrement;
-  iCurrentNumberOfSubcellsSet = Max( iCurrentNumberOfSubcellsSet, subcellsJustSet );
+    iCurrentNumberOfSubcellsSet = Max( iCurrentNumberOfSubcellsSet, subcellsJustSet );
     __ASSERT_DEBUG( iCurrentNumberOfSubcellsSet <= MmTemplateContants::KSubCellsCount,
             User::Invariant() );
 
@@ -1545,11 +1545,11 @@ TBool CMmListBoxItemDrawer::GetBackdropVisibility( TInt aItemIndex,
     ItemHasFloatingType( aItemIndex, EDragTransition );
 
     return 	IsEditMode() /* draw the backdrop only in edit mode */
-    		&& !currentlyDraggedItem /* backdrop is disabled for dragged items */
-    		&& !iIsIndicatorItem /* in non-touch backdrop is not drawn, just "move indicators" */
-    		&& !iLeftOverAreaUnderAnimatedItem /* is the currently drawn item the area left over behind dragged item*/
-    		&& !( STATIC_CAST( CMmWidgetContainer*,Widget()->Parent() )->IsHighlightVisible()
-    				&& aItemIsCurrent );/*if the timer is active then we want to draw highlight (not backdrop) on the current index*/
+        && !currentlyDraggedItem /* backdrop is disabled for dragged items */
+        && !iIsIndicatorItem /* in non-touch backdrop is not drawn, just "move indicators" */
+        && !iLeftOverAreaUnderAnimatedItem /* is the currently drawn item the area left over behind dragged item*/
+        && !( STATIC_CAST( CMmWidgetContainer*,Widget()->Parent() )->IsHighlightVisible()
+            && aItemIsCurrent );/*if the timer is active then we want to draw highlight (not backdrop) on the current index*/
     }
 
 // -----------------------------------------------------------------------------

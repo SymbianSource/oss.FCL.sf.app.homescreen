@@ -120,5 +120,6 @@ LIBRARY     centralrepository.lib
 LIBRARY     bmpanim.lib // AknBitmap animation
 LIBRARY     inetprotutil.lib 
 LIBRARY     browserlauncher.lib
+LIBRARY     alfdecoderserverclient.lib // alf observer
 
 // End of file

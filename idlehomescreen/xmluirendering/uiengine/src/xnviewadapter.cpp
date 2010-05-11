@@ -40,6 +40,8 @@
 #include "xnfocuscontrol.h"
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
+#include "xneffectmanager.h"
+#include "xnwallpaperview.h"
 
 #include "xnviewadapter.h"
 #include "xnmenu.h"
@@ -50,7 +52,10 @@
 
 // Constants
 const TUid KXmlViewUid = { 1 };
+
 _LIT8( KActivateDefaultView, "activatedefault" );
+_LIT8( KSetWallpaper, "setwallpaper" );
+
 _LIT8( KMenuBar, "menubar" );
 
 // Data types
@@ -64,7 +69,23 @@ enum
     EIsDestructionRunning
     };
 
+enum TAction
+    {
+    ENoAction = 0,
+    EActivateDefault,
+    ESetWallpaper
+    };
+
 // ============================= LOCAL FUNCTIONS ===============================
+// -----------------------------------------------------------------------------
+// CleanupEffect
+// -----------------------------------------------------------------------------
+//
+static void CleanupEffect( TAny* aAny )
+    {
+    static_cast< CXnEffectManager* >( aAny )->CleanupControlEffect();
+    }
+
 // -----------------------------------------------------------------------------
 // DetermineStatusPaneLayout
 // -----------------------------------------------------------------------------
@@ -264,6 +285,9 @@ void CXnViewAdapter::ConstructL()
 //
 void CXnViewAdapter::ReloadUiL()
     {
+    iTimer->Cancel();
+    iAction = ENoAction;
+    
     DeactivateContainerL();
     
     iAppUiAdapter.RemoveFromStack( iEventDispatcher );
@@ -410,6 +434,14 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
         sp->DrawNow();
         }
 
+    if ( aCustomMessage == KSetWallpaper )
+        {
+        iAction = ESetWallpaper;
+        
+        iTimer->Cancel();
+        iTimer->Start( 1000, 1000, TCallBack( TimerCallback, this ) );        
+        }
+    
     // Set the active container
     if ( aCustomMessage == KActivateDefaultView )
         {
@@ -417,6 +449,8 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
     
         ActivateDefaultContainerL();
     
+        iAction = EActivateDefault;
+        
         iTimer->Cancel();
         iTimer->Start( 1000, 1000, TCallBack( TimerCallback, this ) );
         }
@@ -444,8 +478,37 @@ TInt CXnViewAdapter::TimerCallback( TAny *aPtr )
     CXnViewAdapter* self = reinterpret_cast< CXnViewAdapter* >( aPtr );
     self->iTimer->Cancel();
     
-    self->iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
-            self->iCoeEnv->RootWin().Identifier(), 0 );
+    if ( self->iAction == EActivateDefault )
+        {
+        self->iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
+                self->iCoeEnv->RootWin().Identifier(), 0 );    
+        }
+    else if ( self->iAction == ESetWallpaper )
+        {
+        CAknViewAppUi& appui = static_cast< CAknViewAppUi& >( self->iAppUiAdapter );
+        
+        CXnWallpaperView* view = 
+            static_cast< CXnWallpaperView* >( appui.View( KWallpaperViewUid ) );
+        
+        if ( view )
+            {
+            TFileName filename( KNullDesC );
+            
+            // Get selected wallpaper
+            view->SelectedWallpaper( filename );
+            
+            if ( filename != KNullDesC )
+                {
+                if ( self->BgManager().SetWallpaper( filename ) )
+                    {
+                    self->iAppUiAdapter.EffectManager()->BgAppearEffect( 
+                        self->iBgManager, ETrue );                     
+                    }                                              
+                }                        
+            }        
+        }
+    
+    self->iAction = ENoAction;
 
     __PRINTS( "*** CXnViewAdapter::TimerCallback, done" );
     
@@ -486,19 +549,20 @@ void CXnViewAdapter::DoDeactivate()
 // -----------------------------------------------------------------------------
 //
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
-    TBool aEnterEditState, TBool aForceActivation )
+    TBool aEnterEditState, TUid aEffect )
     {
     // Returns if the container remains the same and activation is not forced
     // Otherwise the old container is deactivated and the new is activated
-    if ( iFlags.IsSet( EIsDestructionRunning ) ||
-        ( ( !aForceActivation ) &&  ( iContainer == &aContainer ) ) )
+    if ( iFlags.IsSet( EIsDestructionRunning ) || iContainer == &aContainer )        
         {
         return;
         }
 
-    // Find previous container and then deactivate it
-    const CXnViewData* previous( iContainer );
-    DeactivateContainerL();
+    // Get previous container and then deactivate it    
+    const CXnViewData* previous( iContainer ); 
+    const CXnViewData& active( iAppUiAdapter.ViewManager().ActiveViewData() );
+    
+    DeactivateContainerL( EFalse );
 
     if ( iFlags.IsClear( EIsActivated ) )
         {
@@ -510,6 +574,10 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
     // Update  
     iContainer = &aContainer;
         
+    CXnEffectManager* mgr( iAppUiAdapter.EffectManager() );
+    
+    CleanupStack::PushL( TCleanupItem( CleanupEffect, mgr ) );
+    
     // Disable layout and redraw until container activation is done
     iAppUiAdapter.UiEngine().DisableRenderUiLC();
 
@@ -541,20 +609,40 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         {
         EnterEditStateL( aContainer, EFalse );                                
         }
-                          
-    iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
-    
-    if ( previous && iContainer )
+   
+    TBool started(
+        mgr->BeginActivateViewEffect( active, aContainer, aEffect ) );
+            
+    if ( previous )
         {
-        iBgManager->WallpaperChanged( *previous, *iContainer );    
+        CXnControlAdapter* previousControl( 
+            previous->Node()->LayoutNode()->Control() );
+                                      
+        previousControl->MakeVisible( EFalse );
         }
-    
+              
     CXnControlAdapter* adapter( node->Control() );
     adapter->MakeVisible( ETrue );
-	            
+           
+    iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
+    
+    iBgManager->ChangeWallpaper( active, aContainer, !started );
+    
     iAppUiAdapter.UiEngine().RenderUIL();
     
-    CleanupStack::PopAndDestroy(); // DisableRenderUiLC   
+    CleanupStack::PopAndDestroy(); // DisableRenderUiLC
+    
+    mgr->EndActivateViewEffect( active, aContainer, aEffect );
+    
+    CleanupStack::PopAndDestroy(); // cleanupitem
+    
+    iAppUiAdapter.ViewManager().UpdatePageManagementInformationL();
+            
+    if ( iEventDispatcher )
+        {        
+        iEventDispatcher->SetMenuNodeL( 
+            iAppUiAdapter.UiEngine().MenuBarNode() );            
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -581,7 +669,7 @@ void CXnViewAdapter::ActivateDefaultContainerL( TBool aEnterEditState )
         EnterEditStateL( *viewData, aEnterEditState );
         // Deactivate container even though it hasn't changed to close all 
         // popups and other windows
-        ActivateContainerL( *viewData, aEnterEditState, ETrue );
+        ActivateContainerL( *viewData, aEnterEditState );
         }
     }
 
@@ -631,7 +719,7 @@ void CXnViewAdapter::EnterEditStateL( CXnViewData& aView, TBool aEnter )
 // Deactivates current container
 // -----------------------------------------------------------------------------
 //
-void CXnViewAdapter::DeactivateContainerL()
+void CXnViewAdapter::DeactivateContainerL( TBool aHide )
     {
     if ( !iContainer || iFlags.IsSet( EIsDestructionRunning ) )    
         {
@@ -651,8 +739,12 @@ void CXnViewAdapter::DeactivateContainerL()
     CXnNode* node( iContainer->Node()->LayoutNode() );
                 
     node->ReportXuikonEventL( *iDeactivate );
-    node->Control()->MakeVisible( EFalse );
     
+    if ( aHide )
+        {
+        node->Control()->MakeVisible( EFalse );
+        }
+        
     iContainer = NULL;
     }
 

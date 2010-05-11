@@ -241,9 +241,7 @@ private:
 
     // window group ids returned by last WindowGroupList call
     RArray<TInt> iWgIds;
-
-    // For publishing the foreground app uid to Context Framework    
-    TAppUidHexString iFgAppUidStr;
+  
     TUid iFgAppUid;
 
     // For rotating bitmaps

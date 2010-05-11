@@ -680,25 +680,25 @@ struct TScrollToItemEnabler
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::UpdateScrollBarsL()
-  {
-  TBool redrawNeeded = HandleScrollbarVisibilityChangeL();
-  if (ScrollBarFrame()->VerticalScrollBar()->IsVisible())
     {
-    CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
-    view->DisableScrollToItem( ETrue );
-    TScrollToItemEnabler reverter = { view };
-    CleanupClosePushL( reverter );
-    CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
-    CleanupStack::PopAndDestroy( &reverter );
-    }
-  iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
+    TBool redrawNeeded = HandleScrollbarVisibilityChangeL();
+    if (ScrollBarFrame()->VerticalScrollBar()->IsVisible())
+        {
+        CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
+        view->DisableScrollToItem( ETrue );
+        TScrollToItemEnabler reverter = { view };
+        CleanupClosePushL( reverter );
+        CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
+        CleanupStack::PopAndDestroy( &reverter );
+        }
+    iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
         ScrollBarFrame()->VerticalScrollBar()->Rect().Width() );
-  FixViewForMirroredLayout();
-  if ( redrawNeeded )
-    {
-    DrawNow();
+    FixViewForMirroredLayout();
+    if ( redrawNeeded )
+        {
+        DrawNow();
+        }
     }
-  }
 
 // -----------------------------------------------------------------------------
 //

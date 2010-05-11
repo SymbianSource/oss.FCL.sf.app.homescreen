@@ -24,6 +24,7 @@
 // Forward declarations
 class CXnUiEngine;
 class CXnViewManager;
+class CXnPluginData;
 class CXnNode;
 class CFbsBitGc;
 class CFbsBitmap;
@@ -134,9 +135,9 @@ private:
      * Organizing starts using drag and drop.
      *
      * @since Series 60 5.0
-     * @param aNode Node to drag.
+     * @param aPlugin Plugin to drag.
      */
-    void StartDragL( CXnNode& aNode );
+    void StartDragL( const CXnPluginData& aPlugin );
     
     /**
      * Reset the dragging state and deletes screenshot bitmaps.

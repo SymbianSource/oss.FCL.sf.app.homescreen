@@ -113,6 +113,10 @@ void CTsEventControler::HandleTapEventL(
     {
     if(EAknTouchGestureFwLongTap == aEvent.Type())
         {
+        if( IsPhysicsRunning() )
+            {
+            iPhysicsHelper->Stop();
+            }
         iObserver.LongTapL(aEvent.Position());
         }
     else if(EAknTouchGestureFwTap == aEvent.Type())

@@ -31,8 +31,8 @@
 
 // User includes
 #include <aifwstatehandler.h>
+#include <aifwpublisherinfo.h>
 #include <hscontentpublisher.h>
-#include <hspublisherinfo.h>
 #include "nativeuicontroller.h"
 #include "ainativeui.hrh"
 #include "application.h"
@@ -449,14 +449,20 @@ void CNativeUiController::LoadUIDefinitionL()
         
         iPlugins.Append( deviceStatus );
         
-        iFwStateHandler->LoadPlugin( deviceStatus, EAiFwSystemStartup );
+        TAiFwPublisherInfo devstatInfo( 
+            deviceStatus, TAiFwCallback(), EAiFwSystemStartup );
+        
+        iFwStateHandler->LoadPlugin( devstatInfo ); 
         
         THsPublisherInfo profile( KProfilePluginUid, 
             KProfilePluginName, KNativeUiNamespace );
-        
+
         iPlugins.Append( profile );
-        
-        iFwStateHandler->LoadPlugin( profile, EAiFwSystemStartup );        	        
+
+        TAiFwPublisherInfo profileInfo( 
+            profile, TAiFwCallback(), EAiFwSystemStartup );
+                
+        iFwStateHandler->LoadPlugin( profileInfo );                     	       
         }
 
     // We need to load the resource file here if we are not main controller.

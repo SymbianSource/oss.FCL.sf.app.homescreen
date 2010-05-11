@@ -25,6 +25,7 @@
 #include "xnproperty.h"
 #include "xnappuiadapter.h"
 #include "xnuiengine.h"
+#include "xneditmode.h"
 #include "xnnode.h"
 #include "xninactivitymonitor.h"
 
@@ -165,6 +166,14 @@ TBool CXnFocusControl::IsVisible() const
 //
 void CXnFocusControl::Draw( const TRect& aRect, CWindowGc& aGc ) const
     {
+    TInt state( iAppUiAdapter.UiEngine().EditMode()->EditState() );
+            
+    // Don't draw focus appearance when shooting dragging widget in edit mode
+    if ( state == CXnEditMode::EShootContent )
+        {
+        return;
+        }
+    
     if ( IsVisible() || iRefused ) 
         {                                       
         CXnNode* node( iAppUiAdapter.UiEngine().FocusedNode() );

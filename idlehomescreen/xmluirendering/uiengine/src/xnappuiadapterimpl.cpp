@@ -38,6 +38,7 @@
 #include "xnwallpaperview.h"
 #include "xneffectmanager.h"
 #include "xnwaitdialog.h"
+#include "xnitemactivator.h"
 
 #include "xnappuiadapterimpl.h"
 
@@ -123,11 +124,13 @@ void CXnAppUiAdapterImpl::ConstructL()
     iAdapter.AddViewL( wallpaper );
     CleanupStack::Pop( wallpaper );
     
-    iEffectManager = CXnEffectManager::NewL();   
+    iEffectManager = CXnEffectManager::NewL( iAdapter );   
     
     iBackupRestoreObserver = CXnPropertySubscriber::NewL( 
             KUidSystemCategory, conn::KUidBackupRestoreKey, *this );
 
+    iActivator = CXnItemActivator::NewL( iAdapter );
+    
     __TIME_ENDMARK( "CXnAppUiAdapterImpl::ConstructL, done", time );    
     }
 
@@ -141,10 +144,15 @@ void CXnAppUiAdapterImpl::ReloadUiL()
     __PRINTS( "*** CXnAppUiAdapterImpl::ReloadUiL" );
     __TIME_MARK( time );
 
+    delete iActivator;
+    iActivator = NULL;
+           
     iViewAdapter->ReloadUiL();
            
     iViewManager->ReloadUiL();
-        
+    
+    iActivator = CXnItemActivator::NewL( iAdapter );
+    
     __TIME_ENDMARK( "CXnAppUiAdapterImpl::ReloadUiL, done", time );
     }
 
@@ -155,10 +163,12 @@ void CXnAppUiAdapterImpl::ReloadUiL()
 //
 CXnAppUiAdapterImpl::~CXnAppUiAdapterImpl()
     {
-    if ( iXnWaitDialog )
+    if ( iBURWaitDialog )
         {
-        TRAP_IGNORE( iXnWaitDialog->ProcessFinishedL(); );
+        TRAP_IGNORE( iBURWaitDialog->ProcessFinishedL(); );
         }
+    
+    delete iActivator;
     
     delete iBackupRestoreObserver;
     
@@ -261,6 +271,16 @@ MHsContentControl* CXnAppUiAdapterImpl::HsContentControlSrv() const
     }
 
 // -----------------------------------------------------------------------------
+// CXnAppUiAdapterImpl::ItemActivator
+// Gets Item activator
+// -----------------------------------------------------------------------------
+//
+CXnItemActivator& CXnAppUiAdapterImpl::ItemActivator() const
+    {
+    return *iActivator;
+    }
+
+// -----------------------------------------------------------------------------
 // CXnAppUiAdapterImpl::HandleResourceChangeL
 // Handles resource changes
 // -----------------------------------------------------------------------------
@@ -277,12 +297,12 @@ void CXnAppUiAdapterImpl::HandleResourceChangeL( TInt aType )
 //
 void CXnAppUiAdapterImpl::DisplayWaitDialogL()
     {
-    if ( !iXnWaitDialog )
+    if ( !iBURWaitDialog )
        {
-       iXnWaitDialog = new( ELeave ) CXnWaitDialog(
-               reinterpret_cast<CEikDialog**>( &iXnWaitDialog ), ETrue );       
-       iXnWaitDialog->SetCallback( this );
-       iXnWaitDialog->ExecuteLD( R_BACKUP_RESTORE_WAIT_DIALOG );
+       iBURWaitDialog = new( ELeave ) CXnWaitDialog(
+               reinterpret_cast<CEikDialog**>( &iBURWaitDialog ), ETrue );       
+       iBURWaitDialog->SetCallback( this );
+       iBURWaitDialog->ExecuteLD( R_BACKUP_RESTORE_WAIT_DIALOG );
        }
     }
 
@@ -291,7 +311,8 @@ void CXnAppUiAdapterImpl::DisplayWaitDialogL()
 // Property changed notification callback
 // -----------------------------------------------------------------------------
 //
-void CXnAppUiAdapterImpl::PropertyChangedL( const TUint32 aKey, const TInt aValue )
+void CXnAppUiAdapterImpl::PropertyChangedL( const TUint32 aKey, 
+    const TInt aValue )
     {
     const TUint mask( conn::KBURPartTypeMask ^ conn::EBURNormal );
     if ( aKey == conn::KUidBackupRestoreKey )
@@ -301,11 +322,11 @@ void CXnAppUiAdapterImpl::PropertyChangedL( const TUint32 aKey, const TInt aValu
             // Any type of backup or restore operation started
             DisplayWaitDialogL();
             }
-        else if ( iXnWaitDialog )
+        else if ( iBURWaitDialog )
             {
             // Any type of backup or restore operation ended
-            iXnWaitDialog->ProcessFinishedL();
-            // ProcessFinishedL() will NULL iXnWaitDialog
+            iBURWaitDialog->ProcessFinishedL();
+            // ProcessFinishedL() will NULL iBURWaitDialog
             }
         }
     }

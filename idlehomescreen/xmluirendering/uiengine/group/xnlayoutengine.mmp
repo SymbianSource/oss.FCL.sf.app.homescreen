@@ -83,6 +83,8 @@ SOURCE    xnbackgroundmanager.cpp
 SOURCE    xnviewcontroladapter.cpp
 SOURCE    xnspbgcleaner.cpp
 SOURCE    xnwaitdialog.cpp
+SOURCE    xnpublisherdata.cpp
+SOURCE    xnitemactivator.cpp
 
 START RESOURCE  xnuiengine.rss
 HEADER
@@ -155,6 +157,7 @@ LIBRARY    disknotifyhandler.lib
 LIBRARY	   platformenv.lib
 LIBRARY    hspluginsettings.lib
 LIBRARY    akntouchgesturefw.lib
+LIBRARY    alfdecoderserverclient
 
 #if defined(_XN3_DEBUG_) || defined(AI3_DEBUG_PERFORMANCE)
 LIBRARY    flogger.lib

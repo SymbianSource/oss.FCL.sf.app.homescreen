@@ -153,8 +153,8 @@ const RTsFswArray& CTsFswDataList::FswDataL()
 TBool CTsFswDataList::CollectTasksL()
     {
     // clear dirty flag
-    TBool changed = iTaskListDirty;
     iTaskListDirty = EFalse;
+    TBool changed = EFalse;
     
     RTsFswArray newAppsList;
     RTsFswArray newWidgetsList;

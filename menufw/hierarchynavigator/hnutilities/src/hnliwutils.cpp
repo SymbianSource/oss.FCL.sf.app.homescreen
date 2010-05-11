@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -28,9 +28,9 @@
 // ======== MEMBER FUNCTIONS ========
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
-//      
+//
 EXPORT_C void HnLiwUtils::SetGenericParamListL(
     const RPointerArray<CHnMdBaseKey> & aKeys,
     CLiwGenericParamList & aInParam )
@@ -43,13 +43,13 @@ EXPORT_C void HnLiwUtils::SetGenericParamListL(
         TLiwVariant value;
         value.PushL();
         key->ToVariantL( value );
-        aInParam.AppendL( TLiwGenericParam( keyName, value ) );      
+        aInParam.AppendL( TLiwGenericParam( keyName, value ) );
         CleanupStack::PopAndDestroy( &value );
         }
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TBool HnLiwUtils::VariantToStringL(
@@ -113,7 +113,7 @@ EXPORT_C TBool HnLiwUtils::VariantToStringL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TBool HnLiwUtils::VariantToStringL(
@@ -172,7 +172,7 @@ EXPORT_C TBool HnLiwUtils::VariantToStringL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetIterableItemCountL( CLiwIterable& aIterable )
@@ -190,7 +190,7 @@ EXPORT_C TInt HnLiwUtils::GetIterableItemCountL( CLiwIterable& aIterable )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetStringL(
@@ -201,19 +201,19 @@ EXPORT_C TInt HnLiwUtils::GetStringL(
     TInt ret( KErrNone );
     TLiwVariant value;
     value.PushL();
-    
+
     ret = GetVariantL( aParam, aPath, value );
     if ( ret == KErrNone && !VariantToStringL( value, aRet ) )
         {
         ret = KErrBadDescriptor;
         }
-    
+
     CleanupStack::PopAndDestroy( &value );
     return ret;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetStringL(
@@ -224,19 +224,19 @@ EXPORT_C TInt HnLiwUtils::GetStringL(
     TInt ret( KErrNone );
     TLiwVariant value;
     value.PushL();
-    
+
     ret = GetVariantL( aParam, aPath, value );
     if ( ret == KErrNone && !VariantToStringL( value, aRet ) )
         {
         ret = KErrBadDescriptor;
         }
-    
+
     CleanupStack::PopAndDestroy( &value );
     return ret;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetStringL( const CLiwGenericParamList& aParam,
@@ -245,19 +245,19 @@ EXPORT_C TInt HnLiwUtils::GetStringL( const CLiwGenericParamList& aParam,
     TInt ret( KErrNone );
     TLiwVariant value;
     value.PushL();
-    
+
     ret = GetVariantL( aParam, aPath, aPos, value );
     if ( ret == KErrNone && !VariantToStringL( value, aRet ) )
         {
         ret = KErrBadDescriptor;
         }
-    
+
     CleanupStack::PopAndDestroy( &value );
     return ret;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetStringL( const CLiwGenericParamList& aParam,
@@ -266,46 +266,46 @@ EXPORT_C TInt HnLiwUtils::GetStringL( const CLiwGenericParamList& aParam,
     TInt ret( KErrNone );
     TLiwVariant value;
     value.PushL();
-    
+
     ret = GetVariantL( aParam, aPath, aPos, value );
     if ( ret == KErrNone && !VariantToStringL( value, aRet ) )
         {
         ret = KErrBadDescriptor;
         }
-    
+
     CleanupStack::PopAndDestroy( &value );
     return ret;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetInt64L( const CLiwGenericParamList& aParam,
     const TDesC8& aPath, TInt aPos, TInt64& aRet )
-    { 
+    {
     RBuf8 buf;
     TInt err = HnLiwUtils::GetStringL( aParam, aPath, aPos, buf );
-    
+
     if ( KErrNone == err )
-    	{
+      {
         TInt64 value( KErrNotFound );
         TLex8 lex( buf );
 
-    	if ( KErrNone == lex.Val( value ) )
-    		{
-    		aRet = value;
-    		err = KErrNone;
-    		}
-    	}
-    
+      if ( KErrNone == lex.Val( value ) )
+        {
+        aRet = value;
+        err = KErrNone;
+        }
+      }
+
     buf.Close();
-    
-    return err;    
+
+    return err;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetVariantL(
@@ -330,11 +330,11 @@ EXPORT_C TInt HnLiwUtils::GetVariantL(
             /*TInt pos( 0 );
             TInt rest( aPos );
             while ( ( rest = rest / 10 ) != 0 )
-                { 
+                {
                 pos++;
                 }*/
-            
-            path.SetLength( colonFound ); 
+
+            path.SetLength( colonFound );
             TLiwVariant tempVariant;
             tempVariant.PushL();
             if ( KErrNotFound != HnLiwUtils::GetVariantL( aParam, path, aRet ) )
@@ -353,36 +353,36 @@ EXPORT_C TInt HnLiwUtils::GetVariantL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt HnLiwUtils::ExtractNameSpaceL(
-    const CLiwGenericParamList& aParam, 
+    const CLiwGenericParamList& aParam,
     const TDesC8& aNameSpace,
     TLiwVariant& aRet )
     {
         TInt pos( 0 );
         const TLiwGenericParam* param;
-        
+
         if ( &aParam != NULL )
-	    	{
-	    	param = aParam.FindFirst( pos, aNameSpace );
-	        if ( pos >= 0 )
-		        {
-		        aRet.SetL( param->Value() );
-		        }
-	    	}
+        {
+        param = aParam.FindFirst( pos, aNameSpace );
+          if ( pos >= 0 )
+            {
+            aRet.SetL( param->Value() );
+            }
+        }
         else
-        	{
-        	pos = KErrNotFound;
-        	}
-        
+          {
+          pos = KErrNotFound;
+          }
+
         return pos;
     }
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TInt HnLiwUtils::GetVariantL(
@@ -397,9 +397,9 @@ EXPORT_C TInt HnLiwUtils::GetVariantL(
     TLiwVariant lastVariant;
     variant.PushL();
     lastVariant.PushL();
-    
+
     aRet.SetL( TLiwVariant( aPath ) );
-    
+
     ParsePathL( aPath, path );
 
     if ( path.Count() > 0
@@ -411,34 +411,34 @@ EXPORT_C TInt HnLiwUtils::GetVariantL(
             TPtrC8 name = path[ i ];
             LIW::TVariantTypeId typeId = lastVariant.TypeId();
             // LIW::Type ID 7
-            if ( typeId == LIW::EVariantTypeList ) 
+            if ( typeId == LIW::EVariantTypeList )
                 {
                 TInt pos( GetPosition( name ) );
                 found = (pos != KErrNotFound) ? lastVariant.AsList()->AtL( pos, variant ) : EFalse;
                 }
             // LIW::Type ID 8
-            else if ( typeId == LIW::EVariantTypeMap ) 
+            else if ( typeId == LIW::EVariantTypeMap )
                 {
                 found = lastVariant.AsMap()->FindL( name, variant );
                 }
             // LIW::Type ID 9
-            else if ( typeId == LIW::EVariantTypeIterable ) 
+            else if ( typeId == LIW::EVariantTypeIterable )
                 {
                 TInt pos( GetPosition( name ) );
                 found = GetIterableByPositionL( *lastVariant.AsIterable(), pos, variant );
                 }
-            lastVariant.SetL( variant ); 
+            lastVariant.SetL( variant );
             }
         ret = found ? KErrNone : KErrNotFound;
         //aRet.SetL( ( ret != KErrNotFound ) ? variant : TLiwVariant( aPath ) );
         if ( found == 0 )
-        	{
-        	aRet.SetL( TLiwVariant( KNullDesC8 ) );
-        	}
+          {
+          aRet.SetL( TLiwVariant( KNullDesC8 ) );
+          }
         else
-        	{
-        	aRet.SetL( variant );
-        	}
+          {
+          aRet.SetL( variant );
+          }
         }
 
     CleanupStack::PopAndDestroy( &lastVariant );
@@ -448,15 +448,14 @@ EXPORT_C TInt HnLiwUtils::GetVariantL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void HnLiwUtils::ParsePathL(
-    const TDesC8& aPath, 
+    const TDesC8& aPath,
     RArray< TPtrC8 >& aPathParts )
     {
     TChar ch; // token separator
-
     TInt colonPos = aPath.Find( KColon8 );
 
     if ( colonPos > 0 )
@@ -495,12 +494,12 @@ void HnLiwUtils::ParsePathL(
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-TBool HnLiwUtils::GetIterableByPositionL( CLiwIterable & aIterable, TInt pos, 
+TBool HnLiwUtils::GetIterableByPositionL( CLiwIterable & aIterable, TInt pos,
                                           TLiwVariant & aVariant )
-	{
+  {
     TBool ret(EFalse);
     if ( pos >= 0 )
         {
@@ -508,20 +507,20 @@ TBool HnLiwUtils::GetIterableByPositionL( CLiwIterable & aIterable, TInt pos,
         aIterable.Reset();
         ret = aIterable.NextL( aVariant );
         while ( ret )
-        	{
-        	if (counter == pos)
-        		{
-        		break;
-        		}
-        	counter++;
-        	ret = aIterable.NextL( aVariant );
-        	}
+          {
+          if (counter == pos)
+            {
+            break;
+            }
+          counter++;
+          ret = aIterable.NextL( aVariant );
+          }
         }
-    return ret;   
+    return ret;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt HnLiwUtils::GetPosition( const TDesC8& aPosition )
@@ -543,7 +542,7 @@ TInt HnLiwUtils::GetPosition( const TDesC8& aPosition )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt HnLiwUtils::ReplaceIndexL( RBuf8& aPath8, TInt aPos )
@@ -564,16 +563,16 @@ TInt HnLiwUtils::ReplaceIndexL( RBuf8& aPath8, TInt aPos )
         CleanupClosePushL( indexNum );
         indexNum.CreateL( KMaxLength );
         indexNum.AppendNum( aPos );
-    
+
         TInt indexPos = ret = aPath8.Find( KIndex8 );
         TInt indexLength = KIndex().Length();
-    
+
         aPath8.Replace( indexPos, indexLength, indexNum );
         ret += indexNum.Length();
-        
+
         CleanupStack::PopAndDestroy( &indexNum );
         }
-    
+
     return ret;
     }
 

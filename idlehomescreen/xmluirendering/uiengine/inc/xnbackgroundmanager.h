@@ -28,7 +28,6 @@
 class CXnViewManager;
 class CXnViewData;
 class CAknsLayeredBackgroundControlContext;
-class CXnOomSysHandler;
 
 namespace hspswrapper
     {
@@ -74,16 +73,23 @@ public:
      * @param aViewData Page that owns the given wallpaper.
      * @return Error code.
      */            
-    TInt CacheWallpaperL( const TDesC& aFileName, CXnViewData& aViewData );
+    TInt ConstructWallpaper( const TDesC& aFileName, CXnViewData& aViewData );
+
+    /**
+     * Shows wallpaper change dialog
+     * 
+     * @since S60 5.0
+     */
+    void SetWallpaperL();
 
     /**
      * Changes wallpaper image of the current page.
      * 
      * @since S60 5.0
      * @param aFileName WallpaperImage image path and filename
-     * @return Error code.
+     * @return Whether wallpaper is succesfully set or not.
      */
-    TInt AddWallpaperL( const TDesC& aFileName );
+    TBool SetWallpaper( const TDesC& aFileName );
 
     /**
      * Deletes wallpaper from the given page as well as from the cache.
@@ -94,35 +100,28 @@ public:
     void DeleteWallpaper( CXnViewData& aViewData );
 
     /**
+     * Handles wallpaper changing in page change
+     * 
+     * @since S60 5.0
+     * @param aOldView Old view
+     * @param aNewView New view 
+     * @param aDrawNow ETrue if appearance should be updated
+     */
+    void ChangeWallpaper( const CXnViewData& aOldView, 
+        const CXnViewData& aNewView, TBool aDrawNow );
+
+    /**
      * Returns wallpaper type.
      *  
      * @since S60 5.0
      */
     CXnBackgroundManager::WppType WallpaperType();
-
-    /**
-     * Shows wallpaper change dialog
-     * 
-     * @since S60 5.0
+            
+    /** 
+     * Store current wallpaper if needed by using
+     * AknsWallpaperUtils::SetIdleWallpaper
      */
-    void SetWallpaperL();
-
-    /**
-     * Handles wallpaper changing in page change
-     * 
-     * @since S60 5.0
-     * @param aOldView         Old view
-     * @param aNewView         New view 
-     */
-    void WallpaperChanged( const CXnViewData& aOldView, 
-        const CXnViewData& aNewView );
-        
-    /**
-     * Draws wallpaper immediately, or once the window comes visible.
-     * 
-     * @since S60 5.0
-     */
-    void UpdateScreen();
+    void StoreWallpaperL();
 
 public: // Functions from base classes    
 
@@ -177,26 +176,70 @@ private:
      */
     void ConstructL();
 
+    /**
+     * Gets dublicate bitmap from AknsSrv cache and stores ot to view data.
+     */
+    void UpdateViewData( const TDesC& aFileName, CXnViewData& aViewData );
+
+    /**
+     * Stores current wallpaper to HSPS.
+     */
     void SaveWallpaperL();
     TInt SetSettingPropertyL( const TDesC8& aPluginId, const TDesC8& aItemId,
         const TDesC8& aPropertyName, const TDesC8& aPropertyValue );
-    void UpdateWallpapersL();
-    void CleanCache();
-    void RemoveWallpaperL( CXnViewData& aViewData );
-    void RemoveWallpaperFromCache( const TDesC& aFileName, CXnViewData* aViewData = NULL );
-    void RemovableDiskInsertedL();
-    void CheckFeatureTypeL();
-    TInt AddPageSpecificWallpaperL( const TDesC& aFileName );
-    TInt AddCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue );
-    void ReadWallpaperFromCenrepL();    
-    void DrawEditModeBackgroundSkin() const;
-    CXnOomSysHandler& OomSysHandler() const;
-    void DrawStatusPaneMask() const;    
 
     /**
-     * Callback function to be used with CPeriodic.
+     * Goes through all the views and updates wallpapers to the correct size.
      */
-    static TInt TimerCallback( TAny *aPtr );
+    void UpdateWallpapersL();
+    
+    /**
+     * Removes wallpaper from AknsSrv cache, 
+     * if it is not used in other pages than the given (or active page).
+     */
+    void RemoveWallpaperFromCache( const TDesC& aFileName, 
+        CXnViewData* aViewData = NULL );
+    
+    /**
+     * Removes wallpapers that were loaded from MMC.
+     */
+    void RemovableDiskRemovedL();
+
+    /**
+     * Tries to restore wallpapers from MMC.
+     */
+    void RemovableDiskInsertedL();
+    
+    /**
+     * Reads from cenrep wheteher page specific or common wallpaper is enabled 
+     * and acts accordingly.
+     */
+    void CheckFeatureTypeL();
+    
+    /**
+     * Set the given wallpaper to the active page.
+     */
+    void SetPageSpecificWallpaperL( const TDesC& aFileName );
+
+    /**
+     * Set the given wallpaper. 
+     * aSave states whether to save change to HSPS or not.
+     */
+    void SetCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue, 
+        TBool aShowProgressBar = ETrue );
+
+    /**
+     * Called when wallpaper has been changed outside of Homescreen. 
+     * aSave states whether to save change to HSPS or not.
+     */
+    void ReadWallpaperFromCenrepL();    
+
+    /**
+     * Helper functions for drawing
+     */
+    void DrawEditModeBackgroundSkin() const;    
+    void DrawStatusPaneMask() const;    
+    void UpdateStatuspaneMaskL();
 
 private: // data
 
@@ -249,18 +292,13 @@ private: // data
      */
     TInt iIntUpdate;
 
-    /** 
-     * True if screen needs to be drawn when view becomes visible.
+    /**
+     * Status pane bitmap. Drawn on top of a wallpaper in 
+     * the status pane area.
+     * Own.
      */
-    TBool iScreenUpdateNeeded;
+    CFbsBitmap* iSpBitmap;
 
-    /** 
-     * Pointer to wallpaper image. This is used only if same wallpaper 
-     * is shared among all HS pages.
-     * Own. 
-     */   
-    CFbsBitmap* iBgImage;
-    
     /**
      * Pointer to status pane mask. Drawn on top of a wallpaper in 
      * the status pane area.
@@ -274,20 +312,20 @@ private: // data
      * is shared among all HS pages.
      * Own. 
      */  
-    HBufC* iBgImagePath;
+    HBufC* iBgImagePath;    
 
-    /**
-     * Periodic timer.
-     * Own.
+    /** 
+     * Pointer to wallpaper image. This is used only if same wallpaper 
+     * is shared among all HS pages.
+     * Own. 
+     */   
+    CFbsBitmap* iBgImage;
+
+    /*
+     * Flag to indicate wheter wallpaper information needs
+     * to be stored to AknsWallpaperUtils
      */
-    CPeriodic* iTimer;
-    
-    /**
-     * OOM system handler. 
-     * Own.
-     */
-    CXnOomSysHandler* iOomSysHandler;
-    
+    TBool iStoreWallpaper;
     };
 
 #endif      // CXNBACKGROUNDMANAGER_H

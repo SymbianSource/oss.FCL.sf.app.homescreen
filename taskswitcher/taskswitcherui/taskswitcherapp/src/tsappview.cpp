@@ -71,7 +71,7 @@ CTsAppView* CTsAppView::NewLC( const TRect& aRect,
 // -----------------------------------------------------------------------------
 //
 CTsAppView::CTsAppView(CTsDeviceState& aDeviceState)
-        : iDeviceState( aDeviceState )
+        : iDeviceState( aDeviceState ), iExitOnPointerUp(EFalse)
     {
     // no implementation required
     }
@@ -261,7 +261,6 @@ void CTsAppView::GetRects( RArray<TRect>& aRects )
     TSLOG_CONTEXT( CTsAppView::GetRects, TSLOG_LOCAL );
     TSLOG_IN();
     
-#ifndef TASKSWITCHER_USE_CUSTOM_LAYOUT
     TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     
     TAknLayoutRect appsLabel;
@@ -282,18 +281,6 @@ void CTsAppView::GetRects( RArray<TRect>& aRects )
 
     aRects.Append( appsLabel.Rect() );
     aRects.Append( fastSwapAreaPane.Rect() );
-#else
-    TRect tempRect;
-    AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EScreen, tempRect);
-    tempRect.iTl = TPoint(0,0);
-    TRect fastSwapRect, headingRect;
-    fastSwapRect.iTl = TPoint(KFswBorderSize, (tempRect.Height() - KFswItemHeight - KFswHeadingHeight) / 2 + KFswHeadingHeight);
-    fastSwapRect.iBr = TPoint(tempRect.iBr.iX - KFswBorderSize, fastSwapRect.iTl.iY + KFswItemHeight);
-    headingRect.iTl = TPoint(KFswBorderSize, fastSwapRect.iTl.iY - KFswHeadingHeight);
-    headingRect.iBr = TPoint(fastSwapRect.iBr.iX, fastSwapRect.iTl.iY);
-    aRects.Append( headingRect );
-    aRects.Append( fastSwapRect );
-#endif
 
     TSLOG_OUT();
     }
@@ -612,15 +599,32 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
     {
     if( TPointerEvent::EButton1Down == aPointerEvent.iType )
         {
+        iEvtHandler->EnableEventHandling(ETrue);
+        iExitOnPointerUp = EFalse;
 		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
 				ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
 
-		if( !DragArea().Contains(aPointerEvent.iParentPosition))
+		if( !DragArea().Contains(aPointerEvent.iParentPosition) ||
+		    !iFastSwapArea->Count() )
 		    {
 		    //move task switcher to background
 		    iEvtHandler->EnableEventHandling(EFalse);
-		    iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
+		    if ( !iAppsHeading->Rect().Contains( aPointerEvent.iParentPosition ) ||
+		         !iFastSwapArea->Count() )
+		        {
+		        iExitOnPointerUp = ETrue;
+		        }
 		    }
+        }
+    else if( TPointerEvent::EButton1Up == aPointerEvent.iType && iExitOnPointerUp )
+        {
+        // Possible exit, check if pointer up is outside of control area
+        if( ( !DragArea().Contains(aPointerEvent.iParentPosition) &&
+              !iAppsHeading->Rect().Contains(aPointerEvent.iParentPosition) ) ||
+            !iFastSwapArea->Count() )
+            {
+            iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
+            }
         }
     iFastSwapArea->HandlePointerEventL(aPointerEvent);
     }
@@ -773,6 +777,17 @@ TBool CTsAppView::AppCloseInProgress( TInt aWgId )
     {
     return iFastSwapArea->IsAppClosing(aWgId);
     }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppView::WgOnTaskList()
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppView::WgOnTaskList( TInt aWgId )
+    {
+    return iFastSwapArea->WgOnTaskList(aWgId);
+    }
+
 // -----------------------------------------------------------------------------
 // CTsAppView::DragArea
 // -----------------------------------------------------------------------------
@@ -783,12 +798,12 @@ TRect CTsAppView::DragArea()
 	if (Layout_Meta_Data::IsLandscapeOrientation())
 		{
 		dragArea.SetRect(iAppsHeading->Rect().iTl.iX,
-				iAppsHeading->Rect().iTl.iY, iFastSwapArea->Rect().iBr.iX,
+		        iFastSwapArea->Rect().iTl.iY, iFastSwapArea->Rect().iBr.iX,
 				iFastSwapArea->Rect().iBr.iY);
 		}
 	else
 		{
-		dragArea.SetRect(Rect().iTl.iX, iAppsHeading->Rect().iTl.iY,
+		dragArea.SetRect(Rect().iTl.iX, iFastSwapArea->Rect().iTl.iY,
 				Rect().iBr.iX, iFastSwapArea->Rect().iBr.iY);
 		}
 	return dragArea;

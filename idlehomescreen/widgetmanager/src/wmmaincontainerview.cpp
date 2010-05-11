@@ -29,6 +29,7 @@
 #include <hscontentcontroller.h>
 #include <AknUtils.h>
 #include <avkon.rsg>
+#include <layoutmetadata.cdl.h>
 
 #include "wmplugin.h"
 #include "widgetmanager.hrh"
@@ -187,13 +188,11 @@ void CWmMainContainerView::DoActivateL(
 		const TDesC8& /*aCustomMessage*/ )
 	{
     // setup status pane layout
-    StatusPane()->SwitchLayoutL( 
-            R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );    
-    // disable transparancy 
-    StatusPane()->EnableTransparent( EFalse );
+    StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );    
     // apply changes 
     StatusPane()->ApplyCurrentSettingsL();
-
+    // disable transparancy
+    StatusPane()->EnableTransparent( EFalse );
     // create container
     if ( iWmSpBgCleaner == NULL )
         {
@@ -205,18 +204,15 @@ void CWmMainContainerView::DoActivateL(
     // title in status pane
     SetTitleL();
 
+    iWmSpBgCleaner->DrawNow();
     StatusPane()->DrawNow();
 
     // update cba
-    CEikButtonGroupContainer* bgc( Cba() );
-    CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
-    if ( cba ) 
+    if ( Layout_Meta_Data::IsMSKEnabled() )
         {
-        TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
-                                R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
-                                R_AVKON_SOFTKEYS_OPTIONS_BACK );
-
-        cba->SetCommandSetL( cbaResourceId );
+        CEikButtonGroupContainer* bgc( Cba() );
+        CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
+        cba->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT );
         bgc->SetBoundingRect( TRect() );
         cba->DrawNow();
         }
@@ -227,6 +223,7 @@ void CWmMainContainerView::DoActivateL(
         iWmMainContainer = CreateContainerL();
         iWmMainContainer->SetMopParent( this );
         AppUi()->AddToStackL( *this, iWmMainContainer );
+        iWmMainContainer->DrawNow();
         }
     
     iWmPlugin.MainViewActivated( aPrevViewId, iWmMainContainer );
@@ -274,7 +271,6 @@ void CWmMainContainerView::SetTitleL()
             iEikonEnv->CreateResourceReaderLC( 
                     reader, R_WM_MAIN_CONTAINER_TITLE_RESOURCE );
             title->SetFromResourceL( reader );
-            title->DrawDeferred();
             CleanupStack::PopAndDestroy(); // reader internal state
 		    }
 		}
