@@ -85,7 +85,7 @@ CXnPropertySubscriber::~CXnPropertySubscriber()
 //
 void CXnPropertySubscriber::DoCancel()
     {
-    iProperty.Close();
+    iProperty.Cancel();
     }
 
 // -----------------------------------------------------------------------------
@@ -103,3 +103,14 @@ void CXnPropertySubscriber::RunL()
         iPropertyChangeObserver.PropertyChangedL( iKey, intValue );
         }
     }
+
+// ---------------------------------------------------------
+// ---------------------------------------------------------
+//
+TInt CXnPropertySubscriber::RunError(TInt /*aError*/)
+    {   
+    return KErrNone;
+    }
+
+// End of file
+

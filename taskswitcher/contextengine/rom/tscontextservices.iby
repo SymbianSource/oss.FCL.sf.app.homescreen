@@ -21,10 +21,5 @@
 // Context Services binaries
 file=ABI_DIR/BUILD_DIR/tscontextservicesutils.dll    SHARED_LIB_DIR/tscontextservicesutils.dll
 
-// backup registration
-data=DATAZ_/private/20011417/backup_registration.xml    private/20011417/backup_registration.xml
-
-// stub sis
-data=ZSYSTEM/install/tsctxsrv_stub.sis    system/install/tsctxsrv_stub.sis
 
 #endif // TSCONTEXTSERVICES

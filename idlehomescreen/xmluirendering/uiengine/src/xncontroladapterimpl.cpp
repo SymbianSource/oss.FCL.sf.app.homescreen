@@ -21,6 +21,7 @@
 #include <SVGEngineInterfaceImpl.h>
 #include <s32file.h>
 #include <mifconvdefs.h>
+//skinning support
 #include <AknsFrameBackgroundControlContext.h>
 #include <AknsDrawUtils.h>
 #include <aknconsts.h>
@@ -52,7 +53,6 @@
 #include "xndomlist.h"
 #include "xnodt.h"
 #include "xnresource.h"
-#include "xnhittest.h"
 #include "xnplugindata.h"
 #include "xnnode.h"
 #include "xnpanic.h"
@@ -62,9 +62,6 @@
 #include "xneditmode.h"
 
 _LIT8(KScrollableBoxNodeName, "scrollablebox");
-        
-using namespace XnGestureHelper;
-#include "xngesture.h"
 
 // Constants
 const TInt KSkinGfxInnerRectShrink = 5;
@@ -73,7 +70,9 @@ const TInt KFocusGrowValue = 3;
 const TInt KLongTapStartShortDelay( 150000 ); // 0.15s for Sk
 const TInt KLongTapStartLongDelay( 500000 ); // 0.5s
 const TInt KLongTapTimeShortDelay( 600000 ); // 0.6s for SK
-const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s 
+const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s
+
+const TInt KDragThreshold = 20; // pixels
 
 // LOCAL FUNCTION PROTOTYPES
 static TRgb ConvertHslToRgb( TInt aHue, TInt aSaturation, TInt aLightness );
@@ -3355,44 +3354,6 @@ void CreateScaledBitmapL(
 
 // -----------------------------------------------------------------------------
 // SoftkeyNode
-// Gets the node of softkey according to index
-// -----------------------------------------------------------------------------
-//
-static CXnNode* SoftkeyNodeL( CXnNode* aMenuBarNode, const TDesC8& aSoftkey )
-    {
-    if ( aMenuBarNode )
-        {
-        XnMenuInterface::MXnMenuInterface* menuIf( NULL );
-        XnComponentInterface::MakeInterfaceL( menuIf, aMenuBarNode->AppIfL() );
-        CXnNodePluginIf* skNode( NULL );
-        if ( menuIf )
-            {
-            if ( aSoftkey == XnPropertyNames::softkey::type::KLeft )
-                {
-                skNode = menuIf->SoftKeyL(
-                    XnMenuInterface::MXnMenuInterface::ELeft );
-                }
-            else if ( aSoftkey == XnPropertyNames::softkey::type::KMiddle )
-                {
-                skNode = menuIf->SoftKeyL(
-                    XnMenuInterface::MXnMenuInterface::ECenter );
-                }
-            else if ( aSoftkey == XnPropertyNames::softkey::type::KRight )
-                {
-                skNode = menuIf->SoftKeyL(
-                    XnMenuInterface::MXnMenuInterface::ERight );
-                }
-            }
-        if ( skNode )
-            {
-            return &skNode->Node();
-            }
-        }
-    return NULL;
-    }
-
-// -----------------------------------------------------------------------------
-// SoftkeyNode
 // Gets the node of softkey according to pointer location
 // -----------------------------------------------------------------------------
 //
@@ -3653,11 +3614,8 @@ CXnControlAdapterImpl::~CXnControlAdapterImpl()
         iAnimation->Stop();
         delete iAnimation;
         }
-
-    if ( iGestureHelper )
-        {
-        delete iGestureHelper;
-        }
+    
+    delete iGestureFw;
     }
 
 // -----------------------------------------------------------------------------
@@ -3721,29 +3679,21 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
     for ( ; temp; temp = temp->Parent() )
         {
         if ( temp == menuBar )
-            {
-            // This is softkey node
-            const TDesC8* pos( NULL );
-            node = NULL;
-
-            if ( aKeyEvent.iScanCode == EStdKeyDevice0 )
+            {            
+            // This is softkey node        
+            XnMenuInterface::MXnMenuInterface* menuIf( NULL );
+            XnComponentInterface::MakeInterfaceL( menuIf, menuBar->AppIfL() );
+        
+            if ( menuIf )
                 {
-                pos = &XnPropertyNames::softkey::type::KLeft;
+                CXnNodePluginIf* eventNode( menuIf->KeyEventNode() );
+                
+                if ( eventNode )
+                    {
+                    node = &eventNode->Node();
+                    }
                 }
-            else if ( aKeyEvent.iScanCode == EStdKeyDevice1 )
-                {
-                pos = &XnPropertyNames::softkey::type::KRight;
-                }
-            else if ( aKeyEvent.iScanCode == EStdKeyDevice3 )
-                {
-                pos = &XnPropertyNames::softkey::type::KMiddle;
-                }
-
-            if ( pos )
-                {
-                node = SoftkeyNodeL( menuBar, *pos );
-                }
-
+            
             break;
             }
         }
@@ -3758,7 +3708,7 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
          aKeyEvent.iScanCode == EStdKeyDevice3 )  // MSK
         {
         if ( aType == EEventKeyDown )
-            {
+            {            
             iLongtap = EFalse;
             
             if ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
@@ -3907,8 +3857,8 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
                 control->IgnoreEventsUntilNextPointerUp();
                 control->ResetGrabbing();                      
                 }
-            
-            // Indicate long tap has taken plave
+
+          // Indicate long tap has taken place
             iLongtap = ETrue;
             
             CXnNode* hold = BuildTriggerNodeL( *engine,
@@ -3924,6 +3874,23 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
     }
 
 // -----------------------------------------------------------------------------
+// CXnControlAdapterImpl::IsDragThresholdExceeded
+// Checks if drag threshold is exceeded
+// -----------------------------------------------------------------------------
+//
+TBool CXnControlAdapterImpl::IsDragThresholdExceeded( const TPoint& aPoint )
+    {
+    TBool ret = EFalse;
+    TPoint distance = aPoint - iButtonDownStartPoint;
+    if ( Abs( distance.iX ) >= KDragThreshold ||
+         Abs( distance.iY ) >= KDragThreshold )
+        {
+        ret = ETrue;
+        }
+    return ret;
+    }
+
+// -----------------------------------------------------------------------------
 // CXnControlAdapterImpl::HandlePointerEventL
 // Handle pointer events
 // -----------------------------------------------------------------------------
@@ -3935,23 +3902,15 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     
     CXnNode* node( &iNode.Node() );
     CXnUiEngine* engine( node->UiEngine() );
- 
-    if(!engine->IsPartialInputActive())
+    
+    if ( !engine->IsPartialInputActive() )
         {
-        // Forward event to gesture helper
-        if( PassEventToGestureHelperL( aPointerEvent ) )
-            { 
-            CXnAppUiAdapter& appui( engine->AppUiAdapter() );
-            CXnViewData& data( appui.ViewManager().ActiveViewData() );
-            
-            CXnViewControlAdapter* control = 
-                static_cast< CXnViewControlAdapter* >( data.ViewNode()->Control() );
-            
-            control->ResetGrabbing();
-
-            // Swipe took place, consume this event
-            return ETrue;
-            }
+        InitializeGestureL( aPointerEvent );
+        }
+    else
+        {
+        // reset destination
+        iGestureDestination = NULL;
         }
     
     TBool menuBar( node == engine->MenuBarNode() );
@@ -4011,6 +3970,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
     if ( event.iType == TPointerEvent::EButton1Down )
         {
         iLongtap = EFalse;
+        node->HideTooltipsL();
         
         if ( !menuBar )
             {
@@ -4019,6 +3979,8 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
                         
         if ( !menuBar && !engine->FocusedNode() )
             {
+            // save starting point
+            iButtonDownStartPoint = event.iPosition;
             // Require focus to be shown
             engine->AppUiAdapter().ShowFocus();                
             
@@ -4033,25 +3995,18 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
             node->SetStateL( 
                 XnPropertyNames::style::common::KFocus, 
                 XnEventSource::EStylus );
-            node->SetStateL( 
-                XnPropertyNames::style::common::KPressedDown );
             }        
         }
     else if ( event.iType == TPointerEvent::EDrag )
         {        
         if ( node->IsStateSet( XnPropertyNames::style::common::KFocus ) )
             {
-            if ( !node->MarginRect().Contains( event.iPosition ) )
+            if ( IsDragThresholdExceeded( event.iPosition ) ||
+                 !node->MarginRect().Contains( event.iPosition ) )
                 {
-                // Remove pressed down
+                // Remove focus
                 node->UnsetStateL(
-                    XnPropertyNames::style::common::KPressedDown );
-                }
-            if ( node->MarginRect().Contains( event.iPosition ) )
-                {
-                // Add pressed down
-                node->SetStateL(
-                    XnPropertyNames::style::common::KPressedDown );
+                    XnPropertyNames::style::common::KFocus );
                 }
             }
         }
@@ -4064,8 +4019,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
                 node->SetStateL( XnPropertyNames::style::common::KActive );
                 }          
             else if ( ( node->MarginRect().Contains( event.iPosition ) &&
-               node->IsStateSet( XnPropertyNames::style::common::KFocus ) &&
-               node->IsStateSet( XnPropertyNames::style::common::KPressedDown ) ) )
+               node->IsStateSet( XnPropertyNames::style::common::KFocus ) ) )
                 {
 #ifdef RD_TACTILE_FEEDBACK            
                 MTouchFeedback* feedback( MTouchFeedback::Instance() );
@@ -5513,7 +5467,8 @@ void CXnControlAdapterImpl::ConstructL(
 
     if ( CreateGestureHelperL( aNode.Node() ) )
         {
-        iGestureHelper = CXnGestureHelper::NewL( aNode.Node() );
+        iGestureFw = CAknTouchGestureFw::NewL( *this, aAdapter );
+        iGestureFw->SetGestureInterestL( EAknTouchGestureFwGroupFlick );
         }
     }
 
@@ -5853,104 +5808,58 @@ static CFbsBitmap* CreateBitmapFromColorL( TSize aSize, TRgb aColor )
     }
 
 // -----------------------------------------------------------------------------
-// PassEventToGestureHelperL
-// Forwards event to gesturehelper
+// InitializeGestureL
+// Sets up gesture
 // -----------------------------------------------------------------------------
 //
-TBool CXnControlAdapterImpl::PassEventToGestureHelperL(
+void CXnControlAdapterImpl::InitializeGestureL(
     const TPointerEvent& aPointerEvent )
     {
-    TBool ret( EFalse );
-    
-    CXnNode* node( &iNode.Node() );
-    CXnUiEngine* engine( node->UiEngine() );
-
-    if ( iGestureHelper && iGestureHelper->Owner() == node )
+    if ( !iGestureFw || aPointerEvent.iType != TPointerEvent::EButton1Down )
         {
-        if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
-            {                               
-            // Set default destination                     
-            iGestureHelper->SetDestination( iGestureHelper->Owner() );
+        return;
+        }
+    
+    CXnUiEngine* engine( iNode.Node().UiEngine() );                               
+    // Set default destination                     
+    iGestureDestination = &iNode.Node();
+    
+    RPointerArray< CXnPluginData >& plugins( 
+        engine->ViewManager()->ActiveViewData().PluginData() );
+    
+    for ( TInt i = 0; i < plugins.Count(); i++ )
+        {
+        CXnPluginData* plugin( plugins[i] );
+                                   
+        if ( plugin->Occupied() )
+            {
+            CXnNode* widget( plugin->Node()->LayoutNode() );
             
-            RPointerArray< CXnPluginData >& plugins( 
-                engine->ViewManager()->ActiveViewData().PluginData() );
-            
-            for ( TInt i = 0; i < plugins.Count(); i++ )
+            if ( widget->MarginRect().Contains( aPointerEvent.iPosition ) )
                 {
-                CXnPluginData* plugin( plugins[i] );
-                                           
-                if ( plugin->Occupied() )
+                // Resolve swipe destination
+                CXnProperty* prop( widget->GetPropertyL( 
+                    XnPropertyNames::common::KSwipeDestination ) );
+                
+                if ( prop )
                     {
-                    CXnNode* widget( plugin->Node()->LayoutNode() );
-                    
-                    if ( widget->MarginRect().Contains( aPointerEvent.iPosition ) )
+                    const TDesC8& value( prop->StringValue() );
+                        
+                    if( value == XnPropertyNames::KWidget )
                         {
-                        // Resolve swipe destination
-                        CXnProperty* prop( widget->GetPropertyL( 
-                            XnPropertyNames::common::KSwipeDestination ) );
-                        
-                        if ( prop )
-                            {
-                            const TDesC8& value( prop->StringValue() );
-                                
-                            if( value == XnPropertyNames::KWidget )
-                                {
-                                // Set widget as destination    
-                                iGestureHelper->SetDestination( widget );
-                                }
-                            else if( value == XnPropertyNames::KNone )
-                                {
-                                // Set no destination    
-                                iGestureHelper->SetDestination( NULL );
-                                }
-                            }
-                        
-                        break;
+                        // Set widget as destination    
+                        iGestureDestination = widget;
+                        }
+                    else if( value == XnPropertyNames::KNone )
+                        {
+                        // Set no destination    
+                        iGestureDestination = NULL;
                         }
                     }
-                }
-            }
-
-        TXnGestureCode result( iGestureHelper->HandlePointerEventL( aPointerEvent ) );
-        
-        const TDesC8* swipe( NULL );
-    
-        if ( result == EGestureSwipeLeft )
-            {
-            swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KLeft;
-            }
-        else if ( result == EGestureSwipeRight )
-            {
-            swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KRight;
-            }
-
-        if ( swipe )
-            {
-            CXnNode* destination( iGestureHelper->Destination() );
-            
-            if ( destination )
-                {
-                if ( destination == iGestureHelper->Owner() )
-                    {
-                    CancelFocusRefusalL( *engine );
-                    }
-                
-                // Remove focus
-                engine->AppUiAdapter().HideFocus();
-
-                CXnNode* trigger( BuildSwipeTriggerNodeLC( *engine, *swipe ) );
-                destination->ReportXuikonEventL( *trigger );
-                CleanupStack::PopAndDestroy( trigger );
-                       
-                // If needed we can call here for example HandleSwipeL()
-                
-                // Consume this event
-                ret = ETrue;
+                break;
                 }
             }
         }
-
-    return ret;
     }
 
 // -----------------------------------------------------------------------------
@@ -5975,6 +5884,52 @@ RPointerArray< CXnControlAdapter >& CXnControlAdapterImpl::ChildAdapters()
 RFs& CXnControlAdapterImpl::FsSession()
     {
     return iAdapter->ControlEnv()->FsSession();
+    }
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void CXnControlAdapterImpl::HandleTouchGestureL( MAknTouchGestureFwEvent& aEvent )
+    {
+    if ( aEvent.Group() == EAknTouchGestureFwGroupFlick )
+        {
+        TAknTouchGestureFwType type = aEvent.Type();
+        
+        const TDesC8* swipe( NULL );
+    
+        if ( type == EAknTouchGestureFwFlickLeft )
+            {
+            swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KLeft;
+            }
+        else if ( type == EAknTouchGestureFwFlickRight )
+            {
+            swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KRight;
+            }
+
+        if ( swipe && iGestureDestination )
+            {
+            CXnUiEngine* engine = iNode.Node().UiEngine();
+            if ( iGestureDestination == &iNode.Node() )
+                {
+                CancelFocusRefusalL( *engine );
+                }
+            
+            // Remove focus
+            engine->AppUiAdapter().HideFocus();
+
+            CXnNode* trigger( BuildSwipeTriggerNodeLC( *engine, *swipe ) );
+            iGestureDestination->ReportXuikonEventL( *trigger );
+            CleanupStack::PopAndDestroy( trigger );
+            
+            CXnAppUiAdapter& appui( engine->AppUiAdapter() );
+            CXnViewData& data( appui.ViewManager().ActiveViewData() );
+            
+            CXnViewControlAdapter* control = 
+                static_cast< CXnViewControlAdapter* >( data.ViewNode()->Control() );
+            
+            control->ResetGrabbing();
+            }
+        }
     }
 
 

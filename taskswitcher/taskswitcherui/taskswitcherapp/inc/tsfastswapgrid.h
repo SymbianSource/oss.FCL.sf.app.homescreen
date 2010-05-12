@@ -77,9 +77,9 @@ public: // Constructor and destructor
     
 public: // From CCoeControl
     void HandlePointerEventL( const TPointerEvent &aPointerEvent );
-    TTypeUid::Ptr MopSupplyObject( TTypeUid aId );
     void HandleResourceChange( TInt aType );
     void SizeChanged();
+    void Draw( const TRect& aRect ) const;
     
 public: //From MTsDeviceStateObserver
     /**
@@ -115,6 +115,23 @@ public: // New functions
      * Resets index of the item that has been close icon hit
      */
     void ResetCloseHit();
+    
+    /**
+     * Sets color for the screenshot stroke.
+     * 
+     * @param  aColor  color for the thumbnail
+     * @param  aHighlightedColor  color for thumbnail when item is highlighted
+     */
+    void SetStrokeColors( TRgb aColor, 
+                          TRgb aHighlightedColor );
+    
+    /**
+     * Sets items for which stroke will be drawn
+     * 
+     * @param  aItemIndex  array of item indexes for which stroke
+     *                     is drawn
+     */
+    void SetStrokeItemsL( RArray<TInt>& aItemIndex );
     
     /**
      * Sets grid behaviour
@@ -160,43 +177,19 @@ public: // New functions
     TRect VisibleViewRect();
     
     /**
-     * Launch tactile ETouchFeedbackSensitive feedback.
+     * Updates layout data for item drawer. Should be called when
+     * layout maybe out of date
      */
-    void LaunchTactileFeedback();
+    void UpdateItemDrawerLayoutDataL();
     
     /**
-     * Set tactile feedback support.
+     * Enables/disables avkon event handling.
      * 
-     * @param aSupport new support value 
+     * @param  aEnable  if set to ETrue, pointer events will be forwarded
+     *                  to CAknGrid base class if necessary. If set to EFalse,
+     *                  no pointer events will be forwarded.
      */
-    void SetTactileFeedbackSupport(TBool aSupport);
-    
-    /**
-     * Remove item from iFullyVisibleItems and iPartialVisibleItems arrays 
-     * 
-     * @param   aItem  idem index 
-     * @return  ETrue  if item was removed
-     *          EFalse if item was not found
-     */
-    TBool RemoveFromVisibleItems(TInt aItem) const;
-
-    /**
-     * Add item to iFullyVisibleItems array 
-     * 
-     * @param   aItem  idem index 
-     * @return  ETrue  if item was added
-     *          EFalse if item was not added because it was there before
-     */
-    TBool AddToFullyVisibleItems(TInt aItem) const;
-
-    /**
-     * Remove item from iPartialVisibleItems array 
-     * 
-     * @param   aItem  idem index 
-     * @return  ETrue  if item was removed
-     *          EFalse if item was not removed because it was not found
-     */
-    TBool MoveToPartialVisibleItems(TInt aItem) const;
+    void EnableAknEventHandling( TBool aEnable );
 
 private: // From CAknGrid
     virtual void CreateItemDrawerL();
@@ -209,7 +202,7 @@ private: // New functions
     /**
      * Loads close icon bitmap and mask
      */
-    void LoadCloseIcon();
+    void LoadCloseIconAndStrokeParams();
     
     /**
      * Redraws grid and parent controls
@@ -220,9 +213,6 @@ private: // Data
     
     // Grid's parent
     const CCoeControl* iParent;
-    
-    // Background context for grid
-    CAknsFrameBackgroundControlContext* iBgContext;
     
     // Close icon handling
     RArray<TInt> iCloseItems;
@@ -237,12 +227,8 @@ private: // Data
     // Visible view rectangle (horizontal scrolling support)
     TRect iVisibleViewRect;
     
-    // Feedback support
-    TBool iTactileFeedbackSupport;
-    CTsFastSwapTimer* iFeedbackTimer;
-    
-    mutable RArray<TInt> iFullyVisibleItems;
-    mutable RArray<TInt> iPartialVisibleItems;
+    // Flag controlling input handling by grid
+    TBool iAknEventHandlingEnabled;
     };
 
 
@@ -255,8 +241,7 @@ class CTsGridItemDrawer: public CFormattedCellListBoxItemDrawer
 
 public: // Constructor and destructor
     CTsGridItemDrawer( CTsFastSwapGrid* aGrid,
-                       CFormattedCellListBoxData* aData,
-                       TRect aScreenRect );
+                       CFormattedCellListBoxData* aData );
     ~CTsGridItemDrawer();
 
 public: // New functions
@@ -265,7 +250,8 @@ public: // New functions
      * Sets close icon drawn for items that can be closed.
      * Ownership transferred.
      */
-    void SetCloseIcon( CFbsBitmap* aBmp, CFbsBitmap* aMask );
+    void SetCloseIcon( CFbsBitmap* aBmp, CFbsBitmap* aBmpMask,
+                       CFbsBitmap* aBmpPressed, CFbsBitmap* aBmpPressedMask );
 
     /**
      * Initializes close icon rectangles.
@@ -296,6 +282,41 @@ public: // New functions
      *                  if set to EFalse, background will not be redrawn
      */
     void SetRedrawBackground( TBool aEnable );
+    
+    /**
+     * Sets color for the screenshot stroke.
+     * 
+     * @param  aColor  color for the thumbnail
+     * @param  aHighlightedColor  color for thumbnail when item is highlighted
+     */
+    void SetStrokeColors( TRgb aNormalColor,
+                          TRgb aHighlightedColor );
+    
+    /**
+     * Sets items for which stroke will be drawn
+     * 
+     * @param  aItemIndex  array of item indexes for which stroke
+     *                     is drawn.
+     */
+    void SetStrokeItemsL( RArray<TInt>& aItemIndex );
+    
+    /**
+     * Sets stroke offset and size: values must be relative
+     * to item rectangle.
+     * 
+     * @param  aStrokeOffset  offset of the stroke rectangle relative
+     *                        to item rectangle
+     * @param aStrokeSize     size of the stroke rectangle
+     */
+    void SetStrokeOffset( TPoint aStrokeOffset, TSize aStrokeSize );
+    
+    /**
+     * Set screen rectangle, used by the item drawer to determine
+     * drawn area.
+     * 
+     * @param  aRect  screen rectangle
+     */
+    void SetScreenRect( TRect aRect );
 
 private: // From CFormattedCellListBoxItemDrawer
     void DrawActualItem( TInt aItemIndex, const TRect& aActualItemRect,
@@ -333,16 +354,24 @@ private: // Data
     // Owned
     CFbsBitmap* iCloseIcon;
     CFbsBitmap* iCloseIconMask;
+    CFbsBitmap* iCloseIconPressed;
+    CFbsBitmap* iCloseIconPressedMask;
     
     TRect iScreenRect;
     TInt iLeftOffset;
     TInt iRightOffset;
     
-    // Layout data
+    // Close button data
     TRect iCloseIconRect;
     TRect iCloseButtonRect;
 	
     TBool iRedrawBackground;
+    
+    // Stroke data
+    TRgb iStrokeColor;
+    TRgb iHighlightStrokeColor;
+    RArray<TInt> iStrokeItems;
+    TRect iStrokeRect;
     };
 
 

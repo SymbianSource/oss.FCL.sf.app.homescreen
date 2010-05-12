@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_51 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_52 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -198,6 +198,15 @@ TInt CMmListBoxView::GetNumberOfItemsThatFitInRect (const TRect& aRect,
 	return ret;
 	}
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TInt CMmListBoxView::ModelItemsCount()
+    {
+    return iModel->NumberOfItems();
+    }
+
 
 // -----------------------------------------------------------------------------
 //
@@ -330,13 +339,15 @@ void CMmListBoxView::DoDraw(const TRect* aClipRect) const
 
 		if ( !itemDrawer->IsEditMode() )
 		    {
-		    itemDrawer->DrawBackgroundAndSeparatorLines( ViewRect() );
+		    itemDrawer->DrawBackground( ViewRect() );
             itemDrawer->SetRedrawItemBackground( EFalse );
+            itemDrawer->SetDrawSeparatorLines( ETrue );
             while (i < lastPotentialItemIndex)
                 {
                 DrawItem(i++);
                 }
             itemDrawer->SetRedrawItemBackground( ETrue );
+            itemDrawer->SetDrawSeparatorLines( EFalse );
 		    }
 		else
 		    {
@@ -378,7 +389,9 @@ void CMmListBoxView::DrawItem (TInt aItemIndex) const
 
 	if ( !redrawConsumed )
 		{
-		DrawSingleItem ( aItemIndex );
+        itemDrawer->SetDrawSeparatorLines( ETrue );
+	    DrawSingleItem ( aItemIndex );
+        itemDrawer->SetDrawSeparatorLines( EFalse );
 		}
 	}
 

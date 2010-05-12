@@ -27,6 +27,7 @@
 #include "xnwallpaperview.h"
 #include "xnrootdata.h"
 #include "xnuiengine.h"
+#include "xnoomsyshandler.h"
 #include "xneffectmanager.h"
 
 // SYSTEM INCLUDE FILES
@@ -45,6 +46,7 @@
 #include <AknsControlContext.h>
 #include <AknsLayeredBackgroundControlContext.h>
 #include <driveinfo.h>
+#include <layoutmetadata.cdl.h>
 
 using namespace hspswrapper;
 
@@ -101,8 +103,10 @@ void CXnBackgroundManager::ConstructL()
     CheckFeatureTypeL();   
 
     iTimer = CPeriodic::NewL( CActive::EPriorityIdle );
-    
+
     GfxTransEffect::Register( this, KGfxContextBgAppear );    
+
+    iOomSysHandler = CXnOomSysHandler::NewL();
     }
 
 // -----------------------------------------------------------------------------
@@ -136,6 +140,8 @@ CXnBackgroundManager::~CXnBackgroundManager()
     delete iBgContext;
     delete iBgImage;
     delete iBgImagePath;
+    delete iOomSysHandler;
+    delete iSpMask;   
     }
 
 // -----------------------------------------------------------------------------
@@ -177,6 +183,7 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
             {
             SystemGc().DrawBitmap( iRect, wallpaper );
             }
+        DrawStatusPaneMask();
         }
     
     // Skin bg is used by default
@@ -214,6 +221,34 @@ void CXnBackgroundManager::SizeChanged()
             }
         }
     iBgContext->SetRect( iRect );
+    
+    // create status pane mask image and set size
+    if( iSpMask )
+        {
+        delete iSpMask;
+        iSpMask = NULL;
+        }
+    
+    TRect spRect;
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EStatusPane, spRect );
+    
+    TInt err( KErrNone );    
+    
+    if( Layout_Meta_Data::IsLandscapeOrientation() )
+        {
+        TRAP( err, iSpMask = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnGrafBgLscTopMaskIcon ) );
+        }
+    else
+        {
+        TRAP( err, iSpMask = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+                KAknsIIDQgnGrafBgPrtTopMaskIcon ) );        
+        }
+    
+    if( iSpMask )
+        {
+        AknIconUtils::SetSize( iSpMask, spRect.Size(), EAspectRatioNotPreserved );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -353,7 +388,7 @@ CXnBackgroundManager::WppType CXnBackgroundManager::WallpaperType()
     {
     return iType;
     }
-    
+
 // -----------------------------------------------------------------------------
 // CXnBackgroundManager::WallpaperChanged
 // -----------------------------------------------------------------------------
@@ -505,12 +540,19 @@ void CXnBackgroundManager::SetWallpaperL()
             }
         else if ( selectedIndex == 1 )
             {
+            if ( CXnOomSysHandler::HeapAvailable( CXnOomSysHandler::EMem6MB ) )
+                {
             CXnAppUiAdapter& appui( iViewManager.AppUiAdapter() );
             
             appui.EffectManager()->BeginFullscreenEffectL(
                 KGfxContextOpenWallpaperView, iViewManager.ActiveViewData() );        
             
             appui.ActivateLocalViewL( KWallpaperViewUid, KDummyUid, KSingle );                                 
+                }
+            else
+            	{
+            	OomSysHandler().HandlePotentialOomL();
+            	}
             }
         }
     CleanupStack::Pop( query );
@@ -661,7 +703,7 @@ void CXnBackgroundManager::RemovableDiskInsertedL()
             if( path != KNullDesC && !bitmap )
                 {
                 TInt err = CacheWallpaperL( path, *viewData );
-                if( err == KErrNone )
+                if( err == KErrNone && viewData == &iViewManager.ActiveViewData() )
                     {
                     drawingNeeded = ETrue;
                     }
@@ -670,6 +712,13 @@ void CXnBackgroundManager::RemovableDiskInsertedL()
         if( drawingNeeded )
             {
             UpdateScreen();
+            
+            TInt err = AknsWallpaperUtils::SetIdleWallpaper( 
+                iViewManager.ActiveViewData().WallpaperImagePath(), NULL );
+            if( err == KErrNone )
+                {
+                iIntUpdate++;
+                }   
             }    
         }
     else
@@ -731,14 +780,15 @@ TInt CXnBackgroundManager::AddPageSpecificWallpaperL( const TDesC& aFileName )
     // Add new to the cache
     if( aFileName != KNullDesC )
         {
-        if( CacheWallpaperL( aFileName, viewData ) == KErrNone )
+        err = CacheWallpaperL( aFileName, viewData ); 
+    
+        if( err == KErrNone )
             {
             SaveWallpaperL(); // to HSPS
             }
         else
             {
-            // image is corrupted or format is not supported
-            return KErrCACorruptContent;
+            return err;
             }
         }
     // WallpaperImage changed back to default. Update view data.
@@ -783,13 +833,13 @@ TInt CXnBackgroundManager::AddCommonWallpaperL( const TDesC& aFileName,
         {
         iBgImagePath = aFileName.AllocL();
     
-        TBool err( KErrNone );
+        err = KErrNone;
         TRAP( err, iSkinSrv.AddWallpaperL( aFileName, iRect.Size() ) );
-        if( err )
+        if( err != KErrNone )
             {
-            // image is corrupted or format is not supported
-            return KErrCACorruptContent;
+            return err;
             }
+        
         TRAP( err, iBgImage = iSkinSrv.WallpaperImageL( aFileName ) );
         if( err )
             {
@@ -929,5 +979,29 @@ TInt CXnBackgroundManager::TimerCallback(TAny *aPtr)
     return EFalse;
     }
 
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::DrawStatusPaneMask
+// -----------------------------------------------------------------------------
+//
+void CXnBackgroundManager::DrawStatusPaneMask() const
+    {
+    if( iSpMask )
+        {
+        TSize bmpSize = iSpMask->SizeInPixels();
+        TRect spRect( 0, 0, bmpSize.iWidth, bmpSize.iHeight );
+        SystemGc().DrawBitmap( spRect, iSpMask );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnBackgroundManager::OOMSysHandler
+// -----------------------------------------------------------------------------
+//
+CXnOomSysHandler& CXnBackgroundManager::OomSysHandler() const
+    {
+    __ASSERT_DEBUG( iOomSysHandler , User::Panic( _L("xnbackgroundmanager"), 0 ) );
+
+    return *iOomSysHandler;
+    }
 
 //  End of File

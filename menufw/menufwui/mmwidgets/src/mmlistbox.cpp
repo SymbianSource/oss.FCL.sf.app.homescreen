@@ -48,18 +48,18 @@
 // -----------------------------------------------------------------------------
 //
 CMmListBox::CMmListBox() : AKNDOUBLELISTBOXNAME(R_LIST_PANE_LINES_AB_COLUMN)
-	{
-	// No implementation required
-	}
+  {
+  // No implementation required
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 CMmListBox::~CMmListBox()
-	{
-	delete iRedrawTimer;
-	}
+  {
+  delete iRedrawTimer;
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -67,30 +67,30 @@ CMmListBox::~CMmListBox()
 //
 CMmListBox* CMmListBox::NewLC( const CCoeControl* aParent, TInt aFlags,
     CMmTemplateLibrary* aTemplateLibrary )
-	{
-	CMmListBox* self = new (ELeave)CMmListBox();
-	CleanupStack::PushL(self);
-	self->ConstructL( aParent, aFlags, aTemplateLibrary );
-	return self;
-	}
+  {
+  CMmListBox* self = new (ELeave)CMmListBox();
+  CleanupStack::PushL(self);
+  self->ConstructL( aParent, aFlags, aTemplateLibrary );
+  return self;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetListFlag( TInt aFlag )
-	{
-	iListBoxFlags = iListBoxFlags | aFlag;
-	}
+  {
+  iListBoxFlags = iListBoxFlags | aFlag;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::ClearListFlag( TInt aFlag )
-	{
-	iListBoxFlags = iListBoxFlags & !aFlag;
-	}
+  {
+  iListBoxFlags = iListBoxFlags & !aFlag;
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -98,11 +98,11 @@ void CMmListBox::ClearListFlag( TInt aFlag )
 //
 CMmListBox* CMmListBox::NewL( const CCoeControl* aParent, TInt aFlags,
     CMmTemplateLibrary* aTemplateLibrary )
-	{
-	CMmListBox* self = CMmListBox::NewLC( aParent, aFlags, aTemplateLibrary );
-	CleanupStack::Pop( self );
-	return self;
-	}
+  {
+  CMmListBox* self = CMmListBox::NewLC( aParent, aFlags, aTemplateLibrary );
+  CleanupStack::Pop( self );
+  return self;
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -110,9 +110,9 @@ CMmListBox* CMmListBox::NewL( const CCoeControl* aParent, TInt aFlags,
 //
 void CMmListBox::ConstructL( const CCoeControl* aParent, TInt aFlags,
     CMmTemplateLibrary* aTemplateLibrary )
-	{
-	iDisableChildComponentDrawing = EFalse;
-	iModel = iMmModel = CMmListBoxModel::NewL();
+  {
+  iDisableChildComponentDrawing = EFalse;
+  iModel = iMmModel = CMmListBoxModel::NewL();
     CreateItemDrawerL( aTemplateLibrary );
 
     EnableExtendedDrawingL();
@@ -121,7 +121,7 @@ void CMmListBox::ConstructL( const CCoeControl* aParent, TInt aFlags,
     CEikListBox::ConstructL(aParent,aFlags);
     iMmDrawer->SetView( this );
     iRedrawTimer = CPeriodic::NewL( EPriorityRealTime );
-	}
+  }
 
 // -----------------------------------------------------------------------------
 // Clearing ELeftDownInViewRect flag before invoking the base class
@@ -148,14 +148,14 @@ void CMmListBox::HandlePointerEventInEditModeL(
             iListBoxFlags &= ~ELeftDownInViewRect;
             }
         }
-    
+
     TInt itemUnderPointerIndex = KErrNotFound;
     if ( aPointerEvent.iType == TPointerEvent::EButton1Up ||
             aPointerEvent.iType == TPointerEvent::EButton1Down )
         {
         TBool highlightWasVisible = parent->IsHighlightVisible();
         CEikFormattedCellListBoxTypedef::HandlePointerEventL( aPointerEvent );
-        // Tricky: Do not allow the base class implementation of HandlePointerEventL 
+        // Tricky: Do not allow the base class implementation of HandlePointerEventL
         //         to remove the highlight on EButton1Up event when context menu
         //         is displayed for an item
         if ( aPointerEvent.iType == TPointerEvent::EButton1Up &&
@@ -237,50 +237,50 @@ TBool CMmListBox::IsPointerInBottomScrollingThreshold(
 TInt CMmListBox::ScrollIfNeeded( const TPointerEvent& aPointerEvent )
     {
     TInt nextScrollDelay = 0;
-    
-	TBool readyForScrolling =
-			iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
-					&& iMmDrawer->GetFloatingItemCount() != 0;
-	
-	if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
-		{
-		// scroll up by one row
-		TInt newCurrentItemIndex = CurrentItemIndex() - 1;
 
-		if ( newCurrentItemIndex >= 0 )
-			{
-			nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-				Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
-			if (readyForScrolling)
-				{
-				View()->VScrollTo( View()->CalcNewTopItemIndexSoItemIsVisible(
+  TBool readyForScrolling =
+      iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
+          && iMmDrawer->GetFloatingItemCount() != 0;
+
+  if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
+    {
+    // scroll up by one row
+    TInt newCurrentItemIndex = CurrentItemIndex() - 1;
+
+    if ( newCurrentItemIndex >= 0 )
+      {
+      nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+        Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
+      if (readyForScrolling)
+        {
+        View()->VScrollTo( View()->CalcNewTopItemIndexSoItemIsVisible(
                         newCurrentItemIndex ) );
                 View()->SetCurrentItemIndex( newCurrentItemIndex );
                 UpdateScrollBarThumbs();
-				}
-			}
-		}
-	else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
-		{
-		// scroll down by one row
-		TInt lastItemIndex = iModel->NumberOfItems() - 1;
-		TInt newCurrentItemIndex = CurrentItemIndex() + 1;
-		
-		
-		if ( newCurrentItemIndex <= lastItemIndex )
-			{
-			nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-				Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
+        }
+      }
+    }
+  else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
+    {
+    // scroll down by one row
+    TInt lastItemIndex = iModel->NumberOfItems() - 1;
+    TInt newCurrentItemIndex = CurrentItemIndex() + 1;
 
-			if (readyForScrolling)
-				{
-				View()->VScrollTo( View()->CalcNewTopItemIndexSoItemIsVisible(
-						newCurrentItemIndex ) );
-				View()->SetCurrentItemIndex( newCurrentItemIndex );
+
+    if ( newCurrentItemIndex <= lastItemIndex )
+      {
+      nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+        Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
+
+      if (readyForScrolling)
+        {
+        View()->VScrollTo( View()->CalcNewTopItemIndexSoItemIsVisible(
+            newCurrentItemIndex ) );
+        View()->SetCurrentItemIndex( newCurrentItemIndex );
                 UpdateScrollBarThumbs();
-				}
-			}
-		}
+        }
+      }
+    }
 
     return nextScrollDelay;
     }
@@ -308,14 +308,9 @@ void CMmListBox::HandlePointerEventL(const TPointerEvent& aPointerEvent)
         HandlePointerEventInEditModeL( aPointerEvent );
         }
     else
-    	{
+      {
         CEikFormattedCellListBoxTypedef::HandlePointerEventL( aPointerEvent );
-    	}
-
-    if ( iMmDrawer->GetAnimator()->IsActive() )
-    	{
-    	iMmDrawer->GetAnimator()->CancelNextRedrawL();
-    	}
+      }
 
     }
 
@@ -383,7 +378,7 @@ void CMmListBox::RedrawScrollbarBackground() const
 //
 // -----------------------------------------------------------------------------
 //
-void CMmListBox::ProcessScrollEventL( CEikScrollBar* aScrollBar, 
+void CMmListBox::ProcessScrollEventL( CEikScrollBar* aScrollBar,
             TEikScrollEvent aEventType )
     {
     CEikFormattedCellListBoxTypedef::HandleScrollEventL(
@@ -403,7 +398,7 @@ void CMmListBox::HandleRedrawTimerEventL()
         }
     iSkippedScrollbarEventsCount = 0;
     }
-    
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -434,32 +429,32 @@ TKeyResponse CMmListBox::OfferKeyEventL(
                + View()->ItemSize( currentItemIndex ).iHeight;
 
     if ( currentItemIndex == BottomItemIndex()
-    		&& currentItemIndex != previousItemIndex
-    		&& itemY > View()->ViewRect().iBr.iY )
-    	{
-    	if( aType == EEventKey )
-    		{
+        && currentItemIndex != previousItemIndex
+        && itemY > View()->ViewRect().iBr.iY )
+      {
+      if( aType == EEventKey )
+        {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-    		MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(
-    		    View()->ItemDrawer()->Gc() );
-    		TBool effects = transApi && !transApi->EffectsDisabled();
-    		if ( effects )
-    			{
-    			transApi->SetMoveType( MAknListBoxTfxInternal::EListScrollDown );
-    			}
+        MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(
+            View()->ItemDrawer()->Gc() );
+        TBool effects = transApi && !transApi->EffectsDisabled();
+        if ( effects )
+          {
+          transApi->SetMoveType( MAknListBoxTfxInternal::EListScrollDown );
+          }
 #endif
-			iView->VScrollTo(
-				iView->CalcNewTopItemIndexSoItemIsVisible( currentItemIndex ) );
+      iView->VScrollTo(
+        iView->CalcNewTopItemIndexSoItemIsVisible( currentItemIndex ) );
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-			if ( effects )
-				{
-				transApi->Draw( Rect() );
-				}
+      if ( effects )
+        {
+        transApi->Draw( Rect() );
+        }
 #endif
-			}
-    	SetCurrentItemIndex( currentItemIndex );
-    	}
+      }
+      SetCurrentItemIndex( currentItemIndex );
+      }
 
     RedrawIfNecessary( itemIndex, CurrentItemIndex());
     return ret;
@@ -508,13 +503,13 @@ TBool CMmListBox::RedrawIfNecessary( TInt aPreviousCurrent, TInt aCurrent )
         if ( differenceIndex == 1 )
             {
             if( sizeAllBefore != sizeAllAfter )
-            	{
+              {
                 redrawIndex = Min( aPreviousCurrent, aCurrent );
-            	}
+              }
             else
-            	{
-            	return redrawConsumed;
-            	}
+              {
+              return redrawConsumed;
+              }
             }
         else if ( differenceIndex > 1 && sizeAllBefore == sizeAllAfter  )
             {
@@ -533,14 +528,14 @@ TBool CMmListBox::RedrawIfNecessary( TInt aPreviousCurrent, TInt aCurrent )
             lastPotentialItemIndex = iView->BottomItemIndex();
 
         if ( aPreviousCurrent < TopItemIndex() )
-        	{
-        	lastPotentialItemIndex = BottomItemIndex() ;
-        	}
+          {
+          lastPotentialItemIndex = BottomItemIndex() ;
+          }
         else if ( BottomItemIndex() < aPreviousCurrent )
-        	{
-        	lastPotentialItemIndex = BottomItemIndex() + 1;
-        	}
-        
+          {
+          lastPotentialItemIndex = BottomItemIndex() + 1;
+          }
+
         while ( redrawIndex < lastPotentialItemIndex +1 )
             {
             view->DrawSingleItem( redrawIndex++ );
@@ -570,22 +565,22 @@ void CMmListBox::CreateItemDrawerL( CMmTemplateLibrary* aTemplateLibrary )
 // -----------------------------------------------------------------------------
 //
 CMmListBoxModel* CMmListBox::MmModel()
-	{
-	return iMmModel;
-	}
+  {
+  return iMmModel;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetMmModel( CMmListBoxModel* aMmModel )
-	{
-	if ( iMmModel != aMmModel )
-		{
-		delete iMmModel;
-		iMmModel = aMmModel;
-		}
-	}
+  {
+  if ( iMmModel != aMmModel )
+    {
+    delete iMmModel;
+    iMmModel = aMmModel;
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -610,45 +605,45 @@ TInt CMmListBox::AdjustRectHeightToWholeNumberOfItems(TRect& /*aRect*/) const
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetItemDrawerAndViewBgContext (CAknsBasicBackgroundControlContext * aBgContext)
-	{
-	iMmDrawer->SetBgContext (aBgContext);
-	}
+  {
+  iMmDrawer->SetBgContext (aBgContext);
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TBool CMmListBox::HandleScrollbarVisibilityChangeL()
-	{
-	TBool ret = EFalse;
-	if ( AllItemsFitInViewRect() )
-		{
-		if ( ScrollBarFrame()->VerticalScrollBar()->IsVisible()
+  {
+  TBool ret = EFalse;
+  if ( AllItemsFitInViewRect() )
+    {
+    if ( ScrollBarFrame()->VerticalScrollBar()->IsVisible()
             || iMmDrawer->TemplateLibrary()->GetScrollbarVisibility() )
-			{
-			ScrollBarFrame()->VerticalScrollBar()->MakeVisible( EFalse );
-			iMmDrawer->SetScrollbarVisibilityL( EFalse );
+      {
+      ScrollBarFrame()->VerticalScrollBar()->MakeVisible( EFalse );
+      iMmDrawer->SetScrollbarVisibilityL( EFalse );
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-			MAknListBoxTfxInternal *trans = CAknListLoader::TfxApiInternal( ItemDrawer()->Gc() );
-				if ( trans )
-					{
-					trans->Remove( MAknListBoxTfxInternal::EListEverything );
-					}
+      MAknListBoxTfxInternal *trans = CAknListLoader::TfxApiInternal( ItemDrawer()->Gc() );
+        if ( trans )
+          {
+          trans->Remove( MAknListBoxTfxInternal::EListEverything );
+          }
 #endif
 
-			ret = ETrue; //redraw is needed
-			}
-		}
-	else if ( !ScrollBarFrame()->VerticalScrollBar()->IsVisible()
-	          || !iMmDrawer->TemplateLibrary()->GetScrollbarVisibility() )
-		{
-		ScrollBarFrame()->VerticalScrollBar()->MakeVisible( ETrue );
-		iMmDrawer->SetScrollbarVisibilityL( ETrue );
-		ret = ETrue; //redraw is needed
-		}
-	return ret;
-	}
+      ret = ETrue; //redraw is needed
+      }
+    }
+  else if ( !ScrollBarFrame()->VerticalScrollBar()->IsVisible()
+            || !iMmDrawer->TemplateLibrary()->GetScrollbarVisibility() )
+    {
+    ScrollBarFrame()->VerticalScrollBar()->MakeVisible( ETrue );
+    iMmDrawer->SetScrollbarVisibilityL( ETrue );
+    ret = ETrue; //redraw is needed
+    }
+  return ret;
+  }
 
 
 // -----------------------------------------------------------------------------
@@ -656,23 +651,23 @@ TBool CMmListBox::HandleScrollbarVisibilityChangeL()
 // -----------------------------------------------------------------------------
 //
 TBool CMmListBox::AllItemsFitInViewRect()
-	{
-	CMmListBoxView* view = static_cast< CMmListBoxView* >(iView);
-	TInt totalHeight = view->GetTotalHeight( view->TopItemIndex(), view->BottomItemIndex());
-	if ( view->TopItemIndex() == 0 && iMmModel->NumberOfItems() <= view->BottomItemIndex() + 1
-	        && totalHeight <= iView->ViewRect().Height() )
-		{
-		return ETrue;
-		}
-	else
-		{
-		return EFalse;
-		}
-	}
+  {
+  CMmListBoxView* view = static_cast< CMmListBoxView* >(iView);
+  TInt totalHeight = view->GetTotalHeight( view->TopItemIndex(), view->BottomItemIndex());
+  if ( view->TopItemIndex() == 0 && iMmModel->NumberOfItems() <= view->BottomItemIndex() + 1
+          && totalHeight <= iView->ViewRect().Height() )
+    {
+    return ETrue;
+    }
+  else
+    {
+    return EFalse;
+    }
+  }
 
 /**
  * Helper class whose only purpose is to ensure that
- * ScrollToItem method will be always re-enabled. 
+ * ScrollToItem method will be always re-enabled.
  */
 struct TScrollToItemEnabler
     {
@@ -685,77 +680,77 @@ struct TScrollToItemEnabler
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::UpdateScrollBarsL()
-	{
-	TBool redrawNeeded = HandleScrollbarVisibilityChangeL();
-	if (ScrollBarFrame()->VerticalScrollBar()->IsVisible())
-		{
-		CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
-		view->DisableScrollToItem( ETrue );
-		TScrollToItemEnabler reverter = { view };
-		CleanupClosePushL( reverter );
-		CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
-		CleanupStack::PopAndDestroy( &reverter );
-		}
-	iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
+  {
+  TBool redrawNeeded = HandleScrollbarVisibilityChangeL();
+  if (ScrollBarFrame()->VerticalScrollBar()->IsVisible())
+    {
+    CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
+    view->DisableScrollToItem( ETrue );
+    TScrollToItemEnabler reverter = { view };
+    CleanupClosePushL( reverter );
+    CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
+    CleanupStack::PopAndDestroy( &reverter );
+    }
+  iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
         ScrollBarFrame()->VerticalScrollBar()->Rect().Width() );
-	FixViewForMirroredLayout();
-	if ( redrawNeeded )
-		{
-		DrawNow();
-		}
-	}
+  FixViewForMirroredLayout();
+  if ( redrawNeeded )
+    {
+    DrawNow();
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::UpdateScrollBarsNoRedrawL()
-	{
-	HandleScrollbarVisibilityChangeL();
-	if ( ScrollBarFrame()->VerticalScrollBar()->IsVisible() )
-		{
-		CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
-		view->DisableScrollToItem( ETrue );
-		TScrollToItemEnabler reverter = { view };
-		CleanupClosePushL( reverter );
-		CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
-		CleanupStack::PopAndDestroy( &reverter );
-		iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
-		        ScrollBarFrame()->VerticalScrollBar()->Rect().Width() );
-		}
-	}
+  {
+  HandleScrollbarVisibilityChangeL();
+  if ( ScrollBarFrame()->VerticalScrollBar()->IsVisible() )
+    {
+    CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
+    view->DisableScrollToItem( ETrue );
+    TScrollToItemEnabler reverter = { view };
+    CleanupClosePushL( reverter );
+    CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
+    CleanupStack::PopAndDestroy( &reverter );
+    iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
+            ScrollBarFrame()->VerticalScrollBar()->Rect().Width() );
+    }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetMarqueeAdapter( CMmMarqueeAdapter* aAdapter )
-	{
-	iMarqueeAdapter = aAdapter;
-	iMarqueeAdapter->SetControl( const_cast< CMmListBox *>(this) );
-	}
+  {
+  iMarqueeAdapter = aAdapter;
+  iMarqueeAdapter->SetControl( const_cast< CMmListBox *>(this) );
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetMarqueeDrawing( TBool aIsMarqueeBeingDrawn )
-	{
-	iMmDrawer->SetMarqueeDrawing( aIsMarqueeBeingDrawn );
-	}
+  {
+  iMmDrawer->SetMarqueeDrawing( aIsMarqueeBeingDrawn );
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::HandleItemRemovalL()
-	{
-	CEikFormattedCellListBoxTypedef::HandleItemRemovalL();
+  {
+  CEikFormattedCellListBoxTypedef::HandleItemRemovalL();
     DrawNow();
     //avkon does not redraw the items for listbox when item is
     //removed. This needs to be forced here.
     UpdateScrollBarsL();
-	}
+  }
 
 // -----------------------------------------------------------------------------
 // If a parent to the supplied control has its Gc set, this function will find
@@ -819,7 +814,7 @@ void CMmListBox::Draw(const TRect& aRect) const
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
     MAknListBoxTfxInternal *transApi = CAknListLoader::TfxApiInternal( gc );
-    
+
     if ( transApi )
         {
         transApi->SetListType( MAknListBoxTfxInternal::EListBoxTypeMainPane );
@@ -842,7 +837,7 @@ void CMmListBox::Draw(const TRect& aRect) const
             {
             TRect clientRect;
             this->RestoreClientRectFromViewRect(clientRect);
-#ifdef RD_UI_TRANSITION_EFFECTS_LIST           
+#ifdef RD_UI_TRANSITION_EFFECTS_LIST
             if ( transApi )
                 {
                 transApi->StartDrawing( MAknListBoxTfxInternal::EListView );
@@ -883,7 +878,7 @@ void CMmListBox::Draw(const TRect& aRect) const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void CMmListBox::DrawView()
     {
     iDisableChildComponentDrawing = ETrue;
@@ -896,41 +891,41 @@ void CMmListBox::DrawView()
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetVerticalItemOffset( TInt aOffset )
-	{
-	static_cast<CMmListBoxView*>( View() )->SetItemOffsetInPixels( aOffset );
-	UpdateScrollBarThumbs();
-	}
+  {
+  static_cast<CMmListBoxView*>( View() )->SetItemOffsetInPixels( aOffset );
+  UpdateScrollBarThumbs();
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmListBox::VerticalItemOffset() const
-	{
-	return static_cast<CMmListBoxView*>( View() )->VerticalItemOffset();
-	}
+  {
+  return static_cast<CMmListBoxView*>( View() )->VerticalItemOffset();
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::SetItemHeight( TInt aItemHeight )
-	{
-	if ( aItemHeight != iItemHeight )
-	    {
-	    iItemHeight = aItemHeight;
-	    TRAP_IGNORE( UpdateScrollBarsNoRedrawL() );
-	    }
-	}
+  {
+  if ( aItemHeight != iItemHeight )
+      {
+      iItemHeight = aItemHeight;
+      TRAP_IGNORE( UpdateScrollBarsNoRedrawL() );
+      }
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::UpdateScrollBarThumbs()
-	{
-	CEikFormattedCellListBox::UpdateScrollBarThumbs();
-	}
+  {
+  CEikFormattedCellListBox::UpdateScrollBarThumbs();
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -940,9 +935,9 @@ TInt CMmListBox::CountComponentControls() const
     {
     TInt componentControls(0);
     if ( !iDisableChildComponentDrawing )
-		{
+    {
         componentControls = CEikFormattedCellListBoxTypedef::CountComponentControls();
-    	}
+      }
     return componentControls;
     }
 // -----------------------------------------------------------------------------
@@ -958,7 +953,7 @@ void CMmListBox::SetDisableChildComponentDrawing( TBool aDisable )
 //
 // -----------------------------------------------------------------------------
 //
-void CMmListBox::HandleScrollEventL( CEikScrollBar* aScrollBar, 
+void CMmListBox::HandleScrollEventL( CEikScrollBar* aScrollBar,
             TEikScrollEvent aEventType )
     {
     if ( aEventType == EEikScrollThumbDragVert && !iScrollbarThumbIsBeingDragged )

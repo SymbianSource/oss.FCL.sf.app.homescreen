@@ -297,3 +297,22 @@
 // r: TB9.2
 //
 #define qtn_hs_corrupted_image_note "Unable to select. Image corrupted or format not supported."
+
+// d: Shown when user select too large image file as a wallpaper 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_too_big_image_note "Unable to select. Image size is too large."
+
+// d: Show when default configuration is loaded (critical error case)
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_error_content_removed "Critical error occurred. Content removed."
+
+// d: Wait/progress note text that is shown when backup or restore process is ongoing.
+// l: popup_note_wait_window
+// w:
+// r: TB9.2
+#define qtn_hs_backup_use_prevented  "Home screen is not in use during backup or restore operation. Wait to finish."

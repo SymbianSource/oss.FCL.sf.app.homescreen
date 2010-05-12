@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxItemDrawer
-*  Version     : %version: MM_38.1.16 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_38.1.17 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -236,6 +236,14 @@ public:
      * @param aRedraw Should background be redrawn.
      */
     void SetRedrawItemBackground( TBool aRedraw );
+
+    /**
+     * Sets condition if separator line should be drawn.
+     *
+     * @since S60 v3.0
+     * @param aRedraw Should separator line be drawn.
+     */
+    void SetDrawSeparatorLines( TBool aDraw );
 
     /**
      * Checks if item background redrawing is enabled.
@@ -470,12 +478,12 @@ public:
 	void SetHighlightShown( TBool aDrawn );
 
     /**
-     * Draws background and separator lines.
+     * Draws background.
      *
      * @since S60 v3.0
      * @param aItemTextRect Item rectangle.
      */
-    void DrawBackgroundAndSeparatorLines( const TRect& aItemTextRect ) const;
+    void DrawBackground( const TRect& aItemTextRect ) const;
 
 protected:
     /**
@@ -798,6 +806,11 @@ private: // Data
      * Redraw background flag.
      */
     TBool iRedrawBackground;
+
+    /**
+     * Draw separators flag.
+     */
+    TBool iDrawSeparatorLines;
 
     /**
      * Ratio of zooming animation.

@@ -39,6 +39,7 @@ class CXnViewManager;
 class CXnViewData;
 class CRepository;
 class CXnBackgroundManager;
+class CXnOomSysHandler;
 
 namespace hspswrapper
     {
@@ -203,7 +204,9 @@ private:
     TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
 
     TInt ViewListL( CHsContentInfoArray& aArray );
-    
+
+    TInt ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
+
     TInt AppListL( CHsContentInfoArray& aArray );
     
     TInt AddWidgetL( CHsContentInfo& aInfo );
@@ -238,20 +241,21 @@ private:
 private:
     // new functions    
     
-    void TemplatedWidgetsL( RPointerArray< CHsContentInfo >& aWidgets );
-
-    void HSPSPluginsL( RPointerArray< CHsContentInfo >& aWidgets,
-        const TDesC8& aType );
-
-    CPublisherInfo* PublisherInfoL( const CHsContentInfo& aContentInfo );
+      CPublisherInfo* PublisherInfoL( const CHsContentInfo& aContentInfo );
 
     TInt TemplateWidgetCanBeAddedRemovedL( CHsContentInfo& aContentInfo );
     TInt NonTemplateWidgetCanBeAddedRemovedL( CHsContentInfo& aContentInfo );
     
     TBool IsCurrentViewFull();
-    void FilterWidgetListL( CHsContentInfoArray& aContentInfoArray,
+    
+    /**
+     * Filters plugins from the list and checks whether the plugins can be added or removed.
+     */
+    void FilterPluginsL( CHsContentInfoArray& aContentInfoArray,
         TBool aIgnoreViewFull );
+    
     void FilterViewListL( CHsContentInfoArray& aContentInfoArray ); 
+    CXnOomSysHandler& OomSysHandler() const;
     
     /**
      * Notifies the MHsContentControl and the MHsContentControlUi if widget list was changed.
@@ -268,6 +272,44 @@ private:
      */
     CHsContentInfo* CreateContentInfoLC( CXnPluginData& aPlugin, 
         RPointerArray< CHsContentInfo >& aInfos );
+    
+    /**
+     * Appends plugin configurations to the content info array.
+     */
+    void AppendPluginsL(
+            RPointerArray< hspswrapper::CPluginInfo > aPlugins,
+            RPointerArray< CHsContentInfo >& aWidgets );
+    
+    /**
+     * Resets runtime cache.
+     */
+    void ResetCache();
+    
+    /**
+     * Retrieves native application configuration plugins from HSPS
+     */
+    void HspsApplicationPluginsL( RPointerArray< CHsContentInfo >& aWidgets );
+    
+    /**
+     * Retrieves native view configuration plugins from HSPS
+     */
+    void HspsViewPluginsL( RPointerArray< CHsContentInfo >& aWidgets );
+           
+    /**
+     * Retrieves widget and template configuration plugins from HSPS
+     */
+    void HspsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets );        
+    void DoHspsWidgetPluginsL();
+    
+    /**
+     * Retrieves publishers from CPS and them with the HSPS's template plugins
+     */
+    void CpsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets );
+
+    /**
+     * Checks whether the view is full
+     */
+    TBool IsViewFull( CXnViewData& aViewData );
     
 private:
     // from MXnViewObserver    
@@ -320,6 +362,9 @@ private:
     TBool iWidgetsVisibilityState;    
     /** Central repository , to choose plugin, owned*/
     CRepository* iRepository;
+	/** Plugins cache, owned */
+    RPointerArray< hspswrapper::CPluginInfo > iPluginsCache;
+    CXnOomSysHandler* iOomSysHandler;
     };
 
 #endif // C_XNEDITOR_H

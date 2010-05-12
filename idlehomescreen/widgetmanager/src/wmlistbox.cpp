@@ -146,26 +146,24 @@ CWmListItemDrawer::~CWmListItemDrawer()
 	}
 
 // ---------------------------------------------------------
-// CWmListItemDrawer::ResizeDefaultBitmaps
+// CWmListItemDrawer::UpdateItemHeight
 // ---------------------------------------------------------
 //
-void CWmListItemDrawer::ResizeDefaultBitmaps()
+void CWmListItemDrawer::UpdateItemHeight()
     {
-	TAknWindowLineLayout logoPane = 
-	          AknLayoutScalable_Apps::listrow_wgtman_pane_g1().LayoutLine();
-
-    TAknLayoutRect layoutRect;
-    TRect rect = TRect( ItemCellSize() );
-    layoutRect.LayoutRect( rect, logoPane );
-    
-    // RESIZE DEFAULT LOGO BITMAPS ACCORDING TO LAYOUT
-    TSize size = layoutRect.Rect().Size();
-    AknIconUtils::SetSize( 
-        iDefaultLogoImage, size, EAspectRatioPreserved );
-    AknIconUtils::SetSize( 
-        iDefaultLogoImageMask, size, EAspectRatioPreserved );
+    // sets item height according to layout
+    TAknWindowLineLayout listPane = AknLayoutScalable_Apps
+        ::list_wgtman_pane().LayoutLine();
+    TAknLayoutRect listPaneRect;
+    listPaneRect.LayoutRect( iListBox->Rect(), listPane );
+    TAknWindowLineLayout listRowPane = AknLayoutScalable_Apps
+        ::listrow_wgtman_pane().LayoutLine();
+    TAknLayoutRect listRowPaneRect;
+    listRowPaneRect.LayoutRect( listPaneRect.Rect(), listRowPane );
+    TRAP_IGNORE( iListBox->SetItemHeightL( listRowPaneRect.Rect().Height() ); );
+    iListBox->View()->ItemDrawer()->SetItemCellSize( listRowPaneRect.Rect().Size() );
     }
-	
+
 // ---------------------------------------------------------
 // CWmListItemDrawer::DrawItem
 // ---------------------------------------------------------
@@ -201,21 +199,38 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
                                   KAknsIIDQsnFrList,
                                   KAknsIIDQsnFrListCenter );
         }
-    
     // DRAW LOGO
     CFbsBitmap* bitmap = const_cast<CFbsBitmap*>(wData.LogoImage());
     CFbsBitmap* mask = const_cast<CFbsBitmap*>(wData.LogoImageMask());
     TAknLayoutRect logoLayout;
     logoLayout.LayoutRect( itemRect,
              AknLayoutScalable_Apps::listrow_wgtman_pane_g1().LayoutLine() );
-
-    if ( !bitmap && !wData.IsPrepairingLogo() )
+    if ( ( !bitmap || !mask ) && iDefaultLogoImage && iDefaultLogoImageMask )
         {
-        logoLayout.DrawImage( gc, iDefaultLogoImage, iDefaultLogoImageMask );
+        // real logo missing use default
+        TSize size = logoLayout.Rect().Size();
+        if ( iDefaultLogoImage->SizeInPixels() != size )
+            {
+            // Resize default icons only when they are really needed
+            AknIconUtils::SetSize( 
+                iDefaultLogoImage, size, EAspectRatioPreserved );
+            AknIconUtils::SetSize( 
+                iDefaultLogoImageMask, size, EAspectRatioPreserved );
+            }
+    
+        gc.DrawBitmapMasked( logoLayout.Rect(), 
+                iDefaultLogoImage, 
+                TRect(TPoint(0, 0), iDefaultLogoImage->SizeInPixels()), 
+                iDefaultLogoImageMask, 
+                EFalse );
         }
     else if( bitmap && mask )
         {
-        logoLayout.DrawImage( gc, bitmap, mask );
+        gc.DrawBitmapMasked( logoLayout.Rect(), 
+                bitmap, 
+                TRect(TPoint(0, 0), bitmap->SizeInPixels()), 
+                mask, 
+                ETrue );
         }
 
     // DRAW NAME
@@ -279,15 +294,6 @@ const CFbsBitmap* CWmListItemDrawer::DefaultLogoImage()
 const CFbsBitmap* CWmListItemDrawer::DefaultLogoMask()
     {
     return iDefaultLogoImageMask;
-    }
-
-// ---------------------------------------------------------
-// CWmListItemDrawer::HandleSkinChanged
-// ---------------------------------------------------------
-//
-void CWmListItemDrawer::HandleSkinChanged()
-    {
-    ResizeDefaultBitmaps();
     }
 
 // ---------------------------------------------------------
@@ -471,21 +477,7 @@ void CWmListBox::HandleLayoutChanged()
 	iLogoSize = LogoSize();
     for ( TInt i=0; i<iVisibleWidgetArray.Count(); i++)
         {
-        iVisibleWidgetArray[i]->ReCreateLogo( iLogoSize );
-        }
-    }
-
-// ---------------------------------------------------------
-// CWmListBox::HandleSkinChanged
-// ---------------------------------------------------------
-//
-void CWmListBox::HandleSkinChanged()
-    {
-    CWmListItemDrawer* itemDrawer = 
-                        static_cast <CWmListItemDrawer*>( iItemDrawer );
-    if ( itemDrawer )
-        {
-        itemDrawer->HandleSkinChanged();
+        iVisibleWidgetArray[i]->UpdateLogo( iLogoSize, EFalse );
         }
     }
 
@@ -571,7 +563,7 @@ void CWmListBox::SizeChanged()
                     static_cast <CWmListItemDrawer*>( iItemDrawer );
     if ( itemDrawer )
         {
-        return itemDrawer->ResizeDefaultBitmaps();
+        itemDrawer->UpdateItemHeight();
         }
     }
 

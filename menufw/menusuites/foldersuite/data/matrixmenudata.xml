@@ -12,8 +12,8 @@
                     mask_id="16399" 
                     icon_skin_minor_id="0x1ead" 
                     icon_skin_major_id="0x101F86E3"> -->
-            <!--Calendar-->
-            <menu:application uid="0x10005901"/>
+        <!--Calendar-->
+        <menu:application uid="0x10005901"/>
         <!-- </menu:folder> -->
         <!--Contacts application-->
         <menu:application uid="0x101F4CCE"/>
@@ -37,39 +37,15 @@
         </menu:folder>
         <!--Messaging application-->
         <menu:application uid="0x100058C5"/>
-        <!--Photos suite-->
-        <menu:suite title_name="&qtn_apps_photos_title;" 
-                    long_name="&qtn_apps_photos_list;" 
-                    short_name="&qtn_apps_photos_grid;" 
-                    suite_name="photossuite"
-                    icon_file="z:\resource\apps\matrixmenudata.mif" 
-                    icon_id="16398" 
-                    mask_id="16399" 
-                    icon_skin_minor_id="0x217c" 
-                    icon_skin_major_id="0x101F86E3" />
-        <!-- application used in photos suite should be hidden from menu -->
-        <menu:folder flags="hidden">
-            <menu:application uid="0x200009EE"/> <!--Photos-->
-            <menu:application uid="0x2000BB53"/> <!--Share Online-->
-        </menu:folder>
+        <!--Photos application-->
+        <menu:application uid="0x200009EE"/> 
         <!--Download! application-->                         
         <menu:application uid="0x20007803" />
         <!--Maps application-->
         <menu:application uid="0x20001F63"/>
-        <!--Video & TV suite-->
-        <menu:suite title_name="&qtn_apps_videotv_title;" 
-                    long_name="&qtn_apps_videotv_list;" 
-                    short_name="&qtn_apps_videotv_grid;" 
-                    suite_name="tvvideosuite"
-                    icon_file="z:\resource\apps\matrixmenudata.mif" 
-                    icon_id="16402" 
-                    mask_id="16403" 
-                    icon_skin_minor_id="0x217d" 
-                    icon_skin_major_id="0x101F86E3"/>
-        <!-- application used in video suite should be hidden from menu -->
-        <menu:folder flags="hidden">
-            <menu:application uid="0x102750E2"/> <!--VideoCenter-->
-        </menu:folder>
+      
+        <!--Video & TV-->
+        <menu:application uid="0x200159B2"/>
         <!--Settings/Control Panel-->           
         <menu:application uid="0x100058EC"/>
         <!--Games folder-->
@@ -116,19 +92,26 @@
             <!--Voice recorder-->
             <menu:application uid="0x10282411"/>
             <!--Search application-->
+            <menu:application uid="0x101F4CD5" view="1"/>
+            
         </menu:folder>
-        <menu:folder flags="hidden" long_name="mcsplugin_folder">
+    <menu:folder flags="hidden" long_name="mcsplugin_folder">
           <menu:application uid="0x100058EC"
                             view="0x10207250"
-                            long_name="Connectivity"
-                            presenceicon="SKIN ( 270501603 8586 ): mif ( c:\\data\\Installs\\TemplateData\\templateIcons.mif 16386  16387)"/>
-          
+                            icon_file="aimcsplugin.mif"
+                            icon_id="16394"
+                            mask_id="16395"
+                            long_name="&qtn_apps_connectivity_list;"/>
+                            
           <menu:application uid="0x100058EC"
                             view="0x10283321"
-                            long_name="Installations"/>
+                            icon_file="aimcsplugin.mif"
+                            icon_id="16392"
+                            mask_id="16393" 
+                            long_name="&qtn_apps_installations_list;"/>
 
           <menu:shortcut    uid="0x99999999"
-                            long_name="New message"
+                            long_name="&qtn_apps_newmessage_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16406"
                             mask_id="16407"
@@ -137,7 +120,7 @@
                             param="messaging:msg"/>
                             
           <menu:shortcut    uid="0x99999998"
-                            long_name="Sel. message type"
+                            long_name="&qtn_apps_msgtypeselection_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16388"
                             mask_id="16389"
@@ -146,16 +129,14 @@
                             param="messaging:seltype"/>
                             
           <menu:shortcut    uid="0x99999997"
-                            long_name="New email"
+                            long_name="&qtn_apps_newemail_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16402"
                             mask_id="16403"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
                             param="messaging:email"/>
                             
           <menu:shortcut    uid="0x99999996"
-                            long_name="New SyncML" 
+                            long_name="&qtn_apps_newsyncml_list;" 
                             icon_file="aimcsplugin.mif"
                             icon_id="16390"
                             mask_id="16391"
@@ -164,7 +145,7 @@
                             param="messaging:syncmlmail"/>
                             
           <menu:shortcut    uid="0x99999995"
-                            long_name="New postcard"
+                            long_name="&qtn_apps_newpostcard_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16400"
                             mask_id="16401"
@@ -173,33 +154,15 @@
                             param="messaging:postcard"/>
           
           <menu:shortcut    uid="0x99999994"
-                            long_name="New audio message"
+                            long_name="&qtn_apps_newaudiomsg_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16404"
                             mask_id="16405"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
                             param="messaging:audiomsg"/>
-               
-               <menu:url    uid="0x99999993"
-                            long_name="Google search"
-                            icon_file="aimcsplugin.mif"
-                            icon_id="16386"
-                            mask_id="16387"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
-                            url="www.google.com"/>
-                             
-                <menu:url   uid="0x99999992"
-                            long_name="Nokia OVI"
-                            icon_file="ovi_brand_graphics.mif"
-                            icon_id="16384"
-                            mask_id="16385"
-                            presenceicon="SKIN ( 0x101F86E3 0x1af5 )"
-                            url="www.ovi.com"/>
          
-          <menu:shortcut    uid="0x99999991"
-                            long_name="Undefined"
+          <menu:shortcut    flags="hidden"
+                            uid="0x99999991"
+                            long_name="&qtn_apps_undefined_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16388"
                             mask_id="16389"
@@ -207,12 +170,10 @@
                             icon_skin_major_id="0x101F86E3"/>
                             
           <menu:shortcut    uid="0x99999989"
-                            long_name="Dialed calls"
+                            long_name="&qtn_apps_dialledcalls_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16398"
                             mask_id="16399"
-                            icon_skin_minor_id=""
-                            icon_skin_major_id=""
                             param="logs:dialed"/>
 
           <!-- Menu Application Launcher -->
@@ -223,7 +184,8 @@
           <menu:application uid="0x200104E4"/>
           <!-- Video Suite launcher -->
           <menu:application uid="0x200211FA"/>
-
+          <!-- Conversation application -->
+          <menu:application uid="0x2002A540"/>
         </menu:folder>
     </menu:folder>
 </menu:data>

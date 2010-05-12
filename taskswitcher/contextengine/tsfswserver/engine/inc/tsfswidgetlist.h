@@ -21,12 +21,8 @@
 
 #include <e32base.h>
 #include <widgetregistryclient.h>
-
-_LIT(KWidgetAppName, "widgetlauncher.exe");
-
+                      
 const TUint32 KWidgetAppUidValue = 0x10282822;
-
-const TInt KCloseWidgetCmd(2);
 
 /**
  * class handling the list of running wrt widgets
@@ -42,20 +38,27 @@ public:
     /**
      * Initializes the list that stores widgets.
      * @return   -
-     */        
+     */
     void InitializeWidgetListL();
 
     /**
      * Returns a ref to the list of running widgets.
      */
     const RWidgetInfoArray& RunningWidgets() const { return iRunningWidgets; }
+    
+    /**
+     * Check if widget's uid is recognized as CWRT type.
+     */
+    TBool IsCWRTWidget( TUid aUid );
 
 private:
     /** Constructor */
     CTsFsWidgetList();
     void ResetArrayOfWidgetInfo( RWidgetInfoArray& aWidgetInfoArr );
-    
+
     static void CleanupConnect( TAny* aThis );
+
+    TBool IsValBetween( TInt aMinor, TInt aMajor, TInt aBetween );
 
 private:
     /** Contains list of widgets that are currently running */

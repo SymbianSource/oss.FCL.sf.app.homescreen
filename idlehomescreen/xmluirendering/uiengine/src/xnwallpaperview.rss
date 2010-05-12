@@ -54,4 +54,39 @@ RESOURCE TBUF r_qtn_hs_corrupted_image_note
     buf = qtn_hs_corrupted_image_note; 
     }
 
+// ----------------------------------------------------
+// r_qtn_hs_too_big_image_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_too_big_image_note 
+    {
+    buf = qtn_hs_too_big_image_note;
+    }
+    
+// ----------------------------------------------------
+// r_change_wallpaper_wait_dialog
+//
+// ----------------------------------------------------
+//
+RESOURCE DIALOG r_change_wallpaper_wait_dialog
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_gen_note_processing;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }    
+    
 // End of file

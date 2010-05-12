@@ -24,7 +24,7 @@
  *  Whenever a drag begins HandleDragStartL() is invoked.
  *  When the highlight changes during drag, HandleDragOverL() is invoked.
  *  When item is dropped, HandleDragStopL() is invoked.
- *  The set of the three methods fully notifies the observer about the state 
+ *  The set of the three methods fully notifies the observer about the state
  *  of the drag.
  *
  *  @code
@@ -52,7 +52,7 @@ public:
      * @param aModelItemIndex Index of item that the dragged item hovers over.
      */
     virtual void HandleDragOverL( TInt aModelItemIndex ) = 0;
-    
+
     /**
      * Method is invoked on the observer, when the item is dropped.
      *
@@ -60,7 +60,7 @@ public:
      * @param aModelItemIndex Index of item on which the draging stops.
      */
     virtual void HandleDragStopL( TInt aModelItemIndex ) = 0;
-    
+
     /**
      * Method is invoked on the observer, when the dragged item index changes.
      *
@@ -68,7 +68,17 @@ public:
      * @param aModelItemIndex Index of item on which the draging stops.
      */
     virtual void HandleDraggedIndexUpdatedL( TInt aModelItemIndex ) = 0;
-    
+
+    /**
+     * Method is invoked on the observer, when the move item event is needed.
+     *
+     * @since S60 v5.0
+     * @param aRecipientId Index of item on which the move event invokes.
+     * @param aEventParameters Event parameters.
+     */
+    virtual void HandleTriggerMoveItemL( const TInt aRecipientId,
+                CLiwGenericParamList* aEventParameters) = 0;
+
     };
-    
+
 #endif // M_MMDRAGANDDROPOBSERVER_H

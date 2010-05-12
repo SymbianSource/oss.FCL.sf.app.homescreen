@@ -25,7 +25,6 @@ PRJ_EXPORTS
 // Support for productization and Carbide.Ui customization
 //********************************************************
 ../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/root_2001f482/hsps/manifest.dat
-//../hsps/00/rootconfiguration.xml /epoc32/data/Z/resource/homescreen/root_2001f482/hsps/rootconfiguration.xml
 ../xuikon/00/Root.dat /epoc32/data/Z/resource/homescreen/root_2001f482/xuikon/root_2001f482.dat
 ../xuikon/00/Root.css /epoc32/data/Z/resource/homescreen/root_2001f482/xuikon/root.css
 ../xuikon/00/Root.xml /epoc32/data/Z/resource/homescreen/root_2001f482/xuikon/root.xml
@@ -44,9 +43,6 @@ PRJ_EXPORTS
 
 // Support for S60 builds
 //***********************
-../rom/root_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(root_2001f482_resources.iby)
-../rom/root_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(root_2001f482_customer.iby)
-//../rom/root_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(root_2001f482_variant.iby)
 ../rom/root.iby CORE_APP_LAYER_IBY_EXPORT_PATH(root_2001f482.iby)
 
 

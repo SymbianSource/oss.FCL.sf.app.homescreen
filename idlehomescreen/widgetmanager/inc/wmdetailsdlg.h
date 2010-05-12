@@ -27,6 +27,7 @@
 class CAknMarqueeControl;
 class CEikRichTextEditor;
 class CAknsBasicBackgroundControlContext;
+class CWmImageConverter;
 
 // CLASS DECLARATIONS
 /**
@@ -42,9 +43,10 @@ public:
 	static CWmDetailsDlg* NewL(
 	        const TDesC& aName,
 	        const TDesC& aDescription,
-	        TBool  aCanBeAdded,
-            const CFbsBitmap* aLogoBmp,
-            const CFbsBitmap* aLogoMask );
+	        TBool aCanBeAdded,
+	        const TDesC& aIconStr,
+	        const CFbsBitmap& aDefaultIcon,
+	        const CFbsBitmap& aDefaultIconMask );
 
     /** Destructor. */
     ~CWmDetailsDlg();
@@ -108,8 +110,9 @@ private:
     void ConstructL(
 	        const TDesC& aName,
 	        const TDesC& aDescription,
-            const CFbsBitmap* aLogoBmp,
-            const CFbsBitmap* aLogoMask );
+	        const TDesC& aIconStr,
+	        const CFbsBitmap& aDefaultIcon,
+	        const CFbsBitmap& aDefaultIconMask );
 
 private:
 	
@@ -157,6 +160,11 @@ private:
      * ETrue if widget name needs to be scrolled. 
      */
     TBool               iNeedToScroll;
+    
+    /**
+     *  the image converter utility 
+     */
+    CWmImageConverter*    iImageConverter;
 	};
 
 #endif ___WMDETAILSDLG_H__

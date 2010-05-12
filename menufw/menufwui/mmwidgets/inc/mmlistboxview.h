@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  
-*  Version     : %version: MM_12.1.6 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_12.1.7 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -209,6 +209,13 @@ public:
      * @param aDisable Self-explanatory.
      */
     void DisableScrollToItem( TBool aDisable );
+
+    /**
+     * Gets number of items in model.
+     *
+     * @return
+     */
+    TInt ModelItemsCount();
 
 private:
 

@@ -11,24 +11,25 @@
 *
 * Contributors:
 *
-* Description:   Class to listen SWI uninstall operation.
+* Description:   Class to listen SWI operations (install/uninstall/restore).
 *
 */
+#include <swi/swiutils.h>
+#include <sacls.h> // KSWIUidsCurrentlyBeingProcessed
 
-#include "hscontentcontroluninstallmonitor.h"
-#include <SWInstallerInternalPSKeys.h>
+#include "hscontentcontrolswilistener.h"
 
 // ======== MEMBER FUNCTIONS ========
 
 // ---------------------------------------------------------------------------
-// CHsContentControlUninstallMonitor::NewL()
+// CHsContentControlSwiListener::NewL()
 // ---------------------------------------------------------------------------
 //
-CHsContentControlUninstallMonitor* CHsContentControlUninstallMonitor::NewL( 
-        MHsContentControlUninstallObserver& aObs )
+CHsContentControlSwiListener* CHsContentControlSwiListener::NewL( 
+            MHsContentControlSwiObserver& aObs )
     {
-    CHsContentControlUninstallMonitor* self = 
-        new ( ELeave ) CHsContentControlUninstallMonitor( aObs );
+    CHsContentControlSwiListener* self = 
+                new( ELeave ) CHsContentControlSwiListener( aObs );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -36,51 +37,56 @@ CHsContentControlUninstallMonitor* CHsContentControlUninstallMonitor::NewL(
     }
 
 // ---------------------------------------------------------------------------
-// CHsContentControlUninstallMonitor::~CHsContentControlUninstallMonitor()
+// CHsContentControlSwiListener::~CHsContentControlSwiListener()
 // ---------------------------------------------------------------------------
 //
-CHsContentControlUninstallMonitor::~CHsContentControlUninstallMonitor()
+CHsContentControlSwiListener::~CHsContentControlSwiListener()
     {
     Cancel();
-    iSwUninstallKey.Close();
+    iSwInstallKey.Close();
     }
 
 // ---------------------------------------------------------------------------
-// CHsContentControlUninstallMonitor::DoCancel()
+// CHsContentControlSwiListener::DoCancel()
 // ---------------------------------------------------------------------------
 //
-void CHsContentControlUninstallMonitor::DoCancel()
+void CHsContentControlSwiListener::DoCancel()
     {
     if ( IsActive() )
         {
-        iSwUninstallKey.Cancel();
-        }
+        iSwInstallKey.Cancel();
+        }    
     }
 
 // ---------------------------------------------------------------------------
-// CHsContentControlUninstallMonitor::RunL()
+// CHsContentControlSwiListener::RunL()
 // ---------------------------------------------------------------------------
 //
-void CHsContentControlUninstallMonitor::RunL()
-    {
-    iSwUninstallKey.Subscribe( iStatus );
-    SetActive();
+void CHsContentControlSwiListener::RunL()
+    {    
+    RArray<TUid> uidList;
     
-    TInt value = 0;
-    if( iSwUninstallKey.Get( value ) == KErrNone )
+    // get list of uids being processed.
+    if ( Swi::GetAllUids( uidList ) == KErrNone )
         {
-        TUid uid( KNullUid );
-        uid.iUid = value;
-        iObs.HandleUninstallEvent( uid );
+        iObs.HandleSwiEvent( uidList );
+        uidList.Reset();
         }
+
+    // close array
+    uidList.Close();
+
+    // keep monitoring
+    iSwInstallKey.Subscribe( iStatus );
+    SetActive();
     }
 
 // ---------------------------------------------------------------------------
-// CHsContentControlUninstallMonitor::CHsContentControlUninstallMonitor()
+// CHsContentControlSwiListener::CHsContentControlSwiListener()
 // ---------------------------------------------------------------------------
 //
-CHsContentControlUninstallMonitor::CHsContentControlUninstallMonitor( 
-    MHsContentControlUninstallObserver& aObs )
+CHsContentControlSwiListener::CHsContentControlSwiListener( 
+    MHsContentControlSwiObserver& aObs )
     : CActive( CActive::EPriorityStandard ),
     iObs( aObs )
     {
@@ -88,17 +94,16 @@ CHsContentControlUninstallMonitor::CHsContentControlUninstallMonitor(
     }
 
 // ---------------------------------------------------------------------------
-// CHsContentControlUninstallMonitor::ConstructL()
+// CHsContentControlSwiListener::ConstructL()
 // ---------------------------------------------------------------------------
 //
-void CHsContentControlUninstallMonitor::ConstructL()
+void CHsContentControlSwiListener::ConstructL()
     {
-    if ( KErrNone == iSwUninstallKey.Attach( 
-        KPSUidSWInstallerUiNotification, KSWInstallerUninstallation ) )
+    if ( KErrNone == iSwInstallKey.Attach( 
+        KUidSystemCategory, KSWIUidsCurrentlyBeingProcessed ) )
         {
-        iSwUninstallKey.Subscribe( iStatus );
+        iSwInstallKey.Subscribe( iStatus );
         SetActive();
         }
     }
 
-// End of file

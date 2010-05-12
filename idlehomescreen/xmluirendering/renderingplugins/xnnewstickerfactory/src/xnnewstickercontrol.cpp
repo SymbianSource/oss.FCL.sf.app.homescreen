@@ -174,6 +174,22 @@ const TDesC& CXnNewstickerControl::Title( TInt aIndex ) const
     }
 
 // -----------------------------------------------------------------------------
+// CXnNewstickerControl::LastIndexWithContent
+// -----------------------------------------------------------------------------
+//
+TInt CXnNewstickerControl::LastIndexWithContent()
+    {
+    for( TInt i(iTitleTexts.Count()-1); i>=0; --i )
+        {
+        if ( iTitleTexts[ i ]->Des().Length() > 0 )
+            {
+            return i;
+            }
+        }
+    return KErrNotFound;
+    }
+
+// -----------------------------------------------------------------------------
 // CXnNewstickerControl::ClearTitles
 // -----------------------------------------------------------------------------
 //
@@ -252,22 +268,38 @@ TBool CXnNewstickerControl::SetCurrentTitle( TBool aSetDefault )
     {
     TBool ret( EFalse );
     TInt lastIndex( iTitleTexts.Count() - 1 );
+    TInt lastIndexWithContent = LastIndexWithContent();
     
     if( aSetDefault )
         {
+        // set last index as default
         iCurrentTitleIndex = GetNextTitleWithContent( lastIndex, ETrue );
         }
     else if( iCurrentTitleIndex >= lastIndex )
         {
+        // if iCurrentTitleIndex is in last position start from beginning
         iCurrentTitleIndex = GetNextTitleWithContent( 0 );
         }
     else
         {
-        iCurrentTitleIndex = GetNextTitleWithContent( iCurrentTitleIndex + 1 );
+        if ( iCurrentTitleIndex + 1 > lastIndexWithContent )
+            {
+            // if lastIndexWithContent is creater than next item 
+            // it means all next items are empty strings
+            iCurrentTitleIndex = lastIndexWithContent;
+            }
+        else
+            {
+            // find next index with content
+            iCurrentTitleIndex
+                = GetNextTitleWithContent( iCurrentTitleIndex + 1 );
+            }
         }
     
-    if( iCurrentTitleIndex == lastIndex)
+    if( iCurrentTitleIndex == lastIndexWithContent || 
+            lastIndexWithContent == KErrNotFound )
         {
+        // loop done stop periodic timer.
         ret = ETrue;
         }
     

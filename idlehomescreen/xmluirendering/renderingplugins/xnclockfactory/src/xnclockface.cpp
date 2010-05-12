@@ -113,16 +113,6 @@ void CXnClockFaceDigital::DrawL( CXnClockAdapter& aAdapter, CWindowGc& aGc,
 
     CXnNodePluginIf* date( aAdapter.Date() );
 
-    TInt ampmWidth( 0 );
-
-    if( TLocale().TimeFormat() == ETime12 )
-        {
-        // Measure the full width of the ampm string 
-        ampmWidth = AknBidiTextUtils::MeasureTextBoundsWidth( *ampmFont, ampm, 
-            CFont::TMeasureTextInput::EFVisualOrder );
-        }
-
-
     const TInt deltaHeight( aRect.Height() - clockFont->TextPaneHeight() );
     TInt offset( clockFont->TextPaneTopToBaseline() + deltaHeight / 2 );
 

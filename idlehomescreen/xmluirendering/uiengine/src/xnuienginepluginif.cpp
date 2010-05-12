@@ -28,7 +28,6 @@
 #include "xneditor.h"
 #include "xnviewdata.h"
 #include "xndomnode.h"
-#include "xnhittest.h"
 #include "xnpanic.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -182,15 +181,6 @@ EXPORT_C void TXnUiEnginePluginIf::SetFocusedNode(
     }
 
 // -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::RestorePreviousFocusedNode
-// Forwards the call to the ui engine implementation
-// -----------------------------------------------------------------------------
-//
-EXPORT_C void TXnUiEnginePluginIf::RestorePreviousFocusedNode()
-    {    
-    }
-
-// -----------------------------------------------------------------------------
 // TXnUiEnginePluginIf::StringPool
 // Forwards the call to the ui engine implementation
 // -----------------------------------------------------------------------------
@@ -242,16 +232,6 @@ EXPORT_C TInt TXnUiEnginePluginIf::HorizontalTwipValueL(
     CXnProperty* aValue, TInt aReferenceValue )
     {
     return iUiEngine->HorizontalTwipValueL( aValue, aReferenceValue );
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::ActivateViewL
-// Activate a view
-// -----------------------------------------------------------------------------
-//
-EXPORT_C void TXnUiEnginePluginIf::ActivateViewL( CXnNodePluginIf& aViewNode )
-    {
-    iUiEngine->ActivateViewL( aViewNode.Node() );
     }
 
 // -----------------------------------------------------------------------------
@@ -330,35 +310,8 @@ EXPORT_C TBool TXnUiEnginePluginIf::WidgetsVisible() const
     }
 
 // -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::HitRegion
-// -----------------------------------------------------------------------------
-//
-EXPORT_C CXnControlAdapter* TXnUiEnginePluginIf::HitRegion() const
-    {
-    return iUiEngine->HitTest().HitRegion();
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::DeactivateFocusedNodeL
-// Deactivates focused node
-// -----------------------------------------------------------------------------
-//
-EXPORT_C void TXnUiEnginePluginIf::DeactivateFocusedNodeL()
-    {    
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::ShowFocus
-// Queries wheter focus is visible
-// -----------------------------------------------------------------------------
-//
-EXPORT_C TBool TXnUiEnginePluginIf::ShowFocus()
-    {
-    return EFalse;
-    }
-
-// -----------------------------------------------------------------------------
 // TXnUiEnginePluginIf::PluginNodeL
+//
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CXnNodePluginIf& TXnUiEnginePluginIf::PluginNodeL(
@@ -393,44 +346,6 @@ EXPORT_C CXnNodePluginIf& TXnUiEnginePluginIf::PluginNodeL(
     }
 
 // -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::SetFocusVisibleL
-// Sets focus visibility of active view
-// -----------------------------------------------------------------------------
-//               
-EXPORT_C void TXnUiEnginePluginIf::SetFocusVisibleL( TBool /*aVisible*/ )
-    {    
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::FocusVisible
-// Gets focus visibility of active view
-// -----------------------------------------------------------------------------
-//               
-EXPORT_C TBool TXnUiEnginePluginIf::FocusVisible()
-    {    
-    return EFalse;    
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::EnableSwipeL
-// Sets swipe enabled or disabled
-// -----------------------------------------------------------------------------
-//               
-EXPORT_C void TXnUiEnginePluginIf::EnableSwipeL( TBool /*aEnable*/ )
-    {    
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::SwipeEnabledL
-// queries whether swipe is enabled or not
-// -----------------------------------------------------------------------------
-//               
-EXPORT_C TBool TXnUiEnginePluginIf::SwipeEnabledL()
-    {    
-    return EFalse;    
-    }
-
-// -----------------------------------------------------------------------------
 // TXnUiEnginePluginIf::DisableRenderUiLC
 // 
 // -----------------------------------------------------------------------------
@@ -460,7 +375,6 @@ EXPORT_C TBool TXnUiEnginePluginIf::IsTextEditorActive()
     {
     return iUiEngine->IsTextEditorActive();
     }
-
 
 // End of file
 

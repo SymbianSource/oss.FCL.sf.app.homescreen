@@ -1,20 +1,20 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  
-*  Version     : %version: MM_41 % << Don't touch! Updated by Synergy at check-out.
-*
-*/
+ * Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:
+ *  Version     : %version: MM_41 % << Don't touch! Updated by Synergy at check-out.
+ *
+ */
 
 #include <AknUtils.h>
 
@@ -23,31 +23,31 @@
 #include "mmfloatingitem.h"
 #include "mmwidgetcontainer.h"
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-CMmDrawerAnimator::CMmDrawerAnimator(CMmListBoxItemDrawer& aDrawer) :
-    CActive( AknLayoutUtils::PenEnabled() ?
-    		EPriorityRealTime : 
-			EPriorityAbsoluteRealTime8 ), iDrawer(aDrawer), 
+//
+CMmDrawerAnimator::CMmDrawerAnimator( CMmListBoxItemDrawer& aDrawer ) :
+    CActive( AknLayoutUtils::PenEnabled()
+        ? EPriorityAbsoluteVeryLow
+        : EPriorityAbsoluteRealTime8 ), iDrawer( aDrawer ),
     iLastNotedHighlight( KErrNotFound ), iLastNotedTopItem( KErrNotFound ),
     iLastNotedVerticalOffset( 0 ),
-    iUsualAnimationFramesCount( AknLayoutUtils::PenEnabled() ?
-    		MmEffects::KUsualAnimationFramesCount : 
-			MmEffects::KUsualAnimationFramesCountNonTouch )
+    iUsualAnimationFramesCount( AknLayoutUtils::PenEnabled()
+                    ? MmEffects::KUsualAnimationFramesCount
+                    : MmEffects::KUsualAnimationFramesCountNonTouch ),
+    iPreparedForGarbage( EFalse )
     {
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-CMmDrawerAnimator* CMmDrawerAnimator::NewLC(CMmListBoxItemDrawer& aDrawer)
+//
+CMmDrawerAnimator* CMmDrawerAnimator::NewLC( CMmListBoxItemDrawer& aDrawer )
     {
-    CMmDrawerAnimator* self = new ( ELeave ) CMmDrawerAnimator(aDrawer);
-    CleanupStack::PushL(self);
+    CMmDrawerAnimator* self = new ( ELeave ) CMmDrawerAnimator( aDrawer );
+    CleanupStack::PushL( self );
     self->ConstructL();
     return self;
     }
@@ -55,10 +55,10 @@ CMmDrawerAnimator* CMmDrawerAnimator::NewLC(CMmListBoxItemDrawer& aDrawer)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-CMmDrawerAnimator* CMmDrawerAnimator::NewL(CMmListBoxItemDrawer& aDrawer)
+//
+CMmDrawerAnimator* CMmDrawerAnimator::NewL( CMmListBoxItemDrawer& aDrawer )
     {
-    CMmDrawerAnimator* self = CMmDrawerAnimator::NewLC(aDrawer);
+    CMmDrawerAnimator* self = CMmDrawerAnimator::NewLC( aDrawer );
     CleanupStack::Pop( self );
     return self;
     }
@@ -66,18 +66,17 @@ CMmDrawerAnimator* CMmDrawerAnimator::NewL(CMmListBoxItemDrawer& aDrawer)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void CMmDrawerAnimator::ConstructL()
     {
     User::LeaveIfError( iTimer.CreateLocal() ); // Initialize timer
-    CActiveScheduler::Add( this); // Add to scheduler
-    iPreparedForGarbage = EFalse;
+    CActiveScheduler::Add( this ); // Add to scheduler
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 CMmDrawerAnimator::~CMmDrawerAnimator()
     {
     Cancel(); // Cancel any request, if outstanding
@@ -88,141 +87,129 @@ CMmDrawerAnimator::~CMmDrawerAnimator()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void CMmDrawerAnimator::DoCancel()
     {
     iTimer.Cancel();
+    if( iDrawer.GetFloatingItemCount() == 0 )
+        {
+        TRAP_IGNORE(TriggerMoveItemL());
+        }
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-TBool CMmDrawerAnimator::CancelNextRedrawL()
-	{
-	RunL();
-    TTime currentTime;
-    currentTime.HomeTime();
-    return (currentTime.MicroSecondsFrom(iLastRedrawTime) 
-    		<= MmEffects::KAnimationFrameDelay);
-	}
-// -----------------------------------------------------------------------------
 //
-// -----------------------------------------------------------------------------
-// 
 void CMmDrawerAnimator::RunL()
-    {      
-	if ( iPreparedForGarbage )
-		{
-		return;
-		}
-	
-    TTime currentTime;
-    currentTime.HomeTime();
-	
-   if (currentTime.MicroSecondsFrom(iLastRedrawTime) 
-    		>= MmEffects::KAnimationFrameDelay && iDrawer.GetFloatingItemCount() > 0)
-    	{
-    	Cancel();
-    	
-    	TRect refreshRect;
-    	for(int i=0; i< iDrawer.GetFloatingItemCount(); i++)
-			{
-			TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex(i);
-			TSize itemSize = iDrawer.GetItemSize(current.GetDrawnItemIndex(), EFalse);
+    {
+    if( iPreparedForGarbage )
+        {
+        return;
+        }
 
-			TRect beforeRect(current.GetItemPosition(), itemSize);
-			current.MakeStep();
-			TRect afterRect(current.GetItemPosition(), itemSize);
-			
-			if (current.GetFloatingItemType() == EDrag )
-				{
-				TInt dragTrail = iDrawer.GetFloatingItemIndex( EPostDragRefreshItem );
-				if (dragTrail != KErrNotFound)
-					{
-					refreshRect = (refreshRect == TRect(0,0,0,0)) ? beforeRect : refreshRect;
-					refreshRect.BoundingRect( afterRect );
-					}
-				}
-			else
-				{
-				refreshRect = (refreshRect == TRect(0,0,0,0)) ? beforeRect : refreshRect;
-				refreshRect.BoundingRect( beforeRect );
-				refreshRect.BoundingRect( afterRect );
-				}
-			}
-    	const TInt highlightedItemIndex = iDrawer.Widget()->View()->CurrentItemIndex();
-    	if ( iLastNotedHighlight != highlightedItemIndex )
-    	    {
+    if( iDrawer.GetFloatingItemCount() > 0 )
+        {
+        TRect refreshRect;
+        for( int i = 0; i < iDrawer.GetFloatingItemCount(); i++ )
+            {
+            TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex( i );
+            TSize itemSize = iDrawer.GetItemSize(current.GetDrawnItemIndex(), EFalse);
+
+            TRect beforeRect( current.GetItemPosition(), itemSize );
+            current.MakeStep();
+            TRect afterRect( current.GetItemPosition(), itemSize );
+
+            if( current.GetFloatingItemType() == EDrag )
+                {
+                TInt dragTrail = iDrawer.GetFloatingItemIndex( EPostDragRefreshItem );
+                if( dragTrail != KErrNotFound )
+                    {
+                    refreshRect = ( refreshRect == TRect() ) ? beforeRect : refreshRect;
+                    refreshRect.BoundingRect( afterRect );
+                    static_cast<CMmWidgetContainer*> ( iDrawer.Widget()->Parent() )->
+                            SetAllowMove( EFalse );
+                    }
+                }
+            else
+                {
+                refreshRect = (refreshRect == TRect() ) ? beforeRect : refreshRect;
+                refreshRect.BoundingRect( beforeRect );
+                refreshRect.BoundingRect( afterRect );
+                }
+            }
+        const TInt highlightedItemIndex = iDrawer.Widget()->View()->CurrentItemIndex();
+        if( iLastNotedHighlight != highlightedItemIndex )
+            {
             TRect highlightedItemRect(
                     iDrawer.Widget()->View()->ItemPos( highlightedItemIndex ),
-                    iDrawer.Widget()->View()->ItemSize( highlightedItemIndex ) ); 
+                    iDrawer.Widget()->View()->ItemSize( highlightedItemIndex ) );
             refreshRect.BoundingRect( highlightedItemRect );
             iLastNotedHighlight = highlightedItemIndex;
-    	    }
+            }
 
-    	
-    	TInt currentVerticalOffset = static_cast<CMmWidgetContainer*>(
-    	        iDrawer.Widget()->Parent() )->VerticalItemOffset();
 
-    	if (iLastNotedTopItem != iDrawer.Widget()->TopItemIndex() ||
-    	        iLastNotedVerticalOffset != currentVerticalOffset )
-    		{
-    		iDrawer.Widget()->DrawNow();
-        	iLastNotedTopItem = iDrawer.Widget()->TopItemIndex();
-        	iLastNotedVerticalOffset = currentVerticalOffset;
-    		}
-    	else
-    		{
-			if ( refreshRect != TRect(0,0,0,0))
-				{
-				TRect prev(iPreviousRefreshRect);
-				iPreviousRefreshRect = refreshRect;
-				refreshRect.BoundingRect(prev);
-				
-	            // expand rect if non-touch
-	            refreshRect = TRect( AdjustRefreshRectToNonTouch( refreshRect ) );
-	            
-	            // never draw on the outside of widget's view rectangle
-	            refreshRect.Intersection( iDrawer.Widget()->View()->ViewRect() );
-	            
-				iDrawer.Widget()->View()->Draw( &refreshRect );
-				}
-    		}
+      TInt currentVerticalOffset = static_cast<CMmWidgetContainer*>(
+              iDrawer.Widget()->Parent() )->VerticalItemOffset();
 
-    	
-		iLastRedrawTime.HomeTime();
-    	
-    	}
-    
-		if (iDrawer.GetFloatingItemCount() > 0)
-			{
-			Trigger();
-			}
-		else
-			{
-			Cancel();
-			
+        if( iLastNotedTopItem != iDrawer.Widget()->TopItemIndex()
+                || iLastNotedVerticalOffset != currentVerticalOffset )
+            {
+            iDrawer.Widget()->DrawNow();
+            iLastNotedTopItem = iDrawer.Widget()->TopItemIndex();
+            iLastNotedVerticalOffset = currentVerticalOffset;
+            }
+        else
+            {
+            if( refreshRect != TRect() )
+                {
+                TRect prev( iPreviousRefreshRect );
+                iPreviousRefreshRect = refreshRect;
+                refreshRect.BoundingRect( prev );
+
+                // expand rect if non-touch
+                refreshRect = TRect( AdjustRefreshRectToNonTouch( refreshRect ) );
+
+                // never draw on the outside of widget's view rectangle
+                refreshRect.Intersection( iDrawer.Widget()->View()->ViewRect() );
+
+                iDrawer.Widget()->View()->Draw( &refreshRect );
+                }
+            }
+
+        iLastRedrawTime.HomeTime();
+
+        }
+
+    if( iDrawer.GetFloatingItemCount() > 0 )
+        {
+        Trigger();
+        }
+    else
+        {
+        TriggerMoveItemL();
+        Cancel();
+
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-			if ( iTransTfx && iTransTfxInternal->EffectsDisabled() )
-				{
-				iTransTfx->EnableEffects( ETrue );
-	
-				if ( iTransTfx )
-					{
-					iTransTfxInternal->Remove( MAknListBoxTfxInternal::EListEverything );
-					iDrawer.Widget()->DrawNow();
-					iTransTfxInternal->Draw( iDrawer.Widget()->Rect() );
-					}
-				}
+        if( iTransTfx && iTransTfxInternal->EffectsDisabled() )
+            {
+            iTransTfx->EnableEffects( ETrue );
+
+            if( iTransTfx )
+                {
+                iTransTfxInternal->Remove( MAknListBoxTfxInternal::EListEverything );
+                iDrawer.Widget()->DrawNow();
+                iTransTfxInternal->Draw( iDrawer.Widget()->Rect() );
+                }
+            }
 #endif
-			}
+        }
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 TRect CMmDrawerAnimator::AdjustRefreshRectToNonTouch( const TRect& aRefreshRect )
     {
     TRect rect( aRefreshRect );
@@ -231,13 +218,10 @@ TRect CMmDrawerAnimator::AdjustRefreshRectToNonTouch( const TRect& aRefreshRect 
         TRect indicatorRect( iDrawer.GetIndicatorRect() );
         TSize itemSize( iDrawer.GetItemSize(
                 iDrawer.Widget()->CurrentItemIndex(), ETrue ) );
-        
+
         TInt horizontalMargin( ( indicatorRect.Width() - itemSize.iWidth ) / 2 );
         TInt verticalMargin( ( indicatorRect.Height() - itemSize.iHeight ) / 2 );
-        rect.iBr.iX += horizontalMargin;
-        rect.iBr.iY += verticalMargin;
-        rect.iTl.iX -= horizontalMargin;
-        rect.iTl.iY -= verticalMargin;
+        rect.Grow(horizontalMargin, verticalMargin);
         }
     return rect;
     }
@@ -245,35 +229,34 @@ TRect CMmDrawerAnimator::AdjustRefreshRectToNonTouch( const TRect& aRefreshRect 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 TInt CMmDrawerAnimator::Trigger()
     {
-	if ( iPreparedForGarbage )
-		{
-		return KErrCancel;
-		}
-	
-    if (!IsActive() && iDrawer.GetFloatingItemCount() > 0 )
+    if( iPreparedForGarbage )
+        {
+        return KErrCancel;
+        }
+
+    if( !IsActive() && iDrawer.GetFloatingItemCount() > 0 )
         {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-		iTransTfx = CAknListLoader::TfxApi( iDrawer.Gc() );
-		iTransTfxInternal = CAknListLoader::TfxApiInternal( 
-				iDrawer.Gc() );
-	
-		if ( iTransTfx && !iTransTfxInternal->EffectsDisabled() )
-			{
-			iTransTfx->EnableEffects( EFalse );
-			
-			if ( iTransTfxInternal )
-				{
-				iTransTfxInternal->Remove( MAknListBoxTfxInternal::EListEverything );
-				iTransTfxInternal->Draw( iDrawer.Widget()->Rect() );
-				}
-			}
+        iTransTfx = CAknListLoader::TfxApi( iDrawer.Gc() );
+        iTransTfxInternal = CAknListLoader::TfxApiInternal( iDrawer.Gc() );
+
+        if( iTransTfx && !iTransTfxInternal->EffectsDisabled() )
+            {
+            iTransTfx->EnableEffects( EFalse );
+
+            if( iTransTfxInternal )
+                {
+        iTransTfxInternal->Remove( MAknListBoxTfxInternal::EListEverything );
+                iTransTfxInternal->Draw( iDrawer.Widget()->Rect() );
+                }
+            }
 #endif
-    
-        iTimer.After(iStatus, TTimeIntervalMicroSeconds32( 
-        		MmEffects::KAnimationFrameDelay ) ); 
+
+        iTimer.After( iStatus, TTimeIntervalMicroSeconds32(
+                MmEffects::KAnimationFrameDelay ) );
         SetActive();
         }
     return KErrNone;
@@ -282,8 +265,8 @@ TInt CMmDrawerAnimator::Trigger()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-TInt CMmDrawerAnimator::RunError(TInt aError)
+//
+TInt CMmDrawerAnimator::RunError( TInt aError )
     {
     return aError;
     }
@@ -291,39 +274,39 @@ TInt CMmDrawerAnimator::RunError(TInt aError)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-void CMmDrawerAnimator::AnimateDragItemTransitionL( )
-    {     
-    if (KErrNotFound != iDrawer.GetFloatingItemIndex(EDrag))
+//
+void CMmDrawerAnimator::AnimateDragItemTransitionL()
+    {
+    if( KErrNotFound != iDrawer.GetFloatingItemIndex( EDrag ) )
         {
         TMmFloatingItem floatingItem(
-                iDrawer.GetFloatingItemL(EDrag).GetDrawnItemIndex(), 
-                iDrawer.GetFloatingItemL(EDrag).GetItemPosition(), 
+                iDrawer.GetFloatingItemL( EDrag ).GetDrawnItemIndex(),
+                iDrawer.GetFloatingItemL( EDrag ).GetItemPosition(),
                 EDragTransition, iUsualAnimationFramesCount,
-                iDrawer.Widget()->View());
+                iDrawer.Widget()->View() );
         TPoint pointEnd = iDrawer.Widget()->View()->ItemPos( floatingItem.GetDrawnItemIndex() );
         floatingItem.SetPositionStep( pointEnd - floatingItem.GetItemPosition() );
         iDrawer.AddFloatingItemL( floatingItem, 0 );
-        iDrawer.RemoveFloatingItem( iDrawer.GetFloatingItemIndex(EDrag) );
+        iDrawer.RemoveFloatingItem( iDrawer.GetFloatingItemIndex( EDrag ) );
         }
     }
-  
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TBool CMmDrawerAnimator::IsReadyForNewAnimation()
     {
-	if ( iPreparedForGarbage )
-		{
-		return EFalse;
-		}
-	
-    for(int i=0; i< iDrawer.GetFloatingItemCount(); i++)
+    if( iPreparedForGarbage )
         {
-        TMmFloatingItemType type 
-			= iDrawer.GetFloatingItemAtIndex(i).GetFloatingItemType();
-        if ( type != EDrag && type != EZoomTransition )
+        return EFalse;
+        }
+
+    for( int i = 0; i < iDrawer.GetFloatingItemCount(); i++ )
+        {
+        TMmFloatingItemType type =
+                iDrawer.GetFloatingItemAtIndex( i ).GetFloatingItemType();
+        if( type != EDrag && type != EZoomTransition )
             {
             return EFalse;
             }
@@ -337,32 +320,32 @@ TBool CMmDrawerAnimator::IsReadyForNewAnimation()
 //
 void CMmDrawerAnimator::CancelAnimationsL()
     {
-    for(int i=0; i< iDrawer.GetFloatingItemCount(); i++)
+    for( int i = 0; i < iDrawer.GetFloatingItemCount(); i++ )
         {
-        TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex(i);
-        if (current.GetFloatingItemType() != EDrag)
+        TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex( i );
+        if( current.GetFloatingItemType() != EDrag )
             {
             current.InvalidateFloatingItem();
             }
         }
     }
 
- // -----------------------------------------------------------------------------
- //
- // -----------------------------------------------------------------------------
- // 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CMmDrawerAnimator::AnimateItemSwapL( TInt aItemFrom, TInt aItemTo )
     {
-    TMmFloatingItem floatingItem( aItemTo, 
-            iDrawer.Widget()->View()->ItemPos( aItemFrom ), 
+    TMmFloatingItem floatingItem( aItemTo,
+            iDrawer.Widget()->View()->ItemPos( aItemFrom ),
             ESwapTransition, iUsualAnimationFramesCount,
             iDrawer.Widget()->View() );
-      
-    for(int i=0; i< iDrawer.GetFloatingItemCount(); i++)
-        {
-        TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex(i);
 
-        if (current.GetFloatingItemType() == EZoomTransition 
+    for( int i = 0; i < iDrawer.GetFloatingItemCount(); i++ )
+        {
+        TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex( i );
+
+        if( current.GetFloatingItemType() == EZoomTransition
                 && current.GetDrawnItemIndex() == aItemFrom )
             {
             current.InvalidateFloatingItem();
@@ -371,15 +354,15 @@ void CMmDrawerAnimator::AnimateItemSwapL( TInt aItemFrom, TInt aItemTo )
             }
         }
 
-    floatingItem.SetPositionStep( iDrawer.Widget()->View()->ItemPos(aItemTo)- 
-            iDrawer.Widget()->View()->ItemPos(aItemFrom) );
-    iDrawer.AddFloatingItemL(floatingItem);
+    floatingItem.SetPositionStep( iDrawer.Widget()->View()->ItemPos(aItemTo)
+            - iDrawer.Widget()->View()->ItemPos(aItemFrom) );
+    iDrawer.AddFloatingItemL( floatingItem );
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void CMmDrawerAnimator::AnimateItemZoomL( TInt aItemIndex, TBool aZoomIn )
     {
     TMmFloatingItem floatingItem( aItemIndex,
@@ -392,24 +375,26 @@ void CMmDrawerAnimator::AnimateItemZoomL( TInt aItemIndex, TBool aZoomIn )
             (aZoomIn) ? KZoomStateZoomRatio : KNormalStateZoomRatio );
 
     TInt animationFound = EFalse;
-    for(int i=0; i< iDrawer.GetFloatingItemCount(); i++)
+    for( int i = 0; i < iDrawer.GetFloatingItemCount(); i++ )
         {
-        TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex(i);
-        if (current.GetFloatingItemType() == EZoomTransition &&
-                current.GetDrawnItemIndex() == aItemIndex )
+        TMmFloatingItem& current = iDrawer.GetFloatingItemAtIndex( i );
+        if( current.GetFloatingItemType() == EZoomTransition
+                && current.GetDrawnItemIndex() == aItemIndex )
             {
             current.InvalidateFloatingItem();
             floatingItem.SetSizeStep( current.GetCurrentZoomRatio(),
                     (aZoomIn) ? KZoomStateZoomRatio : KNormalStateZoomRatio);
             animationFound = ETrue;
+            static_cast<CMmWidgetContainer*> ( iDrawer.Widget()->Parent() )->
+                    SetAllowMove( EFalse );
             break;
             }
         }
-    
-    if ( (aZoomIn != EFalse || animationFound != EFalse) )
+
+    if( ( aZoomIn != EFalse || animationFound != EFalse ) )
         {
         // This covers the situation, when a zoom out animation is requested
-        // whilst no zoom in occured earlier. In this case the request is 
+        // whilst no zoom in occured earlier. In this case the request is
         // neglected.
         iDrawer.AddFloatingItemL( floatingItem );
         }
@@ -418,20 +403,30 @@ void CMmDrawerAnimator::AnimateItemZoomL( TInt aItemIndex, TBool aZoomIn )
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void CMmDrawerAnimator::SetNextRedrawToWholeScreen()
-	{
-	iPreviousRefreshRect = iDrawer.Widget()->View()->ViewRect();
-	}
+    {
+    iPreviousRefreshRect = iDrawer.Widget()->View()->ViewRect();
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void CMmDrawerAnimator::PrepareForGarbage()
-	{
-//	Cancel any outstanding requests
-	Cancel();
-	iPreparedForGarbage = ETrue;
-	}
+    {
+    //	Cancel any outstanding requests
+    Cancel();
+    iPreparedForGarbage = ETrue;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmDrawerAnimator::TriggerMoveItemL()
+    {
+    static_cast<CMmWidgetContainer*> ( iDrawer.Widget()->Parent() )->
+            TriggerMoveItemL();
+    }
 //End of file

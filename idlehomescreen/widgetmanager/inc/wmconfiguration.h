@@ -35,7 +35,19 @@ NONSHARABLE_CLASS( CWmConfiguration ) : public CBase
 	{
 	
 public: // constructors and destructor
-	
+
+    /** Operator Application type */
+    enum TOpAppType
+        {
+        EUnknown,
+        ES60,
+        ECwrt,
+        EWrt,
+        EJava,
+        EQt,
+		EReserved
+        };
+
     /** Two-phased constructor. */
 	static CWmConfiguration* NewL(
 	        CWmResourceLoader& aResourceLoader );
@@ -88,16 +100,52 @@ public: // API
      * @param aIndex index of the button, starting at 0
      */
     const TDesC& PortalButtonClientParam( TInt aIndex );
-        
+    
+    /**
+     * Returns bool if buttons are mirrored.
+     * @return true when operator button on left on portraid and 
+     * on top on landscape.
+     */
+    TBool PortalButtonsMirrored();
+    
+    /**
+     * Returns application type by button index
+     * @param aIndex button index
+     * @return application type
+     */
+    TOpAppType PortalButtonApplicationType( TInt aIndex );
+    
+    /**
+     * Returns application id as string
+     * @param aIndex button index
+     * @param aOperatorAppId string to get app id
+     */
+    void PortalButtonApplicationId( TInt aIndex, TDes& aOperatorAppId );
+    
+    /**
+     * Returns application id as uid
+     * @param aIndex button index
+     * @param aOperatorAppId uid to get app id
+     */
+    void PortalButtonApplicationId( TInt aIndex, TUid& aOperatorAppId );
+    
 private: // New functions
     
     void LoadConfigurationL();
     TInt FindCorrectLanguageId();
     HBufC* ReadDescParameterL( TInt aKey );
-    void ReadIntParameter( TInt aKey, TInt32& aValue );
+    void ReadInt32Parameter( TInt aKey, TInt32& aValue );
+    void ReadIntParameter( TInt aKey, TInt& aValue );
     HBufC* ReadLocalisedParameterL( TInt aOffset );
-    void IndexConversion( TInt& aIndex );
-
+    void ReadOperatorApplicationInfoL();
+    TUid StringToUid( const TDesC& aStr );
+    
+    /** Returns uid of the widget with a particular bundle identifier. */
+    TUid FetchWidgetUidFromRegistryL( const TDesC& aBundleId );
+    
+    /** sets operator icon to button if not already defined */
+    void SetOperatorIconL( TUid aUid );
+	
 private:
 
     /**
@@ -132,9 +180,9 @@ private:
     HBufC*                  iOviStoreClientParam;
     
     /**
-     * OVI store laucher ui
+     * OVI store laucher uid
      */
-    TUid                      iOviStoreUid;
+    TUid                    iOviStoreUid;
     
     /**
      * OPERATOR button text
@@ -151,7 +199,36 @@ private:
      */
     HBufC*                  iOperatorButtonUrl;
     
-    };
+    /**
+     * OPERATOR store button application parameter
+     */
+    HBufC*                  iOperatorParam;
+    
+    /**
+     * OPERATOR store application id as string. Used for java
+     */
+    HBufC*                  iOperatorAppIdStr;
+    
+    /**
+     * OPERATOR store application id as uid.
+     */
+    TUid                    iOperatorAppIdUid;
+        
+    /**
+     * OPERATOR store application type
+     */
+    TOpAppType              iOperatorAppType;
+        
+    /**
+     * Tells if operator button is enabled. 
+     */
+    TBool                   iOperatorButtonEnabled;
+        
+    /**
+     * Tells if buttons need to be mirrored for operator. 
+     */
+    TBool                   iButtonsMirrored;
+	};
 
 #endif // WMCONFIGURATION_H
 

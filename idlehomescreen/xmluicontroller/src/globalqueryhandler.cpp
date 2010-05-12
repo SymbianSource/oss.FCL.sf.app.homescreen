@@ -81,6 +81,11 @@ void CGlobalQueryHandler::RunL()
         {
         iUiController.AppUi()->SetOnlineStateL( iSetOnline );
         }
+    else
+        {
+         iUiController.AppUi()->SetOnlineStateL(!iSetOnline );
+        }
+        
     }
 
 // -----------------------------------------------------------------------------

@@ -21,7 +21,8 @@
 
 // System includes
 #include <e32base.h>
-
+#include <AknProgressDialog.h> // for MProgressDialogCallback
+#include "xnpropertysubscriber.h" // for CXnPropertySubscriber
 
 // Forward declarations
 class CXnUiEngine;
@@ -34,6 +35,7 @@ class MHsContentControlUi;
 class CHsCcProviderClient;
 class CXnEffectManager;
 class MHsContentControl;
+class CXnWaitDialog;
 
 // Constants
 
@@ -46,7 +48,9 @@ class MHsContentControl;
 *  @lib xn3layoutengine.lib
 *  @since Series 60 3.1
 */
-NONSHARABLE_CLASS( CXnAppUiAdapterImpl ) : public CBase    
+NONSHARABLE_CLASS( CXnAppUiAdapterImpl ) : public CBase,
+                                           public MXnPropertyChangeObserver,
+                                           public MProgressDialogCallback    
     {
 public:
     // Constructors and destructor
@@ -156,6 +160,15 @@ public:
      */
     void HandleResourceChangeL( TInt aType );
     
+public: // From MProgressDialogCallback
+
+    /**
+     * Callback method from MProgressDialogCallback interface.
+     * Gets called when a dialog is dismissed.
+     * @param aButtonId Id of the pushed button.
+     */
+    void DialogDismissedL( TInt aButtonId );
+
 private:
     
     /**
@@ -164,6 +177,18 @@ private:
     CXnAppUiAdapterImpl( TUid aApplicationUid,    
             CXnAppUiAdapter& aAdapter );
 
+private:    
+    // from MXnPropertyChangeObserver    
+    void PropertyChangedL( const TUint32 aKey, const TInt aValue );
+
+private:    
+    // new functions
+    
+    /**
+     * Launches wait dialog during backup/restore.
+     */
+    void DisplayWaitDialogL();
+    
 private:
     // Data
     /** AppUi, Not owned. */
@@ -185,7 +210,11 @@ private:
     /** Effect manager, Owned */
     CXnEffectManager* iEffectManager;
     /** Resource offset */
-    TInt iResourceOffset;    
+    TInt iResourceOffset;
+    /** Wait dialog, Owned */
+    CXnWaitDialog* iXnWaitDialog;
+    /** Publish&Subscribe observer for Backup & Restore, Owned */
+    CXnPropertySubscriber* iBackupRestoreObserver;  
     };
 
 #endif      // XNAPPUIADAPTERIMPL_H

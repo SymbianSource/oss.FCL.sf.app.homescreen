@@ -17,10 +17,11 @@
 
 
 #include "tsfswengine.h"
+#include "tscpsnotifier.h"
+#include "tsfswdatalist.h"
 #include "tsfsalwaysshownapplist.h"
 #include "tsfshiddenapplist.h"
 #include "tsfswidgetlist.h"
-#include "tsfswiconcache.h"
 #include "tspreviewprovider.h"
 #include "tsfswclient.h"
 #include <apgtask.h>
@@ -34,13 +35,22 @@
 #include "enginelogging.h"
 
 // time to wait before refreshing content
-const TInt KContentRefreshDelay = 500000; // 0.5 sec
+const TInt KContentRefreshDelay = 50000; // 0.05 sec
 
 // for screenshots, they are scaled down to (screensize/this_factor).
 const TInt KScreenSizeFactor = 2;
 
 // format to get a lowercase hex string prefixed with 0x
 _LIT( KHexFmt, "0x%x" );
+
+const TUid KTsCameraUid = { 0x101F857a };
+
+//close command for widget
+const TInt KCloseWidgetCmd(9);
+//handle close cmd for s60 widgets
+_LIT(KWidgetAppName, "widgetlauncher.exe");
+//handle close cmd for CWRT widgets
+_LIT(KWidgetAppNameWgt,"wgtwidgetlauncher.exe");
 
 // --------------------------------------------------------------------------
 // CTsFswEngine::NewL
@@ -86,20 +96,11 @@ void CTsFswEngine::ConstructL()
     User::LeaveIfError( iWsSession.Connect() );
     User::LeaveIfError( iAppArcSession.Connect() );
 
-    iHiddenAppList = CTsFsHiddenAppList::NewL( *this );
-    iAlwaysShownAppList = CTsFsAlwaysShownAppList::NewL();
-
+    iDataList = CTsFswDataList::NewL(*this);
     iWidgetsSupported = FeatureManager::FeatureSupported( KFeatureIdWebWidgets );
-    if ( iWidgetsSupported )
-        {
-        iWidgetList = CTsFsWidgetList::NewL();
-        }
-
-    // create app icon retriever instance
-    iAppIcons = CTsFswIconCache::NewL();
 
     // get an initial list of tasks
-    iAppDataRefreshNeeded = ETrue;
+    iDataList->SetAppDataRefreshNeeded();
     CollectTasksL();
 
     // listen for app screenshots
@@ -116,6 +117,7 @@ void CTsFswEngine::ConstructL()
         iSwiProp.Subscribe( iStatus );
         SetActive();
         }
+    iCpsWidgetPublisher = CTSCpsNotifier::NewL(*this);
     }
 
 // --------------------------------------------------------------------------
@@ -130,22 +132,8 @@ CTsFswEngine::~CTsFswEngine()
     delete iUpdateStarter;
     delete iPreviewProvider;
 
-    // delete the bitmaps as the hash map cannot do that
-    THashMapIter<TInt, CFbsBitmap*> iter( iScreenshots );
-    while ( const TInt* key = iter.NextKey() )
-        {
-        CFbsBitmap** value = iter.CurrentValue();
-        delete *value;
-        }
-    iScreenshots.Close();
-    delete iAppIcons;
-
-    iData.ResetAndDestroy();
     iWgIds.Close();
 
-    delete iHiddenAppList;
-    delete iAlwaysShownAppList;
-    delete iWidgetList;
     iAppArcSession.Close();
     iWsSession.Close();
 
@@ -155,7 +143,8 @@ CTsFswEngine::~CTsFswEngine()
         delete iRotaTasks[i];
         }
     iRotaTasks.Close();
-//    delete iContextUtility;
+    delete iDataList;
+    delete iCpsWidgetPublisher;
     }
 
 // --------------------------------------------------------------------------
@@ -165,43 +154,8 @@ CTsFswEngine::~CTsFswEngine()
 EXPORT_C const RTsFswArray& CTsFswEngine::FswDataL()
     {
     TSLOG_CONTEXT( FswDataL, TSLOG_LOCAL );
-    TSLOG1_IN( "dirty flag = %d", iTaskListDirty );
-
-    // check the dirty flag and refresh if needed
-    if ( iTaskListDirty )
-        {
-        CollectTasksL();
-        // dirty flag is cleared in the above call
-        }
-
-    // Get app icon for entries without screenshot,
-    // do this only here as the app icon is not needed in case a screenshot
-    // is already available.
-    for ( TInt i = 0, ie = iData.Count(); i != ie; ++i )
-        {
-        if ( !iData[i]->ScreenshotHandle() )
-            {
-            CFbsBitmap* bmp;
-            CFbsBitmap* mask;
-            TUid appUid = iData[i]->AppUid();
-            // this will leave with -46 in case of widgets if we do not have AllFiles cap
-            TRAPD( err, iAppIcons->GetIconL( appUid, bmp, mask ) );
-            if ( err == KErrNone && bmp )
-                {
-                iData[i]->SetAppIconHandles( bmp->Handle(),
-                    mask ? mask->Handle() : 0 );
-                }
-            else
-                {
-                iAppIcons->DefaultIcon( bmp, mask );
-                iData[i]->SetAppIconHandles( bmp->Handle(),
-                    mask ? mask->Handle() : 0 );
-                }
-            }
-        }
-
     TSLOG_OUT();
-    return iData;
+    return iDataList->FswDataL();
     }
 
 // --------------------------------------------------------------------------
@@ -218,7 +172,7 @@ EXPORT_C void CTsFswEngine::CloseAppL( TInt aWgId )
         // convert aWgId to an index in the list of running widgets and close widget
         CloseWidgetL( -aWgId -1 );
         }
-    else if( !iAlwaysShownAppList->IsAlwaysShownApp( AppUidForWgIdL( aWgId ) ) )
+    else if( !iDataList->IsAlwaysShownAppL( aWgId ) )
         {
         // send window group event to kill the app
         TWsEvent event;
@@ -242,7 +196,7 @@ EXPORT_C void CTsFswEngine::SwitchToAppL( TInt aWgId )
     if ( iWidgetsSupported && aWgId < 0 )
         {
         // for widgets clients see a wgid that is -1*(index+1)
-        const RWidgetInfoArray& arr( iWidgetList->RunningWidgets() );
+        const RWidgetInfoArray& arr( iDataList->Widgets()->RunningWidgets() );
         // convert aWgId to an index in the list of running widgets
         TInt idx = -aWgId - 1;
         // if index is valid then handle the widget specially
@@ -267,17 +221,14 @@ EXPORT_C void CTsFswEngine::SwitchToAppL( TInt aWgId )
 //
 void CTsFswEngine::SwitchToWidgetL( TInt aWidgetIndex )
     {
-    const RWidgetInfoArray& arr( iWidgetList->RunningWidgets() );
-    RApaLsSession ls;
-    User::LeaveIfError( ls.Connect() );
-    CleanupClosePushL( ls );
+    const RWidgetInfoArray& arr( iDataList->Widgets()->RunningWidgets() );
     CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
     cmdLine->SetCommandL( EApaCommandRun );
     TApaAppInfo info;
     iAppArcSession.GetAppInfo( info, arr[aWidgetIndex]->iUid ); // codescanner::accessArrayElementWithoutCheck2 (aWidgetIndex checked in SwitchToAppL())
     cmdLine->SetExecutableNameL( info.iFullName );
-    ls.StartApp( *cmdLine );
-    CleanupStack::PopAndDestroy( 2, &ls );
+    iAppArcSession.StartApp( *cmdLine );
+    CleanupStack::PopAndDestroy(cmdLine);
     }
 
 // --------------------------------------------------------------------------
@@ -290,24 +241,13 @@ void CTsFswEngine::UpdateTaskList()
     TSLOG_CONTEXT( UpdateTaskList, TSLOG_LOCAL );
     TSLOG_IN();
 
-    // If no clients are subscribed for fsw content change notifications
-    // then there is no need to waste time with rebuilding the task list,
-    // just set the dirty flag.
-    TInt listenerCount = iObserver.FswDataListenerCount();
-    TSLOG1( TSLOG_INFO, "listener count = %d", listenerCount );
-    if ( listenerCount > 0 )
+    // There can be many calls in a row, use a timer to prevent degrading
+    // device performance.
+    iDataList->SetDirty();
+    if ( !iUpdateStarter->IsActive() )
         {
-        // There can be many calls in a row, use a timer to prevent degrading
-        // device performance.
-        if ( !iUpdateStarter->IsActive() )
-            {
-            iUpdateStarter->Start( KContentRefreshDelay, 0,
+        iUpdateStarter->Start( KContentRefreshDelay, 0,
                 TCallBack( UpdateStarterCallback, this ) );
-            }
-        }
-    else
-        {
-        iTaskListDirty = ETrue;
         }
 
     // screenshot taking support - call Register and Unregister when needed
@@ -349,7 +289,7 @@ EXPORT_C TUid CTsFswEngine::ForegroundAppUidL( TInt aType )
         CApaWindowGroupName* wgn = CApaWindowGroupName::NewLC(
             iWsSession, allWgIds[i].iId );
         TUid newUid = wgn->AppUid();
-        TBool hidden = wgn->Hidden() || iHiddenAppList->IsHiddenL(
+        TBool hidden = wgn->Hidden() || iDataList->HiddenApps()->IsHiddenL(
             newUid, iWsSession, allWgIds[i].iId );
         CleanupStack::PopAndDestroy( wgn );
 
@@ -410,222 +350,12 @@ TInt CTsFswEngine::UpdateStarterCallback( TAny* aParam )
 TBool CTsFswEngine::CollectTasksL()
     {
     TSLOG_CONTEXT( CollectTasksL, TSLOG_LOCAL );
-    TSLOG_IN();
-
-    // clear dirty flag
-    iTaskListDirty = EFalse;
-
-    TBool changed = EFalse;
-    RTsFswArray newList;
-    CleanupResetAndDestroyPushL( newList );
-
-    // update app data if needed
-    // (usually on startup and when new apps might have been installed)
-    if ( iAppDataRefreshNeeded )
-        {
-        TSLOG0( TSLOG_INFO, "refreshing app data" );
-        iAppArcSession.GetAllApps();
-        iAlwaysShownAppList->InitializeAlwaysShownListL();
-        iAppDataRefreshNeeded = EFalse;
-        }
-
-    // get all window groups
-    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
-    CleanupClosePushL( allWgIds );
-    User::LeaveIfError( iWsSession.WindowGroupList( 0, &allWgIds ) );
-    TInt count = allWgIds.Count();
-
-    for ( TInt i = 0; i < count; ++i )
-        {
-        // ignore uninteresting entries (e.g. embedded apps)
-        if ( allWgIds[i].iParentId > 0 )
-            {
-            continue;
-            }
-        
-        // get window group name
-        TInt wgId = allWgIds[i].iId;
-        CApaWindowGroupName* windowName =
-            CApaWindowGroupName::NewLC( iWsSession, wgId );
-        TUid appUid = windowName->AppUid();
-        
-        // ignore entries with null uid
-        if ( !appUid.iUid )
-            {
-            CleanupStack::PopAndDestroy( windowName );
-            continue;
-            }
-        
-        // will append the task to our own list only if it is not hidden
-        TBool onHiddenList = iHiddenAppList->IsHiddenL(
-            appUid, iWsSession, wgId );
-
-        // get screen number (-1=console, 0=main screen, 1=cover ui)
-        TInt appScreen = 0;
-        TInt scrNumErr = iAppArcSession.GetDefaultScreenNumber( appScreen, appUid );
-
-        // check if it is on always-shown list
-        TBool mustShow = iAlwaysShownAppList->IsAlwaysShownApp( appUid );
-
-#ifdef _DEBUG
-        const TDesC& captionDbg( windowName->Caption() );
-        TSLOG4( TSLOG_INFO, "[%d] wgid=%d appuid=%x (%S)", i, wgId,
-            appUid.iUid, &captionDbg );
-        TSLOG4( TSLOG_INFO, "hidden=%d onhiddenlist=%d mustshow=%d scrno=%d",
-            windowName->Hidden(), onHiddenList, mustShow, appScreen );
-#endif
-
-        // if this is the widget app then save wgid for later use
-        // and ignore it, but include running widgets instead
-        if ( iWidgetsSupported && appUid.iUid == KWidgetAppUidValue )
-            {
-            changed = ETrue;
-            }
-        // add item to task list if it is always-shown OR it is not hidden
-        // and it is not on cover ui
-        else if ( mustShow
-                || ( !onHiddenList
-                    && !windowName->Hidden()
-                    && ( appScreen == 0 || appScreen == -1 )
-                    && scrNumErr == KErrNone ) )
-            {
-            if ( AddEntryL( wgId, appUid, windowName, newList, EFalse ) )
-                {
-                changed = ETrue;
-                }
-            }
-        CleanupStack::PopAndDestroy( windowName );
-        }
-    CleanupStack::PopAndDestroy( &allWgIds );
-    CheckWidgetsL(newList);
-    
-    // if counts for old and new lists do not match then there is a change for sure,
-    // probably an app has been closed
-    if ( iData.Count() != newList.Count() )
-        {
-        changed = ETrue;
-        }
-
-    // move pointers from the temporary list into the real one
-    iData.ResetAndDestroy();
-    TInt newListCount = newList.Count();
-    TSLOG1( TSLOG_INFO, "new list count = %d", newListCount );
-    for ( TInt i = 0; i < newListCount; ++i )
-        {
-        TSLOG3( TSLOG_INFO, "[%d] %S wgid=%d",
-            i, &newList[i]->AppName(), newList[i]->WgId() );
-        iData.AppendL( newList[i] );
-        newList[i] = 0;
-        }
-    CleanupStack::PopAndDestroy( &newList );
-    
+    TBool changed = iDataList->CollectTasksL();
     TSLOG1_OUT( "change flag = %d", changed );
     return changed;
     }
 
-// --------------------------------------------------------------------------
-// CTsFswEngine::AddEntryL
-// --------------------------------------------------------------------------
-//
-TBool CTsFswEngine::AddEntryL( TInt aWgId, const TUid& aAppUid,
-        CApaWindowGroupName* aWgName, RTsFswArray& aNewList,
-        TBool aIsWidget )
-    {
-    TBool changed = EFalse;
-    CTsFswEntry* entry = CTsFswEntry::NewLC();
-    entry->SetWgId( aWgId );
-    entry->SetAppUid( aAppUid );
-    entry->SetWidget( aIsWidget );
-
-    // check if present in old list and if yes then take some of the old data
-    TBool found = CheckIfExistsL( *entry, aAppUid, changed, aNewList );
-
-    // if not present previously then find out app name
-    // and check if screenshot is already available
-    if ( !found )
-        {
-        // when adding a new entry to the list it is changed for sure
-        changed = ETrue;
-        HBufC* name = FindAppNameLC( aWgName, aAppUid, aWgId );
-        if ( name )
-            {
-            entry->SetAppNameL( *name );
-            }
-        CleanupStack::PopAndDestroy( name );
-        TInt h = LookupScreenshotHandle( aWgId );
-        if ( h )
-            {
-            entry->SetScreenshotHandle( h );
-            }
-        entry->SetAlwaysShown( iAlwaysShownAppList->IsAlwaysShownApp( aAppUid ) );
-        if ( aWgName )
-            {
-            entry->SetSystemApp( aWgName->IsSystem() );
-            }
-        }
-
-    // add to new list, ownership is transferred
-    aNewList.AppendL( entry );
-    CleanupStack::Pop( entry );
-    return changed;
-    }
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::CheckIfExistsL
-// --------------------------------------------------------------------------
-//
-TBool CTsFswEngine::CheckIfExistsL( CTsFswEntry& aEntry,
-        const TUid& aAppUid,
-        TBool& aChanged,
-        RTsFswArray& aNewList )
-    {
-    for ( TInt entryIdx = 0, oldCount = iData.Count();
-            entryIdx < oldCount; ++entryIdx )
-        {
-        // Enough to check appuid, no need to bother with wgid as the
-        // screenshot handle is up-to-date or will be updated later anyway.
-        if ( iData[entryIdx]->AppUid() == aAppUid )
-            {
-            // if positions do not match then the list is different than before
-            if ( entryIdx != aNewList.Count() )
-                {
-                aChanged = ETrue;
-                }
-            CTsFswEntry* oldEntry = iData[entryIdx];
-            aEntry.SetAppNameL( oldEntry->AppName() );
-            aEntry.SetScreenshotHandle( oldEntry->ScreenshotHandle() );
-            aEntry.SetAlwaysShown( oldEntry->AlwaysShown() );
-            aEntry.SetSystemApp( oldEntry->SystemApp() );
-            return ETrue;
-            }
-        }
-    return EFalse;
-    }
     
-// --------------------------------------------------------------------------
-// CTsFswEngine::CheckWidgetsL
-// --------------------------------------------------------------------------
-//
-void CTsFswEngine::CheckWidgetsL( RTsFswArray& aNewList )
-    {
-    if( iWidgetsSupported )
-        {
-        iWidgetList->InitializeWidgetListL();
-        const RWidgetInfoArray& arr( iWidgetList->RunningWidgets() );
-        for ( TInt i = 0, ie = arr.Count(); i != ie; ++i )
-            {
-            //verify if widget is working in full screen mode
-            if( arr[i]->iFileSize )
-                {
-                // wgid will be a special negative value
-                // windowgroupname is not needed here so pass NULL
-                AddEntryL( -(i+1), arr[i]->iUid, 0, aNewList, ETrue );
-                }
-            }
-        }
-    }
-
-// --------------------------------------------------------------------------
 // CTsFswEngine::HiddenAppListUpdated
 // Callback from the hidden app list watcher
 // --------------------------------------------------------------------------
@@ -636,119 +366,13 @@ void CTsFswEngine::HiddenAppListUpdated()
     }
 
 // --------------------------------------------------------------------------
-// CTsFswEngine::AppUidForWgIdL
-// --------------------------------------------------------------------------
-//
-TUid CTsFswEngine::AppUidForWgIdL( TInt aWgId )
-    {
-    CApaWindowGroupName* windowName =
-        CApaWindowGroupName::NewLC( iWsSession, aWgId );
-    TUid appUid = windowName->AppUid();
-    CleanupStack::PopAndDestroy( windowName );
-    return appUid;
-    }
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::FindParentWgId
-// --------------------------------------------------------------------------
-//
-TInt CTsFswEngine::FindParentWgId( TInt aWgId )
-    {
-    TInt parent( KErrNotFound );
-    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
-    // Ask for window group list from RWsSession
-    TInt error = iWsSession.WindowGroupList( 0, &allWgIds );
-    if ( !error )
-        {
-        TInt count( allWgIds.Count() );
-        for ( TInt i( 0 ); i < count; i++ )
-            {
-            RWsSession::TWindowGroupChainInfo info = allWgIds[i];
-            if ( info.iId == aWgId && info.iParentId > 0)
-                {
-                parent = info.iParentId;
-                break;
-                }
-            }
-        }
-    allWgIds.Close();
-    return parent;
-    }
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::FindMostTopParentWgId
-// --------------------------------------------------------------------------
-//
-TInt CTsFswEngine::FindMostTopParentWgId( TInt aWgId )
-    {
-    TInt parent( KErrNotFound );
-    parent = FindParentWgId( aWgId );
-    if( parent != KErrNotFound)
-        {
-        TInt topParent = FindMostTopParentWgId(parent);
-        if( topParent != KErrNotFound )
-            {
-            parent = topParent;
-            }
-        }
-    return parent;
-    }
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::FindAppNameLC
-// --------------------------------------------------------------------------
-//
-HBufC* CTsFswEngine::FindAppNameLC( CApaWindowGroupName* aWindowName,
-                                  const TUid& aAppUid,
-                                  TInt aWgId )
-    {
-    //Retrieve the app name
-    TApaAppInfo info;
-    iAppArcSession.GetAppInfo( info, aAppUid );
-    TPtrC caption = info.iShortCaption;
-
-    HBufC* tempName = 0;
-    if ( !caption.Length() && aWindowName ) // if not set - use thread name instead
-        {
-        if ( aWindowName->Caption().Length() )
-            {
-            tempName = aWindowName->Caption().AllocL();
-            //put on cleanupstack after the if
-            }
-        else
-            {
-            TThreadId threadId;
-            TInt err = iWsSession.GetWindowGroupClientThreadId(
-                    aWgId, threadId );
-            if ( err == KErrNone )
-                {
-                RThread thread;
-                CleanupClosePushL( thread );
-                err = thread.Open ( threadId );
-                if ( err==KErrNone )
-                    {
-                    tempName = thread.Name().AllocL(); // codescanner::forgottoputptroncleanupstack
-                    // tempName put on cleanupstack after the if
-                    }
-                CleanupStack::PopAndDestroy( &thread );
-                }
-            }
-        }
-    else
-        {
-        tempName = caption.AllocL();
-        //put on cleanupstack after the if
-        }
-    CleanupStack::PushL( tempName );
-    return tempName;
-    }
-
-// --------------------------------------------------------------------------
 // CTsFswEngine::CopyBitmapL
 // --------------------------------------------------------------------------
 //
 CFbsBitmap* CTsFswEngine::CopyBitmapL( TInt aFbsHandle, TBool aKeepAspectRatio )
     {
+    TSLOG_CONTEXT( CopyBitmapL, TSLOG_LOCAL );
+    
     CFbsBitmap* ret = new (ELeave) CFbsBitmap;
     CleanupStack::PushL( ret );
     CFbsBitmap* bmp = new (ELeave) CFbsBitmap;
@@ -788,6 +412,7 @@ CFbsBitmap* CTsFswEngine::CopyBitmapL( TInt aFbsHandle, TBool aKeepAspectRatio )
     CleanupStack::PopAndDestroy( bmp );
     CleanupStack::Pop( ret );
 
+    TSLOG_OUT();
     return ret;
     }
 
@@ -856,25 +481,24 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
     TSLOG_CONTEXT( HandleFswPpApplicationChange, TSLOG_LOCAL );
     TSLOG2_IN( "aWgId = %d aFbsHandle = %d", aWgId, aFbsHandle );
 
+    TUid appUid;
+    TInt err = iDataList->AppUidForWgId( aWgId, appUid );
+    if ( err || appUid == KTsCameraUid )
+        {
+        // Dont't assign screenshot to camera app
+        TSLOG0( TSLOG_LOCAL, "Screenshot for camera - ignore" );
+        iPreviewProvider->AckPreview(aFbsHandle);
+        TSLOG_OUT();
+        return;
+        }
+    
     CFbsBitmap* bmp = 0;
-    TRAPD( err, bmp = CopyBitmapL( aFbsHandle, EFalse ) );
+    TRAP( err, bmp = CopyBitmapL( aFbsHandle, EFalse ) );
     iPreviewProvider->AckPreview(aFbsHandle);
     if ( err == KErrNone )
         {
-        CFbsBitmap** oldbmp = iScreenshots.Find( aWgId );
-        if ( oldbmp )
-            {
-            delete *oldbmp;
-            }
-        if ( iScreenshots.Insert( aWgId, bmp ) != KErrNone )
-            {
-            delete bmp;
-            iScreenshots.Remove( aWgId );
-            }
-        else
-            {
-            AssignScreenshotHandle( aWgId, bmp->Handle() );
-            }
+		iDataList->MoveEntryAtStart(appUid.iUid, EFalse);
+        StoreScreenshot(aWgId, bmp);
         }
 
     TSLOG_OUT();
@@ -890,14 +514,8 @@ void CTsFswEngine::HandleFswPpApplicationUnregistered( TInt aWgId )
     TSLOG_CONTEXT( HandleFswPpApplicationUnregistered, TSLOG_LOCAL );
     TSLOG1_IN( "aWgId = %d", aWgId );
 
-    CFbsBitmap** bmp = iScreenshots.Find( aWgId );
-    if ( bmp )
-        {
-        delete *bmp;
-        iScreenshots.Remove( aWgId );
-        AssignScreenshotHandle( aWgId, 0 );
-        }
-
+    RemoveScreenshot(aWgId);
+    
     TSLOG_OUT();
     }
 
@@ -911,15 +529,14 @@ void CTsFswEngine::HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aCloc
     TSLOG_CONTEXT( HandleFswPpApplicationBitmapRotation, TSLOG_LOCAL );
     TSLOG1_IN( "aWgId = %d", aWgId );
     
-    CFbsBitmap** bmp = iScreenshots.Find( aWgId );
+    CFbsBitmap** bmp = iDataList->FindScreenshot(aWgId);
+            
     if ( bmp )
         {
         // Rotate bitmap
         TRAP_IGNORE( RotateL( **bmp, aWgId, aClockwise ) );
         // Bitmap in a array is invalid, remove it
-        delete *bmp;
-        iScreenshots.Remove( aWgId );
-        AssignScreenshotHandle( aWgId, 0 );
+        RemoveScreenshot(aWgId);
         }
     
     TSLOG_OUT();
@@ -968,16 +585,7 @@ void CTsFswEngine::RotationComplete( TInt aWgId,
     
     if ( aError == KErrNone )
         {
-        if ( iScreenshots.Insert( aWgId, aBitmap ) != KErrNone )
-            {
-            delete aBitmap;
-            iScreenshots.Remove( aWgId );
-            AssignScreenshotHandle( aWgId, 0 );
-            }
-        else
-            {
-            AssignScreenshotHandle( aWgId, aBitmap->Handle() );
-            }
+        StoreScreenshot(aWgId, aBitmap);
         }
     else
         {
@@ -986,97 +594,6 @@ void CTsFswEngine::RotationComplete( TInt aWgId,
         }
     
     TSLOG_OUT();
-    }
-
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::AssignScreenshotHandle
-// Called when a screenshot arrives to check if there is a corresponding
-// application in the task list. Firstly try to match screenshot into parental
-// application then into standalone one.
-// --------------------------------------------------------------------------
-//
-void CTsFswEngine::AssignScreenshotHandle( TInt aWgIdForScreenshot,
-        TInt aBitmapHandle )
-    {
-    TBool changed = EFalse;
-    TInt parentWgId = FindMostTopParentWgId( aWgIdForScreenshot );
-    // now parentWgId is a valid wgid or KErrNotFound (-1)
-    if (parentWgId != KErrNotFound)
-		{
-		AssignScreenshotHandle( parentWgId, aBitmapHandle, changed );
-		}
-    if (!changed)
-		{
-		AssignScreenshotHandle( aWgIdForScreenshot, aBitmapHandle, changed );
-		}
-    if ( changed )
-        {
-        iObserver.FswDataChanged();
-        }
-    }
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::AssignScreenshotHandle
-// Called when a screenshot arrives to check if there is a corresponding
-// application in the task list. It might be tried to be match into parental 
-// or standalone application.
-// --------------------------------------------------------------------------
-//
-void CTsFswEngine::AssignScreenshotHandle(TInt aWgIdForScreenshot,
-		TInt aBitmapHandle, TBool& aAsigned)
-	{
-	aAsigned = EFalse;
-	for (TInt i = 0, ie = iData.Count(); i != ie; ++i)
-		{
-		if (iData[i]->Widget())
-			{
-			// Do not do anything for now => no screenshot for widgets.
-			continue;
-			}
-		TInt appWgId = iData[i]->WgId();
-		if (appWgId == aWgIdForScreenshot)
-			{
-			iData[i]->SetScreenshotHandle(aBitmapHandle);
-			aAsigned = ETrue;
-			break;
-			}
-		}
-	}
-
-// --------------------------------------------------------------------------
-// CTsFswEngine::LookupScreenshotHandle
-// Called to check if there is a screenshot already stored for the given
-// app. (or a screenshot with a wgid for which aWgIdForApp is the parent)
-// --------------------------------------------------------------------------
-//
-TInt CTsFswEngine::LookupScreenshotHandle( TInt aWgIdForApp )
-    {
-    CFbsBitmap** bmp = iScreenshots.Find( aWgIdForApp );
-    if ( bmp )
-        {
-        // there is a screenshot stored for this wgid
-        return (*bmp)->Handle();
-        }
-    else if ( aWgIdForApp > 0 )
-        {
-        // must check if there is a screenshot for which aWgIdForApp is the parent
-        THashMapIter<TInt, CFbsBitmap*> iter( iScreenshots );
-        while ( const TInt* wgid = iter.NextKey() )
-            {
-            if ( FindParentWgId( *wgid ) == aWgIdForApp )
-                {
-                CFbsBitmap** bmp = iter.CurrentValue();
-                return (*bmp)->Handle();
-                }
-            }
-        }
-    else if ( aWgIdForApp < 0 )
-        {
-        // Must be a widget, wgid is useless in this case.
-        // Do not do anything for now => no screenshot for widgets.
-        }
-    return 0;
     }
 
 // --------------------------------------------------------------------------
@@ -1095,7 +612,7 @@ void CTsFswEngine::RunL()
             // refresh the app list during the next task list update.
             if ( operationStatus == Swi::ESwisStatusSuccess )
                 {
-                iAppDataRefreshNeeded = ETrue;
+                iDataList->SetAppDataRefreshNeeded();
                 }
             }
         iSwiProp.Subscribe( iStatus );
@@ -1160,15 +677,12 @@ void CTsFswEngine::CloseWidgetL(TInt aOffset )
     {
     TSLOG_CONTEXT( CloseWidgetL, TSLOG_LOCAL );
     TSLOG1_IN( "aOffset = %d", aOffset );
-    if( iWidgetList->RunningWidgets().Count() <= aOffset )
+    if( iDataList->Widgets()->RunningWidgets().Count() <= aOffset )
         {
         User::Leave(KErrArgument);
         }
-    const CWidgetInfo* widgetInfo(iWidgetList->RunningWidgets()[aOffset]);
+    const CWidgetInfo* widgetInfo(iDataList->Widgets()->RunningWidgets()[aOffset]);
     const TPtrC bundleName(*widgetInfo->iBundleName);
-    RApaLsSession ls;
-    User::LeaveIfError( ls.Connect() );
-    CleanupClosePushL( ls );
     CApaCommandLine* const cmdLine = CApaCommandLine::NewLC();
     
     HBufC8* const
@@ -1185,14 +699,80 @@ void CTsFswEngine::CloseWidgetL(TInt aOffset )
     cmdLine->SetCommandL( EApaCommandBackgroundAndWithoutViews );
     cmdLine->SetOpaqueDataL( *opaque );
     CleanupStack::PopAndDestroy( opaque );
-    cmdLine->SetExecutableNameL( KWidgetAppName );
-    ls.StartApp( *cmdLine );
+    
+    if (iDataList->Widgets()->IsCWRTWidget(widgetInfo->iUid))
+    	{
+        cmdLine->SetExecutableNameL( KWidgetAppNameWgt);
+    	}
+    else
+    	{
+        cmdLine->SetExecutableNameL( KWidgetAppName );
+    	}
+    
+    iAppArcSession.StartApp( *cmdLine );
     CleanupStack::PopAndDestroy( cmdLine );
-    CleanupStack::PopAndDestroy( &ls );
     TSLOG_OUT();
     }
 
+// --------------------------------------------------------------------------
+// CTsFswEngine::StoreScreenshot
+// --------------------------------------------------------------------------
+//
+TBool CTsFswEngine::StoreScreenshot(TInt aWgId, CFbsBitmap* aBmp)
+    {
+    TSLOG_CONTEXT( StoreScreenshot, TSLOG_LOCAL );
+    //iDataList would take ownership
+    TBool change = EFalse;
+    change = iDataList->StoreScreenshot(aWgId, aBmp);
+    if(change)
+        {
+        iObserver.FswDataChanged();
+        }
+    TSLOG1_OUT( "Screenshot for  = %d", aWgId );
+    return change;
+    }
 
+// --------------------------------------------------------------------------
+// CTsFswEngine::RemoveScreenshot()
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::RemoveScreenshot(TInt aWgId)
+    {
+    TBool change = EFalse;
+    change = iDataList->RemoveScreenshot(aWgId);
+    if( change )
+        {
+        iObserver.FswDataChanged();
+        }
+    }
+
+// --------------------------------------------------------------------------
+// CTsFswEngine::HandleWidgetUpdateL()
+// --------------------------------------------------------------------------
+//
+void CTsFswEngine::HandleWidgetUpdateL(TInt aWidgetId, TInt aBitmapHandle)
+    {
+	TSLOG_CONTEXT( HandleWidgetUpdateL, TSLOG_LOCAL );
+    
+	iDataList->MoveEntryAtStart(aWidgetId, ETrue);
+    
+	CFbsBitmap* bmp = 0;
+    TBool contentChanged(EFalse); 
+    if( aBitmapHandle )
+    	{
+		TRAPD( err, bmp = CopyBitmapL( aBitmapHandle, EFalse ) );
+		if ( err == KErrNone )
+			{
+            contentChanged = StoreScreenshot(aWidgetId, bmp);
+			}
+		}
+	if(!contentChanged)
+		{
+		iObserver.FswDataChanged();
+		}
+ 
+    TSLOG_OUT();
+    }
 
 // --------------------------------------------------------------------------
 // CTsRotationListener::CTsRotationListener

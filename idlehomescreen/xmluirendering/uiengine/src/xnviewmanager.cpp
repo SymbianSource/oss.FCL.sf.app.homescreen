@@ -27,6 +27,7 @@
 #include <aifwdefs.h>
 #include <gfxtranseffect/gfxtranseffect.h>
 #include <akntransitionutils.h>
+#include <layoutmetadata.cdl.h>
 
 // User includes
 #include "xnapplication.h"
@@ -63,7 +64,8 @@ _LIT8( KTemplateViewUID, "0x20026f50" );
 const TInt KPSCategoryUid( 0x200286E3 );
 const TInt KPSCrashCountKey( 1 );     
 const TInt KStabilityInterval( 60000000 ); // 1 minute
-const TInt KCrashRestoreThreshold( 3 );
+const TInt KCrashRestoreDefaultThreshold( 3 );
+const TInt KCrashRestoreAllTreshold( 4 );
 
 // ============================ LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
@@ -276,9 +278,7 @@ CXnViewManager::CXnViewManager( CXnAppUiAdapter& aAdapter )
 // -----------------------------------------------------------------------------
 //
 CXnViewManager::~CXnViewManager()
-    {
-    delete iUiStartupPhase;
-    
+    {        
     delete iStabilityTimer;
     
     iObservers.Reset();
@@ -303,33 +303,6 @@ CXnViewManager::~CXnViewManager()
     }
 
 // -----------------------------------------------------------------------------
-// CXnViewManager::PropertyChangedL()
-// 
-// -----------------------------------------------------------------------------
-//
-void CXnViewManager::PropertyChangedL( const TUint32 aKey, const TInt aValue )
-    {
-    if ( aKey == KPSStartupUiPhase && aValue == EStartupUiPhaseAllDone )
-        {
-	    iUiStartupPhaseAllDone = ETrue;
-				
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( ActiveViewData() );    
-        }
-    
-    iUiStartupPhaseAllDone = ETrue;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewManager::UiStartupPhaseAllDone()
-// 
-// -----------------------------------------------------------------------------
-//
-TBool CXnViewManager::UiStartupPhaseAllDone() const
-    {
-    return iUiStartupPhaseAllDone;        
-    }
-    
-// -----------------------------------------------------------------------------
 // CXnViewManager::ConstructL()
 // 2nd phase constructor
 // -----------------------------------------------------------------------------
@@ -353,28 +326,9 @@ void CXnViewManager::ConstructL()
     
     iComposer = CXnComposer::NewL( *iHspsWrapper );
     
-    // Robustness checks.
-    TInt crashCount = 0;
-    RProperty::Get( TUid::Uid( KPSCategoryUid ),
-                    KPSCrashCountKey,
-                    crashCount );    
-            
-    if( crashCount >= KCrashRestoreThreshold )
-        {
-        iHspsWrapper->RestoreRootL();
-        ResetCrashCount();        
-        ShowErrorNoteL( R_QTN_HS_ERROR_WIDGETS_REMOVED );        
-        }
-    else if( crashCount > 0 )
-        {
-        // Start stability timer to ensure that
-        // if system is stabile at least KStabilityInterval
-        // then crash count is reset to 0. 
-        iStabilityTimer = CPeriodic::NewL( CActive::EPriorityStandard );
-        iStabilityTimer->Start( KStabilityInterval,
-                                KStabilityInterval,
-                                TCallBack( SystemStabileTimerCallback, this ) );
-        }       
+    iIsLandscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();
+    
+    DoRobustnessCheckL();
     }
 
 // -----------------------------------------------------------------------------
@@ -394,14 +348,8 @@ void CXnViewManager::LoadUiL()
            
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
     
-    // Determine UI startup phase
-    delete iUiStartupPhase;
-    iUiStartupPhase = NULL;
-    
-    iUiStartupPhaseAllDone = EFalse;
-                   
-    iUiStartupPhase = CXnPropertySubscriber::NewL( 
-        KPSUidStartup, KPSStartupUiPhase, *this );
+    // Activate initial view already here to get publishers loaded        
+    ActiveViewData().SetActive( ETrue );    
     }
 
 // -----------------------------------------------------------------------------
@@ -921,7 +869,6 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
         if ( next.Load() == KErrNoMemory )
             {
             next.ShowOutOfMemError();
-            
             return;
             }
         }
@@ -940,21 +887,42 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
         
         TInt ret( GfxTransEffect::BeginGroup() );
         
-        CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+        CFbsBitmap* currentBg( ActiveViewData().WallpaperImage() );
+        CFbsBitmap* nextBg( next.WallpaperImage() );
         
-        GfxTransEffect::Begin( bg, KGfxControlActionAppear );
-
-        GfxTransEffect::SetDemarcation( bg, bg->Position() );
-        GfxTransEffect::End( bg );        
+        if ( currentBg || nextBg )
+            {
+            CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+            
+            if ( !currentBg && nextBg )
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgAnimToImgAppear );
+                }
+            else
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgImgToImgAppear );
+                }
+            
+            GfxTransEffect::SetDemarcation( bg, bg->Position() );
+            GfxTransEffect::End( bg );
+            }
         
-        GfxTransEffect::Begin( thisView, KGfxControlActionDisappear );
+        if ( iIsLandscapeOrientation )
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
+            GfxTransEffect::Begin( nextView, KGfxControlActionAppearLsc );
+            }
+        else
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
+            GfxTransEffect::Begin( nextView, KGfxControlActionAppearPrt );
+            }
         
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( next );
+        TRAP_IGNORE( iAppUiAdapter.ViewAdapter().ActivateContainerL( next ) );
         
         GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
         GfxTransEffect::End( thisView );
-                
-        GfxTransEffect::Begin( nextView, KGfxControlActionAppear );
+        
         GfxTransEffect::SetDemarcation( nextView, nextView->Position() );
         GfxTransEffect::End( nextView );
                                 
@@ -979,7 +947,6 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
         if ( prev.Load() == KErrNoMemory )
             {
             prev.ShowOutOfMemError();
-            
             return;
             }
         }
@@ -997,23 +964,43 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
         GfxTransEffect::Register( prevView, KGfxContextActivatePrevView );
     
         TInt ret( GfxTransEffect::BeginGroup() );
+        
+        CFbsBitmap* currentBg( ActiveViewData().WallpaperImage() );
+        CFbsBitmap* prevBg( prev.WallpaperImage() );
+        
+        if ( currentBg || prevBg )
+            {
+            CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
             
-        CCoeControl* bg( &iAppUiAdapter.ViewAdapter().BgManager() );
+            if ( !currentBg && prevBg )
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgAnimToImgAppear );
+                }
+            else
+                {
+                GfxTransEffect::Begin( bg, KGfxControlActionBgImgToImgAppear );
+                }
+            
+            GfxTransEffect::SetDemarcation( bg, bg->Position() );
+            GfxTransEffect::End( bg );
+            }
         
-        GfxTransEffect::Begin( bg, KGfxControlActionAppear );
-    
-        GfxTransEffect::SetDemarcation( bg, bg->Position() );
-        GfxTransEffect::End( bg );        
+        if ( iIsLandscapeOrientation )
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
+            GfxTransEffect::Begin( prevView, KGfxControlActionAppearLsc );
+            }
+        else
+            {
+            GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
+            GfxTransEffect::Begin( prevView, KGfxControlActionAppearPrt );
+            }
         
-        GfxTransEffect::Begin( thisView, KGfxControlActionDisappear );
-        
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( prev );
+        TRAP_IGNORE( iAppUiAdapter.ViewAdapter().ActivateContainerL( prev ) );
         
         GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
         GfxTransEffect::End( thisView );
-                
-        GfxTransEffect::Begin( prevView, KGfxControlActionAppear );
-                              
+                                      
         GfxTransEffect::SetDemarcation( prevView, prevView->Position() );
         GfxTransEffect::End( prevView );
                                 
@@ -1234,7 +1221,11 @@ TInt CXnViewManager::RemoveViewL( const CHsContentInfo& aInfo )
             retval = iHspsWrapper->RemovePluginL( view->PluginId() );
             
             // Notify observers of view list change
-            NotifyViewRemovalL( *view );
+            TRAPD( err, NotifyViewRemovalL( *view ) );
+            if ( err != KErrNone )
+                {
+                // ignored
+                }            
 
             iRootData->DestroyViewData( view );
                                                                    
@@ -1307,7 +1298,11 @@ void CXnViewManager::RemoveViewL( TInt aEffectId )
         iHspsWrapper->RemovePluginL( view->PluginId() );
         
         // Notify observers of view list change
-        NotifyViewRemovalL( *view );
+        TRAPD( err, NotifyViewRemovalL( *view ) );
+        if ( err != KErrNone )
+            {
+            // ignored
+            }   
 
         iRootData->DestroyViewData( view );
         
@@ -1773,17 +1768,58 @@ void CXnViewManager::ResetCrashCount()
 // -----------------------------------------------------------------------------
 // CXnViewManager::ShowErrorNoteL 
 // -----------------------------------------------------------------------------
-void CXnViewManager::ShowErrorNoteL( const TInt aResourceId )
+void CXnViewManager::ShowErrorNoteL()
     {        
-    HBufC* msg( StringLoader::LoadLC( aResourceId ) );
-        
-    CAknErrorNote* note = new ( ELeave ) CAknErrorNote;
-    CleanupStack::PushL( note );
+    CAknQueryDialog* query = CAknQueryDialog::NewL();
+    query->PrepareLC( R_HS_CONTENT_REMOVED_VIEW );
+
+    HBufC* queryText( StringLoader::LoadLC( R_HS_ERROR_CONTENT_REMOVED ) );    
+    query->SetPromptL( queryText->Des() );    
+    CleanupStack::PopAndDestroy( queryText );
+
+    query->RunLD();   
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::DoRobustnessCheckL 
+// -----------------------------------------------------------------------------
+void CXnViewManager::DoRobustnessCheckL()
+    {
+    TInt crashCount = 0;
+    RProperty::Get( TUid::Uid( KPSCategoryUid ),
+                    KPSCrashCountKey,
+                    crashCount );    
     
-    note->ExecuteLD( *msg );
+    if( crashCount == KCrashRestoreDefaultThreshold )
+        {    
+        TInt err = iHspsWrapper->RestoreDefaultConfL();         
+        ShowErrorNoteL();
+        }
+    else if( crashCount >= KCrashRestoreAllTreshold )
+        {       
+        TInt err = iHspsWrapper->RestoreRootL();              
+        ResetCrashCount();
+        return;
+        }
     
-    CleanupStack::Pop( note );
-    CleanupStack::PopAndDestroy( msg );    
+    if( crashCount > 0 )
+        {        
+        // Start stability timer to ensure that
+        // if system is stabile at least KStabilityInterval
+        // then crash count is reset to 0. 
+        iStabilityTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+        iStabilityTimer->Start( KStabilityInterval,
+                                KStabilityInterval,
+                                TCallBack( SystemStabileTimerCallback, this ) );
+        }           
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::OrientationChanged 
+// -----------------------------------------------------------------------------
+void CXnViewManager::OrientationChanged()
+    {
+    iIsLandscapeOrientation = Layout_Meta_Data::IsLandscapeOrientation();    
     }
 
 // End of file

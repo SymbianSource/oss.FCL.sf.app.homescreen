@@ -27,11 +27,6 @@ PRJ_EXPORTS
 
 ../rom/aicontainer.iby CORE_APP_LAYER_IBY_EXPORT_PATH(aicontainer.iby)
 
-// Backup registration
-//backup_registration.xml  /epoc32/data/z/private/101fd657/backup_registration.xml
-//backup_registration.xml  /epoc32/release/winscw/udeb/z/private/101fd657/backup_registration.xml
-//backup_registration.xml  /epoc32/release/winscw/urel/z/private/101fd657/backup_registration.xml
-
 // Generic configuration interface for component cenrep settings
 ../conf/activeidle.confml                  APP_LAYER_CONFML(activeidle.confml)
 ../conf/activeidle_10207467.crml           APP_LAYER_CRML(activeidle_10207467.crml)

@@ -127,12 +127,6 @@ public:
      */
     IMPORT_C void SetFocusedNode( CXnNodePluginIf* aFocusedNode );
 
-    /**
-     * Restore focus to previously focused node
-     *
-     * @since Series 60 3.1
-     */
-    IMPORT_C void RestorePreviousFocusedNode();
 
     /**
      * Get the string pool
@@ -191,14 +185,6 @@ public:
         TInt aReferenceValue );
 
     /**
-     * Activate a view
-     *
-     * @since Series 60 3.1
-     * @param aViewNode View node
-     */
-    IMPORT_C void ActivateViewL( CXnNodePluginIf& aViewNode );
-
-    /**
      * Get the size of the current screen device
      *
      * @since Series 60 3.1
@@ -253,29 +239,6 @@ public:
      * @return ETrue if widgets visible, EFalse otherwise
      */
     IMPORT_C TBool WidgetsVisible() const;
-
-    /**
-     * Gets control defining hit region
-     *
-     * @since Series 60 5.0
-     * @return Control defining the hit region
-     */
-    IMPORT_C CXnControlAdapter* HitRegion() const;
-
-    /**
-     * Deactivates focused node
-     *
-     * @since Series 60 5.0
-     */
-    IMPORT_C void DeactivateFocusedNodeL();
-
-    /**
-     * Queries wheter focus is visible
-     *
-     * @since Series 60 5.0
-     * @return ETrue if focus is shown, EFalse otherwise
-     */
-    IMPORT_C TBool ShowFocus();
     
     /**
      * Gets a plugin node which the given node is.
@@ -285,35 +248,7 @@ public:
      * @return A Plugin node.
      */
     IMPORT_C CXnNodePluginIf& PluginNodeL( CXnNodePluginIf* aNode );
-        
-    /**
-     * Sets focus visibility for active view
-     * @since Series 60 5.0
-     * @param aVisible Visibility state
-     */                
-    IMPORT_C void SetFocusVisibleL( TBool aVisible );
-        
-    /**
-     * Return focus visibility of active view
-     * @since Series 60 5.0
-     * @return ETrue if active view focus is visible, EFalse otherwise
-     */                
-    IMPORT_C TBool FocusVisible();
-        
-    /**
-     * Enables or disables swipe for active view
-     * @since Series 60 5.0
-     * @param aEnable True will enable swipe, false will disable
-     */                
-    IMPORT_C void EnableSwipeL( TBool aEnable );
-        
-    /**
-     * Return whether swipe is enabled or not
-     * @since Series 60 5.0
-     * @return ETrue if swipe is enable, EFalse otherwise
-     */                
-    IMPORT_C TBool SwipeEnabledL();
-    
+                                    
     /**
      * Disables layoyt and redraw, places cleanup item to cleanup stack
      * for enabling layot and redraw

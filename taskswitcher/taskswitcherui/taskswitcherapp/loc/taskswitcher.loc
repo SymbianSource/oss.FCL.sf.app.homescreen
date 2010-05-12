@@ -41,7 +41,13 @@
 //l:heading_pane_t1
 //r:5.0
 //
-#define qtn_task_switcher_heading_applications "Open applications"
+#define qtn_task_switcher_heading_applications "Open applications (%d)"
+
+//d:Text for no appliactions
+//l:none
+//r:5.0
+//
+#define qtn_task_switcher_no_apps "No open application"
 
 //d:Text for appliactions that has no name
 //l:none

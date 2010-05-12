@@ -24,6 +24,8 @@
 
 // User includes
 #include "xnappuiadapter.h"
+#include "xnviewadapter.h"
+#include "xnkeyeventdispatcher.h"
 #include "xnviewmanager.h"
 #include "xnviewdata.h"
 #include "xnplugindata.h"
@@ -35,7 +37,6 @@
 #include "xntype.h"
 #include "xnuiengine.h"
 #include "xneditor.h"
-#include "xnhittest.h"
 #include "xnfocuscontrol.h"
 
 #include "xnpopupcontroladapter.h"
@@ -165,6 +166,8 @@ void CXnPopupControlAdapter::ProcessCommandL( TInt aCommandId )
             }
         }        
 
+    iUiEngine->Editor()->SetTargetPlugin( NULL );
+    
     iMenuItems.Reset();
     iCommandId = 0;
     
@@ -197,13 +200,18 @@ void CXnPopupControlAdapter::SetObserver(
 void CXnPopupControlAdapter::TryDisplayingStylusPopupL( CXnNode& aPlugin )
     {
     HideMenuL();
+    
     CXnViewManager* manager( iUiEngine->ViewManager() );            
     CXnPluginData* plugin( manager->ActiveViewData().Plugin( &aPlugin ) );
+    
     if ( !plugin )
         {
         return;
         }
-    TPointerEvent event( iUiEngine->HitTest().PointerEvent() );
+    
+    CXnViewAdapter& adapter( iUiEngine->AppUiAdapter().ViewAdapter() );
+    
+    const TPointerEvent& event( adapter.EventDispatcher()->PointerEvent() );
     
     delete iStylusPopupMenu;
     iStylusPopupMenu = NULL;

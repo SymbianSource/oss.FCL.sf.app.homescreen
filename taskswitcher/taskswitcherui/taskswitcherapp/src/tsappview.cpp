@@ -134,7 +134,7 @@ void CTsAppView::ConstructL( const TRect& aRect, RWindowGroup& aWg )
                KAknsIIDQsnFrPopup,
                iBgContextOuterRect,
                iBgContextInnerRect,
-               ETrue );
+               EFalse );
     iBgContext->SetFrameRects(iBgContextOuterRect, iBgContextInnerRect);
     iBgContext->SetCenter( KAknsIIDQsnFrPopupCenter );
 
@@ -249,7 +249,7 @@ void CTsAppView::CreateControlsL()
     
     CleanupStack::PopAndDestroy( &rects );
     
-    UpdateHeadingsL();
+    UpdateHeadingsL(0);
     }
 
 // -----------------------------------------------------------------------------
@@ -309,6 +309,7 @@ void CTsAppView::SizeChanged()
     iViewRect = Rect();
     UpdatePopupRects();
     iBgContext->SetFrameRects(iBgContextOuterRect, iBgContextInnerRect);
+    iBgContext->SetParentPos(PositionRelativeToScreen());
     if ( iFastSwapArea && iAppsHeading  )
         {
         RArray<TRect> rects;
@@ -456,6 +457,18 @@ void CTsAppView::HandleSwitchToForegroundEvent()
     TSLOG_CONTEXT( CTsAppView::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
     TSLOG_IN();
     
+    // Forward event to interested controls
+    iFastSwapArea->HandleSwitchToForegroundEvent();
+    iFastSwapArea->UpdateComponentVisibility();
+    
+    // Check for layout updates
+    CTsAppUi* appUi = static_cast<CTsAppUi*>(iCoeEnv->AppUi());
+    if ( iViewRect != appUi->ApplicationRect() &&
+         appUi->LayoutChangeAllowed() )
+        {
+        HandleDeviceStateChanged( EOrientation );
+        }
+    
     Window().Invalidate(Rect());
     
     iEvtHandler->EnableEventHandling(ETrue);
@@ -467,9 +480,6 @@ void CTsAppView::HandleSwitchToForegroundEvent()
 
     // Focus jumps back to fsw
     ChangeFocus( iFastSwapArea );
-
-    // Forward event to interested controls
-    iFastSwapArea->HandleSwitchToForegroundEvent();
 
     // Start animation
     CTsAppUi* appui =
@@ -604,9 +614,8 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
         {
 		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
 				ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
-		if ( !( iFastSwapArea->Rect().Contains(aPointerEvent.iParentPosition) ||
-		        iAppsHeading->Rect().Contains(aPointerEvent.iParentPosition)
-		       ) )
+
+		if( !DragArea().Contains(aPointerEvent.iParentPosition))
 		    {
 		    //move task switcher to background
 		    iEvtHandler->EnableEventHandling(EFalse);
@@ -620,28 +629,22 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
 // CTsAppView::DataChanged
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::DataChanged( CCoeControl* /*aWhere*/, TInt /*aNewCount*/ )
+void CTsAppView::DataChanged( CCoeControl* /*aWhere*/, TInt aNewCount )
     {
-    TRAP_IGNORE( UpdateHeadingsL() );
+    TRAP_IGNORE( UpdateHeadingsL( aNewCount ) );
     }
 
 // -----------------------------------------------------------------------------
 // CTsAppView::UpdateHeadingsL
 // -----------------------------------------------------------------------------
 //
-void CTsAppView::UpdateHeadingsL()
+void CTsAppView::UpdateHeadingsL( TInt aNewCount )
     {
-#ifndef TASKSWITCHER_USE_CUSTOM_LAYOUT
     HBufC* text = StringLoader::LoadLC(
-        R_TASK_SWITCHER_HEADING_APPLICATIONS );
-#else
-    _LIT( KTitle, "Task switcher" );
-    HBufC* text = KTitle().AllocLC();
-#endif
+        R_TASK_SWITCHER_HEADING_APPLICATIONS, aNewCount );
     iAppsHeading->SetTextL( *text );
     iAppsHeading->DrawDeferred();
     CleanupStack::PopAndDestroy( text );
-
     }
 
 
@@ -663,6 +666,16 @@ void CTsAppView::OrderFullWindowRedraw()
     {
     InvalidateWindows(this);
     DrawNow();
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppView::EnableDragEvents
+// -----------------------------------------------------------------------------
+//
+void CTsAppView::EnableDragEvents( TBool aEnable )
+    {
+    iEvtHandler->EnableDragEventHandling( aEnable );
     }
 
 
@@ -710,13 +723,7 @@ void CTsAppView::LongTapL(const TPoint& aPoint)
 //
 void CTsAppView::DragL(const MAknTouchGestureFwDragEvent& aEvent)
     {
-	if( aEvent.State() == EAknTouchGestureFwStop )
-		{
-		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
-				ETouchFeedbackVibra | ETouchFeedbackAudio), TPointerEvent());
-		}
-    if( iFastSwapArea->Rect().Contains(aEvent.StartPosition()) ||
-		iAppsHeading->Rect().Contains(aEvent.StartPosition()) )
+    if(DragArea().Contains(aEvent.StartPosition()))
         {
 		iFastSwapArea->DragL(aEvent);
         }
@@ -758,6 +765,34 @@ void CTsAppView::LaunchFeedback( TTouchLogicalFeedback aLogicalType,
 	}
 
 
+// -----------------------------------------------------------------------------
+// CTsAppView::AppCloseInProgress()
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppView::AppCloseInProgress( TInt aWgId )
+    {
+    return iFastSwapArea->IsAppClosing(aWgId);
+    }
+// -----------------------------------------------------------------------------
+// CTsAppView::DragArea
+// -----------------------------------------------------------------------------
+//
+TRect CTsAppView::DragArea()
+	{
+	TRect dragArea;
+	if (Layout_Meta_Data::IsLandscapeOrientation())
+		{
+		dragArea.SetRect(iAppsHeading->Rect().iTl.iX,
+				iAppsHeading->Rect().iTl.iY, iFastSwapArea->Rect().iBr.iX,
+				iFastSwapArea->Rect().iBr.iY);
+		}
+	else
+		{
+		dragArea.SetRect(Rect().iTl.iX, iAppsHeading->Rect().iTl.iY,
+				Rect().iBr.iX, iFastSwapArea->Rect().iBr.iY);
+		}
+	return dragArea;
+	}    
 
 
 // End of file

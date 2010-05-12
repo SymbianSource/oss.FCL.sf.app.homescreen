@@ -287,11 +287,11 @@ EXPORT_C void CXnAppUiAdapter::PrepareToExit()
     }
 
 // -----------------------------------------------------------------------------
-// CXnAppUiAdapter::UiActivated
+// CXnAppUiAdapter::HandleUiReadyEventL
 //
 // -----------------------------------------------------------------------------
 //
-EXPORT_C void CXnAppUiAdapter::UiActivated()
+EXPORT_C void CXnAppUiAdapter::HandleUiReadyEventL()
     {
     // Default empty implementation
     }

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<package version="1.0">
+<package version="2.0">
 
-  <family>qhd_tch</family>
-  <type>view</type>
+    <family>qhd_tch</family>
+    <type>view</type>
 
     <!-- interface uid -->
     <interfaceuid>0x2001f48a</interfaceuid>

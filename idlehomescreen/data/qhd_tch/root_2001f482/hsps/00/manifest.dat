@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<package version="1.0">
+<package version="2.0">
 
-  <family>qhd_tch</family>
+    <family>qhd_tch</family>
 
-  <type>application</type>
+    <type>application</type>
     
-  <!-- application uid -->
+    <!-- application uid -->
 	<interfaceuid>0x102750F0</interfaceuid>
 
 	<!-- vendor uid -->

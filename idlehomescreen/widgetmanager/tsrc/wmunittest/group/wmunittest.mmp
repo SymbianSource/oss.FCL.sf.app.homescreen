@@ -56,6 +56,7 @@ SOURCE          wmconfiguration.cpp
 SOURCE          wminstaller.cpp
 SOURCE          wmprocessmonitor.cpp
 SOURCE          wmwidgetorderdata.cpp
+SOURCE          wmspbgcleaner.cpp 
 
 SOURCEPATH      ../src
 SOURCE          wmunittest.cpp
@@ -108,6 +109,7 @@ LIBRARY     bmpanim.lib // AknBitmap animation
 LIBRARY     inetprotutil.lib
 LIBRARY     bitgdi.lib // CFbsBitmapDevice
 LIBRARY     charconv.lib
+LIBRARY     browserlauncher.lib
 
 // libraries needed by the test framework
 LIBRARY     stiftestinterface.lib

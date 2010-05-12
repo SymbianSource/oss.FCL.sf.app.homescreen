@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+<file xmlns="http://www.s60.com/xml/genconfml/1" name="manifest.dat" target="\private\200159c0\install\view_2001f48b\hsps\00\">
+	<setting ref="Homescreen1manifest/PackageVersion"/>
+	<setting ref="Homescreen1manifest/DeviceFamily"/>
+	<setting ref="Homescreen1manifest/ConfigurationType"/>
+	<setting ref="Homescreen1manifest/InterfaceUid"/>
+	<setting ref="Homescreen1manifest/ProviderUid"/>
+	<setting ref="Homescreen1manifest/ConfigurationUid"/>
+	<setting ref="Homescreen1manifest/FullName"/>
+	<setting ref="Homescreen1manifest/ShortName"/>
+	<setting ref="Homescreen1manifest/ConfigurationVersion"/>
+	<setting ref="Homescreen1manifest/ConfigurationFile"/>
+	<setting ref="Homescreen1manifest/UiResourceFile"/>
+		<xsl:stylesheet version="1.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration/data">
+		<package>
+	  <xsl:attribute name="version"><xsl:value-of select="Homescreen1manifest/PackageVersion"/></xsl:attribute>
+    <family>
+    <xsl:value-of select="Homescreen1manifest/DeviceFamily"/>
+    </family>
+    <type>
+    <xsl:value-of select="Homescreen1manifest/ConfigurationType"/>
+    </type>
+    <interfaceuid>
+    <xsl:value-of select="Homescreen1manifest/InterfaceUid"/>
+    </interfaceuid>
+    <provideruid>
+    <xsl:value-of select="Homescreen1manifest/ProviderUid"/>
+    </provideruid>
+    <configurationuid>
+    <xsl:value-of select="Homescreen1manifest/ConfigurationUid"/>
+    </configurationuid>
+    <fullname>
+    <xsl:text>&#x26;</xsl:text>
+    <xsl:value-of select="Homescreen1manifest/FullName"/>
+    <xsl:text>&#x3B;</xsl:text>
+    </fullname>
+    <shortname>
+    <xsl:value-of select="Homescreen1manifest/ShortName"/>
+    </shortname>
+    <version>
+    <xsl:value-of select="Homescreen1manifest/ConfigurationVersion"/>
+    </version>
+    <filexml>
+    <xsl:value-of select="Homescreen1manifest/ConfigurationFile"/>
+    </filexml>
+    <localization>
+        <fileresource>
+        <xsl:value-of select="Homescreen1manifest/UiResourceFile"/>
+        </fileresource>
+    </localization>
+  </package>
+  </xsl:template>
+	</xsl:stylesheet>
+</file>
+</container>

@@ -54,6 +54,7 @@ SOURCE  wmconfiguration.cpp
 SOURCE  wminstaller.cpp
 SOURCE  wmprocessmonitor.cpp
 SOURCE  wmwidgetorderdata.cpp
+SOURCE  wmspbgcleaner.cpp 
 
 SOURCEPATH		../data
 START RESOURCE  20026F53.rss
@@ -118,4 +119,6 @@ LIBRARY     etext.lib
 LIBRARY     centralrepository.lib
 LIBRARY     bmpanim.lib // AknBitmap animation
 LIBRARY     inetprotutil.lib 
+LIBRARY     browserlauncher.lib
+
 // End of file

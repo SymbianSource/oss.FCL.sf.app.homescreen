@@ -28,14 +28,14 @@
 #include <widgetmanagerview.rsg>
 #include <hscontentcontroller.h>
 #include <AknUtils.h>
+#include <avkon.rsg>
 
 #include "wmplugin.h"
 #include "widgetmanager.hrh"
 #include "wmmaincontainerview.h"
 #include "wmresourceloader.h"
 #include "wmmaincontainer.h"
-#include <avkon.rsg>
-
+#include "wmspbgcleaner.h"
 
 // ---------------------------------------------------------
 // CWmMainContainerView::CWmMainContainerView()
@@ -46,6 +46,7 @@ CWmMainContainerView::CWmMainContainerView(
     iWmPlugin( aWmPlugin )
 	{
 	iWmMainContainer = NULL;
+	iWmSpBgCleaner = NULL;
 	}
 
 // ---------------------------------------------------------
@@ -60,6 +61,13 @@ CWmMainContainerView::~CWmMainContainerView()
 
         delete iWmMainContainer;
         iWmMainContainer = NULL;
+        }
+    
+    if ( iWmSpBgCleaner != NULL )
+        {
+        AppUi()->RemoveFromStack( iWmSpBgCleaner );
+        delete iWmSpBgCleaner;
+        iWmSpBgCleaner = NULL;
         }
 	}
 
@@ -180,20 +188,25 @@ void CWmMainContainerView::DoActivateL(
 	{
     // setup status pane layout
     StatusPane()->SwitchLayoutL( 
-            R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
-    StatusPane()->ApplyCurrentSettingsL();
-    
+            R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );    
     // disable transparancy 
-    if ( StatusPane()->IsTransparent() )
+    StatusPane()->EnableTransparent( EFalse );
+    // apply changes 
+    StatusPane()->ApplyCurrentSettingsL();
+
+    // create container
+    if ( iWmSpBgCleaner == NULL )
         {
-        StatusPane()->EnableTransparent( EFalse );    
+        iWmSpBgCleaner = CWmSpBgCleaner::NewL();
+        iWmSpBgCleaner->SetMopParent( this );
+        AppUi()->AddToStackL( *this, iWmSpBgCleaner );
         }
 
     // title in status pane
     SetTitleL();
-    
+
     StatusPane()->DrawNow();
-    
+
     // update cba
     CEikButtonGroupContainer* bgc( Cba() );
     CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
@@ -232,27 +245,13 @@ void CWmMainContainerView::DoDeactivate()
 		iWmMainContainer = NULL;
 		iWmPlugin.MainViewDeactivated();
 		}
-	}
 
-// ---------------------------------------------------------
-// CWmMainContainerView::HandleStatusPaneSizeChange
-// ---------------------------------------------------------
-//
-void CWmMainContainerView::HandleStatusPaneSizeChange()
-	{
-	CAknView::HandleStatusPaneSizeChange();
-	
-	// this may fail, but we're not able to propagate exceptions here
-	TVwsViewId view;
-	AppUi()->GetActiveViewId( view );
-	if ( view.iViewUid == Id() )
-		{
-		if ( iWmMainContainer ) 
-		    {
-		    iWmMainContainer->SetRect( AppUi()->ClientRect() );
-		    }
-		}
-	
+    if ( iWmSpBgCleaner != NULL )
+        {
+        AppUi()->RemoveFromStack( iWmSpBgCleaner );
+        delete iWmSpBgCleaner;
+        iWmSpBgCleaner = NULL;
+        }
 	}
 
 // ---------------------------------------------------------
@@ -429,7 +428,7 @@ TBool CWmMainContainerView::HandleHelpMenuItemSelectedL()
 TBool CWmMainContainerView::HandleDeactivateFindPaneL()
     {
     if ( iWmMainContainer )
-        {       
+        {
         iWmMainContainer->DeactivateFindPaneL();
         }
     return ETrue;

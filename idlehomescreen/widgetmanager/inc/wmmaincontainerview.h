@@ -21,8 +21,8 @@
 
 #include <aknview.h>
 
-
 class CWmMainContainer;
+class CWmSpBgCleaner;
 class CWmPlugin;
 
 /**
@@ -103,13 +103,6 @@ protected: // from base class CAknView
 		TUid aCustomMessageId,
 		const TDesC8& aCustomMessage );
 	
-   /**
-     * Event handler for status pane size changes.
-     * 
-     * @see CAknView::HandleStatusPaneSizeChange
-     */
-	void HandleStatusPaneSizeChange();
-
 protected:	// From MEikMenuObserver
     /*
      * Menu observer interface.
@@ -139,6 +132,11 @@ private:
      */
 	CWmMainContainer* iWmMainContainer;
 
+    /** 
+     * Statuspane background cleaner 
+     */
+	CWmSpBgCleaner* iWmSpBgCleaner;
+	
 	/** 
 	 * the plugin root (not owned) 
 	 */

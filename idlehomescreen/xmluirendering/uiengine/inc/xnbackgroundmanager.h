@@ -28,6 +28,7 @@
 class CXnViewManager;
 class CXnViewData;
 class CAknsLayeredBackgroundControlContext;
+class CXnOomSysHandler;
 
 namespace hspswrapper
     {
@@ -115,7 +116,7 @@ public:
      */
     void WallpaperChanged( const CXnViewData& aOldView, 
         const CXnViewData& aNewView );
-    
+        
     /**
      * Draws wallpaper immediately, or once the window comes visible.
      * 
@@ -162,7 +163,7 @@ private: // Functions from base classes
     /**
     * From MDiskNotifyHandlerCallback.
     */
-    void HandleNotifyDisk( TInt aError, const TDiskEvent& aEvent );
+    void HandleNotifyDisk( TInt aError, const TDiskEvent& aEvent );   
 
 private:
     
@@ -189,6 +190,8 @@ private:
     TInt AddCommonWallpaperL( const TDesC& aFileName, TBool aSave = ETrue );
     void ReadWallpaperFromCenrepL();    
     void DrawEditModeBackgroundSkin() const;
+    CXnOomSysHandler& OomSysHandler() const;
+    void DrawStatusPaneMask() const;    
 
     /**
      * Callback function to be used with CPeriodic.
@@ -240,7 +243,7 @@ private: // data
      * Stores wallpaper type. 
      */
     CXnBackgroundManager::WppType iType;
-
+    
     /** 
      * Internal wallpaper update in progress
      */
@@ -258,6 +261,13 @@ private: // data
      */   
     CFbsBitmap* iBgImage;
     
+    /**
+     * Pointer to status pane mask. Drawn on top of a wallpaper in 
+     * the status pane area.
+     * Own.
+     */
+    CFbsBitmap* iSpMask;
+    
     /** 
      * Path of the wallpaper image, including filename. 
      * This is used only if same wallpaper 
@@ -271,6 +281,12 @@ private: // data
      * Own.
      */
     CPeriodic* iTimer;
+    
+    /**
+     * OOM system handler. 
+     * Own.
+     */
+    CXnOomSysHandler* iOomSysHandler;
     
     };
 

@@ -37,7 +37,6 @@ class CXnODT;
 class CXnPointerArray;
 class CXnEditor;
 class CXnEditMode;
-class CXnHitTest;
 class CXnKeyEventDispatcher;
 
 // Class declaration
@@ -243,14 +242,6 @@ public:
     void RefreshMenuL();
 
     /**
-     * Activate a view
-     *
-     * @since Series 60 3.1
-     * @param aViewNode View node
-     */
-    void ActivateViewL( CXnNode& aViewNode );
-
-    /**
      * Returns view manager
      *
      * @since S60 5.0
@@ -412,14 +403,6 @@ public:
      * @since Series 60 5.0
      */
     RPointerArray< CXnNode >* Plugins();
-
-    /**
-     * Gets hit test
-     *
-     * @since S60 5.1
-     * @return the hittest
-     */
-    CXnHitTest& HitTest() const;
 
     /**
      * Gets theme resource file

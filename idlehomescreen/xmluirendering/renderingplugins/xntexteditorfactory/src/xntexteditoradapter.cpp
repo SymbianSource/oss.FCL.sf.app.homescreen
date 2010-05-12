@@ -226,7 +226,13 @@ void CXnTextEditorAdapter::ConstructL()
         iEditor->SetAknEditorFlags( EAknEditorFlagEnablePartialScreen );
         SetFlag( iSplitInputFlags, ESplitInputEnabled );
         }
-    
+
+    // for RTL languages
+    iEditor->SetAknEditorLocalLanguage( User::Language() );
+    ( AknLayoutUtils::LayoutMirrored() ? 
+                        iEditor->SetAlignment( EHRightVCenter ) : 
+                        iEditor->SetAlignment( EHLeftVCenter ) );
+
     iEditor->SetObserver( this );
                                         
     // Default not focused                                  

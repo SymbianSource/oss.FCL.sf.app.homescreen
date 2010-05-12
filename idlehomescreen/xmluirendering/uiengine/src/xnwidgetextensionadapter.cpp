@@ -19,16 +19,16 @@
 #include <coecntrl.h>
 #include <coemain.h>
 #include <AknUtils.h>
+#include <gfxtranseffect/gfxtranseffect.h>
+#include <akntransitionutils.h>
+#include <AknPriv.hrh>
 
 // User includes
 #include "xnwidgetextensionadapter.h"
 #include "xncontroladapter.h"
-
 #include "xncomponentnodeimpl.h"
 #include "xncomponent.h"
-
 #include "xnuiengine.h"
-#include "xnhittest.h"
 
 #include "xnnode.h"
 #include "xnnodepluginif.h"
@@ -45,9 +45,6 @@
 #include "xnviewmanager.h"
 #include "xnviewdata.h"
 #include "xnplugindata.h"
-
-#include <gfxtranseffect/gfxtranseffect.h>
-#include <akntransitionutils.h>
 
 // Constants
 _LIT8( KPopup, "popup" );
@@ -91,6 +88,20 @@ CXnWidgetExtensionAdapter::~CXnWidgetExtensionAdapter()
         }
     GfxTransEffect::Deregister( this );
     }
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL
+// 
+// -----------------------------------------------------------------------------
+// 
+void CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL()
+	{
+    if( IsVisible() )
+		{
+	    CCoeControl::MakeVisible( EFalse );
+		}
+	CXnControlAdapter::HandleScreenDeviceChangedL();
+	
+	}
 
 // -----------------------------------------------------------------------------
 // CXnWidgetExtensionAdapter::CXnWidgetExtensionAdapter
@@ -201,60 +212,9 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
     
     if ( aVisible && iPopup )
         {        
-        // read position-hint property and set-up its variable
-        CXnProperty* positionHintProp = NULL;
-        TRAP_IGNORE( positionHintProp = iNode.Node().GetPropertyL( KPositionHint ) );
-                   
-        if ( positionHintProp )
-            {
-            const TDesC8& displayHintVal = positionHintProp->StringValue();
-                    
-            if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveLeft )
-                {
-                iPositionHint = EAboveLeft;
-                }
-            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveRight )
-                {
-                iPositionHint = EAboveRight;
-                }
-            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowLeft )
-                {
-                iPositionHint = EBelowLeft;
-                }
-            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowRight )
-                {
-                iPositionHint = EBelowRight;
-                }
-            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KRight )
-                {
-                iPositionHint = ERight;
-                }
-            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KLeft )
-                {
-                iPositionHint = ELeft;
-                }
-            else 
-                {
-                 // if the value if of unknown type, use default one
-                 if ( AknLayoutUtils::LayoutMirrored() )
-                     {
-                     iPositionHint = EAboveRight;
-                     }
-                     else
-                     {
-                     iPositionHint = EAboveLeft; 
-                     }
-                 }
-        
-            if ( iPositionHint != ENone )
-                {    
-                // the popup is going visible and position-hind is available
-                // calculate its position
-                CalculatePosition();
-                }
-            }        
+        ChangePopupPosition();
         }
-
+    
     TBool effectStarted = EFalse;
     if ( iAppUiAdapter->IsForeground() )
         {
@@ -359,7 +319,85 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
 //    
 void CXnWidgetExtensionAdapter::Draw( const TRect& aRect ) const
     {
+    SystemGc().Clear( aRect );
     CXnControlAdapter::Draw( aRect );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::DoHandlePropertyChangeL
+// 
+// -----------------------------------------------------------------------------
+//    
+void CXnWidgetExtensionAdapter::DoHandlePropertyChangeL( CXnProperty* /*aProperty*/ )
+    {
+    if( iNode.Node().IsLaidOut() && IsVisible() )
+        {
+        ChangePopupPosition();
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnWidgetExtensionAdapter::ChangePopupPosition
+// 
+// -----------------------------------------------------------------------------
+// 
+void CXnWidgetExtensionAdapter::ChangePopupPosition()
+    {
+    if ( iPopup )
+        { 
+        // read position-hint property and set-up its variable
+        CXnProperty* positionHintProp = NULL;
+        TRAP_IGNORE( positionHintProp = iNode.Node().GetPropertyL( KPositionHint ) );
+                   
+        if ( positionHintProp )
+            {
+            const TDesC8& displayHintVal = positionHintProp->StringValue();
+                    
+            if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveLeft )
+                {
+                iPositionHint = EAboveLeft;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KAboveRight )
+                {
+                iPositionHint = EAboveRight;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowLeft )
+                {
+                iPositionHint = EBelowLeft;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KBelowRight )
+                {
+                iPositionHint = EBelowRight;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KRight )
+                {
+                iPositionHint = ERight;
+                }
+            else if ( displayHintVal == XnPropertyNames::tooltip::positionhint::KLeft )
+                {
+                iPositionHint = ELeft;
+                }
+            else 
+                {
+                 // if the value if of unknown type, use default one
+                 if ( AknLayoutUtils::LayoutMirrored() )
+                     {
+                     iPositionHint = EAboveRight;
+                     }
+                     else
+                     {
+                     iPositionHint = EAboveLeft; 
+                     }
+                 }
+        
+            if ( iPositionHint != ENone )
+                {    
+                // the popup is going visible and position-hind is available
+                // calculate its position
+                CalculatePosition();
+                }
+            }        
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -371,8 +409,8 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
     // widget's rectangle
     TRect controlRect;
 
-    // get popup's window size
-    TRect popupRect = this->Rect();
+    // get popup's size.
+    TSize popupSize = iNode.BorderRect().Size();
 
     TRect clientRect = static_cast<CEikAppUi&>( *iAppUiAdapter ).ClientRect();
 
@@ -420,16 +458,16 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
             
             // if this position does not fit the screen,
             // and if below left is more suitable, use it
-            if ( spaceAbove < popupRect.Height() && spaceBelow > spaceAbove )
+            if ( spaceAbove < popupSize.iHeight && spaceBelow > spaceAbove )
                 {
                 rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iBr.iY ), 
-                              TPoint( controlRect.iTl.iX + popupRect.Width(), controlRect.iBr.iY + popupRect.Height() ) );
+                              TPoint( controlRect.iTl.iX + popupSize.iWidth, controlRect.iBr.iY + popupSize.iHeight ) );
                 }
             else
                 {
                 // use the above-left position
-                rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iTl.iY - popupRect.Height() ), 
-                              TPoint( controlRect.iTl.iX + popupRect.Width(), controlRect.iTl.iY ) );
+                rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iTl.iY - popupSize.iHeight ), 
+                              TPoint( controlRect.iTl.iX + popupSize.iWidth, controlRect.iTl.iY ) );
                 
                 }
             break;
@@ -438,15 +476,15 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
             
             // if this position does not fit the screen,
             // and if below right is more suitable, use it
-            if ( spaceAbove < popupRect.Height() && spaceBelow > spaceAbove )
+            if ( spaceAbove < popupSize.iHeight && spaceBelow > spaceAbove )
                 {
-                rect = TRect( TPoint( controlRect.iBr.iX - popupRect.Width(), controlRect.iBr.iY ), 
-                              TPoint( controlRect.iBr.iX, controlRect.iBr.iY + popupRect.Height() ) );
+                rect = TRect( TPoint( controlRect.iBr.iX - popupSize.iWidth, controlRect.iBr.iY ), 
+                              TPoint( controlRect.iBr.iX, controlRect.iBr.iY + popupSize.iHeight ) );
                 }
             else
                 {
                 // use the above-right position
-                rect = TRect( TPoint( controlRect.iBr.iX - popupRect.Width(), controlRect.iTl.iY - popupRect.Height() ), 
+                rect = TRect( TPoint( controlRect.iBr.iX - popupSize.iWidth, controlRect.iTl.iY - popupSize.iHeight ), 
                               TPoint( controlRect.iBr.iX,  controlRect.iTl.iY ) );
                 }
             break;
@@ -455,16 +493,16 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
             
             // if this position does not fit the screen,
             // and if above left is more suitable, use it
-            if ( spaceBelow < popupRect.Height() && spaceBelow < spaceAbove )
+            if ( spaceBelow < popupSize.iHeight && spaceBelow < spaceAbove )
                 {
-                rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iTl.iY - popupRect.Height() ), 
-                              TPoint( controlRect.iTl.iX + popupRect.Width(), controlRect.iTl.iY ) );
+                rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iTl.iY - popupSize.iHeight ), 
+                              TPoint( controlRect.iTl.iX + popupSize.iWidth, controlRect.iTl.iY ) );
                 }
             else
                 {
                 // use the below-left position
                 rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iBr.iY ), 
-                              TPoint( controlRect.iTl.iX + popupRect.Width(), controlRect.iBr.iY + popupRect.Height() ) );
+                              TPoint( controlRect.iTl.iX + popupSize.iWidth, controlRect.iBr.iY + popupSize.iHeight ) );
                 }
             break;
 
@@ -472,16 +510,16 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
 
               // if this position does not fit the screen,
               // and if above right is more suitable, use it
-              if ( spaceBelow < popupRect.Height() && spaceBelow < spaceAbove )
+              if ( spaceBelow < popupSize.iHeight && spaceBelow < spaceAbove )
                   {
-                  rect = TRect( TPoint( controlRect.iBr.iX - popupRect.Width(), controlRect.iTl.iY - popupRect.Height() ), 
+                  rect = TRect( TPoint( controlRect.iBr.iX - popupSize.iWidth, controlRect.iTl.iY - popupSize.iHeight ), 
                                 TPoint( controlRect.iBr.iX,  controlRect.iTl.iY ) );
                   }
               else
                   {
                   // use the below-right position
-                  rect = TRect( TPoint( controlRect.iBr.iX - popupRect.Width(), controlRect.iBr.iY ), 
-                                TPoint( controlRect.iBr.iX, controlRect.iBr.iY + popupRect.Height() ) );
+                  rect = TRect( TPoint( controlRect.iBr.iX - popupSize.iWidth, controlRect.iBr.iY ), 
+                                TPoint( controlRect.iBr.iX, controlRect.iBr.iY + popupSize.iHeight ) );
                   }
             break;
 
@@ -489,33 +527,33 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
 
             // if this position does not fit the screen,
             // and if left or above-left is more suitable, use it
-            if ( spaceRight < popupRect.Width() )
+            if ( spaceRight < popupSize.iWidth )
                 {
                 // use the left position if the space is big enough
-                if ( spaceLeft >= popupRect.Width() )
+                if ( spaceLeft >= popupSize.iWidth )
                     {
                     // use left position
-                    rect = TRect( TPoint( controlRect.iTl.iX - popupRect.Width(), controlRect.iTl.iY ), 
-                                  TPoint( controlRect.iTl.iX, controlRect.iTl.iY + popupRect.Height() ) );
+                    rect = TRect( TPoint( controlRect.iTl.iX - popupSize.iWidth, controlRect.iTl.iY ), 
+                                  TPoint( controlRect.iTl.iX, controlRect.iTl.iY + popupSize.iHeight ) );
                     }
-                else if ( spaceAbove >= popupRect.Height() )
+                else if ( spaceAbove >= popupSize.iHeight )
                     {
                     // use the above-right position
-                    rect = TRect( TPoint( controlRect.iBr.iX - popupRect.Width(), controlRect.iTl.iY - popupRect.Height() ), 
+                    rect = TRect( TPoint( controlRect.iBr.iX - popupSize.iWidth, controlRect.iTl.iY - popupSize.iHeight ), 
                                   TPoint( controlRect.iBr.iX,  controlRect.iTl.iY ) );  
                     }
                 else
                     {
                     // use the below-right position
-                    rect = TRect( TPoint( controlRect.iBr.iX - popupRect.Width(), controlRect.iBr.iY ), 
-                                  TPoint( controlRect.iBr.iX, controlRect.iBr.iY + popupRect.Height() ) );
+                    rect = TRect( TPoint( controlRect.iBr.iX - popupSize.iWidth, controlRect.iBr.iY ), 
+                                  TPoint( controlRect.iBr.iX, controlRect.iBr.iY + popupSize.iHeight ) );
                     }
                 }
             else
                 {
                 // use the right position
                 rect = TRect( TPoint( controlRect.iBr.iX, controlRect.iTl.iY ), 
-                              TPoint( controlRect.iBr.iX + popupRect.Width(), controlRect.iTl.iY + popupRect.Height() ) );
+                              TPoint( controlRect.iBr.iX + popupSize.iWidth, controlRect.iTl.iY + popupSize.iHeight ) );
                 }
                 
             break;
@@ -524,32 +562,32 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
             
             // if this position does not fit the screen,
             // and if right is more suitable, use it
-            if ( spaceLeft < popupRect.Width() )
+            if ( spaceLeft < popupSize.iWidth )
                 {
                 // use the right position, if it the space is big enough
-                if ( spaceRight >= popupRect.Width() )
+                if ( spaceRight >= popupSize.iWidth )
                     {    
                     rect = TRect( TPoint( controlRect.iBr.iX, controlRect.iTl.iY ), 
-                                  TPoint( controlRect.iBr.iX + popupRect.Width(), controlRect.iTl.iY + popupRect.Height() ) );
+                                  TPoint( controlRect.iBr.iX + popupSize.iWidth, controlRect.iTl.iY + popupSize.iHeight ) );
                     }
-                else if ( spaceAbove >= popupRect.Height() )
+                else if ( spaceAbove >= popupSize.iHeight )
                     {
                     // use the above-left position
-                    rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iTl.iY - popupRect.Height() ), 
-                                  TPoint( controlRect.iTl.iX + popupRect.Width(), controlRect.iTl.iY ) );
+                    rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iTl.iY - popupSize.iHeight ), 
+                                  TPoint( controlRect.iTl.iX + popupSize.iWidth, controlRect.iTl.iY ) );
                     }
                 else
                     {
                     // use the below-left position
                     rect = TRect( TPoint( controlRect.iTl.iX, controlRect.iBr.iY ), 
-                                  TPoint( controlRect.iTl.iX + popupRect.Width(), controlRect.iBr.iY + popupRect.Height() ) );
+                                  TPoint( controlRect.iTl.iX + popupSize.iWidth, controlRect.iBr.iY + popupSize.iHeight ) );
                     }
                 }
             else
                 {
                 // use the left position  
-                rect = TRect( TPoint( controlRect.iTl.iX - popupRect.Width(), controlRect.iTl.iY ), 
-                              TPoint( controlRect.iTl.iX, controlRect.iTl.iY + popupRect.Height() ) );
+                rect = TRect( TPoint( controlRect.iTl.iX - popupSize.iWidth, controlRect.iTl.iY ), 
+                              TPoint( controlRect.iTl.iX, controlRect.iTl.iY + popupSize.iHeight ) );
                 }
             break;
         default:
@@ -670,6 +708,11 @@ void CXnWidgetExtensionAdapter::NotifyResourceChanged( TInt aType )
             {
             DrawableWindow()->FadeBehind( ETrue );
             }
+        }
+    
+    else if( iPopup && aType == KAknSplitInputDisabled )
+        {
+        HidePopupL();
         }
     }
 

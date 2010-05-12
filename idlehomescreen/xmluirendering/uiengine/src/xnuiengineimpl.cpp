@@ -22,6 +22,7 @@
 #include <AknUtils.h>
 #include <layoutmetadata.cdl.h>
 #include <AknPriv.hrh> 
+#include <debug.h>
 
 // User includes
 #include "xnuiengine.h"
@@ -35,7 +36,6 @@
 #include "xnpopupcontroladapter.h"
 #include "xnviewcontroladapter.h"
 #include "xnviewdata.h"
-#include "xnrootdata.h"
 #include "xnnodebreadthfirstiterator.h"
 #include "xntype.h"
 #include "xnnodepluginif.h"
@@ -51,13 +51,13 @@
 #include "xndomdocument.h"
 #include "xndomnode.h"
 #include "xneditmode.h"
-#include "xnhittest.h"
 #include "xnnode.h"
 #include "xnpanic.h"
 #include "xneffectmanager.h"
 #include "xneditor.h"
 #include "xnbackgroundmanager.h"
 #include "xntexteditor.h"
+#include "xnrootdata.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -8066,9 +8066,7 @@ CXnUiEngineImpl::CXnUiEngineImpl( CXnUiEngine& aUiEngine,
 void CXnUiEngineImpl::ConstructL()
     {                  
     iEditMode = CXnEditMode::NewL( *iUiEngine );
-
-    iHitTest = CXnHitTest::NewL();
-
+   
     iCurrentGraphicsDevice = CCoeEnv::Static()->ScreenDevice();
 
     // Update the units here, even the refence client rect is only a quess.
@@ -8103,10 +8101,14 @@ CXnUiEngineImpl::~CXnUiEngineImpl()
     iViewManager.RemoveObserver( *this );
            
     delete iEditMode;
-    delete iHitTest;
 
     iFocusCandidateList.Reset();
-    iRedrawRegions.ResetAndDestroy();
+
+    if ( iRedrawRegions.Count() )
+        {
+        iRedrawRegions.ResetAndDestroy();
+        }
+
     iDirtyList.Reset();
     }
 
@@ -8285,7 +8287,15 @@ TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
                         {
                         AddToRedrawListL( node, rect );
                         
-                        adapter->SetRect( rect );
+                        // popup calculates its position based on _s60-position-hint property
+                        if( node->Type()->Type() == KPopUpNodeName )
+                            {
+                            adapter->DoHandlePropertyChangeL();
+                            }
+                        else
+                            {
+                            adapter->SetRect( rect );                        
+                            }
                         CXnProperty* prop = node->GetPropertyL(
                             XnPropertyNames::common::KSizeAware );
                         if ( prop && prop->StringValue() ==
@@ -8327,6 +8337,8 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
     TraceTreeL(iCurrentView );
 #endif                          
 
+    __PRINTS("*** CXnUiEngineImpl::RenderUIL ***");
+    
     for( TInt i=0; i<iRedrawRegions.Count(); i++)
         {
         CCoeControl* control = iRedrawRegions[i]->iControl;
@@ -8337,7 +8349,9 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
             // Mark tree rendered
             iCurrentView->SetRenderedL();
             // Error occured during dirty set, redraw whole window
-            control->DrawNow();                                              
+            control->DrawNow();               
+            
+            __PRINTS("* CXnUiEngineImpl::RenderUIL - redraw region error -> full redraw ***");
             }                                        
         else 
             {
@@ -8352,7 +8366,10 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                     // Make bounding rect over the dirty areas
                     TRect boundingRect( redrawRegion.BoundingRect() );
                     
-                    control->DrawNow( boundingRect );
+                    __PRINT( __DBG_FORMAT( "* CXnUiEngineImpl::RenderUIL - redrawing bounding rect iTl.iX: %d, iTl.iY: %d, iBr.iX: %d, iBr.iY: %d" ),          
+                        boundingRect.iTl.iX, boundingRect.iTl.iY, boundingRect.iBr.iX, boundingRect.iBr.iY );                                         
+                    
+                    control->DrawNow( boundingRect );                    
                     }                               
                 else
                     {
@@ -8360,12 +8377,20 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                         {
                         // Draw every dirty area separately
                         TRect redrawRect( redrawRegion[i] );
-    
+
+                        __PRINT( __DBG_FORMAT( "* CXnUiEngineImpl::RenderUIL - redrawing rect iTl.iX: %d, iTl.iY: %d, iBr.iX: %d, iBr.iY: %d" ),          
+                                redrawRect.iTl.iX, redrawRect.iTl.iY, redrawRect.iBr.iX, redrawRect.iBr.iY );                                         
+                        
                         control->DrawNow( redrawRect );
                         }
                     }  
                 }
+            else
+                {
+                __PRINTS("* CXnUiEngineImpl::RenderUIL - nothing to redraw ***");
+                }
             }  
+        
         redrawRegion.Clear();  
         }
 
@@ -8374,6 +8399,8 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
     iLayoutControl &= ~XnLayoutControl::ERenderUI;
     
     iAppUiAdapter.EffectManager()->UiRendered();
+    
+    __PRINTS("*** CXnUiEngineImpl::RenderUIL - done ***");
     }
 
 // -----------------------------------------------------------------------------
@@ -8525,7 +8552,7 @@ CXnPointerArray* CXnUiEngineImpl::FindNodeByClassL(
 
     return array;
     }
-
+    
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::FindContentSourceNodesL()
 // -----------------------------------------------------------------------------
@@ -8584,7 +8611,7 @@ CXnPointerArray* CXnUiEngineImpl::FindContentSourceNodesL(
 
     return array;
     }
-    
+
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::Resources()
 // -----------------------------------------------------------------------------
@@ -9070,6 +9097,9 @@ void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
         return;
         }
 
+    // remove focus
+    iAppUiAdapter.HideFocus();
+
     // Update client rect
     SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
 
@@ -9087,7 +9117,13 @@ void CXnUiEngineImpl::HandleDynamicLayoutVariantSwitchL()
     RootNode()->SetDirtyL();
 
     ReportScreenDeviceChangeL();
+    
+    iViewManager.OrientationChanged();
             
+    if ( !iControlAdapterList )
+        {
+        iControlAdapterList = &iViewManager.Controls();
+        }
     for ( TInt i = 0; i < iControlAdapterList->Count(); i++ )
         {
         CXnControlAdapter* adapter( ( *iControlAdapterList )[i] );
@@ -9402,6 +9438,10 @@ void CXnUiEngineImpl::AddToDirtyListL( CXnNode* aNode )
             {
             // Force relayout and redraw from current view
             iDirtyList.Reset();
+            if ( !iCurrentView )
+                {
+                iCurrentView = iViewManager.ViewNode();
+                }
             iDirtyList.AppendL( iCurrentView );
             TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
             if( dirtyRegion )
@@ -9516,7 +9556,7 @@ void CXnUiEngineImpl::SetClientRectL( TRect aRect, TBool aDrawNow )
         
         UpdateInternalUnits( iHorizontalUnitInPixels, iVerticalUnitInPixels,
             iClientRect );
-               
+        
         if ( aDrawNow )
             {
             RootNode()->SetDirtyL();
@@ -9632,15 +9672,6 @@ void CXnUiEngineImpl::ForceRenderUIL( TBool aLayoutOnly )
         RenderUIL();
         }
     iLayoutControl &= ~XnLayoutControl::EIgnoreState;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnUiEngineImpl::HitTest
-// -----------------------------------------------------------------------------
-//
-CXnHitTest& CXnUiEngineImpl::HitTest() const
-    {
-    return *iHitTest;
     }
 
 // -----------------------------------------------------------------------------
@@ -9848,11 +9879,15 @@ void CXnUiEngineImpl::ReportScreenDeviceChangeL()
 // -----------------------------------------------------------------------------
 void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
     {
-    DisableRenderUiLC();
     CXnNode* editorplugin = FindPlugin( aNode );
-
-    if ( aEnable ) 
+    if ( !editorplugin )
+        {
+        User::Leave( KErrNotFound );
+        }
     
+    DisableRenderUiLC();
+
+    if ( aEnable )    
         {        
         iSplitScreenState.iPartialScreenOpen = ETrue;           
         iSplitScreenState.iPartialScreenEditorNode = &aNode;           
@@ -9860,8 +9895,27 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
         // make sure that we always get up event
         CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(  
             iViewManager.ActiveViewData().ViewNode()->Control() );            
-                
-        control->ResetGrabbing();
+                   
+        control->ResetGrabbing();  
+         
+        // Block progression must be bottom-to-top when partial screen is open
+        // Previous value needs to be stored first
+        CXnProperty* prop( 
+                editorplugin->Parent()->GetPropertyL( 
+                        XnPropertyNames::style::common::KBlockProgression ) );                
+        if ( prop )
+            {
+            iSplitScreenState.iPartialScreenBlock = &prop->StringValue();
+            }
+        else
+            {
+            iSplitScreenState.iPartialScreenBlock = 
+                    &XnPropertyNames::style::common::block_progression::KTB();
+            }
+
+        SetPartialScreenBlockProgressionL( 
+                editorplugin->Parent(), 
+                XnPropertyNames::style::common::block_progression::KBT );
 
         // Hide all plugins except the one that contains given editor node
         RPointerArray< CXnNode >& plugins( *Plugins() );                   
@@ -9873,13 +9927,6 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
                 SetNodeVisibleL(pluginNode, EFalse);
                 }      
              }
-         
-        // Block progression must be bottom-to-top when partial screen is open
-        // Previous value needs to be stored first
-        StorePartialScreenBlockProgressionL();
-           
-        SetPartialScreenBlockProgressionL( 
-            XnPropertyNames::style::common::block_progression::KBT );
         
         // Hide statuspane
         iAppUiAdapter.StatusPane()->MakeVisible( EFalse );
@@ -9888,30 +9935,23 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
     else
         { 
         // Show plugin nodes again
-        RPointerArray< CXnNode >& plugins( *Plugins() );                   
+        RPointerArray< CXnNode >& plugins( *Plugins() );
 
         for( TInt i=0; i<plugins.Count(); i++ )
            {           
-           CXnNode* pluginNode = plugins[i];               
+           CXnNode* pluginNode = plugins[i];
            
            if ( pluginNode != editorplugin )
                 {
                 SetNodeVisibleL(pluginNode, ETrue);
-                }           
+                }
            }
-            
-        if( iSplitScreenState.iPartialScreenBlock == NULL )
-            {
-            SetPartialScreenBlockProgressionL( 
-                        XnPropertyNames::style::common::block_progression::KTB );
-            }
-        else
-            {
-            SetPartialScreenBlockProgressionL(iSplitScreenState.iPartialScreenBlock->Des());
-            delete iSplitScreenState.iPartialScreenBlock; 
-            iSplitScreenState.iPartialScreenBlock = NULL;
-            }
+
+        SetPartialScreenBlockProgressionL( 
+                editorplugin->Parent(),
+                *iSplitScreenState.iPartialScreenBlock );
         
+        iSplitScreenState.iPartialScreenBlock = NULL;
         iSplitScreenState.iPartialScreenEditorNode = NULL;
         iSplitScreenState.iPartialScreenOpen = EFalse;
                  
@@ -10062,52 +10102,23 @@ void CXnUiEngineImpl::SetNodeVisibleL( CXnNode* aNode , TBool aVisible )
 // -----------------------------------------------------------------------------
 // SetPartialScreenBlockProgressionL
 // -----------------------------------------------------------------------------
-void CXnUiEngineImpl::SetPartialScreenBlockProgressionL( const TDesC8& aBlockProgression )
+void CXnUiEngineImpl::SetPartialScreenBlockProgressionL( 
+        CXnNode* aParent, const TDesC8& aBlockProgression )
     {
-    CXnNode* plugin = FindPlugin( *iSplitScreenState.iPartialScreenEditorNode );
-    CXnNode* parent( NULL );    
-    if( plugin )
-        {
-        parent = plugin->Parent();
-        }
-    
-    CXnDomStringPool* sp( iUiEngine->ODT()->DomDocument().StringPool());   
-    if(parent)
-        {
+    CXnDomStringPool* sp( iUiEngine->ODT()->DomDocument().StringPool());
+    if( aParent && sp )
+        {        
         CXnProperty* block_progression = CXnProperty::NewL(
-        XnPropertyNames::style::common::KBlockProgression,
-        aBlockProgression,
-        CXnDomPropertyValue::EString, *sp );
-        
-        CleanupStack::PushL( block_progression );            
-        parent->SetPropertyL(block_progression);            
-        CleanupStack::Pop( block_progression );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// SetPartialScreenBlockProgressionL
-// -----------------------------------------------------------------------------
-void CXnUiEngineImpl::StorePartialScreenBlockProgressionL()
-    {    
-    CXnNode* parent = iSplitScreenState.iPartialScreenEditorNode->Parent();
-    
-    if(parent)
-        {
-        CXnProperty* blocProgressionProperty( 
-          parent->GetPropertyL( XnPropertyNames::style::common::KBlockProgression ) );               
-        
-        HBufC* blocProgressionValue (blocProgressionProperty->StringValueL());
-        CleanupStack::PushL( blocProgressionValue );
-        if(iSplitScreenState.iPartialScreenBlock)
+                XnPropertyNames::style::common::KBlockProgression,
+                aBlockProgression,
+                CXnDomPropertyValue::EString, *sp );
+        if ( block_progression )
             {
-            delete iSplitScreenState.iPartialScreenBlock;
-            iSplitScreenState.iPartialScreenBlock = NULL;
+            CleanupStack::PushL( block_progression );            
+            aParent->SetPropertyL(block_progression);            
+            CleanupStack::Pop( block_progression );
             }
-        iSplitScreenState.iPartialScreenBlock =
-                CnvUtfConverter::ConvertFromUnicodeToUtf8L(blocProgressionValue->Des() );
-        CleanupStack::PopAndDestroy( blocProgressionValue );
-        }    
+        }
     }
 
 // -----------------------------------------------------------------------------

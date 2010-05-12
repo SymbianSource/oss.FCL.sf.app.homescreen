@@ -27,6 +27,7 @@
 #include <aknconsts.h>
 #include <akntitle.h>
 #include <StringLoader.h>
+#include <csxhelp/hmsc.hlp.hrh>
 
 // User includes
 #include <hspublisherinfo.h>
@@ -85,14 +86,14 @@ void CAppUi::ConstructL()
     // Always reset the phoneforward P&S key on startup just in case
     RProperty::Set( KPSUidAiInformation,
       KActiveIdleForwardNumericKeysToPhone, EPSAiForwardNumericKeysToPhone );
-
+        
     iEditModeTitle = StringLoader::LoadL( R_QTN_HS_TITLE_EDITMODE );
     
     // Initialize with empty title pane so it's not shown on startup.                  
     __HEAP("XML UI: Init - Construct App UI")
+    
     __TIME("XML UI: CXnAppUiAdapter::ConstructL",
-        CXnAppUiAdapter::ConstructL();       
-    ) 
+        CXnAppUiAdapter::ConstructL() );       
       
     CAknAppUiBase::SetKeyEventFlags( CAknAppUiBase::EDisableSendKeyShort |
                                      CAknAppUiBase::EDisableSendKeyLong );
@@ -167,20 +168,8 @@ CAppUi::~CAppUi()
 //
 void CAppUi::ActivateUi()
     {
-    __TICK( "CAppUi::ActivateUi" );
-    
-    TVwsViewId activeViewId;
-        
-    TInt err( GetActiveViewId( activeViewId ) );
-    
-    if ( err == KErrNotFound )
-        {    
-        // Get Xml Ui view id
-        TVwsViewId xmlViewId( View().ViewId() );
-    
-        TRAP_IGNORE( ActivateLocalViewL( xmlViewId.iViewUid ) );              
-        }                  
-
+    __PRINTS( "*** CAppUi::ActivateUi" );
+       
     if ( iDeviceStatusInfo.Uid() == TUid::Null() )
         {
         __PRINTS( "*** CAppUi::ActivateUI - Loading DeviceStatus plugin" );
@@ -192,12 +181,23 @@ void CAppUi::ActivateUi()
             KDeviceStatusPluginName, KNs ); 
                            
         iUiCtl.FwStateHandler()->LoadPlugin( 
-            iDeviceStatusInfo, EAiFwSystemStartup );                                       
-        }
-    
-    TRAP_IGNORE( iUiCtl.FwEventHandler()->HandleUiReadyEventL( iUiCtl ) );
+            iDeviceStatusInfo, EAiFwSystemStartup );                                           
+        }        
     
     __PRINTS( "*** CAppUi::ActivateUi - done" );
+    }
+
+// ----------------------------------------------------------------------------
+// CAppUi::HandleUiReadyEventL()
+// ----------------------------------------------------------------------------
+//
+void CAppUi::HandleUiReadyEventL()
+    {
+    __PRINTS( "*** CAppUi::HandleUiReadyEventL" );
+    
+    iUiCtl.FwEventHandler()->HandleUiReadyEventL( iUiCtl );
+    
+    __PRINTS( "*** CAppUi::HandleUiReadyEventL - done" );    
     }
 
 // ----------------------------------------------------------------------------
@@ -641,6 +641,32 @@ void CAppUi::SetTitlePaneTextL( const TDesC& aText )
     
     // redraw statuspane
     sp->DrawNow();
+    }
+
+// -----------------------------------------------------------------------------
+// CAppUi::HelpContextL
+// Returns the help context
+// -----------------------------------------------------------------------------
+//
+CArrayFix<TCoeHelpContext>* CAppUi::HelpContextL() const
+    {
+	TUid fwUid = TUid::Uid( AI_UID3_AIFW_COMMON );
+	TCoeContextName helpString;
+	if( iUiCtl.UiEngineL()->IsEditMode()) 
+	    {
+	    helpString.Copy( KSET_HLP_HOME_SCREEN_EDIT );
+	    }
+    else
+	    {
+	    helpString.Copy( KSET_HLP_HOME_SCREEN );
+	    }
+    
+    CArrayFixFlat<TCoeHelpContext>* array =
+                   new( ELeave ) CArrayFixFlat<TCoeHelpContext>( 1 );
+    CleanupStack::PushL( array );
+    array->AppendL( TCoeHelpContext( fwUid, helpString  ) );
+    CleanupStack::Pop( array );
+    return array;
     }
 
 // End of File.

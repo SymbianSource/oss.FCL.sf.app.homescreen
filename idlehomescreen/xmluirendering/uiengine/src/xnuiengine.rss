@@ -27,6 +27,7 @@ NAME    XNAI
 #include <avkon.rsg>
 #include <avkon.rh>
 #include <avkon.mbg>
+#include <AvkonIcons.hrh>
 #include <e32keys.h>
 #include <activeidle3.loc>
 
@@ -103,6 +104,11 @@ RESOURCE TBUF r_qtn_hs_delete_page
     buf = qtn_hs_delete_current_page; 
     }
     
+RESOURCE TBUF r_hs_error_content_removed
+		{
+		buf = qtn_hs_error_content_removed;
+		}    
+    
 RESOURCE DIALOG r_yes_no_hs_remove_view 
     { 
     flags = EGeneralQueryFlags; 
@@ -151,10 +157,52 @@ RESOURCE AVKON_LIST_QUERY r_listquery_change_wallpaper
         };
     softkeys = R_AVKON_SOFTKEYS_SELECT_BACK;
     }
+    
+RESOURCE DIALOG r_hs_content_removed_view 
+    { 
+    flags = EGeneralQueryFlags; 
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY; 
+    items = 
+        { 
+        DLG_LINE 
+            { 
+            type = EAknCtQuery; 
+            id = EGeneralQuery; 
+            control = AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout; 
+                label = r_hs_error_content_removed;
+                bmpfile = AVKON_ICON_FILE;
+                bmpid = EMbmAvkonQgn_note_error;
+                bmpmask = EMbmAvkonQgn_note_error_mask;                
+                }; 
+            } 
+        }; 
+    }    
 
 RESOURCE TBUF r_qtn_hs_operation_failed_no_disk 
     { 
     buf = qtn_hs_operation_failed_no_disk; 
+    }
+
+RESOURCE DIALOG r_backup_restore_wait_dialog
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_hs_backup_use_prevented;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
     }
 
 // End of file

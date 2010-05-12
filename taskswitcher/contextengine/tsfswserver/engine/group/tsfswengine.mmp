@@ -28,6 +28,8 @@ SOURCE          tsfshiddenapplist.cpp
 SOURCE          tsfsalwaysshownapplist.cpp
 SOURCE          tsfswidgetlist.cpp
 SOURCE          tsfswiconcache.cpp
+SOURCE          tsfswdatalist.cpp
+SOURCE          tscpsnotifier.cpp
 
 MW_LAYER_SYSTEMINCLUDE
 
@@ -52,6 +54,7 @@ LIBRARY widgetregistryclient.lib
 LIBRARY featmgr.lib
 LIBRARY bitmaptransforms.lib
 
+LIBRARY	liwservicehandler.lib
 LIBRARY tspreviewprovider.lib
 LIBRARY tsfswutils.lib
 

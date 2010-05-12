@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api id="33b42b58fde503a976613f372680ae87" dataversion="2.0">
+  <name>HS Rendering Plug-in API</name>
+  <description>API allows the widget developer to create his own rendering plugin, which can be taken into use in widget declaration.</description>
+  <type>c++</type>
+  <collection>idlehomescreen</collection>
+  <libs>
+    <lib name="extrenderingplugin.lib"/>
+  </libs>
+  <release category="platform" sinceversion="5.2"/>
+  <attributes>
+    <htmldocprovided>no</htmldocprovided>
+    <adaptation>no</adaptation>
+  </attributes>
+</api>

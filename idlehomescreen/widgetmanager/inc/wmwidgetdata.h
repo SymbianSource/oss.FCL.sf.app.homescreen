@@ -27,7 +27,6 @@
 #include <bamdesca.h>
 #include <hscontentinfo.h>
 
-#include "wmimageconverter.h"
 
 // FORWARD DECLARATIONS
 class CDictionaryFileStore;
@@ -37,6 +36,7 @@ class CHsContentInfo;
 class CWmPersistentWidgetOrder;
 class RWidgetRegistryClientSession;
 class CWmResourceLoader;
+class CWmImageConverter;
 
 // CLASS DECLARATION
 /**
@@ -46,7 +46,6 @@ class CWmResourceLoader;
  */
 NONSHARABLE_CLASS( CWmWidgetData )
     : public CBase
-    , public MConverterObserver
     {
 
 public: // types
@@ -57,6 +56,14 @@ public: // types
             EUnknown,
             ENative,
             ECps // wrt widgets included in this category
+            };
+
+    /** wrt widget type */
+    enum TWrtType
+            {
+            EUnIdentified,
+            EWgz,                    
+            EWgt
             };
 
 public: // construction
@@ -139,7 +146,7 @@ public: // external handles
     /**
      * Init logo re-creation
      */
-    void ReCreateLogo( const TSize& aSize );
+    void UpdateLogo( const TSize& aSize, TBool aReCreateLogo );
     
     /**
      * returns widget description
@@ -185,7 +192,7 @@ public: // methods to read the content
     inline const CHsContentInfo& HsContentInfo() const;
 
     /** widget name */
-    inline const TDesC& Name() const;
+    const TDesC& Name() const;
 
     /** widget uid */
     inline TUid Uid() const;
@@ -199,6 +206,9 @@ public: // methods to read the content
     /** widget type */
     inline TWidgetType WidgetType() const;
 
+    /** wrt widget type */
+    inline TWrtType WrtType() const;
+    
     /** running install animation index */
     inline TInt InstallAnimationIndex() const;
 
@@ -218,13 +228,8 @@ public: // methods to read the content
     void VisualizeUninstallL();
 	
     /** stop uninstallation animation */
-    void StopUninstallAnimationL();
+    void StopUninstallAnimation();
     
-protected: // from MConverterObserver
-
-    /** image conversin completed */
-    void NotifyCompletion( TInt aError );
-
 private: // new functions
     
     /** uninstall animation related*/
@@ -243,16 +248,12 @@ private: // new functions
     /** Logo icon string handling */
     void HandleIconString( const TDesC& aIconStr );
     void FireDataChanged();
-    static TInt TimeoutTick( TAny* aPtr );
 
 private: // data members
     
     /* reference to resource loader */
     CWmResourceLoader& iWmResourceLoader;
     
-    /* the image converter utility */
-    CWmImageConverter*    iImageConverter;
-
     /* observes this widget representation (NOT OWNED) */
     MWmWidgetDataObserver* iObserver;
 
@@ -265,8 +266,11 @@ private: // data members
     /** The CHsContentInfo that corresponds to this list row */
     CHsContentInfo*     iHsContentInfo;
 
-    /** type oif the widget */
+    /** type of the widget */
     TWidgetType         iWidgetType;
+    
+    /** type of the wrt widget */    
+    TWrtType            iWrtType;
 
     /** persistent order of widgets (used in sorting) */
     const CWmPersistentWidgetOrder* iPersistentWidgetOrder;
@@ -288,30 +292,15 @@ private: // data members
     
     /** timer for updating animation */
     CPeriodic*          iAnimationTimer;
-    
-    /** timer for canceling image convertion */
-    CPeriodic*          iTimeoutTimer;
-    
+        
     /* uninstall animation index */
     TInt                iAnimationIndex;
 
     /** uninstallation switch */
     TBool               iAsyncUninstalling;
-    
-    /** logo changed switch */
-    TBool               iFireLogoChanged;
-
-    /**
-     * ActiveSchedulerWait used to wait while logo image
-     * is being prepaired.
-     */
-    CActiveSchedulerWait* iWait;
-    
-    /**
-     * Holds widget name. Used for restoring widget name 
-     * if error has occurred during uninstallation.
-     */
-    HBufC* iWidgetName;
+        
+    /* the image converter utility */
+    CWmImageConverter*    iImageConverter;
     };
 
 

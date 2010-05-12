@@ -137,6 +137,12 @@ public: // New functions
     */       
     virtual CXnNodePluginIf* SoftKeyL( XnMenuInterface::MXnMenuInterface::TSoftKeyPosition aPos ) = 0;
 
+    /**
+    * Returns softkey node, which should handle key event.     
+    * @return softkey node which should handle key event, NULL if not available. 
+    */           
+    virtual CXnNodePluginIf* KeyEventNode() = 0;
+    
    /**
     * Sets MXnMenuObserver observer
     * @since S60 5.1
@@ -152,10 +158,11 @@ public: // New functions
 
    /**
     * Tries to display menubar
-    * @since S60 5.1    
-    * @param aMenuNodeId the menu node id
+    * @since S60 5.2    
+    * @param aMenuNodeId the menu node id        
+    * @param aContextMenu ETrue if context menu should be displayed, EFalse otherwise 
     */                      
-    virtual void TryDisplayingMenuBarL( const TDesC& aMenuNodeId ) = 0;
+    virtual void TryDisplayingMenuBarL( const TDesC& aMenuNodeId, TBool aContextMenu ) = 0;
     };
 }   
     
@@ -220,6 +227,11 @@ class CXnMenu : public CXnComponent, public XnMenuInterface::MXnMenuInterface
         */        
         CXnNodePluginIf* SoftKeyL( XnMenuInterface::MXnMenuInterface::TSoftKeyPosition aPos );
 
+        /**
+         * @see MXnMenuInterface::KeyEventNode
+         */        
+         CXnNodePluginIf* KeyEventNode();
+        
        /**
         * @see MXnMenuInterface::SetObserver
         */                
@@ -233,13 +245,13 @@ class CXnMenu : public CXnComponent, public XnMenuInterface::MXnMenuInterface
        /**
         * @see MXnMenuInterface::TryDisplayingMenuBarL
         */                       
-       void TryDisplayingMenuBarL( const TDesC& aMenuNodeId );
-       
-                              
+       void TryDisplayingMenuBarL( const TDesC& aMenuNodeId, TBool aContextMenu );
+                                                 
       /**
        * @see MXnComponentInterface::MakeInterfaceL
        */
-      XnComponentInterface::MXnComponentInterface* MakeInterfaceL( const TDesC8& aType );   
+      XnComponentInterface::MXnComponentInterface* MakeInterfaceL( const TDesC8& aType );
+      
     private:
     
         /**

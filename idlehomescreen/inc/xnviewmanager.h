@@ -22,7 +22,6 @@
 #include <e32base.h>
 
 // User includes
-#include "xnpropertysubscriber.h"
 
 // Forward declarations
 class CXnUiEngine;
@@ -86,8 +85,7 @@ public:
  * @lib xn3layoutengine.lib
  * @since S60 5.0
  */
-NONSHARABLE_CLASS( CXnViewManager ) : public CBase,
-    public MXnPropertyChangeObserver
+NONSHARABLE_CLASS( CXnViewManager ) : public CBase
     {
 public:
     /**
@@ -119,14 +117,6 @@ private:
      * 2nd phase constructor
      */
     void ConstructL();
-
-private:
-    // from MXnPropertyChangeObserver
-    
-    /**
-     * @see MXnPropertyChangeObserver
-     */
-    void PropertyChangedL( const TUint32 aKey, const TInt aValue );
     
 public:
     // New functions
@@ -212,9 +202,9 @@ public:
     CXnOomSysHandler& OomSysHandler() const;
     
     void UpdatePageManagementInformationL();
-    
-    TBool UiStartupPhaseAllDone() const;
-            
+
+    void OrientationChanged();
+
 private:
     // new functions
     
@@ -264,11 +254,11 @@ private:
     void ResetCrashCount();    
 
     /**
-     * Show error note
-     * 
-     * @param aResourceId   Resource id for string to be displayed.
+     * Show error note from resource.
      */
-    void ShowErrorNoteL( const TInt aResourceId );        
+    void ShowErrorNoteL();   
+    
+    void DoRobustnessCheckL();
     
 private:
     // data
@@ -295,12 +285,6 @@ private:
      * Not own.
      */
     CXnUiEngine* iUiEngine;
-
-    /**
-     * UI startup phase observer
-     * Own.
-     */
-    CXnPropertySubscriber* iUiStartupPhase;
     
     /**
      * Comopser.
@@ -364,9 +348,9 @@ private:
     CPeriodic* iStabilityTimer;
 
     /**
-     * Flag to indicate that UI startup phase is ready
-     */
-    TBool iUiStartupPhaseAllDone;
+     * Flag for current orientation.
+     */    
+    TBool iIsLandscapeOrientation;
     
 private:   
     // Friend classes

@@ -30,7 +30,6 @@
 #include "xnnodeappif.h"
 #include "aistrcnv.h"
 
-#include <csxhelp/hmsc.hlp.hrh>
 #include <hlplch.h>
 
 using namespace AiXmlUiController;
@@ -59,27 +58,6 @@ const TUid KVoiceCallUidViewId = { 0x10282D81 };
 const TUid KVideoCallUid = { 0x101F8681 };
 
 // ======== LOCAL FUNCTIONS ========
-// ----------------------------------------------------------------------------
-// Shows the Homescreen specific help item
-// ----------------------------------------------------------------------------
-//
-static void ShowHelpL( const TDesC& aHelpString )
-    {
-    TUid fwUid = TUid::Uid( AI_UID3_AIFW_COMMON );
-    TCoeContextName helpString;
-    helpString.Copy( aHelpString );
-    
-    CArrayFixFlat<TCoeHelpContext>* array = 
-    new (ELeave) CArrayFixFlat<TCoeHelpContext>(1);
-    CleanupStack::PushL( array );
-    
-    array->AppendL( TCoeHelpContext( fwUid, helpString ) );
-    
-    HlpLauncher::LaunchHelpApplicationL( 
-    CCoeEnv::Static()->WsSession(), array );
-    
-    CleanupStack::Pop( array );
-    }
 
 // ---------------------------------------------------------------------------
 // Activates Phone application either in video call or normal view
@@ -175,14 +153,9 @@ void CAIEventHandler::HandleEventL( const TDesC8& aEventText, CXnDomNode& aEvent
             }    
         else if ( event == AiUiDef::xml::event::KEventShowHelp )
             {
-            if( iUiController.UiEngineL()->IsEditMode() )
-                {
-                ShowHelpL( KSET_HLP_HOME_SCREEN_EDIT );
-                }
-            else
-                {
-                ShowHelpL( KSET_HLP_HOME_SCREEN );
-                }
+            HlpLauncher::LaunchHelpApplicationL(
+                CCoeEnv::Static()->WsSession(), 
+        		CCoeEnv::Static()->AppUi()->AppHelpContextL() );
             }
         else if ( event == AiUiDef::xml::event::KEventActivatePhoneView )
             {

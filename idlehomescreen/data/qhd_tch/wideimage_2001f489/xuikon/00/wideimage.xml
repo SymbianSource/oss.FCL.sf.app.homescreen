@@ -3,7 +3,7 @@
     <widget id="wideimage_template" focusable="true" _s60-initial-focus="1">        
         
         <!-- Data plugin in this widget -->
-        <contentsource id="wideimage_plugin" name="" value="0x200286DD" />
+        <contentsource id="wrt_plugin" name="WRTWidget" value="0x200286DD" />
         <configuration name="service" value="Service.ContentPublishing"/>
         <configuration name="interface" value="IContentPublishing"/>
         <configuration name="command" value="GetList"/>
@@ -12,15 +12,15 @@
         <actions>
             <action>
                 <trigger name="activate"/>
-                <event id="p_trigger" name="" />            
+                <event id="w_trigger" name="WRTWidget/publisher(selected)" />            
             </action>
         </actions>
         <box id="default_container" _s60-initial-focus="1">
-            <image id="default_image">
-	            <property id="prop1" class=""/>
+            <image id="w_default_image">
+	            <property id="default_image" class="WRTWidget/def_image"/>
             </image>
-            <text id="default_text">
-            	<property id="prop2" class=""/>
+            <text id="w_default_text">
+            	<property id="default_text" class="WRTWidget/def_text"/>
             </text>
  			 </box>            
        <box id="image_container" sizeaware="true" _s60-initial-focus="1">   
@@ -31,7 +31,7 @@
                 </action>
             </actions>
             <image id="wide_image">
-                <property id="prop3" class=""/>
+                <property id="w_image" class="WRTWidget/image1"/>
                 <property class="policy/emptyContent" name="image_container" value="display: none;"/>
                 <property class="policy/Content" name="image_container" value="display: block;"/>
                 <property class="policy/Content" name="default_container" value="display: none;"/>

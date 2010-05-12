@@ -135,6 +135,11 @@ TInt CWmUnitTest::ViewListL( CHsContentInfoArray& /*aArray*/ )
     return KErrNone;
     }
 
+TInt CWmUnitTest::ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray )
+    {
+    return KErrNone;
+    }
+
 TInt CWmUnitTest::AppListL( CHsContentInfoArray& /*aArray*/ )
     {
     return KErrNone;

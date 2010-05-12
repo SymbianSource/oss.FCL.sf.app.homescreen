@@ -160,15 +160,28 @@ public:
      */
     void ClearPassiveFocusedNodesL();
 
+    /**
+     * Clears dispatcher's internal state.
+     * 
+     * @since S60 5.2
+     */
+    void ClearStateL();
+    
+    /** 
+     * Returns the last pointer event
+     * 
+     * @since S60 5.2
+     * @return Last pointer event
+     */
+    const TPointerEvent& PointerEvent() const;
+            
 private:
     // new functions
     
     void SetNodeL( CXnNode* aToLose, CXnNode* aToGain, TBool aNotify,
         TInt aSource = 0 );
     
-    void ResolveAndSetFocusL();
-    
-    void ClearStateL();
+    void ResolveAndSetFocusL();       
     
 protected:
     // New functions
@@ -223,6 +236,8 @@ private:
     CEikButtonGroupContainer* iCbaContainer;
     /** For storing the nodes that have passive focus. */
     RPointerArray< CXnNode > iPassiveFocusedNodes;
+    /** Last pointer event */
+    TPointerEvent iPointerEvent;
     };
 
 #endif //__XNKEYEVENTDISPATCHER_H__

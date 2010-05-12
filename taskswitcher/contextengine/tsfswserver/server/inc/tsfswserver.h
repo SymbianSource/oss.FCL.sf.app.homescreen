@@ -66,8 +66,6 @@ private:
         
     // from MTsFswEngineObserver
     void FswDataChanged();
-    TInt FswDataListenerCount();
-
 private:
     TInt iSessionCount;
     CTsFswEngine* iEngine;

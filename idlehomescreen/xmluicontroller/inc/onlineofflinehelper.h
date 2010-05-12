@@ -193,9 +193,12 @@ private:
     
     enum
         {
+        // if defined Home Screen is in online mode.
         EOnline,
-        EUtilizeOnline,
+        // if defined there is no need to show automatic offline note 
+        // and automatic offline setting is disabled.
         ERoamingShown,
+        // if defined phone profile is offline.
         EOfflineProfile
         };
 private: 

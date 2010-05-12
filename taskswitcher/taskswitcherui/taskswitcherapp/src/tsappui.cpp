@@ -60,7 +60,9 @@ const TInt KMinMemoryAmountInBytes = 524288;
 
 // time to wait before sending the task to background
 // (must give time to animation)
-const TInt KWaitBeforeGoingToBackground = 100000;
+const TInt KWaitBeforeGoingToBackground = 200000;
+
+const TUid KTsAppUid = { KTsAppUidValue };
 
 // -----------------------------------------------------------------------------
 // CTsAppUi::ConstructL()
@@ -118,6 +120,7 @@ void CTsAppUi::ConstructL()
     // Create custom window group
     iWg = RWindowGroup(CCoeEnv::Static()->WsSession());
     iWg.Construct((TUint32)&iWg, ETrue);
+    iWg.EnableScreenChangeEvents(); 
     
     // Create UI
     iAppView = CTsAppView::NewL( ApplicationRect(), *iDeviceState, iWg );
@@ -144,10 +147,15 @@ void CTsAppUi::ConstructL()
     // And finally, go to background.
     MoveAppToBackground( ENoneTransition );
     
-    iEikonEnv->RootWin().SetOrdinalPosition(-1);
+    iEikonEnv->RootWin().SetOrdinalPosition(-1, ECoeWinPriorityNeverAtFront);
     iEikonEnv->RootWin().EnableReceiptOfFocus(EFalse);
     
+    RWindowGroup& windowGroup = CCoeEnv::Static()->RootWin();
+    windowGroup.EnableGroupListChangeEvents();
+    
     iIsPopUpShown = EFalse;
+    iUiStarted = EFalse;
+    iDisableAppKeyHandling = EFalse;
     
     TSLOG_OUT();
     }
@@ -207,7 +215,7 @@ TBool CTsAppUi::EffectsEnabled() const
 // CTsAppUi::StartTransion
 // -----------------------------------------------------------------------------
 //
-void CTsAppUi::StartTransion( TUint aTransitionType )
+void CTsAppUi::StartTransion( TUint aTransitionType, TUid aNextAppUid, TInt aWgId )
     {
     if( !EffectsEnabled() )
         {
@@ -228,10 +236,7 @@ void CTsAppUi::StartTransion( TUint aTransitionType )
                          CAknTransitionUtils::EForceInvisible );
         break;
     case EActivationTransition:
-        StartTransition( aTransitionType, 
-                         EFalse, 
-                         ETrue, 
-                         CAknTransitionUtils::EForceInvisible );
+        StartAppActivateTransition( aNextAppUid, aWgId );
         break;
         }
     }
@@ -257,6 +262,46 @@ void CTsAppUi::StartTransition( TUint aTranstionId,
         static_cast<CAknTransitionUtils::TMakeVisibleSubComponentsInfo>(aSubCom) );
     GfxTransEffect::NotifyExternalState( ECaptureComponentsEnd, ptr );
     GfxTransEffect::End( iAppView );
+    }
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::StartAppActivateTransition
+// -----------------------------------------------------------------------------
+//
+void CTsAppUi::StartAppActivateTransition( TUid aNextAppUid, TInt aWgId )
+    {
+    // Check what type of transition will be trigerred
+    if ( aWgId == iUnderAppWgId )
+        {
+        // App under task switcher was launched
+        StartTransition( EBackgroundTransition, 
+                         EFalse, 
+                         ETrue, 
+                         CAknTransitionUtils::EForceInvisible );
+        }
+    else
+        {
+        // App start animation
+        TRAP_IGNORE( RequestPopUpL() );
+        const TDesC8* ptr = reinterpret_cast<const TDesC8*>(iAppView);
+        GfxTransEffect::Abort(iAppView);
+        TInt groupId = GfxTransEffect::BeginGroup();
+        GfxTransEffect::BeginFullScreen(
+                 EActivationAppShowTransition, ApplicationRect(),
+                 AknTransEffect::EParameterType,
+                 AknTransEffect::GfxTransParam( aNextAppUid , KTsAppUid ) );
+        GfxTransEffect::Begin( iAppView, EBackgroundTransition );
+        GfxTransEffect::SetDemarcation( iAppView, iAppView->Rect() );
+        GfxTransEffect::NotifyExternalState( ECaptureComponentsBegin, ptr );
+        iAppView->MakeVisible( EFalse );
+        CAknTransitionUtils::MakeVisibleSubComponents( 
+            iAppView,
+            static_cast<CAknTransitionUtils::TMakeVisibleSubComponentsInfo>(CAknTransitionUtils::EForceInvisible) );
+        GfxTransEffect::NotifyExternalState( ECaptureComponentsEnd, ptr );
+        GfxTransEffect::End( iAppView );
+        GfxTransEffect::EndFullScreen();
+        GfxTransEffect::EndGroup(groupId);
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -336,14 +381,27 @@ void CTsAppUi::HandleForegroundEventL( TBool aForeground )
     // Both this function and the 'manual' MoveAppTo functions must fire the events
     // because in some cases only one of them will run (e.g. when bringing to foreground
     // not with the hw key but by other means etc.)
+    iDisableAppKeyHandling = EFalse;
+    if ( !iUiStarted )
+        {
+        // Ignore foreground events if UI is starting
+        return;
+        }
     if ( aForeground )
         {
         HandleSwitchToForegroundEvent();
         }
     // exclude cases with dialogs like power menu, memory card
-    else if( !IsFaded())
+    else
         {
-        HandleSwitchToBackgroundEvent();
+        if( !IsFaded() )
+            {
+            HandleSwitchToBackgroundEvent();
+            }
+        else
+            {
+            iDisableAppKeyHandling = ETrue;
+            }
         }
 
     // Call Base class method
@@ -381,12 +439,12 @@ void CTsAppUi::PropertyChanged( TUid aCategory, TUint aKey )
                     {
                     MoveAppToBackground( EBackgroundTransition );
                     }
-                else
+                else if( !iDisableAppKeyHandling )
                     {
                     iAppView->HandleAppKey(KAppKeyTypeLong);
                     }
                 }
-            else if(  value & KTaskswitcherShortAppKeyPressed )
+            else if(  value & KTaskswitcherShortAppKeyPressed && !iDisableAppKeyHandling )
                 {
                 iAppView->HandleAppKey(KAppKeyTypeShort);
                 }
@@ -413,18 +471,10 @@ void CTsAppUi::HandleResourceChangeL( TInt aType )
     // Must call base class implementation first,
     // sizes from LayoutMetricsRect etc. will only be correct after this.
     CAknAppUi::HandleResourceChangeL( aType );
-    if( aType == KEikDynamicLayoutVariantSwitch && iAppView )
+    if( aType == KEikDynamicLayoutVariantSwitch && iAppView && !LayoutChangeAllowed() )
         {
-        // Check if layout switch is necessary
-        TSizeMode mode = iEikonEnv->ScreenDevice()->GetCurrentScreenModeAttributes();
-        TBool isLandscape = mode.iScreenSize.iWidth > mode.iScreenSize.iHeight;
-        TRect appRect = ApplicationRect();
-        TBool isAppLandscape = appRect.Width() > appRect.Height();
-        if(isLandscape != isAppLandscape)
-            {
-            // Keep displayed orientation
-            return;
-            }
+        // Keep displayed orientation
+        return;
         }
     // forward event
     iDeviceState->HandleResourceChange( aType );
@@ -439,7 +489,7 @@ void CTsAppUi::HandleResourceChangeL( TInt aType )
 // CTsAppUi::MoveAppToBackground()
 // -----------------------------------------------------------------------------
 //
-void CTsAppUi::MoveAppToBackground( TUint aTransitionType )
+void CTsAppUi::MoveAppToBackground( TUint aTransitionType, TUid aAppUid, TInt aWgId )
     {
     TSLOG_CONTEXT( MoveAppToBackground, TSLOG_LOCAL );
     TSLOG_IN();
@@ -450,7 +500,7 @@ void CTsAppUi::MoveAppToBackground( TUint aTransitionType )
         }
     else
         {
-        StartTransion(aTransitionType);
+        StartTransion(aTransitionType, aAppUid, aWgId);
         iGoToBackgroundTimer->Cancel();
         iGoToBackgroundTimer->Start( 
                 KWaitBeforeGoingToBackground, 
@@ -500,6 +550,8 @@ void CTsAppUi::MoveAppToForeground( TUint  /*aTransitionType*/ )
     TSLOG_CONTEXT( MoveAppToForeground, TSLOG_LOCAL );
     TSLOG_IN();
 
+    iUiStarted = ETrue;
+    
     // Request window server to bring our application
     // to foreground
     iApplicationTask.BringToForeground();
@@ -529,6 +581,8 @@ void CTsAppUi::HandleSwitchToBackgroundEvent()
 
         // notify view
         iAppView->HandleSwitchToBackgroundEvent();
+        
+        iWg.SetOrdinalPosition(-1, ECoeWinPriorityNormal);
         }
 
     TSLOG_OUT();
@@ -558,6 +612,8 @@ void CTsAppUi::HandleSwitchToForegroundEvent()
 
         // notify view
         iAppView->HandleSwitchToForegroundEvent();
+        
+        iWg.SetOrdinalPosition(iWg.OrdinalPosition(), ECoeWinPriorityAlwaysAtFront);
         }
 
     TSLOG_OUT();
@@ -660,5 +716,123 @@ void CTsAppUi::DisablePopUpL()
         }
     TSLOG_OUT();
     }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::LayoutCanBeChanged
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppUi::LayoutChangeAllowed()
+    {
+    // Check if layout switch is necessary
+    TSizeMode mode = iEikonEnv->ScreenDevice()->GetCurrentScreenModeAttributes();
+    TBool isLandscape = mode.iScreenSize.iWidth > mode.iScreenSize.iHeight;
+    TRect appRect = ApplicationRect();
+    TBool isAppLandscape = appRect.Width() > appRect.Height();
+    TBool retVal;
+    if(isLandscape != isAppLandscape)
+        {
+        retVal = EFalse;
+        }
+    else
+        {
+        retVal = ETrue;
+        }
+    return retVal;  
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::HandleWsEventL
+// -----------------------------------------------------------------------------
+//
+void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
+        CCoeControl* aDestination)
+    {
+    CAknAppUi::HandleWsEventL(aEvent, aDestination);
+    TInt eventType = aEvent.Type();
+    if ( eventType == EEventWindowGroupListChanged )
+        {
+        TInt wgId = WgIdOfUnderlyingApp(EFalse);
+        if ( iForeground &&
+             wgId != iUnderAppWgId &&
+             !iAppView->AppCloseInProgress(iUnderAppWgId) )
+            {
+            MoveAppToBackground( ENoneTransition );
+            }
+        if ( WgIdOfUnderlyingApp(ETrue) != iUnderAppWgId )
+            {
+            HandleResourceChangeL(KEikDynamicLayoutVariantSwitch);
+            }
+        iUnderAppWgId = wgId;
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::WgIdOfUnderlyingApp
+// -----------------------------------------------------------------------------
+//
+TInt CTsAppUi::WgIdOfUnderlyingApp( TBool aIgnoreParentChild )
+    {
+    TInt retVal(0);
+    TApaTaskList taskList( iEikonEnv->WsSession() );
+    TInt underlyingWg = taskList.FindByPos(0).WgId();
+    if ( aIgnoreParentChild )
+        {
+        retVal = underlyingWg;
+        }
+    else
+        {
+        TInt parentWg = GetTopParentWg( underlyingWg );
+        retVal = parentWg ? parentWg : underlyingWg;
+        }
+    return retVal;
+    }
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::GetTopParentWg
+// -----------------------------------------------------------------------------
+//
+TInt CTsAppUi::GetTopParentWg( TInt aChildWg )
+	{
+	TInt parentWg = GetParentWg( aChildWg );
+	if( parentWg )
+		{
+		TInt topParentWg = GetTopParentWg( parentWg );
+		if( topParentWg )
+			{
+			parentWg = topParentWg; 
+			}
+		}
+	return parentWg;
+	}
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::GetParentWg
+// -----------------------------------------------------------------------------
+//
+TInt CTsAppUi::GetParentWg( TInt aChildWg )
+    {
+	TInt retVal(0);
+    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
+    // Ask for window group list from RWsSession
+    TInt error = iEikonEnv->WsSession().WindowGroupList( 0, &allWgIds );
+    if ( !error )
+        {
+        TInt count( allWgIds.Count() );
+        for ( TInt i( 0 ); i < count; i++ )
+            {
+            RWsSession::TWindowGroupChainInfo info = allWgIds[i];
+            if ( info.iId == aChildWg && info.iParentId > 0)
+                {
+				retVal = info.iParentId;
+                break;
+                }
+            }
+        }
+    allWgIds.Close();
+	return retVal;
+	}
 
 // End of file

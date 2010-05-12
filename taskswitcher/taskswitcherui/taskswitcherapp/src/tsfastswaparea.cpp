@@ -50,15 +50,8 @@ enum TPopupCommands
 /** Number of closable applications, to show "close all" option. */
 const TInt KTsMaxClosableApps = 2;
 
-/** Uid of Active Idle application. 
-    Used when movind Ai to specified position.*/
-const TUid KAiUid = TUid::Uid( 0x102750F0 );
-    
-/** Position of Ai in fsw grid.*/
-const TInt KAiPosition = 0;
-
 /** Default grid item to highlight.*/
-const TInt KItemToHighlight = 3;
+const TInt KItemToHighlight = 2;
 
 const TInt KAppKeyTypeShort = 1;
 const TInt KAppKeyTypeLong = 2;
@@ -110,7 +103,7 @@ CTsFastSwapArea::CTsFastSwapArea(CCoeControl& aParent,
     CTsDeviceState& aDeviceState,
     CTsEventControler& aEventHandler) :
     iParent(aParent), iDeviceState(aDeviceState), iEvtHandler(aEventHandler),
-    iPreviousNoOfItems(0), iIgnoreLayoutSwitch(EFalse)
+    iIgnoreLayoutSwitch(EFalse), iWidgetClosingCount(0)
     {
     // no implementation required
     }
@@ -122,6 +115,7 @@ CTsFastSwapArea::CTsFastSwapArea(CCoeControl& aParent,
 CTsFastSwapArea::~CTsFastSwapArea()
     {
     iArray.ResetAndDestroy();
+    iIsClosing.Close();
     delete iGrid;
     delete iFSClient;
     delete iPopup;
@@ -141,7 +135,7 @@ void CTsFastSwapArea::ConstructL( const TRect& aRect )
 
     SetRect( aRect );
 
-    // setup ganes grid
+    // setup grid
     ReCreateGridL();
 
     // create stylus popup instance
@@ -195,6 +189,44 @@ void CTsFastSwapArea::ReCreateGridL()
     
     AknListBoxLayouts::SetupStandardGrid( *iGrid );
     
+    // Setup layout
+    LayoutGridL();
+    
+    if( wasHighlight )
+        {
+        iGrid->ShowHighlight();
+        }
+    else
+        {
+        iGrid->HideHighlight();
+        }
+    
+    // Setup empty text
+    HBufC* text = StringLoader::LoadLC( R_TS_FSW_NO_APPS );
+    iGrid->SetEmptyGridTextL( *text );
+    CleanupStack::PopAndDestroy( text );
+    
+    // Setup grid observers
+    if ( obs )
+        {
+        iGrid->SetObserver( obs );
+        }
+    iGrid->SetListBoxObserver(this);
+    iGrid->SetFastSwapGridObserver(this);
+    iGrid->SetContainerWindowL(*this);
+	
+    // Make sure that there is an ActivateL call even when we are not
+    // called from ConstructL. (in order to have the grid's parent ptr set properly)
+    ActivateL();
+    }
+
+
+// --------------------------------------------------------------------------
+// CTsFastSwapArea::LayoutGridL
+// --------------------------------------------------------------------------
+//
+void CTsFastSwapArea::LayoutGridL()
+    {
     RArray<TAknLayoutRect> rects;
     CleanupClosePushL(rects);
     rects.ReserveL(KLayoutItemCount);
@@ -205,8 +237,14 @@ void CTsFastSwapArea::ReCreateGridL()
     TAknLayoutRect gridNextItem = rects[3];
     CleanupStack::PopAndDestroy(&rects);
     
-    TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     iGrid->SetRect(gridAppPane.Rect());
+    
+    TInt variety;
+    TBool disable = GetVariety(variety);
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL());
+        }
     TAknLayoutScalableParameterLimits gridParams = 
         AknLayoutScalable_Apps::cell_tport_appsw_pane_ParamLimits( variety );
     TPoint empty( ELayoutEmpty, ELayoutEmpty );
@@ -224,7 +262,7 @@ void CTsFastSwapArea::ReCreateGridL()
     // Text colors
     TRgb textColor;
     AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), textColor,
-            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG19 );
     TRgb highlightTextColor;
     AknsUtils::GetCachedColor( AknsUtils::SkinInstance(), highlightTextColor,
             KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG11 );
@@ -234,15 +272,7 @@ void CTsFastSwapArea::ReCreateGridL()
     colors.iHighlightedText = highlightTextColor;
     colors.iHighlightedBack = iGrid->ItemDrawer()->HighlightedBackColor();
     iGrid->ItemDrawer()->FormattedCellData()->SetSubCellColorsL(1, colors);
-    
-    // Setup grid observers
-    if ( obs )
-        {
-        iGrid->SetObserver( obs );
-        }
-    iGrid->SetListBoxObserver(this);
-    iGrid->SetFastSwapGridObserver(this);
-    iGrid->SetContainerWindowL(*this);
+    iGrid->SetStrokeColors(textColor, highlightTextColor);
     
     if ( AknLayoutUtils::LayoutMirrored() )
         {
@@ -264,22 +294,16 @@ void CTsFastSwapArea::ReCreateGridL()
         }
     iGridItemWidth = gridItem.Rect().Width();
     
-    iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(EFalse);
+    // Update item drawer
+    iGrid->UpdateItemDrawerLayoutDataL();
     
     // Update state
     HandleDeviceStateChanged( EDeviceType );
-    if( wasHighlight )
-        {
-        iGrid->ShowHighlight();
-        }
-    else
-        {
-        iGrid->HideHighlight();
-        }
     
-    // Make sure that there is an ActivateL call even when we are not
-    // called from ConstructL. (in order to have the grid's parent ptr set properly)
-    ActivateL();
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->DisablePopUpL());
+        }
     }
 
 
@@ -294,7 +318,12 @@ void CTsFastSwapArea::GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects )
     TAknLayoutRect gridImage;
     TAknLayoutRect gridNextItem;
     
-    TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
+    TInt variety;
+    TBool disable = GetVariety(variety);
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL());
+        }
     
     gridAppPane.LayoutRect( Rect(), 
             AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
@@ -310,6 +339,11 @@ void CTsFastSwapArea::GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects )
     gridNextItem.LayoutRect( gridAppPane.Rect(),
             AknLayoutScalable_Apps::cell_tport_appsw_pane_cp03( variety ) );
     aRects.Append(gridNextItem);
+    
+    if ( disable )
+        {
+        TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->DisablePopUpL());
+        }
     }
 
 
@@ -337,11 +371,11 @@ void CTsFastSwapArea::SizeChanged()
         // data with new layout values
         TInt selIdx = SelectedIndex();
         TRAPD(err, 
-              ReCreateGridL();
-              /*iEvtHandler.ReInitPhysicsL(GridWorldSize(), ViewSize(), ETrue);*/);
+              /*ReCreateGridL()*/
+              LayoutGridL() );
         if ( err != KErrNone )
             {
-            TSLOG1( TSLOG_INFO, "ReCreateGridL leaves with %d", err );
+            TSLOG1( TSLOG_INFO, "LayoutGridL leaves with %d", err );
             }
         HandleFswContentChanged();
         iGrid->SetCurrentDataIndex(selIdx);
@@ -384,6 +418,7 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
     if ( aIndex >= 0 && aIndex < iArray.Count() )
         {
         TInt wgId = iArray[aIndex]->WgId();
+        TUid appUid = iArray[aIndex]->AppUid();
         // Move other app to foreground and then move ourselves to background.
         // Order is important and cannot be reversed.
         iFSClient->SwitchToApp( wgId );
@@ -393,7 +428,7 @@ void CTsFastSwapArea::SwitchToApp( TInt aIndex )
         iIgnoreLayoutSwitch = ETrue;
         CTsAppUi* appui =
             static_cast<CTsAppUi*>( iEikonEnv->AppUi() );
-        appui->MoveAppToBackground( CTsAppUi::EActivationTransition );
+        appui->MoveAppToBackground( CTsAppUi::EActivationTransition, appUid, wgId );
         iIgnoreLayoutSwitch = EFalse;
         
         // Orientation update
@@ -422,6 +457,11 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
             }
         TInt wgId = iArray[aIndex]->WgId();
         iFSClient->CloseApp( wgId );
+        iIsClosing.Append(wgId);
+        if ( iArray[aIndex]->Widget() )
+            {
+            iWidgetClosingCount++;
+            }
         // The fsw content will change sooner or later
         // but the updated content (without the closed app) will not
         // come very fast. It looks better to the user if the item
@@ -432,12 +472,14 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
         delete iArray[aIndex];
         iArray.Remove( aIndex );
         NotifyChange();
-        if ( !aSuppressRendering )
+        
+        // Hide highlight
+        if ( iGrid->GridBehaviour() == CTsFastSwapGrid::ETouchOnly )
             {
-            RenderContentL( ETrue );
+            iGrid->HideHighlight();
             }
-        // Update item selection on the screen if last item was deleted
-        TInt newItemCount = GridItemCount();
+        // Update selection
+        TInt newItemCount = GridItemCount() - 1;
         if ( aIndex == newItemCount )
             {
             newItemCount--;
@@ -445,8 +487,12 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
             }
         else
             {
-            DrawDeferred();
             iGrid->SetCurrentDataIndex(selIdx);
+            }
+        // Render contect
+        if ( !aSuppressRendering )
+            {
+            RenderContentL( ETrue );
             }
         
         // Orientation update
@@ -479,7 +525,7 @@ void CTsFastSwapArea::TryCloseAllL()
         {
         RenderContentL();
         RestoreSelectedIndex();
-        UpdateGrid();
+        UpdateGrid( ETrue, EFalse );
         }
     }
 
@@ -544,7 +590,6 @@ void CTsFastSwapArea::HandleFswContentChangedL()
 
     // get current content from fastswap server
     iFSClient->GetContentL( iArray );
-    SwapApplicationOrder( iArray );
 
 #ifdef _DEBUG
     for ( TInt i = 0, ie = iArray.Count(); i != ie; ++i )
@@ -554,6 +599,20 @@ void CTsFastSwapArea::HandleFswContentChangedL()
         TSLOG4( TSLOG_INFO, "[%d]: %d %d %S", i, e->WgId(), e->AppUid(), &name );
         }
 #endif
+    
+    // Update closing widget count if necessary
+    if ( iWidgetClosingCount )
+        {
+        TInt widgetCount(0);
+        for ( TInt i = 0, ie = iArray.Count(); i != ie; ++i )
+            {
+            if ( iArray[i]->Widget() )
+                {
+                widgetCount++;
+                }
+            }
+        iWidgetClosingCount = widgetCount;
+        }
 
     // draw
     RenderContentL();
@@ -581,8 +640,9 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     CleanupStack::PushL( textArray );
     RArray<TInt> closeItemArray;
     CleanupClosePushL(closeItemArray);
+    RArray<TInt> strokeItemArray;
+    CleanupClosePushL(strokeItemArray);
     
-    TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
     RArray<TAknLayoutRect> rects;
     CleanupClosePushL(rects);
     rects.ReserveL(KLayoutItemCount);
@@ -591,6 +651,8 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     CleanupStack::PopAndDestroy(&rects);
     if ( iArray.Count() )
         {
+        iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(EFalse);
+        static_cast<CTsAppView*>(&iParent)->EnableDragEvents(ETrue);
         if ( AknLayoutUtils::LayoutMirrored() )
             {
             iGrid->SetLayoutL( EFalse, EFalse, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
@@ -599,6 +661,11 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
             {
             iGrid->SetLayoutL( EFalse, ETrue, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
             }
+        }
+    else
+        {
+        iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(ETrue);
+        static_cast<CTsAppView*>(&iParent)->EnableDragEvents(EFalse);
         }
         
     for ( TInt i = 0, ie = iArray.Count(); i != ie; ++i )
@@ -623,9 +690,15 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
         CFbsBitmap* mask = 0;
         if ( !h )
             {
+            // No screenshot, take app icon
             h = iArray[i]->AppIconBitmapHandle();
             maskh = iArray[i]->AppIconMaskHandle();
             TSLOG1( TSLOG_INFO, "using appicon, handle = %d", h );
+            }
+        else
+            {
+            // Screenshot exists, mark it for stroke
+            strokeItemArray.AppendL(i);
             }
         __ASSERT_DEBUG( h, User::Invariant() );
         bitmap = CopyBitmapL( h, sz );
@@ -658,8 +731,10 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
         }
     iGrid->ItemDrawer()->FormattedCellData()->SetIconArrayL(iconArray);
     iGrid->SetCloseItemsL(closeItemArray);
+    iGrid->SetStrokeItemsL(strokeItemArray);
     
     // Cleanup
+    CleanupStack::PopAndDestroy(&strokeItemArray);
     CleanupStack::PopAndDestroy(&closeItemArray);
     CleanupStack::Pop(textArray);
     CleanupStack::Pop(iconArray);
@@ -671,17 +746,9 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
         }
     
     // refresh the items in the grid
-    if(iPreviousNoOfItems < iArray.Count())
-        {
-        iGrid->HandleItemAdditionL();
-        }
-    else if(iPreviousNoOfItems > iArray.Count())
-        {
-        iGrid->HandleItemRemovalL();
-        }
-    iPreviousNoOfItems = iArray.Count();
     iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
     UpdateGrid( ETrue, !aSuppressAnimation );
+    iGrid->HandleItemAdditionL();
     
     TSLOG_OUT();
     }
@@ -703,7 +770,6 @@ CFbsBitmap* CTsFastSwapArea::CopyBitmapL( TInt aFbsHandle, TSize aSize )
     // do not always use aSize, preserving the aspect ratio is quite
     // important when showing app icons instead of screenshots
     TSize sz = CalculateSizePreserveRatio( aSize, bmp->SizeInPixels() );
-
     User::LeaveIfError( ret->Create( sz, bmp->DisplayMode() ) );
 
     AknIconUtils::ScaleBitmapL( sz, ret, bmp );
@@ -744,6 +810,11 @@ void CTsFastSwapArea::HandleSwitchToBackgroundEvent()
     {
     // stop listening for changes in fsw content
     iFSClient->CancelSubscribe();
+    // Hide highlight
+    if ( iGrid->GridBehaviour() == CTsFastSwapGrid::ETouchOnly )
+        {
+        iGrid->HideHighlight();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -755,14 +826,21 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     TSLOG_CONTEXT( CTsFastSwapArea::HandleSwitchToForegroundEvent, TSLOG_LOCAL );
     TSLOG_IN();
     
+    iIsClosing.Reset();
+    iWidgetClosingCount = 0;
+    
+    CTsGridItemDrawer* itemDrawer =
+        static_cast<CTsGridItemDrawer*>( iGrid->ItemDrawer() );
+    itemDrawer->SetRedrawBackground(ETrue);
+    
+    // Update Layout
+    CTsAppUi* appUi = static_cast<CTsAppUi*>(iEikonEnv->AppUi());
+    if ( appUi && appUi->EffectsEnabled() )
+        {
+        TRAP_IGNORE( LayoutGridL() );
+        }
+    
     // Reset grid
-    TRAP_IGNORE( ReCreateGridL() );
-    
-    // get the current task list
-    HandleFswContentChanged();
-    // and then start listening for changes
-    iFSClient->Subscribe( *this );
-    
     if ( iDeviceState.DeviceType() == CTsDeviceState::EFullTouch )
         {
         iGrid->HideHighlight();
@@ -772,11 +850,18 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
         iGrid->ShowHighlight();
         }
     
+    // get the current task list
+    HandleFswContentChanged();
+    // and then start listening for changes
+    iFSClient->Subscribe( *this );
+    
     RestoreSelectedIndex();
     UpdateGrid(EFalse, EFalse);
     
     iRedrawTimer->Cancel();
     iRedrawTimer->After(KRedrawTime);
+    
+    itemDrawer->SetRedrawBackground(EFalse);
     
     // give feedback
     LaunchPopupFeedback();
@@ -816,7 +901,6 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
         TEventCode aType )
     {
     iKeyEvent = ETrue;
-    iGrid->SetTactileFeedbackSupport(EFalse);
     // handle the 'clear' key
     if ( aType == EEventKey && aKeyEvent.iCode == EKeyBackspace )
         {
@@ -913,10 +997,12 @@ TKeyResponse CTsFastSwapArea::ShowHighlightOnKeyEvent(
 void CTsFastSwapArea::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     {
     iKeyEvent = EFalse;
-    iGrid->SetTactileFeedbackSupport(ETrue);
     if(aPointerEvent.iType == TPointerEvent::EButton1Down)
         {
         iTapEvent = aPointerEvent;
+        iGrid->EnableAknEventHandling(EFalse);
+        iGrid->HandlePointerEventL(aPointerEvent);
+        iGrid->EnableAknEventHandling(ETrue);
         }
     }
 
@@ -947,7 +1033,7 @@ void CTsFastSwapArea::RestoreSelectedIndex()
     iSavedSelectedIndex = KErrNotFound;
     if ( GridItemCount() )
         {
-        // highlight second recent item (that has index 2) if possible
+        // highlight second recent item (that has index 1) if possible
         TInt highlightItem = 0;
         TInt count = GridItemCount();
         while( highlightItem < count 
@@ -1137,26 +1223,6 @@ void CTsFastSwapArea::NotifyChange()
     }
     
 // -----------------------------------------------------------------------------
-// CTsFastSwapArea::SwapApplicationOrder
-// -----------------------------------------------------------------------------
-//
-void CTsFastSwapArea::SwapApplicationOrder( 
-    RPointerArray<CTsFswEntry>& aArray )
-    {
-    for ( TInt i = 0; i < aArray.Count(); ++i )
-        {
-        if( aArray[i]->AppUid() == KAiUid )
-            {
-            CTsFswEntry* homescreenEntry(0);
-            homescreenEntry = aArray[i];
-            aArray.Remove(i);
-            aArray.Insert(homescreenEntry, KAiPosition);
-            break;
-            }
-        }
-    }
-    
-// -----------------------------------------------------------------------------
 // CTsFastSwapArea::PreferredImageSize
 // -----------------------------------------------------------------------------
 //
@@ -1219,20 +1285,16 @@ TSize CTsFastSwapArea::CalculateSizePreserveRatio(
         const TSize& aTargetAreaSize,
         const TSize& aSourceSize )
     {
-    TSize sz;
-    if ( aSourceSize.iWidth > aSourceSize.iHeight )
-        {
-        sz.iWidth = aTargetAreaSize.iWidth;
-        TReal ratio = aSourceSize.iWidth / (TReal) aSourceSize.iHeight;
-        sz.iHeight = sz.iWidth / ratio;
-        }
-    else
-        {
-        sz.iHeight = aTargetAreaSize.iHeight;
-        TReal ratio = aSourceSize.iHeight / (TReal) aSourceSize.iWidth;
-        sz.iWidth = sz.iHeight / ratio;
-        }
-    return sz;
+    const TReal 
+      resizedAspectRatio(aTargetAreaSize.iWidth/(TReal)aTargetAreaSize.iHeight);
+    const TReal 
+      orginalAspectRatio(aSourceSize.iWidth/(TReal)aSourceSize.iHeight);
+    //this condition avoid empty margins ( bigger output ). to realy fit area change it
+    const TReal scaleFactor = 
+        ( orginalAspectRatio > resizedAspectRatio ) ? 
+        (aTargetAreaSize.iHeight /(TReal)aSourceSize.iHeight) ://scale by height
+        (aTargetAreaSize.iWidth /(TReal)aSourceSize.iWidth) ;//scale by width
+    return TSize(aSourceSize.iWidth * scaleFactor, aSourceSize.iHeight * scaleFactor);
     }
 
 // --------------------------------------------------------------------------
@@ -1242,7 +1304,6 @@ TSize CTsFastSwapArea::CalculateSizePreserveRatio(
 void CTsFastSwapArea::SelectNextItem()
     {
     iKeyEvent = ETrue;
-    iGrid->SetTactileFeedbackSupport(EFalse);
     TBool forceRedraw(ETrue);
     TBool animate(ETrue);
     TInt selectedItem = SelectedIndex();
@@ -1282,7 +1343,7 @@ void CTsFastSwapArea::CenterItem(TInt aRedrawDelay)
     TPoint absViewPos = ViewPos();
     absViewPos.iX -= Rect().Width() / 2;
     if( !iEvtHandler.IsPhysicsRunning() &&
-        ( absViewPos.iX < 0 || absViewPos.iX + Rect().Width() > GridWorldSize().iWidth )
+        ( absViewPos.iX < 0 ||( absViewPos.iX + Rect().Width() > GridWorldSize().iWidth && GridItemCount() ) )
       )
         {
         // View is outside of grid world - update view
@@ -1320,6 +1381,7 @@ void CTsFastSwapArea::UpdateGrid( TBool aForceRedraw, TBool aAnimate )
             }
         if ( aForceRedraw )
             {
+            iParent.DrawDeferred();
             iGrid->DrawNow();
             }
         }
@@ -1331,20 +1393,27 @@ void CTsFastSwapArea::UpdateGrid( TBool aForceRedraw, TBool aAnimate )
 //
 void CTsFastSwapArea::HandleAppKey(TInt aType)
     {
-    if( aType == KAppKeyTypeShort )
+    if ( iArray.Count() )
         {
-        if(iGrid->IsHighlightVisible())
+        if( aType == KAppKeyTypeShort )
             {
-            SelectNextItem();
+            if(iGrid->IsHighlightVisible())
+                {
+                SelectNextItem();
+                }
+            else
+                {
+                iGrid->ShowHighlight();
+                }
             }
-        else
+        else if( aType == KAppKeyTypeLong )
             {
-            iGrid->ShowHighlight();
+            SwitchToApp( SelectedIndex() );
             }
         }
-    else if( aType == KAppKeyTypeLong )
+    else
         {
-        SwitchToApp( SelectedIndex() );
+        TRAP_IGNORE( iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit) );
         }
     }
 
@@ -1374,13 +1443,13 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
         gridViewRect.iTl.iX = -currentXPos;
         // Take edge offset into account
         gridViewRect.iTl.iX += Rect().iTl.iX;
-        if(GridItemCount() <= iMaxItemsOnScreen)
+        if(GridItemCount() && GridItemCount() <= iMaxItemsOnScreen)
             {
             // Center view
             gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
             }
-        iGrid->SetRect( gridViewRect );
         DrawDeferred();
+        iGrid->SetRect( gridViewRect );
         iLogicalViewPosOffset = 0;
         }
     else
@@ -1396,7 +1465,7 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
 //
 void CTsFastSwapArea::TapL(const TPoint& aPoint)
     {
-    if(Rect().Contains(aPoint))
+    if(Rect().Contains(aPoint) && iArray.Count())
         {
         //provide tap pointer event to grid
         iGrid->HandlePointerEventL(iTapEvent);
@@ -1417,7 +1486,7 @@ void CTsFastSwapArea::TapL(const TPoint& aPoint)
 void CTsFastSwapArea::LongTapL(const TPoint& aPoint)
     {
     TInt index(KErrNotFound);
-    if( iGrid->GridView()->XYPosToItemIndex(aPoint,index) )
+    if( iGrid->GridView()->XYPosToItemIndex(aPoint,index) && iArray.Count() )
         {
         iGrid->SetCurrentItemIndex(index);
         SaveSelectedIndex();
@@ -1448,8 +1517,7 @@ void CTsFastSwapArea::DragL(
 		{
 		CenterItem( KUpdateGridTime );
 		}
-		
-    iGrid->SetTactileFeedbackSupport(ETrue);
+
     iGrid->HideHighlight();
     }
 
@@ -1482,7 +1550,7 @@ TPoint CTsFastSwapArea::ViewPos() const
     retVal.iY = iGrid->Rect().iTl.iY + Rect().Height() / 2;
     retVal.iX = - (iGrid->Rect().iTl.iX - Rect().iTl.iX) + Rect().Width() / 2 ;
     TInt gridItemCount = iGrid->Model()->ItemTextArray()->MdcaCount();
-    if( gridItemCount <= iMaxItemsOnScreen)
+    if(gridItemCount && gridItemCount <= iMaxItemsOnScreen)
         {
         // View centered
         retVal.iX += ( Rect().Width() - gridItemCount * iGridItemWidth ) / 2;
@@ -1498,7 +1566,12 @@ TPoint CTsFastSwapArea::ViewPos() const
 TPoint CTsFastSwapArea::ItemViewPosition( TInt aItemIdx )
     {
     TPoint retVal = Rect().iTl;
-    if ( aItemIdx == 0 )
+    if ( aItemIdx < 0 )
+        {
+        // No items
+        retVal.iX = 0;
+        }
+    else if ( aItemIdx == 0 )
         {
         // First item
         if( AknLayoutUtils::LayoutMirrored() )
@@ -1674,6 +1747,59 @@ TInt CTsFastSwapArea::GetCurrentScreenOrientation()
     TPixelsAndRotation availableRect;
     iEikonEnv->ScreenDevice()->GetDefaultScreenSizeAndRotation(availableRect);
     return availableRect.iPixelSize.iWidth > availableRect.iPixelSize.iHeight;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::GetVariety
+// -----------------------------------------------------------------------------
+//
+TBool CTsFastSwapArea::GetVariety( TInt& aVariety )
+    {
+    aVariety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
+    TInt screenOrientation = GetCurrentScreenOrientation();
+    if ( aVariety != screenOrientation )
+        {
+        aVariety = screenOrientation;
+        return ETrue;
+        }
+    return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::IsAppClosing
+// -----------------------------------------------------------------------------
+//
+TBool CTsFastSwapArea::IsAppClosing( TInt aWgId )
+    {
+    TBool retVal(EFalse);
+    if ( iIsClosing.Count() )
+        {
+        TInt idx = iIsClosing.Find(aWgId);
+        retVal = idx != KErrNotFound;
+        if ( retVal )
+            {
+            iIsClosing.Remove(idx);
+            }
+        else if ( iWidgetClosingCount )
+            {
+            retVal = ETrue;
+            iWidgetClosingCount--;
+            }
+        }
+    else
+        {
+        // Check current item list
+        for ( TInt i = 0; i < iArray.Count(); i++ )
+            {
+            TInt wgId = iArray[i]->WgId();
+            if ( wgId == aWgId )
+                {
+                retVal = ETrue;
+                }
+            }
+        }
+    return retVal;
     }
 
 // End of file

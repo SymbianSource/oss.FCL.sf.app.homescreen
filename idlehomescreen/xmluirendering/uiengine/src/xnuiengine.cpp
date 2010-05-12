@@ -264,15 +264,6 @@ TInt CXnUiEngine::HorizontalTwipValueL(
     }
 
 // -----------------------------------------------------------------------------
-// CXnUiEngine::ActivateViewL
-// Activate a view
-// -----------------------------------------------------------------------------
-//
-void CXnUiEngine::ActivateViewL( CXnNode& /*aViewNode*/ )
-    {    
-    }
-
-// -----------------------------------------------------------------------------
 // CXnUiEngine::ViewManager
 // -----------------------------------------------------------------------------
 //
@@ -495,15 +486,6 @@ CXnEditMode* CXnUiEngine::EditMode()
 RPointerArray< CXnNode >* CXnUiEngine::Plugins()
     {
     return iUiEngineImpl->Plugins();
-    }
-
-// -----------------------------------------------------------------------------
-// CXnUiEngine::HitTest
-// -----------------------------------------------------------------------------
-//
-CXnHitTest& CXnUiEngine::HitTest() const
-    {
-    return iUiEngineImpl->HitTest();
     }
 
 // -----------------------------------------------------------------------------

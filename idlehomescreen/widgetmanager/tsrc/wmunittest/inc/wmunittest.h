@@ -26,7 +26,6 @@
 #include <s32file.h> // RFs
 
 #include "wmwidgetorderdata.h"
-#include "wmimageconverter.h" // MConverterObserver
 #include <hscontentcontroller.h>
 #include "wminstaller.h"
 
@@ -67,7 +66,6 @@ class CWmInstaller;
 *  test class for STIF Test Framework TestScripter.
 */
 NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
-                                 public MConverterObserver,
                                  public MHsContentController
     {
     public: // Constructors and destructor
@@ -89,16 +87,13 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
         /** From CScriptBase Runs a script line. */
         virtual TInt RunMethodL( CStifItemParser& aItem );
     
-    public: // from MConverterObserver
-
-        virtual void NotifyCompletion( TInt aError );
-
     public: // from MHsContentController
 
         
         TInt WidgetListL( CHsContentInfoArray& aArray );
         TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
         TInt ViewListL( CHsContentInfoArray& aArray );
+        TInt ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
         TInt AppListL( CHsContentInfoArray& aArray );
         TInt AddWidgetL( CHsContentInfo& aInfo );
         TInt RemoveWidgetL( CHsContentInfo& aInfo );
@@ -165,12 +160,6 @@ NONSHARABLE_CLASS(CWmUnitTest) : public CScriptBase,
         TInt ImageConverterDeleteL( CStifItemParser& aItem );
         // calls image converter's main conversion method
         TInt ImageConverterConvertL( CStifItemParser& aItem );
-        // checks image converter callback and checks its result
-        TInt ImageConverterWaitResultL( CStifItemParser& aItem );
-        // gets and checks the conversion method from image converter
-        TInt ImageConverterConversionMethodL( CStifItemParser& aItem );
-        // cancel ongoing convert
-        TInt CancelConvertL( CStifItemParser& aItem );
 
         // TESTING UNISTALL
         TInt UninstallL( CStifItemParser& aItem );

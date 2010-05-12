@@ -18,6 +18,7 @@
 
 #include "tsfswidgetlist.h"
 #include <widgetregistrydata.h>
+#include <widgetregistryconstants.h>
 
 // --------------------------------------------------------------------------
 // CTsFsWidgetList::NewL
@@ -91,5 +92,35 @@ void CTsFsWidgetList::ResetArrayOfWidgetInfo(
         }
     }
 
+// --------------------------------------------------------------------------
+// CTsFsWidgetList::IsCWRTWidget
+// --------------------------------------------------------------------------
+//
+TBool CTsFsWidgetList::IsCWRTWidget( TUid aUid )
+    {
+	TBool ret(EFalse);
+	if(IsValBetween(KWidgetUidCWRTInternalMemoryStart,
+			KWidgetUidCWRTInternalMemoryStop, aUid.iUid) ||
+		IsValBetween(KWidgetUidCWRTExternalMemoryStart,
+			KWidgetUidCWRTExternalMemoryStop, aUid.iUid) )
+		{
+		ret = ETrue;//it is cwrt widget
+		}
+    return ret;
+    }
+
+// --------------------------------------------------------------------------
+// CTsFsWidgetList::IsValBetween
+// --------------------------------------------------------------------------
+//
+TBool CTsFsWidgetList::IsValBetween( TInt aMinor, TInt aMajor, TInt aBetween )
+	{
+	TBool ret(EFalse);
+	 if	( aBetween >= aMinor && aBetween < aMajor )
+		 {
+		 ret = ETrue;
+		 }
+	 return ret;
+	}
 
 // end of file

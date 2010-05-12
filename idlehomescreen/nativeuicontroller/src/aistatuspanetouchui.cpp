@@ -27,18 +27,18 @@
 #ifdef RD_TACTILE_FEEDBACK
 #include <touchfeedback.h>
 #endif
-
-// User includes
 #include <hscontentpublisher.h>
 #include <hspublisherinfo.h>
+#include <aidevicestatuscontentmodel.h>
+#include <AiNativeUi.rsg>
+
+// User includes
 #include "aistrcnv.h"
 #include "aistatuspanetouchui.h"
 #include "aistatuspanel.h"
 #include "ainativeuiplugins.h"
 #include "aifweventhandler.h"
 #include "aiconsts.h"
-#include "aidevicestatuscontentmodel.h"
-#include <AiNativeUi.rsg>
 
 using namespace AiNativeUiController;
 

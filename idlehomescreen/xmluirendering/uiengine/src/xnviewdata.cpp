@@ -34,7 +34,7 @@
 #include "debug.h"
 
 // Constants
-const TInt KLoadDelay( 100000 );
+const TInt KLoadDelay( 10000 );
 const TInt KInterval( 10000 );
 
 // ============================ LOCAL FUNCTIONS ================================
@@ -489,6 +489,8 @@ void CXnViewData::LoadPublishers()
     
     CXnViewData* self = static_cast< CXnViewData* >( aAny );
     
+    CXnAppUiAdapter* appui = static_cast< CXnAppUiAdapter* >( iAvkonAppUi );         
+    
     RPointerArray< CXnPluginData >& plugins( self->PluginData() );
     
     for ( TInt i = self->iLoadIndex; i < plugins.Count(); i++ )
@@ -521,11 +523,9 @@ void CXnViewData::LoadPublishers()
         
         if( ret != KErrNone )
             {
-            self->iManager.UnloadWidgetFromPluginL( *plugin, ETrue );
-            
+            self->iManager.UnloadWidgetFromPluginL( *plugin, ETrue );            
             self->iShowContentRemoved = ETrue;
-            }
-        
+            }        
         }
     else
         {                
@@ -542,14 +542,17 @@ void CXnViewData::LoadPublishers()
             {            
             CXnNodeAppIf& plugin( self->iContentSourceNodes[i]->AppIfL() ); 
                     
-            self->iManager.AppUiAdapter().LoadPublisher( plugin, reason );                          
+            appui->LoadPublisher( plugin, reason );                          
             }                
                              
         if ( self->iShowContentRemoved )
             {
             self->ShowContentRemovedError();
             self->iShowContentRemoved = EFalse;
-            }           
+            }      
+                
+        // Fire UI ready blindly here, it will be handled in AiFw if needed
+        appui->HandleUiReadyEventL();
         }                  
             
     __PRINTS( "*** CXnViewData::DoLoadPublishersL - done" );

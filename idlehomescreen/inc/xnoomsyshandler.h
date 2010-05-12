@@ -71,7 +71,8 @@ public:     // data types
         EMem1MB = 1024000,
         EMem2MB = 2048000,
         EMem3MB = 3072000,
-        EMem4MB = 4096000
+        EMem4MB = 4096000,
+        EMem6MB = 6144000 
         };
 
 public: // Construction / destruction.

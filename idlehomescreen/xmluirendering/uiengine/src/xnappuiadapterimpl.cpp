@@ -22,6 +22,9 @@
 #include <hspluginsettings.h>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
+#include <connect/sbdefs.h>
+#include <e32property.h>
+#include <xnuiengine.rsg>
 
 // User includes
 #include "xnappuiadapter.h"
@@ -34,6 +37,7 @@
 #include "xneditor.h"
 #include "xnwallpaperview.h"
 #include "xneffectmanager.h"
+#include "xnwaitdialog.h"
 
 #include "xnappuiadapterimpl.h"
 
@@ -121,6 +125,9 @@ void CXnAppUiAdapterImpl::ConstructL()
     
     iEffectManager = CXnEffectManager::NewL();   
     
+    iBackupRestoreObserver = CXnPropertySubscriber::NewL( 
+            KUidSystemCategory, conn::KUidBackupRestoreKey, *this );
+
     __TIME_ENDMARK( "CXnAppUiAdapterImpl::ConstructL, done", time );    
     }
 
@@ -147,7 +154,14 @@ void CXnAppUiAdapterImpl::ReloadUiL()
 // -----------------------------------------------------------------------------
 //
 CXnAppUiAdapterImpl::~CXnAppUiAdapterImpl()
-    {  
+    {
+    if ( iXnWaitDialog )
+        {
+        TRAP_IGNORE( iXnWaitDialog->ProcessFinishedL(); );
+        }
+    
+    delete iBackupRestoreObserver;
+    
     delete iUiEngine;
     
     delete iUiStateListener;
@@ -254,6 +268,56 @@ MHsContentControl* CXnAppUiAdapterImpl::HsContentControlSrv() const
 void CXnAppUiAdapterImpl::HandleResourceChangeL( TInt aType )
     {
     iUiStateListener->HandleResourceChangeL( aType );    
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapterImpl::DisplayWaitDialogL
+// Displays wait dialog during backup/restore. 
+// -----------------------------------------------------------------------------
+//
+void CXnAppUiAdapterImpl::DisplayWaitDialogL()
+    {
+    if ( !iXnWaitDialog )
+       {
+       iXnWaitDialog = new( ELeave ) CXnWaitDialog(
+               reinterpret_cast<CEikDialog**>( &iXnWaitDialog ), ETrue );       
+       iXnWaitDialog->SetCallback( this );
+       iXnWaitDialog->ExecuteLD( R_BACKUP_RESTORE_WAIT_DIALOG );
+       }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnAppUiAdapterImpl::BackupRestoreEvent
+// Property changed notification callback
+// -----------------------------------------------------------------------------
+//
+void CXnAppUiAdapterImpl::PropertyChangedL( const TUint32 aKey, const TInt aValue )
+    {
+    const TUint mask( conn::KBURPartTypeMask ^ conn::EBURNormal );
+    if ( aKey == conn::KUidBackupRestoreKey )
+        {
+        if ( aValue & mask )
+            {
+            // Any type of backup or restore operation started
+            DisplayWaitDialogL();
+            }
+        else if ( iXnWaitDialog )
+            {
+            // Any type of backup or restore operation ended
+            iXnWaitDialog->ProcessFinishedL();
+            // ProcessFinishedL() will NULL iXnWaitDialog
+            }
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CXnAppUiAdapterImpl::DialogDismissedL()
+// Callback method from MProgressDialogCallback interface.
+// ----------------------------------------------------------------------------
+//
+void CXnAppUiAdapterImpl::DialogDismissedL(TInt /*aButtonId*/)
+    {
+    // No implementation required.
     }
 
 // End of file

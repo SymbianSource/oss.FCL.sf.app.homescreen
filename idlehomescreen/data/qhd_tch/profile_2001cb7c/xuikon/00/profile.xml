@@ -106,17 +106,17 @@
                                     </event>
                                 </action>
                             </actions>
-                            <title id="title_vhz" titleindex="0">
-                                <property class="DeviceStatus/VHZText"/>    
-                                <property class="policy/emptyContent" name="title_vhz" value="display: none;" />
-                                <property class="policy/Content" name="title_vhz" value="display: block;" />
-                                <property class="policy/Visibility" name="NT_SATVHZ" value="if (title_vhz,title_sat,SatIdleModeIcon) display:block" />
-                                <property class="policy/Visibility" name="NT_SATVHZ" value="if !+(title_vhz,title_sat,SatIdleModeIcon) display:none" />
-                            </title>
-                            <title id="title_sat" titleindex="1">
+                            <title id="title_sat" titleindex="0">
                                 <property class="SAT/SatIdleModeText"/>
                                 <property class="policy/emptyContent" name="title_sat" value="display: none;" />
                                 <property class="policy/Content" name="title_sat" value="display: block;" />
+                                <property class="policy/Visibility" name="NT_SATVHZ" value="if (title_vhz,title_sat,SatIdleModeIcon) display:block" />
+                                <property class="policy/Visibility" name="NT_SATVHZ" value="if !+(title_vhz,title_sat,SatIdleModeIcon) display:none" />
+                            </title>
+                            <title id="title_vhz" titleindex="1">
+                                <property class="DeviceStatus/VHZText"/>    
+                                <property class="policy/emptyContent" name="title_vhz" value="display: none;" />
+                                <property class="policy/Content" name="title_vhz" value="display: block;" />
                                 <property class="policy/Visibility" name="NT_SATVHZ" value="if (title_vhz,title_sat,SatIdleModeIcon) display:block" />
                                 <property class="policy/Visibility" name="NT_SATVHZ" value="if !+(title_vhz,title_sat,SatIdleModeIcon) display:none" />
                             </title>

@@ -43,6 +43,14 @@ class CXnNode;
 #define KGfxControlActionAppear         3
 #define KGfxControlActionDisappear      4
 
+#define KGfxControlActionAppearPrt         3
+#define KGfxControlActionDisappearPrt      5
+#define KGfxControlActionAppearLsc         6
+#define KGfxControlActionDisappearLsc      7
+
+#define KGfxControlActionBgImgToImgAppear   3
+#define KGfxControlActionBgAnimToImgAppear  5
+
 // Full screen effect ids
 #define KGfxContextOpenWallpaperView    1007
 #define KGfxContextCloseWallpaperView   1008

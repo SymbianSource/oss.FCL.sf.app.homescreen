@@ -21,8 +21,7 @@
                     <property name="class" value="plugins"/>
                 </event>
                 <event name="system/seteditmode">
-                    <property name="id" value="hs_popup_open_hold"/>    
-                    <property name="class" value="widget_indication"/>
+                    <property name="id" value="hs_popup_open_hold"/>
                 </event>                                    
             </action>                
             <action>
@@ -34,8 +33,7 @@
                     <property name="class" value="plugins"/>
                 </event>
                 <event name="system/reseteditmode">
-                    <property name="id" value="hs_popup_open_hold"/>   
-                    <property name="class" value="widget_indication"/>
+                    <property name="id" value="hs_popup_open_hold"/>
                 </event>                                                    
             </action>                                
             <action>
@@ -80,24 +78,12 @@
 
         <!-- Plugins in this view -->
         <box id="plugins_container">
-            <plugin id="plugin1" class="plugins" actionshandler="plugin_actions">
-                <image class="widget_indication" />
-            </plugin>
-            <plugin id="plugin2" class="plugins" actionshandler="plugin_actions">
-                <image class="widget_indication" />
-            </plugin>
-            <plugin id="plugin3" class="plugins" actionshandler="plugin_actions">
-                <image class="widget_indication" />
-            </plugin>
-            <plugin id="plugin4" class="plugins" actionshandler="plugin_actions">
-                <image class="widget_indication" />
-            </plugin>
-            <plugin id="plugin5" class="plugins" actionshandler="plugin_actions">
-                <image class="widget_indication" />
-            </plugin>
-            <plugin id="plugin6" class="plugins" actionshandler="plugin_actions">
-                <image class="widget_indication" />
-            </plugin>
+            <plugin id="plugin1" class="plugins" actionshandler="plugin_actions"/>
+            <plugin id="plugin2" class="plugins" actionshandler="plugin_actions"/>
+            <plugin id="plugin3" class="plugins" actionshandler="plugin_actions"/>
+            <plugin id="plugin4" class="plugins" actionshandler="plugin_actions"/>
+            <plugin id="plugin5" class="plugins" actionshandler="plugin_actions"/>
+            <plugin id="plugin6" class="plugins" actionshandler="plugin_actions"/>
         </box>
 
         <!-- plugins' actions handler -->
@@ -148,6 +134,12 @@
                     <property name="hs_add_view"/>
                     <property name="hs_remove_view"/>
                     <property name="hs_change_wallpaper"/>
+                </menuitemgroup>
+                <menuitemgroup id="ContextMenu/EditMode">
+                    <property name="hs_remove_widget"/>
+                    <property name="hs_widget_settings"/>
+                    <property name="hs_widget_general_1"/>
+                    <property name="hs_widget_general_2"/>
                 </menuitemgroup>
                 <!-- These items are always shown, if not otherwise changed in the declaration -->
                 <menuitemgroup id="Menu/AlwaysShown">

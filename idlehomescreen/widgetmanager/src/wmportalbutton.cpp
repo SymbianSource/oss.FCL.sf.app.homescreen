@@ -32,7 +32,10 @@
 #include <widgetregistryclient.h> // widgetreqistry
 #include <bacline.h>
 #include <escapeutils.h> 
+#include <browserlauncher.h>
+#include <centralrepository.h>
 
+#include "wmimageconverter.h"
 #include "wmportalbutton.h"
 #include "wmcommon.h"
 #include "wmplugin.h"
@@ -42,10 +45,7 @@
 #include "wmprocessmonitor.h"
 
 // CONSTANTS
-_LIT( KUrlPrefix, "4 ");
 
-
-const TUid KOSSBrowserUidValue = { 0x10008D39 };
 // MEMBER FUNCTIONS
 
 // ---------------------------------------------------------
@@ -78,7 +78,7 @@ CWmPortalButton* CWmPortalButton::NewL(
 // ---------------------------------------------------------
 //
 CWmPortalButton::~CWmPortalButton()
-    {    
+    {
     delete iButtonIcon;
     delete iButtonIconMask;
     
@@ -87,6 +87,7 @@ CWmPortalButton::~CWmPortalButton()
     // for de-reference open file count, so it should be deleted last.
     delete iImageConverter;
     delete iProcessMonitor;
+    delete iBrowserLauncher;
     }
 
 // ---------------------------------------------------------
@@ -102,6 +103,7 @@ CWmPortalButton::CWmPortalButton(
     iButtonIcon = NULL;
     iButtonIconMask = NULL;
 	iProcessMonitor = NULL;
+	iBrowserLauncher = NULL;
     }
 
 // ---------------------------------------------------------
@@ -138,10 +140,13 @@ void CWmPortalButton::ConstructL(
             KAknsIIDQsnFrButtonCenterInactive );
     
     // start image converter for the icon
-    iImageConverter = CWmImageConverter::NewL( this );
+    iImageConverter = CWmImageConverter::NewL();
     TSize iconsize( LayoutIconSize() );
     iImageConverter->HandleIconString(
-            iconsize.iWidth, iconsize.iHeight, aIcon );
+            iconsize, 
+            aIcon, 
+            iButtonIcon, 
+            iButtonIconMask );
     // observe our own press events
     SetObserver( this );
     
@@ -160,18 +165,31 @@ void CWmPortalButton::ExecuteL()
     {
     if ( iPortalButtonIndex == 0 )
         {
+        // OVI button
         if ( !iProcessMonitor )
             {
             iProcessMonitor = CWmProcessMonitor::NewL();
             }
-		if ( !iProcessMonitor->IsActive() )
+        // if process monitor is active laucher was allready started.
+        // this is for ignoring multiple button presses
+        if ( !iProcessMonitor->IsActive() )
             {
             RunOviL( iWmMainContainer->Configuration() );
             }
         }
     else if ( iPortalButtonIndex == 1 )
         {
-        RunOperatorL( iWmMainContainer->Configuration() );
+        // OPERATOR button
+        // if this leaves it means we need to start browser
+        // becouse application info was not given
+        TRAPD( err, RunOperatorApplicationL( 
+                iWmMainContainer->Configuration() ) )
+        if ( err != KErrNone )        
+            {
+            StartBrowserL( 
+                    iWmMainContainer->Configuration().PortalButtonBrowserUrl( 
+                            iPortalButtonIndex ) );
+            }
         } 
     else
         {
@@ -186,8 +204,6 @@ void CWmPortalButton::ExecuteL()
 //
 void CWmPortalButton::RunOviL( CWmConfiguration& aConf )
     {
-    // param is: channel=homescreenwidgets 
-    // laucher uid: 0x2002D07F
     RApaLsSession session;
     User::LeaveIfError( session.Connect() );
     CleanupClosePushL( session );
@@ -197,13 +213,7 @@ void CWmPortalButton::RunOviL( CWmConfiguration& aConf )
     TUid launchUid;
     launchUid = aConf.PortalButtonClientUid( iPortalButtonIndex );
 
-    TInt err = session.GetAppInfo( appInfo, launchUid );
-    if ( err != KErrNone )
-        {
-        //This is temp until we have laucher in SDK
-        StartBrowserL( aConf );
-        }
-    else
+    if ( session.GetAppInfo( appInfo, launchUid ) == KErrNone )
         {
         // Form parameter
         HBufC* param = HBufC::NewLC( aConf.PortalButtonClientParam( iPortalButtonIndex ).Length() );
@@ -226,67 +236,39 @@ void CWmPortalButton::RunOviL( CWmConfiguration& aConf )
 // CWmPortalButton::StartBrowserL
 // ---------------------------------------------------------
 //
-void CWmPortalButton::StartBrowserL( CWmConfiguration& aConf )
+void CWmPortalButton::StartBrowserL( const TDesC& aUrl )
     {
-    RApaLsSession session;
-    User::LeaveIfError( session.Connect() );
-    CleanupClosePushL( session );
+    // already running/or request launch or url is empty
+    if ( iBrowserLauncher || !aUrl.Length() ) { return; } 
 
-    HBufC* param = NULL;
-    if ( iPortalButtonIndex == 1 )
-        {
-        // browser start parameter
-        param = HBufC::NewLC( 
-                aConf.PortalButtonBrowserUrl( iPortalButtonIndex ).Length() + 
-                        KUrlPrefix().Length() );
+    _LIT( KUrlPrefix, "4 ");
+    HBufC* param = HBufC::NewLC( aUrl.Length() + KUrlPrefix().Length() );
+    param->Des().Append( KUrlPrefix );
+    param->Des().Append( aUrl );
         
-        param->Des().Copy( KUrlPrefix );
-        param->Des().Append( aConf.PortalButtonBrowserUrl( iPortalButtonIndex ) );
-        }
-    else
-        {
-        // becouse launcher knows url we need to have it temp here
-        // until laucher is available
-        _LIT( KTempUrl, "4 https://store.ovi.com/applications/");
-        param = HBufC::NewLC( KTempUrl().Length() );
-        param->Des().Copy( KTempUrl );
-        }
+    // Create browser launcher
+    CBrowserLauncher* launcher = CBrowserLauncher::NewLC();
+
+    // Asynchronous operation to launch the browser with given URL
+    launcher->LaunchBrowserEmbeddedL( 
+            *param, NULL, this, NULL );
     
-    TUid id( KOSSBrowserUidValue );
-    TApaTaskList taskList( CEikonEnv::Static()->WsSession() );
-    TApaTask task = taskList.FindApp( id );
-    if( task.Exists() )
-        {
-        task.BringToForeground();
-        HBufC8* param8 = HBufC8::NewLC(param->Length());
-        param8->Des().Append(*param);
-        task.SendMessage(TUid::Uid(0), *param8); // UID not used
-        CleanupStack::PopAndDestroy(param8);
-        }
-    else
-        {
-        if( !session.Handle() )
-            {
-            User::LeaveIfError( session.Connect() );
-            }
-        TThreadId thread;
-        User::LeaveIfError(
-                session.StartDocument(*param, KOSSBrowserUidValue, thread));
-        }
-    
+    CleanupStack::Pop( launcher ); 
+    iBrowserLauncher = launcher;
+    launcher = NULL;
+
     CleanupStack::PopAndDestroy( param );
-    CleanupStack::PopAndDestroy( &session );
     }
 
 // ---------------------------------------------------------
-// CWmPortalButton::RunOperatorL
+// CWmPortalButton::HandleServerAppExit
 // ---------------------------------------------------------
 //
-void CWmPortalButton::RunOperatorL( CWmConfiguration& aConf )
+void CWmPortalButton::HandleServerAppExit( TInt aReason )
     {
-    // Current info is that this will be a widget
-    // meanwhile we just start browser
-    StartBrowserL( aConf );
+    MAknServerAppExitObserver::HandleServerAppExit( aReason );
+    delete iBrowserLauncher;
+    iBrowserLauncher = NULL;
     }
 
 // ---------------------------------------------------------
@@ -373,53 +355,17 @@ void CWmPortalButton::SizeChanged()
     // resize icon
     if ( iButtonIcon && iButtonIconMask )
         {
-        TSize size = LayoutIconSize();
-        AknIconUtils::SetSize( 
-            iButtonIcon, size, EAspectRatioPreserved );
-        AknIconUtils::SetSize( 
-            iButtonIconMask, size, EAspectRatioPreserved );
+        iImageConverter->UpdateImageSize(
+            LayoutIconSize(),
+            iWmMainContainer->Configuration().PortalButtonIcon(
+                    iPortalButtonIndex ),
+            *iButtonIcon, 
+            *iButtonIconMask );
         }
         
     TBool landscape = Layout_Meta_Data::IsLandscapeOrientation();
     SetTextAndIconAlignment( 
             landscape ? CAknButton::EIconOverText : CAknButton::EIconBeforeText );
-    }
-
-// ---------------------------------------------------------
-// CWmPortalButton::NotifyCompletion
-// ---------------------------------------------------------
-//
-void CWmPortalButton::NotifyCompletion( TInt aError )
-    {
-    if ( KErrNone == aError )
-        {
-        // take ownership of icon
-        delete iButtonIcon;
-        iButtonIcon = NULL;
-        iButtonIcon = iImageConverter->Bitmap();
-        delete iButtonIconMask;
-        iButtonIconMask = NULL;
-        iButtonIconMask = iImageConverter->Mask();
-        if ( iButtonIcon && iButtonIconMask )
-            {
-            TSize size = LayoutIconSize();
-            if ( iButtonIcon->SizeInPixels() != size )
-                {
-                AknIconUtils::SetSize( 
-                    iButtonIcon, size, EAspectRatioPreserved );
-                }
-            if ( iButtonIconMask->SizeInPixels() != size )
-                {
-                AknIconUtils::SetSize( 
-                    iButtonIconMask, size, EAspectRatioPreserved );
-                }
-            DrawDeferred();
-            }
-        }
-    else
-        {
-        // no image available. Do nothing.
-        }
     }
 
 // ---------------------------------------------------------
@@ -490,7 +436,13 @@ void CWmPortalButton::Draw( const TRect& /*aRect*/ ) const
                 imageLayout.LayoutRect( rect, AknLayoutScalable_Apps
                         ::wgtman_btn_pane_g1( variety ).LayoutLine() );
                 }
-            imageLayout.DrawImage( gc, iButtonIcon, iButtonIconMask );
+            
+            gc.DrawBitmapMasked(
+                imageLayout.Rect(),
+                iButtonIcon,
+                TRect(TPoint( 0, 0 ), iButtonIcon->SizeInPixels() ),
+                iButtonIconMask,
+                EFalse );
             }
         
         // draw text if portrait        
@@ -525,36 +477,15 @@ void CWmPortalButton::DrawText(
     
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     
-    TRgb textColor( layoutText.Color() );
-
-    if ( IsDimmed() )
+    TRgb textColor;
+    TInt err = AknsUtils::GetCachedColor( 
+                    skin, 
+                    textColor, 
+                    KAknsIIDQsnTextColors, 
+                    EAknsCIQsnTextColorsCG63 );
+    if ( err != KErrNone )
         {
-        const TInt KAlpha = 77;
-        textColor = iEikonEnv->ControlColor( EColorButtonText, *this );        
-        // try over-writing color from theme, ignore error.
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
-        textColor.SetAlpha( KAlpha );
-        }
-    else if ( IsFocused() || iButtonPressed )
-        {
-        textColor = iEikonEnv->ControlColor( EColorButtonTextPressed, *this );
-        // try over-writing color from theme, ignore error.
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG10 );
-        }
-    else if ( textColor.Internal() <= 0 )
-        {
-        textColor = iEikonEnv->ControlColor( EColorButtonText, *this );
-        // try over-writing color from theme, ignore error.
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );        
-        }
-    else
-        {
-        // default for button
-        AknsUtils::GetCachedColor( 
-                skin, textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG80 ); 
+        textColor = layoutText.Color(); 
         }
     aGc.SetPenColor( textColor);
     
@@ -592,6 +523,97 @@ void CWmPortalButton::DrawText(
         
     aGc.DrawText( visualText, textRect, 
             baselineOffset, layoutText.Align() );    
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::RunOperatorApplicationL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::RunOperatorApplicationL( CWmConfiguration& aConf )
+    {
+    CWmConfiguration::TOpAppType type = aConf.PortalButtonApplicationType( 1 );
+    if ( type == CWmConfiguration::EUnknown ||
+        type >= CWmConfiguration::EReserved )
+        {
+        // Leave if not found
+        User::Leave( KErrArgument );
+        }
+    
+    switch( type )
+        {
+        case CWmConfiguration::ES60:
+        case CWmConfiguration::EQt:    
+            {
+            TUid uid = KNullUid;
+            aConf.PortalButtonApplicationId( 1, uid );
+            StartProcessL( uid, aConf.PortalButtonClientParam( 1 ) );
+            }
+            break;
+        case CWmConfiguration::ECwrt:
+            {
+            TUid uid = KNullUid;
+            aConf.PortalButtonApplicationId( 1, uid );
+            StartWidgetL( uid, aConf.PortalButtonClientParam( 1 ) );
+            }
+            break;
+        case CWmConfiguration::EWrt:
+            {
+            TUid uid = KNullUid;
+            aConf.PortalButtonApplicationId( 1, uid );
+            StartWidgetL( uid, KNullDesC );
+            }
+            break;
+        case CWmConfiguration::EJava:
+            {
+            TBuf<NCentralRepositoryConstants::KMaxUnicodeStringLength> appId;
+            aConf.PortalButtonApplicationId( 1, appId );
+            //TODO:
+            }
+            break;
+        }
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::StartProcessL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::StartProcessL( TUid aUid, const TDesC& aParam )
+    {
+    RApaLsSession session;
+    User::LeaveIfError( session.Connect() );
+    CleanupClosePushL( session );
+    
+    //get app info
+    TApaAppInfo appInfo;
+    User::LeaveIfError( session.GetAppInfo( appInfo, aUid ) );
+    // do the launch
+    RProcess process;
+    User::LeaveIfError( process.Create( appInfo.iFullName, aParam ) );
+    process.Resume();
+    
+    CleanupStack::PopAndDestroy( &session );
+    }
+
+// ---------------------------------------------------------
+// CWmPortalButton::StartWidgetL
+// ---------------------------------------------------------
+//
+void CWmPortalButton::StartWidgetL( TUid aAppUid, const TDesC& aParams )
+    {
+    if ( aAppUid == KNullUid )
+        User::Leave( KErrArgument );
+    
+    HBufC* params = aParams.AllocLC();
+    
+    RApaLsSession appArc;
+    User::LeaveIfError( appArc.Connect() );
+    CleanupClosePushL( appArc );
+    
+    TThreadId threadId;
+    User::LeaveIfError( appArc.StartDocument( *params, aAppUid, threadId ) );
+    
+    CleanupStack::PopAndDestroy( &appArc );      
+    CleanupStack::PopAndDestroy( params );
     }
 
 // End of file

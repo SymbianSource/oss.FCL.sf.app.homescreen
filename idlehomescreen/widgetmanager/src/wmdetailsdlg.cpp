@@ -30,8 +30,10 @@
 #include <AknsBasicBackgroundControlContext.h>
 #include <AknMarqueeControl.h>
 #include <widgetmanagerview.rsg>
+
 #include "widgetmanager.hrh"
 #include "wmdetailsdlg.h"
+#include "wmimageconverter.h"
 
 
 // CONSTANTS
@@ -47,12 +49,18 @@ CWmDetailsDlg* CWmDetailsDlg::NewL(
 			const TDesC& aName,
 	        const TDesC& aDescription,
 	        TBool  aCanBeAdded,
-            const CFbsBitmap* aLogoBmp,
-            const CFbsBitmap* aLogoMask )
+            const TDesC& aIconStr,
+            const CFbsBitmap& aDefaultIcon,
+            const CFbsBitmap& aDefaultIconMask )
     {
     CWmDetailsDlg* self = new ( ELeave ) CWmDetailsDlg( aCanBeAdded );
     CleanupStack::PushL( self );
-    self->ConstructL( aName, aDescription, aLogoBmp, aLogoMask );
+    self->ConstructL( 
+            aName, 
+            aDescription, 
+            aIconStr, 
+            aDefaultIcon, 
+            aDefaultIconMask );
     CleanupStack::Pop( self );
     return self;
     }
@@ -61,7 +69,7 @@ CWmDetailsDlg* CWmDetailsDlg::NewL(
 // CWmDetailsDlg::CWmDetailsDlg
 // ---------------------------------------------------------
 //
-CWmDetailsDlg::CWmDetailsDlg( TBool  aCanBeAdded )
+CWmDetailsDlg::CWmDetailsDlg( TBool aCanBeAdded )
     : CAknDialog(),
     iCanBeAdded( aCanBeAdded ),
     iNeedToScroll( EFalse )
@@ -85,6 +93,7 @@ CWmDetailsDlg::~CWmDetailsDlg()
     delete iLogoBmp;
     delete iLogoMask;
     delete iBgContext;
+    delete iImageConverter;
     }
 
 // -----------------------------------------------------------------------------
@@ -110,13 +119,10 @@ TInt CWmDetailsDlg::ExecuteLD()
 void CWmDetailsDlg::ConstructL(
 			const TDesC& aName,
 	        const TDesC& aDescription,
-            const CFbsBitmap* aLogoBmp,
-            const CFbsBitmap* aLogoMask )
+	        const TDesC& aIconStr,
+	        const CFbsBitmap& aDefaultIcon,
+	        const CFbsBitmap& aDefaultIconMask )
     {
-    if ( !aLogoBmp )
-        {
-        User::Leave( KErrArgument );
-        }
  
 	CAknDialog::ConstructL( R_AVKON_DIALOG_EMPTY_MENUBAR );
     
@@ -125,21 +131,61 @@ void CWmDetailsDlg::ConstructL(
 
 	iName = aName.AllocL();
 	iDescription = aDescription.AllocL();
-
-	// create bitmap and duplicate handle
-	iLogoBmp = new ( ELeave ) CFbsBitmap;
-    TSize newSize = TSize( aLogoBmp->SizeInPixels().iWidth ,
-                           aLogoBmp->SizeInPixels().iHeight );
-    User::LeaveIfError( iLogoBmp->Create( newSize, aLogoBmp->DisplayMode() ) );    
-    User::LeaveIfError( iLogoBmp->Duplicate( aLogoBmp->Handle() ) );
 	
-    if ( aLogoMask )
+	iImageConverter = CWmImageConverter::NewL();
+	
+    // Main window
+    TRect mainPane;
+    AknLayoutUtils::LayoutMetricsRect(
+            AknLayoutUtils::EApplicationWindow, mainPane );
+    
+    // Dialog
+    TAknLayoutRect dlgWindowRect;
+    TAknWindowLineLayout dlgWindow = AknLayoutScalable_Apps
+               ::popup_wgtman_window().LayoutLine();
+    dlgWindowRect.LayoutRect( mainPane, dlgWindow );
+    
+    // Heading
+    TAknLayoutRect layoutRect;
+    TAknWindowLineLayout headingPane = AknLayoutScalable_Apps
+               ::wgtman_heading_pane().LayoutLine();        
+    layoutRect.LayoutRect( dlgWindowRect.Rect(), headingPane );
+    
+    // Icon
+    TAknLayoutRect iconRect;
+    TAknWindowLineLayout icongrapichs = AknLayoutScalable_Apps
+            ::wgtman_heading_pane_g1().LayoutLine();
+    iconRect.LayoutRect( layoutRect.Rect(), icongrapichs );
+    
+    iImageConverter->HandleIconString( 
+            iconRect.Rect().Size(), 
+            aIconStr, 
+            iLogoBmp, 
+            iLogoMask );
+    
+    // if icon creation fails use defaults
+    if ( !iLogoBmp || !iLogoMask )
         {
-        iLogoMask = new ( ELeave ) CFbsBitmap;
-        newSize = TSize( aLogoMask->SizeInPixels().iWidth ,
-                         aLogoMask->SizeInPixels().iHeight );
-        User::LeaveIfError( iLogoMask->Create( newSize, aLogoMask->DisplayMode() ) );    
-        User::LeaveIfError( iLogoMask->Duplicate( aLogoMask->Handle() ) );
+		delete iLogoBmp; iLogoBmp = NULL;
+		delete iLogoMask; iLogoMask = NULL;
+
+		iLogoBmp = new ( ELeave ) CFbsBitmap;        
+		iLogoMask = new ( ELeave ) CFbsBitmap;  
+
+		TSize size = iconRect.Rect().Size();
+		User::LeaveIfError(
+                iLogoBmp->Create( size, aDefaultIcon.DisplayMode() ) );
+        User::LeaveIfError( 
+                iLogoMask->Create( size, aDefaultIconMask.DisplayMode() ) );
+        
+        iLogoBmp->Duplicate( aDefaultIcon.Handle() );
+        iLogoMask->Duplicate( aDefaultIconMask.Handle() );
+        
+        // Resize default icons only when they are really needed
+        AknIconUtils::SetSize( 
+                iLogoBmp, size, EAspectRatioPreserved );
+        AknIconUtils::SetSize( 
+                iLogoMask, size, EAspectRatioPreserved );
         }
     
     iEikonEnv->AddWindowShadow( static_cast<CCoeControl*>(this) );
@@ -180,12 +226,11 @@ void CWmDetailsDlg::PreLayoutDynInitL()
                     EEikEdwinAvkonDisableCursor |
                     EEikEdwinDisplayOnly |
                     EEikEdwinReadOnly );
+    iRtEditor->EnableKineticScrollingL( ETrue );
 
     CEikScrollBarFrame* scrollBarFrame = iRtEditor->CreateScrollBarFrameL();
     scrollBarFrame->SetScrollBarVisibilityL( CEikScrollBarFrame::EOff,
-                                             CEikScrollBarFrame::EOff ); // set to EAuto 
-                                             // when layout fixed. ~wk04_2010
-                                             // currently scrollbar overlaps cba.
+                                             CEikScrollBarFrame::EAuto );
     
     iMarquee = CAknMarqueeControl::NewL();
     TCallBack callback( RedrawCallback, this );
@@ -225,18 +270,12 @@ void CWmDetailsDlg::InsertAndFormatContentL()
     TCharFormatMask charFormatMask;
     CParaFormat paraFormat;
     TParaFormatMask paraFormatMask;
-    if ( Layout_Meta_Data::IsMirrored() )
-        {
-        paraFormat.iHorizontalAlignment = CParaFormat::ERightAlign;
-        }
-    else
-        {
-        paraFormat.iHorizontalAlignment = CParaFormat::ELeftAlign;
-        }
+    paraFormat.iHorizontalAlignment = CParaFormat::ELeftAlign;
     charFormat.iFontPresentation.iTextColor = color;
     paraFormatMask.SetAttrib(EAttAlignment);
     charFormatMask.SetAttrib(EAttFontTypeface);
     charFormatMask.SetAttrib(EAttFontHeight);
+    paraFormatMask.SetAttrib(EAttLineSpacing);
     charFormatMask.SetAttrib(EAttColor);
     iRtEditor->ApplyParaFormatL(&paraFormat, paraFormatMask);
     iRtEditor->ApplyCharFormatL(charFormat, charFormatMask);
@@ -319,7 +358,10 @@ void CWmDetailsDlg::SizeChanged()
         layoutRect.LayoutRect( rect, contentPane );
         AknLayoutUtils::LayoutControl( iRtEditor, layoutRect.Rect(), rtePane );
         CEikScrollBarFrame* sbFrame = iRtEditor->ScrollBarFrame();
-        if ( sbFrame && sbFrame->VScrollBarVisibility() != CEikScrollBarFrame::EOff )
+        if ( sbFrame && 
+            sbFrame->ScrollBarVisibility( 
+                    CEikScrollBar::EVertical ) != CEikScrollBarFrame::EOff &&
+            sbFrame->VerticalScrollBar()->IsVisible() )
             {
             CEikScrollBar* scrollBar = sbFrame->VerticalScrollBar();
             TAknWindowLineLayout scrollPane = AknLayoutScalable_Apps
@@ -401,7 +443,6 @@ void CWmDetailsDlg::Draw( const TRect& /*aRect*/ ) const
     TRect rect = Rect();
     TRect innerRect( rect );
     TRgb color = KRgbBlack;
-    const TInt offSet = 5;
 
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
@@ -423,12 +464,17 @@ void CWmDetailsDlg::Draw( const TRect& /*aRect*/ ) const
                ::wgtman_heading_pane().LayoutLine();        
     layoutRect.LayoutRect( rect, headingPane );
 
+    TAknLayoutRect logoLayout;
+        logoLayout.LayoutRect( layoutRect.Rect(),AknLayoutScalable_Apps
+                ::wgtman_heading_pane_g1().LayoutLine() );
+        
     if( iLogoBmp && iLogoMask )
         {
-        TAknLayoutRect logoLayout;
-        logoLayout.LayoutRect( layoutRect.Rect(),AknLayoutScalable_Apps
-                ::wgtman_heading_pane_g1().LayoutLine() );        
-        logoLayout.DrawImage( gc, iLogoBmp, iLogoMask );
+        gc.DrawBitmapMasked( logoLayout.Rect(), 
+                iLogoBmp, 
+                TRect(TPoint(0, 0), iLogoBmp->SizeInPixels()), 
+                iLogoMask, 
+                EFalse );
         }
     
     AknsUtils::GetCachedColor( 
@@ -478,22 +524,6 @@ void CWmDetailsDlg::Draw( const TRect& /*aRect*/ ) const
     const TInt KBorderWidth = 2;
     gc.SetPenSize( TSize( KBorderWidth, KBorderWidth ) );    
     gc.DrawRoundRect( innerRect, TSize( KFrameRoundRadius, KFrameRoundRadius ) );
-    
-    // draw shadow
-    gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
-    gc.SetPenStyle( CGraphicsContext::ESolidPen );
-    gc.SetBrushColor( color );
-    gc.SetPenColor( color );
-    TRect rightShadowArea = Rect();
-    rightShadowArea.iTl.iX = rightShadowArea.iBr.iX - offSet;
-    rightShadowArea.iTl.iY += offSet/2;
-    gc.DrawRect(rightShadowArea);
-    TRect bottomShadowArea = Rect();
-    bottomShadowArea.iTl.iX += offSet/2;
-    bottomShadowArea.iTl.iY += bottomShadowArea.iBr.iY - offSet;
-    gc.DrawRect( bottomShadowArea );
-    gc.SetBrushStyle( CGraphicsContext::ENullBrush );
-    gc.SetPenStyle( CGraphicsContext::ENullPen );
     }
 
 // ---------------------------------------------------------
@@ -547,14 +577,7 @@ void CWmDetailsDlg::StopMarquee()
 void CWmDetailsDlg::FocusChanged( TDrawNow aDrawNow )
     {
     CCoeControl::FocusChanged( aDrawNow );
-    if ( IsFocused() )
-        {
-        StartMarquee();
-        }
-    else
-        {
-        StopMarquee();
-        }
+    ( IsFocused() ? StartMarquee() : StopMarquee() );
     }
 
 

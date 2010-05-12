@@ -153,12 +153,12 @@ public: // new functions
 	/** 
 	 * executes findbox activation 
 	 */
-	void ActivateFindPaneL( TBool aActivateAdabtive = EFalse );
+	void ActivateFindPaneL( TBool aActivateAdaptive = EFalse );
 
     /** 
 	 * executes findbox deactivation 
 	 */
-    void DeactivateFindPaneL();
+    void DeactivateFindPaneL(TBool aLayout = ETrue);
 	
     /** 
      * sorts the widget list in alphabetical order
@@ -194,6 +194,13 @@ public: // new functions
 
 public:
 
+	/**
+     * Handles focus changed events.
+     *
+     * @see CCoeControl::FocusChanged
+     */    
+    void FocusChanged( TDrawNow aDrawNow );    
+	
     /**
      * Handles key events.
      * 
@@ -302,6 +309,7 @@ private: // New functions
     void StartLoadingWidgetsL();
     void RemoveCtrlsFromStack();
     void UpdateFocusMode();
+    void ResetFocus( TDrawNow aDrawNow = ENoDrawNow );
     CCoeControl* FindChildControlByPoint( const TPoint& aPoint );
     void HandleFindSizeChanged();
     TKeyResponse MoveFocusByKeys(
@@ -316,6 +324,8 @@ private: // New functions
     TKeyResponse HandleSearchKeyEventL( 
             const TKeyEvent& aKeyEvent, 
             TEventCode aType );
+    TInt OperatorButtonHigherPriority( TInt aIndex );
+    
 private:
 
     /**

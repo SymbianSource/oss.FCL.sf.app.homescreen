@@ -178,6 +178,7 @@ private:
     RArray<TInt> iWgIds;
     TTime iScreenChangedTime; // fix for orientation changed/wg group changed problem
     TBool iClockwiseRot; // for marking rotation direction
+    TBool iLastWgIdRedraw;
     };
 
 #endif // PREVIEWPROVIDERCRP_H

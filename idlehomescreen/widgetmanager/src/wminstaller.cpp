@@ -17,6 +17,7 @@
 */
 
 #include <e32base.h>
+#include <eikenv.h>
 
 #include "wminstaller.h"
 #include "wmwidgetdata.h"
@@ -25,6 +26,14 @@
 
 // CONSTANTS
 _LIT8( KWrtMime, "application/x-nokia-widget");
+
+/* 
+  Note: 
+  same mime type as above is used for wgz & wgt in wk9.
+  \ext\mw\cwrt\app\platform\s60\WidgetRecognizer\
+  Uninstalltion will fail with KErrNotFound for now.
+*/
+_LIT8( KCWrtMime, "application/widget");
 
 // ---------------------------------------------------------
 // CWmInstaller::NewL
@@ -68,7 +77,6 @@ CWmInstaller::CWmInstaller( CWmPlugin& aWmPlugin ) :
 //
 void CWmInstaller::ConstructL()
     {
-    iMime = KWrtMime().AllocL();
     iIdle = CIdle::NewL( CActive::EPriorityStandard );
     }
 
@@ -110,16 +118,20 @@ void CWmInstaller::DoCancel()
 //
 void CWmInstaller::RunL()
     {
-    // error has occurred, stop uninstallation animation.
-    if ( iStatus != KErrNone )
-        { 
-        CWmWidgetData* widget = iWmPlugin.GetUninstalledWidgetByUid( iUid );
-        if ( widget )
-            {
-            widget->StopUninstallAnimationL();
-            }
+    // if error has occurred, stop uninstallation animation.
+    CWmWidgetData* widget = 
+            iWmPlugin.GetUninstalledWidgetByUid( iUid );
+    if ( widget )
+        {
+        widget->StopUninstallAnimation();
         }
-    
+
+    if ( KErrNone !=  iStatus.Int() )
+        {
+        // display error note incase of error
+        CEikonEnv::Static()->HandleError( iStatus.Int() );
+        }
+
     // close SWI session
     if ( iIdle && iIdle->IsActive() )
         {
@@ -151,7 +163,14 @@ TInt CWmInstaller::CloseSwiSession( TAny* aPtr )
 // ---------------------------------------------------------
 //
 TInt CWmInstaller::RunError(TInt /*aError*/)
-    {   
+    {
+     // if error has occurred, stop uninstallation animation.
+    CWmWidgetData* widget = 
+            iWmPlugin.GetUninstalledWidgetByUid( iUid );
+    if ( widget )
+        {
+        widget->StopUninstallAnimation();
+        }
     // close SWI session
     if ( iIdle && iIdle->IsActive() )
         {
@@ -172,9 +191,21 @@ void CWmInstaller::UninstallL( CWmWidgetData* aData )
         {
         User::Leave( KErrInUse );
         }
+    else if ( !aData || aData->PublisherUid() == KNullUid ||
+        aData->WrtType() == CWmWidgetData::EUnIdentified )
+        {
+        User::Leave( KErrArgument );
+        }
     else
         {
+        delete iMime;
+        iMime = NULL;
+        CloseSwiSession( this );
+        
+        // re-open session to swi server
         User::LeaveIfError( iInstaller.Connect() );
+        iMime = ( ( aData->WrtType() == CWmWidgetData::EWgt ) ?
+            KCWrtMime().AllocL() : KWrtMime().AllocL() );
         iUid = aData->PublisherUid();
         SwiUI::TUninstallOptions optionsUninstall;
         optionsUninstall.iBreakDependency = SwiUI::EPolicyAllowed;

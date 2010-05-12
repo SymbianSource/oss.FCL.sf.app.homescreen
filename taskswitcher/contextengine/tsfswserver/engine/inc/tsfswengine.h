@@ -32,15 +32,14 @@
 #include "tsfswentry.h"
 #include "tsfswobservers.h"
 
-class CTsFsAlwaysShownAppList;
-class CTsFsHiddenAppList;
-class CTsFsWidgetList;
 class MTsFswEngineObserver;
-class CTsFswIconCache;
 class CTsFastSwapPreviewProvider;
 class CApaWindowGroupName;
 class CBitmapRotator;
 class CTsRotationTask;
+class CTSCpsNotifier;
+
+class CTsFswDataList;
 
 // descriptor big enough to store hex repr of 32-bit integer plus 0x prefix
 typedef TBuf<10> TAppUidHexString;
@@ -62,12 +61,12 @@ public:
      * @param   aObserver   ref to observer
      */
     IMPORT_C static CTsFswEngine* NewL( MTsFswEngineObserver& aObserver );
-    
+
     /**
      * @copydoc NewL
      */
     IMPORT_C static CTsFswEngine* NewLC( MTsFswEngineObserver& aObserver );
-    
+
     /**
      * Destructor.
      */
@@ -80,13 +79,13 @@ public:
      * @return  ref to content array
      */
     IMPORT_C const RTsFswArray& FswDataL();
-    
+
     /**
      * Tries to close the given app.
      * @param   aWgId   value given by WgId() for an entry in iData
      */
     IMPORT_C void CloseAppL( TInt aWgId );
-    
+
     /**
      * Brings the given app to foreground.
      * @param   aWgId   value given by WgId() for an entry in iData
@@ -106,15 +105,23 @@ public:
      */
     IMPORT_C TUid ForegroundAppUidL( TInt aType );
 
+public:
     /**
      * Callback for rotation completion. Takes ownership of a given
      * bitmap.
      */
-    void RotationComplete( TInt aWgId,
+    void RotationComplete( TInt aWgId, 
             CFbsBitmap* aBitmap,
             CTsRotationTask* aCompletedTask,
             TInt aError );
-    
+
+    /**
+     * Called by CPS publisher when changes occours on widgets' CPS data.
+     * Copies screenshot with use of delivered bitmap handle.
+     * Moves last changed widget with entry into start position. 
+     */
+    void HandleWidgetUpdateL( TInt aWidgetId, TInt aBitmapHandle );
+
 private:
     // from CActive
     void RunL();
@@ -123,7 +130,7 @@ private:
 
     // from MTsFswTaskListObserver
     void UpdateTaskList();
-    
+
     // from MTsFswResourceObserver
     void HandleResourceChange( TInt aType );
 
@@ -134,7 +141,7 @@ private:
     void HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle );
     void HandleFswPpApplicationUnregistered( TInt aWgId );
     void HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise );
-    
+
     void RotateL( CFbsBitmap& aBitmap, TInt aWgId, TBool aClockwise );
 
 private:
@@ -142,83 +149,18 @@ private:
      * Constructor.
      */
     CTsFswEngine( MTsFswEngineObserver& aObserver );
-    
+
     /**
      * Performs 2nd phase construction.
      */
     void ConstructL();
-    
+
     /**
      * Gets the window group list and reconstructs the fsw content.
      * @return   TBool   ETrue if the list has been modified
      */
     TBool CollectTasksL();
-    
-    /**
-     * Called from CollectTasksL for each entry in the task list.
-     * @param   aWgId       window group id
-     * @param   aAppUid     application uid
-     * @param   aWgName     window group name or NULL
-     * @param   aNewList    list to add to
-     * @param   aIsWidget   true if the entry corresponds to a web widget
-     * @return  TBool   ETrue if it was really a new entry in the list
-     */
-    TBool AddEntryL( TInt aWgId, const TUid& aAppUid,
-        CApaWindowGroupName* aWgName, RTsFswArray& aNewList,
-        TBool aIsWidget );
 
-    /**
-     * Checks if there is an entry for same app in the content list.
-     * If yes then it takes some of the data for the entry that
-     * will correspond to the same app in the refreshed content list.
-     * @param   aEntry      new entry in content list
-     * @param   aAppUid     application uid
-     * @param   aChanged    ref to change-flag, set to ETrue if it is sure
-     * that the new content list will be different from the previous one
-     * @param   aNewList    ref to new content list
-     * @return  ETrue if app was found
-     */
-    TBool CheckIfExistsL( CTsFswEntry& aEntry,
-        const TUid& aAppUid,
-        TBool& aChanged,
-        RTsFswArray& aNewList );
-
-    /**
-     * Adds running widgets to the list.
-     * @param   aNewList    array to add to
-     */
-    void CheckWidgetsL( RTsFswArray& aNewList );
-
-    /**
-     * Finds out the app uid for the given window group id.
-     * @param   aWgId   a valid window group id
-     * @return  application uid
-     */
-    TUid AppUidForWgIdL( TInt aWgId );
-    
-    /**
-     * Returns the parent's wg id or KErrNotFound.
-     * @param   aWgId   a valid window group id
-     * @return parent wg id or KErrNotFound if there is no parent
-     */
-    TInt FindParentWgId( TInt aWgId );
-    
-    /**
-     * Returns the most top parent's wg id or KErrNotFound.
-     * @param   aWgId   a valid window group id
-     * @return parent wg id or KErrNotFound if there is no parent
-     */
-    TInt FindMostTopParentWgId( TInt aWgId );
-    
-    /**
-     * Finds out the application name.
-     * @param   aWindowName window group name or NULL
-     * @param   aAppUId     application uid
-     * @param   aWgId       window group id
-     * @return  application name, ownership transferred to caller
-     */
-    HBufC* FindAppNameLC( CApaWindowGroupName* aWindowName,
-        const TUid& aAppUid, TInt aWgId );
 
     /**
      * Makes a copy of the bitmap with the given handle.
@@ -227,34 +169,7 @@ private:
      * @return  CFbsBitmap*     the copy, ownership transferred to caller
      */
     CFbsBitmap* CopyBitmapL( TInt aFbsHandle, TBool aKeepAspectRatio );
-    
-    /**
-     * Checks if the app to which the screenshot belongs is in the task list
-     * and updates the entry when found. Also triggers change notification
-     * to observer when data is modified.
-     * @param   aWgIdForScreenshot  wgid for the screenshot 
-     * @param   aBitmapHandle       handle for screenshot bitmap
-     */
-    void AssignScreenshotHandle( TInt aWgIdForScreenshot, TInt aBitmapHandle );
-    
-    /**
-     * Checks if the app to which the screenshot belongs is in the task list
-     * and updates the entry when found. 
-     * @param   aWgIdForScreenshot  wgid for the screenshot 
-     * @param   aBitmapHandle       handle for screenshot bitmap
-     * @param   aAsigned       		result of operation
-     */
-    void AssignScreenshotHandle( TInt aWgIdForScreenshot,
-            TInt aBitmapHandle, TBool& aAsigned  );
-    
-    /**
-     * Returns the bitmap handle for the screenshot belonging to the given app
-     * or 0 if not (yet) found.
-     * @param   aWgIdForApp     a window group id (from the window group list)
-     * @return  bitmap handle or 0
-     */
-    TInt LookupScreenshotHandle( TInt aWgIdForApp );
-    
+
     /**
      * Callback for the iUpdateStarter timer.
      * Calls CollectTasksL and notifies the observer if the task list
@@ -288,62 +203,44 @@ private:
      * Close running widget
      * @param aOffset - widget info offset
      */
-    void CloseWidgetL(TInt aOffset);
+    void CloseWidgetL( TInt aOffset );
 
-private: // data    
+    /**
+     * Removes screenshot bitmap from contained iDataList
+     */
+    void RemoveScreenshot( TInt aWgId );
+
+    /**
+     * Add or overwrite screenshot datamap into iDataList
+     * @return ETrue if content was changed
+     */
+    TBool StoreScreenshot( TInt aWgId, CFbsBitmap* aBmp );
+
+private:
+    // data    
     MTsFswEngineObserver& iObserver;
-    RTsFswArray iData; // current fsw content, i.e. the task list
     CEikonEnv* iEnv; // not own
-
-    // always shown app list, own    
-    CTsFsAlwaysShownAppList* iAlwaysShownAppList;
-    
-    // hidden app list, own
-    CTsFsHiddenAppList* iHiddenAppList;
-    
-    // web widget list, own
-    CTsFsWidgetList* iWidgetList;
 
     // window server session
     RWsSession iWsSession;
-    
+
     // apparc session
     RApaLsSession iAppArcSession;
 
-    /**
-     * Hash table storing the screenshots.
-     * Key: window group id for the screenshot
-     * (the one received in ApplicationChange)
-     * Value: CFbsBitmap*, pointers owned
-     */    
-    RHashMap<TInt, CFbsBitmap*> iScreenshots;
-    
     // preview provider instance, own
     CTsFastSwapPreviewProvider* iPreviewProvider;
-    
+
     // timer to defer content refresh
     CPeriodic* iUpdateStarter;
-    
-    // app icon provider/container instance, own
-    CTsFswIconCache* iAppIcons;
-    
+
     // true if web widgets are supported by the system
     TBool iWidgetsSupported;
 
     // PS property to listen for swi status changes
     RProperty iSwiProp;
-    // when true CollectTasksL will call GetAllApps etc.
-    // which is slow and need not be done normally, except
-    // during startup and perhaps when new applications are installed
-    TBool iAppDataRefreshNeeded;
 
     // window group ids returned by last WindowGroupList call
     RArray<TInt> iWgIds;
-    
-    // Dirty flag, indicates that iData is not up-to-date because
-    // there were no subscribed clients during a previous possible
-    // change of the task list.
-    TBool iTaskListDirty;
 
     // For publishing the foreground app uid to Context Framework    
     TAppUidHexString iFgAppUidStr;
@@ -351,8 +248,12 @@ private: // data
 
     // For rotating bitmaps
     RPointerArray<CTsRotationTask> iRotaTasks;
-    };
 
+    CTsFswDataList* iDataList;//own
+
+    //Used to observ wigets' actions on CPS service
+    CTSCpsNotifier* iCpsWidgetPublisher;//owned
+    };
 
 /**
  * Listener for rotation complete event
@@ -362,13 +263,12 @@ NONSHARABLE_CLASS( CTsRotationTask ) : public CActive
 public:
     CTsRotationTask( CTsFswEngine& aEngine );
     ~CTsRotationTask();
-    void StartLD( TInt aWgId,
-            CFbsBitmap* aBitmapHandle,
-            TBool aClockwise );
+    void StartLD( TInt aWgId, CFbsBitmap* aBitmapHandle, TBool aClockwise );
 private:
     void RunL();
     void DoCancel();
-private: // Data
+private:
+    // Data
     CTsFswEngine& iEngine;
     TInt iWgId;
     CFbsBitmap* iBitmap; // owned for the duration of transformation

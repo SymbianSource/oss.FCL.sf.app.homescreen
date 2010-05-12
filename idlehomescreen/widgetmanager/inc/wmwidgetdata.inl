@@ -27,10 +27,6 @@
     inline const CHsContentInfo& CWmWidgetData::HsContentInfo() const
         { return *iHsContentInfo; }
 
-    /** widget name */
-    inline const TDesC& CWmWidgetData::Name() const
-        { return iHsContentInfo->Name(); }
-
     /** widget uid */
     inline TUid CWmWidgetData::Uid() const
         { return UidFromString( iHsContentInfo->Uid() ); };
@@ -43,6 +39,10 @@
     inline CWmWidgetData::TWidgetType CWmWidgetData::WidgetType() const
         { return iWidgetType; }
 
+    /** wrt widget type */
+    inline CWmWidgetData::TWrtType CWmWidgetData::WrtType() const
+        { return iWrtType; }
+    
     /** the logo bitmap */
     inline const CFbsBitmap* CWmWidgetData::LogoImage()
         { return iLogoImage; }

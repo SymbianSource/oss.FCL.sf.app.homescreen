@@ -20,6 +20,7 @@
 #include "xnnewsticker.h"
 #include "xnbitmap.h"
 #include "xntext.h"
+#include "xntexteditor.h"
 #include "emptycontenttransactionelement.h"
 #include "aixmluiconstants.h"
 #include "aixmluiutils.h"
@@ -81,15 +82,25 @@ void CEmptyContentTransactionElement::UpdateDataL()
         imageIntr->SetContentBitmaps( NULL, NULL );
         }
     else if ( type->Type() == XnTextInterface::MXnTextInterface::Type() ) // text element
-            {
-            // Get control interface
-            XnTextInterface::MXnTextInterface* textControl = NULL;
-            XnComponentInterface::MakeInterfaceL( textControl, Target() );
-            LeaveIfNull( textControl, KErrNotSupported );
-            
-            // Clears the text from component
-            textControl->SetTextL( KNullDesC );
-            }
+        {
+        // Get control interface
+        XnTextInterface::MXnTextInterface* textControl = NULL;
+        XnComponentInterface::MakeInterfaceL( textControl, Target() );
+        LeaveIfNull( textControl, KErrNotSupported );
+        
+        // Clears the text from component
+        textControl->SetTextL( KNullDesC );
+        }
+    else if ( type->Type() == XnTextEditorInterface::MXnTextEditorInterface::Type() ) // texteditor element
+        {
+        // Get control interface
+        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;
+        XnComponentInterface::MakeInterfaceL( editorControl, Target() );
+        LeaveIfNull( editorControl, KErrNotSupported );
+        
+        // Clears the text from component
+        editorControl->SetTextL( KNullDesC );
+        }
     else
         {
         CXnNodeAppIf* parent = Target().ParentL();

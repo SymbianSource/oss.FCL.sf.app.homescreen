@@ -66,7 +66,8 @@ CTsEventControler::CTsEventControler(
     :
     CBase(),
     iObserver(aObserver),
-    iHandleEvents(ETrue)
+    iHandleEvents(ETrue),
+    iHandleDragEvents(ETrue)
     {
     }
 
@@ -134,10 +135,13 @@ void CTsEventControler::HandleTapEventL(
 void CTsEventControler::HandleDragEventL(
     MAknTouchGestureFwDragEvent& aEvent)
     {
-    iObserver.DragL(aEvent);
-    if ( iHandleEvents )
+    if ( iHandleDragEvents )
         {
-        iPhysicsHelper->HandleDragEvent(aEvent);
+        iObserver.DragL(aEvent);
+        if ( iHandleEvents && iHandleDragEvents )
+            {
+            iPhysicsHelper->HandleDragEvent(aEvent);
+            }
         }
     }
 
@@ -215,6 +219,20 @@ void CTsEventControler::StopAnimation()
 void CTsEventControler::EnableEventHandling( TBool aEnable )
     {
     iHandleEvents = aEnable;
+    if ( !aEnable && IsPhysicsRunning() )
+        {
+        iPhysicsHelper->Stop();
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// EnableDragEventHandling
+// -----------------------------------------------------------------------------
+//
+void CTsEventControler::EnableDragEventHandling( TBool aEnable )
+    {
+    iHandleDragEvents = aEnable;
     if ( !aEnable && IsPhysicsRunning() )
         {
         iPhysicsHelper->Stop();

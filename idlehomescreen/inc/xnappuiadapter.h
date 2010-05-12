@@ -160,12 +160,12 @@ public:
         CXnNodeAppIf& aDestination );
     
     /**
-     * This is called when initial view is activated
+     * This is called when (initial) view is ready
      * To be overriden by subclass.
      * 
      * @since S60 5.2
      */
-    IMPORT_C virtual void UiActivated();
+    IMPORT_C virtual void HandleUiReadyEventL();
     
     /**     
      * Second-phase constructor

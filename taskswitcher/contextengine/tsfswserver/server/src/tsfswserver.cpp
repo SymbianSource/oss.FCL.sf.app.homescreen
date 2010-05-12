@@ -188,25 +188,6 @@ void CTsFswServer::FswDataChanged()
     }
 
 // --------------------------------------------------------------------------
-// CTsFswServer::FswDataListenersCount
-// callback from engine
-// --------------------------------------------------------------------------
-//
-TInt CTsFswServer::FswDataListenerCount()
-    {
-    TInt n = 0;
-    iSessionIter.SetToFirst();
-    while ( CTsFswSession* session = static_cast<CTsFswSession*>( iSessionIter++ ) )
-        {
-        if ( session->IsListening() )
-            {
-            ++n;
-            }
-        }
-    return n;
-    }
-
-// --------------------------------------------------------------------------
 // RunServerL
 // --------------------------------------------------------------------------
 //

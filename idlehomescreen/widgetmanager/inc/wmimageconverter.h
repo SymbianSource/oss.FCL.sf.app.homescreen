@@ -27,47 +27,23 @@
 
 // Forward declarations
 class CFbsBitmap;
-class CBitmapScaler;
-class CImageDecoder;
 class TAknsItemID;
 class CWmUnitTest;
 class MSvgError;
 
 // Class declaration
 /**
- *  MConverterObserver
- *  To notify when image is converted
- */
-NONSHARABLE_CLASS( MConverterObserver )
-    {
-    public:
-        virtual void NotifyCompletion( TInt aError ) = 0;
-    };
-
-// Class declaration
-/**
  * CWmImageConverter
  * Image converter
  */
-NONSHARABLE_CLASS ( CWmImageConverter ) : public CActive,
-        public MAknIconFileProvider
+NONSHARABLE_CLASS ( CWmImageConverter ) : public MAknIconFileProvider
     {
-    /** states for this converter */
-    enum TState 
-        {
-        EIdle = 0,
-        EDecoding,
-        EScalingBitmap,
-        EScalingMask,
-        EFailed
-        };
-
 public: //contructors/destructors
     /**
      * Two-phased constructor.
      * @param aObserver observer
      */
-    static CWmImageConverter* NewL( MConverterObserver* aObserver );    
+    static CWmImageConverter* NewL();    
     
     /** Destructor */
     ~CWmImageConverter();
@@ -77,9 +53,10 @@ public: // interface methods
     /**
      * Parses icon string and prepares logo image.
      * 
-     * @param aWidth wanted widht
-     * @param aHeight wanted height
+     * @param aIconSize wanted size
      * @param aIconStr str containing logo icon
+	 * @param aBitmap bitmap to create. Empty if fails
+	 * @param aMask mask to create. Empty if fails
      * Supported values:
      * - skin(<major id> <minor id>):mif(<path> <bitmapid> <maskid>)
      * - mif(<path> <bitmapid> <maskid>)
@@ -88,91 +65,35 @@ public: // interface methods
      * 
      * @return Error code 
      */
-    TInt HandleIconString( TInt aWidth, TInt aHeight, const TDesC& aIconStr );
-
-    /**
-     * Returns converted bitmap. Caller takes ownership
-     * 
-     * @return CFbsBitmap
-     */
-    CFbsBitmap* Bitmap();
+    TInt HandleIconString( 
+            const TSize& aIconSize,
+            const TDesC& aIconStr,
+            CFbsBitmap*& aBitmap,
+            CFbsBitmap*& aMask  );
     
-    /**
-     * Returns converted mask. Caller takes ownership
+	/**
+     * Parses icon string and resizes given bitmaps if needed.
+	 * Errors are ignored and previos size image will be used.
      * 
-     * @return CFbsBitmap
-     */
-    CFbsBitmap* Mask();
-
-    /**
-     * sets the size for decoding
-     * @param aSize the logo size
-     */
-    void SetLogoSize( const TSize& aSize );
-
-    /** supported image conversion methods */
-    enum TConversionMethod
-        {
-        EUnrecognized, // we could not recognise the icon string
-        EUidIcon, // App.UID-coded icon
-        ESvgIcon, // Icon from SVG-file
-        ESkinIcon, // Icon from SKIN id
-        EMifIcon, // Icon from MIF file, known graphic index
-        ESkinAndMifIcon, // Icon from SKIN and MIF combination 
-        EImageIcon, // Icon from image file (jpeg or png)
-        };
-
-    /**
-     * The type of currently converted image.
-     * This method can be used to check if correct conversion was used.
-     * @return conversion method used for current image
-     */
-    TConversionMethod ConversionMethod();
-
-    /**
-     * Image convertion status
-     * 
-     * @return ETrue if processing image, false otherwise.
-     */
-    TBool IsProcessing();
-
-protected: // implementation of CActive
-    /**
-     * Implements cancellation of an outstanding request.
-     * 
-     * @see CActive::DoCancel
-     */
-    void DoCancel();
+     * @param aIconSize wanted size
+     * @param aIconStr icon string to find out what to resize
+	 * @param aBitmap bitmap to resize
+	 * @param aMask mask to resize
+	 */
+    void UpdateImageSize( 
+            const TSize& aSize,
+            const TDesC& aIconStr, 
+            CFbsBitmap& aBitmap, 
+            CFbsBitmap& aMask );
     
-    /**
-     * Handles an active object's request completion event.
-     * 
-     * @see CActive::RunL
-     */
-    void RunL();
-    
-    /**
-     * RunError
-     * 
-     * @see CActive::RunError
-     */
-    TInt RunError(TInt aError);
-        
 private:
     CWmImageConverter(); 
-    void ConstructL( MConverterObserver* aObserver );
-    void CheckSvgErrorL( MSvgError* aError );
-    void HandleIconStringL( TInt aWidth, TInt aHeight, 
-            const TDesC& aIconStr );
+    void ConstructL();
 
 private:
+    void CheckSvgErrorL( MSvgError* aError );
+    void HandleIconStringL( const TSize& aIconSize, const TDesC& aIconStr );
     
-    TBool DoesScaleBitmapUseFallBack( CFbsBitmap* aSrcBitmap );
-    void ScaleBitmapL( const TSize& aSize, 
-                    CFbsBitmap* aTrgBitmap,
-                    CFbsBitmap* aSrcBitmap );    
-    void ScaleBitmap( TInt aWidth, TInt aHeight );
-    void ScaleMask( TInt aWidth, TInt aHeight );
     void CreateIconFromUidL( const TUid& aUid );
     void CreateIconFromSvgL( const TDesC& aFileName );
     void CreateIconFromOtherL( const TDesC& aFileName );
@@ -190,6 +111,7 @@ private:
 
     // helpers
     TInt ParseNextUint( TLex& aLex, TUint& aValue );
+    void CopyBitmapL( CFbsBitmap& aTrgBitmap, CFbsBitmap& aSrcBitmap );
     
 private: // from MAknIconFileProvider
 
@@ -201,11 +123,6 @@ private: // from MAknIconFileProvider
     
 private:
     /**
-     * Converter observer (not owned)
-     */
-    MConverterObserver*     iObserver;
-
-    /**
      * decoded image
      */
     CFbsBitmap*             iBitmap;
@@ -214,22 +131,7 @@ private:
      * decoded image mask
      */
     CFbsBitmap*             iMask;
-    
-    /**
-     * decoder from ICL API
-     */
-    CImageDecoder*          iImageDecoder;
-    
-    /**
-     * bitmap scaler
-     */
-    CBitmapScaler*          iScaler;
-    
-    /**
-     * internal state
-     */
-    TState                  iState;
-    
+
     /**
      * File name to convert
      */
@@ -239,22 +141,11 @@ private:
      * size to convert
      */
     TSize                   iSize;
-    
-    /**
-     * is scaling needed
-     */
-    TBool                   iScaleNeeded;
-    
+
     /**
      * File handle
      */
     RFs                     iFs;
-
-    /**
-     * Conversion method for current image
-     */
-    TConversionMethod       iConversionMethod;
-
     };
 
 #endif // #ifndef WMIMAGECONVERTER_H

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_83.1.2.1.23.1.20 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_83.1.2.1.23.1.21 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -71,35 +71,35 @@ class CAknStylusPopUpMenu;
  */
 NONSHARABLE_CLASS(CMmAppUi) : public CAknAppUi,
                             public MHnControllerInterface,
-							public MAknToolbarObserver,
+                            public MAknToolbarObserver,
                             public MMmWidgetObserver,
                             public MMmActionRequest,
                             public MAknsSkinChangeObserver
-	{
+  {
 
 public:
 
-	/**
-	 * 2nd phase constructor.
-	 *
-	 * @since S60 v5.0
-	 */
-	void ConstructL();
+  /**
+   * 2nd phase constructor.
+   *
+   * @since S60 v5.0
+   */
+  void ConstructL();
 
-	/**
-	 * C++ default constructor. This needs to be public due to
-	 * the way the framework constructs the AppUi.
-	 *
-	 * @since S60 v5.0
-	 */
-	CMmAppUi();
+  /**
+   * C++ default constructor. This needs to be public due to
+   * the way the framework constructs the AppUi.
+   *
+   * @since S60 v5.0
+   */
+  CMmAppUi();
 
-	/**
-	 * Virtual Destructor.
-	 *
-	 * @since S60 v5.0
-	 */
-	~CMmAppUi();
+  /**
+   * Virtual Destructor.
+   *
+   * @since S60 v5.0
+   */
+  ~CMmAppUi();
 
 // from base class CEikAppUi
 
@@ -124,9 +124,9 @@ public:
      * @param aDocumentName Not used by this app.
      * @param aTail Command line tail.
      */
-	TBool ProcessCommandParametersL( TApaCommand aCommand,
-									TFileName& aDocumentName,
-									const TDesC8& aTail );
+  TBool ProcessCommandParametersL( TApaCommand aCommand,
+                  TFileName& aDocumentName,
+                  const TDesC8& aTail );
 
     /**
      * From CAknAppUi.
@@ -138,7 +138,7 @@ public:
      */
     void ProcessCommandL(TInt aCommand);
 
-	/**
+  /**
      * From CEikAppUi.
      * Takes care of Command Line tail handling.
      *
@@ -146,9 +146,9 @@ public:
      * @param aUid UID of the message.
      * @param aParams Message params.
      */
-	void ProcessMessageL( TUid aUid, const TDesC8& aParams );
+  void ProcessMessageL( TUid aUid, const TDesC8& aParams );
 
-	/**
+  /**
      * From MCoeMessageObserver.
      * Handles window server messages.
      *
@@ -163,7 +163,7 @@ public:
          TUid aMessageUid,
          const TDesC8& aMessageParameters );
 
-	/**
+  /**
      * From MEikMenuObserver (CEikAppUi).
      * Handles dynamic menu pane initialization.
      *
@@ -339,6 +339,17 @@ public:
     void SkinPackageChanged(
         const TAknsSkinStatusPackageChangeReason aReason );
 
+    /**
+     * From MMmDragAndDropObserver.
+     * Method is invoked on the observer, when the move item event is needed.
+     *
+     * @since S60 v5.0
+     * @param aRecipientId Index of item on which the move event invokes.
+     * @param aEventParameters Event parameters.
+     */
+    void HandleTriggerMoveItemL( const TInt aRecipientId,
+            CLiwGenericParamList* aEventParameters );
+
 private:
 
     /**
@@ -379,29 +390,29 @@ private:
         };
 
     /**
-	 * Indicates if edit mode is on.
-	 *
-	 * @since S60 v5.0
-	 * @return Returns edit mode status.
-	 */
+   * Indicates if edit mode is on.
+   *
+   * @since S60 v5.0
+   * @return Returns edit mode status.
+   */
     TBool IsEditMode();
 
     /**
-	 * Adjusts highlight when entering or leaving edit mode.
-	 *
-	 * @since S60 v5.0
-	 * @param aOriginalHighlight Highlight that would normally be set
-	 * @return A modified value of highlight
-	 */
+   * Adjusts highlight when entering or leaving edit mode.
+   *
+   * @since S60 v5.0
+   * @param aOriginalHighlight Highlight that would normally be set
+   * @return A modified value of highlight
+   */
     TInt AdjustEditModeHighlightL( TInt aOriginalHighlight );
 
     /**
-	 * Manages the container lookup.
-	 *
-	 * @since S60 v5.0
-	 * @return Pointer to the container to be loaded, of NULL
-	 * 		   if a new container should be created.
-	 */
+   * Manages the container lookup.
+   *
+   * @since S60 v5.0
+   * @return Pointer to the container to be loaded, of NULL
+   * 		   if a new container should be created.
+   */
     CMmWidgetContainer* GetAppropriateContainerToLoadL();
 
     /**
@@ -426,16 +437,16 @@ private:
 
 // from base class CEikAppUi
 
-	/**
-	 * From CEikAppUi.
-	 * Takes care of command handling.
-	 *
-	 * @since S60 v5.0
-	 * @param aCommand Command to be handled.
-	 */
-	void HandleCommandL( TInt aCommand );
+  /**
+   * From CEikAppUi.
+   * Takes care of command handling.
+   *
+   * @since S60 v5.0
+   * @param aCommand Command to be handled.
+   */
+  void HandleCommandL( TInt aCommand );
 
-	/**
+  /**
      * From CEikAppUi.
      * Handles Window Server events.
      *
@@ -445,18 +456,18 @@ private:
      */
     void HandleWsEventL( const TWsEvent& aEvent, CCoeControl* aDestination );
 
-	/**
+  /**
      * Indicates if root (main) view is displayed.
      *
      * @since S60 v5.0
      * @return ETrue if root displayed, EFalse otherwise.
      */
-	TBool IsRootdisplayedL();
+  TBool IsRootdisplayedL();
 
-	/**
-	 * Handles pen down events for an item.
-	 *
-	 * @since S60 v5.0
+  /**
+   * Handles pen down events for an item.
+   *
+   * @since S60 v5.0
      * @param aIndex Item index.
      */
     void HandleHighlightItemPenDownL( TInt aIndex );
@@ -513,12 +524,12 @@ private:
      */
     void InsertL();
 
-	/**
+  /**
      * Handles the "Back" softkey event.
      *
      * @since S60 v5.0
      */
-	void HandleBackCommandL();
+  void HandleBackCommandL();
 
     /**
      * Refreshes toolbar.
@@ -732,7 +743,7 @@ private:
      * @since S60 v5.0
      */
     void StartLayoutSwitchFullScreen( TInt aKastorEffect
-    		= AknTransEffect::ELayoutSwitchStart);
+        = AknTransEffect::ELayoutSwitchStart);
 
     /**
      * Ends fullscreen
@@ -932,7 +943,7 @@ private: // Data
      */
     CMMExtensionManager* iMmExtManager;
 
-	/**
+  /**
      * Screen state.
      */
     TBool iScreenOn;
@@ -999,6 +1010,11 @@ private: // Data
      * by any popup note that is not originating from Matrix menu.
      */
     TBool iHasFocus;
+
+  /**
+     * ETrue if Matrix is hidden from TS which is used on startup.
+     */
+  TBool isHiddenFromFS;
 
     /**
      * Own.

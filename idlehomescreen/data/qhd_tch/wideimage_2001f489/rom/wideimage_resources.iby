@@ -21,7 +21,18 @@
 #if defined(__LAYOUT_360_640_TOUCH) || defined(__LAYOUT_640_360_TOUCH)
 
 // Enabled by DTD-localization tools, language specific
-data=ZPRIVATE\200159c0\install\wideimage_2001f489\xuikon\00\wideimage.o0000 \private\200159c0\install\wideimage_2001f489\xuikon\00\wideimage.o0000
+#if defined (__LOCALES_37_IBY__)
+data=ZPRIVATE\200159c0\install\wideimage_2001f489\xuikon\37\wideimage.o0037 \private\200159c0\install\wideimage_2001f489\xuikon\37\wideimage.o0037
+#endif
+#if defined  (__LOCALES_50_IBY__)
+data=ZPRIVATE\200159c0\install\wideimage_2001f489\xuikon\50\wideimage.o0050 \private\200159c0\install\wideimage_2001f489\xuikon\50\wideimage.o0050
+#endif
+#if defined  (__LOCALES_57_IBY__)
+data=ZPRIVATE\200159c0\install\wideimage_2001f489\xuikon\57\wideimage.o0057 \private\200159c0\install\wideimage_2001f489\xuikon\57\wideimage.o0057
+#endif
+#if defined  (__LOCALES_94_IBY__)
+data=ZPRIVATE\200159c0\install\wideimage_2001f489\xuikon\94\wideimage.o0094 \private\200159c0\install\wideimage_2001f489\xuikon\94\wideimage.o0094
+#endif
 
 #endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH
 

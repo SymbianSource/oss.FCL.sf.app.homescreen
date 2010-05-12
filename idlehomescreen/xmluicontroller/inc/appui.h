@@ -80,6 +80,8 @@ private:
     
     void HandleEnterEditModeL( TBool aEnter );
        
+    void HandleUiReadyEventL();
+    
 private:
     // new functions
     
@@ -127,7 +129,16 @@ private:
      */
     void HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId, 
         const TVwsViewId& aViewIdToBeDeactivated );
-               
+    
+private:
+    // from CCoeAppUi    
+    
+    /**
+     * Gets a list of help contexts for a particular
+     * application user interface.
+     */
+    CArrayFix<TCoeHelpContext>* HelpContextL() const;
+
 public: 
     // new functions
     

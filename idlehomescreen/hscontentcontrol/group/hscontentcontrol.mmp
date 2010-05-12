@@ -33,7 +33,7 @@ SOURCEPATH        ../src
 SOURCE            hscontentcontrolfactory.cpp 
 SOURCE            hscontentcontrolui.cpp 
 SOURCE            hscontentcontrolecomlistener.cpp
-SOURCE            hscontentcontroluninstallmonitor.cpp
+SOURCE            hscontentcontrolswilistener.cpp
 
 //By default, the build tools look for the WINSCW def file in a BWINS directory
 //(at the same level as the directory containing the mmp file), 
@@ -60,7 +60,8 @@ LIBRARY           euser.lib
 LIBRARY           estor.lib
 LIBRARY           ecom.lib
 LIBRARY           charconv.lib
-LIBRARY           xn3layoutengine.lib	
+LIBRARY           swiutils.lib
+LIBRARY           xn3layoutengine.lib
 
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE

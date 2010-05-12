@@ -218,6 +218,11 @@ public:
      */
     TPoint ViewPos()const;
     
+    /**
+     * Checks if the app with the given window group id is closing
+     */
+    TBool IsAppClosing( TInt aWgId );
+    
 public:    
     // from CCoeControl    
     TInt CountComponentControls() const;
@@ -270,6 +275,11 @@ private:
     void ReCreateGridL();
     
     /**
+     * Setup grid layout
+     */
+    void LayoutGridL();
+    
+    /**
      * Returns rectangles for fast swap area controls
      */
     void GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects );
@@ -290,12 +300,6 @@ private:
      * Sends the data-changed notification.
      */   
     void NotifyChange();
-
-    /**
-     * Chage application order.
-     * move Homescreen to first left position.
-     */   
-    void SwapApplicationOrder( RPointerArray<CTsFswEntry>& aArray );
     
     /**
      * Retrieves and returns size for image graphics.
@@ -382,7 +386,17 @@ private:
      * @return  1 if landscape, 0 if portait 
      */
     TInt GetCurrentScreenOrientation();
-
+    
+    /**
+     * Retrieves variety value, based on current screen resolution.
+     * 
+     * @param  aVariety  result of the function, 0 value means portrait
+     *                   value of 1 indicates landscape
+     * @return  ETrue if screen resolution differs from vale returned by
+     *          layout meta data functions.
+     */
+    TBool GetVariety( TInt& aVariety );
+        
 private: // Data
     
     // parent control
@@ -416,7 +430,6 @@ private: // Data
     CTsEventControler& iEvtHandler;
     
     TInt iMaxItemsOnScreen;
-    TInt iPreviousNoOfItems;
     
     // Tap event
     TPointerEvent iTapEvent;
@@ -438,6 +451,10 @@ private: // Data
     // Key event handling
     TBool iConsumeEvent;
     TBool iKeyEvent;
+    
+    // App closing handling
+    RArray<TInt> iIsClosing;
+    TInt iWidgetClosingCount;
     };
 
 #endif // TSFASTSWAPAREA_H
