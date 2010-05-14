@@ -20,9 +20,11 @@
 
 #include <qstate.h>
 #include <qabstractitemmodel.h>
+#include <QPointer>
 
 #include "hsmenustates_global.h"
 #include "hsmenuservice.h"
+#include "hsmenuview.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -31,143 +33,59 @@ class HbAction;
 class HbMenu;
 class HbAbstractViewItem;
 class QModelIndex;
-class HsMenuView;
 class HsMenuItemModel;
+class HsMenuModeWrapper;
+class HsMenuViewBuilder;
 
-/**
- * @ingroup group_hsmenustateplugin
- * @brief Collection State.
- *
- * Displays a concrete collection.
- *
- * @see StateMachine
- *
- * @lib ?library
- * @since S60 ?S60_version
- */
 class HsCollectionState: public QState
 {
     Q_OBJECT
-
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
-
 public:
-
-    HsCollectionState(HsMenuView &menuView, QState *parent = 0);
-
+    HsCollectionState(HsMenuViewBuilder &menuView,
+                      HsMenuModeWrapper &menuMode,
+                      QState *parent = 0);
     ~HsCollectionState();
-
 public slots:
-
     void collectionsSortOrder(HsSortAttribute sortAttribute);
-
 protected:
-
     void onEntry(QEvent *event);
-
 signals:
-
     void sortOrderChanged(HsSortAttribute sortAttribute);
-
 private slots:
-
     bool openTaskSwitcher();
-
     void listItemActivated(const QModelIndex &index);
-
-    void listItemLongPressed(HbAbstractViewItem *item,
-                             const QPointF &coords);
-
+    void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addAppsAction();
-
     void addCollectionShortcutToHomeScreenAction();
-
     void renameAction();
-
     void deleteAction();
-
     void backSteppingAction();
-
     void updateLabel();
-
     void stateEntered();
-
     void stateExited();
-
     void latestOnTopMenuAction();
-
     void oldestOnTopMenuAction();
-
+	void contextMenuAction(HbAction *action);
 private:
-
     void construct();
-
-    /**
-     * Set up Menu.
-     *
-     * @since S60 ?S60_version.
-     * @param isDynamic Decides which options should be added to menu.
-     */
     void constructMenu(bool isDynamic);
-
     void makeConnect();
-
     void makeDisconnect();
-
     void addElementToHomeScreen(const QModelIndex &index);
 
 private:
-
-    /**
-     * Sort order
-     */
     HsSortAttribute mSortAttribute;
-
-    /**
-     * All collections sort order
-     */
     HsSortAttribute mCollectionsSortAttribute;
-
-    /**
-     * The id of the current collection.
-     */
     int mCollectionId;
-
-    /**
-     * The type of the current collection.
-     */
     QString mCollectionType;
-
-    /**
-     * The List View widget.
-     */
-    HsMenuView &mMenuView;
-
-    /**
-     * Secondary Softkey action.
-     * Backstepping functionality.
-     * Own.
-     */
-    HbAction *mSecondarySoftkeyAction;
-
-    /**
-     * Old navigation icon.
-     * Not own.
-     */
-    HbAction *mOldNavigationAction;
-   
-
-    /**
-     * Item Model for the List.
-     * Own.
-     */
+    HsMenuView mMenuView;
+    HsMenuModeWrapper &mMenuMode;
+    HbAction *const mSecondarySoftkeyAction;
     HsMenuItemModel *mCollectionModel;
-
-    /**
-     * Options menu.
-     * Own.
-     */
     HbMenu *mOptions;
+	QModelIndex mContextModelIndex;
+	QPointer<HbMenu> mContextMenu;
 
 };
 

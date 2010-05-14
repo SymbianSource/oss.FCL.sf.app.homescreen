@@ -2,5 +2,8 @@
     <qresource>
         <file alias="hsanalogclockwidget.css">resource/hsanalogclockwidget.css</file>
         <file alias="hsanalogclockwidget.widgetml">resource/hsanalogclockwidget.widgetml</file>
+
+        <file alias="hsdigitalclockwidget.css">resource/hsdigitalclockwidget.css</file>
+        <file alias="hsdigitalclockwidget.widgetml">resource/hsdigitalclockwidget.widgetml</file>
     </qresource>
 </RCC>

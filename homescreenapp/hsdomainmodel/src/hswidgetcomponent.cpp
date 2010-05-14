@@ -18,12 +18,13 @@
 #include <QCoreApplication>
 #include <QDir>
 
-#include "hswidgetcomponentregistry.h"
 #include "hswidgetcomponent.h"
+#include "hswidgetcomponentdescriptor.h"
+#include "hswidgetcomponentregistry.h"
 #include "hsapp_defs.h"
 #include "caservice.h"
 #include "caquery.h"
-#include "canotifier.h"
+
 
 /*!
 
@@ -48,32 +49,28 @@ QString HsWidgetComponent::uri() const
     return mUri;
 }
 
+
+bool HsWidgetComponent::isAvailable() const
+{
+    bool ret(true);
+    if (mRootPath.isEmpty() || !QDir(mRootPath).exists()) {
+        ret = false;
+    }
+    return  ret;
+}
 /*!
 
 */
 HsWidgetComponent::HsWidgetComponent(const QString &uri, QObject *parent)
   : QObject(parent),
-    mUri(uri)
+    mUri(uri),
+    mState(Available)
 {
-    listenChangeEvents();
 	resolveRootPath();
 	installTranslator();
+	
 }
 
-/*!
-
-*/
-void HsWidgetComponent::listenChangeEvents()
-{
-	CaQuery query;
-    query.setEntryTypeNames(QStringList(widgetTypeName()));
-	CaNotifierFilter filter(query);  
-    CaNotifier *notifier = CaService::instance()->createNotifier(filter);
-    notifier->setParent(this);
-    connect(notifier,
-            SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SLOT(onEntryChanged(CaEntry,ChangeType)));
-}
 
 /*!
 
@@ -86,10 +83,13 @@ void HsWidgetComponent::resolveRootPath()
 	QList< QSharedPointer<CaEntry> > widgetEntries = CaService::instance()->getEntries(query);
 	
     if (widgetEntries.isEmpty()) {
-		return;
+        return;
 	}
     QSharedPointer<CaEntry> entry = widgetEntries.first();
     mRootPath = entry->attribute(widgetPathAttributeName());
+    if (mRootPath.isEmpty() || !QDir(mRootPath).exists()) {
+        mState = Unavailable;
+    }
 }
 
 /*!
@@ -136,18 +136,44 @@ void HsWidgetComponent::uninstallTranslator()
     QCoreApplication::removeTranslator(&mTranslator);
 }
 
-/*!
-    This slot reacts to \a entry change that is described with 
-    \a changeType. On remove change type, aboutToUninstall() signal is
-    emitted.
-*/
-void HsWidgetComponent::onEntryChanged(const CaEntry &entry, ChangeType changeType)
+void HsWidgetComponent::emitAboutToUninstall()
 {
-    if (changeType == RemoveChangeType) {
-        QString uri = entry.attribute(widgetUriAttributeName());
-        if (uri == mUri) {
-           	uninstallTranslator();
-			emit aboutToUninstall();
-        }
+    if (mState == Available) {
+        mState = Uninstalling;
+        emit aboutToUninstall();
     }
 }
+void HsWidgetComponent::emitUninstalled()
+{
+    if (mState == Uninstalling) {
+        mState = Available;
+        emit uninstalled();
+    }
+}
+void HsWidgetComponent::emitUpdated()
+{
+    if (mState == Uninstalling) {
+        mState = Available;
+        emit updated();
+    }
+}
+void HsWidgetComponent::emitUnavailable()
+{
+    if (mState == Available) {
+        mState = Unavailable;
+        emit unavailable();
+    }
+}
+void HsWidgetComponent::emitAvailable()
+{
+    if (mState == Unavailable) {
+        mState = Available;
+        emit available();
+    }
+}
+
+
+
+
+    
+

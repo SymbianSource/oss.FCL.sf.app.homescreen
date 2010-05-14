@@ -37,12 +37,48 @@
  */
 
 /*!
+ \var HsArrangeState::mDialog
+ Dialog consists of collection's entries.
+ */
+
+/*!
+ \var HsArrangeState::mEntriesList
+ Entries list collected from DB.
+ */
+
+/*!
+ \var HsArrangeState::mItemModel
+ Collection name.
+ */
+
+/*!
+ \var HsArrangeState::mTopItemId
+ Item id visible on top.
+ */
+
+/*!
+ \var HsArrangeState::mTopModelIndex
+ ModelIndex visible on top.
+ */
+
+/*!
+ \var HsArrangeState::mCollIdList
+ Collection list.
+ */
+
+/*!
+ \var HsArrangeState::mArrangedCollIdList
+ Collection list.
+ */
+
+/*!
  Constructor
  \param parent owner
  \retval void
  */
 HsArrangeState::HsArrangeState(QState *parent) :
-    QState(parent), mDialog(0), mEntriesList(0), mItemModel(0)
+    QState(parent), mDialog(0), mEntriesList(0), 
+    mItemModel(0), mFinishedEntered(false)
 {
     construct();
 }
@@ -53,17 +89,18 @@ HsArrangeState::HsArrangeState(QState *parent) :
  */
 HsArrangeState::~HsArrangeState()
 {
+    // in case of throw
     if (mDialog) {
-        delete mDialog;
+        mDialog->close();
     }
     if (mItemModel) {
         delete mItemModel;
     }
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsArrangeState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::construct");
@@ -90,9 +127,11 @@ void HsArrangeState::save(const HbListWidget& listWidget)
     HSMENUTEST_FUNC_EXIT("HsArrangeState::save");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Derived from QState.
+ Method invoked when a state is entered.
+ \param event an event causing the entrance the state.
+ */
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
@@ -120,7 +159,6 @@ void HsArrangeState::onEntry(QEvent *event)
     mDialog = qobject_cast<HbDialog*>(
             loader.findWidget(HS_ARRANGE_DIALOG_NAME));
 
-    
     if (mEntriesList != NULL && mDialog != NULL) {
 
         mItemModel = HsMenuService::getAllCollectionsModel();
@@ -136,40 +174,61 @@ void HsArrangeState::onEntry(QEvent *event)
         mEntriesList->setArrangeMode(true);
     
         mDialog->setTimeout(HbPopup::NoTimeout);
-    
+        mDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+
         mDialog->setPreferredSize(
             HbInstance::instance()->allMainWindows().at(0)->size());
-    
-        HbAction const* action(mDialog->exec());
+            
+        mDialog->open(this, SLOT(arrangeDialogFinished(HbAction*)));
         
-        mEntriesList->setArrangeMode(false);
-        
-        if (action == mDialog->primaryAction()) {
-            save(*mEntriesList);
-        }
-    }    
+    }
     HSMENUTEST_FUNC_EXIT("HsArrangeState::onEntry");
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+
+/*!
+ Slot invoked on closing the dialog.
+ */
+void HsArrangeState::arrangeDialogFinished(HbAction* finishedAction)
+{
+    if (!mFinishedEntered) {
+        mFinishedEntered = true;
+
+        mEntriesList->setArrangeMode(false);
+        if (finishedAction == mDialog->actions().value(0)) {
+            save(*mEntriesList);
+        }
+        emit exit();
+    } else {
+        // (work-around for crash if more then one action is selected in HbDialog)
+        qWarning("Another signal finished was emited.");
+    }
+}
+
+
+/*!
+ Slot invoked when a state is exited.
+ */
 void HsArrangeState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::stateExited");
+    if (mDialog) {
+        mDialog->close();
+    }
+    mDialog = NULL;
 
-    qDeleteAll(mObjectList);
-    mObjectList.clear();
+    mObjectList.clear(); // mDialog as parent for all confml items
     
     mEntriesList = NULL;
-    mDialog = NULL;
     delete mItemModel;
     mItemModel = NULL;
 
     mArrangedCollIdList.clear();
     mCollIdList.clear();
+
+    mFinishedEntered = false;
 
     HSMENUTEST_FUNC_EXIT("HsArrangeState::stateExited");
     qDebug("HsArrangeState::stateExited()");
@@ -199,7 +258,6 @@ void HsArrangeState::fulfillEntriesList(HbListWidget& listWidget)
 
         listWidget.addItem(widgetItem);
         if (mTopItemId == itemId) {
-            listWidget.indexCount();
             listWidget.setCurrentItem(widgetItem);
             mTopModelIndex = listWidget.currentIndex();
         }

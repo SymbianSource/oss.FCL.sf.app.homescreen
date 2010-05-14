@@ -19,9 +19,10 @@
 #define HSMENUMODETRANSITION_H
 
 #include <QAbstractTransition>
-#include "hsmenuview.h"
+#include "hsapp_defs.h"
 
 class QState;
+class HsMenuModeWrapper;
 
 class HsMenuModeTransition: public QAbstractTransition
 {
@@ -29,7 +30,7 @@ class HsMenuModeTransition: public QAbstractTransition
 public:
 
     HsMenuModeTransition(
-        HsMenuView &menuView, HsMenuMode menuMode, QState *target);
+        HsMenuModeWrapper &menuMode, HsMenuMode expectedMode, QState *target);
 
     bool eventTest(QEvent *event);
 
@@ -37,8 +38,8 @@ public:
 
 private:
 
-    HsMenuView &mMenuView;
-    HsMenuMode mMode;
+    HsMenuModeWrapper &mMenuMode;
+    const HsMenuMode mExpectedMenuMode;
 };
 
 #endif //HSMENUMODETRANSITION_H

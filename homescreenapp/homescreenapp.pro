@@ -23,9 +23,12 @@ SUBDIRS  += hsutils \
             stateplugins \
             widgetplugins \
             hsapplication \
-            hsmenuclientplugin
+            hsmenuclientplugin 
 
-symbian:SUBDIRS  += hshomescreenclientplugin
+symbian: {
+SUBDIRS  += hshomescreenclientplugin \
+            hswidgetuninstaller
+}
 
 SUBDIRS  += ./../tsrc
 

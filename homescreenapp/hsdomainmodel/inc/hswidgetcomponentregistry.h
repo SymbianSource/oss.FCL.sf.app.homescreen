@@ -19,15 +19,23 @@
 #define HSWIDGETCOMPONENTREGISTRY_H
 
 #include <QObject>
+#include <QVariant>
+#include <qservicemanager.h>
+
+
 
 #include "hsdomainmodeldatastructures.h"
 #include "hsdomainmodel_global.h"
+#include "cadefs.h"
 
 #include "hstest_global.h"
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
 class HsWidgetComponent;
-class QSignalMapper;
+class CaEntry;
+class HsWidgetComponentDescriptor;
+
+QTM_USE_NAMESPACE
 
 class HSDOMAINMODEL_EXPORT HsWidgetComponentRegistry : public QObject
 {
@@ -38,18 +46,27 @@ public:
     ~HsWidgetComponentRegistry();
 	
 	HsWidgetComponent *component(const QString &uri);
-
+	
+	void uninstallComponent(const HsWidgetComponentDescriptor &componentDescriptor);
+	
 private:
     Q_DISABLE_COPY(HsWidgetComponentRegistry)
     HsWidgetComponentRegistry(QObject *parent = 0);
-
+    
+    void handleEntryAdded(const CaEntry &entry, const QString &uri);
+    void handleEntryRemoved(const CaEntry &entry, const QString &uri);
+    void handleEntryUpdated(const CaEntry &entry, const QString &uri);
+    void registerService(const CaEntry &entry, const QString& uri, bool reset = false );
+   
+   
 private slots:
-    void onAboutToUninstall(const QString &uri);
+    void onEntryChanged(const CaEntry &entry, ChangeType changeType);
 
 private:
 	QHash<QString, HsWidgetComponent *> mRegistry;
-	static QScopedPointer<HsWidgetComponentRegistry> mInstance;
-    QScopedPointer<QSignalMapper> mSignalMapper;
+	QServiceManager mServiceManager;
+	static HsWidgetComponentRegistry *mInstance;
+    
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };
 

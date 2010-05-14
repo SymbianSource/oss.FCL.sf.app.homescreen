@@ -21,11 +21,13 @@
 
 class TsTasksGrid : public HbGridView
 {
-
     Q_OBJECT
 
 signals:
     void deleteButtonClicked(const QModelIndex &index);
+
+protected:
+    virtual void polishEvent();
 
 };
 

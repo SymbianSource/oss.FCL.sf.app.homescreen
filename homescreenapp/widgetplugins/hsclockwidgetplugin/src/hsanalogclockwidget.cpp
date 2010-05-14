@@ -11,107 +11,67 @@
 *
 * Contributors:
 *
-* Description:  Clock widget
+* Description:  Analog clock widget
 *
 */
 
-#include "hsanalogclockwidget.h"
-#include <QGraphicsGridLayout>
+#include <QGraphicsSceneMouseEvent>
 #include <QTime>
-#include <QDir>
-#include <HbIconItem>
+
 #include <HbStyleLoader>
+#include <HbIconItem>
+#include <HbTouchArea>
+
+#include "hsanalogclockwidget.h"
 
 /*!
     \class HsAnalogClockWidget
     \ingroup group_hsclockwidgetplugin
     \brief Homescreen themable analog clock widget.
-
 */
 
 /*!
-    \fn HsAnalogClockWidget::HsAnalogClockWidget(QGraphicsItem *parent, Qt::WindowFlags flags)
-
     Constructs widget.
 */
 HsAnalogClockWidget::HsAnalogClockWidget(QGraphicsItem *parent)
     : HbWidget(parent),
-      mClockBackground(0), 
-      mClockHourHand(0), 
-      mClockMinuteHand(0)
+      mBackground(0), mHourHand(0), mMinuteHand(0), 
+      mSecondHand(0), mTouchArea(0)
 {
     HbStyleLoader::registerFilePath(":/hsanalogclockwidget.widgetml");
     HbStyleLoader::registerFilePath(":/hsanalogclockwidget.css");
 
-    updatePrimitives();
+    createPrimitives();
 }
 
 /*!
-    \fn HsAnalogClockWidget::~HsAnalogClockWidget()
-
     Destructor.
 */
 HsAnalogClockWidget::~HsAnalogClockWidget()
 {
-    delete mClockBackground;
-    delete mClockHourHand;
-    delete mClockMinuteHand;
-
-    HbStyleLoader::registerFilePath(":/hsanalogclockwidget.widgetml");
-    HbStyleLoader::registerFilePath(":/hsanalogclockwidget.css");
+    HbStyleLoader::unregisterFilePath(":/hsanalogclockwidget.widgetml");
+    HbStyleLoader::unregisterFilePath(":/hsanalogclockwidget.css");
+    mTouchArea->removeEventFilter(this);
 }
 
 /*!
-    @copydoc HbWidget::resizeEvent()
- */
-void HsAnalogClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
+    Filters touch area events.
+*/
+bool HsAnalogClockWidget::eventFilter(QObject *watched, QEvent *event)
 {
-    QGraphicsWidget::resizeEvent(event);
-    updatePrimitives();   
-}
+    Q_UNUSED(watched)
 
-/*!
-    @copydoc HbWidget::updatePrimitives()
- */
-void HsAnalogClockWidget::updatePrimitives()
-{
-    if (!mClockBackground) {
-        mClockBackground = new HbIconItem(QLatin1String("qtg_graf_clock_day_bg"), this);
-        HbStyle::setItemName(mClockBackground, QLatin1String("clock_background"));
+    switch (event->type()) {
+        case QEvent::GraphicsSceneMousePress:
+            return true;
+        case QEvent::GraphicsSceneMouseRelease:
+            handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
+            return true;
+        default:
+            break;
     }
 
-    // Calculate angles for clock hands.
-    QTime time = QTime::currentTime();
-    qreal s = 6 * time.second();
-    qreal m = 6 * (time.minute() + s/360);
-    qreal h = 30 * ((time.hour() % 12) + m/360);
-
-	if (!mClockHourHand) {
-        mClockHourHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_hour"), this);
-        HbStyle::setItemName(mClockHourHand, QLatin1String("clock_hour_hand"));
-    }
-
-    // these should work but don't
-    //int x = mClockHourHand->iconItemSize().width()/2;
-    //int y = mClockHourHand->iconItemSize().height()/2;
-    // workaround
-    int x = mClockHourHand->preferredSize().width()/2;
-    int y = mClockHourHand->preferredSize().height()/2;
-    mClockHourHand->setTransform(QTransform().translate(x, y).rotate(h).translate(-x, -y));
-
-	if (!mClockMinuteHand) {
-        mClockMinuteHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_min"), this);
-        HbStyle::setItemName(mClockMinuteHand, QLatin1String("clock_minute_hand"));
-    }
-
-    // these should work but don't
-    //int x = mClockMinuteHand->iconItemSize().width()/2;
-    //int y = mClockMinuteHand->iconItemSize().height()/2;
-    // workaround
-    x = mClockMinuteHand->preferredSize().width()/2;
-    y = mClockMinuteHand->preferredSize().height()/2;
-    mClockMinuteHand->setTransform(QTransform().translate(x, y).rotate(m).translate(-x, -y));
-
+    return false;
 }
 
 /*!
@@ -120,14 +80,72 @@ void HsAnalogClockWidget::updatePrimitives()
 void HsAnalogClockWidget::tick()
 {
     updatePrimitives();
-    update();
 }
 
 /*!
-    Update primitives also here because a problem in Hb - to be removed later on
+    @copydoc HbWidget::resizeEvent()
  */
-void HsAnalogClockWidget::polish( HbStyleParameters& params ) 
-{  
-    HbWidget::polish(params); 
-    updatePrimitives();
-} 
+void HsAnalogClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
+{
+    HbWidget::resizeEvent(event);
+    updatePrimitives();   
+}
+
+/*!
+    Creates all widget primitives.
+ */
+void HsAnalogClockWidget::createPrimitives()
+{
+    mBackground = new HbIconItem(QLatin1String("qtg_graf_clock_day_bg"), this);
+    HbStyle::setItemName(mBackground, QLatin1String("background"));
+
+    mHourHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_hour"), this);
+    HbStyle::setItemName(mHourHand, QLatin1String("hour_hand"));
+
+    mMinuteHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_min"), this);
+    HbStyle::setItemName(mMinuteHand, QLatin1String("minute_hand"));
+
+    mSecondHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_sec"), this);
+    HbStyle::setItemName(mSecondHand, QLatin1String("second_hand"));
+
+    mTouchArea = new HbTouchArea(this);
+    mTouchArea->installEventFilter(this);    
+    HbStyle::setItemName(mTouchArea, QLatin1String("toucharea"));
+}
+
+/*!
+    @copydoc HbWidget::updatePrimitives()
+ */
+void HsAnalogClockWidget::updatePrimitives()
+{
+    // Calculate angles for clock hands.
+    QTime time = QTime::currentTime();
+    qreal s = 6 * time.second();
+    qreal m = 6 * (time.minute() + s/360);
+    qreal h = 30 * ((time.hour() % 12) + m/360);
+
+    int x = mBackground->iconItemSize().width()/2;
+    int y = mBackground->iconItemSize().height()/2;
+    QPointF originPoint = QPointF(x, y);
+
+    mHourHand->setTransformOriginPoint(originPoint);
+    mHourHand->setRotation(h);
+
+    mMinuteHand->setTransformOriginPoint(originPoint);
+    mMinuteHand->setRotation(m);
+
+    mSecondHand->setTransformOriginPoint(originPoint);
+    mSecondHand->setRotation(s);
+}
+
+/*!
+    \internal
+*/
+void HsAnalogClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (!contains(event->pos())) {
+        return;
+    }
+
+    emit clockTapped();
+}

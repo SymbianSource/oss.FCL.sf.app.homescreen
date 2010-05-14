@@ -18,14 +18,14 @@
 #ifndef HS_LIST_DIALOG_H
 #define HS_LIST_DIALOG_H
 
-#include <hblistdialog.h>
+#include <HbSelectionDialog>
 #include <hsmenuservice.h>
 
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 class QStandardItemModel;
 
-class HsCollectionsListDialog: public HbListDialog
+class HsCollectionsListDialog: public HbSelectionDialog
 {
     Q_OBJECT
 
@@ -38,51 +38,28 @@ public:
 
     virtual ~HsCollectionsListDialog();
 
-    HbAction *exec();
+    void open(QObject* receiver, const char* member );
 
     int getItemId();
 
+protected:
+    void closeEvent( QCloseEvent * event );
+
 private:
 
-    /**
-     * Connects edit line signals to slots.
-     */
     void makeConnect();
 
-    /**
-     * Disconnects edit line signals from slots.
-     */
     void makeDisconnect();
 
-    /**
-     * Creates standard item model.
-     *
-     * @since S60 ?S60_version.
-     * @param sortOrder sort order.
-     * @param collectionId id of collection to remove from model.
-     * @return QStandardItemModel - caller takes ownership.
-     */
     QStandardItemModel *standartItemModel(HsSortAttribute sortOrder,
                                           int collectionId);
 
-    /**
-     * Inserts "new collection" item into model.
-     *
-     * @since S60 ?S60_version.
-     * @param model a model.
-     */
     void insertNewCollectionItem(QStandardItemModel *model);
 
 private:
 
-    /**
-     * Model
-     */
     QStandardItemModel *mModel;
 
-    /**
-     * Selected item id
-     */
     int mItemId;
 };
 

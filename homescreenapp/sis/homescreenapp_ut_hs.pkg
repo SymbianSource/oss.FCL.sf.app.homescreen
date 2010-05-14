@@ -42,6 +42,7 @@
 "/epoc32/data/z/private/10003a3f/import/apps/t_hsutils_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsutils_reg.rsc"
 "/epoc32/data/z/resource/apps/t_hsutils.rsc"                       - "c:/resource/apps/t_hsutils.rsc"
 "../hsutils/tsrc/t_hsutils/nokia.png"       - "C:/hsresources/testresources/nokia.png"
+"../hsutils/tsrc/t_hsutils/large.jpg"       - "C:/hsresources/testresources/large.jpg"
 
 ;--------------- hsdomainmodel ---------------
 
@@ -57,6 +58,15 @@
 "/epoc32/release/armv5/urel/mockwidgetplugin.dll" - "c:/sys/bin/mockwidgetplugin.dll"
 "/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin"
 "/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.xml" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.xml"
+"/epoc32/data/z/resource/qt/translations/mockwidgetplugin.qm" - "c:/resource/qt/translations/mockwidgetplugin.qm"
+
+"/epoc32/release/armv5/urel/mockwidgetplugintoosmall.dll" - "c:/sys/bin/mockwidgetplugintoosmall.dll"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoosmall.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoosmall.qtplugin"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoosmall.xml" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoosmall.xml"
+
+"/epoc32/release/armv5/urel/mockwidgetplugintoobig.dll" - "c:/sys/bin/mockwidgetplugintoobig.dll"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.qtplugin"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.xml" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.xml"
 
 
 ;--------------- runtimeplugins ---------------

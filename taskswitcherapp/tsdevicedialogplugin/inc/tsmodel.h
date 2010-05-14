@@ -87,6 +87,11 @@ private:
      * Icon size in model
      */
     QSize mSize;
+    
+    /*
+     * Maximum number of items (only for running apps + activities)
+     */ 
+    int mMaxItems;
 };
 
 #endif // TSMODEL_H

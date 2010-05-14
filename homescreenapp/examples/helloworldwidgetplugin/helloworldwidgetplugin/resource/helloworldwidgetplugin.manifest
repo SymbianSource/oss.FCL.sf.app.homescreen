@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<widgetprovider>
-    <widget library="helloworldwidgetplugin"
-            uri="helloworldwidgetplugin"
-            title="HelloWorld"
-            iconuri="helloworldwidgetplugin.png"
-	    description="Helloworld example widget."/>
-</widgetprovider>

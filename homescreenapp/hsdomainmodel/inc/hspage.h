@@ -69,6 +69,7 @@ private:
 
 private slots:
     void onWidgetFinished(HsWidgetHost *widget);
+    void onWidgetResized(HsWidgetHost *widget);
 
 private:
     int mDatabaseId;    

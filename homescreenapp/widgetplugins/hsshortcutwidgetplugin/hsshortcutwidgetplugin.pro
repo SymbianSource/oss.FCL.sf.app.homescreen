@@ -18,6 +18,8 @@ TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
 
+HB += hbfeedback
+
 PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F46
 
 include(../../common.pri)

@@ -26,6 +26,7 @@ INCLUDEPATH += ./inc \
                 ../../serviceproviders/hsmenuserviceprovider/inc
 
 QT += xml sql
+HB += hbfeedback
 
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
@@ -42,6 +43,7 @@ RESOURCES += hshomescreenstateplugin.qrc
 
 symbian: {
     TARGET.UID3 = 0x20022F41
+    LIBS += -lxqsettingsmanager
 }
 
 include(hshomescreenstateplugin.pri)

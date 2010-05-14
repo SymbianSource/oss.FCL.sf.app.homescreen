@@ -29,38 +29,47 @@ HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 #include "cadefs.h"
 
 class CaEntry;
+class HsWidgetComponentDescriptor;
 
 class HSDOMAINMODEL_EXPORT HsWidgetComponent : public QObject
 {
     Q_OBJECT
 	Q_PROPERTY(QString rootPath READ rootPath)
 	Q_PROPERTY(QString uri READ uri)
-
+	
+	enum State {Available, Unavailable, Uninstalling,Uninstalled };
 public:
     ~HsWidgetComponent();
 
 	QString rootPath() const;
 	QString uri() const;
-
+	bool isAvailable() const;
 signals:
 	void aboutToUninstall();
-	
+	void uninstalled();
+	void updated();
+	void unavailable();
+	void available();
 private:
     Q_DISABLE_COPY(HsWidgetComponent)
 	HsWidgetComponent(const QString &uri, QObject *parent = 0);
-	void listenChangeEvents();
+
 	void resolveRootPath();
     void installTranslator();
 	void uninstallTranslator();
-
-private slots:
-    void onEntryChanged(const CaEntry &entry, ChangeType changeType);
-
+	
+	void emitAboutToUninstall();
+	void emitUninstalled();
+	void emitUpdated();
+	void emitUnavailable();
+	void emitAvailable();
 private:	
 	QTranslator mTranslator;
 	QString mUri;
+	
 	QString mRootPath;
- 
+	QString mDrive;
+	State mState;
 	friend class HsWidgetComponentRegistry;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)

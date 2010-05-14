@@ -34,36 +34,47 @@ class CaEntry;
 class HsShortcutWidget : public HbWidget
 {
     Q_OBJECT
-    Q_PROPERTY(int mcsId READ mcsId WRITE setMcsId)
+    Q_PROPERTY(int caEntryId READ caEntryId WRITE setCaEntryId)
+    Q_PROPERTY(QString uid READ uid WRITE setUid)
     
 public:
     HsShortcutWidget(QGraphicsItem *parent = 0, Qt::WindowFlags flags = 0);
     ~HsShortcutWidget();
 
-    void setMcsId(int mcsId);
-    int mcsId() const;
+    void setCaEntryId(int caEntryId);
+    int caEntryId() const;
+    void setUid(const QString &uid);
+    QString uid() const;
 
     bool eventFilter(QObject *watched, QEvent *event);
 
 signals:
     void finished();
+    void setPreferences(const QStringList &names);
 
 public slots:
     void onInitialize();
     void onShow();
     void onHide();
 
-    void onEntryChanged(const CaEntry &entry, ChangeType changeType);
-
 private:
     Q_DISABLE_COPY(HsShortcutWidget)
 
     void handleMousePressEvent(QGraphicsSceneMouseEvent *event);
+    void handleMouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
-    void updatePrimitives();
-    void createCaNotifier();
+            
+    void createPrimitives();
+    void updateContent(const CaEntry &caEntry);
     void updateVisibility();
+
+    void setBackgroundToNormal();
+    void setBackgroundToPressed();
+
+    void createCaNotifier();
+
+private slots:
+    void onEntryChanged(const CaEntry &caEntry, ChangeType changeType);
 
 private:
     HbFrameItem *mBackground;
@@ -71,11 +82,11 @@ private:
     HbTextItem *mText;
     HbTouchArea *mTouchArea;
     
-    bool mIsPressed;
-
-    int mMcsId;
-    QSharedPointer<CaEntry> mCaEntry;
-
+    int mCaEntryId;
+    QString mUid;
+    EntryRole mCaEntryRole;
+    EntryFlags mCaEntryFlags;
+    QString mCaEntryTypeName;
     HOMESCREEN_TEST_FRIEND_CLASS(TestShortcutWidget)
 };
 

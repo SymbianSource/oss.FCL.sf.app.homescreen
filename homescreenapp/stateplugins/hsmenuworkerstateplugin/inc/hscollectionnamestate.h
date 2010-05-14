@@ -25,7 +25,9 @@
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class HbAction;
 class HsShortcutService;
+class HsCollectionNameDialog;
 
 class HsCollectionNameState: public QState
 {
@@ -47,19 +49,29 @@ signals:
 
     void cancel();
 
+    void exit();
+
+private slots:
+
+    void dialogFinished(HbAction* finishedAction);
+
+    void cleanUp();
+
 protected:
 
     void onEntry(QEvent *event);
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
+private:
+
+    int mItemId;
+
+    HsCollectionNameDialog *mCollectionNameDialog;
+
+    bool mFinishedEntered;
 };
 
 #endif /* COLLECTIONANAMESTATE_H */

@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
     
     HbMainWindow window;
     window.setRenderHint(QPainter::SmoothPixmapTransform);
+    window.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
         
     HsHomeScreen hs;
     QObject::connect(&app, SIGNAL(aboutToQuit()) ,&hs, SLOT(stop()));

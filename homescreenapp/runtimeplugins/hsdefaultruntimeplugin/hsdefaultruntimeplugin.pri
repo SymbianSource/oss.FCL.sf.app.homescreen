@@ -14,7 +14,14 @@
 # Description:
 #
 
-HEADERS += ./inc/*.h
-SOURCES += ./src/*.cpp
+HEADERS += ./inc/hsdefaultruntime.h \
+           ./inc/hsdefaultruntimeplugin.h
+SOURCES += ./src/hsdefaultruntime.cpp \
+           ./src/hsdefaultruntimeplugin.cpp
 
-
+symbian: {
+HEADERS += ./inc/hsbackuprestoreobserver.h \
+           ./inc/hsbackuprestoreactivecallback.h
+SOURCES += ./src/hsbackuprestoreobserver.cpp \
+           ./src/hsbackuprestoreactivecallback.cpp
+}

@@ -24,9 +24,8 @@
 #include <QSortFilterProxyModel>
 #include <HbAbstractItemView>
 #include "hsmenustates_global.h"
-#include "hsapp_defs.h"
 #include "hsmenuviewbuilder.h"
-
+#include "hsapp_defs.h"
 
 class QPointF;
 class QActionGroup;
@@ -34,9 +33,11 @@ class HbView;
 class HbMainWindow;
 class HbAction;
 class HbAbstractItemView;
+class HbListView;
 class HbGroupBox;
 class HbWidget;
 class HsMenuItemModel;
+
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -45,33 +46,23 @@ class HsMenuView: public QObject
     Q_OBJECT
 
 public:
-    HsMenuView();
+    HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext);
     ~HsMenuView();
 
-    void setModel(HsMenuItemModel *model);
-    void setModelToView(QAbstractItemModel *model);
-
-    void setLabel(const QString &label);
-    void scrollTo(const QModelIndex &index,
-                  HbAbstractItemView::ScrollHint hint =
-                      HbAbstractItemView::EnsureVisible);
-
-    void setLabelVisible(bool visible);
     void setSearchPanelVisible(bool visible);
 
     HbView *view();
-    QActionGroup *toolBarActionGroup();
-    HbAction *allAppsAction();
-    HbAction *allCollectionsAction();
-    HbAction *oviStoreAction();
 
-    QModelIndex firstVisibleItemIndex();
+    HbListView *listView();
 
-    HsMenuMode getHsMenuMode();
+    void activate();
+    void inactivate();
 
-    void setHsMenuMode(HsMenuMode menuMode);
-    void hideToolBar();
-    void showToolBar();
+    HbGroupBox *viewLabel();
+
+    void setModel(HsMenuItemModel *model);
+
+
 signals:
     void activated(const QModelIndex &index);
     void longPressed(HbAbstractViewItem *item, const QPointF &coords);
@@ -94,42 +85,38 @@ private slots:
 
 
 private:
-    HbAbstractItemView::ScrollHint convertScrollHint(
-        QAbstractItemView::ScrollHint hint);
 
-    void connectItemViewsSignals();
-    void disconnectItemViewsSignals();
+    void addViewToMainWindow(HbView *view);
 
-    void connectSearchItemViewsSignals();
-    void disconnectSearchItemViewsSignals();
-
-
-    void connectModelSignals();
-    void disconnectModelSignals();
+    QModelIndex firstVisibleItemIndex(const HbListView *view) const;
 
     void connectSearchPanelSignals();
     void disconnectSearchPanelSignals();
+    void connectSearchItemViewsSignals();
+    void disconnectSearchItemViewsSignals();
 
     void searchFinished();
     void searchBegins();
-
-    void setUpToolBar();
+    HbAbstractItemView::ScrollHint convertScrollHint(
+        QAbstractItemView::ScrollHint hint);
 
 private:
 
-    HsMenuViewBuilder mBuilder;
+    const HsViewContext mViewContext;
+    HsMenuViewBuilder &mBuilder;
 
-    HsMenuItemModel *mModel;
-
-    QModelIndex mFirstVisibleIndex;
-    QModelIndex mLastVisibleIndex;
-    QModelIndex mSearchIndex;
-
-    QActionGroup *mToolBarActionGroup;
-
-    HsMenuMode mMenuMode;
+    QModelIndex mSearchViewInitialIndex;
+    QModelIndex mIndexToScrollAfterSearchDone;
+    QModelIndex mSearchViewLongPressedIndex;
 
     QSortFilterProxyModel *mProxyModel; // owned
+
+    HbView *mView;
+    HbListView *mListView;
+    HbGroupBox *mViewLabel;
+
+    HbListView *mSearchListView;
+    HbSearchPanel *mSearchPanel;
 
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };

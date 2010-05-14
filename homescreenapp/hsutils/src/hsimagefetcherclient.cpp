@@ -27,7 +27,6 @@
 
 namespace
 {
-    const char gFetcherService[] = "com.nokia.services.media";
     const char gFetcherInterface[] = "image";
     const char gFetcherOperation[] = "fetch(QVariantMap,QVariant)";
 }
@@ -50,7 +49,7 @@ HsImageFetcherClient::HsImageFetcherClient(QObject *parent)
   : QObject(parent)
 {
 }
-#endif // Q_OS_SYMBIAN   
+#endif // Q_OS_SYMBIAN
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -59,7 +58,7 @@ HsImageFetcherClient::~HsImageFetcherClient()
 {
 #ifdef Q_OS_SYMBIAN
     delete mReq;
-#endif // Q_OS_SYMBIAN   
+#endif // Q_OS_SYMBIAN
 }
 
 // ---------------------------------------------------------------------------
@@ -68,13 +67,13 @@ HsImageFetcherClient::~HsImageFetcherClient()
 void HsImageFetcherClient::fetch()
 {
 #ifdef Q_OS_SYMBIAN
-    qDebug() << "HsImageFetcherClient::fetch START";    
-  
+    qDebug() << "HsImageFetcherClient::fetch START";
+
     if (mReq) {
         delete mReq;
         mReq = 0;
     }
-  
+
     mReq = mAppMgr.create(gFetcherInterface, gFetcherOperation, false);
     if (mReq) {
         // Connect signals once
@@ -83,14 +82,14 @@ void HsImageFetcherClient::fetch()
     } else {
         qCritical() << "HsImageFetcherClient::fetch -> Create request failed";
         return;
-    } 
+    }
 
     if (!(mReq)->send()) {
         qCritical() << "HsImageFetcherClient::fetch -> Send failed" << mReq->lastErrorMessage();;
     }
 
     qDebug() << "HsImageFetcherClient::fetch END";
-#endif // Q_OS_SYMBIAN        
+#endif // Q_OS_SYMBIAN
 }
 
 
@@ -102,17 +101,17 @@ void HsImageFetcherClient::handleOk(const QVariant &result)
     // disconnect error signal as it will give -4999 (EConnectionClosed) error afterwards even though image
     // is fetched successfully
     disconnect(mReq, SIGNAL(requestError(int,const QString&)), this, SLOT(handleError(int,const QString&)));
-        
+
     XQAiwRequest *request = static_cast<XQAiwRequest *>(sender());
     int implementationId=-1;
     implementationId = (request->descriptor().property(XQAiwInterfaceDescriptor::ImplementationId)).toInt();
-    
+
     if (result.canConvert<QString>()) {
         qDebug("HsImageFetcherClient::%x:handleOk result=%s,%s",
                implementationId,
                result.typeName(),
                qPrintable(result.value<QString>()));
-            
+
         emit fetchCompleted(result.value<QString>());
     } else if (result.canConvert<QStringList>()) {
         QStringList resultList = result.value<QStringList>();
@@ -121,7 +120,7 @@ void HsImageFetcherClient::handleOk(const QVariant &result)
 	        QString msg = QString("HsImageFetcherClient::handleOk, size=")+QString::number( resultList.size() )+QString("\n");
 	        for (int i(0), size(resultList.size()); i < size; ++i) {
                 msg += QString::number(i) + QString(":") + resultList[i] + QString("\n");
-	        }	        
+	        }
 	        qDebug()<<msg;
 		}
         emit fetchCompleted(resultList[0]);
@@ -133,23 +132,23 @@ void HsImageFetcherClient::handleOk(const QVariant &result)
     }
 #else
 	Q_UNUSED(result)
-#endif // Q_OS_SYMBIAN     
+#endif // Q_OS_SYMBIAN
 }
-  
+
 void HsImageFetcherClient::handleError(int errorCode, const QString &errorMessage)
 {
 #ifdef Q_OS_SYMBIAN
     XQAiwRequest *request = static_cast<XQAiwRequest *>(sender());
     int implementationId = -1;
     implementationId = (request->descriptor().property(XQAiwInterfaceDescriptor::ImplementationId)).toInt();
-    
+
     qCritical("HsImageFetcherClient::%x:handleError code=%d, errorMessage:%s",
         implementationId, errorCode, qPrintable(errorMessage));
     emit fetchFailed(errorCode, errorMessage);
 #else
 	Q_UNUSED(errorCode)
 	Q_UNUSED(errorMessage)
-#endif // Q_OS_SYMBIAN     
+#endif // Q_OS_SYMBIAN
 }
 
 #ifdef COVERAGE_MEASUREMENT

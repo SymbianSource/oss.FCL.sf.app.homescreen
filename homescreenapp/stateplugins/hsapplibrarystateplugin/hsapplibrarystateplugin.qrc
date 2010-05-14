@@ -2,4 +2,7 @@
     <qresource prefix="/xml">
         <file alias="applibrary.docml">resource/applibrary.docml</file>
     </qresource>
+    <qresource prefix="/css">
+        <file alias="hsapplibrarystateplugin.css">resource/hsapplibrarystateplugin.css</file>
+    </qresource>
 </RCC>

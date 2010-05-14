@@ -17,6 +17,7 @@
 
 #include <QState>
 #include "hsmenumodetransition.h"
+#include "hsmenumodewrapper.h"
 
 /*!
  \class HsMenuModeTransition
@@ -26,13 +27,13 @@
 
 /*!
  Constructor.
- \param menuView homescreen menu view.
- \param menuMode homescreen menu mode.
+ \param menuView object representing homescreen menu view mode.
+ \param menuMode menu mode the transition is to be active for.
  \param target target state.
  */
 HsMenuModeTransition::HsMenuModeTransition(
-    HsMenuView &menuView, HsMenuMode menuMode, QState *target):
-    mMenuView(menuView),mMode(menuMode)
+    HsMenuModeWrapper &menuMode, HsMenuMode expectedMenuMode, QState *target):
+    mMenuMode(menuMode), mExpectedMenuMode(expectedMenuMode)
 {
     setTargetState(target);
 }
@@ -45,7 +46,7 @@ HsMenuModeTransition::HsMenuModeTransition(
 bool HsMenuModeTransition::eventTest(QEvent *event)
 {
     Q_UNUSED(event);
-    return mMenuView.getHsMenuMode() == mMode;
+    return mMenuMode.getHsMenuMode() == mExpectedMenuMode;
 }
 
 /*!

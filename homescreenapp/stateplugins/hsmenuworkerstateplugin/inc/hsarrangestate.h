@@ -29,6 +29,7 @@ HS_STATES_TEST_CLASS(MenuStatesTest)
 class HbListWidget;
 class HsMenuItemModel;
 class HbDialog;
+class HbAction;
 
 class HsArrangeState: public QState
 {
@@ -45,40 +46,19 @@ public:
 
 protected:
 
-    /**
-     * Derived from QState.
-     * Method invoked when a state is entered.
-     * @param event an event causing the entrance the state.
-     *
-     * @since S60 ?S60_version.
-     */
     void onEntry(QEvent *event);
-
-    /**
-     * Slot connected to saving action of state.
-     * It is called when new application are addend to collection.
-     *
-     * @since S60 ?S60_version.
-     * @param id Id of collection to which applications were added.
-     */
-    //    void showMessageAppsAdded(int id);
 
 private slots:
 
-    /**
-     * Slot invoked when a state is exited.
-     *
-     * @since S60 ?S60_version.
-     */
     void stateExited();
+
+    void arrangeDialogFinished(HbAction* finishedAction);
+
+signals:
+    void exit();
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
     void fulfillEntriesList(HbListWidget& listWidget);
@@ -89,42 +69,24 @@ private:
 
 private:
 
-    /**
-     * Dialog consists of collection's entries.
-     */
     HbDialog *mDialog;
 
-    /**
-     * Entries list collected from DB.
-     */
     HbListWidget *mEntriesList;
 
-    /**
-     * Collection name.W
-     */
     HsMenuItemModel *mItemModel;
 
-    /**
-     * Item id visible on top.
-     */
     int mTopItemId;
 
-    /*
-     * ModelIndex visible on top.
-     */
     QModelIndex mTopModelIndex;
 
-    /**
-     * Collection list.
-     */
     QList<int> mCollIdList;
 
-    /**
-     * Collection list.
-     */
     QList<int> mArrangedCollIdList;
     
     QObjectList mObjectList;
+    
+    bool mFinishedEntered;
+
 
 };
 

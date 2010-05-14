@@ -22,6 +22,7 @@ MOBILITY = serviceframework
 include (../common.pri)
 
 QT += sql 
+HB += hbfeedback
 
 LIBS += -lcaclient \
         -lhsutils 

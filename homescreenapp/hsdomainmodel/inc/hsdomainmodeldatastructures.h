@@ -26,8 +26,8 @@ class HSDOMAINMODEL_EXPORT HsSceneData
 public:
     HsSceneData() 
       : id(-1), defaultPageId(-1), maximumPageCount(-1),
-        maximumWidgetHeight(-1), maximumWidgetWidth(-1),
-        minimumWidgetHeight(-1), minimumWidgetWidth(-1)
+        maximumWidgetHeight(-1.0), maximumWidgetWidth(-1.0),
+        minimumWidgetHeight(-1.0), minimumWidgetWidth(-1.0)
     {}
     
     int     id;
@@ -35,10 +35,10 @@ public:
     QString landscapeWallpaper;
     int     defaultPageId;
     int     maximumPageCount;
-    int     maximumWidgetHeight;
-    int     maximumWidgetWidth;
-    int     minimumWidgetHeight;
-    int     minimumWidgetWidth;
+    qreal   maximumWidgetHeight;
+    qreal   maximumWidgetWidth;
+    qreal   minimumWidgetHeight;
+    qreal   minimumWidgetWidth;
 };
 
 class HSDOMAINMODEL_EXPORT HsPageData

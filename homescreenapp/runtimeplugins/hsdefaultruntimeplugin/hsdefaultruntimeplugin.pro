@@ -37,7 +37,7 @@ INCLUDEPATH += ./inc \
 
 symbian: {
     TARGET.UID3 = 0x20022F3E
-    LIBS += -lxqkeycapture
+    LIBS += -lxqkeycapture -labclient
 }
 
 

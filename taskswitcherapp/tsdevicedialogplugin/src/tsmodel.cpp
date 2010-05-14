@@ -29,6 +29,13 @@
 #include <canotifierfilter.h>
 #include <hsactivitydbclientinterface.h>
 
+#ifdef Q_OS_SYMBIAN
+#include <XQSettingsManager>
+
+const int TSDeviceDialogUid = 0x2002677F;
+const int ItemsLimit = 0x00000001;
+#endif
+
 const char entryTypeKeyword[] = "application";
 const char applicationUidKeyword [] = "application:uid";
 const int maxItems(10);
@@ -49,7 +56,8 @@ TsModel::TsModel(CaService &applicationSrv, QObject &activitySrv, QObject *paren
     mApplicationService(applicationSrv),
     mActivityService(activitySrv),
     mNotifier(NULL),
-    mSize(240, 240)
+    mSize(240, 240),
+    mMaxItems(maxItems)
 {
     // creating query
     mQuery.setEntryRoles(ItemEntryRole);
@@ -68,6 +76,18 @@ TsModel::TsModel(CaService &applicationSrv, QObject &activitySrv, QObject *paren
     if (mQuery.parentId() > 0) {
         connect(mNotifier, SIGNAL(groupContentChanged(int)), this, SLOT(updateModel()));
     }
+
+#ifdef Q_OS_SYMBIAN
+    XQSettingsManager *crManager = new XQSettingsManager;
+    XQCentralRepositorySettingsKey itemsNumberKey(TSDeviceDialogUid, ItemsLimit);
+    QVariant itemsNumberVariant = crManager->readItemValue(itemsNumberKey, XQSettingsManager::TypeInt);
+    if (!itemsNumberVariant.isNull()) {
+        int number = itemsNumberVariant.toInt();
+        if (number > 0) {
+            mMaxItems = number;
+        }
+    }
+#endif
 }
 
 /*!
@@ -109,7 +129,7 @@ QVariant TsModel::data(const QModelIndex &index,
 
 int TsModel::maxRowCount()const
 {
-    return maxItems;
+    return mMaxItems;
 }
 
 /*!
@@ -164,13 +184,11 @@ void TsModel::getApplications()
         if (entry) {
             //add running application filtering
             if (entry->data(TsDataRoles::Closable).toBool() && //running application filtering
-                    entry->data(TsDataRoles::Visible).toBool() && //visible applications filtering
-                    maxRowCount() > mEntries.count()) { //maximum model size check
+                    entry->data(TsDataRoles::Visible).toBool()) { //visible applications filtering
                 mEntries.append(entry);
             } else {
                 delete entry;
             }
-
         }
     }
 }
@@ -188,8 +206,10 @@ void TsModel::getActivities()
         prepareActivityEntry(activity);
         entry = new TsActivityModelItem(*this, mActivityService, activity);
         if (entry) {
-            if (entry->data(TsDataRoles::Visible).toBool() && //visible activity filtering
-                    maxRowCount() > mEntries.count()) { //maximum model size check
+			if (maxRowCount() <= mEntries.count()) {
+				break;
+			}
+            if (entry->data(TsDataRoles::Visible).toBool()) { //visible activity filtering
                 mEntries.append(entry);
             } else {
                 delete entry;

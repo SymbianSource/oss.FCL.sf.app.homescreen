@@ -52,7 +52,8 @@ namespace
     Constructs a new database with the given \a parent object.
 */
 HsDatabase::HsDatabase(QObject *parent)
-  : QObject(parent)
+  : QObject(parent),
+  	mBlocked(false)
 {
 }
 
@@ -102,6 +103,10 @@ QString HsDatabase::databaseName() const
 */  
 bool HsDatabase::open()
 {
+	if (mBlocked) {
+		return false;
+	}
+
     QSqlDatabase database;
     if (QSqlDatabase::contains(mConnectionName)) {
         database = QSqlDatabase::database(mConnectionName);
@@ -190,10 +195,10 @@ bool HsDatabase::scene(HsSceneData &data)
         data.landscapeWallpaper  = query.value(2).toString();
         data.defaultPageId       = query.value(3).toInt();
         data.maximumPageCount    = query.value(4).toInt();
-        data.maximumWidgetHeight = query.value(5).toInt();
-        data.maximumWidgetWidth  = query.value(6).toInt();
-        data.minimumWidgetHeight = query.value(7).toInt();
-        data.minimumWidgetWidth  = query.value(8).toInt();
+        data.maximumWidgetHeight = query.value(5).toReal();
+        data.maximumWidgetWidth  = query.value(6).toReal();
+        data.minimumWidgetHeight = query.value(7).toReal();
+        data.minimumWidgetWidth  = query.value(8).toReal();
         return true;
     }
     
@@ -752,7 +757,24 @@ bool HsDatabase::setWidgetPreferences(int widgetId, const QVariantHash &data)
 
     return true;
 }
- 
+
+/*!
+    Sets the database blocked or unblocked.
+*/
+void HsDatabase::setDataBaseBlocked(bool blocked)
+{
+	mBlocked = blocked;
+}
+
+/*!
+    Returns is the database blocked.
+    Return value true if blocked.
+*/
+bool HsDatabase::getDataBaseBlocked()
+{
+	return mBlocked;
+}
+
 /*!
     Sets the database instance. The existing instance
     will be deleted.

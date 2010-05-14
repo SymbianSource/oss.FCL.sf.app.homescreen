@@ -14,16 +14,16 @@
  * Description: Menu Application Library state.
  *
  */
-#include <qsignaltransition.h>
-#include <qhistorystate.h>
-
 #include <hbmainwindow.h>
 #include <hbview.h>
 #include <hbaction.h>
-#include <hbtoolbar.h>
+#include <HbToolBar>
+#include <HbIcon>
 #include <hbinstance.h>
 #include <hblistview.h>
 #include <hbsearchpanel.h>
+#include <HbToolBarExtension>
+#include <HbStyleLoader>
 #include <hsmenueventtransition.h>
 
 #include "hstest_global.h"
@@ -32,16 +32,68 @@
 #include "hsallcollectionsstate.h"
 #include "hscollectionstate.h"
 #include "hsinstalledappsstate.h"
-#include "hsovistorehandler.h"
+#include "hsoperatorhandler.h"
 #include "hsmenuview.h"
 #include "hsmenumodetransition.h"
+
+/*!
+ \class HsAppLibraryState
+ \ingroup group_hsmenustateplugin
+ \brief Application Library State.
+ Parent state for Application Library functionality
+ (browsing applications and collections)
+ \lib ?library
+ \see StateMachine
+ */
+
+/*!
+ \var HsAppLibraryState::mSecondarySoftkeyAction
+ Secondary Softkey action.
+ Usually backstepping functionality.
+ Own.
+ */
+
+/*!
+ \var HsAppLibraryState::mAllAppsState
+ All Applications state.
+ Own.
+ */
+
+/*!
+ \var HsAppLibraryState::mHistoryTransaction
+ Transition to remember last visited child state in Application Library.
+ Own.
+ */
+
+/*!
+ \var HsAppLibraryState::mAllCollectionsState
+ All Collections state.
+ Own.
+ */
+
+/*!
+ \var HsAppLibraryState::mCollectionState
+ Collection state.
+ Own.
+ */
+
+/*!
+ \fn void HsAppLibraryState::toHomescreenState();
+ Signal emitted when leaving the state,
+ i.e when the back softkey is pressed.
+ */
+
+/*!
+ \fn void HsAppLibraryState::initialize();
+ Signal emitted when entering the state
+ */
 
 /*!
  Constructor.
  \param parent Owner.
  */
 HsAppLibraryState::HsAppLibraryState(QState *parent) :
-    QState(parent), mSecondarySoftkeyAction(0), mAllAppsState(0),
+    QState(parent), mAllAppsState(0),
     mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0)
 {
     construct();
@@ -52,13 +104,11 @@ HsAppLibraryState::HsAppLibraryState(QState *parent) :
  */
 HsAppLibraryState::~HsAppLibraryState()
 {
-    HbMainWindow *const hbW =
-        HbInstance::instance()->allMainWindows().value(0);
+    delete mAllAppsState;
+    delete mAllCollectionsState;
+    delete mCollectionState;
+    delete mInstalledAppsState;
 
-    if (hbW) {
-        mMenuView.view()->setNavigationAction(NULL);
-        hbW->removeView(mMenuView.view());
-    }
 }
 
 /*!
@@ -69,14 +119,10 @@ void HsAppLibraryState::construct()
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::construct");
     setObjectName("homescreen.nokia.com/state/applibrarystate");
 
-    mSecondarySoftkeyAction = new HbAction(Hb::BackAction, this);
-    connect(mSecondarySoftkeyAction, SIGNAL(triggered()),
-            SIGNAL(toHomescreenState()));
-
-    mAllAppsState = new HsAllAppsState(mMenuView, this);
+    mAllAppsState = new HsAllAppsState(mMenuViewBuilder, mMenuMode, this);
     connect(this, SIGNAL(entered()),mAllAppsState, SLOT(scrollToBeginning()));
 
-    mAllCollectionsState = new HsAllCollectionsState(mMenuView, this);
+    mAllCollectionsState = new HsAllCollectionsState(mMenuViewBuilder, mMenuMode, this);
     connect(this, SIGNAL(entered()),
             mAllCollectionsState, SLOT(scrollToBeginning()));
 
@@ -84,12 +130,16 @@ void HsAppLibraryState::construct()
     setInitialState(initialState);
 
     mHistoryTransaction =  new HsMenuModeTransition(
-        mMenuView, NormalHsMenuMode, mAllAppsState);
+        mMenuMode, NormalHsMenuMode, mAllAppsState);
+
     initialState->addTransition(mHistoryTransaction);
     initialState->addTransition(new HsMenuModeTransition(
-                                    mMenuView, AddHsMenuMode, mAllAppsState));
+                                    mMenuMode, AddHsMenuMode, mAllAppsState));
 
-    mCollectionState = new HsCollectionState(mMenuView, this);
+    mCollectionState = new HsCollectionState(mMenuViewBuilder,
+            mMenuMode,
+            this);
+
     connect(mCollectionState, SIGNAL(entered()),SLOT(clearToolbarLatch()));
 
     HsMenuEventTransition *eventTransition =
@@ -108,23 +158,21 @@ void HsAppLibraryState::construct()
                                   mCollectionState, mAllCollectionsState);
     mCollectionState->addTransition(collectionToAppLibTransition);
 
-    HsInstalledAppsState *installedAppsState = new HsInstalledAppsState(
-        mMenuView, this);
+    mInstalledAppsState = new HsInstalledAppsState(
+        mMenuViewBuilder, this);
 
     HsMenuEventTransition *installedToAppLibTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenApplicationLibrary,
-                                  installedAppsState, mAllAppsState);
-    installedAppsState->addTransition(installedToAppLibTransition);
+                                  mInstalledAppsState, mAllAppsState);
+    mInstalledAppsState->addTransition(installedToAppLibTransition);
 
     HsMenuEventTransition *allViewToInstalledTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
-                                  mAllAppsState, installedAppsState);
+                                  mAllAppsState, mInstalledAppsState);
     mAllAppsState->addTransition(allViewToInstalledTransition);
 
     constructToolbar();
 
-    connect(this, SIGNAL(entered()),SLOT(stateEntered()));
-    connect(this, SIGNAL(exited()),SLOT(stateExited()));
     connect(mAllCollectionsState, SIGNAL(sortOrderChanged(HsSortAttribute)),
             mAllAppsState, SLOT(collectionsSortOrder(HsSortAttribute)));
     connect(mAllCollectionsState, SIGNAL(sortOrderChanged(HsSortAttribute)),
@@ -132,6 +180,12 @@ void HsAppLibraryState::construct()
 
     connect(mAllAppsState, SIGNAL(entered()),
             this, SLOT(allAppsStateEntered()));
+
+    connect(mAllAppsState, SIGNAL(toAppLibraryState()),
+            this, SIGNAL(toHomescreenState()));
+    connect(mAllCollectionsState, SIGNAL(toAppLibraryState()),
+            this, SIGNAL(toHomescreenState()));
+
     connect(mAllCollectionsState, SIGNAL(entered()),
             this, SLOT(allCollectionsStateEntered()));
 
@@ -151,37 +205,13 @@ void HsAppLibraryState::onEntry(QEvent *event)
     if (event->type() == HsMenuEvent::eventType()) {
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
-        mMenuView.setHsMenuMode(
+        mMenuMode.setHsMenuMode(
             static_cast<HsMenuMode>(data.value(menuModeType()).toInt()));
     } else {
-        mMenuView.setHsMenuMode(NormalHsMenuMode);
+        mMenuMode.setHsMenuMode(NormalHsMenuMode);
     }
 
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::onEntry");
-}
-
-/*!
- Slot invoked when a state is entered.
- */
-void HsAppLibraryState::stateEntered()
-{
-    HSTEST_FUNC_ENTRY("AppLibraryState::stateEntered");
-    HbMainWindow *hbW = HbInstance::instance()->allMainWindows().value(0);
-    if (!hbW->views().contains(mMenuView.view())) {
-        hbW->addView(mMenuView.view());
-        mMenuView.view()->setNavigationAction(mSecondarySoftkeyAction);
-    }
-    hbW->setCurrentView(mMenuView.view());
-    HSTEST_FUNC_EXIT("AppLibraryState::stateEntered");
-}
-
-/*!
- Slot invoked when a state is exited.
- */
-void HsAppLibraryState::stateExited()
-{
-    HSTEST_FUNC_ENTRY("AppLibraryState::stateExited");
-    HSTEST_FUNC_EXIT("AppLibraryState::stateExited");
 }
 
 /*!
@@ -191,30 +221,62 @@ void HsAppLibraryState::constructToolbar()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::constructToolbar");
 
-    HsOviStoreHandler *const oviStoreHandler = new HsOviStoreHandler(this);
+    connect(mMenuViewBuilder.oviStoreAction(), SIGNAL(triggered()),
+            this, SLOT(oviStoreAction()));
 
-    HbAction *const oviStoreAction(mMenuView.oviStoreAction());
+    HsOperatorHandler *const operatorHandler = new HsOperatorHandler(this);
 
-    oviStoreAction->setIcon(HbIcon(oviStoreHandler->icon()));
-    connect(mMenuView.oviStoreAction(), SIGNAL(triggered()),
-            oviStoreHandler, SLOT(action()));
+    const bool operatorActionAvailable = !operatorHandler->icon().isNull();
 
-    HbAction *const allCollectionsAction(mMenuView.allCollectionsAction());
+    if (operatorActionAvailable) {
 
-    mAllAppsState->addTransition(allCollectionsAction, SIGNAL(triggered()),
-                                 mAllCollectionsState);
-    mCollectionState->addTransition(allCollectionsAction,
-                                    SIGNAL(triggered()), mAllCollectionsState);
+        //TODO HbToolBarExtension is not supported in docml currently
+        //should be changed in future
+        bool loaded = HbStyleLoader::registerFilePath(
+                     ":/css/hsapplibrarystateplugin.css");
+        Q_ASSERT(loaded);
+        HbAction *const operatorAction(mMenuViewBuilder.operatorAction());
 
-    HbAction *const allAppsAction(mMenuView.allAppsAction());
+        HbToolBarExtension *const extension(
+            mMenuViewBuilder.toolBarExtension());
+        HbAction *const extensionAction(
+            mMenuViewBuilder.toolBar()->addExtension(extension));
 
-    mAllCollectionsState->addTransition(allAppsAction,
-                                        SIGNAL(triggered()), mAllAppsState);
-    mCollectionState->addTransition(allAppsAction, SIGNAL(triggered()),
-                                    mAllAppsState);
+        extensionAction->setIcon(HbIcon("qtg_mono_store"));
 
-    mAllAppsState->assignProperty(
-        allAppsAction, "checked", true);
+        operatorAction->setIcon(operatorHandler->icon());
+        operatorAction->setText(hbTrId(operatorHandler->text().toLatin1()));
+
+        //TODO: no locstring for ovi store currently
+        mMenuViewBuilder.oviStoreAction()->setText("Ovi Store");
+
+        connect(mMenuViewBuilder.operatorAction(), SIGNAL(triggered()),
+                operatorHandler, SLOT(action()));
+
+        extension->addAction(mMenuViewBuilder.oviStoreAction());
+        extension->addAction(operatorAction);
+
+    } else {
+        mMenuViewBuilder.toolBar()->addAction(
+            mMenuViewBuilder.oviStoreAction());
+    }
+
+
+    HbAction *const allCollectionsAction(mMenuViewBuilder.allCollectionsAction());
+
+    mAllAppsState->addTransition(
+        allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
+    mCollectionState->addTransition(
+        allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
+
+    HbAction *const allAppsAction(mMenuViewBuilder.allAppsAction());
+
+    mAllCollectionsState->addTransition(
+        allAppsAction, SIGNAL(triggered()), mAllAppsState);
+    mCollectionState->addTransition(
+        allAppsAction, SIGNAL(triggered()), mAllAppsState);
+
+    mAllAppsState->assignProperty(allAppsAction, "checked", true);
     mAllCollectionsState->assignProperty(
         allCollectionsAction, "checked", true);
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::constructToolbar");
@@ -227,7 +289,7 @@ void HsAppLibraryState::clearToolbarLatch()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::clearToolbarLatch");
     QAction *const checkedAction =
-        mMenuView.toolBarActionGroup()->checkedAction();
+        mMenuViewBuilder.toolBarActionGroup()->checkedAction();
 
     if (checkedAction != NULL) {
         checkedAction->setChecked(false);
@@ -236,11 +298,27 @@ void HsAppLibraryState::clearToolbarLatch()
 }
 
 /*!
+ Ovi Store Action slot
+*/
+bool HsAppLibraryState::oviStoreAction()
+{
+    HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::oviStoreAction");
+    CaEntry oviEntry;
+    oviEntry.setEntryTypeName(urlTypeName());
+    oviEntry.setAttribute(urlEntryKey(),
+                          QString("https://store.ovi.com/applications/"));
+
+    bool result = CaService::instance()->executeCommand(oviEntry);
+    HSMENUTEST_FUNC_EXIT("HsAppLibraryState::oviStoreAction");
+    return result;
+}
+
+/*!
  All apps stete entered.
  */
 void HsAppLibraryState::allAppsStateEntered()
 {
-    if (mMenuView.getHsMenuMode() == NormalHsMenuMode) {
+    if (mMenuMode.getHsMenuMode() == NormalHsMenuMode) {
         mHistoryTransaction->setTargetState(mAllAppsState);
     }
 }
@@ -250,7 +328,8 @@ void HsAppLibraryState::allAppsStateEntered()
  */
 void HsAppLibraryState::allCollectionsStateEntered()
 {
-    if (mMenuView.getHsMenuMode() == NormalHsMenuMode) {
+    if (mMenuMode.getHsMenuMode() == NormalHsMenuMode) {
         mHistoryTransaction->setTargetState(mAllCollectionsState);
     }
 }
+

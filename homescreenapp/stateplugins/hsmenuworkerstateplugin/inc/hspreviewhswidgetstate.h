@@ -29,18 +29,8 @@ class HsWidgetHost;
 class CaNotifier;
 class HbAction;
 class HbScrollArea;
+class HbMessageBox;
 
-/**
- * @ingroup group_hsworkerstateplugin
- * @brief Application Library State.
- *
- * Parent state for Application Library functionality (browsing applications and collections)
- *
- * @see StateMachine
- *
- * @lib ?library
- * @since S60 ?S60_version
- */
 class HsPreviewHSWidgetState : public HsMenuBaseState
 {
     Q_OBJECT
@@ -49,61 +39,29 @@ class HsPreviewHSWidgetState : public HsMenuBaseState
 
 public:
 
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param parent Owner.
-     */
     HsPreviewHSWidgetState(QState *parent = 0);
 
-    /**
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     virtual ~HsPreviewHSWidgetState();
 
 private slots:
 
-    /**
-     * Slot invoked when preview dialog is dismissed.
-     *
-     * @since S60 ?S60_version.
-     */
     void previewDialogFinished(HbAction* finishedAction);
 
-    /**
-     * Slot invoked when message for corrupted widget is dismissed
-     *
-     * @since S60 ?S60_version.
-     */
     void messageWidgetCorruptedFinished(HbAction* finishedAction);
-    /**
-     * Inherited from HsMenuBaseState.
-     *
-     * @since S60 ?S60_version.
-     */
+
     void onEntry(QEvent *event);
 
-    /**
-     * Memory card removed.
-     */
+    void cleanUp();
+
     void memoryCardRemoved();
 
+signals:
+    void exit();
 
 private:
 
-    /**
-     * Show message widget corrupted.
-     *
-     */
     void showMessageWidgetCorrupted();
 
-    /**
-     * Subscribe for memory card remove.
-     *
-     */
     void subscribeForMemoryCardRemove();
 
 private:
@@ -119,6 +77,8 @@ private:
     QObjectList mObjectList;
 
     int mEntryId;
+
+    HbMessageBox *mCorruptedMessage;
 
 };
 

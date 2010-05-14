@@ -23,6 +23,8 @@
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class HbAction;
+class HbMessageBox;
 class HsShortcutService;
 class HsMenuService;
 
@@ -42,14 +44,29 @@ protected:
 
     void onEntry(QEvent *event);
 
+private slots:
+
+    void deleteMessageFinished(HbAction* finishedAction);
+
+    void cleanUp();
+
+signals:
+
+    void exit();
+
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
+
+private:
+
+    int mItemId;
+
+    int mCollectionId;
+
+    HbMessageBox *mDeleteMessage; // deletes itself automatically on close
+
+    HbAction *mConfirmAction; // child for mDeleteMessage
 
 };
 

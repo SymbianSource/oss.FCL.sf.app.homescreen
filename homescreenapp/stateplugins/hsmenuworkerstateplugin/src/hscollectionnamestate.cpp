@@ -31,20 +31,20 @@
  */
 
 /*!
- \fn void commit(const QString &collectionName);
+ \fn void HsCollectionNameState::commit(const QString &collectionName);
  Signal emitted when collection name is given.
  \param collectionName name of collection.
  */
 
 /*!
- \fn void commitCheckList(const QString &collectionName);
+ \fn void HsCollectionNameState::commitCheckList(const QString &collectionName);
  Signal emitted when collection name is given - version to trigger
  transition to HsAppsCheckListState.
  \param collectionName name of collection.
  */
 
 /*!
- \fn void cancel();
+ \fn void HsCollectionNameState::cancel();
  Signal emitted when user selects cancel.
  */
 
@@ -54,7 +54,8 @@
  \retval void
  */
 HsCollectionNameState::HsCollectionNameState(QState *parent) :
-    QState(parent)
+    QState(parent),
+    mItemId(0), mCollectionNameDialog(NULL), mFinishedEntered(false)
 {
     construct();
 }
@@ -65,19 +66,23 @@ HsCollectionNameState::HsCollectionNameState(QState *parent) :
  */
 HsCollectionNameState::~HsCollectionNameState()
 {
+    cleanUp();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsCollectionNameState::construct()
 {
     setObjectName(this->parent()->objectName() + "/collectionnamestate");
+    connect(this, SIGNAL(exited()), SLOT(cleanUp()));
+
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Sets entry event.
+ \param event entry event.
+ */
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
@@ -87,30 +92,56 @@ void HsCollectionNameState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_ENTRY("HsCollectionNameState::onEntry");
     QState::onEntry(event);
 
-    int itemId = 0;
+    mItemId = 0;
+    mFinishedEntered = false;
     if (event->type() == HsMenuEvent::eventType()) {
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
 
-        itemId = data.value(itemIdKey()).toInt();
+        mItemId = data.value(itemIdKey()).toInt();
     }
+    mCollectionNameDialog = new HsCollectionNameDialog(mItemId);
+    mCollectionNameDialog->open(this, SLOT(dialogFinished(HbAction*)));
 
-    HsCollectionNameDialog editor(itemId);
-
-    HbAction *result = editor.exec();
-    if (result == editor.primaryAction()) {
-        QString newName(editor.newName(editor.value().toString(), true));
-        if (itemId) {
-            if (newName != HsMenuService::getName(itemId)) {
-                HsMenuService::renameCollection(itemId, newName);
-            }
-        } else {
-            HsMenuService::createCollection(newName);
-        }
-    }
     HSMENUTEST_FUNC_EXIT("HsCollectionNameState::onEntry");
 }
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsCollectionNameState::dialogFinished(HbAction* finishedAction)
+{
+    if (!mFinishedEntered) {
+        mFinishedEntered = true;
+        if (finishedAction == mCollectionNameDialog->actions().value(0)) {
+            QString newName(mCollectionNameDialog->newName(mCollectionNameDialog->value().toString(), true));
+            if (mItemId) {
+                if (newName != HsMenuService::getName(mItemId)) {
+                    HsMenuService::renameCollection(mItemId, newName);
+                }
+            } else {
+                HsMenuService::createCollection(newName);
+            }
+        }
+        mCollectionNameDialog = NULL; //set to NULL since this will be deleted atfer close
+        emit exit();
+    } else {
+        // (work-around if more then one action is selected in HbDialog)
+        qWarning("Another signal finished was emited.");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsCollectionNameState::cleanUp()
+{
+    if (mCollectionNameDialog) {
+        mCollectionNameDialog->close();
+        mCollectionNameDialog = NULL;
+    }
+}

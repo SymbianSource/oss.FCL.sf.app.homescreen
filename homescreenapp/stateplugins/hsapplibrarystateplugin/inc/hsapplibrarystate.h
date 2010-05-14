@@ -22,6 +22,7 @@
 #include <hbdocumentloader.h>
 #include "hsmenustates_global.h"
 #include "hsmenuview.h"
+#include "hsmenumodewrapper.h"
 #include "hsapp_defs.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
@@ -34,20 +35,11 @@ class QActionGroup;
 class HsAllAppsState;
 class HsAllCollectionsState;
 class HsCollectionState;
+class HsInstalledAppsState;
 class HsMenuModeTransition;
+class HsMenuModeWrapper;
 
-/**
- * @ingroup group_hsmenustateplugin
- * @brief Application Library State.
- *
- * Parent state for Application Library functionality
- *  (browsing applications and collections)
- *
- * @see StateMachine
- *
- * @lib ?library
- * @since S60 ?S60_version
- */
+
 class HsAppLibraryState: public QState
 {
     Q_OBJECT
@@ -70,16 +62,11 @@ public slots:
 
     void clearToolbarLatch();
 
+    bool oviStoreAction();
+
     void allAppsStateEntered();
 
     void allCollectionsStateEntered();
-
-private slots:
-
-    void stateEntered();
-
-    void stateExited();
-
 
 protected:
 
@@ -93,13 +80,7 @@ private:
 
 private:
 
-    /**
-     * Secondary Softkey action.
-     * Usually backstepping functionality.
-     * Own.
-     */
-    HbAction *mSecondarySoftkeyAction;
-
+    HsMenuViewBuilder mMenuViewBuilder;
     /**
      * All Applications state.
      * Own.
@@ -124,7 +105,9 @@ private:
      */
     HsCollectionState *mCollectionState;
 
-    HsMenuView mMenuView;
+    HsInstalledAppsState *mInstalledAppsState;
+
+    HsMenuModeWrapper mMenuMode;
 };
 
 #endif //HSAPPLIBRARYSTATE_H

@@ -39,71 +39,37 @@ class HsViewAppSettingsState : public QState
 
 public:
 
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param parent Owner.
-     */
     HsViewAppSettingsState(QState *parent = 0);
 
-    /**
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     virtual ~HsViewAppSettingsState();
     
 private slots:
     
-    /**
-     * Slot connected trrigger action of secondary soft key of check list box.
-     * It is called when done button is selected.
-     *
-     * @since S60 ?S60_version.
-     */
     void settingsDone();
     
 signals:
         void initialize(const QString &aUid);      
+    void exit();
 
 protected:
 
     void onEntry(QEvent *event);
+    void onExit(QEvent *event);
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
     
-    /**
-     * Returns pointer to tha main window.
-     *
-     * @since S60 ?S60_version.
-     * @return Pointer to the main window.
-     */
     HbMainWindow *mainWindow() const; 
     
     void subscribeForMemoryCardRemove(int entryId);
 
 private:
-    /**
-     * View. Owned.
-     */
+
     HbView *mView;
 
-    /**
-     * Previous view. Not owned.
-     */
     HbView *mPreviousView;
     
-    /**
-     * Confirm action. Owned.
-     */
     HbAction *mActionConfirm;
     
     CaNotifier *mNotifier;

@@ -23,19 +23,21 @@
 #include <HbIconItem>
 #include <HbTextItem>
 #include <HbTouchArea>
+#include <HbInstantFeedback>
 
 #include "hsshortcutwidget.h"
 #include "hsshortcutservice.h"
-
+#include "hsapp_defs.h"
 #include "caservice.h"
 #include "canotifier.h"
+#include "caquery.h"
 
 /*!
     \class HsShortcutWidget
     \ingroup group_hsshortcutwidgetplugin
     \brief Implementation for the homescreen shortcut widget.
 
-    Shortcut can be defined to launch different applications or applications 
+    Shortcut can be defined to launch different applications or applications
     with parameters, for example browser with certain url.
 */
 
@@ -45,11 +47,12 @@
 HsShortcutWidget::HsShortcutWidget(QGraphicsItem *parent, Qt::WindowFlags flags)
   : HbWidget(parent, flags),
     mBackground(0), mIcon(0), mText(0), mTouchArea(0),
-    mIsPressed(false),
-    mMcsId(-1), mCaEntry() 
+    mCaEntryId(-1), mCaEntryRole(ItemEntryRole)
 {
     HbStyleLoader::registerFilePath(":/hsshortcutwidget.widgetml");
     HbStyleLoader::registerFilePath(":/hsshortcutwidget.css");
+
+    createPrimitives();
 }
 
 /*!
@@ -64,17 +67,33 @@ HsShortcutWidget::~HsShortcutWidget()
 /*!
     Sets the menu content service id.
 */
-void HsShortcutWidget::setMcsId(int mcsId)
+void HsShortcutWidget::setCaEntryId(int caEntryId)
 {
-    mMcsId = mcsId;
+    mCaEntryId = caEntryId;
 }
 
 /*!
     Returns the menu content service id.
 */
-int HsShortcutWidget::mcsId() const
+int HsShortcutWidget::caEntryId() const
 {
-    return mMcsId;
+    return mCaEntryId;
+}
+
+/*!
+    Sets the application's UID this shortcut points to.
+*/
+void HsShortcutWidget::setUid(const QString &uid)
+{
+    mUid = uid;
+}
+
+/*!
+    Returns the application's UID this shortcut points to.
+*/
+QString HsShortcutWidget::uid() const
+{
+    return mUid;
 }
 
 /*!
@@ -87,17 +106,18 @@ bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
     switch (event->type()) {
         case QEvent::GraphicsSceneMousePress:
             handleMousePressEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            break;
-
+            return true;
+        case QEvent::GraphicsSceneMouseMove:
+            handleMouseMoveEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
+            return true;
         case QEvent::GraphicsSceneMouseRelease:
             handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            break;
-
-        default:            
+            return true;
+        default:
             break;
     }
 
-    return true;
+    return false;
 }
 
 /*!
@@ -105,10 +125,38 @@ bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
 */
 void HsShortcutWidget::onInitialize()
 {
-    mCaEntry = CaService::instance()->getEntry(mMcsId);
-    if (!mCaEntry.isNull()) {
-        createCaNotifier(); 
-        updatePrimitives();
+    QSharedPointer<CaEntry> caEntry;
+
+    if(-1 == mCaEntryId) {
+        //Shortcut can be pre installed to Homescreen's DB by setting
+        //application UID for its preference. Entry Id is retrieved
+        //from CA by UID.
+        CaQuery query;
+        query.setEntryTypeNames(QStringList(applicationTypeName()));
+        //Convert UID from hex to ten base, because CA t UIDs in ten base.
+        bool ok;
+        int hexBaseInteger = mUid.toInt(&ok, 0); // Qt Assistant: If base is 0, the C language convention is used:
+                                             // If the string begins with "0x", base 16 is used.
+        QString tenBaseString = QString::number(hexBaseInteger);
+        query.setAttribute(applicationUidEntryKey(), tenBaseString);
+        QList< QSharedPointer<CaEntry> > appEntries = CaService::instance()->getEntries(query);
+
+        //Verify that entry's UID is what we want since we get all application entries
+        //if UID did not match in getEntries() above.
+        if (!appEntries.isEmpty()
+            && appEntries.first()->attribute(applicationUidEntryKey()) == tenBaseString) {
+            caEntry = appEntries.first();
+            mCaEntryId = caEntry->id();
+			//Save caEntryId to Homescreen database
+            emit setPreferences(QStringList() << QLatin1String("caEntryId"));
+        }
+    } else {
+        caEntry = CaService::instance()->getEntry(mCaEntryId);
+    }
+
+    if (!caEntry.isNull()) {
+        createCaNotifier();
+        updateContent(*caEntry.data());
     } else {
         emit finished();
     }
@@ -130,62 +178,51 @@ void HsShortcutWidget::onHide()
 }
 
 /*!
-    Invoked when \a entry has changed with a \a changeType.
-*/
-void HsShortcutWidget::onEntryChanged(const CaEntry &entry, ChangeType changeType)
-{
-    Q_UNUSED(entry)
-
-    mCaEntry = CaService::instance()->getEntry(mMcsId);
-
-    switch(changeType) {
-        case RemoveChangeType:
-            emit finished();
-            break;
-        case UpdateChangeType:
-            updateVisibility();
-            updatePrimitives();
-            break;
-        default:
-            break;
-    }
-}
-
-/*!
-    Mouse press handler.
+    \internal
 */
 void HsShortcutWidget::handleMousePressEvent(QGraphicsSceneMouseEvent *event)
-{   
+{
     Q_UNUSED(event)
-
-    mIsPressed = true;
-    updatePrimitives();
+    setBackgroundToPressed();
 }
 
 /*!
-    Mouse release handler.
+    \internal
 */
-void HsShortcutWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void HsShortcutWidget::handleMouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    mIsPressed = false;
-    updatePrimitives();
-
-    if (!contains(event->pos())) {
-        return;
-    }
-
-    if (mCaEntry->role() == ItemEntryRole) {
-        CaService::instance()->executeCommand(mMcsId);
+    if (contains(event->pos())) {
+        setBackgroundToPressed();
     } else {
-        HsShortcutService::instance()->executeCollectionAction(mMcsId, mCaEntry->entryTypeName());
+        setBackgroundToNormal();
     }
 }
 
 /*!
     \internal
 */
-void HsShortcutWidget::updatePrimitives()
-{   
+void HsShortcutWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    setBackgroundToNormal();
+
+    if (!contains(event->pos())) {
+        return;
+    }
+
+    HbInstantFeedback::play(HbFeedback::BasicItem);
+    
+    if (mCaEntryRole == ItemEntryRole) {
+        CaService::instance()->executeCommand(mCaEntryId);
+    } else {
+        HsShortcutService::instance()->executeCollectionAction(mCaEntryId, mCaEntryTypeName);
+    }
+}
+
+/*!
+    \internal
+*/
+void HsShortcutWidget::createPrimitives()
+{
     // Background
     if (!mBackground) {
         HbFrameDrawer *drawer = new HbFrameDrawer(
@@ -193,32 +230,17 @@ void HsShortcutWidget::updatePrimitives()
         mBackground = new HbFrameItem(drawer, this);
         HbStyle::setItemName(mBackground, QLatin1String("background"));
     }
-    if (mIsPressed) {        
-        mBackground->frameDrawer().setFrameGraphicsName(QLatin1String("qtg_fr_hsitems_pressed"));
-    } else {
-        mBackground->frameDrawer().setFrameGraphicsName(QLatin1String("qtg_fr_hsshortcut_normal"));
-    }
 
     // Icon
     if (!mIcon) {
         mIcon = new HbIconItem(this);
         HbStyle::setItemName(mIcon, QLatin1String("icon"));
     }
-    mIcon->setIcon(mCaEntry->makeIcon());
-    
+
     // Text
-    QString text = mCaEntry->text();
-    if (!text.isNull()) {
-        if (!mText) {
-            mText = new HbTextItem(this);
-            HbStyle::setItemName(mText, QLatin1String("text"));
-        }
-        mText->setText(text);
-    } else {
-        if (mText) {
-            delete mText;
-            mText = 0;
-        }
+    if (!mText) {
+        mText = new HbTextItem(this);
+        HbStyle::setItemName(mText, QLatin1String("text"));
     }
 
     // Touch Area
@@ -232,18 +254,13 @@ void HsShortcutWidget::updatePrimitives()
 /*!
     \internal
 */
-void HsShortcutWidget::createCaNotifier()
+void HsShortcutWidget::updateContent(const CaEntry &caEntry)
 {
-    CaNotifierFilter filter;
-    filter.setIds(QList<int>() << mMcsId);
-    
-    CaNotifier *notifier = CaService::instance()->createNotifier(filter);
-    notifier->setParent(this);
-
-    connect(notifier,
-        SIGNAL(entryChanged(CaEntry,ChangeType)),
-        SLOT(onEntryChanged(CaEntry,ChangeType)), 
-        Qt::QueuedConnection);
+    mCaEntryRole = caEntry.role();
+    mCaEntryFlags = caEntry.flags();
+    mCaEntryTypeName = caEntry.entryTypeName();
+    mIcon->setIcon(caEntry.makeIcon());
+    mText->setText(caEntry.text());
 }
 
 /*!
@@ -251,5 +268,54 @@ void HsShortcutWidget::createCaNotifier()
 */
 void HsShortcutWidget::updateVisibility()
 {
-    setVisible(!mCaEntry->flags().testFlag(MissingEntryFlag));
+    setVisible(!mCaEntryFlags.testFlag(MissingEntryFlag));
+}
+
+/*!
+    \internal
+*/
+void HsShortcutWidget::setBackgroundToNormal()
+{
+    mBackground->frameDrawer().
+        setFrameGraphicsName(QLatin1String("qtg_fr_hsshortcut_normal"));
+}
+
+/*!
+    \internal
+*/
+void HsShortcutWidget::setBackgroundToPressed()
+{
+    mBackground->frameDrawer().
+        setFrameGraphicsName(QLatin1String("qtg_fr_hsitems_pressed"));
+}
+
+/*!
+    \internal
+*/
+void HsShortcutWidget::createCaNotifier()
+{
+    CaNotifierFilter filter;
+    filter.setIds(QList<int>() << mCaEntryId);
+
+    CaNotifier *notifier = CaService::instance()->createNotifier(filter);
+    notifier->setParent(this);
+
+    connect(notifier,
+        SIGNAL(entryChanged(CaEntry,ChangeType)),
+        SLOT(onEntryChanged(CaEntry,ChangeType)),
+        Qt::QueuedConnection);
+}
+
+/*!
+    \internal
+*/
+void HsShortcutWidget::onEntryChanged(const CaEntry &caEntry, ChangeType changeType)
+{
+    updateContent(caEntry);
+    updateVisibility();
+
+    if ( changeType == RemoveChangeType && !(caEntry.flags() & MissingEntryFlag)) {
+        //genuinely removed
+        emit finished();
+    }
 }

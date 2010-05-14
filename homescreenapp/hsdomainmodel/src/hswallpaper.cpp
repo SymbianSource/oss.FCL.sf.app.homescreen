@@ -16,41 +16,30 @@
 */
 
 #include <QDir>
-#include <QPainter>
+#include <QGraphicsLinearLayout>
+#include <HbIconItem>
+#include <HbMainWindow>
 #include "hswallpaper.h"
 #include "hsscene.h"
 
 HsWallpaper::HsWallpaper(QGraphicsItem *parent)
   : HbWidget(parent),
-    mOrientation(Qt::Vertical)
+    mOrientation(Qt::Vertical),
+    mIconItem(0)
 {
+    mIconItem = new HbIconItem();
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout();
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addItem(mIconItem);
+    setLayout(layout);
+
+    connect(HsScene::mainWindow(),
+        SIGNAL(orientationChanged(Qt::Orientation)),
+        SLOT(onOrientationChanged(Qt::Orientation)));
 }
 
 HsWallpaper::~HsWallpaper()
 {
-}
-
-void HsWallpaper::paint(QPainter *painter,
-                        const QStyleOptionGraphicsItem *option, 
-                        QWidget *widget)
-{
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
-    Qt::Orientation orientation = HsScene::orientation();
-    if (orientation != mOrientation) {
-        mOrientation = orientation;
-        mImage = QPixmap();
-        if (orientation == Qt::Horizontal) {
-            mImage.load(mLImagePath);
-        } else {
-            mImage.load(mPImagePath);
-        }
-    }
-
-    if (!mImage.isNull()) {
-        painter->drawPixmap(rect().toRect(), mImage);
-    }
 }
 
 bool HsWallpaper::setImagesById(const QString &id,
@@ -69,9 +58,26 @@ bool HsWallpaper::setImagesByPaths(const QString &landscapeImagePath,
     mOrientation = HsScene::orientation();
     
     if (mOrientation == Qt::Horizontal) {
-        return mImage.load(mLImagePath);
+        setLandscapeImage(mLImagePath, true);
     } else {
-        return mImage.load(mPImagePath);
+        setPortraitImage(mPImagePath, true);
+    }
+    return true;
+}
+
+void HsWallpaper::setPortraitImage(const QString &path, bool activate)
+{
+    mPImagePath = path;
+    if (activate) {
+        mIconItem->setIcon(HbIcon(QIcon(path)));
+    }
+}
+
+void HsWallpaper::setLandscapeImage(const QString &path, bool activate)
+{
+    mLImagePath = path;
+    if (activate) {
+        mIconItem->setIcon(HbIcon(QIcon(path)));
     }
 }
 
@@ -109,4 +115,13 @@ QString HsWallpaper::wallpaperPath(Qt::Orientation orientation,
         "_landscape." : "_portrait.";
     return wallpaperDirectory() + id +
            orientationString + ext;
+}
+
+void HsWallpaper::onOrientationChanged(Qt::Orientation orientation)
+{
+    if (orientation == Qt::Horizontal) {
+        mIconItem->setIcon(HbIcon(QIcon(mLImagePath)));
+    } else {
+        mIconItem->setIcon(HbIcon(QIcon(mPImagePath)));
+    }
 }

@@ -32,11 +32,13 @@
 [0x102032BE],0,0,0,{"S60ProductID"}
 [0x102752AE],0,0,0,{"S60ProductID"}
 [0x1028315F],0,0,0,{"S60ProductID"}
- 
-"/epoc32/release/armv5/urel/helloworldwidgetplugin.dll"                                           - "c:/sys/bin/helloworldwidgetplugin.dll"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"  - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"
-"../helloworldwidgetplugin/resource/helloworldwidgetplugin.xml_for_sisx"                          - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.xml"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"       - "c:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"
 
-"/epoc32/release/armv5/urel/helloworldwidgetplugininstaller.exe"                                  - "c:/sys/bin/helloworldwidgetplugininstaller.exe", FR, RB, RW
+
+"../resource/helloworldwidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest",FM,"application/hs-widget-uninstall+xml",RR,RW
+ 
+"/epoc32/release/armv5/urel/helloworldwidgetplugin.dll"                                             - "!:/sys/bin/helloworldwidgetplugin.dll"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"    - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"
+"../resource/helloworldwidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"
+"../resource/helloworldwidgetplugin.xml"                                                            - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.xml"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"         - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"
+

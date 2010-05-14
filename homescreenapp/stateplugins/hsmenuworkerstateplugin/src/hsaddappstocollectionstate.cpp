@@ -20,6 +20,7 @@
 #include <hsmenuservice.h>
 #include <hbnotificationdialog.h>
 #include <QAbstractTransition>
+#include <hbaction.h>
 
 #include "hsaddappstocollectionstate.h"
 #include "hsmenuevent.h"
@@ -31,47 +32,139 @@
  \class HsAddAppsToCollectionState
  \ingroup group_hsmenuworkerstateplugin
  \brief Manages adding to homescreen state
+ State responsible for adding new applications to collections.
+ \lib ?library
+ \see StateMachine
  */
 
 /*!
- \fn void transitToSaveState(const QString &collectionName);
+ \enum HsAddAppsToCollectionState::CollectionActionType
+ Types of collection's related actions.
+ */
+
+/*! \var HsAddAppsToCollectionState::CollectionActionType HsAddAppsToCollectionState::NoActionType
+ No action.
+ */
+
+/*! \var HsAddAppsToCollectionState::CollectionActionType HsAddAppsToCollectionState::ViaItemSpecificMenuType
+ Adding a specific application to an existing collection via item specific menu.
+ */
+
+/*! \var HsAddAppsToCollectionState::CollectionActionType HsAddAppsToCollectionState::ViaAllViewOptionMenuType
+ Add one/many applications to a new/an existing collection via the All view.
+ */
+
+/*! \var HsAddAppsToCollectionState::CollectionActionType HsAddAppsToCollectionState::ViaAllCollectionsViewType
+ Adding a new collection via the Collections view.
+ */
+
+/*! \var HsAddAppsToCollectionState::CollectionActionType HsAddAppsToCollectionState::ViaCollectionsViewOptionsMenuType
+ Add items to a collection via the collection's view options menu.
+ */
+
+/*! \var HsAddAppsToCollectionState::CollectionActionType HsAddAppsToCollectionState::ViaCollectionSpecificMenuType
+ Add a specific item to a collection via collection specific menu.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mCollectionName
+ Collection name.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mCollectionId
+ Collection id.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mAppList
+ Applications list.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mShowConfirmation
+ Bool indicating need of confirmation note after saving in content arsenal.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mInitialState
+ Initial state.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mSelectCollectionState
+ Select collection state.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mNewCollectionState
+ Collection name state.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mAppsCheckListState
+ Collection name state.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mActionType
+ Collection action type.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mApplicationsSortAttribute
+ Applications sort order.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mCollectionsSortAttribute
+ Collections sort order.
+ */
+
+/*!
+ \var HsAddAppsToCollectionState::mAppsCheckList
+ Applications check list.
+ */
+
+/*!
+ \fn void HsAddAppsToCollectionState::transitToSaveState(const QString &collectionName);
  Signal emitted when collection name is selected.
  \param collectionName name of collection.
  */
 
 /*!
- \fn void transitToAppsCheckListState(const QString &collectionName);
+ \fn void HsAddAppsToCollectionState::transitToAppsCheckListState(const QString &collectionName);
  Signal emitted when collection name is selected - version to trigger
  transition to mAppCheckListState.
  \param collectionName name of collection.
  */
 
 /*!
- \fn void void transitToSaveState(int collectionId);
+ \fn void void HsAddAppsToCollectionState::transitToSaveState(int collectionId);
  Signal emitted when collection id is selected.
  \param collectionId id of collection.
  */
 
 /*!
- \fn void transitToAppsCheckListState(int collectionId);
+ \fn void HsAddAppsToCollectionState::transitToAppsCheckListState(int collectionId);
  Signal emitted when collection name is selected - version to trigger
  transition to mAppCheckListState.
  \param collectionId id of collection.
  */
 
 /*!
- \fn void transitToNewCollectionState();
+ \fn void HsAddAppsToCollectionState::transitToNewCollectionState();
  Signal emitted when user selects creating new collection.
  */
 
 /*!
- \fn void transitToSaveState(const QList<int> &appList);
+ \fn void HsAddAppsToCollectionState::transitToSaveState(const QList<int> &appList);
  Signal emitted when applications are selected.
  \param appList application list.
  */
 
 /*!
- \fn void transitToFinalState();
+ \fn void HsAddAppsToCollectionState::transitToFinalState();
  Signal emitted when user selects cancel.
  \param collectionName name of collection.
  */
@@ -82,11 +175,13 @@
  \param parent Owner.
  */
 HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
-    QState(parent), mCollectionName(0), mCollectionId(0), mAppList(),
+    QState(parent), mCollectionName(), mCollectionId(0), mAppList(),
     mShowConfirmation(0), mInitialState(0), mSelectCollectionState(0),
     mNewCollectionState(0), mAppsCheckListState(0), mActionType(
         NoActionType), mApplicationsSortAttribute(NoHsSortAttribute),
-    mCollectionsSortAttribute(NoHsSortAttribute), mAppsCheckList(0)
+    mCollectionsSortAttribute(NoHsSortAttribute), mAppsCheckList(0),
+    mEditorDialog(0), mEditorFinishedEntered(false), mListDialog(0),
+    mListFinishedEntered(false)
 {
     construct();
 }
@@ -97,7 +192,7 @@ HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
  */
 HsAddAppsToCollectionState::~HsAddAppsToCollectionState()
 {
-    delete mAppsCheckList;
+
 }
 
 /*!
@@ -109,10 +204,6 @@ void HsAddAppsToCollectionState::construct()
     setObjectName("homescreen.nokia.com/state/addappstocollectionstate");
     createStates();
     connect(this, SIGNAL(exited()),SLOT(stateExited()));
-
-    mAppsCheckList = new HsAppsCheckList();
-    connect(mAppsCheckList, SIGNAL(commit(QList<int>)),
-            SLOT(selectApplicationsDone(QList<int>)));
 
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::construct");
 }
@@ -281,7 +372,19 @@ void HsAddAppsToCollectionState::stateExited()
     if (transitionsList.count()) {
         mInitialState->removeTransition(transitionsList[0]);
     }
-    mAppsCheckList->cleanUp();
+    delete mAppsCheckList;
+    mAppsCheckList = NULL;
+
+    if (mEditorDialog) {
+        mEditorDialog->close();
+        mEditorDialog = NULL;
+    }
+
+    if (mListDialog) {
+        mListDialog->close();
+        mListDialog = NULL;
+    }
+
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::stateExited");
     qDebug("AddAppsToCollectionState::stateExited()");
 }
@@ -295,31 +398,49 @@ void HsAddAppsToCollectionState::stateExited()
 void HsAddAppsToCollectionState::newCollection()
 {
     qDebug("HsAddAppsToCollectionState::newCollection");
-
     HSMENUTEST_FUNC_ENTRY("HsAddAppsToCollectionState::newCollection");
-    HsCollectionNameDialog editor;
-    HbAction *result = editor.exec();
-    if (result == editor.primaryAction()) {
-        QString newName(editor.newName(editor.value().toString(), true));
-        if (mActionType == ViaAllViewOptionMenuType) {
-            qDebug("HsAddAppsToCollectionState::newCollection() "
-                   "- emit collectionNameSelectedCl(newName)");
-            emit transitToAppsCheckListState(newName);
-        } else {
-            qDebug("HsAddAppsToCollectionState::newCollection() "
-                   "- emit collectionNameSelected(newName)");
-            emit transitToSaveState(newName);
-        }
-    } else {
-        qDebug(
-            "HsAddAppsToCollectionState::newCollection() - emit cancel()");
-        emit transitToFinalState();
-    }
+    mEditorFinishedEntered = false;
+    mEditorDialog = new HsCollectionNameDialog();
+    mEditorDialog->open(this, SLOT(editorDialogFinished(HbAction*)));
+
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::newCollection");
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsAddAppsToCollectionState::editorDialogFinished(HbAction* finishedAction)
+{
+    if (!mEditorFinishedEntered) {
+        mEditorFinishedEntered = true;
+
+        if (finishedAction == mEditorDialog->actions().value(0)) {
+            QString newName(mEditorDialog->newName(mEditorDialog->value().toString(), true));
+            if (mActionType == ViaAllViewOptionMenuType) {
+                qDebug("HsAddAppsToCollectionState::newCollection() "
+                       "- emit collectionNameSelectedCl(newName)");
+                emit transitToAppsCheckListState(newName);
+            } else {
+                qDebug("HsAddAppsToCollectionState::newCollection() "
+                       "- emit collectionNameSelected(newName)");
+                emit transitToSaveState(newName);
+            }
+        } else {
+            qDebug(
+                "HsAddAppsToCollectionState::newCollection() - emit cancel()");
+            emit transitToFinalState();
+        }
+        mEditorDialog = NULL; // set to null since this will be deleted after close
+
+    } else {
+        // (work-around if more then one action is selected in HbDialog)
+        qWarning("Another signal finished was emited.");
+    }
+}
 
 /*!
  Slot invoked when select collection state is entered.
@@ -330,34 +451,54 @@ void HsAddAppsToCollectionState::newCollection()
 void HsAddAppsToCollectionState::selectCollection()
 {
     qDebug("HsAddAppsToCollectionState::selectCollection()");
-
     HSMENUTEST_FUNC_ENTRY("HsAddAppsToCollectionState::selectCollection");
-    HsCollectionsListDialog listView(mCollectionsSortAttribute,
-                                     mCollectionId);
-    if (listView.exec() != listView.secondaryAction()) {
-        int itemId = listView.getItemId();
-        if (itemId) {
-            if (mActionType == ViaAllViewOptionMenuType) {
-                qDebug("emit collectionSelectedCl(%d)", itemId);
-                emit transitToAppsCheckListState(itemId);
-            } else {
-                qDebug("emit collectionSelected(%d)", itemId);
-                emit transitToSaveState(itemId);
-            }
-        } else {
-            qDebug("emit createNewCollection()");
-            emit transitToNewCollectionState();
-        }
-    } else {
-        qDebug("emit cancel()");
-        emit transitToFinalState();
-    }
+    mListFinishedEntered = false;
+    mListDialog = new HsCollectionsListDialog(mCollectionsSortAttribute,
+                                                       mCollectionId);
+    mListDialog->open(this, SLOT(listDialogFinished(HbAction*)));
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::selectCollection");
 }
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsAddAppsToCollectionState::listDialogFinished(HbAction* finishedAction)
+{
+    if (!mListFinishedEntered) {
+        mListFinishedEntered = true;
+
+		if (finishedAction != mListDialog->actions().value(1)) {
+            int itemId = mListDialog->getItemId();
+            if (itemId) {
+                if (mActionType == ViaAllViewOptionMenuType) {
+                    qDebug("emit collectionSelectedCl(%d)", itemId);
+                    emit transitToAppsCheckListState(itemId);
+                } else {
+                    qDebug("emit collectionSelected(%d)", itemId);
+                    emit transitToSaveState(itemId);
+                }
+            } else {
+                qDebug("emit createNewCollection()");
+                emit transitToNewCollectionState();
+            }
+        } else {
+            qDebug("emit cancel()");
+            emit transitToFinalState();
+        }
+
+        mListDialog = NULL; // set to null since this will be deleted after close
+
+    } else {
+        // (work-around if more then one action is selected in HbDialog)
+        qWarning("Another signal finished was emited.");
+    }
+}
+
 /*!
  Slot connected to saving action of state.
  It is called when new application are addend to collection.
@@ -425,6 +566,9 @@ void HsAddAppsToCollectionState::appsCheckListState()
     HSMENUTEST_FUNC_ENTRY("HsAddAppsToCollectionState::appsCheckListState");
     if (!mAppsCheckList) {
         mAppsCheckList = new HsAppsCheckList();
+        connect(mAppsCheckList, SIGNAL(commit(QList<int>)),
+                SLOT(selectApplicationsDone(QList<int>)));
+
     }
     mAppsCheckList->setSortOrder(mApplicationsSortAttribute);
     mAppsCheckList->showAppsCheckboxList(mApplicationsSortAttribute);

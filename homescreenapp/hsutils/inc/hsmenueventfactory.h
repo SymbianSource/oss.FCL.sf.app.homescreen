@@ -38,7 +38,7 @@ private:
 
 public:
 
-    static QEvent *createAddToHomeScreenEvent(int entryId);
+    static QEvent *createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode);
 
     static QEvent *createOpenCollectionEvent(int itemId,
             const QString &collectionType);

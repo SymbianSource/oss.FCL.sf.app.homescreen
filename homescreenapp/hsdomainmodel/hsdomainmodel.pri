@@ -25,7 +25,8 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hswallpaper.h \
            ./inc/hswidgethost.h \
            ./inc/hswidgetcomponentregistry.h \
-					 ./inc/hswidgetcomponent.h                               
+					 ./inc/hswidgetcomponent.h \
+					 ./inc/hswidgetcomponentdescriptor.h                              
 					 
 SOURCES += ./src/hscontentservice.cpp   \           
            ./src/hsdatabase.cpp  \                        
@@ -35,7 +36,8 @@ SOURCES += ./src/hscontentservice.cpp   \
            ./src/hswallpaper.cpp \ 
            ./src/hswidgethost.cpp \
            ./src/hswidgetcomponentregistry.cpp \
-					 ./src/hswidgetcomponent.cpp                               
+					 ./src/hswidgetcomponent.cpp \
+					 ./src/hswidgetcomponentdescriptor.cpp                               
 
                               
 

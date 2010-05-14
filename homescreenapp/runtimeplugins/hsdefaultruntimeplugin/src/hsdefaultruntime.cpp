@@ -39,6 +39,9 @@
 #include "hswidgetpositioningonorientationchange.h"
 #include "hswidgetpositioningonwidgetadd.h"
 #include "hstest_global.h"
+#ifdef Q_OS_SYMBIAN
+#include "hsbackuprestoreobserver.h"
+#endif
 
 QTM_USE_NAMESPACE
 
@@ -80,6 +83,7 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 	  mPublisher(NULL)
 #ifdef Q_OS_SYMBIAN
 	  ,keyCapture()
+	  ,mBRObserver(NULL)
 #endif
 {
     HSTEST_FUNC_ENTRY("HS::HsDefaultRuntime::HsDefaultRuntime");
@@ -100,6 +104,9 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
     
+#ifdef Q_OS_SYMBIAN
+    mBRObserver = CHsBackupRestoreObserver::NewL();
+#endif
     registerAnimations();
 
     createStatePublisher();
@@ -118,6 +125,9 @@ HsDefaultRuntime::~HsDefaultRuntime()
 {
     HsWidgetPositioningOnOrientationChange::setInstance(0);
 	delete mPublisher;
+#ifdef Q_OS_SYMBIAN	
+	delete mBRObserver;
+#endif
 }
 
 /*!

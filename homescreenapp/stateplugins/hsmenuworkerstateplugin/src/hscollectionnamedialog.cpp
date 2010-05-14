@@ -32,6 +32,16 @@
  */
 
 /*!
+ \var HsCollectionNameDialog::mCollectionsNames
+ Collections names list from data model.
+ */
+
+/*
+ \var HsCollectionNameDialog::mLastCollectionName
+ Last found collection name.
+ */
+
+/*!
  Maximum length if collection name
  */
 const int qMaxStrLength = 248;
@@ -72,25 +82,38 @@ HsCollectionNameDialog::~HsCollectionNameDialog()
  \retval Selected action.
  */
 #ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP // Reason: Modal inputdialog exec
+#pragma CTC SKIP // Reason: Modal inputdialog open
 #endif //COVERAGE_MEASUREMENT
-HbAction *HsCollectionNameDialog::exec()
+void HsCollectionNameDialog::open(QObject* receiver, const char* member)
 {
-    HSMENUTEST_FUNC_ENTRY("HsInputDialog::exec");
+    HSMENUTEST_FUNC_ENTRY("HsCollectionNameDialog::open");
+    this->setAttribute(Qt::WA_DeleteOnClose);
+
     onTextChanged(value().toString());
     makeConnect();
 
-    HbAction *action = HbInputDialog::exec();
+    HbInputDialog::open(receiver, member);
 
-    makeDisconnect();
-    HSMENUTEST_FUNC_EXIT("HsInputDialog::exec");
-    return action;
+    HSMENUTEST_FUNC_EXIT("HsCollectionNameDialog::open");
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP // Reason: Modal inputdialog exec
 #endif //COVERAGE_MEASUREMENT
+
+
 /*!
- Gets new collection's name.
+    \reimp 
+    Disconnects signals and calls base class impl. which emits finished(HbAction*) 
+ */
+void HsCollectionNameDialog::closeEvent ( QCloseEvent * event )
+{
+    qDebug("HsCollectionNameDialog::closeEvent");
+    makeDisconnect();
+    HbDialog::closeEvent(event); // emits finished(HbAction*) 
+}
+
+/*!
+ * Gets new collection's name.
  \param name name of collection.
  \param addLastName true
  if last found name is need to add to validation
@@ -128,9 +151,9 @@ QString HsCollectionNameDialog::newName(const QString &name,
     return newName;
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Connects edit line signals to slots.
+ */
 void HsCollectionNameDialog::makeConnect()
 {
     /*connect(lineEdit(), SIGNAL(textChanged(QString&text)),
@@ -140,9 +163,9 @@ void HsCollectionNameDialog::makeConnect()
             SLOT(onContentsChanged()));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Disconnects edit line signals from slots.
+ */
 void HsCollectionNameDialog::makeDisconnect()
 {
     /*disconnect(lineEdit(), SIGNAL(textChanged(QString&text)),
@@ -151,17 +174,21 @@ void HsCollectionNameDialog::makeDisconnect()
                this, SLOT(onContentsChanged()));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ This slot is received whenever the text changes.
+ This slot is also received when the text is
+ changed programmatically,
+ for example, by calling setText().
+ \param text the new text.
+ */
 void HsCollectionNameDialog::onTextChanged(const QString &text)
 {
     qDebug() << QString("HsInputDialog::onTextChanged( %1 )").arg(text);
     HSMENUTEST_FUNC_ENTRY("HsInputDialog::onTextChanged");
-    if (text.trimmed() == "") {
-        primaryAction()->setEnabled(false);
+    if (text.trimmed() == "" ) {
+		actions()[0]->setEnabled(false);
     } else {
-        primaryAction()->setEnabled(true);
+        actions()[0]->setEnabled(true);
     }
 
     QString newText = newName(text);
@@ -175,9 +202,9 @@ void HsCollectionNameDialog::onTextChanged(const QString &text)
     HSMENUTEST_FUNC_EXIT("HsInputDialog::onTextChanged");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ This slot is received whenever the contents changes.
+ */
 void HsCollectionNameDialog::onContentsChanged()
 {
     qDebug("HsInputDialog::onContentsChanged()");

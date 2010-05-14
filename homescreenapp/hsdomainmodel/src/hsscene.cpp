@@ -343,9 +343,10 @@ bool HsScene::isOnline()const
 HsScene *HsScene::instance()
 {
     if (!mInstance) {
-        mInstance.reset(new HsScene);
+        mInstance = new HsScene;
+        mInstance->setParent(HsScene::mainWindow());
     }
-    return mInstance.data();
+    return mInstance;
 }
 
 /*!
@@ -393,10 +394,10 @@ HsScene::HsScene(QObject *parent)
     mActiveWidget(0),
     mIsOnline(true),
     mMaximumPageCount(1),
-    mMaximumWidgetSizeInPixels(341, 268),
-    mMinimumWidgetSizeInPixels(20, 20),
-    mMaximumWidgetSizeInUnits(51, 40),
-    mMinimumWidgetSizeInUnits(3, 3)
+    mMaximumWidgetSizeInPixels(321.6, 261.3),
+    mMinimumWidgetSizeInPixels(58.625, 58.625),
+    mMaximumWidgetSizeInUnits(48, 39),
+    mMinimumWidgetSizeInUnits(8.75, 8.75)
 {
     mWallpaper = new HsWallpaper;
 }
@@ -404,4 +405,4 @@ HsScene::HsScene(QObject *parent)
 /*!
     Points to the scene instance.
 */
-QScopedPointer<HsScene> HsScene::mInstance(0);
+HsScene *HsScene::mInstance = 0;

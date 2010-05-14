@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+
+    <section name="commonDefinitions">
+        <object name="allAppsAction" type="HbAction">
+        <bool name="checkable" value="TRUE"/>
+        <icon iconName="qtg_mono_applications_all" name="icon"/>
+        </object>
+        <object name="allCollectionsAction" type="HbAction">
+            <bool name="checkable" value="TRUE"/>
+            <icon iconName="qtg_mono_applications_collections" name="icon"/>
+        </object>
+        <object name="searchAction" type="HbAction">
+            <icon iconName="qtg_mono_search" name="icon"/>
+        </object>
+        <object name="oviStoreAction" type="HbAction">
+            <icon iconName="qtg_mono_ovistore" name="icon"/>
+        </object>
+        <object name="operatorAction" type="HbAction"/>
+
+        <widget name="view" type="HbView">
+            <widget name="container" role="HbView:widget" type="HbWidget">
+                <widget name="collectionLabel" type="HbGroupBox">
+                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
+                    <string name="heading" value="."/>
+                    <enums name="groupBoxType" value="GroupBoxSimpleLabel"/>
+                    <bool name="marqueeHeading" value="TRUE"/>
+                    <fontspec name="fontSpec" role="Title" textheight="0"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <bool name="progressive" value="TRUE"/>
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+            </widget>
+            <!--  no support for toolbar extensions, not defined in docml for now -->
+            <!--widget name="toolBar" role="HbView:toolBar" type="HbToolBar">
+                <enums name="orientation" value="Horizontal"/>
+                <ref object="allAppsAction" role="HbToolBar:addAction"/>
+                <ref object="allCollectionsAction" role="HbToolBar:addAction"/>
+                <ref object="searchAction" role="HbToolBar:addAction"/>
+                <ref object="oviStoreAction" role="HbToolBar:addAction"/>
+                <ref object="operatorAction" role="HbToolBar:addAction"/>
+                <bool name="visible" value="FALSE"/>
+            </widget-->
+            <bool name="contentFullScreen" value="FALSE"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
+    </section>
+    <section name="allAppsViewDefinition">
+        <widget name="allAppsView" type="HbView">
+            <widget name="allAppsContainer" role="HbView:widget" type="HbWidget">
+                <widget name="allAppsListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+	        </widget>
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+
+                <widget name="allAppsSearchListView" type="HbListView">
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="allAppsListView"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="FALSE"/>
+        </widget>
+    </section>
+    <section name="allAppsSearchViewDefinition">
+        <widget name="allAppsView" type="HbView">
+            <widget name="allAppsContainer" role="HbView:widget" type="HbWidget">
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <sizehint height="10un" type="MAXIMUM" width="100un"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="allAppsListView" type="HbListView">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="allAppsSearchListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="allAppsSearchListView"/>
+                    <linearitem itemname="searchPanel"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="TRUE"/>
+        </widget>
+    </section>
+    <section name="allCollectionsViewDefinition">
+        <widget name="allCollectionsView" type="HbView">
+            <widget name="allCollectionsContainer" role="HbView:widget" type="HbWidget">
+                <widget name="allCollectionsListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="allCollectionsListView"/>
+                </layout>
+            </widget>
+            <widget name="allCollectionsSearchListView" type="HbListView">
+                <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+            <widget name="searchPanel" type="HbSearchPanel">
+                <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="FALSE"/>
+        </widget>
+    </section>
+    <section name="allCollectionsSearchViewDefinition">
+        <widget name="allCollectionsView" type="HbView">
+            <widget name="allCollectionsContainer" role="HbView:widget" type="HbWidget">
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <sizehint height="10un" type="MAXIMUM" width="100un"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="allCollectionsListView" type="HbListView">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="allCollectionsSearchListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="allCollectionsSearchListView"/>
+                    <linearitem itemname="searchPanel"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="TRUE"/>
+        </widget>
+    </section>
+    <section name="installedAppsViewDefinition">
+        <widget name="installedAppsView" type="HbView">
+            <widget name="installedAppsContainer" role="HbView:widget" type="HbWidget">
+                <widget name="installedAppsLabel" type="HbGroupBox">
+                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
+                    <string name="heading" value="."/>
+                    <enums name="groupBoxType" value="GroupBoxSimpleLabel"/>
+                    <bool name="marqueeHeading" value="TRUE"/>
+                    <fontspec name="fontSpec" role="Title" textheight="0"/>
+                </widget>
+                <widget name="installedAppsListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="installedAppsSearchListView" type="HbListView">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="installedAppsLabel"/>
+                    <linearitem itemname="installedAppsListView"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="FALSE"/>
+        </widget>
+    </section>
+    <section name="installedAppsSearchViewDefinition">
+        <widget name="installedAppsView" type="HbView">
+            <widget name="installedAppsContainer" role="HbView:widget" type="HbWidget">
+                <widget name="installedAppsLabel" type="HbGroupBox">
+                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
+                    <string name="heading" value="."/>
+                    <bool name="marqueeHeading" value="TRUE"/>
+                    <fontspec name="fontSpec" role="Title" textheight="0"/>
+                </widget>
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <sizehint height="10un" type="MAXIMUM" width="100un"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="installedAppsListView" type="HbListView">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="installedAppsSearchListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="installedAppsLabel"/>
+                    <linearitem itemname="installedAppsSearchListView"/>
+                    <linearitem itemname="searchPanel"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="TRUE"/>
+        </widget>
+    </section>
+    <section name="collectionViewDefinition">
+        <widget name="collectionView" type="HbView">
+            <widget name="collectionContainer" role="HbView:widget" type="HbWidget">
+                <widget name="collectionLabel" type="HbGroupBox">
+                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="collectionListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="collectionSearchListView" type="HbListView">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="collectionLabel"/>
+                    <linearitem itemname="collectionListView"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="FALSE"/>
+        </widget>
+    </section>
+    <section name="collectionSearchViewDefinition">
+        <widget name="collectionView" type="HbView">
+            <widget name="collectionContainer" role="HbView:widget" type="HbWidget">
+                <widget name="collectionLabel" type="HbGroupBox">
+                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="searchPanel" type="HbSearchPanel">
+                    <bool name="visible" value="TRUE"/>
+                    <sizehint height="10un" type="MAXIMUM" width="100un"/>
+                </widget>
+                <widget name="collectionListView" type="HbListView">
+                    <sizehint height="0un" type="MAXIMUM" width="0un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="collectionSearchListView" type="HbListView">
+                    <widget name="listViewItemPrototype" role="HbListView:prototype" type="HbListViewItem">
+                        <enums name="graphicsSize" value="Thumbnail"/>
+                    </widget>
+                    <bool name="itemRecycling" value="TRUE"/>
+                    <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                    <sizehint height="100un" type="MAXIMUM" width="100un"/>
+                    <bool name="frictionEnabled" value="TRUE"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <layout orientation="Vertical" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <linearitem itemname="collectionLabel"/>
+                    <linearitem itemname="collectionSearchListView"/>
+                    <linearitem itemname="searchPanel"/>
+                </layout>
+            </widget>
+            <string locid="txt_applib_title_applications" name="title"/>
+            <bool name="contentFullScreen" value="TRUE"/>
+        </widget>
+    </section>
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common commonDefinition"/>
+        <uistate name="all apps view state" sections="#common commonDefinition allAppsViewDefinition"/>
+        <uistate name="all apps search view state" sections="#common commonDefinition allAppsSearchViewDefinition"/>
+        <uistate name="all collections view state" sections="#common commonDefinition allCollectionsViewDefinition"/>
+        <uistate name="all collections search view state" sections="#common commonDefinition allCollectionsSearchViewDefinition"/>
+        <uistate name="installed apps view state" sections="#common commonDefinition installedAppsViewDefinition"/>
+        <uistate name="installed apps search view state" sections="#common commonDefinition installedAppsSearchViewDefinition"/>
+        <uistate name="collection view state" sections="#common commonDefinition collectionViewDefinition"/>
+        <uistate name="collection search view state" sections="#common commonDefinition collectionSearchViewDefinition"/>
+        <dummydata objectName="allAppsSearchListView" section="allAppsSearchViewDefinition" value="app_list_template4"/>
+    </metadata>
+</hbdocument>

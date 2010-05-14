@@ -27,6 +27,7 @@
 #include <hbscrollarea.h>
 #include <hbscrollbar.h>
 #include <QtAlgorithms>
+#include <hbnotificationdialog.h>
 
 #include "hsmenueventfactory.h"
 #include "hsmenuservice.h"
@@ -48,6 +49,15 @@
 const char HS_PREVIEW_HS_WIDGET_STATE[] = "HsPreviewHSWidgetState";
 
 /*!
+ \class HsPreviewHSWidgetState
+ \ingroup group_hsworkerstateplugin
+ \brief Application Library State.
+ Parent state for Application Library functionality (browsing applications and collections)
+ \see StateMachine
+ \lib ?library
+ */
+
+/*!
  Constructor
  \param parent: parent state
  \retval void
@@ -58,9 +68,11 @@ HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
     mNotifier(0),
     mScrollArea(0),
     mWidget(0),
-    mEntryId(0)
+    mEntryId(0),
+    mCorruptedMessage(0)
 {
     requestServices(QList<QVariant> () << CONTENT_SERVICE_KEY);
+    connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
 /*!
@@ -68,9 +80,7 @@ HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
  */
 HsPreviewHSWidgetState::~HsPreviewHSWidgetState()
 {
-    if (mNotifier) {
-        delete mNotifier;
-    }
+    cleanUp(); // in case of throw
 }
 
 /*!
@@ -124,8 +134,8 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
                 loader.findWidget(HS_WIDGET_PREVIEW_SCROLL_AREA_NAME));
 
         // set parent to actions to delete them together with dialog
-        mPopupDialog->primaryAction()->setParent(mPopupDialog);
-        mPopupDialog->secondaryAction()->setParent(mPopupDialog);
+        mPopupDialog->actions()[0]->setParent(mPopupDialog);
+        mPopupDialog->actions()[1]->setParent(mPopupDialog);
 
         if (mPopupDialog != NULL && mScrollArea != NULL) {
             mPopupDialog->setContentWidget(mScrollArea); // ownership transferred
@@ -153,6 +163,33 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
 
+/*!
+ Slot launched after state has exited and in destructor.
+ \retval void
+ */
+void HsPreviewHSWidgetState::cleanUp()
+{
+    // Close popups if App key was pressed
+    if (mPopupDialog) {
+        mPopupDialog->close();
+    }
+
+    if (mCorruptedMessage) {
+        mCorruptedMessage->close();
+    }
+
+    mPopupDialog = NULL;
+    mScrollArea = NULL;
+    mWidget = NULL;
+    mCorruptedMessage = NULL;
+
+    disconnect(mNotifier,
+               SIGNAL(entryChanged(CaEntry,ChangeType)),
+               this, SLOT(memoryCardRemoved()));
+
+    delete mNotifier;
+    mNotifier = NULL;
+}
 
 /*!
  Memory card with instaled widget was removed.
@@ -163,6 +200,8 @@ void HsPreviewHSWidgetState::memoryCardRemoved()
     if (mPopupDialog) {
         mPopupDialog->close();
     }
+    // exit not needed, it is called after dialog closed
+
 }
 
 /*!
@@ -173,30 +212,26 @@ void HsPreviewHSWidgetState::previewDialogFinished(HbAction* finishedAction)
 {
     if (mPopupDialog != NULL) { 
         // (work-around for crash if more then one action is selected in HbDialog)
-        disconnect(mNotifier,
-                   SIGNAL(entryChanged(CaEntry,ChangeType)),
-                   this, SLOT(memoryCardRemoved()));
-
-        if (finishedAction == mPopupDialog->primaryAction()) {
+        if (finishedAction == mPopupDialog->actions().value(0)) {
             mWidget->hideWidget();
             mScrollArea->takeContentWidget();
             HsScene::instance()->activePage()->addNewWidget(
                 mWidget); // ownership transferred
+            HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+            notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
+            notificationDialog->setTitle(hbTrId(
+                                         "txt_applib_dpophead_added_to_homescreen") );
+            notificationDialog->show();
         } else {
             mWidget->uninitializeWidget();
             mWidget->deleteFromDatabase();
         }
         mPopupDialog = NULL;
-        mScrollArea = NULL;
-        mWidget = NULL;
-
-        delete mNotifier;
-        mNotifier = NULL;
-
+        emit exit();
     } else {
         // (work-around for crash if more then one action is selected in HbDialog)
         qWarning("Another signal finished was emited.");
-        }
+    }
 }
 
 
@@ -230,17 +265,25 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
 
-    QString message(hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
-    HbMessageBox::question(message, this,
-                SLOT(messageWidgetCorruptedFinished(HbAction*)),
-                hbTrId("txt_common_button_ok"), hbTrId("txt_common_button_cancel"));
+    mCorruptedMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+    mCorruptedMessage->setAttribute(Qt::WA_DeleteOnClose);
 
+    QString message(hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
+    mCorruptedMessage->setText(message);
+
+	mCorruptedMessage->clearActions();
+    HbAction *primaryAction = new HbAction(hbTrId("txt_common_button_ok"), mCorruptedMessage);
+	mCorruptedMessage->addAction(primaryAction);
+
+    HbAction *secondaryAction = new HbAction(hbTrId("txt_common_button_cancel"), mCorruptedMessage);
+    mCorruptedMessage->addAction(secondaryAction);
+
+    mCorruptedMessage->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
-
 
 /*!
  Slot launched on dismissing the corrupted widget error note
@@ -248,7 +291,14 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
  */
 void HsPreviewHSWidgetState::messageWidgetCorruptedFinished(HbAction* finishedAction)
 {
-    if (finishedAction && qobject_cast<HbMessageBox*>(finishedAction->parent())->primaryAction() == finishedAction) {
-        HsMenuService::executeAction(mEntryId, removeActionIdentifier());
+    if (mCorruptedMessage) {
+        if (finishedAction == mCorruptedMessage->actions().value(0)) {
+            HsMenuService::executeAction(mEntryId, removeActionIdentifier());
+        }
+        mCorruptedMessage = NULL;
+        emit exit();
+    } else {
+        // (work-around for crash if more then one action is selected in HbDialog)
+        qWarning("Another signal finished was emited.");
     }
 }

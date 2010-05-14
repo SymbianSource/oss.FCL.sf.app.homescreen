@@ -26,10 +26,17 @@
 #include "hsarrangestate.h"
 #include "hspreviewhswidgetstate.h"
 #include "hsviewappsettingsstate.h"
+
 /*!
  \class HsMenuWorkerState
  \ingroup group_hsworkerstateplugin
  \brief Menu Worker State.
+ */
+
+/*!
+ \var HsMenuWorkerState::mInitialState
+ Initial state.
+ Own.
  */
 
 /*!
@@ -50,9 +57,9 @@ HsMenuWorkerState::~HsMenuWorkerState()
 
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsMenuWorkerState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuWorkerState::construct");
@@ -83,7 +90,7 @@ void HsMenuWorkerState::construct()
                                   mInitialState, newChildState);
     mInitialState->addTransition(createCollectionTransition);
     // set a transition to the initial state after child processing finished
-    newChildState->addTransition(mInitialState);
+    newChildState->addTransition(newChildState, SIGNAL(exit()), mInitialState);
 
     HsAddAppsToCollectionState *addAppsToCollectionState =
         new HsAddAppsToCollectionState(this);
@@ -103,9 +110,12 @@ void HsMenuWorkerState::construct()
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::construct");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Template method for constructing child states.
+ \param operation Operation type triggering transition to the
+ newely created state.
+ \return newely created state.
+ */
 template<class T>
 T *HsMenuWorkerState::createChildState(
     HsMenuEvent::OperationType operation)
@@ -119,7 +129,7 @@ T *HsMenuWorkerState::createChildState(
         new HsMenuEventTransition(operation, mInitialState, newChildState);
     mInitialState->addTransition(newChildStateTransition);
     // set a transition to the initial state after child processing finished
-    newChildState->addTransition(mInitialState);
+    newChildState->addTransition(newChildState, SIGNAL(exit()), mInitialState);
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::createChildState");
 
     return newChildState;

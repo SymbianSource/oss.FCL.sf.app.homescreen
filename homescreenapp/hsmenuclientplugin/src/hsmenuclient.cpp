@@ -31,7 +31,7 @@
 /*!
     \class HsMenuClient
     \ingroup group_hsmenuclient
-    \brief Implements home screen menu api, see \ref page_hsmenuclient for 
+    \brief Implements home screen menu api, see @ref page_hsmenuclient for 
     usage details.
     
 */
@@ -49,7 +49,7 @@ HsMenuClient::~HsMenuClient()
 
 /*!
  Add an Templated Application Entry or Update if entryPreferences contains paramter id see 
- \ref page_hsmenuclient for exmaple usages
+ \ref section_add_parametrized_widget for exmaple usages
  \param entryPreference entry prefereneces
  \retval true if operation was successful
  */
@@ -59,7 +59,7 @@ bool HsMenuClient::add(const QVariantMap &entryPreference)
 }
 /*!
  Remove an Templated Application Entry see 
- \ref page_gsmenuclient for exmaple usages
+ \ref section_remove_tapp for exmaple usages
  \param entry entry prefereneces
  \retval true if operation was successful
  */
@@ -69,7 +69,7 @@ bool HsMenuClient::remove(const QVariantMap &entry) const
 }
 /*!
  Get list of Templated Application Entrys see 
- \ref page_hsmenuclient for exmaple usages
+ \ref section_list_tapp for exmaple usages
  \param queryPreference prefereneces for query db
  \retval QList
  */

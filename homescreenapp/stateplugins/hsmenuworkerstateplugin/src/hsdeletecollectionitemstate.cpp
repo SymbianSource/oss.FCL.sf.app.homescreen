@@ -16,6 +16,7 @@
  */
 
 #include <hbmessagebox.h>
+#include <hbaction.h>
 #include <hsmenuservice.h>
 #include <hsmenueventfactory.h>
 
@@ -34,7 +35,11 @@
  \param parent Owner.
  */
 HsDeleteCollectionItemState::HsDeleteCollectionItemState(QState *parent) :
-    QState(parent)
+    QState(parent),
+    mItemId(0),
+    mCollectionId(0),
+    mDeleteMessage(NULL),
+    mConfirmAction(NULL)
 {
     construct();
 }
@@ -44,20 +49,23 @@ HsDeleteCollectionItemState::HsDeleteCollectionItemState(QState *parent) :
  */
 HsDeleteCollectionItemState::~HsDeleteCollectionItemState()
 {
+    cleanUp(); // in case of throw
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsDeleteCollectionItemState::construct()
 {
     setObjectName(this->parent()->objectName()
                   + "/DeleteCollectionItemState");
+    connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Sets entry event.
+ \param event entry event.
+ */
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
@@ -69,21 +77,66 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    const int itemId = data.value(itemIdKey()).toInt();
-
-    const int collectionId = data.value(collectionIdKey()).toInt();
+    mItemId = data.value(itemIdKey()).toInt();
+    mCollectionId = data.value(collectionIdKey()).toInt();
 
     QString message;
     message.append(
         hbTrId("txt_applib_dialog_remove_1_from_collection").arg(
-            HsMenuService::getName(itemId)));
+            HsMenuService::getName(mItemId)));
 
-    if (HbMessageBox::question(message, hbTrId(
-                                   "txt_common_button_ok"), hbTrId("txt_common_button_cancel"))) {
-        HsMenuService::removeApplicationFromCollection(itemId, collectionId);
-    }
+    // create and show message box
+    mDeleteMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+    mDeleteMessage->setAttribute(Qt::WA_DeleteOnClose);
+
+    mDeleteMessage->setText(message);
+
+    mDeleteMessage->clearActions();
+    mConfirmAction = new HbAction(hbTrId("txt_common_button_ok"), mDeleteMessage);
+    mDeleteMessage->addAction(mConfirmAction);
+
+    HbAction *secondaryAction = new HbAction(hbTrId("txt_common_button_cancel"), mDeleteMessage);
+    mDeleteMessage->addAction(secondaryAction);
+
+    mDeleteMessage->open(this, SLOT(deleteMessageFinished(HbAction*)));
+
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionItemState::onEntry");
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+void HsDeleteCollectionItemState::deleteMessageFinished(HbAction* finishedAction)
+{
+    if (mItemId !=0 ) { // (work-around for crash if more then one action is selected in HbDialog)
+
+        if (finishedAction == mConfirmAction) {
+            HsMenuService::removeApplicationFromCollection(mItemId, mCollectionId);
+        }
+        mItemId = 0;
+        emit exit();
+    } else {
+        // (work-around for crash if more then one action is selected in HbDialog)
+        qWarning("Another signal finished was emited.");
+    }
+}
+
+/*!
+ Slot launched after state has exited and in destructor.
+ \retval void
+ */
+void HsDeleteCollectionItemState::cleanUp()
+{
+    // Close messagebox if App key was pressed
+    if (mDeleteMessage) {
+        mDeleteMessage->close();
+    }
+
+    mDeleteMessage = NULL;
+    mConfirmAction= NULL;
+    mItemId = 0;
+    mCollectionId = 0;
+}

@@ -34,6 +34,9 @@
 #endif
 
 class HsContentService;
+#ifdef Q_OS_SYMBIAN
+class CHsBackupRestoreObserver;
+#endif
 QTM_BEGIN_NAMESPACE
 class QValueSpacePublisher;
 QTM_END_NAMESPACE
@@ -81,6 +84,7 @@ private:
 	
 #ifdef Q_OS_SYMBIAN
     XqKeyCapture keyCapture;
+    CHsBackupRestoreObserver* mBRObserver;
 #endif
     
     TEST_FRIEND

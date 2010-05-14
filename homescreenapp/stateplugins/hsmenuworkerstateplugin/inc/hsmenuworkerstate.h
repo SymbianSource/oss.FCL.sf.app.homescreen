@@ -34,48 +34,19 @@ class HsMenuWorkerState: public QState
 
 public:
 
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param parent Owner.
-     */
     HsMenuWorkerState(QState *parent = 0);
 
-    /**
-
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     virtual ~HsMenuWorkerState();
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
-    /**
-     * Template method for constructing child states.
-     *
-     * @since S60 ?S60_version.
-     * @param operation Operation type triggering transition to the
-     * newely created state.
-     * @return newely created state.
-     */
     template<class T>
     T *createChildState(HsMenuEvent::OperationType operation);
 
 private:
 
-    /**
-     * Initial state.
-     * Own.
-     */
     QState *mInitialState;
 
 };

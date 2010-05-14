@@ -36,6 +36,7 @@ SOURCES +=  src/tsdevicedialog.cpp \
             src/tsmodel.cpp \
             src/tsentrymodelitem.cpp \
             src/tsactivitymodelitem.cpp \
+            src/tstasksgrid.cpp \
             src/tstasksgriditem.cpp \
             src/tsdocumentloader.cpp \
 
@@ -53,12 +54,19 @@ symbian {
     TARGET.UID3 = 0x2002677F
     pluginstub.sources = tsdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs
-
+    
+    LIBS += -lxqsettingsmanager
+    
     # ugly hack
     translation.sources = ./*.qm
     translation.path = $$QT_PLUGINS_BASE_DIR/../translations
 	
     DEPLOYMENT += pluginstub translation
+    
+    BLD_INF_RULES.prj_exports += \
+    "$${LITERAL_HASH}include <platform_paths.hrh>" \
+    "conf/tsdevicedialog.confml APP_LAYER_CONFML(tsdevicedialog.confml)" \
+    "conf/tsdevicedialog_2002677F.crml APP_LAYER_CRML(tsdevicedialog_2002677F.crml)"
 }
 
 win32 {

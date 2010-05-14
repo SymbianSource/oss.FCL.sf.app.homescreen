@@ -20,10 +20,12 @@
 
 #include <QFlags>
 #include <QMap>
+#include <QSet>
 #include <QString>
 #include <qnamespace.h>
-#include <hbdocumentloader.h>
+#include <HbDocumentLoader>
 
+class QActionGroup;
 class HbAction;
 class HbGroupBox;
 class HbLineEdit;
@@ -32,6 +34,20 @@ class HbSearchPanel;
 class HbToolBar;
 class HbView;
 class HbWidget;
+class HbToolBarExtension;
+
+enum HsViewContext {
+    HsAllAppsContext,
+    HsAllCollectionsContext,
+    HsInstalledAppsContext,
+    HsCollectionContext,
+};
+
+enum HsOperationalContext {
+    HsItemViewContext,
+    HsSearchContext
+};
+
 
 class HsMenuViewBuilder
 {
@@ -39,56 +55,66 @@ public:
     HsMenuViewBuilder();
     ~HsMenuViewBuilder();
 
-    bool setLabelVisible(bool);
-    bool setSearchPanelVisible(bool);
-    bool isLabelVisible() const;
-    bool isSearchPanelVisible() const;
-
-    HbView *view() const;
-    HbListView *listView() const;
-    HbGroupBox *label() const;
-    HbSearchPanel *searchPanel() const;
+    // mandatory context independent widgets accessors
     HbAction *allAppsAction() const;
     HbAction *allCollectionsAction() const;
     HbAction *searchAction() const;
     HbAction *oviStoreAction() const;
+    HbAction *operatorAction() const;
     HbToolBar *toolBar() const;
-    HbLineEdit *searchPanelLineEdit() const;
-private:
+    QActionGroup *toolBarActionGroup() const;
+    HbToolBarExtension *toolBarExtension() const;
 
-    bool parseSection(const QString &sectionName);
+    // mandatory context dependent widgets accessors
+    HbView *currentView() const;
+    HbListView *currentListView() const;
+
+
+    // optional widgets accessors
+    HbGroupBox *currentViewLabel() const;
+    HbSearchPanel *currentSearchPanel() const;
+
+
+    void setViewContext(HsViewContext viewContext);
+    void setOperationalContext(HsOperationalContext operationalContext);
+    bool build();
+
+private:
+    void init();
+
+    bool parseSection(const QString &sectionName = QString());
+
+
+    bool readContextConfiguration(HsViewContext, HsOperationalContext);
+
+
+    void searchPanelVisibilityChange(bool visible);
+
+    HbLineEdit *searchPanelLineEdit() const;
+
+    QMap<HsViewContext, QString > mViewContextToStringMap;
+    QMap<HsOperationalContext, QString > mOperationalContextToStringMap;
 
     HbDocumentLoader mDocumentLoader;
-
-    QObject mParent;
-
-    enum ViewOption {
-        Default = 0x0,
-        Label = 0x1,
-        Search = 0x2
-    };
-
-    Q_DECLARE_FLAGS(ViewOptions, ViewOption)
-    ViewOptions mViewOptions;
-    QMap<ViewOptions, QString> mSections;
-
-    void buildSectionKeyMap();
+    QSet<QObject *> mLoadedObjects;
 
     const QString DOCUMENT_FILE_NAME;
+    const QString COMMON_SECTION_NAME;
     const QString ALL_APPS_ACTION_NAME;
     const QString ALL_COLLECTIONS_ACTION_NAME;
     const QString SEARCH_ACTION_NAME;
     const QString OVI_STORE_ACTION_NAME;
-    const QString VIEW_NAME;
-    const QString CONTAINER_NAME;
-    const QString LIST_VIEW_NAME;
-    const QString TOOL_BAR_NAME;
+    const QString OPERATOR_ACTION_NAME;
     const QString SEARCH_PANEL_NAME;
-    const QString LABEL_NAME;
-    const QString LIST_VIEW_SECTION_NAME;
-    const QString LIST_LABELED_VIEW_SECTION_NAME;
-    const QString LIST_SEARCH_VIEW_SECTION_NAME;
-    const QString LIST_SEARCH_LABELED_VIEW_SECTION_NAME;
+    const QString TOOL_BAR_NAME;
+
+    QActionGroup *mToolBarActionGroup;
+    HbToolBar *mToolBar;
+    HbToolBarExtension *mToolBarExtension;
+    HbAction *mToolBarExtensionAction;
+
+    HsViewContext mViewContext;
+    HsOperationalContext mOperationalContext;
 };
 
 #endif // HSMENUVIEWBUILDER_H

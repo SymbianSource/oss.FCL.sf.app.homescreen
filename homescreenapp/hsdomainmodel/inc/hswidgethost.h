@@ -41,13 +41,15 @@ class HSDOMAINMODEL_EXPORT HsWidgetHost : public HbWidget
 
 public:
     enum State {
-        Constructed,
+        Unloaded,
+        Loaded,
         Initialized,
         Visible,
         Hidden,
         Uninitialized,
         Finished,
-        Faulted
+        Faulted,
+        UninstallingOrUpdating
     };
 
 public:
@@ -59,6 +61,7 @@ public:
     ~HsWidgetHost();
     
     bool load();
+    void unload();
     
     bool setPage(HsPage *page);
     HsPage *page() const;
@@ -82,6 +85,7 @@ public:
 signals:
     void widgetFinished(HsWidgetHost *widget);
     void widgetError(HsWidgetHost *widget);
+    void widgetResized(HsWidgetHost *widget);
 
 public slots:
     void initializeWidget();
@@ -90,8 +94,8 @@ public slots:
     void uninitializeWidget();
     void setOnline(bool online = true);
 
-    void startDragAnimation();
-    void startDropAnimation();
+    void startDragEffect();
+    void startDropEffect();
     
     void startTapAndHoldAnimation();
     void stopTapAndHoldAnimation();
@@ -114,7 +118,10 @@ private slots:
     void onSetPreferences(const QStringList &names);
     void onFinished();
     void onError();
-    
+    void onAboutToUninstall();
+    void onUpdated();
+    void onUnavailable();
+    void onAvailable();
 private:
     Q_DISABLE_COPY(HsWidgetHost)
     QGraphicsWidget *mWidget;

@@ -16,7 +16,6 @@
  */
 
 #include <hbaction.h>
-#include <hblistdialog.h>
 #include <hblabel.h>
 #include <hsmenuservice.h>
 #include <QDebug>
@@ -33,6 +32,26 @@
  */
 
 /*!
+ \var HsCollectionsListDialog::mModel
+ Model.
+ */
+
+/*!
+ \var HsCollectionsListDialog::mItemId
+ Selected item id.
+ */
+
+/*!
+ \fn void HsCollectionsListDialog::makeConnect();
+ Connects edit line signals to slots.
+*/
+
+/*!
+ \fn void HsCollectionsListDialog::makeDisconnect();
+ Disconnects edit line signals from slots.
+ */
+
+/*!
  Constructor
  \param sortOrder sort order.
  \param collectionId collectionId id of collection
@@ -41,7 +60,7 @@
  */
 HsCollectionsListDialog::HsCollectionsListDialog(HsSortAttribute sortOrder,
         int collectionId) :
-    HbListDialog(), mItemId(0)
+    HbSelectionDialog(), mItemId(0)
 {
     setPrimaryAction(NULL);
     setHeadingWidget(new HbLabel(hbTrId("txt_applib_title_add_to")));
@@ -60,33 +79,53 @@ HsCollectionsListDialog::~HsCollectionsListDialog()
     delete mModel;
 }
 
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP // Reason: Modal inputdialog exec
-#endif //COVERAGE_MEASUREMENT
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP // Reason: Modal inputdialog open
+#endif //COVERAGE_MEASUREMENT
 /*!
  Executes dialog.
  \retval Selected action.
  */
-HbAction *HsCollectionsListDialog::exec()
+void HsCollectionsListDialog::open(QObject* receiver, const char* member)
 {
-    HbAction *action = HbListDialog::exec();
-    if (action != secondaryAction()) {
+    this->setAttribute(Qt::WA_DeleteOnClose);
+    HbSelectionDialog::open(receiver, member);
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP // Reason: Modal inputdialog exec
+#endif //COVERAGE_MEASUREMENT
+
+
+
+/*!
+    \reimp
+    Disconnects signals and calls base class impl. which emits finished(HbAction*)
+ */
+void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
+{
+    qDebug("HsCollectionsListDialog::closeEvent");
+    HbAction *closingAction = qobject_cast<HbAction *>(sender());
+
+	if (closingAction != actions().value(1)) {
         QModelIndexList modlist = selectedModelIndexes();
         if (modlist.count()) {
             mItemId
             = mModel-> data(modlist[0], CaItemModel::IdRole).toInt();
         }
     }
-    return action;
+
+    HbDialog::closeEvent(event); // emits finished(HbAction*)
 }
 
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP // Reason: Modal inputdialog exec
-#endif //COVERAGE_MEASUREMENT
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+
+
+/*!
+ Creates standard item model.
+ \param sortOrder sort order.
+ \param collectionId id of collection to remove from model.
+ \return QStandardItemModel - caller takes ownership.
+ */
 QStandardItemModel *HsCollectionsListDialog::standartItemModel(
     HsSortAttribute sortOrder, int collectionId)
 {
@@ -119,9 +158,10 @@ QStandardItemModel *HsCollectionsListDialog::standartItemModel(
     return model;
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Inserts "new collection" item into model.
+ \param model a model.
+ */
 void HsCollectionsListDialog::insertNewCollectionItem(
     QStandardItemModel *model)
 {

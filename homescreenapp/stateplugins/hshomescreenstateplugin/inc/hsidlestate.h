@@ -30,9 +30,14 @@ class QGraphicsSceneMouseEvent;
 class QPropertyAnimation;
 class HbView;
 class HbAction;
+class HbContinuousFeedback;
 class HsIdleWidget;
 class HsTitleResolver;
 class QParallelAnimationGroup;
+class HbMenu;
+#ifdef Q_OS_SYMBIAN
+class XQSettingsManager;
+#endif
 
 class HsIdleState : public QState
 {
@@ -40,7 +45,7 @@ class HsIdleState : public QState
 
 public:
     HsIdleState(QState *parent = 0);
-	~HsIdleState();
+    ~HsIdleState();
 
 signals:
     void event_applicationLibrary();
@@ -54,9 +59,9 @@ signals:
     void event_addPage();
     void event_removePage();
     void event_toggleConnection();
-    
+
 protected:
-    bool eventFilter(QObject *watched, QEvent *event);    
+    bool eventFilter(QObject *watched, QEvent *event);
 
 private:
     Q_DISABLE_COPY(HsIdleState)
@@ -69,37 +74,40 @@ private:
     bool isInRightPageChangeZone();
     void addPageToScene(int pageIndex);
     qreal parallaxFactor() const;
-    
+    void updateZoneAnimation();
+    void removeActivePage();
+
 private slots:
     void action_disableUserInteraction();
-    void action_enableUserInteraction();    
+    void action_enableUserInteraction();
     void action_idle_setupView();
     void action_idle_layoutNewWidgets();
     void action_idle_showActivePage();
     void action_idle_connectOrientationChangeEventHandler();
     void action_idle_installEventFilter();
     void action_idle_cleanupView();
-    void action_idle_disconnectOrientationChangeEventHandler();    
+    void action_idle_disconnectOrientationChangeEventHandler();
     void action_idle_uninstallEventFilter();
     void action_waitInput_updateOptionsMenu();
     void action_waitInput_connectMouseEventHandlers();
-    void action_waitInput_disconnectMouseEventHandlers();    
+    void action_waitInput_publishIdleKey();
+    void action_waitInput_disconnectMouseEventHandlers();
     void action_widgetInteraction_connectMouseEventHandlers();
     void action_widgetInteraction_connectGestureTimers();
     void action_widgetInteraction_disconnectMouseEventHandlers();
-    void action_widgetInteraction_disconnectGestureTimers();    
+    void action_widgetInteraction_disconnectGestureTimers();
     void action_sceneInteraction_connectMouseEventHandlers();
     void action_sceneInteraction_connectGestureTimers();
     void action_sceneInteraction_disconnectMouseEventHandlers();
-    void action_sceneInteraction_disconnectGestureTimers();    
+    void action_sceneInteraction_disconnectGestureTimers();
     void action_moveWidget_reparentToControlLayer();
-    void action_moveWidget_startWidgetDragAnimation();
+    void action_moveWidget_startWidgetDragEffect();
     void action_moveWidget_connectMouseEventHandlers();
-
     void action_moveWidget_reparentToPage();
-    void action_moveWidget_startWidgetDropAnimation();
+    void action_moveWidget_startWidgetDropEffect();
     void action_moveWidget_disconnectMouseEventHandlers();
     void action_moveScene_connectMouseEventHandlers();
+    void action_moveScene_moveToNearestPage();
     void action_moveScene_disconnectMouseEventHandlers();
     void action_sceneMenu_showMenu();
     void action_addPage_addPage();
@@ -136,14 +144,15 @@ private slots:
 
     void onAddContentActionTriggered();
 
-	  bool openTaskSwitcher();
-	  void zoneAnimationFinished();
+    bool openTaskSwitcher();
+    void zoneAnimationFinished();
+    void onSceneMenuAboutToClose();
+    void onRemovePageMessageBoxClosed(HbAction *action);
 
 private:
     HbView *mView;
     HbAction *mNavigationAction;
     HsIdleWidget *mUiWidget;
-    
     QTimer mTimer;
     qreal mTapAndHoldDistance;
     qreal mPageChangeZoneWidth;
@@ -154,6 +163,13 @@ private:
     bool mPageChanged;
     bool mAllowZoneAnimation;
     QParallelAnimationGroup *mPageChangeAnimation;
+    HbContinuousFeedback *mContinuousFeedback;
+    bool mTrashBinFeedbackAlreadyPlayed;
+
+    qreal mDeltaX;
+#ifdef Q_OS_SYMBIAN    
+    XQSettingsManager *mSettingsMgr;
+#endif    
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };
 

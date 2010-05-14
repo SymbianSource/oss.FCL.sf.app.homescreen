@@ -18,48 +18,48 @@
 #ifndef HSANALOGCLOCKWIDGET_H
 #define HSANALOGCLOCKWIDGET_H
 
-#include <QGraphicsSvgItem>
-#include <hbwidget.h>
+#include <HbWidget>
+
 #include <hstest_global.h>
 
 HOMESCREEN_TEST_CLASS(TestClockWidget)
 
 class HbIconItem;
+class HbTouchArea;
 
 class HsAnalogClockWidget : public HbWidget
 {
     Q_OBJECT
 
 public:
-
     explicit HsAnalogClockWidget(QGraphicsItem *parent = 0);
-    virtual ~HsAnalogClockWidget();
+    ~HsAnalogClockWidget();
+
+    bool eventFilter(QObject *watched, QEvent *event);
+
+signals:
+    void clockTapped();
 
 public slots:
-
     void tick();
 
 protected:
-
     void resizeEvent(QGraphicsSceneResizeEvent *event);
-    void polish(HbStyleParameters& params);
 
 private:
-
-    void updatePrimitives();
-
-private:
-
-    HbIconItem *mClockBackground;
-    HbIconItem *mClockHourHand;
-    HbIconItem *mClockMinuteHand;
-    
     Q_DISABLE_COPY(HsAnalogClockWidget)
+    void createPrimitives();
+    void updatePrimitives();
+    void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+private:
+    HbIconItem *mBackground;
+    HbIconItem *mHourHand;
+    HbIconItem *mMinuteHand;
+    HbIconItem *mSecondHand;
+    HbTouchArea *mTouchArea;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestClockWidget)
 };
-
-
-
 
 #endif

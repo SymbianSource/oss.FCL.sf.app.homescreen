@@ -18,27 +18,56 @@
 #ifndef HSDIGITALCLOCKWIDGET_H
 #define HSDIGITALCLOCKWIDGET_H
 
-#include <hblabel.h>
+#include <HbWidget>
 
 #include <hstest_global.h>
 
 HOMESCREEN_TEST_CLASS(TestClockWidget)
 
-class HsDigitalClockWidget : public HbLabel
+class HbFrameItem;
+class HbIconItem;
+class HbTouchArea;
+
+class HsDigitalClockWidget : public HbWidget
 {
     Q_OBJECT
-    
+
 public:
-    
-    HsDigitalClockWidget(QGraphicsItem *parent = 0);
+    explicit HsDigitalClockWidget(bool useAmPm = true, QGraphicsItem *parent = 0);
     ~HsDigitalClockWidget();
-    
+
+    bool eventFilter(QObject *watched, QEvent *event);
+
+signals:
+    void clockTapped();
+
+public slots:
+    void tick();
+    void setAmPm(bool useAmPm);
+
 protected:
+    void resizeEvent(QGraphicsSceneResizeEvent *event);
 
-    virtual void changeEvent(QEvent *event);
+private:
+    Q_DISABLE_COPY(HsDigitalClockWidget)
+    void createPrimitives();
+    void updatePrimitives();
+    void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
+private:
+    HbFrameItem *mBackground;
+    HbIconItem *mDigit1;
+    HbIconItem *mDigit2;
+    HbIconItem *mDigit3;
+    HbIconItem *mDigit4;
+    HbIconItem *mDigit5;
+    HbIconItem *mDigit6;
+    HbIconItem *mAmPm;
+    HbTouchArea *mTouchArea;
+    bool mUseAmPm;
+    QMap<QChar, QString> mDigitMap;
+    
     HOMESCREEN_TEST_FRIEND_CLASS(TestClockWidget)
-
 };
 
 #endif // HSDIGITALCLOCKWIDGET_H

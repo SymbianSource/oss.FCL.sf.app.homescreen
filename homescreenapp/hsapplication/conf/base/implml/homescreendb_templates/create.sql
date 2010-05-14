@@ -5,10 +5,10 @@ CREATE TABLE Scene (
   landscapeWallpaper TEXT,
   defaultPageId INTEGER,
   maximumPageCount INTEGER,
-  maximumWidgetHeight INTEGER,
-  maximumWidgetWidth INTEGER,
-  minimumWidgetHeight INTEGER,
-  minimumWidgetWidth INTEGER);
+  maximumWidgetHeight REAL,
+  maximumWidgetWidth REAL,
+  minimumWidgetHeight REAL,
+  minimumWidgetWidth REAL);
 
 DROP TABLE IF EXISTS Pages;
 CREATE TABLE Pages (

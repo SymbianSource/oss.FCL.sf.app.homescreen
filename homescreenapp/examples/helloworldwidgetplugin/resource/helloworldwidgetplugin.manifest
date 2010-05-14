@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<hswidgetmanifest>
+    <uri>helloworldwidgetplugin</uri>
+    <title>Hello world</title>
+    <description>Home screen example widget</description>
+    <icon>helloworldwidgetplugin.png</icon>
+    <hidden>false</hidden>
+    <servicexml>helloworldwidgetplugin.xml</servicexml>
+</hswidgetmanifest>

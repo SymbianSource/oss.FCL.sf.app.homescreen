@@ -22,23 +22,15 @@
 #include <hsmenubasestate.h>
 
 #include "hsmenustates_global.h"
+#include "hsapp_defs.h"
+
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
-
+class HbAction;
 class CaEntry;
+class HbMessageBox;
 
 
-/**
- * @ingroup group_hsworkerstateplugin
- * @brief Application Library State.
- *
- * Parent state for Application Library functionality (browsing applications and collections)
- *
- * @see StateMachine
- *
- * @lib ?library
- * @since S60 ?S60_version
- */
 class HsAddToHomeScreenState: public  HsMenuBaseState
 {
     Q_OBJECT
@@ -47,47 +39,46 @@ class HsAddToHomeScreenState: public  HsMenuBaseState
 
 public:
 
-    /**
-     * Constructor.
-     *
-     * @since S60 ?S60_version.
-     * @param parent Owner.
-     */
     HsAddToHomeScreenState(QState *parent = 0);
 
-    /**
-     * Destructor.
-     *
-     * @since S60 ?S60_version.
-     */
     virtual ~HsAddToHomeScreenState();
 
 private slots:
 
-    /**
-     * Inherited from HsMenuBaseState.
-     *
-     * @since S60 ?S60_version.
-     */
     void onEntry(QEvent *event);
+
+    void cleanUp();
+
+    void messageWidgetCorruptedFinished(HbAction* finishedAction);
+
+signals:
+
+    void exit();
 
 private:
 
-    void showMessageWidgetCorrupted(int itemId);
+    void showMessageWidgetCorrupted();
 
-    void addWidget(HsContentService &service, const QString &uri,
-                    int entryId);
+    bool addWidget(HsContentService &service, const QString &uri);
 
-    void addShortcut(HsContentService &contentService, int entryId);
+    bool addShortcut(HsContentService &contentService);
 
-    void addApplication(HsContentService &contentService, CaEntry &entryId);
+    bool addApplication(HsContentService &contentService, CaEntry &entryId);
 
     void logActionResult(QString operationName, int entryId,
                          bool operationSucceded);
 
+private:
 
     // keep path in memory so it wont
     QString mLibraryPath;
+
+    int mEntryId;
+
+    HbMessageBox *mCorruptedMessage;
+
+    HbAction *mConfirmAction;
+    HsMenuMode mMenuMode;
 
 };
 

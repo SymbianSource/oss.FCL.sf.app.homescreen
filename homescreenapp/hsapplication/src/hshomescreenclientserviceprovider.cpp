@@ -19,6 +19,7 @@
 #include <QFileInfo>
 
 #include "hshomescreenclientserviceprovider.h"
+#include "hswidgetcomponentdescriptor.h"
 #include "hscontentservice.h"
 
 #include "hsscene.h"
@@ -26,6 +27,7 @@
 #include "hswallpaper.h"
 #include "hsdatabase.h"
 #include "hswallpaperhelper.h"
+#include "hswidgetcomponentregistry.h"
 
 #define HSBOUNDARYEFFECT 20 // amount of extra pixels in wallpaper width reserved for boundary effect 
 
@@ -126,6 +128,30 @@ bool HsHomeScreenClientServiceProvider::setWallpaper(const QString &fileName)
 }
 
 
+
+bool HsHomeScreenClientServiceProvider::widgetUninstalled(const QVariantHash &widgetDescriptor)
+{
+    HsWidgetComponentDescriptor widgetComponent = widgetComponentDescriptor(widgetDescriptor);
+    HsWidgetComponentRegistry* widgetRegistry = HsWidgetComponentRegistry::instance();
+    widgetRegistry->uninstallComponent(widgetComponent);
+    return true;
+}
+
+
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+HsWidgetComponentDescriptor HsHomeScreenClientServiceProvider::widgetComponentDescriptor(const QVariantHash& widgetDescriptor)
+{
+    HsWidgetComponentDescriptor widget;
+    widget.installationPath = widgetDescriptor["installationPath"].toString(); 
+    widget.uri = widgetDescriptor["uri"].toString(); 
+    widget.title = widgetDescriptor["title"].toString(); 
+    widget.description = widgetDescriptor["description"].toString(); 
+    widget.iconUri = widgetDescriptor["iconUri"].toString(); 
+    widget.hidden = widgetDescriptor["hidden"].toString(); 
+    widget.serviceXml = widgetDescriptor["serviceXml"].toString(); 
+    widget.version = widgetDescriptor["version"].toString(); 
+    return widget;
+}

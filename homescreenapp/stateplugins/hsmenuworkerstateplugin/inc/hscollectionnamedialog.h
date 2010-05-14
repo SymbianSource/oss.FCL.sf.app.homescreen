@@ -35,31 +35,20 @@ public:
 
     virtual ~HsCollectionNameDialog();
 
-    HbAction *exec();
-
+    void open(QObject* receiver, const char* member );
+    
     QString newName(const QString &name, bool addLastName = false);
 
+protected:
+    void closeEvent( QCloseEvent * event );
 private:
 
-    /**
-     * Connects edit line signals to slots.
-     */
     void makeConnect();
 
-    /**
-     * Disconnects edit line signals from slots.
-     */
     void makeDisconnect();
 
 private slots:
 
-    /**
-     * This slot is received whenever the text changes.
-     * The text argument is the new text.
-     * This slot is also received when the text is
-     *  changed programmatically,
-     * for example, by calling setText().
-     */
     void onTextChanged(const QString &text);
 
     void onContentsChanged();

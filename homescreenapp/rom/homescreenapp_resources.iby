@@ -25,4 +25,5 @@ data=DATAZ_\QT_TRANSLATIONS_DIR\homescreen.qm       QT_TRANSLATIONS_DIR\homescre
 // -------- hsapplibrarystateplugin
 data=DATAZ_\QT_TRANSLATIONS_DIR\hsapplibrary.qm     QT_TRANSLATIONS_DIR\hsapplibrary.qm
 
+data=\epoc32\data\z\resource\apps\hsapplication.rsc       resource\apps\hsapplication.rsc
 #endif //__HOMESCREENAPP_LANGUAGE_IBY__

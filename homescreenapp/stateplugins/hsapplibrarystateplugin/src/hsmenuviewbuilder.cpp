@@ -16,6 +16,7 @@
  */
 
 #include <QDebug>
+#include <QActionGroup>
 #include <QGraphicsWidget>
 #include <HbAction>
 #include <HbGroupBox>
@@ -28,36 +29,38 @@
 #include <HbStaticVkbHost>
 #include <HbMainWindow>
 #include <HbInputMethod>
+#include <HbToolBarExtension>
 
 #include "hsmenuviewbuilder.h"
 #include "hsmenustates_global.h"
 
 // TODO this class is temprary solution, proper one should come from Orbit
-class HsVkbHost : public HbStaticVkbHost {
+class HsVkbHost : public HbStaticVkbHost
+{
 public:
-	explicit HsVkbHost(HbWidget *target):
-		HbStaticVkbHost(target), mWidget(target) {}
+    explicit HsVkbHost(HbWidget *target):
+        HbStaticVkbHost(target), mWidget(target) {}
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT skipped: its very temporary TODO
-	void openFinished() {		
-		updateViewHeight(applicationArea().height());
-	}
+    void openFinished() {
+        updateViewHeight(applicationArea().height());
+    }
 
-	void closeFinished(){				
-		updateViewHeight(-1);
-	}
+    void closeFinished() {
+        updateViewHeight(-1);
+    }
 
-	void updateViewHeight(qreal height) {		
-		HbView* view = mWidget->mainWindow()->currentView();
-		view->setMaximumHeight(height);
-	}
+    void updateViewHeight(qreal height) {
+        HbView *view = mWidget->mainWindow()->currentView();
+        view->setMaximumHeight(height);
+    }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
-	
-	HbWidget * mWidget;
+
+    HbWidget *mWidget;
 };
 
 /*!
@@ -71,118 +74,99 @@ public:
     \sa HsMenuView
 */
 
-/*!
-  Sets view label visible or hidden.
-  \param visible When true label is set visible, invisible otherwise.
-  \return \a true on success, \a false otherwise.
- */
-bool HsMenuViewBuilder::setLabelVisible(bool visible)
-{
-    bool result(true);
-
-    if (visible != mViewOptions.testFlag(Label)) {
-        mViewOptions ^= ViewOptions(Label);
-        result = parseSection(mSections[mViewOptions]);
-    }
-    return result;
-}
-
 
 /*!
-  Sets search panel visible or hidden.
-  \param visible When true search panel is set visible,
-  invisible otherwise.
-  \return \a true on success, \a false otherwise.
+  Cleanup search text on showing search panel. Ensures vkb host instance
+  is appears on show and disappears on hide search panel.
+  
+  \param visible When true search panel is to show up,
+  hide otherwise.
  */
-bool HsMenuViewBuilder::setSearchPanelVisible(bool visible)
+void HsMenuViewBuilder::searchPanelVisibilityChange(bool visible)
 {
-    bool result(true);
-
-    if (visible != mViewOptions.testFlag(Search)) {
-        mViewOptions ^= ViewOptions(Search);
-        result = parseSection(mSections[mViewOptions]);
-
-        if (visible) {
-			// TODO this is temprary solution, proper solution should come from Orbit
-                        if (!HbVkbHost::getVkbHost(searchPanel()))
-                                {
-                                new HsVkbHost(searchPanel());
-                                }
-            HbLineEdit *const lineEdit(searchPanelLineEdit());
-
-            lineEdit->setText("");
+    if (visible) {
+        // TODO this is temprary solution, proper solution should come from Orbit
+        if (!HbVkbHost::getVkbHost(currentSearchPanel())) {
+            new HsVkbHost(currentSearchPanel());
         }
-        else {
-           if (static_cast<HsVkbHost *>(HbVkbHost::getVkbHost(searchPanel()))) {
-             static_cast<HsVkbHost *>(HbVkbHost::getVkbHost(searchPanel()))->
-                     updateViewHeight(-1);
-            }
-       }
+        HbLineEdit *const lineEdit(searchPanelLineEdit());
+
+        lineEdit->setText("");
+    } else {
+        if (static_cast<HsVkbHost *>(HbVkbHost::getVkbHost(currentSearchPanel()))) {
+            static_cast<HsVkbHost *>(HbVkbHost::getVkbHost(currentSearchPanel()))->
+            updateViewHeight(-1);
+        }
     }
-    return result;
+
 }
 
 /*!
- \return \a true when label is visible, \a false otherwise.
+ \return pointer to the view resulting from last \a build call or NULL if 
+ the \a build has not yet been called.
+ Memory ownership is not changed.
  */
-bool HsMenuViewBuilder::isLabelVisible() const
+HbView *HsMenuViewBuilder::currentView() const
 {
-    return mViewOptions.testFlag(Label);
+    const QString VIEW_NAME =
+        mViewContextToStringMap[mViewContext]
+        + "View";
+
+    HbView *const view =
+        qobject_cast<HbView *>(mDocumentLoader.findWidget(VIEW_NAME));
+
+    if (view != NULL && mViewContext != HsInstalledAppsContext) {
+        view->setToolBar(mToolBar);
+    }
+
+    return view;
 }
 
 /*!
- \return \a true when search panel is visible, \a false otherwise.
- */
-bool HsMenuViewBuilder::isSearchPanelVisible() const
-{
-    return mViewOptions.testFlag(Search);
-}
-
-/*!
- \return pointer to the main view.
+ \return pointer to list view resulting from last \a build call or NULL if 
+ the \a build has not yet been called.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbView *HsMenuViewBuilder::view() const
+HbListView *HsMenuViewBuilder::currentListView() const
 {
-    return qobject_cast<HbView *>(mDocumentLoader.findWidget(VIEW_NAME));
-}
+    const QString LIST_VIEW_NAME = mViewContextToStringMap[mViewContext]
+                                   + mOperationalContextToStringMap[mOperationalContext]
+                                   + "ListView";
 
-/*!
- \return pointer to the list item view.
- The pointer is valid until the HsMenuViewBuilder instance is destroyed.
- Memory ownership is not changed.
- */
-HbListView *HsMenuViewBuilder::listView() const
-{
     return qobject_cast<HbListView *>(
                mDocumentLoader.findWidget(LIST_VIEW_NAME));
 }
 
 /*!
- \return pointer to the label.
+ \return pointer to the view label resulting from last \a build call. It is 
+ guaranteed to be not NULL if the \a build was called for the context
+ related to view including label.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbGroupBox *HsMenuViewBuilder::label() const
+HbGroupBox *HsMenuViewBuilder::currentViewLabel() const
 {
+    const QString LABEL_NAME = mViewContextToStringMap[mViewContext]
+                               + "Label";
+
     return qobject_cast<HbGroupBox *>(
                mDocumentLoader.findWidget(LABEL_NAME));
 }
 
 /*!
- \return pointer to the searchPanel.
+ \return pointer to search panel.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbSearchPanel *HsMenuViewBuilder::searchPanel() const
+HbSearchPanel *HsMenuViewBuilder::currentSearchPanel() const
 {
     return qobject_cast<HbSearchPanel *>(mDocumentLoader.findWidget(
             SEARCH_PANEL_NAME));
 }
 
 /*!
- \return pointer to All Applications Action.
+ \return pointer to All Applications Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
@@ -193,7 +177,7 @@ HbAction *HsMenuViewBuilder::allAppsAction() const
 }
 
 /*!
- \return pointer to All Collections Action.
+ \return pointer to All Collections Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
@@ -204,7 +188,7 @@ HbAction *HsMenuViewBuilder::allCollectionsAction() const
 }
 
 /*!
- \return pointer to Search Action.
+ \return pointer to Search Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
@@ -215,7 +199,7 @@ HbAction *HsMenuViewBuilder::searchAction() const
 }
 
 /*!
- \return pointer to Ovi Store Action.
+ \return pointer to Ovi Store Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
@@ -226,15 +210,53 @@ HbAction *HsMenuViewBuilder::oviStoreAction() const
 }
 
 /*!
+ \return pointer to Operator Action. Guaranteed to be not NULL.
+ The pointer is valid until the HsMenuViewBuilder instance is destroyed.
+ Memory ownership is not changed.
+ */
+HbAction *HsMenuViewBuilder::operatorAction() const
+{
+    return qobject_cast<HbAction *>(mDocumentLoader.findObject(
+                                        OPERATOR_ACTION_NAME));
+}
+
+/*!
  \return pointer to the main view toolbar.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
 HbToolBar *HsMenuViewBuilder::toolBar() const
 {
-    return qobject_cast<HbToolBar *>(
-               mDocumentLoader.findWidget(TOOL_BAR_NAME));
+    return mToolBar;
 }
+
+/*!
+ \return pointer to the toolbar extension.
+ The pointer is valid until the HsMenuViewBuilder instance is destroyed.
+ Memory ownership is not changed.
+ */
+HbToolBarExtension *HsMenuViewBuilder::toolBarExtension() const
+{
+    return mToolBarExtension;
+}
+
+/*!
+ \return action group for \a allAppsState and \a allCollectionsState action.
+ */
+QActionGroup *HsMenuViewBuilder::toolBarActionGroup() const
+{
+    return mToolBarActionGroup;
+}
+
+/*!
+ Reads docml configuration corresponding to current context.
+ */
+bool HsMenuViewBuilder::build()
+{
+    return readContextConfiguration(mViewContext, mOperationalContext);
+}
+
+
 
 /*!
  Constructor.
@@ -242,61 +264,48 @@ HbToolBar *HsMenuViewBuilder::toolBar() const
  search panel and view label.
  */
 HsMenuViewBuilder::HsMenuViewBuilder():
-    mViewOptions(0),
     DOCUMENT_FILE_NAME(":/xml/applibrary.docml"),
+    COMMON_SECTION_NAME("commonDefinitions"),
     ALL_APPS_ACTION_NAME("allAppsAction"),
     ALL_COLLECTIONS_ACTION_NAME("allCollectionsAction"),
     SEARCH_ACTION_NAME("searchAction"),
     OVI_STORE_ACTION_NAME("oviStoreAction"),
-    VIEW_NAME("view"),
-    CONTAINER_NAME("container"),
-    LIST_VIEW_NAME("listView"),
-    TOOL_BAR_NAME("toolBar"),
+    OPERATOR_ACTION_NAME("operatorAction"),
     SEARCH_PANEL_NAME("searchPanel"),
-    LABEL_NAME("label"),
-    LIST_VIEW_SECTION_NAME("list_view"),
-    LIST_LABELED_VIEW_SECTION_NAME("list_labeled_view"),
-    LIST_SEARCH_VIEW_SECTION_NAME("list_search_view"),
-    LIST_SEARCH_LABELED_VIEW_SECTION_NAME("list_search_labeled_view")
+    TOOL_BAR_NAME("toolBar"),
+    mToolBar(new HbToolBar),
+    mToolBarExtension(new HbToolBarExtension),
+    mViewContext(HsAllAppsContext),
+    mOperationalContext(HsItemViewContext)
 {
-    buildSectionKeyMap();
+    init();
 
     // parse common section and the one specified by view options
-    bool result = parseSection("") && parseSection(mSections[mViewOptions]);
+    const bool result = parseSection(COMMON_SECTION_NAME);
 
     Q_ASSERT_X(result,
                "HsMenuViewBuilder::HsMenuViewBuilder()",
                "construction failed");
+
+    mToolBar->addAction(allAppsAction());
+    mToolBar->addAction(allCollectionsAction());
+    mToolBar->addAction(searchAction());
+
+    mToolBarActionGroup = new QActionGroup(allAppsAction());
+
+    allAppsAction()->setActionGroup(mToolBarActionGroup);
+    allCollectionsAction()->setActionGroup(mToolBarActionGroup);
 }
 
 /*!
  Destructor.
- Deletes list view, search panel, view label, All Applications
- Action, All Collections Action, Search Action, Ovi Store Action, container
- widget, main view toolbar and the main view.
-
- The destructor needs to be checked agains any change in related docml file.
+ Deletes widgets owned by the Menu View Builder.
  */
 HsMenuViewBuilder::~HsMenuViewBuilder()
 {
-    QObjectList objectList;
-
-    objectList << listView();
-
-    objectList << searchPanel();
-
-    objectList << label();
-
-    objectList << allAppsAction();
-    objectList << allCollectionsAction();
-    objectList << searchAction();
-    objectList << mDocumentLoader.findWidget(CONTAINER_NAME);
-    objectList << toolBar();
-    objectList << view();
-
-    foreach(QObject *obj, objectList) {
-        obj->deleteLater();
-    }
+    delete mToolBarExtension;
+    delete mToolBar;
+    qDeleteAll(mLoadedObjects);
 }
 
 /*!
@@ -311,20 +320,25 @@ bool HsMenuViewBuilder::parseSection(const QString &sectionName)
 
     bool loadStatusOk = false;
 
-    QObjectList loadedObjects = mDocumentLoader.load(DOCUMENT_FILE_NAME,
-                                sectionName,
-                                &loadStatusOk);
+    const QObjectList loadedObjects =
+        mDocumentLoader.load(DOCUMENT_FILE_NAME,
+                             sectionName,
+                             &loadStatusOk);
+
+    mLoadedObjects |= loadedObjects.toSet();
 
     Q_ASSERT_X(loadStatusOk,
                DOCUMENT_FILE_NAME.toLatin1().data(),
                "Error while loading docml file.");
+
     HSMENUTEST_FUNC_EXIT("HsMenuViewBuilder::parseSection");
 
     return loadStatusOk;
 }
 
+
 /*!
- \retval Line edit of the searchPanel on success, 0 otherwise.
+ \return Line edit of the searchPanel on success, NULL otherwise.
  */
 HbLineEdit *HsMenuViewBuilder::searchPanelLineEdit() const
 {
@@ -332,7 +346,7 @@ HbLineEdit *HsMenuViewBuilder::searchPanelLineEdit() const
 
     HbLineEdit *result(0);
 
-    foreach(QGraphicsItem *obj, searchPanel()->childItems()) {
+    foreach(QGraphicsItem *obj, currentSearchPanel()->childItems()) {
 
         QGraphicsWidget *const widget =
             static_cast<QGraphicsWidget *>(obj);
@@ -353,19 +367,55 @@ HbLineEdit *HsMenuViewBuilder::searchPanelLineEdit() const
 }
 
 /*!
-    Sets up mapping between ViewOptions and section names.
+    Builds mapping between context and docml name buidling blocks.
  */
-void HsMenuViewBuilder::buildSectionKeyMap()
+void HsMenuViewBuilder::init()
 {
-    mSections[ViewOptions()]  =
-        LIST_VIEW_SECTION_NAME;
-
-    mSections[ViewOptions(Search)]   =
-        LIST_SEARCH_VIEW_SECTION_NAME;
-
-    mSections[ViewOptions(Label)]  =
-        LIST_LABELED_VIEW_SECTION_NAME;
-
-    mSections[ViewOptions(Label | Search)]   =
-        LIST_SEARCH_LABELED_VIEW_SECTION_NAME;
+    mViewContextToStringMap[HsAllAppsContext] = "allApps";
+    mViewContextToStringMap[HsAllCollectionsContext] = "allCollections";
+    mViewContextToStringMap[HsInstalledAppsContext] = "installedApps";
+    mViewContextToStringMap[HsCollectionContext] = "collection";
+    mOperationalContextToStringMap[HsItemViewContext] = "";
+    mOperationalContextToStringMap[HsSearchContext] = "Search";
 }
+
+/*!
+ Sets view context. Not reflected in widgets returned by the builder
+ until \a build is not run.
+ */
+void HsMenuViewBuilder::setViewContext(HsViewContext viewContext)
+{
+    mViewContext = viewContext;
+}
+
+/*!
+ Sets operational context. Not reflected in widgets returned by the builder
+ until \a build is not run.
+ */
+void HsMenuViewBuilder::setOperationalContext(
+    HsOperationalContext operationalContext)
+{
+
+    mOperationalContext = operationalContext;
+}
+
+/*!
+ Reads configuration for requested context and ensures search panel and corresponding
+ vkb host are managed properly.
+ */
+bool HsMenuViewBuilder::readContextConfiguration(HsViewContext viewContext,
+        HsOperationalContext operationalContext)
+{
+    const QString sectionName = mViewContextToStringMap[viewContext]
+        + mOperationalContextToStringMap[operationalContext] 
+        + "ViewDefinition";
+
+    const bool result = parseSection(sectionName);
+
+    if (currentSearchPanel()) {
+        searchPanelVisibilityChange(mOperationalContext == HsSearchContext);
+    }
+
+    return result;
+}
+

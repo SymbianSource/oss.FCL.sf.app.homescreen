@@ -23,6 +23,8 @@
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class HbAction;
+class HbMessageBox;
 class HsShortcutService;
 class HsMenuService;
 
@@ -35,28 +37,33 @@ class HsDeleteCollectionState: public QState
 public:
 
     HsDeleteCollectionState(QState *parent = 0);
+
     virtual ~HsDeleteCollectionState();
 
 protected:
+
     void onEntry(QEvent *event);
+
+private slots:
+
+    void deleteMessageFinished(HbAction* finishedAction);
+
+    void cleanUp();
+
+signals:
+
+    void exit();
 
 private:
 
-    /**
-     * Constructs contained objects.
-     *
-     * @since S60 ?S60_version.
-     */
     void construct();
 
-    /**
-     * Convenience method returning the shortcut service.
-     *
-     * @since S60 ?S60_version.
-     * @return Shortcut Service.
-     */
     HsShortcutService *shortcutService() const;
 
+private:
+    int mItemId;
+    HbMessageBox *mDeleteMessage; // deletes itself automatically on close
+    HbAction *mConfirmAction; // child for mDeleteMessage
 };
 
 #endif //HSDELETECOLLECTIONSTATE_H

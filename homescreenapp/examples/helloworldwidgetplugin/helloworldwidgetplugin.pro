@@ -14,6 +14,51 @@
 # Description: Example of home screen widget
 #
 
-TEMPLATE = subdirs
-SUBDIRS = helloworldwidgetplugin \
-          helloworldwidgetplugininstaller
+TEMPLATE = lib
+CONFIG += plugin mobility hb
+MOBILITY = serviceframework
+
+HEADERS += ./inc/*.h
+SOURCES += ./src/*.cpp
+
+INCLUDEPATH += ./inc               
+
+symbian: {
+
+    DESTDIR = /private/20022F35/import/widgetregistry/20022F7E
+    INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+
+    TARGET.UID3 = 0x20022F7E
+    TARGET.EPOCALLOWDLLDATA=1
+    TARGET.CAPABILITY = ALL -TCB
+    
+    plugins.path = $${DESTDIR}
+    plugins.sources = $${TARGET}.dll 
+    
+    widgetResources.path = $${DESTDIR}
+    widgetResources.sources += resource/$${TARGET}.xml    
+    widgetResources.sources += resource/$${TARGET}.manifest
+    widgetResources.sources += resource/$${TARGET}.png
+        
+    DEPLOYMENT += plugins \
+                  widgetResources
+}
+
+win32: {
+
+    CONFIG(debug, debug|release) {
+      SUBDIRPART = debug
+    } else {
+      SUBDIRPART = release
+    }    
+    
+    PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F7E
+    
+    DESTDIR = $$PWD/../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
+
+    manifest.path = $${DESTDIR}
+    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png
+    
+    INSTALLS += manifest    
+    
+}

@@ -144,6 +144,7 @@ QVariant TsActivityModelItem::decorationRole() const
         if (mActivity.end() != node) {
             QMetaObject::invokeMethod(&mService,
                                       "getThumbnail",
+                                      Q_ARG(QSize, QSize(128, 128)),
                                       Q_ARG(QString, node.value().toString()),
                                       Q_ARG(void *, const_cast<TsActivityModelItem *>(this)));
         }

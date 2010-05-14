@@ -91,7 +91,8 @@ private:
     QSizeF mMinimumWidgetSizeInPixels;
     QSizeF mMaximumWidgetSizeInUnits;
     QSizeF mMinimumWidgetSizeInUnits;
-    static QScopedPointer<HsScene> mInstance;
+    
+    static HsScene *mInstance;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)

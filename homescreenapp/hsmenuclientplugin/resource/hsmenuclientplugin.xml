@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <service>
     <name>hsmenuclientplugin</name>
-    <filepath>hsmenuclient</filepath>
+    <filepath>hsmenuclientplugin</filepath>
     <description>HsMenu Client plugin</description>
     <interface>
         <name>com.nokia.symbian.IMenuClient</name>

@@ -44,11 +44,12 @@
     \param attributes Widget params.
     \return Event for adding the widget to homescreen.
 */
-QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(int entryId)
+QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode)
 {
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
     params.insert(itemIdKey(), entryId);
+    params.insert(menuModeType(), menuMode);
     return new HsMenuEvent(HsMenuEvent::AddToHomeScreen, params);
 }
 

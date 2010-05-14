@@ -61,6 +61,17 @@ enum HsMenuMode {
     AddHsMenuMode
 };
 
+enum HsContextAction {
+    AddToHomeScreenContextAction = 1,
+    AddToCollectionContextAction,    
+    UninstallContextAction, 
+    AppSettingContextAction,
+    RenameContextAction, 
+    DeleteContextAction, 
+    RemoveFromCollectionContextAction    
+};
+
+
 const char TS_DEVICE_DIALOG_URI[] = 
     "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
 

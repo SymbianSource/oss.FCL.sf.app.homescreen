@@ -101,9 +101,3 @@
 "/epoc32/data/z/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.qtplugin" - "c:/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.qtplugin"
 "/epoc32/data/z/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F43/hsclockwidgetplugin.manifest"
 "/epoc32/data/z/private/20022F35/import/widgetregistry/20022F43/clock.png"  - "c:/private/20022F35/import/widgetregistry/20022F43/clock.png"
-
-; -------- hsdialerwidgetplugin
-"/epoc32/release/armv5/urel/hsdialerwidgetplugin.dll" - "c:/sys/bin/hsdialerwidgetplugin.dll"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.qtplugin" - "c:/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.qtplugin"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.manifest"  - "c:/private/20022F35/import/widgetregistry/20022F44/hsdialerwidgetplugin.manifest"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F44/dialer.png"  - "c:/private/20022F35/import/widgetregistry/20022F44/dialer.png"

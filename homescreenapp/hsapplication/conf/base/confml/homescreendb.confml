@@ -4,10 +4,10 @@
     <confml:setting ref="portraitWallpaper" name="Portrait wallpaper" type="string"/>
     <confml:setting ref="landscapeWallpaper" name="Landscape wallpaper" type="string"/>
     <confml:setting ref="maximumPageCount" name="Maximum number of pages" type="int"/>
-    <confml:setting ref="maximumWidgetHeight" name="Maximum height of widget" type="int"/>
-    <confml:setting ref="maximumWidgetWidth" name="Maximum width of widget" type="int"/>
-    <confml:setting ref="minimumWidgetHeight" name="Minimum height of widget" type="int"/>
-    <confml:setting ref="minimumWidgetWidth" name="Minimum width of widget" type="int"/>
+    <confml:setting ref="maximumWidgetHeight" name="Maximum height of widget" type="real"/>
+    <confml:setting ref="maximumWidgetWidth" name="Maximum width of widget" type="real"/>
+    <confml:setting ref="minimumWidgetHeight" name="Minimum height of widget" type="real"/>
+    <confml:setting ref="minimumWidgetWidth" name="Minimum width of widget" type="real"/>
     <confml:setting ref="defaultPageId" name="Default page ID" type="selection">
       <confml:option map="HomeScreenDbSettings/Pages"/>
     </confml:setting>
@@ -44,22 +44,52 @@
       <confml:landscapeWallpaper/>
       <confml:portraitWallpaper/>
       <confml:maximumPageCount>8</confml:maximumPageCount>
-      <confml:maximumWidgetHeight>40</confml:maximumWidgetHeight>
-      <confml:maximumWidgetWidth>51</confml:maximumWidgetWidth>
-      <confml:minimumWidgetHeight>3</confml:minimumWidgetHeight>
-      <confml:minimumWidgetWidth>3</confml:minimumWidgetWidth>
+      <confml:maximumWidgetHeight>39</confml:maximumWidgetHeight>
+      <confml:maximumWidgetWidth>48</confml:maximumWidgetWidth>
+      <confml:minimumWidgetHeight>8.75</confml:minimumWidgetHeight>
+      <confml:minimumWidgetWidth>8.75</confml:minimumWidgetWidth>
       <confml:defaultPageId map="HomeScreenDbSettings/Pages[@key='1']"/>
-      <confml:Widgets extensionPolicy="replace"><confml:id>1</confml:id><confml:uri>hsclockwidgetplugin</confml:uri><confml:pageId>1</confml:pageId></confml:Widgets>
-      <confml:Widgets><confml:id>2</confml:id><confml:uri>hsdialerwidgetplugin</confml:uri><confml:pageId>1</confml:pageId></confml:Widgets>
-      <confml:Widgets><confml:id>3</confml:id><confml:uri>ftuhswidget</confml:uri><confml:pageId>1</confml:pageId></confml:Widgets>
-      <confml:WidgetPresentations extensionPolicy="append"><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='1']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:Widgets><confml:id>1</confml:id><confml:uri>hsclockwidgetplugin</confml:uri><confml:pageId  map="HomeScreenDbSettings/Pages[@key='1']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>2</confml:id><confml:uri>hsdialerwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='1']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>3</confml:id><confml:uri>ftuhswidget</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='1']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>4</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>5</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>6</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>7</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>8</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>9</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>10</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='2']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>11</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='3']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>12</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='3']"></confml:pageId></confml:Widgets>
+      <confml:Widgets><confml:id>13</confml:id><confml:uri>hsshortcutwidgetplugin</confml:uri><confml:pageId map="HomeScreenDbSettings/Pages[@key='3']"></confml:pageId></confml:Widgets>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='1']"></confml:widgetId></confml:WidgetPresentations>
       <confml:WidgetPresentations><confml:key>landscape</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='1']"></confml:widgetId></confml:WidgetPresentations>
       <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>136</confml:x><confml:y>276</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='2']"></confml:widgetId></confml:WidgetPresentations>
       <confml:WidgetPresentations><confml:key>landscape</confml:key><confml:x>136</confml:x><confml:y>176</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='2']"></confml:widgetId></confml:WidgetPresentations>
       <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>400</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='3']"></confml:widgetId></confml:WidgetPresentations>
-      <confml:WidgetPresentations><confml:key>landscape</confml:key><confml:x>300</confml:x><confml:y>150</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='3']"></confml:widgetId></confml:WidgetPresentations>      
-      <confml:WidgetPreferences extensionPolicy="replace"><confml:key>clockType</confml:key><confml:value>Analog</confml:value><confml:widgetId>1</confml:widgetId></confml:WidgetPreferences>
-      <confml:Pages extensionPolicy="replace"><confml:id>1</confml:id><confml:indexPosition>0</confml:indexPosition></confml:Pages>
+      <confml:WidgetPresentations><confml:key>landscape</confml:key><confml:x>300</confml:x><confml:y>150</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='3']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='4']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>100</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='5']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>185</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='6']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>270</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='7']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>185</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='8']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>100</confml:x><confml:y>185</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='9']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>185</confml:x><confml:y>185</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='10']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>15</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='11']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>100</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='12']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPresentations><confml:key>portrait</confml:key><confml:x>185</confml:x><confml:y>80</confml:y><confml:zValue>0.0</confml:zValue><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='13']"></confml:widgetId></confml:WidgetPresentations>
+      <confml:WidgetPreferences><confml:key>clockType</confml:key><confml:value>Analog</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='1']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x20022EF9</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='4']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x10005901</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='5']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x20029F80</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='6']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x2001FE79</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='7']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x10207C62</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='8']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x10005951</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='9']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x20025FD9</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='10']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x102828D6</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='11']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x101FB751</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='12']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:WidgetPreferences><confml:key>uid</confml:key><confml:value>0x100059EE</confml:value><confml:widgetId map="HomeScreenDbSettings/Widgets[@key='13']"></confml:widgetId></confml:WidgetPreferences>
+      <confml:Pages><confml:id>1</confml:id><confml:indexPosition>0</confml:indexPosition></confml:Pages>
       <confml:Pages><confml:id>2</confml:id><confml:indexPosition>1</confml:indexPosition></confml:Pages>
       <confml:Pages><confml:id>3</confml:id><confml:indexPosition>2</confml:indexPosition></confml:Pages>
     </confml:HomeScreenDbSettings>

@@ -34,9 +34,46 @@
  */
 
 /*!
- \fn void commit(const QList<int> &appList);
+ \fn void HsAppsCheckList::commit(const QList<int> &appList);
  Signal emitted when applications are selected.
  \param appList application list.
+ */
+
+/*!
+ \var HsAppsCheckList::mView
+ View. Owned.
+ */
+
+/*!
+ \var HsAppsCheckList::mPreviousView
+ Previous view. Not owned.
+ */
+
+/*!
+ \var HsAppsCheckList::mActionConfirm
+ Confirm action. Owned.
+ */
+
+/*!
+ \var HsAppsCheckList::mListView
+ List view. Owned.
+ */
+
+/*!
+ \var HsAppsCheckList::mModel
+ Standard Item Model for the List.
+ Own.
+ */
+
+/*!
+ \var HsAppsCheckList::mSortAttribute
+ Sort order for applications.
+ */
+
+/*!
+ \var HsAppsCheckList::mLoadedObjects
+ List of objects loaded by document loader.
+ Content owned.
  */
 
 /*!
@@ -119,9 +156,9 @@ void HsAppsCheckList::showAppsCheckboxList(HsSortAttribute sortOrder)
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Construct contrlos.
+ */
 void HsAppsCheckList::constructControls()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::constructControls");
@@ -152,9 +189,10 @@ void HsAppsCheckList::constructControls()
     HSMENUTEST_FUNC_EXIT("HsAppsCheckList::constructControls");
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Slot connected trrigger action of secondary soft key of check list box.
+ It is called when done button is selected.
+ */
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
@@ -179,9 +217,12 @@ void HsAppsCheckList::selectApplicationsDone()
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+
+/*!
+ Returns list with selected items ids.
+ \param modelIndexList list with selected model indexes.
+ \return list with items ids.
+ */
 QList<int> HsAppsCheckList::getSortedItemsList(
     const QModelIndexList &modelIndexList)
 {
@@ -209,9 +250,10 @@ QList<int> HsAppsCheckList::getSortedItemsList(
     return list;
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Returns pointer to tha main window.
+ \return Pointer to the main window.
+ */
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT

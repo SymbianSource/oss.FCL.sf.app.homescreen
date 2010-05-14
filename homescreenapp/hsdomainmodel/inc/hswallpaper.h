@@ -23,6 +23,8 @@
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
+class HbIconItem;
+
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
 class HSDOMAINMODEL_EXPORT HsWallpaper : public HbWidget
@@ -33,14 +35,14 @@ public:
     HsWallpaper(QGraphicsItem *parent = 0);
     ~HsWallpaper();
 
-    void paint(QPainter *painter,
-               const QStyleOptionGraphicsItem *option, 
-               QWidget *widget = 0);
-
     bool setImagesById(const QString &id = "d",
                        const QString &ext = "png");
+
     bool setImagesByPaths(const QString &landscapeImagePath,
                           const QString &portraitImagePath);
+
+    void setPortraitImage(const QString &path, bool activate = false);
+    void setLandscapeImage(const QString &path, bool activate = false);
 
     bool removeImages();
 
@@ -52,11 +54,15 @@ public:
 private:    
     Q_DISABLE_COPY(HsWallpaper)
 
+private slots:
+    void onOrientationChanged(Qt::Orientation orientation);
+
 private:
-    QPixmap mImage;
     QString mLImagePath;
     QString mPImagePath;
     Qt::Orientation mOrientation;
+
+    HbIconItem *mIconItem;
     
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

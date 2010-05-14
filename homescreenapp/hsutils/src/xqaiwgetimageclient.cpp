@@ -96,6 +96,8 @@ void XQAIWGetImageClient::fetch( QVariantMap filter, XQAIWMultimediaFlags flag)
     QStringList filters;
     filters << "*.png";
     filters << "*.jpg";
+    filters << "*.bmp";
+    filters << "*.gif";
 
     QStringList images;
 

@@ -20,9 +20,11 @@
 
 #include <qstate.h>
 #include <QModelIndex>
+#include <QPointer>
 
 #include "hsmenustates_global.h"
 #include "hsmenuservice.h"
+#include "hsmenuview.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -31,19 +33,9 @@ class HbAction;
 class HbMenu;
 class HbAbstractViewItem;
 class QPointF;
-class HsMenuView;
+class HsMenuViewBuilder;
 class HsMenuItemModel;
-/**
- * @ingroup group_hsmenustateplugin
- * @brief All Applications State.
- *
- * Displays all installed packages present on the device.
- *
- * @see StateMachine
- *
- * @lib ?library
- * @since S60 ?S60_version
- */
+
 class HsInstalledAppsState: public QState
 {
     Q_OBJECT
@@ -52,7 +44,8 @@ class HsInstalledAppsState: public QState
 
 public:
 
-    HsInstalledAppsState(HsMenuView &menuView, QState *parent = 0);
+    HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
+                         QState *parent = 0);
 
     ~HsInstalledAppsState();
 
@@ -71,6 +64,8 @@ private slots:
 
     void stateExited();
 
+	void contextMenuAction(HbAction *action);
+
 private:
 
     void construct();
@@ -78,12 +73,11 @@ private:
     void setMenuOptions();
 
 private:
-
     /**
      * The View widget.
      * Own.
      */
-    HsMenuView &mMenuView;
+    HsMenuView mMenuView;
 
     /**
      * Item Model for the List.
@@ -96,14 +90,10 @@ private:
      * Backstepping functionality.
      * Own.
      */
-    HbAction *mSecondarySoftkeyAction;
+    HbAction *const mSecondarySoftkeyAction;
 
-    /**
-     * Old navigation icon.
-     * Not own.
-     */
-    HbAction *mOldNavigationAction;
-
+	QModelIndex mContextModelIndex;
+	QPointer<HbMenu> mContextMenu;
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H

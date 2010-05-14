@@ -20,9 +20,13 @@
 
 #include <qstate.h>
 #include <QModelIndex>
+#include <QPointer>
 
 #include "hsmenustates_global.h"
+#include "hsmenumodewrapper.h"
 #include "hsmenuservice.h"
+#include "hsmenuview.h"
+
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -31,98 +35,54 @@ class HbAction;
 class HbMenu;
 class HbAbstractViewItem;
 class QPointF;
-class HsMenuView;
+class HsMenuViewBuilder;
 class HsMenuItemModel;
-/**
- * @ingroup group_hsmenustateplugin
- * @brief All Applications State.
- *
- * Displays all applications present on the device in a sorted list.
- *
- * @see StateMachine
- *
- * @lib ?library
- * @since S60 ?S60_version
- */
+class HsMenuModeWrapper;
+
 class HsAllAppsState: public QState
 {
     Q_OBJECT
-
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
-
 public:
-    HsAllAppsState(HsMenuView &menuView, QState *parent = 0);
+    HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
+                   HsMenuModeWrapper &menuMode,
+                   QState *parent = 0);
     ~HsAllAppsState();
+signals:
+    void toAppLibraryState();
 
 public slots:
     void scrollToBeginning();
     void collectionsSortOrder(HsSortAttribute sortAttribute);
-
 private slots:
-
     bool openTaskSwitcher();
-
     bool checkSoftwareUpdates();
-
     void listItemActivated(const QModelIndex &index);
-
     void addActivated(const QModelIndex &index);
-
-    void listItemLongPressed(HbAbstractViewItem *item,
-                             const QPointF &coords);
-
-    void addLongPressed(HbAbstractViewItem *item,
-                        const QPointF &coords);
-
+    void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
+    void addLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addToCollection();
-
     void openInstalledView();
-
     void ascendingMenuAction();
-
     void descendingMenuAction();
-
     void stateEntered();
-
     void addModeEntered();
-
     void normalModeEntered();
-
-    void stateExited();
-
+    void stateExited();	
+	void contextMenuAction(HbAction *action);
 private:
-
     void construct();
-
     void setMenuOptions();
-
     void addToHomeScreen(const QModelIndex &index);
-
 private:
-
-    /**
-     * Sort order
-     */
+    HbAction *mSecondarySoftkeyAction;
     HsSortAttribute mSortAttribute;
-
-    /**
-     * Collections sort order
-     */
     HsSortAttribute mCollectionsSortAttribute;
-
-    /**
-     * The View widget.
-     */
-    HsMenuView &mMenuView;
-
-    /**
-     * Item Model for the List.
-     * Own.
-     */
+    HsMenuView mMenuView;
+    HsMenuModeWrapper &mMenuMode;
     HsMenuItemModel *mAllAppsModel;
-
-    QModelIndex mBookmark;
-
+	QModelIndex mContextModelIndex;
+	QPointer<HbMenu> mContextMenu;
 };
 
 #endif // HSALLAPPSSTATE_H

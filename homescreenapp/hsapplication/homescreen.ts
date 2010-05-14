@@ -26,7 +26,7 @@
     <comment>Offline text in home screen view title</comment>        
     <source>Offline</source>
     <translation variants="no">Offline</translation>
-    <extra-loc-layout_id>qtl_chrome_title</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_titlebar</extra-loc-layout_id>    
     <extra-loc-viewid>homescreen</extra-loc-viewid>
     <extra-loc-positionid>title</extra-loc-positionid>
     <extra-loc-feature>ho</extra-loc-feature>
@@ -66,7 +66,7 @@
     <comment>Home screen canvas menu item for opening Application library</comment>        
     <source>Add content</source>
     <translation variants="no">Add content</translation>
-    <extra-loc-layout_id>qtl_menu_set</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
     <extra-loc-viewid>homescreen</extra-loc-viewid>
     <extra-loc-positionid>list</extra-loc-positionid>
     <extra-loc-feature>ho</extra-loc-feature>
@@ -86,7 +86,7 @@
     <comment>Text in home screen view title when SIM access profile is active. While this mode is active, SIM card is controlled by car kit.</comment>        
     <source>In car control</source>
     <translation variants="no">In car control</translation>
-    <extra-loc-layout_id>qtl_chrome_title</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_titlebar</extra-loc-layout_id>    
     <extra-loc-viewid>homescreen</extra-loc-viewid>
     <extra-loc-positionid>title</extra-loc-positionid>
     <extra-loc-feature>ho</extra-loc-feature>
@@ -96,7 +96,7 @@
     <comment>Home screen canvas menu item for opening picture gallery</comment>        
     <source>Change wallpaper</source>
     <translation variants="no">Change wallpaper</translation>
-    <extra-loc-layout_id>qtl_menu_set</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
     <extra-loc-viewid>homescreen</extra-loc-viewid>
     <extra-loc-positionid>list</extra-loc-positionid>
     <extra-loc-feature>ho</extra-loc-feature>
@@ -112,11 +112,21 @@
     <extra-loc-feature>ho</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_homescreen_dpopinfo_loading_wallpaper">
+    <comment>Text in progress dialog when loading new wallpaper</comment>        
+    <source>Loading wallpaper</source>
+    <translation variants="no">Loading wallpaper</translation>
+    <extra-loc-layout_id></extra-loc-layout_id>    
+    <extra-loc-viewid>homescreen</extra-loc-viewid>
+    <extra-loc-positionid>dpopinfo</extra-loc-positionid>
+    <extra-loc-feature>ho</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_homescreen_list_add_page">
     <comment>Home screen canvas menu item for adding new Homescreen page next currently active one</comment>        
     <source>Add page</source>
     <translation variants="no">Add page</translation>
-    <extra-loc-layout_id>qtl_menu_set</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
     <extra-loc-viewid>homescreen</extra-loc-viewid>
     <extra-loc-positionid>list</extra-loc-positionid>
     <extra-loc-feature>ho</extra-loc-feature>
@@ -176,7 +186,7 @@
     <comment>Text in home screen view title, when device is out of network coverage or no SIM card present</comment>        
     <source>No service</source>
     <translation variants="no">No service</translation>
-    <extra-loc-layout_id>qtl_chrome_title</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_titlebar</extra-loc-layout_id>    
     <extra-loc-viewid>homescreen</extra-loc-viewid>
     <extra-loc-positionid>title</extra-loc-positionid>
     <extra-loc-feature>ho</extra-loc-feature>

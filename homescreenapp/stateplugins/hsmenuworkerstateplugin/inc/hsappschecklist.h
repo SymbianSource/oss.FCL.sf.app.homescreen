@@ -56,73 +56,30 @@ signals:
 
 protected slots:
 
-    /**
-     * Slot connected trrigger action of secondary soft key of check list box.
-     * It is called when done button is selected.
-     *
-     * @since S60 ?S60_version.
-     */
     void selectApplicationsDone();
 
 private:
 
-    /**
-     * Construct contrlos.
-     */
     void constructControls();
 
-    /**
-     * Returns pointer to tha main window.
-     *
-     * @since S60 ?S60_version.
-     * @return Pointer to the main window.
-     */
     HbMainWindow *mainWindow() const;
 
-    /**
-     * Returns list with selected items ids.
-     *
-     * @param modelIndexList list with selected model indexes.
-     * @return list with items ids.
-     */
     QList<int> getSortedItemsList(const QModelIndexList &modelIndexList);
 
 private:
 
-    /**
-     * View. Owned.
-     */
     HbView *mView;
 
-    /**
-     * Previous view. Not owned.
-     */
     HbView *mPreviousView;
 
-    /**
-     * Confirm action. Owned.
-     */
     HbAction *mActionConfirm;
 
-    /**
-     * List view. Owned.
-     */
     HbListView *mListView;
 
-    /**
-     * Standard Item Model for the List.
-     * Own.
-     */
     HsMenuItemModel *mModel;
 
-    /**
-     * Sort order for applications.
-     */
     HsSortAttribute mSortAttribute;
 
-	/**
-     * List of objects loaded by document loader. Content owned.
-     */
     QObjectList mLoadedObjects;
 
 };

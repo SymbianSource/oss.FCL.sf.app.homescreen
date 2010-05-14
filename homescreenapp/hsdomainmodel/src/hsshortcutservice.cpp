@@ -24,7 +24,7 @@
 
 namespace
 {
-    const char gShortcutId[]        = "mcsId";
+    const char gShortcutId[]        = "caEntryId";
     const char gShortcutWidgetUri[] = "hsshortcutwidgetplugin";
 }
 

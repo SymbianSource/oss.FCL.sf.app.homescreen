@@ -21,6 +21,7 @@
 #include <QVariant>
 
 #include <xqserviceprovider.h>
+#include "hswidgetcomponentdescriptor.h"
 
 class HsHomeScreenClientServiceProvider : public XQServiceProvider
 {
@@ -33,6 +34,10 @@ public:
 public slots:
     bool addWidget(const QString &uri,const QVariantHash &preferences);
     bool setWallpaper(const QString &fileName);
+    bool widgetUninstalled(const QVariantHash &widgetDescriptor);
+    
+private:
+    HsWidgetComponentDescriptor widgetComponentDescriptor(const QVariantHash& widgetDescriptor);
 };
 
 #endif // HSHOMESCREENCLIENTSERVICEPROVIDER_H

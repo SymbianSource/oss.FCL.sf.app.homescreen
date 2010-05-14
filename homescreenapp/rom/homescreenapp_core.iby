@@ -22,11 +22,15 @@
 
 file=ABI_DIR\BUILD_DIR\hsapplication.exe                  PROGRAMS_DIR\hsapplication.exe
 data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc  private\10003a3f\import\apps\hsapplication_reg.rsc
-data=\epoc32\data\z\resource\apps\hsapplication.rsc       resource\apps\hsapplication.rsc
 data=\epoc32\data\z\resource\apps\hsapplication.mif       resource\apps\hsapplication.mif
 data=ZPRIVATE\20022f35\homescreen.db                      private\20022f35\homescreen.db
 data=ZPRIVATE\20022f35\wallpapers\d_portrait.png          private\20022f35\wallpapers\d_portrait.png
 data=ZPRIVATE\20022f35\wallpapers\d_landscape.png         private\20022f35\wallpapers\d_landscape.png
+
+// ---- hswidgetuninstaller --------------------------------------------
+file=ABI_DIR\BUILD_DIR\hswidgetuninstaller.exe            PROGRAMS_DIR\hswidgetuninstaller.exe
+data=ZPRIVATE\10003a3f\import\apps\hswidgetuninstaller_reg.rsc private\10003a3f\import\apps\hswidgetuninstaller_reg.rsc
+data=\epoc32\data\z\resource\apps\hswidgetuninstaller.rsc resource\apps\hswidgetuninstaller.rsc
 
 // ---- hsutils --------------------------------------------
 
@@ -85,17 +89,10 @@ data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manife
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\tclock.png                       private\20022f35\import\widgetregistry\20022F6C\tclock.png
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml          private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml
 
-// -------- hsdialerwidgetplugin
-file=ABI_DIR\BUILD_DIR\hsdialerwidgetplugin.dll                                        SHARED_LIB_DIR\hsdialerwidgetplugin.dll
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.qtplugin    private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.qtplugin
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.manifest    private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.manifest
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\qtg_graf_hs_dialer.svg           private\20022f35\import\widgetregistry\20022F44\qtg_graf_hs_dialer.svg
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml         private\20022f35\import\widgetregistry\20022F44\hsdialerwidgetplugin.xml
-
 // ---- IMenuClient --------------------------------------------
 
 // -------- hsmenuclientplugin
-file=ABI_DIR\BUILD_DIR\hsmenuclientplugin.dll                           SHARED_LIB_DIR\hsmenuclientplugin.dll 
+file=ABI_DIR\BUILD_DIR\hsmenuclientplugin.dll                           SHARED_LIB_DIR\hsmenuclientplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\hsmenuclientplugin.qtplugin     resource\qt\plugins\hsmenuclientplugin.qtplugin
 data=ZPRIVATE\20022f35\hsmenuclientplugin.xml                           private\20022f35\hsmenuclientplugin.xml
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,17 +20,21 @@
 
 #include <QState>
 #include <QStringList>
+
 #include "hstest_global.h"
+#include "hswallpaperimagereader.h"
 
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
-class QImage;
+class QThread;
 class HbView;
+class HbProgressDialog;
 #ifdef Q_OS_SYMBIAN
 class HsImageFetcherClient;
 #else
 class XQAIWGetImageClient;
 #endif
+class HsImageRender;
 
 class HsSelectBackgroundState : public QState
 {
@@ -40,11 +44,21 @@ public:
     HsSelectBackgroundState(QState *parent = 0);
     ~HsSelectBackgroundState();
 
-signals:
-    void event_waitInput();
-
 private:
     Q_DISABLE_COPY(HsSelectBackgroundState)
+
+    enum ImageProcessingState {
+        NotRunning,
+        ProcessPortraitAsFirst,
+        ProcessLandscapeAsFirst,
+        ProcessPortraitAsSecond,
+        ProcessLandscapeAsSecond,
+        Error
+    };
+
+signals:
+    void event_waitInput();
+    void handleError();
 
 private slots:
     void action_selectWallpaper();
@@ -52,6 +66,9 @@ private slots:
    
     void onFetchComplete(QStringList imageStringList);
     void onFetchFailed(int error);
+    void onImageProcessed();
+    void onShowAnimation();
+    void onHandleError();
 
     // for S60 API
 #ifdef Q_OS_SYMBIAN
@@ -68,6 +85,11 @@ private:
 #endif
     
     HbView *mSourceView;
+    QThread *mWallpaperImageReaderThread;
+    HsWallpaperImageReader *mWallpaperImageReader;
+    HbProgressDialog *mProgressDialog;
+    ImageProcessingState mImageProcessingState;
+    bool mShowAnimation;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };

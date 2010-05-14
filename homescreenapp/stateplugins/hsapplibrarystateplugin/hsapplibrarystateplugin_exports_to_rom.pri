@@ -16,5 +16,6 @@
 
 BLD_INF_RULES.prj_exports += \
     "$${LITERAL_HASH}include <platform_paths.hrh>" \
-    "conf/hsapplibrary.confml  			APP_LAYER_CONFML(hsapplibrary.confml)" \
-	"conf/hsapplibrary_20022F97.crml  	APP_LAYER_CRML(hsapplibrary_20022F97.crml)"
+    "conf/hsapplibrary.confml           APP_LAYER_CONFML(hsapplibrary.confml)" \
+    "conf/hsapplibrary_20022F97.crml    APP_LAYER_CRML(hsapplibrary_20022F97.crml)" \
+    "conf/applibrary_view.confml        APP_LAYER_CONFML(applibrary_view.confml)"

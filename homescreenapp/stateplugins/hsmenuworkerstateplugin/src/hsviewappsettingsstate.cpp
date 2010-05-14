@@ -33,9 +33,26 @@
 #include "hsmenuservice.h"
 
 /*!
- \class HsCollectionNameDialog
+ \class HsViewAppSettingsState
  \ingroup HsViewAppSettingsState
  \brief State for showing Application Settings HbView from provided plugin
+ */
+
+/*!
+ \var HsViewAppSettingsState::mView
+ View.
+ Owned.
+ */
+
+/*!
+ \var HsViewAppSettingsState::mPreviousView
+ Previous view.
+ Not owned.
+ */
+
+/*!
+ \var HsViewAppSettingsState::mActionConfirm
+ Confirm action. Owned.
  */
 
 /*!
@@ -54,9 +71,9 @@ HsViewAppSettingsState::HsViewAppSettingsState(QState *parent) :
         construct();
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Constructs contained objects.
+ */
 void HsViewAppSettingsState::construct()
 {
     setObjectName(this->parent()->objectName()
@@ -88,17 +105,6 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
     
     const int entryId = data.value(itemIdKey()).toInt();   
     QSharedPointer<const CaEntry> entry = CaService::instance()->getEntry(entryId);    
-    
-    if(mView)
-        {
-    
-        delete mActionConfirm;  
-        mActionConfirm = NULL;    
-    
-        delete mView;  
-        mView = NULL;
-
-        }
     
     QString pluginPath(entry->attribute(appSettingsPlugin()));
     QPluginLoader loader(pluginPath);
@@ -133,6 +139,10 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
+/*!
+ Returns pointer to tha main window.
+ \return Pointer to the main window.
+ */
 HbMainWindow *HsViewAppSettingsState::mainWindow() const
 {
     return HbInstance::instance()->allMainWindows().value(0);
@@ -145,16 +155,12 @@ HbMainWindow *HsViewAppSettingsState::mainWindow() const
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
+/*!
+ Invoked when plugin view exits
+ */
 void HsViewAppSettingsState::settingsDone()
 {
-    // Remove mView from main window and restore previous view.
-    HbMainWindow *hbMainWindow = mainWindow();
-    hbMainWindow->setCurrentView(mPreviousView);
-    hbMainWindow->removeView(mView);
-    delete mActionConfirm;
-    mActionConfirm = NULL;
-    delete mView;
-    mView = NULL;
+    emit exit();
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
@@ -178,3 +184,23 @@ void HsViewAppSettingsState::subscribeForMemoryCardRemove(int entryId)
             SLOT(settingsDone()));
 }
 
+void HsViewAppSettingsState::onExit(QEvent *event)
+{
+    
+    QState::onExit(event);
+    // Remove mView from main window and restore previous view.
+    HbMainWindow *hbMainWindow = mainWindow();
+    hbMainWindow->setCurrentView(mPreviousView);
+    hbMainWindow->removeView(mView);
+    disconnect(mNotifier,
+               SIGNAL(entryChanged(CaEntry,ChangeType)),
+               this,
+               SLOT(settingsDone()));
+    delete mNotifier;
+    mNotifier = NULL;
+    
+    delete mActionConfirm;
+    mActionConfirm = NULL;
+    delete mView;
+    mView = NULL;
+}
