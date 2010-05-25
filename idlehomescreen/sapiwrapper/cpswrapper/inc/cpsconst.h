@@ -38,6 +38,9 @@ namespace cpswrapper
 	_LIT( KDelete16, "delete" );
 	_LIT8( KAdd, "add" );
 	_LIT( KAdd16, "add" );
+	_LIT( KUpdate16, "update" );
+	_LIT8( KUpdate, "update" );
+	_LIT8( KAddUpdateDelete , "add:update:delete" );
 	_LIT8( KRequestNotification, "RequestNotification" );
 	_LIT8( KType, "type" );
 	_LIT8( KGetList, "GetList" );

@@ -1224,8 +1224,17 @@ void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdaptive )
     if ( iFindbox && !iFindPaneIsVisible &&
             iWidgetsList->Model()->NumberOfItems() > KMinWidgets )
         {
-        // reset focus
-        ResetFocus();
+        // set focus
+        if ( iWidgetsList->ItemDrawer()->Flags() 
+                & CListItemDrawer::ESingleClickDisabledHighlight )
+            {
+            ResetFocus();
+            }
+        else
+            {
+            iWidgetsList->SetFocus( ETrue, EDrawNow );                
+            }
+        
         
         // set column filter flag
         TBitFlags32 bitFlag;
@@ -1296,7 +1305,16 @@ void CWmMainContainer::DeactivateFindPaneL(TBool aLayout)
             m->RemoveFilter();
             }
         
-        ResetFocus();
+        //set focus
+        if ( iWidgetsList->ItemDrawer()->Flags() 
+                & CListItemDrawer::ESingleClickDisabledHighlight )
+            {
+            ResetFocus();
+            }
+        else
+            {
+            iWidgetsList->SetFocus( ETrue, EDrawNow );                
+            }
 
         iFindbox->MakeVisible( EFalse );        
         iFindPaneIsVisible = EFalse;        
@@ -1487,6 +1505,19 @@ void CWmMainContainer::LaunchDetailsDialogL()
         if ( dlg && dlg->ExecuteLD() == ECbaAddToHs )
             {
             AddWidgetToHomeScreenL();
+            }
+        else
+            {
+            if ( iWidgetsList->ItemDrawer()->Flags() 
+                    & CListItemDrawer::ESingleClickDisabledHighlight )
+                {
+                ResetFocus();
+                }
+            else
+                {
+                iWidgetsList->SetFocus( ETrue, EDrawNow );
+                UpdateFocusMode();
+                }
             }
         }
     }

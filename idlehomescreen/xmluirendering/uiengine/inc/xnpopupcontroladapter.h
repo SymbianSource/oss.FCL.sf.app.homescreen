@@ -102,11 +102,15 @@ public:
      */
     void HandleScreenDeviceChangedL();
     
+    /*
+     * Closes stylus popup menu if it is open
+     */
+    void HideMenuL();
+    
 private:
     // New functions
     void PopulateMenuL( CXnPluginData& aPlugin, CXnNode* aItem );                                  
     void ShowMenuL( CXnPluginData& aPlugin, TPoint aPosition );
-    void HideMenuL();
                            
 private:
     // Data

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.64 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.65 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -1745,6 +1745,9 @@ void CMmWidgetContainer::HandleNumberOfItemsChangedL( TItemsChangeType aChange )
     SetHighlightVisibilityL( EFalse );
     if( aChange == EItemsAdded )
         {
+        // force update scrollbar to go down
+        if( WidgetType() == EGridWidget && NumberOfItems() > 0)
+            Widget()->SetCurrentItemIndex( NumberOfItems() - 1 );
         HandleItemAdditionL();
         }
     else if( aChange == EItemsRemoved )

@@ -66,7 +66,8 @@ const TInt KPSCrashCountKey( 1 );
 const TInt KStabilityInterval( 60000000 ); // 1 minute
 const TInt KActivationCompleteInterval( 2000000 ); // 2s
 const TInt KCrashRestoreDefaultThreshold( 3 );
-const TInt KCrashRestoreAllTreshold( 4 );
+const TInt KCrashRestoreRomTreshold( 4 );
+const TInt KCrashRestoreViewsTreshold( 5 );
 
 // ============================ LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
@@ -1791,10 +1792,14 @@ void CXnViewManager::DoRobustnessCheckL()
 
         query->RunLD();           
         }
-    else if( crashCount >= KCrashRestoreAllTreshold )
-        {       
-        iHspsWrapper->RestoreRootL();
-        
+    else if( crashCount == KCrashRestoreRomTreshold )
+        {
+        iHspsWrapper->RestoreRomConfL();                         
+        }
+    else if( crashCount >= KCrashRestoreViewsTreshold )
+        {
+        iHspsWrapper->RestoreViewsL();
+                 
         ResetCrashCount();
         return;
         }

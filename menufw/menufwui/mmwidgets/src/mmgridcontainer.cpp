@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_74 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_74 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_75 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_75 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -92,9 +92,9 @@ CMmGridContainer::~CMmGridContainer()
 // -----------------------------------------------------------------------------
 //
 THnSuiteWidgetType CMmGridContainer::WidgetType()
-	{
-	return EGridWidget;
-	}
+  {
+  return EGridWidget;
+  }
 // -----------------------------------------------------------------------------
 // CMmGridContainer::ConstructL()
 // 2nd phase constructor
@@ -125,15 +125,15 @@ void CMmGridContainer::ConstructL( const TRect& aRect, MObjectProvider* aObjectP
 CMmGrid* CMmGridContainer::CreateGridL( CMmTemplateLibrary* aTemplateLibrary )
     {
     iGrid = CMmGrid::NewL( this,
-    		EAknListBoxSelectionList | EAknListBoxLoopScrolling | EAknListBoxDisableHighlight , aTemplateLibrary );
+        EAknListBoxSelectionList | EAknListBoxLoopScrolling | EAknListBoxDisableHighlight , aTemplateLibrary );
     iGrid->SetContainerWindowL( *this );
     iGrid->CreateScrollBarFrameL( ETrue );
     iGrid->SetPrimaryScrollingType(
-    			CAknGridView::EScrollFollowsItemsAndLoops );
+          CAknGridView::EScrollFollowsItemsAndLoops );
     iGrid->SetSecondaryScrollingType(
-    			CAknGridView::EScrollFollowsGrid );
+          CAknGridView::EScrollFollowsGrid );
     iGrid->ScrollBarFrame()->SetScrollBarVisibilityL(
-    		CEikScrollBarFrame::EAuto, CEikScrollBarFrame::EAuto );
+        CEikScrollBarFrame::EAuto, CEikScrollBarFrame::EAuto );
     iGrid->ScrollBarFrame()->DrawBackground( EFalse, EFalse );
     return iGrid;
     }
@@ -146,7 +146,7 @@ void CMmGridContainer::SizeChanged()
     {
     CMmWidgetContainer::SizeChanged();
     if ( iGrid )
-    	{
+      {
 //    	iGrid->SetRect( Rect() );
         iGrid->SetupLayout();
         }
@@ -157,34 +157,34 @@ void CMmGridContainer::SizeChanged()
 //
 void CMmGridContainer::SetEditModeL( TBool aIsEditMode )
     {
-	if (aIsEditMode && !AknLayoutUtils::PenEnabled() )
-		{
-		iGrid->SetPrimaryScrollingType(
-				CAknGridView::EScrollStops );
-		iGrid->SetSecondaryScrollingType(
-				CAknGridView::EScrollStops );
+  if (aIsEditMode && !AknLayoutUtils::PenEnabled() )
+    {
+    iGrid->SetPrimaryScrollingType(
+        CAknGridView::EScrollStops );
+    iGrid->SetSecondaryScrollingType(
+        CAknGridView::EScrollStops );
         }
     else
-    	{
-    	iGrid->SetPrimaryScrollingType(
-    	    			CAknGridView::EScrollFollowsItemsAndLoops );
-    	iGrid->SetSecondaryScrollingType(
-    	    			CAknGridView::EScrollFollowsGrid );
+      {
+      iGrid->SetPrimaryScrollingType(
+                CAknGridView::EScrollFollowsItemsAndLoops );
+      iGrid->SetSecondaryScrollingType(
+                CAknGridView::EScrollFollowsGrid );
 
-    	}
+      }
 
-	// In EditMode we allow Avkon to redraw scrollbar background
-	// to prevent scrollbar flicking.
-	// When edit mode is disabled, this redrawing causes performance problems
-	// (and disabling it does not produce erroneous side-effects).
-	if( aIsEditMode )
-		{
-	    iGrid->ScrollBarFrame()->DrawBackground( EFalse, ETrue );
-		}
-	else
-		{
-	    iGrid->ScrollBarFrame()->DrawBackground( EFalse, EFalse );
-		}
+  // In EditMode we allow Avkon to redraw scrollbar background
+  // to prevent scrollbar flicking.
+  // When edit mode is disabled, this redrawing causes performance problems
+  // (and disabling it does not produce erroneous side-effects).
+  if( aIsEditMode )
+    {
+      iGrid->ScrollBarFrame()->DrawBackground( EFalse, ETrue );
+    }
+  else
+    {
+      iGrid->ScrollBarFrame()->DrawBackground( EFalse, EFalse );
+    }
 
     CMmWidgetContainer::SetEditModeL( aIsEditMode );
     }
@@ -214,18 +214,18 @@ EXPORT_C void CMmGridContainer::SetDefaultHighlightL(  TBool aRedraw )
 // -----------------------------------------------------------------------------
 //
 TInt CMmGridContainer::DefaultHighlightOffset()
-	{
-	TInt topVisibleItemIndex = iGrid->View()->TopItemIndex();
-	TInt hiddenPixels = -iGrid->View()->ItemOffsetInPixels();
+  {
+  TInt topVisibleItemIndex = iGrid->View()->TopItemIndex();
+  TInt hiddenPixels = -iGrid->View()->ItemOffsetInPixels();
 
-	if ( iGrid->View()->ItemIsPartiallyVisible( topVisibleItemIndex )
-		&& hiddenPixels > iGrid->View()->ItemSize().iHeight / 2 )
-		{
-		topVisibleItemIndex += ColumnsInCurrentView();
-		}
+  if ( iGrid->View()->ItemIsPartiallyVisible( topVisibleItemIndex )
+    && hiddenPixels > iGrid->View()->ItemSize().iHeight / 2 )
+    {
+    topVisibleItemIndex += ColumnsInCurrentView();
+    }
 
-	return topVisibleItemIndex;
-	}
+  return topVisibleItemIndex;
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -243,10 +243,10 @@ CMmListBoxModel* CMmGridContainer::GetMmModel()
 // -----------------------------------------------------------------------------
 //
 void CMmGridContainer::SetItemDrawerAndViewBgContext(
-		CAknsBasicBackgroundControlContext * aBgContext )
-	{
-	iGrid->SetItemDrawerAndViewBgContext (aBgContext);
-	}
+    CAknsBasicBackgroundControlContext * aBgContext )
+  {
+  iGrid->SetItemDrawerAndViewBgContext (aBgContext);
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -254,10 +254,10 @@ void CMmGridContainer::SetItemDrawerAndViewBgContext(
 // -----------------------------------------------------------------------------
 //
 void CMmGridContainer::SetupWidgetLayoutL()
-	{
-	User::LeaveIfNull( iGrid );
-	iGrid->SetupLayout();
-	}
+  {
+  User::LeaveIfNull( iGrid );
+  iGrid->SetupLayout();
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -286,9 +286,9 @@ void CMmGridContainer::SetHighlightVisibilityL( TBool aVisible )
 // ---------------------------------------------------------------------------
 //
 void CMmGridContainer::HandleItemAdditionL()
-	{
-	iGrid->HandleItemAdditionL();
-	}
+  {
+  iGrid->HandleItemAdditionL();
+  }
 
 
 // ---------------------------------------------------------------------------
@@ -296,47 +296,49 @@ void CMmGridContainer::HandleItemAdditionL()
 // ---------------------------------------------------------------------------
 //
 void CMmGridContainer::HandleItemRemovalL()
-	{
+  {
 
-	GetMmModel()->HandleSuiteEventL( ESuiteItemsRemoved, GetMmModel()->GetSuiteModel() );
-	ValidateWidgetCurrentItemIndex();
-	iDrawer->RemoveFloatingItems();
-	if( IsEditMode() )
-		{
-		iDrawer->GetAnimator()->SetNextRedrawToWholeScreen();
-		}
+  GetMmModel()->HandleSuiteEventL( ESuiteItemsRemoved, GetMmModel()->GetSuiteModel() );
+  ValidateWidgetCurrentItemIndex();
+  iDrawer->RemoveFloatingItems();
+  if( IsEditMode() )
+    {
+    iDrawer->GetAnimator()->SetNextRedrawToWholeScreen();
+    }
 
-	CacheWidgetPosition();
-	iGrid->HandleItemRemovalL();
-	RestoreWidgetPosition();
-	CacheWidgetPosition();
+  CacheWidgetPosition();
+  iGrid->View()->SetDisableRedraw( ETrue ); //prevention scroll view
+  iGrid->HandleItemRemovalL();
+  iGrid->View()->SetDisableRedraw( EFalse );
+  RestoreWidgetPosition();
+  CacheWidgetPosition();
 
-	if ( iCurrentHighlight != iGrid->CurrentItemIndex() )
-		{
-		iCurrentHighlight = iGrid->CurrentItemIndex();
-		if( !iCurrentHighlight && !iGrid->Model()->NumberOfItems() )
-			{
-			iCurrentHighlight = KErrNotFound ;
-			}
-		CHnSuiteModel* suiteModel = GetSuiteModelL();
-		if ( suiteModel )
-		    {
-		    suiteModel->SetSuiteHighlightL( iCurrentHighlight );
-		    }
-		}
-	static_cast<CMmListBoxItemDrawer*>( iGrid->ItemDrawer() )->TrimCacheSize(
+  if ( iCurrentHighlight != iGrid->CurrentItemIndex() )
+    {
+    iCurrentHighlight = iGrid->CurrentItemIndex();
+    if( !iCurrentHighlight && !iGrid->Model()->NumberOfItems() )
+      {
+      iCurrentHighlight = KErrNotFound ;
+      }
+    CHnSuiteModel* suiteModel = GetSuiteModelL();
+    if ( suiteModel )
+        {
+        suiteModel->SetSuiteHighlightL( iCurrentHighlight );
+        }
+    }
+  static_cast<CMmListBoxItemDrawer*>( iGrid->ItemDrawer() )->TrimCacheSize(
             GetMmModel()->NumberOfItems() );
-	}
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 TInt CMmGridContainer::ColumnsInCurrentView()
-	{
-	CAknGridView* view ( (CAknGridView*) iGrid->View() );
-	return view->NumberOfColsInView();
-	}
+  {
+  CAknGridView* view ( (CAknGridView*) iGrid->View() );
+  return view->NumberOfColsInView();
+  }
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -361,27 +363,27 @@ void CMmGridContainer::DrawView()
 // -----------------------------------------------------------------------------
 //
 void CMmGridContainer::SetVerticalItemOffset( TInt aOffset )
-	{
-	iGrid->SetVerticalItemOffset( aOffset );
-	}
+  {
+  iGrid->SetVerticalItemOffset( aOffset );
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmGridContainer::VerticalItemOffset() const
-	{
-	return iGrid->VerticalItemOffset();
-	}
+  {
+  return iGrid->VerticalItemOffset();
+  }
 
 //----------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CMmGridContainer::UpdateViewScrollBarThumbs()
-	{
-	iGrid->UpdateScrollBarThumbs();
-	}
+  {
+  iGrid->UpdateScrollBarThumbs();
+  }
 
 // -----------------------------------------------------------------------------
 //

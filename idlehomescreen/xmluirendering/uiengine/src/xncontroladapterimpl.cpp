@@ -3791,12 +3791,22 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
                 {
                 CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(
                     appui.ViewManager().ActiveViewData().ViewNode()->Control() );
-                
-                control->IgnoreEventsUntilNextPointerUp();
+                                
                 control->ResetGrabbing();                      
+                
+#ifdef RD_TACTILE_FEEDBACK            
+                MTouchFeedback* feedback( MTouchFeedback::Instance() );
+                
+                if ( feedback )
+                    {
+                    feedback->InstantFeedback( iAdapter, ETouchFeedbackBasic, 
+                       ETouchFeedbackVibra, TPointerEvent() );
+                                               
+                    }
+#endif                
                 }
 
-          // Indicate long tap has taken place
+          	// Indicate long tap has taken place
             iLongtap = ETrue;
             
             CXnNode* hold = BuildTriggerNodeL( *engine,

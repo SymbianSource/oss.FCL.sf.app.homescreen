@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -39,25 +39,25 @@ public:
      * This method should be called only once. If you want to store another icon
      * simply call Close() on this icon holder and then create a new icon holder
      * to store the new icon.
-     * 
+     *
      * @param aGulIcon Icon to store in this icon holder.
      */
     IMPORT_C void SetGulIcon( CGulIcon* aGulIcon );
-    
+
     /**
      * Returns the icon held by this icon holder.
-     * 
+     *
      * @return Icon held by this object (NULL value possible).
      */
     IMPORT_C CGulIcon* GetGulIcon() const;
-    
+
     /**
      * Standard C++ destructor.
      */
     ~CHnIconHolder();
-    
+
 private: // data
-    
+
     /**
      * A CGulIcon object owned by this icon holder.
      * Can possibly be NULL.

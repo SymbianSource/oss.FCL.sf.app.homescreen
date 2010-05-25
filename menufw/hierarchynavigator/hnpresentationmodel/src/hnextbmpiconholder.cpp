@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -28,10 +28,10 @@ EXPORT_C void CHnExtBmpIconHolder::SetGulIcon( CGulIcon* aGulIcon,
         CLiwBitmapBuffer* aBmpBuffer, CLiwBitmapBuffer* aMaskBuffer )
     {
     __ASSERT_DEBUG( aGulIcon && aBmpBuffer, User::Invariant() );
-    
+
     if ( aGulIcon )
         {
-        __ASSERT_DEBUG( aGulIcon->BitmapsOwnedExternally(), User::Invariant() ); 
+        __ASSERT_DEBUG( aGulIcon->BitmapsOwnedExternally(), User::Invariant() );
         CHnIconHolder::SetGulIcon( aGulIcon );
         aGulIcon->SetBitmapsOwnedExternally( ETrue );
         if ( aBmpBuffer )
@@ -56,9 +56,27 @@ CHnExtBmpIconHolder::~CHnExtBmpIconHolder()
     if ( iBmpBuffer )
         {
         iBmpBuffer->DecRef();
+         }
+    if ( iMaskBuffer )
+        {
+        iMaskBuffer->DecRef();
+        }
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CHnExtBmpIconHolder::CleanBmpBuffer()
+    {
+    if ( iBmpBuffer )
+        {
+        iBmpBuffer->DecRef();
+        iBmpBuffer = NULL;
         }
     if ( iMaskBuffer )
         {
         iMaskBuffer->DecRef();
+        iMaskBuffer = NULL;
         }
     }

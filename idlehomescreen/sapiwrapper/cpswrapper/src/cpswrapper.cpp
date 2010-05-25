@@ -386,17 +386,11 @@ namespace cpswrapper
     //
     void CCpsWrapper::StartListeningPublisherRegistryL()
         {
-        // Start Listening all the HS template using widgets unregistration
-        RequestForNotificationL( KAll, KHSTemplate, KAll, KDelete, KPublisher16 );
-                 
-        // Start Listening all the WRT widgets unregistration
-        RequestForNotificationL( KAll, KWRTTemplate, KAll, KDelete, KPublisher16 );
-        
         // Start Listening all the WRT widgets registrations
-        RequestForNotificationL( KAll, KWRTTemplate, KAll, KAdd, KPublisher16 );
+        RequestForNotificationL( KAll, KWRTTemplate, KAll, KAddUpdateDelete, KPublisher16 );
         
         // Start Listening all the HS template widgets registrations
-        RequestForNotificationL( KAll, KHSTemplate, KAll, KAdd, KPublisher16 );
+        RequestForNotificationL( KAll, KHSTemplate, KAll, KAddUpdateDelete , KPublisher16 );
         }
     
     // -----------------------------------------------------------------------
@@ -413,6 +407,10 @@ namespace cpswrapper
         else if ( aOperation == KAdd16 )
             {
             iObserver.NotifyWidgetRegisteredL();
+            }
+        else if ( aOperation == KUpdate16 )
+            {
+            iObserver.NotifyWidgetUpdatedL();
             }
     	}
     }

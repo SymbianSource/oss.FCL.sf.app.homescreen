@@ -61,6 +61,11 @@ namespace cpswrapper
          * Callback methot for registered widget notify.
          */
         virtual void NotifyWidgetRegisteredL() = 0;
+        
+        /**
+         * Callback method for updated widget notify.
+         */
+        virtual void NotifyWidgetUpdatedL() = 0;
         };
 
     /**

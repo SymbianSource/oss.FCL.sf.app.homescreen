@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxItemDrawer
-*  Version     : %version: MM_38.1.17 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_38.1.18 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -65,12 +65,12 @@ public:
      * @param aFormattedCellData Cell data.
      * @param aWidgetType Widget type.
      */
-	static CMmListBoxItemDrawer* NewL(
-	        CMmListBoxModel* aMmListBoxModel,
-		    const CFont* aFont,
-		    CFormattedCellListBoxData* aFormattedCellData,
-		    TMmWidgetType aWidgetType,
-		    CMmTemplateLibrary* aTemplateLibrary );
+  static CMmListBoxItemDrawer* NewL(
+          CMmListBoxModel* aMmListBoxModel,
+        const CFont* aFont,
+        CFormattedCellListBoxData* aFormattedCellData,
+        TMmWidgetType aWidgetType,
+        CMmTemplateLibrary* aTemplateLibrary );
 
     /**
      * Two-phased constructor.
@@ -81,12 +81,12 @@ public:
      * @param aFormattedCellData Cell data.
      * @param aWidgetType Widget type.
      */
-	static CMmListBoxItemDrawer* NewLC(
-	        CMmListBoxModel* aMmListBoxModel,
-		    const CFont* aFont,
-		    CFormattedCellListBoxData* aFormattedCellData,
-		    TMmWidgetType aWidgetType,
-		    CMmTemplateLibrary* aTemplateLibrary );
+  static CMmListBoxItemDrawer* NewLC(
+          CMmListBoxModel* aMmListBoxModel,
+        const CFont* aFont,
+        CFormattedCellListBoxData* aFormattedCellData,
+        TMmWidgetType aWidgetType,
+        CMmTemplateLibrary* aTemplateLibrary );
 
     /**
      * Destructor.
@@ -226,8 +226,8 @@ public:
      * @since S60 5.0
      * @param aBgContext Background context.
      */
-	void SetBgContext(
-			CAknsBasicBackgroundControlContext* aBgContext );
+  void SetBgContext(
+      CAknsBasicBackgroundControlContext* aBgContext );
 
     /**
      * Sets condition if background should be redrawn.
@@ -458,7 +458,7 @@ public:
      * @since S60 v3.0
      * @param aIsRunning Is scrollbar event running.
      */
-	void SetScrollbarEventRunning( TBool aIsRunning );
+  void SetScrollbarEventRunning( TBool aIsRunning );
 
     /**
      * Sets number of columns in view.
@@ -466,16 +466,16 @@ public:
      * @since S60 v3.0
      * @param aNumberOfColumns Number of columns in view.
      */
-	void SetNumberOfColsInView( TInt aNumberOfColumns );
+  void SetNumberOfColsInView( TInt aNumberOfColumns );
 
-	/**
-	 * Used in non-touch edit mode to block drawing of move indicators and highlight
-	 * to clean screen for animation.
-	 *
-	 * @since S60 v3.0
-	 * @param aDrawn Should highlight and move indicators be drawn.
-	 */
-	void SetHighlightShown( TBool aDrawn );
+  /**
+   * Used in non-touch edit mode to block drawing of move indicators and highlight
+   * to clean screen for animation.
+   *
+   * @since S60 v3.0
+   * @param aDrawn Should highlight and move indicators be drawn.
+   */
+  void SetHighlightShown( TBool aDrawn );
 
     /**
      * Draws background.
@@ -512,8 +512,8 @@ protected:
      * @param aItemIsSelected Is item selected.
      */
     void DrawItemText( TInt aItemIndex, const TRect& aItemTextRect,
-    		TBool aItemIsCurrent, TBool aViewIsEmphasized,
-    		TBool aItemIsSelected ) const;
+        TBool aItemIsCurrent, TBool aViewIsEmphasized,
+        TBool aItemIsSelected ) const;
     /**
      * Draws the actual item contents for the specified item in the specified
      * rectangle.
@@ -526,8 +526,8 @@ protected:
      * @param aItemIsSelected @c ETrue if the item is selected.
      */
     void DrawActualItem(TInt aItemIndex, const TRect& aActualItemRect,
-			TBool aItemIsCurrent, TBool aViewIsEmphasized, TBool aViewIsDimmed,
-			TBool aItemIsSelected) const;
+      TBool aItemIsCurrent, TBool aViewIsEmphasized, TBool aViewIsDimmed,
+      TBool aItemIsSelected) const;
 
     /**
      * Sets up item currently drawn item subcells.
@@ -660,7 +660,7 @@ private:
      * @param aSubcellIncrement Is incremented if backdrop subcell template is appended.
      */
     void SetupBackdropSubcellL(
-    		RArray<TTemplateChild>& aTemplateChildArray, TInt aItemIndex,
+        RArray<TTemplateChild>& aTemplateChildArray, TInt aItemIndex,
             RBuf& aItemText, TInt& aSubcellIncrement ) const;
 
     /**
@@ -674,8 +674,8 @@ private:
      * @param aSubcellIncrement Is incremented if backdrop subcell template is appended.
      */
     void SetupIconSubcellL(
-    		RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
-    		RBuf& aItemText, TInt& aSubcellIncrement ) const;
+        RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
+        RBuf& aItemText, TInt& aSubcellIncrement ) const;
 
     /**
      * Determines whether a bitmap of given size needs scaling to be displayed
@@ -711,8 +711,8 @@ private:
      * @param aChildIndex Index of a template child.
      */
     void SetupTextSubcellL(
-    		RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
-    		RBuf& aItemText, TInt& aSubcellIncrement ) const;
+        RArray<TTemplateChild>& aTemplateChildArray, TInt aChildIndex, TInt aItemIndex,
+        RBuf& aItemText, TInt& aSubcellIncrement ) const;
 
     /**
      * Appends text if there is enough free memory.
@@ -742,7 +742,7 @@ private:
      * @return ETrue if highlight is drawn for the actually drawn item.
      */
     TBool GetHighlightVisibility(  TInt aItemIndex,
-    		TBool aItemIsCurrent, TBool aAllowHighlightForNonDraggedItem  ) const;
+        TBool aItemIsCurrent, TBool aAllowHighlightForNonDraggedItem  ) const;
 
     /**
      * Returns backdrop visibility.
@@ -943,6 +943,11 @@ private: // Data
      */
     mutable TBool iLastDrawnItemWasFloating;
 
-	};
+    /**
+     * ETrue if the drawing item is floating item of swap transition type.
+     */
+    mutable TBool iIsSwapFloating;
+
+  };
 
 #endif // MMLISTBOXITEMDRAWER_H

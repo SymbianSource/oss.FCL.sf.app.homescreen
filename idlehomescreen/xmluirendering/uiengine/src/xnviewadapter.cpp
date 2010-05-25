@@ -591,6 +591,17 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
 
     CXnNode* node( aContainer.Node()->LayoutNode() );
     
+    CXnDomStringPool* sp( node->DomNode()->StringPool() );
+    
+    CXnProperty* prop = CXnProperty::NewL(
+        XnPropertyNames::style::common::KDisplay, 
+        XnPropertyNames::style::common::display::KBlock,
+        CXnDomPropertyValue::EString, *sp );
+    CleanupStack::PushL( prop );    
+    
+    node->SetPropertyWithoutNotificationL( prop );
+    CleanupStack::Pop( prop );
+    
     node->ReportXuikonEventL( *iActivate );
                            
     if ( iFlags.IsSet( EIsInCall ) )
@@ -731,15 +742,26 @@ void CXnViewAdapter::DeactivateContainerL( TBool aHide )
     // Run controls to powersave mode
     ChangeControlsStateL( EFalse );
 
+    CXnNode* node( iContainer->Node()->LayoutNode() );
+    
+    CXnDomStringPool* sp( node->DomNode()->StringPool() );
+    
+    CXnProperty* prop = CXnProperty::NewL(
+        XnPropertyNames::style::common::KDisplay, 
+        XnPropertyNames::style::common::display::KNone,
+        CXnDomPropertyValue::EString, *sp );
+    CleanupStack::PushL( prop );    
+    
+    node->SetPropertyWithoutNotificationL( prop );
+    CleanupStack::Pop( prop );
+    
     if ( !iDeactivate )
         {
         iDeactivate = BuildDeactivateTriggerL( iAppUiAdapter.UiEngine() );
         }
-
-    CXnNode* node( iContainer->Node()->LayoutNode() );
-                
+                  
     node->ReportXuikonEventL( *iDeactivate );
-    
+       
     if ( aHide )
         {
         node->Control()->MakeVisible( EFalse );

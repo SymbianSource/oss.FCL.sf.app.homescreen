@@ -238,20 +238,19 @@ void CTsFswEngine::UpdateTaskList()
     TSLOG_CONTEXT( UpdateTaskList, TSLOG_LOCAL );
     TSLOG_IN();
 
-    // There can be many calls in a row, use a timer to prevent degrading
-    // device performance.
-    iDataList->SetDirty();
-    if ( !iUpdateStarter->IsActive() )
-        {
-        iUpdateStarter->Start( KContentRefreshDelay, 0,
-                TCallBack( UpdateStarterCallback, this ) );
-        }
-
     // screenshot taking support - call Register and Unregister when needed
     UpdatePreviewContent();
 
     // get the foreground app uid and publish it to CFW if different than before
     TRAP_IGNORE( PublishFgAppUidL() );
+
+    // There can be many calls in a row, use a timer to prevent degrading
+    // device performance.
+    if ( !iUpdateStarter->IsActive() )
+        {
+        iUpdateStarter->Start( KContentRefreshDelay, 0,
+                TCallBack( UpdateStarterCallback, this ) );
+        }
     
     TSLOG_OUT();
     }
@@ -316,6 +315,11 @@ void CTsFswEngine::PublishFgAppUidL()
         {
         iFgAppUid = newUid;
         iDataList->MoveEntryAtStart(newUid.iUid, EFalse);
+        TBool change( iDataList->MoveEntryAtStart(newUid.iUid, EFalse) );
+        if( change )
+            {
+            iObserver.FswDataChanged();
+            }
         }
 
     TSLOG_OUT();
@@ -755,10 +759,9 @@ void CTsFswEngine::HandleWidgetUpdateL(TInt aWidgetId, TInt aBitmapHandle)
     {
 	TSLOG_CONTEXT( HandleWidgetUpdateL, TSLOG_LOCAL );
     
-	iDataList->MoveEntryAtStart(aWidgetId, ETrue);
+	TBool contentChanged( iDataList->MoveEntryAtStart(aWidgetId, ETrue) );
     
 	CFbsBitmap* bmp = 0;
-    TBool contentChanged(EFalse); 
     if( aBitmapHandle )
     	{
 		TRAPD( err, bmp = CopyBitmapL( aBitmapHandle, EFalse ) );

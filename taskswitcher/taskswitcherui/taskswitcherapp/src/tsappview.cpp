@@ -446,7 +446,6 @@ void CTsAppView::HandleSwitchToForegroundEvent()
     
     // Forward event to interested controls
     iFastSwapArea->HandleSwitchToForegroundEvent();
-    iFastSwapArea->UpdateComponentVisibility();
     
     // Check for layout updates
     CTsAppUi* appUi = static_cast<CTsAppUi*>(iCoeEnv->AppUi());
@@ -483,7 +482,6 @@ void CTsAppView::HandleSwitchToForegroundEvent()
         MakeVisible( ETrue );
         }
     
-    iFastSwapArea->UpdateComponentVisibility();
     DrawDeferred();
     
     TSLOG_OUT();
@@ -601,8 +599,6 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
         {
         iEvtHandler->EnableEventHandling(ETrue);
         iExitOnPointerUp = EFalse;
-		LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
-				ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
 
 		if( !DragArea().Contains(aPointerEvent.iParentPosition) ||
 		    !iFastSwapArea->Count() )
@@ -615,6 +611,13 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
 		        iExitOnPointerUp = ETrue;
 		        }
 		    }
+		else if ( !iAppsHeading->Rect().Contains( aPointerEvent.iParentPosition ) ||
+                  !iFastSwapArea->Count() )
+		    {
+		    // Feedback only on "active" areas of UI
+		    LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
+		            ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
+		    }
         }
     else if( TPointerEvent::EButton1Up == aPointerEvent.iType && iExitOnPointerUp )
         {
@@ -623,6 +626,8 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
               !iAppsHeading->Rect().Contains(aPointerEvent.iParentPosition) ) ||
             !iFastSwapArea->Count() )
             {
+            LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
+                    ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
             iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
             }
         }

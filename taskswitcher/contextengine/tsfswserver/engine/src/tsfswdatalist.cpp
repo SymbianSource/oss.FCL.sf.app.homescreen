@@ -28,7 +28,8 @@
 #include <featmgr.h>
 #include <apgwgnam.h>
 
-
+// Special case: ovi store secure widget UID
+const TUid KTsOviStoreSecureWidgetUid = { 0x2001A93E };
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -113,7 +114,8 @@ const RTsFswArray& CTsFswDataList::FswDataL()
     if ( iTaskListDirty )
         {
         CollectTasksL();
-        // dirty flag is cleared in the above call
+        // clear dirty flag
+		SetDirty(EFalse);
         }
     
     // Get app icon for entries without screenshot,
@@ -153,8 +155,7 @@ const RTsFswArray& CTsFswDataList::FswDataL()
 TBool CTsFswDataList::CollectTasksL()
     {
     // clear dirty flag
-    iTaskListDirty = EFalse;
-    TBool changed = EFalse;
+    TBool changed = iTaskListDirty;
     
     RTsFswArray newAppsList;
     RTsFswArray newWidgetsList;
@@ -206,9 +207,9 @@ CTsFsWidgetList* CTsFswDataList::Widgets()
 // CTsFswDataList::SetDirty()
 // --------------------------------------------------------------------------
 //
-void CTsFswDataList::SetDirty()
+void CTsFswDataList::SetDirty(TBool aDirty)
     {
-    iTaskListDirty = ETrue;
+    iTaskListDirty = aDirty;
     }
 
 // --------------------------------------------------------------------------
@@ -252,14 +253,18 @@ TBool CTsFswDataList::RemoveScreenshot(TInt aId)
     {
     TBool changed = EFalse;
     CFbsBitmap** bmp = iScreenshots.Find( aId );
+
     if ( bmp )
         {
+        changed |= AssignScreenshotHandle( aId, 0 );
+        changed |= RemoveScreenshotFromParent( (*bmp)->Handle());
         delete *bmp;
         iScreenshots.Remove( aId );
-        changed = AssignScreenshotHandle( aId, 0 );
         }
     return changed;
     }
+
+
 
 // --------------------------------------------------------------------------
 // CTsFswDataList::FindScreenshotByWgId
@@ -276,10 +281,11 @@ CFbsBitmap** CTsFswDataList::FindScreenshot(TInt aId)
 // CTsFswDataList::MoveEntryAtStart
 // --------------------------------------------------------------------------
 //
-void CTsFswDataList::MoveEntryAtStart(TInt aAppId, TBool aWidget)
+TBool CTsFswDataList::MoveEntryAtStart(TInt aAppId, TBool aWidget)
     {
     TSLOG_CONTEXT( MoveEntryAtStart, TSLOG_LOCAL );
     
+    TBool wasMoved(EFalse);
     TInt appId(0);
     //check embeded case
     if( !aWidget )
@@ -302,15 +308,19 @@ void CTsFswDataList::MoveEntryAtStart(TInt aAppId, TBool aWidget)
  
     for ( TInt i = 0; i < iData.Count(); ++i )
         {
-        if( iData[i]->AppUid().iUid == appId && iData[i]->Widget() == aWidget)
+        if( iData[i]->AppUid().iUid == appId &&
+            ((iData[i]->Widget() == aWidget) || (iData[i]->AppUid() == KTsOviStoreSecureWidgetUid )))
             {
             CTsFswEntry* entry = iData[i];
             iData.Remove(i);
             iData.Insert(entry, 0);
+            SetDirty(ETrue);
+            wasMoved = ETrue;
             break;
             }
         }
     TSLOG_OUT();
+    return wasMoved;
     }
 
 // --------------------------------------------------------------------------
@@ -629,13 +639,14 @@ void CTsFswDataList::AssignScreenshotHandle(TInt aWgIdForScreenshot,
     aAsigned = EFalse;
     for (TInt i = 0, ie = iData.Count(); i != ie; ++i)
         {
-        if (iData[i]->Widget())
+        if (iData[i]->Widget() || iData[i]->AppUid() == KTsOviStoreSecureWidgetUid )
             {
             TInt widgetId = iData[i]->AppUid().iUid;
             if (widgetId == aWgIdForScreenshot)
                 {
                 iData[i]->SetScreenshotHandle(aBitmapHandle);
                 aAsigned = ETrue;
+                SetDirty(ETrue);
                 break;
                 }  
 			continue;          
@@ -645,6 +656,7 @@ void CTsFswDataList::AssignScreenshotHandle(TInt aWgIdForScreenshot,
             {
             iData[i]->SetScreenshotHandle(aBitmapHandle);
             aAsigned = ETrue;
+            SetDirty(ETrue);          
             break;
             }
         }
@@ -799,5 +811,25 @@ TUid CTsFswDataList::AppUidForWgIdL( TInt aWgId )
     CleanupStack::PopAndDestroy( windowName );
     return appUid;
     }
+
+// --------------------------------------------------------------------------
+// CTsFswDataList::RemoveScreenshotFromParent
+// --------------------------------------------------------------------------
+//
+TBool CTsFswDataList::RemoveScreenshotFromParent( TInt aBmpHandle )
+    {
+    TBool changed(EFalse);
+    for( TInt i = 0; i < iData.Count(); ++i)
+        {
+        if ( !iData[i]->Widget() && iData[i]->ScreenshotHandle() == aBmpHandle )
+            {
+            changed = ETrue;
+            iData[i]->SetScreenshotHandle(
+                    LookupScreenshotHandle( iData[i]->WgId()) );
+            }
+        }
+    return changed;
+    }
+
 
 // end of file

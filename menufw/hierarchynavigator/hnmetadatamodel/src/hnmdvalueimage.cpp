@@ -278,11 +278,25 @@ HBufC* CHnMdValueImage::FindMatchigMifFileL( const RFs& aFs, TDesC& aFileName )
     {
     DEBUG16(("_MM_: CHnMdValueImage::FindMatchigMifFileL IN"));
 
+    _LIT( KGridRootMif, "gridroot.mif" );
+
     // whole path to the mif file was not specified
     TDriveList driveList;
     HBufC* ret = NULL;
 
-    if ( KErrNone == aFs.DriveList( driveList ) )
+    if ( aFileName == KGridRootMif )
+        {
+        ret = HBufC::NewL(
+                1 + KRscPath().Length() + // 1 - drive letter len.
+                aFileName.Length() );
+        TPtr ptr( ret->Des() );
+        TChar driveLetter;
+        aFs.DriveToChar( EDriveZ, driveLetter );
+        ptr.Append( driveLetter );
+        ptr.Append( KRscPath );
+        ptr.Append( aFileName );
+        }
+    else if ( KErrNone == aFs.DriveList( driveList ) )
         {
         TInt driveNumber( EDriveY ); // start with drive Y
         do // iterates through drives: Y, X, W, ..., C, B, A, Z
@@ -336,15 +350,18 @@ HBufC* CHnMdValueImage::GetMifFileNameL()
     CleanupClosePushL( tmpBuf );
 
     TInt errCode = HnLiwUtils::GetStringL( *iParamList, iMifFile8, iPos, tmpBuf );
-    if ( !BaflUtils::FileExists( iCmnPtrs->iFs, tmpBuf ) && tmpBuf.Length() )
+    if ( tmpBuf.Length() )
         {
-        // fileName was retrieved but corresponding file was not found
-        ret = FindMatchigMifFileL( iCmnPtrs->iFs, tmpBuf );
-        }
-    else if ( tmpBuf.Length() )
-        {
-        // return fileName as it is
-        ret = tmpBuf.AllocL();
+        if ( BaflUtils::FileExists( iCmnPtrs->iFs, tmpBuf ) )
+            {
+            // return fileName as it is
+            ret = tmpBuf.AllocL();
+            }
+        else
+            {
+            // fileName was retrieved but corresponding file was not found
+            ret = FindMatchigMifFileL( iCmnPtrs->iFs, tmpBuf );
+            }
         }
     
     // clean up

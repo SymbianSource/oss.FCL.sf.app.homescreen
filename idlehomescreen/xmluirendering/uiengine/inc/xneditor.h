@@ -281,9 +281,9 @@ private:
             RPointerArray< CHsContentInfo >& aWidgets );
     
     /**
-     * Resets runtime cache.
+     * Resets pluging configurations and templated publishers.
      */
-    void ResetCache();
+    void ResetPluginsAndPublishers();
     
     /**
      * Retrieves native application configuration plugins from HSPS
@@ -311,6 +311,9 @@ private:
      */
     TBool IsViewFull( CXnViewData& aViewData );
     
+    /** callback for notify widget launcher */
+    static TInt WidgetListChangedCallBack( TAny* aSelf );
+    
 private:
     // from MXnViewObserver    
     
@@ -335,6 +338,8 @@ private:
     void NotifyWidgetUnregisteredL( const TDesC& aPublisher );
     
     void NotifyWidgetRegisteredL();
+    
+    void NotifyWidgetUpdatedL();
     
 private:
     // from MHspsWrapperObserver
@@ -362,9 +367,12 @@ private:
     TBool iWidgetsVisibilityState;    
     /** Central repository , to choose plugin, owned*/
     CRepository* iRepository;
-	/** Plugins cache, owned */
-    RPointerArray< hspswrapper::CPluginInfo > iPluginsCache;
+	/** Widget/template plugin configurations, owned */
+    RPointerArray< hspswrapper::CPluginInfo > iPluginConfigurations;
+	/** Oom handler, owned. */
     CXnOomSysHandler* iOomSysHandler;
+	/** Launcher for notifying widget updates */    
+    CPeriodic* iNotifyWidgetUpdate;
     };
 
 #endif // C_XNEDITOR_H

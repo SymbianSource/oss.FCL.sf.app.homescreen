@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -26,7 +26,7 @@ class CLiwBitmapBuffer;
 /**
  * This is an extended version of @c CHnIconHolder which holds a CGulIcon that does
  * not own the bitmaps and CLiwBitmapBuffer objects that do.
- * 
+ *
  * Such class was needed because some of the bitmaps for icons are obtained from
  * CLiwBitmapBuffer objects and there is no way to transfer ownership of that
  * bitmaps from them. It is not possible to make copies of that bitmaps either,
@@ -40,26 +40,32 @@ public:
      * This method should be called only once. If you want to store another icon
      * simply call Close() on this icon holder and then create a new icon holder
      * to store the new icon.
-     * 
+     *
      * @param aGulIcon Icon to store in this icon holder.
      * @param aBmpBuffer The buffer that owns the primary bitmap.
-     * @param aMaskBuffer The buffer that owns the mask bitmap. 
+     * @param aMaskBuffer The buffer that owns the mask bitmap.
      */
     IMPORT_C void SetGulIcon( CGulIcon* aGulIcon, CLiwBitmapBuffer* aBmpBuffer, CLiwBitmapBuffer* aMaskBuffer );
-    
+
+    /**
+     * Clean both liw bitmap buffer and liw maskbitmap buffer.
+     * Allows set new mask and new bitmap for the icon.
+     */
+    virtual void CleanBmpBuffer();
+
     /**
      * Standard C++ virtual destructor.
      */
     virtual ~CHnExtBmpIconHolder();
 
 private: // data
-    
+
     /**
      * Liw bitmap buffer that owns the primary bitmap for the icon.
      * Co-owns (CLiwBitmapBuffer are ref-counted).
      */
     CLiwBitmapBuffer* iBmpBuffer;
-    
+
     /**
      * Liw bitmap buffer that owns the mask bitmap for the icon.
      * Co-owns (CLiwBitmapBuffer are ref-counted).

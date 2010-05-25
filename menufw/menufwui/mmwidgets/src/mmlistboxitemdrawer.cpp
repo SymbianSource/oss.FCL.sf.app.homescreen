@@ -29,6 +29,7 @@
 #include <AknBidiTextUtils.h>
 #include <AknDef.hrh>
 #include <AknLayoutFont.h>
+#include <avkon.mbg>
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
 #include <aknlistloadertfx.h>
@@ -53,6 +54,7 @@
 #include "mmwidgetcontainer.h"
 #include "hnsuitemodel.h"
 #include "menudebug.h"
+#include "hnextbmpiconholder.h"
 
 // -----------------------------------------------------------------------------
 //
@@ -77,6 +79,7 @@ CMmListBoxItemDrawer::CMmListBoxItemDrawer(
   // this is needed to get iColors initialized on first use:
   iLastDrawnItemWasFloating = ETrue;
     SetFlags( CListItemDrawer::EDisableHighlight );
+    iIsSwapFloating = EFalse;
     }
 
 // -----------------------------------------------------------------------------
@@ -314,13 +317,13 @@ void CMmListBoxItemDrawer::DrawFloatingItems( TRect currentlyDrawnRect )
                 iZoomIconIndex = iFloatingItems[i].GetDrawnItemIndex();
                 iIconAnimationZoomRatio = iFloatingItems[i].GetCurrentZoomRatio();
 
-        if ( ItemHasFloatingType( drawnItemIndex, EDrag) ||
-            ItemHasFloatingType( drawnItemIndex, EDragTransition) )
+                if ( ItemHasFloatingType( drawnItemIndex, EDrag) ||
+                        ItemHasFloatingType( drawnItemIndex, EDragTransition) )
                     {
                     ClearFlags( CListItemDrawer::EPressedDownState );
                     }
-
-        DrawActualItem( drawnItemIndex, rect, ETrue, EFalse, EFalse, EFalse );
+                type == ESwapTransition ? iIsSwapFloating = ETrue : iIsSwapFloating = EFalse;
+                DrawActualItem( drawnItemIndex, rect, ETrue, EFalse, EFalse, EFalse );
                 iIconAnimationZoomRatio = tempZoomRatio;
                 iZoomIconIndex = tempZoomIconIndex;
                 }
@@ -399,6 +402,7 @@ void CMmListBoxItemDrawer::DoDrawItem(TInt aItemIndex, TPoint aItemRectPos,
             }
         }
 
+    iIsSwapFloating = EFalse;
     DrawActualItem(aItemIndex, actualItemRect, aItemIsCurrent, aViewIsEmphasized,
             aViewIsDimmed, aItemIsSelected);
     const_cast<CMmListBoxItemDrawer*>(this)->iLeftOverAreaUnderAnimatedItem = EFalse;
@@ -505,7 +509,7 @@ void CMmListBoxItemDrawer::DoDrawItemTextL( TInt aItemIndex, const TRect
         }
 #endif
 
-  if( iDrawSeparatorLines )
+  if( iDrawSeparatorLines && !iIsSwapFloating )
         {
         CMmListBoxView* view = static_cast<CMmListBoxView*>( iWidget->View() );
         if( aItemIndex != ( view->ModelItemsCount() - 1  ))
@@ -1183,30 +1187,65 @@ void CMmListBoxItemDrawer::SetupIconSubcellL(
         {
         CFbsBitmap* bitmap = icon->Bitmap();
         ASSERT( bitmap );
+        TInt errTooBig( KErrNone );
         //resize the item if it is a move indicator
         if( iIsIndicatorItem )
             {
-                AknIconUtils::SetSize( bitmap, child.iRectAccordingToParent.Size(),
+            errTooBig = AknIconUtils::SetSize( bitmap,
+                    child.iRectAccordingToParent.Size(),
                     EAspectRatioNotPreserved );
             }
         else
             {
-                TSize bmpSize = bitmap->SizeInPixels();
-                TBool setSizeRequired = bitmap->DisplayMode() == ENone;
-                if ( targetSize.iWidth && targetSize.iHeight &&
-                        ( setSizeRequired || !BitmapFitsIntoTarget( bmpSize, targetSize ) ) )
-                    {
+            TSize bmpSize = bitmap->SizeInPixels();
+            TBool setSizeRequired = bitmap->DisplayMode() == ENone;
+            if ( targetSize.iWidth && targetSize.iHeight &&
+                    ( setSizeRequired || !BitmapFitsIntoTarget( bmpSize, targetSize ) ) )
+                {
                 CFbsBitmap* mask = icon->Mask();
                 if( mask )
                     {
-                        __ASSERT_DEBUG( bmpSize == mask->SizeInPixels(), User::Invariant() );
-                        AknIconUtils::SetSize( mask, targetSize, EAspectRatioPreservedAndUnusedSpaceRemoved );
-                        }
-                    AknIconUtils::SetSize( bitmap, targetSize, EAspectRatioPreservedAndUnusedSpaceRemoved );
+                    __ASSERT_DEBUG( bmpSize == mask->SizeInPixels(), User::Invariant() );
+                    errTooBig = AknIconUtils::SetSize( mask, targetSize,
+                            EAspectRatioPreservedAndUnusedSpaceRemoved );
+                    }
+                if( !errTooBig )
+                    errTooBig = AknIconUtils::SetSize( bitmap, targetSize,
+                        EAspectRatioPreservedAndUnusedSpaceRemoved );
                 }
             }
 
-            TInt iconIndex = iItemsDataCache->GetItemCacheL( aItemIndex )->AppendIconL( iconHolder );
+        if( errTooBig == KErrTooBig )
+            {
+            // If icon is not created, try to create default application icon
+            MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+            CFbsBitmap* bitmap( NULL );
+            CFbsBitmap* maskBitmap( NULL );
+            TRAPD( err,
+                {
+                AknsUtils::CreateIconLC( skin,
+                    KAknsIIDQgnMenuUnknownLst, bitmap, maskBitmap,
+                    AknIconUtils::AvkonIconFileName(),
+                    EMbmAvkonQgn_menu_unknown_lst,
+                    EMbmAvkonQgn_menu_unknown_lst_mask );
+                CleanupStack::Pop( 2 ); // for trap
+                }
+                );
+            if( !err )
+                {
+                if( maskBitmap)
+                    AknIconUtils::SetSize( maskBitmap, targetSize,
+                            EAspectRatioPreservedAndUnusedSpaceRemoved );
+                AknIconUtils::SetSize( bitmap, targetSize,
+                        EAspectRatioPreservedAndUnusedSpaceRemoved );
+                static_cast<CHnExtBmpIconHolder*>(iconHolder)->CleanBmpBuffer();
+                icon->SetBitmap(bitmap);
+                icon->SetMask(maskBitmap);
+                icon->SetBitmapsOwnedExternally(EFalse);
+                }
+            }
+
+        TInt iconIndex = iItemsDataCache->GetItemCacheL( aItemIndex )->AppendIconL( iconHolder );
 
         HBufC8* number = HnConvUtils::NumToStr8LC( iconIndex );
         const TInt newLength = aItemText.Length() + number->Length();
@@ -1322,7 +1361,8 @@ void CMmListBoxItemDrawer::SetupBackdropSubcellL(
             {
             TSize itemSize = GetItemSize( aItemIndex,
                 aItemIndex == iWidget->View()->CurrentItemIndex() );
-            CHnIconHolder* iconHolder = iMmModel->GetAttributeAsRefCountedGraphics( aItemIndex, child.iData, &itemSize );
+            CHnIconHolder* iconHolder = iMmModel->GetAttributeAsRefCountedGraphics(
+                    aItemIndex, child.iData, &itemSize );
             icon = iconHolder ? iconHolder->GetGulIcon() : NULL;
             if( icon )
                 {
@@ -1331,7 +1371,8 @@ void CMmListBoxItemDrawer::SetupBackdropSubcellL(
                         TPoint( itemSize.iWidth, itemSize.iHeight ) );
                 AknIconUtils::SetSize( bitmap, itemSize,
                         EAspectRatioNotPreserved );
-        TInt iconIndex = iItemsDataCache->GetItemCacheL( aItemIndex )->AppendIconL( iconHolder );
+                TInt iconIndex = iItemsDataCache->GetItemCacheL( aItemIndex )->
+                        AppendIconL( iconHolder );
 
                 HBufC8* number = HnConvUtils::NumToStr8LC( iconIndex );
                 TInt newLength = aItemText.Length() + number->Length();
@@ -1399,10 +1440,13 @@ void CMmListBoxItemDrawer::SetupSubCellsL( TBool aItemIsCurrent,
 
     //Backdrop icon as first element to draw
     TInt subcellIncrement( 0 );
-    if( GetBackdropVisibility( aItemIndex, aItemIsCurrent ) )
+    if( ( GetBackdropVisibility( aItemIndex, aItemIsCurrent )
+                || ItemHasFloatingType( aItemIndex, ESwapTransition ) )
+            && !iIsSwapFloating )
         {
         SetupBackdropSubcellL( templateChildArray, aItemIndex, itemText, subcellIncrement );
         iItemHasBackdrop = ETrue;
+        iIsSwapFloating = EFalse;
         }
     else
         {
@@ -1519,9 +1563,9 @@ TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex,
     TBool highlightVisibility( EFalse );
     if( !iItemHasBackdrop && !iLeftOverAreaUnderAnimatedItem ) //never draw highlight when item has backdrop or when left over area under animated item
         {
-    TBool currentlyDraggedItem =
-      ItemHasFloatingType( aItemIndex, EDrag ) ||
-      ItemHasFloatingType( aItemIndex, EDragTransition );
+        TBool currentlyDraggedItem =
+                ItemHasFloatingType( aItemIndex, EDrag ) ||
+                ItemHasFloatingType( aItemIndex, EDragTransition );
 
         if( ( STATIC_CAST(CMmWidgetContainer*,Widget()->Parent())->IsHighlightVisible()
                 && aItemIsCurrent && aAllowHighlightForNonDraggedItem )
@@ -1540,7 +1584,7 @@ TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex,
 TBool CMmListBoxItemDrawer::GetBackdropVisibility( TInt aItemIndex,
         TBool aItemIsCurrent ) const
     {
-  TBool currentlyDraggedItem =
+    TBool currentlyDraggedItem =
     ItemHasFloatingType( aItemIndex, EDrag ) ||
     ItemHasFloatingType( aItemIndex, EDragTransition );
 

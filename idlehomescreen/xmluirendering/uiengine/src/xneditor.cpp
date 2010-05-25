@@ -57,6 +57,7 @@
 #include "xnviewdata.h"
 #include "xnwallpaperview.h"
 #include "xnbackgroundmanager.h"
+#include "xnpopupcontroladapter.h"
 
 #include "xneditor.h"
 #include "xnpanic.h"
@@ -91,6 +92,8 @@ enum
     ECanBeAdded = 0x01,
     ECanBeRemoved
     };
+
+const TInt KNotifyWidgetUpdateDelay( 1000000 ); //1sec
 
 // ====================== LOCAL FUNTION PROTOTYPES ============================
 static void DeletePluginInfos( TAny* aObject );
@@ -309,6 +312,7 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
     iHspsWrapper = CHspsWrapper::NewL( aUid, this );
     iRepository= CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
     iOomSysHandler = CXnOomSysHandler::NewL();
+    iNotifyWidgetUpdate = CPeriodic::New( CActive::EPriorityIdle );
     }
 
 // ---------------------------------------------------------------------------
@@ -317,10 +321,16 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
 // 
 CXnEditor::~CXnEditor()
     {
-    iViewManager.RemoveObserver( *this );
-    if( iPluginsCache.Count() )
+    if ( iNotifyWidgetUpdate->IsActive() )
         {
-        iPluginsCache.ResetAndDestroy();
+        iNotifyWidgetUpdate->Cancel();
+        }
+    delete iNotifyWidgetUpdate;
+    
+    iViewManager.RemoveObserver( *this );
+    if( iPluginConfigurations.Count() )
+        {
+        iPluginConfigurations.ResetAndDestroy();
         }    
     delete iCpsWrapper;
     delete iHspsWrapper;
@@ -609,6 +619,18 @@ void CXnEditor::AddWidgetL()
         }
     if( ui )
         {
+        CXnNode* popup( iViewManager.UiEngine().StylusPopupNode() );
+        if ( popup )
+            {
+            CXnPopupControlAdapter* control =
+                static_cast< CXnPopupControlAdapter* >(
+                        popup->Control() );
+           
+            if ( control )
+                {
+                control->HideMenuL();
+                }
+            }
         ui->SetContentController( this );
         ui->Activate();
         
@@ -872,11 +894,10 @@ CPublisherInfo* CXnEditor::PublisherInfoL( const CHsContentInfo& aContentInfo )
 void CXnEditor::CpsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets )
     {
     // Get publishers from CPS
+    delete iPublisherMap;
+    iPublisherMap = NULL;
     
-    if( !iPublisherMap )
-        {
-        iPublisherMap = iCpsWrapper->GetTemplatedPublishersL();
-        }
+    iPublisherMap = iCpsWrapper->GetTemplatedPublishersL();
     
     RPointerArray< CPublisherInfo >& publisherInfo( iPublisherMap->PublisherInfo() );
     
@@ -885,13 +906,13 @@ void CXnEditor::CpsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets )
         {
         CPublisherInfo* info( publisherInfo[i] );
 
-        for ( TInt j = 0; j < iPluginsCache.Count(); j++ )
+        for ( TInt j = 0; j < iPluginConfigurations.Count(); j++ )
             {        
-            if( iPluginsCache[j]->Name().Length() > 0 )
+            if( iPluginConfigurations[j]->Name().Length() > 0 )
                 {               
                 // 8 to 16bit conv
-                HBufC* nameBuf = HBufC::NewLC( iPluginsCache[j]->Name().Length() );
-                nameBuf->Des().Copy( iPluginsCache[j]->Name() );
+                HBufC* nameBuf = HBufC::NewLC( iPluginConfigurations[j]->Name().Length() );
+                nameBuf->Des().Copy( iPluginConfigurations[j]->Name() );
                 TBool matchingNames = ( nameBuf->Des() == info->TemplateType() );
                 CleanupStack::PopAndDestroy();
                 if ( matchingNames )
@@ -903,8 +924,8 @@ void CXnEditor::CpsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets )
                     contentInfo->SetNameL( info->WidgetName() );
                     contentInfo->SetPublisherIdL( info->PublisherId() );
                     contentInfo->SetMaxWidgets( info->MaxWidgets() );
-                    contentInfo->SetUidL( iPluginsCache[j]->Uid() );
-                    contentInfo->SetTypeL( iPluginsCache[j]->Type() );
+                    contentInfo->SetUidL( iPluginConfigurations[j]->Uid() );
+                    contentInfo->SetTypeL( iPluginConfigurations[j]->Type() );
                     contentInfo->SetDescriptionL( info->Description() );
                     contentInfo->SetIconPathL( info->LogoIcon() );                                
                     contentInfo->SetIsWrt( info->ContentType() == KWRTTemplate() );
@@ -1328,7 +1349,7 @@ void CXnEditor::NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ )
 //
 void CXnEditor::NotifyWidgetUnregisteredL( const TDesC& aPublisher )
     {
-    ResetCache();
+    ResetPluginsAndPublishers();
     RemoveUnRegisteredWidgetL( aPublisher );
     WidgetListChanged();    
     }
@@ -1339,8 +1360,43 @@ void CXnEditor::NotifyWidgetUnregisteredL( const TDesC& aPublisher )
 //
 void CXnEditor::NotifyWidgetRegisteredL()
     {
-    ResetCache();        
+    ResetPluginsAndPublishers();        
     WidgetListChanged();
+    }
+
+// ---------------------------------------------------------------------------
+// CXnEditor::NotifyWidgetUpdatedL
+// ---------------------------------------------------------------------------
+//
+void CXnEditor::NotifyWidgetUpdatedL()
+    {
+    if ( iNotifyWidgetUpdate->IsActive() )
+        {
+        iNotifyWidgetUpdate->Cancel();
+        }
+    // start waiting for widget updates (wait time is 1sec).
+	// if no new updates, notify views about changes. otherwise
+	// start waiting for new updates again. 
+    iNotifyWidgetUpdate->Start(
+        KNotifyWidgetUpdateDelay,
+        KNotifyWidgetUpdateDelay,
+        TCallBack( WidgetListChangedCallBack, this ) );
+    }
+
+// ---------------------------------------------------------------------------
+// CXnEditor::WidgetListChangedCallBack
+// ---------------------------------------------------------------------------
+//
+TInt CXnEditor::WidgetListChangedCallBack( TAny* aSelf )
+    {
+    CXnEditor* editor = static_cast<CXnEditor*>( aSelf );
+    if ( editor && editor->iNotifyWidgetUpdate->IsActive() )
+        {
+        // prevent multiple events
+        editor->iNotifyWidgetUpdate->Cancel();
+        editor->WidgetListChanged();
+        }
+    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -1403,7 +1459,7 @@ TInt CXnEditor::HandleNotifyL(
     {
     if ( aEvent == KEventPluginUnInstalled )
         {
-        ResetCache();
+        ResetPluginsAndPublishers();
                 
         CHsContentInfo* info = CHsContentInfo::NewLC();
 
@@ -1422,13 +1478,13 @@ TInt CXnEditor::HandleNotifyL(
         }
     else if ( aEvent == KEventPluginInstalled )
         {        
-        ResetCache();
+        ResetPluginsAndPublishers();
         
         WidgetListChanged();        
         }
     else if ( aEvent == KEventPluginUpdated )
         {
-        ResetCache();
+        ResetPluginsAndPublishers();
         
         // If the plugin is in use then reload the widget
         if ( aPluginId.Length() > 0 )
@@ -1540,13 +1596,13 @@ void CXnEditor::AppendPluginsL(
     }
 
 // -----------------------------------------------------------------------------
-// CXnEditor::ResetCache
+// CXnEditor::ResetPluginsAndPublishers
 // -----------------------------------------------------------------------------
 //
-void CXnEditor::ResetCache()
+void CXnEditor::ResetPluginsAndPublishers()
     {
     // Force loading of widget/template plugin configurations
-    iPluginsCache.ResetAndDestroy();
+    iPluginConfigurations.ResetAndDestroy();
     
     // Forece reloading of CPS publishers 
     delete iPublisherMap;
@@ -1596,19 +1652,19 @@ void CXnEditor::HspsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets )
     __ASSERT_DEBUG( aWidgets.Count() == 0, User::Leave( KErrGeneral ) );
     
     // If widget/template plugins haven't been fetched yet
-    if( iPluginsCache.Count() == 0 )
+    if( iPluginConfigurations.Count() == 0 )
         {
         // Fetch the plugins into the runtime cache
         TRAPD( err, DoHspsWidgetPluginsL() );
         if( err )
             {            
-            ResetCache();
+            ResetPluginsAndPublishers();
             User::LeaveIfError( err );
             }  
         }    
         
     // Append plugins to the content info array
-    AppendPluginsL( iPluginsCache, aWidgets );            
+    AppendPluginsL( iPluginConfigurations, aWidgets );            
     }
 
 // -----------------------------------------------------------------------------
@@ -1617,8 +1673,8 @@ void CXnEditor::HspsWidgetPluginsL( RPointerArray< CHsContentInfo >& aWidgets )
 //
 void CXnEditor::DoHspsWidgetPluginsL()
     {        
-    iHspsWrapper->GetPluginsL( iPluginsCache, KPluginInterface, KKeyWidget );        
-    iHspsWrapper->GetPluginsL( iPluginsCache, KPluginInterface, KKeyTemplate );            
+    iHspsWrapper->GetPluginsL( iPluginConfigurations, KPluginInterface, KKeyWidget );        
+    iHspsWrapper->GetPluginsL( iPluginConfigurations, KPluginInterface, KKeyTemplate );            
     }
 
 // -----------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -37,7 +37,7 @@ EXPORT_C CGulIcon* CHnIconHolder::GetGulIcon() const
     {
     return iGulIcon;
     }
-    
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------

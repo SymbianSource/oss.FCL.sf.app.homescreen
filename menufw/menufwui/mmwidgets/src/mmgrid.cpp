@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_103 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_104 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -277,7 +277,7 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
         {
         TBool highlightWasVisible = parent->IsHighlightVisible();
         CAknGrid::HandlePointerEventL( aPointerEvent );
-        // Tricky: Do not allow the base class implementation of HandlePointerEventL 
+        // Tricky: Do not allow the base class implementation of HandlePointerEventL
         //         to remove the highlight on EButton1Up event when context menu
         //         is displayed for an item
         if ( aPointerEvent.iType == TPointerEvent::EButton1Up &&
@@ -293,19 +293,19 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
         if ( CurrentItemIndex() != itemUnderPointerIndex )
             {
             CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
-    		if ( parent->IsNoItemDragged() )
-    			{
-    			if ( ItemDrawer()->Flags() & CListItemDrawer::EPressedDownState )
-    				{
-    				ItemDrawer()->ClearFlags( CListItemDrawer::EPressedDownState );
-    				iView->DrawItem( CurrentItemIndex() );
-    				}
-    			}
-    		else
-    			{
-    			iView->SetCurrentItemIndex( itemUnderPointerIndex );
-				iView->DrawItem(itemUnderPointerIndex);
-    			}
+        if ( parent->IsNoItemDragged() )
+          {
+          if ( ItemDrawer()->Flags() & CListItemDrawer::EPressedDownState )
+            {
+            ItemDrawer()->ClearFlags( CListItemDrawer::EPressedDownState );
+            iView->DrawItem( CurrentItemIndex() );
+            }
+          }
+        else
+          {
+          iView->SetCurrentItemIndex( itemUnderPointerIndex );
+        iView->DrawItem(itemUnderPointerIndex);
+          }
             }
         }
 
@@ -389,23 +389,23 @@ void CMmGrid::ScrollWithoutRedraw( TInt distanceInPixels )
         ++totalNumberOfRows;
         }
     const TInt topItemRowIndex = TopItemIndex() / numOfCols;
-    
+
     // desired view position relative to the first item in grid (always positive)
     TInt desiredViewPosition = rowHeight * topItemRowIndex - VerticalItemOffset();
-    
+
     desiredViewPosition += distanceInPixels;
-    
+
     const TInt viewPositionMin = 0;
-    const TInt viewPositionMax = 
-		Max( 0, ( totalNumberOfRows * rowHeight ) - view->ViewRect().Height() );
-    
+    const TInt viewPositionMax =
+    Max( 0, ( totalNumberOfRows * rowHeight ) - view->ViewRect().Height() );
+
     desiredViewPosition = Min( desiredViewPosition, viewPositionMax );
     desiredViewPosition = Max( desiredViewPosition, viewPositionMin );
-   
+
     ASSERT( desiredViewPosition >= 0 );
-    
+
     TInt newTopItemIndex = ( desiredViewPosition / rowHeight ) * numOfCols;
-    TInt newVerticalOffset = -( desiredViewPosition % rowHeight ); 
+    TInt newVerticalOffset = -( desiredViewPosition % rowHeight );
     SetTopItemIndex( newTopItemIndex );
     SetVerticalItemOffset( newVerticalOffset );
     }
@@ -420,43 +420,43 @@ TInt CMmGrid::ScrollIfNeeded( const TPointerEvent& aPointerEvent )
     TInt nextScrollDelay = 0;
 
     TBool readyForScrolling = iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
-		&& iMmDrawer->GetFloatingItemCount() != 0;
+    && iMmDrawer->GetFloatingItemCount() != 0;
 
-	if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
-		{
-		// scroll up by one row
-		TInt newCurrentItemIndex = CurrentItemIndex() - view->NumberOfColsInView();
+  if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
+    {
+    // scroll up by one row
+    TInt newCurrentItemIndex = CurrentItemIndex() - view->NumberOfColsInView();
         if ( newCurrentItemIndex < 0 )
             {
             newCurrentItemIndex = CurrentItemIndex();
             }
 
        nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-		   Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
+       Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
 
-		if ( readyForScrolling )
-			{
-			ScrollWithoutRedraw( -iItemHeight );
-			View()->SetCurrentItemIndex( newCurrentItemIndex );
-			}
-		}
-	else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
-		{
-		TInt newCurrentItemIndex = CurrentItemIndex() + view->NumberOfColsInView();
-		if ( newCurrentItemIndex > iModel->NumberOfItems() - 1 )
-			{
-			newCurrentItemIndex = CurrentItemIndex();
-			}
-	
-		nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-			Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
+    if ( readyForScrolling )
+      {
+      ScrollWithoutRedraw( -iItemHeight );
+      View()->SetCurrentItemIndex( newCurrentItemIndex );
+      }
+    }
+  else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
+    {
+    TInt newCurrentItemIndex = CurrentItemIndex() + view->NumberOfColsInView();
+    if ( newCurrentItemIndex > iModel->NumberOfItems() - 1 )
+      {
+      newCurrentItemIndex = CurrentItemIndex();
+      }
 
-		if ( readyForScrolling )
-			{
-			ScrollWithoutRedraw( iItemHeight );
-			View()->SetCurrentItemIndex( newCurrentItemIndex );
-			}
-		}
+    nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+      Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
+
+    if ( readyForScrolling )
+      {
+      ScrollWithoutRedraw( iItemHeight );
+      View()->SetCurrentItemIndex( newCurrentItemIndex );
+      }
+    }
 
     return nextScrollDelay;
     }
@@ -691,11 +691,17 @@ void CMmGrid::AdjustTopItemIndex() const
 
     TInt topRow = TopItemIndex() / numOfCols;
 
-    if ( !( TopItemIndex() % numOfCols == 0 &&
-         topRow <= maxPossibleTopRow ) )
+    if( !( TopItemIndex() % numOfCols == 0
+            && topRow <= maxPossibleTopRow ) )
         {
         topRow = Min( topRow, maxPossibleTopRow );
         SetTopItemIndex( topRow * numOfCols );
+        }
+    else if( ( (CMmWidgetContainer* ) Parent() )->IsEditMode()
+            && ( Abs(maxPossibleTopRow - topRow) == 1) // prevention scrolling both scrollbar and view too much rows
+            && !View()->ItemIsPartiallyVisible(TopItemIndex())) // prevention scrolling view during remove item via menu
+        {
+        SetTopItemIndex( maxPossibleTopRow * numOfCols );
         }
 
     // prevent problems with view being scrolled up beyond limits
@@ -924,13 +930,13 @@ void CMmGrid::RedrawScrollbarBackground() const
 //
 // -----------------------------------------------------------------------------
 //
-void CMmGrid::ProcessScrollEventL( CEikScrollBar* aScrollBar, 
+void CMmGrid::ProcessScrollEventL( CEikScrollBar* aScrollBar,
             TEikScrollEvent aEventType )
     {
     CAknGrid::HandleScrollEventL( aScrollBar, aEventType );
     iCurrentTopItemIndex = TopItemIndex();
 
-    // setting default highligh in order not to overwrite the top item index
+    // setting default highlight in order not to overwrite the top item index
     // set before in the SetLayout method
     CMmWidgetContainer* parent = static_cast< CMmWidgetContainer* > ( Parent() );
     if (!parent->IsHighlightVisible())
@@ -964,7 +970,7 @@ void CMmGrid::HandleRedrawTimerEventL()
         }
     iSkippedScrollbarEventsCount = 0;
     }
-    
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -983,37 +989,37 @@ TInt CMmGrid::RedrawTimerCallback( TAny* aPtr )
 // -----------------------------------------------------------------------------
 //
 void CMmGrid::SetVerticalItemOffset(TInt aOffset)
-	{
-	static_cast<CMmGridView*> (View())->SetItemOffsetInPixels(aOffset);
-	UpdateScrollBarThumbs();
-	}
+  {
+  static_cast<CMmGridView*> (View())->SetItemOffsetInPixels(aOffset);
+  UpdateScrollBarThumbs();
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmGrid::VerticalItemOffset() const
-	{
-	return static_cast<CMmGridView*> (View())->VerticalItemOffset();
-	}
+  {
+  return static_cast<CMmGridView*> (View())->VerticalItemOffset();
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmGrid::SetItemHeight( TInt aItemHeight )
-	{
-	iItemHeight = aItemHeight;
-	}
+  {
+  iItemHeight = aItemHeight;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmGrid::UpdateScrollBarThumbs()
-	{
-	CAknGrid::UpdateScrollBarThumbs();
-	}
+  {
+  CAknGrid::UpdateScrollBarThumbs();
+  }
 
 // -----------------------------------------------------------------------------
 //
@@ -1023,9 +1029,9 @@ TInt CMmGrid::CountComponentControls() const
     {
     TInt componentControls(0);
     if ( !iDisableChildComponentDrawing )
-    	{
+      {
         componentControls = CAknGrid::CountComponentControls();
-    	}
+      }
     return componentControls;
     }
 // -----------------------------------------------------------------------------

@@ -1,97 +1,56 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration xmlns="http://www.s60.com/xml/confml/1" name="Homescreen 1" version="1">
-  <feature ref="HomescreenPlugins_1" name="Homescreen 1 widgets">
-    <setting ref="MaxWidgets" name="Max Widgets" type="string">
+<configuration name="Homescreen 1" version="1" xmlns="http://www.s60.com/xml/confml/2" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <feature name="Homescreen 1 widgets" ref="HomescreenPlugins_1">
+    <setting name="Max Widgets" ref="MaxWidgets" type="string">
       <desc>Maximum widget amount in Homescreen 1 page. Customizable</desc>
     </setting>
-    <setting ref="UseEmptyWidgets" readOnly="true" name="Use Empty Widgets" type="boolean">
+    <setting name="Use Empty Widgets" readOnly="true" ref="UseEmptyWidgets" type="boolean">
       <desc>Not customizable!</desc>
     </setting>
-    <setting ref="ItemIdEmptyWidgets" readOnly="true" name="Item id for empty widgets definition in view" type="string">
+    <setting name="Item id for empty widgets definition in view" readOnly="true" ref="ItemIdEmptyWidgets" type="string">
       <desc>Not customizable!</desc>
     </setting>
-    <setting ref="PropertyEmptyWidgets" readOnly="true" name="Property name for empty widgets definition in view" type="string">
+    <setting name="Property name for empty widgets definition in view" readOnly="true" ref="PropertyEmptyWidgets" type="string">
       <desc>Not customizable!</desc>
     </setting>
-    <setting ref="BackGroundPath" name="background path" type="string">
+    <setting name="background path" ref="BackGroundPath" type="string">
       <desc>Path of the Wallpaper resource. Customizable. </desc>
     </setting>
-    <setting ref="ItemIdWallpaper" readOnly="true" name="Item id wallpaper" type="string">
+    <setting name="Item id wallpaper" readOnly="true" ref="ItemIdWallpaper" type="string">
       <desc>Not customizable!</desc>
     </setting>
-    <setting ref="WallpaperPropertyName" readOnly="true" name="Wallpaper property name" type="string">
+    <setting name="Wallpaper property name" readOnly="true" ref="WallpaperPropertyName" type="string">
       <desc>Not customizable!</desc>
     </setting>
-    <setting ref="Plugins" name="Widgets" type="sequence">
+    <setting name="Widgets" ref="Plugins" type="sequence">
       <desc>Widgets in the Homescreen 1</desc>
-      <setting ref="Uid" name="Widget" type="selection">
-        <desc>Widget name</desc>
-        <!-- S60 Native Widgets -->
-        <option name="Empty" value="0x2001f47f"/>
-        <option name="PhoneSetup" value="0x20021195"/>
-        <option name="ContactsBar" value="0x20022eba"/>
-        <option name="Shortcut" value="0x2001f483"/>
-        <option name="Shortcut2" value="0x2001f484"/>
-        <option name="Desktop" value="0x20026f4f"/>
-        <option name="Topcontacts" value="0x200184cd"/>
-        <option name="Topcontacts2" value="0x200184c9"/>
-        <option name="ShareOnlineAI3" value="0x20010980"/>
-        <option name="wsfwidget" value="0x20026f45"/>
-        <option name="Organizer" value="0x2001f481"/>
-        <option name="MusicWidget" value="0x10207c18"/>
-        <option name="Fmtx" value="0x20021189"/>
-        <option name="EmailWidget" value="0x2001e272"/>
-        <option name="Profile" value="0x2001cb7c"/>
-        <option name="ServiceWidget" value="0x20021383"/>
-        <option name="SocialMixer" value="0x2002699f"/>
-        <!-- S60WRT on eMMC -->
-        <option name="Accuweather eMMC" value="0x2000dd2a"/>
-        <option name="Ap News eMMC" value="0x2000dd2b"/>
-        <option name="Facebook eMMC" value="0x2000dd2c"/>
-        <option name="Bloomberg eMMC" value="0x2000dd2d"/>
-        <option name="Amazon eMMC" value="0x2000dd2e"/>
-        <option name="Hi5 eMMC" value="0x2000dd2f"/>
-        <option name="Reuters eMMC" value="0x2000dd30"/>
-        <option name="CNN Video eMMC" value="0x2000dd31"/>
-        <option name="E! eMMC" value="0x2000dd32"/>
-        <option name="Movie Teasers eMMC" value="0x2000dd33"/>
-        <option name="Nat Geo eMMC" value="0x2000dd34"/>
-        <option name="Chat eMMC" value="0x2000dd35"/>
-        <option name="Web TV Demo eMMC" value="0x2000dd36"/>
-        <option name="Communities eMMC" value="0x2000dd37"/>
-        <option name="Ovi Files eMMC" value="0x2000dd38"/>
-        <option name="YLE Areena eMMC" value="0x2000dd39"/>
-                
-        <!-- S60WRT on eMMC -->
-        <option name="SSOUI eMMC" value="0x2000de24"/>
-        <option name="Timer.A eMMC" value="0x2000de25"/>
-        
+    <setting name="Widget" ref="Uid" type="selection">
+      <desc>Widget name</desc>
+      <!-- S60 Native Widgets -->
+      <option name="Empty" value="0x2001f47f"/>
+      <option name="PhoneSetup" value="0x20021195"/>
+      <option name="ContactsBar" value="0x20022eba"/>
+      <option name="Shortcut" value="0x2001f483"/>
+      <option name="Shortcut2" value="0x2001f484"/>
+      <option name="Desktop" value="0x20026f4f"/>
+      <option name="Topcontacts" value="0x200184cd"/>
+      <option name="Topcontacts2" value="0x200184c9"/>
+      <option name="ShareOnlineAI3" value="0x20010980"/>
+      <option name="wsfwidget" value="0x20026f45"/>
+      <option name="Organizer" value="0x2001f481"/>
+      <option name="MusicWidget" value="0x10207c18"/>
+      <option name="Fmtx" value="0x20021189"/>
+      <option name="EmailWidget" value="0x2001e272"/>
+      <option name="Profile" value="0x2001cb7c"/>
+      <option name="ServiceWidget" value="0x20021383"/>
+      <option name="SocialMixer" value="0x2002699f"/>
+      <!-- Automatic option listing of WRTs on the release -->	
+      <option map="DFSFeatures/HomescreenWidgets"></option>
       </setting>
-      <setting ref="BundleIdentifier" name="Bundle Identifier" type="selection">
+      <setting name="Bundle Identifier" ref="BundleIdentifier" type="selection">
         <desc>Bundle identifier for the (C)WRT widgets. None for the native widgets</desc>
-        <!-- Bundle names of WRT -->
-        <option name="None" value="0"/>
-        <option name="AccuWeather" value="com.accuweather.widget.touchNG"/>
-        option name="Ap News" value="com.nokia.apnews.widget"/>
-        <option name="Facebook" value="com.nokia.facebook.widget.S605th"/>
-        <option name="Bloomberg" value="com.bloomberg.nokia.mobile"/>
-        <option name="Amazon" value="com.nokia.widget.amazon"/>
-        <option name="Hi5" value="com.nokia.widget.s605.hi5"/>
-        <option name="Reuters" value="com.reuters.widget.news"/>
-        <option name="CNN Video" value="com.cnn"/>
-        <option name="E!" value="com.moderati.eonline"/>
-        <option name="Movie Teasers" value="com.movieteasers"/>
-        <option name="Nat Geo" value="com.natgeo"/>
-        <option name="Chat" value="com.nokia.ChatClient"/>
-        <option name="Web TV Demo" value="com.nokia.forum.webtv.widget"/>
-        <option name="Communities" value="com.nokia.socialmixer.v1"/>
-        <option name="Ovi Files" value="com.nokia.ss.sas.filesql"/> 
-        <option name="YLE Areena" value="com.tieto.yle"/> 
-        <option name="SSOUI" value="ovi.serviceui.SSOUI"/>
-        <option name="Timer.A" value="com.nokia.wgt.TIMER.A"/>
-        
-      </setting>
-      <setting ref="TemplateIdentifier" name="Template Identifier" type="selection">
+      <option name="None / Automatic" value="0" />
+    </setting>
+      <setting name="Template Identifier" ref="TemplateIdentifier" type="selection">
         <desc>Templeate identifier for the (C)WRT widgets. None for the native widgets</desc>
         <option name="None" value="0"/>
         <option name="wideimage" value="0x2001f489"/>
@@ -100,130 +59,130 @@
         <option name="tworows" value="0x2001f488"/>
         <option name="onerow" value="0x2001f480"/>
       </setting>
-      <setting ref="LockingStatus" name="locking Status" type="selection">
+      <setting name="locking Status" ref="LockingStatus" type="selection">
         <desc>Locking status for the widget 1 in Homescreen 1 page</desc>
         <option name="None" value="none"/>
         <option name="Locked" value="locked"/>
       </setting>
-      <setting ref="ShortcutWidget" name="Customize Shortcut widget" type="selection">
+      <setting name="Customize Shortcut widget" ref="ShortcutWidget" type="selection">
         <desc>Customize enabler for desktop/shortcut widget</desc>
         <option name="Not Customize desktop Widget" value="0"/>
         <option name="Customize desktop widget" value="1"/>
       </setting>
-      <setting ref="Customize1Shortcut" name="Customize 1st Shortcut" type="selection">
+      <setting name="Customize 1st Shortcut" ref="Customize1Shortcut" type="selection">
         <desc>Customize 1st item in desktop widget</desc>
         <option name="Not Customize 1st shortcut" value="0"/>
         <option name="Customize 1st shortcut" value="1"/>
       </setting>
-      <setting ref="Shortcut1Type" name="1st Shortcut type" type="selection">
+      <setting name="1st Shortcut type" ref="Shortcut1Type" type="selection">
         <desc>Type of the item: Application, bookmark, or shortcut(param specific item)</desc>
         <option name="Application" value="application"/>
         <option name="Bookmark" value="bookmark"/>
         <option name="Shortcut" value="shortcut"/>
       </setting>
-      <setting ref="Shortcut1Uid" name="1st Shortcut Uid" type="string">
+      <setting name="1st Shortcut Uid" ref="Shortcut1Uid" type="string">
         <desc>Uid for the application, Menu content Uid for the bookmarks and shortcuts.</desc>
       </setting>
-      <setting ref="Shortcut1View" name="1st Shortcut View" type="string">
+      <setting name="1st Shortcut View" ref="Shortcut1View" type="string">
         <desc>url for the bookmark based shortcut. for example http://www.google.com</desc>
       </setting>
-      <setting ref="Shortcut1Param" name="1st Shortcut Param" type="string">
+      <setting name="1st Shortcut Param" ref="Shortcut1Param" type="string">
         <desc>Params for shortcut. For example: messaging:msg</desc>
       </setting>
-      <setting ref="Customize2Shortcut" name="Customize 2nd Shortcut" type="selection">
+      <setting name="Customize 2nd Shortcut" ref="Customize2Shortcut" type="selection">
         <desc>Customize 2nd item in desktop widget</desc>
         <option name="Not Customize 2nd shortcut" value="0"/>
         <option name="Customize 2nd shortcut" value="1"/>
       </setting>
-      <setting ref="Shortcut2Type" name="2nd Shortcut Application" type="selection">
+      <setting name="2nd Shortcut Application" ref="Shortcut2Type" type="selection">
         <desc>Type of the item: Application, bookmark, or shortcut(param specific item)</desc>
         <option name="Application" value="application"/>
         <option name="Bookmark" value="bookmark"/>
         <option name="Shortcut" value="shortcut"/>
       </setting>
-      <setting ref="Shortcut2Uid" name="2nd Shortcut Uid" type="string">
+      <setting name="2nd Shortcut Uid" ref="Shortcut2Uid" type="string">
         <desc>Uid for the application, Menu content Uid for the bookmarks and shortcuts</desc>
       </setting>
-      <setting ref="Shortcut2View" name="2nd Shortcut View" type="string">
+      <setting name="2nd Shortcut View" ref="Shortcut2View" type="string">
         <desc>url for the bookmark based shortcut. for example http://www.google.com</desc>
       </setting>
-      <setting ref="Shortcut2Param" name="2nd Shortcut Param" type="string">
+      <setting name="2nd Shortcut Param" ref="Shortcut2Param" type="string">
         <desc>Params for shortcut. messaging:msg</desc>
       </setting>
-      <setting ref="Customize3Shortcut" name="Customize 3rd Shortcut" type="selection">
+      <setting name="Customize 3rd Shortcut" ref="Customize3Shortcut" type="selection">
         <desc>Customize 3rd item in desktop widget</desc>
         <option name="Not Customize 3rd shortcut" value="0"/>
         <option name="Customize 3rd shortcut" value="1"/>
       </setting>
-      <setting ref="Shortcut3Type" name="3rd Shortcut Application" type="selection">
+      <setting name="3rd Shortcut Application" ref="Shortcut3Type" type="selection">
         <desc>Type of the item: Application, bookmark, or shortcut(param specific item)</desc>
         <option name="Application" value="application"/>
         <option name="Bookmark" value="bookmark"/>
         <option name="Shortcut" value="shortcut"/>
       </setting>
-      <setting ref="Shortcut3Uid" name="3rd Shortcut Uid" type="string">
+      <setting name="3rd Shortcut Uid" ref="Shortcut3Uid" type="string">
         <desc>Uid for the application,Menu content  Uid for the bookmarks and shortcuts.</desc>
       </setting>
-      <setting ref="Shortcut3View" name="3rd Shortcut View" type="string">
+      <setting name="3rd Shortcut View" ref="Shortcut3View" type="string">
         <desc>url for the bookmark based shortcut. for example http://www.google.com</desc>
       </setting>
-      <setting ref="Shortcut3Param" name="3rd Shortcut Param" type="string">
+      <setting name="3rd Shortcut Param" ref="Shortcut3Param" type="string">
         <desc>Params for shortcut. messaging:msg</desc>
       </setting>
-      <setting ref="Customize4Shortcut" name="Customize 4th Shortcut" type="selection">
+      <setting name="Customize 4th Shortcut" ref="Customize4Shortcut" type="selection">
         <desc>Customize 4th item in desktop widget</desc>
-        <option name="Not Customize 4th shortcut" value="0"/>
-        <option name="Customize 4th shortcut" value="1"/>
+        <option name="Not Customize 4th shortcut" value="0" />
+        <option name="Customize 4th shortcut" value="1" />
       </setting>
-      <setting ref="Shortcut4Type" name="4th ShortCut Application" type="selection">
+      <setting name="4th ShortCut Application" ref="Shortcut4Type" type="selection">
         <desc>Type of the item: Application, bookmark, or shortcut(param specific item)</desc>
-        <option name="Application" value="application"/>
-        <option name="Bookmark" value="bookmark"/>
-        <option name="Shortcut" value="shortcut"/>
+        <option name="Application" value="application" />
+        <option name="Bookmark" value="bookmark" />
+        <option name="Shortcut" value="shortcut" />
       </setting>
-      <setting ref="Shortcut4Uid" name="4th Shortcut Uid" type="string">
+      <setting name="4th Shortcut Uid" ref="Shortcut4Uid" type="string">
         <desc>Uid for the application, Menu content  ids for the bookmarks and shortcuts </desc>
       </setting>
-      <setting ref="Shortcut4View" name="4th Shortcut View" type="string">
+      <setting name="4th Shortcut View" ref="Shortcut4View" type="string">
         <desc>url for the bookmark based shortcut. for example http://www.google.com</desc>
       </setting>
-      <setting ref="Shortcut4Param" name="4th Shortcut Param" type="string">
+      <setting name="4th Shortcut Param" ref="Shortcut4Param" type="string">
         <desc>Params for shortcut. messaging:msg</desc>
       </setting>
-      <setting ref="Shortcut1ItemId" readOnly="true" name="Shortcut1 ItemId" type="string">
+      <setting name="Shortcut1 ItemId" readOnly="true" ref="Shortcut1ItemId" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut1ItemName" readOnly="true" name="Shortcut1 ItemName" type="string">
+      <setting name="Shortcut1 ItemName" readOnly="true" ref="Shortcut1ItemName" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut2ItemId" readOnly="true" name="Shortcut2 ItemId" type="string">
+      <setting name="Shortcut2 ItemId" readOnly="true" ref="Shortcut2ItemId" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut2ItemName" readOnly="true" name="Shortcut2 ItemName" type="string">
+      <setting name="Shortcut2 ItemName" readOnly="true" ref="Shortcut2ItemName" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut3ItemId" readOnly="true" name="Shortcut3 ItemId" type="string">
+      <setting name="Shortcut3 ItemId" readOnly="true" ref="Shortcut3ItemId" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut3ItemName" readOnly="true" name="Shortcut3 ItemName" type="string">
+      <setting name="Shortcut3 ItemName" readOnly="true" ref="Shortcut3ItemName" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut4ItemId" readOnly="true" name="Shortcut4 ItemId" type="string">
+      <setting name="Shortcut4 ItemId" readOnly="true" ref="Shortcut4ItemId" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="Shortcut4ItemName" readOnly="true" name="Shortcut4 ItemName" type="string">
+      <setting name="Shortcut4 ItemName" readOnly="true" ref="Shortcut4ItemName" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="ShortcutPropertyNameType" readOnly="true" name="Shortcut PropertyNameType" type="string">
+      <setting name="Shortcut PropertyNameType" readOnly="true" ref="ShortcutPropertyNameType" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="ShortcutPropertyNameUid" readOnly="true" name="Shortcut PropertyNameUid" type="string">
+      <setting name="Shortcut PropertyNameUid" readOnly="true" ref="ShortcutPropertyNameUid" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="ShortcutPropertyNameView" readOnly="true" name="Shortcut PropertyNameView" type="string">
+      <setting name="Shortcut PropertyNameView" readOnly="true" ref="ShortcutPropertyNameView" type="string">
         <desc>Not customizable!</desc>
       </setting>
-      <setting ref="ShortcutPropertyNameParam" readOnly="true" name="Shortcut PropertyNameParam" type="string">
+      <setting name="Shortcut PropertyNameParam" readOnly="true" ref="ShortcutPropertyNameParam" type="string">
         <desc>Not customizable!</desc>
       </setting>
     </setting>
@@ -236,13 +195,241 @@
       <PropertyEmptyWidgets>use_empty_widget</PropertyEmptyWidgets>
       <ItemIdWallpaper>wallpaper</ItemIdWallpaper>
       <WallpaperPropertyName>path</WallpaperPropertyName>
-      <BackGroundPath></BackGroundPath>
-      <Plugins extensionPolicy="replace"><Uid>0x2001cb7c</Uid><BundleIdentifier>0</BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>locked</LockingStatus><ShortcutWidget>0</ShortcutWidget><Customize1Shortcut></Customize1Shortcut><Shortcut1Type></Shortcut1Type><Shortcut1Uid></Shortcut1Uid><Shortcut1View></Shortcut1View><Shortcut1Param></Shortcut1Param><Customize2Shortcut></Customize2Shortcut><Shortcut2Type></Shortcut2Type><Shortcut2Uid></Shortcut2Uid><Shortcut2View></Shortcut2View><Shortcut2Param></Shortcut2Param><Customize3Shortcut></Customize3Shortcut><Shortcut3Type></Shortcut3Type><Shortcut3Uid></Shortcut3Uid><Shortcut3View></Shortcut3View><Shortcut3Param></Shortcut3Param><Customize4Shortcut></Customize4Shortcut><Shortcut4Type></Shortcut4Type><Shortcut4Uid></Shortcut4Uid><Shortcut4View></Shortcut4View><Shortcut4Param></Shortcut4Param><Shortcut1ItemId>first</Shortcut1ItemId><Shortcut1ItemName>Shortcut1</Shortcut1ItemName><Shortcut2ItemId>second</Shortcut2ItemId><Shortcut2ItemName>Shortcut2</Shortcut2ItemName><Shortcut3ItemId>third</Shortcut3ItemId><Shortcut3ItemName>Shortcut3</Shortcut3ItemName><Shortcut4ItemId>fourth</Shortcut4ItemId><Shortcut4ItemName>Shortcut4</Shortcut4ItemName><ShortcutPropertyNameType>type</ShortcutPropertyNameType><ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid><ShortcutPropertyNameView>view</ShortcutPropertyNameView><ShortcutPropertyNameParam>param</ShortcutPropertyNameParam></Plugins>
-      <Plugins><Uid>0x20026f4f</Uid><BundleIdentifier>0</BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus><ShortcutWidget>0</ShortcutWidget><Customize1Shortcut>0</Customize1Shortcut><Shortcut1Type></Shortcut1Type><Shortcut1Uid></Shortcut1Uid><Shortcut1View></Shortcut1View><Shortcut1Param></Shortcut1Param><Customize2Shortcut></Customize2Shortcut><Shortcut2Type></Shortcut2Type><Shortcut2Uid></Shortcut2Uid><Shortcut2View></Shortcut2View><Shortcut2Param></Shortcut2Param><Customize3Shortcut></Customize3Shortcut><Shortcut3Type></Shortcut3Type><Shortcut3Uid></Shortcut3Uid><Shortcut3View></Shortcut3View><Shortcut3Param></Shortcut3Param><Customize4Shortcut></Customize4Shortcut><Shortcut4Type></Shortcut4Type><Shortcut4Uid></Shortcut4Uid><Shortcut4View></Shortcut4View><Shortcut4Param></Shortcut4Param><Shortcut1ItemId>first</Shortcut1ItemId><Shortcut1ItemName>Shortcut1</Shortcut1ItemName><Shortcut2ItemId>second</Shortcut2ItemId><Shortcut2ItemName>Shortcut2</Shortcut2ItemName><Shortcut3ItemId>third</Shortcut3ItemId><Shortcut3ItemName>Shortcut3</Shortcut3ItemName><Shortcut4ItemId>fourth</Shortcut4ItemId><Shortcut4ItemName>Shortcut4</Shortcut4ItemName><ShortcutPropertyNameType>type</ShortcutPropertyNameType><ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid><ShortcutPropertyNameView>view</ShortcutPropertyNameView><ShortcutPropertyNameParam>param</ShortcutPropertyNameParam></Plugins>
-      <Plugins><Uid>0x10207c18</Uid><BundleIdentifier>0</BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus><ShortcutWidget>0</ShortcutWidget><Customize1Shortcut>0</Customize1Shortcut><Shortcut1Type></Shortcut1Type><Shortcut1Uid></Shortcut1Uid><Shortcut1View></Shortcut1View><Shortcut1Param></Shortcut1Param><Customize2Shortcut></Customize2Shortcut><Shortcut2Type></Shortcut2Type><Shortcut2Uid></Shortcut2Uid><Shortcut2View></Shortcut2View><Shortcut2Param></Shortcut2Param><Customize3Shortcut></Customize3Shortcut><Shortcut3Type></Shortcut3Type><Shortcut3Uid></Shortcut3Uid><Shortcut3View></Shortcut3View><Shortcut3Param></Shortcut3Param><Customize4Shortcut></Customize4Shortcut><Shortcut4Type></Shortcut4Type><Shortcut4Uid></Shortcut4Uid><Shortcut4View></Shortcut4View><Shortcut4Param></Shortcut4Param><Shortcut1ItemId>first</Shortcut1ItemId><Shortcut1ItemName>Shortcut1</Shortcut1ItemName><Shortcut2ItemId>second</Shortcut2ItemId><Shortcut2ItemName>Shortcut2</Shortcut2ItemName><Shortcut3ItemId>third</Shortcut3ItemId><Shortcut3ItemName>Shortcut3</Shortcut3ItemName><Shortcut4ItemId>fourth</Shortcut4ItemId><Shortcut4ItemName>Shortcut4</Shortcut4ItemName><ShortcutPropertyNameType>type</ShortcutPropertyNameType><ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid><ShortcutPropertyNameView>view</ShortcutPropertyNameView><ShortcutPropertyNameParam>param</ShortcutPropertyNameParam></Plugins>
-      <Plugins><Uid>0x2001f481</Uid><BundleIdentifier>0</BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus><ShortcutWidget>0</ShortcutWidget><Customize1Shortcut>0</Customize1Shortcut><Shortcut1Type></Shortcut1Type><Shortcut1Uid></Shortcut1Uid><Shortcut1View></Shortcut1View><Shortcut1Param></Shortcut1Param><Customize2Shortcut></Customize2Shortcut><Shortcut2Type></Shortcut2Type><Shortcut2Uid></Shortcut2Uid><Shortcut2View></Shortcut2View><Shortcut2Param></Shortcut2Param><Customize3Shortcut></Customize3Shortcut><Shortcut3Type></Shortcut3Type><Shortcut3Uid></Shortcut3Uid><Shortcut3View></Shortcut3View><Shortcut3Param></Shortcut3Param><Customize4Shortcut></Customize4Shortcut><Shortcut4Type></Shortcut4Type><Shortcut4Uid></Shortcut4Uid><Shortcut4View></Shortcut4View><Shortcut4Param></Shortcut4Param><Shortcut1ItemId>first</Shortcut1ItemId><Shortcut1ItemName>Shortcut1</Shortcut1ItemName><Shortcut2ItemId>second</Shortcut2ItemId><Shortcut2ItemName>Shortcut2</Shortcut2ItemName><Shortcut3ItemId>third</Shortcut3ItemId><Shortcut3ItemName>Shortcut3</Shortcut3ItemName><Shortcut4ItemId>fourth</Shortcut4ItemId><Shortcut4ItemName>Shortcut4</Shortcut4ItemName><ShortcutPropertyNameType>type</ShortcutPropertyNameType><ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid><ShortcutPropertyNameView>view</ShortcutPropertyNameView><ShortcutPropertyNameParam>param</ShortcutPropertyNameParam></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier>0</BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus><ShortcutWidget>0</ShortcutWidget><Customize1Shortcut>0</Customize1Shortcut><Shortcut1Type></Shortcut1Type><Shortcut1Uid></Shortcut1Uid><Shortcut1View></Shortcut1View><Shortcut1Param></Shortcut1Param><Customize2Shortcut></Customize2Shortcut><Shortcut2Type></Shortcut2Type><Shortcut2Uid></Shortcut2Uid><Shortcut2View></Shortcut2View><Shortcut2Param></Shortcut2Param><Customize3Shortcut></Customize3Shortcut><Shortcut3Type></Shortcut3Type><Shortcut3Uid></Shortcut3Uid><Shortcut3View></Shortcut3View><Shortcut3Param></Shortcut3Param><Customize4Shortcut></Customize4Shortcut><Shortcut4Type></Shortcut4Type><Shortcut4Uid></Shortcut4Uid><Shortcut4View></Shortcut4View><Shortcut4Param></Shortcut4Param><Shortcut1ItemId>first</Shortcut1ItemId><Shortcut1ItemName>Shortcut1</Shortcut1ItemName><Shortcut2ItemId>second</Shortcut2ItemId><Shortcut2ItemName>Shortcut2</Shortcut2ItemName><Shortcut3ItemId>third</Shortcut3ItemId><Shortcut3ItemName>Shortcut3</Shortcut3ItemName><Shortcut4ItemId>fourth</Shortcut4ItemId><Shortcut4ItemName>Shortcut4</Shortcut4ItemName><ShortcutPropertyNameType>type</ShortcutPropertyNameType><ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid><ShortcutPropertyNameView>view</ShortcutPropertyNameView><ShortcutPropertyNameParam>param</ShortcutPropertyNameParam></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier>0</BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus><ShortcutWidget>0</ShortcutWidget><Customize1Shortcut>0</Customize1Shortcut><Shortcut1Type></Shortcut1Type><Shortcut1Uid></Shortcut1Uid><Shortcut1View></Shortcut1View><Shortcut1Param></Shortcut1Param><Customize2Shortcut></Customize2Shortcut><Shortcut2Type></Shortcut2Type><Shortcut2Uid></Shortcut2Uid><Shortcut2View></Shortcut2View><Shortcut2Param></Shortcut2Param><Customize3Shortcut></Customize3Shortcut><Shortcut3Type></Shortcut3Type><Shortcut3Uid></Shortcut3Uid><Shortcut3View></Shortcut3View><Shortcut3Param></Shortcut3Param><Customize4Shortcut></Customize4Shortcut><Shortcut4Type></Shortcut4Type><Shortcut4Uid></Shortcut4Uid><Shortcut4View></Shortcut4View><Shortcut4Param></Shortcut4Param><Shortcut1ItemId>first</Shortcut1ItemId><Shortcut1ItemName>Shortcut1</Shortcut1ItemName><Shortcut2ItemId>second</Shortcut2ItemId><Shortcut2ItemName>Shortcut2</Shortcut2ItemName><Shortcut3ItemId>third</Shortcut3ItemId><Shortcut3ItemName>Shortcut3</Shortcut3ItemName><Shortcut4ItemId>fourth</Shortcut4ItemId><Shortcut4ItemName>Shortcut4</Shortcut4ItemName><ShortcutPropertyNameType>type</ShortcutPropertyNameType><ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid><ShortcutPropertyNameView>view</ShortcutPropertyNameView><ShortcutPropertyNameParam>param</ShortcutPropertyNameParam></Plugins>
+      <BackGroundPath />
+      <Plugins extensionPolicy="replace">
+        <Uid>0x2001cb7c</Uid>
+        <BundleIdentifier>0</BundleIdentifier>
+        <TemplateIdentifier>0</TemplateIdentifier>
+        <LockingStatus>locked</LockingStatus>
+        <ShortcutWidget>0</ShortcutWidget>
+        <Customize1Shortcut />
+        <Shortcut1Type />
+        <Shortcut1Uid />
+        <Shortcut1View />
+        <Shortcut1Param />
+        <Customize2Shortcut />
+        <Shortcut2Type />
+        <Shortcut2Uid />
+        <Shortcut2View />
+        <Shortcut2Param />
+        <Customize3Shortcut />
+        <Shortcut3Type />
+        <Shortcut3Uid />
+        <Shortcut3View />
+        <Shortcut3Param />
+        <Customize4Shortcut />
+        <Shortcut4Type />
+        <Shortcut4Uid />
+        <Shortcut4View />
+        <Shortcut4Param />
+        <Shortcut1ItemId>first</Shortcut1ItemId>
+        <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+        <Shortcut2ItemId>second</Shortcut2ItemId>
+        <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+        <Shortcut3ItemId>third</Shortcut3ItemId>
+        <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+        <Shortcut4ItemId>fourth</Shortcut4ItemId>
+        <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+        <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+        <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+        <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+        <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+      <Plugins>
+        <Uid>0x20026f4f</Uid>
+        <BundleIdentifier>0</BundleIdentifier>
+        <TemplateIdentifier>0</TemplateIdentifier>
+        <LockingStatus>none</LockingStatus>
+        <ShortcutWidget>0</ShortcutWidget>
+        <Customize1Shortcut>0</Customize1Shortcut>
+        <Shortcut1Type />
+        <Shortcut1Uid />
+        <Shortcut1View />
+        <Shortcut1Param />
+        <Customize2Shortcut />
+        <Shortcut2Type />
+        <Shortcut2Uid />
+        <Shortcut2View />
+        <Shortcut2Param />
+        <Customize3Shortcut />
+        <Shortcut3Type />
+        <Shortcut3Uid />
+        <Shortcut3View />
+        <Shortcut3Param />
+        <Customize4Shortcut />
+        <Shortcut4Type />
+        <Shortcut4Uid />
+        <Shortcut4View />
+        <Shortcut4Param />
+        <Shortcut1ItemId>first</Shortcut1ItemId>
+        <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+        <Shortcut2ItemId>second</Shortcut2ItemId>
+        <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+        <Shortcut3ItemId>third</Shortcut3ItemId>
+        <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+        <Shortcut4ItemId>fourth</Shortcut4ItemId>
+        <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+        <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+        <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+        <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+        <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+      <Plugins>
+        <Uid>0x10207c18</Uid>
+        <BundleIdentifier>0</BundleIdentifier>
+        <TemplateIdentifier>0</TemplateIdentifier>
+        <LockingStatus>none</LockingStatus>
+        <ShortcutWidget>0</ShortcutWidget>
+        <Customize1Shortcut>0</Customize1Shortcut>
+        <Shortcut1Type />
+        <Shortcut1Uid />
+        <Shortcut1View />
+        <Shortcut1Param />
+        <Customize2Shortcut />
+        <Shortcut2Type />
+        <Shortcut2Uid />
+        <Shortcut2View />
+        <Shortcut2Param />
+        <Customize3Shortcut />
+        <Shortcut3Type />
+        <Shortcut3Uid />
+        <Shortcut3View />
+        <Shortcut3Param />
+        <Customize4Shortcut />
+        <Shortcut4Type />
+        <Shortcut4Uid />
+        <Shortcut4View />
+        <Shortcut4Param />
+        <Shortcut1ItemId>first</Shortcut1ItemId>
+        <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+        <Shortcut2ItemId>second</Shortcut2ItemId>
+        <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+        <Shortcut3ItemId>third</Shortcut3ItemId>
+        <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+        <Shortcut4ItemId>fourth</Shortcut4ItemId>
+        <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+        <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+        <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+        <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+        <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+      <Plugins>
+        <Uid>0x2001f481</Uid>
+        <BundleIdentifier>0</BundleIdentifier>
+        <TemplateIdentifier>0</TemplateIdentifier>
+        <LockingStatus>none</LockingStatus>
+        <ShortcutWidget>0</ShortcutWidget>
+        <Customize1Shortcut>0</Customize1Shortcut>
+        <Shortcut1Type />
+        <Shortcut1Uid />
+        <Shortcut1View />
+        <Shortcut1Param />
+        <Customize2Shortcut />
+        <Shortcut2Type />
+        <Shortcut2Uid />
+        <Shortcut2View />
+        <Shortcut2Param />
+        <Customize3Shortcut />
+        <Shortcut3Type />
+        <Shortcut3Uid />
+        <Shortcut3View />
+        <Shortcut3Param />
+        <Customize4Shortcut />
+        <Shortcut4Type />
+        <Shortcut4Uid />
+        <Shortcut4View />
+        <Shortcut4Param />
+        <Shortcut1ItemId>first</Shortcut1ItemId>
+        <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+        <Shortcut2ItemId>second</Shortcut2ItemId>
+        <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+        <Shortcut3ItemId>third</Shortcut3ItemId>
+        <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+        <Shortcut4ItemId>fourth</Shortcut4ItemId>
+        <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+        <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+        <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+        <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+        <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+      <Plugins>
+        <Uid>0x2001f47f</Uid>
+        <BundleIdentifier>0</BundleIdentifier>
+        <TemplateIdentifier>0</TemplateIdentifier>
+        <LockingStatus>none</LockingStatus>
+        <ShortcutWidget>0</ShortcutWidget>
+        <Customize1Shortcut>0</Customize1Shortcut>
+        <Shortcut1Type />
+        <Shortcut1Uid />
+        <Shortcut1View />
+        <Shortcut1Param />
+        <Customize2Shortcut />
+        <Shortcut2Type />
+        <Shortcut2Uid />
+        <Shortcut2View />
+        <Shortcut2Param />
+        <Customize3Shortcut />
+        <Shortcut3Type />
+        <Shortcut3Uid />
+        <Shortcut3View />
+        <Shortcut3Param />
+        <Customize4Shortcut />
+        <Shortcut4Type />
+        <Shortcut4Uid />
+        <Shortcut4View />
+        <Shortcut4Param />
+        <Shortcut1ItemId>first</Shortcut1ItemId>
+        <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+        <Shortcut2ItemId>second</Shortcut2ItemId>
+        <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+        <Shortcut3ItemId>third</Shortcut3ItemId>
+        <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+        <Shortcut4ItemId>fourth</Shortcut4ItemId>
+        <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+        <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+        <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+        <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+        <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+     <Plugins>
+        <Uid>0x2001f47f</Uid>
+        <BundleIdentifier>0</BundleIdentifier>
+        <TemplateIdentifier>0</TemplateIdentifier>
+        <LockingStatus>none</LockingStatus>
+        <ShortcutWidget>0</ShortcutWidget>
+        <Customize1Shortcut>0</Customize1Shortcut>
+        <Shortcut1Type />
+        <Shortcut1Uid />
+        <Shortcut1View />
+        <Shortcut1Param />
+        <Customize2Shortcut />
+        <Shortcut2Type />
+        <Shortcut2Uid />
+        <Shortcut2View />
+        <Shortcut2Param />
+        <Customize3Shortcut />
+        <Shortcut3Type />
+        <Shortcut3Uid />
+        <Shortcut3View />
+        <Shortcut3Param />
+        <Customize4Shortcut />
+        <Shortcut4Type />
+        <Shortcut4Uid />
+        <Shortcut4View />
+        <Shortcut4Param />
+        <Shortcut1ItemId>first</Shortcut1ItemId>
+        <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+        <Shortcut2ItemId>second</Shortcut2ItemId>
+        <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+        <Shortcut3ItemId>third</Shortcut3ItemId>
+        <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+        <Shortcut4ItemId>fourth</Shortcut4ItemId>
+        <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+        <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+        <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+        <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+        <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
     </HomescreenPlugins_1>
   </data>
 </configuration>

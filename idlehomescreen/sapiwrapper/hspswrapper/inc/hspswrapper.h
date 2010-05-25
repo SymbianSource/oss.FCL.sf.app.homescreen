@@ -235,21 +235,30 @@ public:
      * @return Operation status. KErrNone (success), KErrNotFound
      */
     IMPORT_C TInt SetActivePluginL(const TDesC8& aPluginId);     
-    
-    /**
-      * Removes all but one view and removes all plugins from it.
-      *
-      * @return Operation status. KErrNone (success), KErrNotFound
-      */
-    IMPORT_C TInt RestoreRootL();        
-
+              
      /**
-       * Restore (re-install) default configuration from ROM.
+       * Restores plug-in configurations from eMMC, UDA and ROM drives.       
        *
        * @return Operation status. KErrNone (success), KErrNotFound
        */
     IMPORT_C TInt RestoreDefaultConfL();      
-     
+            
+    /**
+      * Restores plug-in configurations from ROM only. To be used if content
+      * in UDA and eMMC drives is causing panics.
+      *
+      * @return Operation status. KErrNone (success), KErrNotFound
+      */
+    IMPORT_C TInt RestoreRomConfL();
+    
+     /**
+      * Restores active application configuration by removing all extra views,
+      * all plug-ins will be removed also.     
+      *
+      * @return Operation status. KErrNone (success), KErrNotFound
+      */
+    IMPORT_C TInt RestoreViewsL();
+            
     /**
      * Replace plugin in the active configuration.
      *

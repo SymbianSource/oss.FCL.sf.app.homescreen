@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.75 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.75 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.78 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.78 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -46,7 +46,7 @@
 #include <AknDlgShut.h>
 #include <mmenuinternalPSkeys.h>
 #include <aknstyluspopupmenu.h> //stylus popup for long tap event
-#include <APGWGNAM.H>
+#include <apgwgnam.h>
 
 #include "mmgui.hrh"
 #include "mmguiconstants.h"
@@ -332,10 +332,13 @@ void CMmAppUi::ProcessMessageL( TUid /*aUid*/, const TDesC8& aParams )
             {
             //make dummy container visible when returning
             //to menu by AppKey
-            iDummyContainer->MakeVisible( ETrue );
-            RefreshUiPanesL( ETrue );
-            iCurrentContainer->MakeVisible( EFalse );
-            iDummyContainer->DrawNow();
+            if( iDummyContainer && iCurrentContainer )
+                {
+                iDummyContainer->MakeVisible( ETrue );
+                RefreshUiPanesL( ETrue );
+                iCurrentContainer->MakeVisible( EFalse );
+                iDummyContainer->DrawNow();
+                }
             CleanupForExitL( EExitKeyApplication );
             User::LeaveIfError( iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
             CEikonEnv::Static()->RootWin().Identifier(), 0 ) );
@@ -1448,9 +1451,9 @@ void CMmAppUi::HandleMessageL( const TDesC8& aMessage )
         RefreshCbaL();
         iGarbage.ResetAndDestroy();
         ResetContainerMap();
-      iCurrentSuiteModel = NULL;
-      iCurrentContainer = NULL;
-      }
+        iCurrentSuiteModel = NULL;
+        iCurrentContainer = NULL;
+        }
 
     TRAPD( err, iHNInterface->LoadSuitesFromUriL( aMessage ) );
 
@@ -1806,9 +1809,10 @@ void CMmAppUi::HandlePresentationChangeL(
         iToolbar->SetToolbarVisibility( EFalse );
         }
 
+    TBool scrollView( EFalse );
     if( iCurrentContainer != aWidgetContainer )
         {
-        // During open new folder cancel longTap. 
+        // During open new folder cancel longTap.
         if( iCurrentContainer && iCurrentContainer->IsEditMode() )
             iCurrentContainer->EnableLongTapAnimation( EFalse );
 
@@ -1827,26 +1831,7 @@ void CMmAppUi::HandlePresentationChangeL(
             {
             iCurrentContainer->SetHighlightVisibilityL( ETrue );
             }
-
-        // force scroll view to highlighted item in case we've been backing back
-        // and change presentation mode (to list view) had been done.
-        if( iCurrentContainer->WidgetType() == EListWidget )
-            {
-            TInt offsetBottom =
-                    iCurrentContainer->Widget()->View()->ItemPos(
-                        iCurrentSuiteModel->GetSuiteHighlight() ).iY
-                        + iCurrentContainer->Widget()->ItemHeight()
-                        - iCurrentContainer->Widget()->View()->ViewRect().Height();
-            TInt offsetTop = iCurrentContainer->Widget()->View()->ItemPos(
-                    iCurrentSuiteModel->GetSuiteHighlight() ).iY;
-            TBool takeTop = Abs( offsetTop ) < Abs( offsetBottom );
-            TInt offset = ( takeTop ) ? offsetTop : offsetBottom;
-            if( offset != 0 )
-                {
-                iCurrentContainer->Widget()->HandlePhysicsScrollEventL(
-                        offset );
-                }
-            }
+        scrollView = ETrue;
         }
     else
         {
@@ -1896,6 +1881,16 @@ void CMmAppUi::HandlePresentationChangeL(
 
                 // restore the correct widget position
                 iCurrentContainer->RestoreWidgetPosition();
+                // force scroll view to highlighted item in case we've been backing back
+                // and change presentation mode (to list view) had been done.
+                if( scrollView && iCurrentContainer->WidgetType() == EListWidget
+                        && iCurrentSuiteModel->GetSuiteHighlight() > KErrNotFound
+                        && !iCurrentContainer->ItemIsFullyVisible(
+                                iCurrentSuiteModel->GetSuiteHighlight() ))
+                    {
+                    iCurrentContainer->ScrollToItemL(
+                            iCurrentSuiteModel->GetSuiteHighlight() );
+                    }
                 }
 
             // refresh changed items only

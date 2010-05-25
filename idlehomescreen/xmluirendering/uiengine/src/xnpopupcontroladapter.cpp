@@ -19,7 +19,6 @@
 #include <e32base.h>
 #include <e32const.h>
 #include <coecntrl.h>
-#include <AknUtils.h>
 #include <aknstyluspopupmenu.h>
 
 // User includes
@@ -145,6 +144,8 @@ void CXnPopupControlAdapter::ConstructL( CXnNodePluginIf& aNode )
     
     iNode = &aNode.Node();
     iUiEngine = iNode->UiEngine();
+    
+    iMenuShown = EFalse;
     }
 
 // -----------------------------------------------------------------------------
@@ -341,17 +342,9 @@ void CXnPopupControlAdapter::ShowMenuL( CXnPluginData& aPlugin,
         CXnNode* plugin( aPlugin.Owner()->LayoutNode() );
         
         iUiEngine->Editor()->SetTargetPlugin( plugin );
-                       
-        if ( AknLayoutUtils::LayoutMirrored() )
-            {
-            iStylusPopupMenu->SetPosition( aPosition, 
-                CAknStylusPopUpMenu::EPositionTypeRightBottom );                        
-            }
-        else
-            {
-            iStylusPopupMenu->SetPosition( aPosition, 
-                CAknStylusPopUpMenu::EPositionTypeLeftBottom );                        
-            }
+                                      
+        iStylusPopupMenu->SetPosition( aPosition, 
+            CAknStylusPopUpMenu::EPositionTypeRightBottom );                        
         
         iStylusPopupMenu->ShowMenu();
         iMenuShown = ETrue;
@@ -374,5 +367,6 @@ void CXnPopupControlAdapter::HideMenuL()
         iMenuShown = EFalse;
         }    
     }
+
 
 // End of file

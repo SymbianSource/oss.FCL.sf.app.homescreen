@@ -705,20 +705,20 @@ void CMmListBox::UpdateScrollBarsL()
 // -----------------------------------------------------------------------------
 //
 void CMmListBox::UpdateScrollBarsNoRedrawL()
-  {
-  HandleScrollbarVisibilityChangeL();
-  if ( ScrollBarFrame()->VerticalScrollBar()->IsVisible() )
     {
-    CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
-    view->DisableScrollToItem( ETrue );
-    TScrollToItemEnabler reverter = { view };
-    CleanupClosePushL( reverter );
-    CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
-    CleanupStack::PopAndDestroy( &reverter );
-    iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
-            ScrollBarFrame()->VerticalScrollBar()->Rect().Width() );
+    HandleScrollbarVisibilityChangeL();
+    if ( ScrollBarFrame()->VerticalScrollBar()->IsVisible() )
+        {
+        CMmListBoxView* view = static_cast<CMmListBoxView*>( View() );
+        view->DisableScrollToItem( ETrue );
+        TScrollToItemEnabler reverter = { view };
+        CleanupClosePushL( reverter );
+        CEikFormattedCellListBoxTypedef::UpdateScrollBarsL();
+        CleanupStack::PopAndDestroy( &reverter );
+        iMmDrawer->TemplateLibrary()->SetScrollbarWidthL(
+                ScrollBarFrame()->VerticalScrollBar()->Rect().Width() );
+        }
     }
-  }
 
 // -----------------------------------------------------------------------------
 //

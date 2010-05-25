@@ -11,29 +11,53 @@
 *
 * Contributors:
 *
-* Description:  Implementation for wrapper for a box
+* Description:  View control adapter
 *
 */
 
 // System includes
-#include <gfxtranseffect/gfxtranseffect.h>
-#include <akntransitionutils.h>
 
 // User includes
 #include "xnappuiadapter.h"
 #include "xnuiengine.h"
-#include "xnnode.h"
-#include "xndomnode.h"
 #include "xnnodepluginif.h"
+#include "xnnode.h"
+
+#include "xndomdocument.h"
+#include "xndomnode.h"
 #include "xnproperty.h"
-#include "xnviewadapter.h"
-#include "xnbackgroundmanager.h"
-#include "xnviewdata.h"
-#include "xnviewmanager.h"
+
 #include "xnviewcontroladapter.h"
 
 // Constants
     
+// ============================ LOCAL FUNCTIONS ================================
+// -----------------------------------------------------------------------------
+// ResetGrabbingL
+// Removes recursively grabbing controls
+// -----------------------------------------------------------------------------
+//
+static void ResetGrabbingL( CXnControlAdapter* aControl, 
+    const TPointerEvent& aEvent ) 
+    {       
+    if ( aControl )
+        {                              
+        CCoeControl* grabber( aControl->GrabbingComponent() );
+        
+        if ( grabber )
+            {                        
+            grabber->IgnoreEventsUntilNextPointerUp();
+            
+            aControl->CCoeControl::HandlePointerEventL( aEvent );
+            
+            CXnControlAdapter* adapter = 
+                dynamic_cast< CXnControlAdapter* >( grabber );
+            
+            ResetGrabbingL( adapter, aEvent );            
+            }        
+        }    
+    }
+
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -77,6 +101,18 @@ void CXnViewControlAdapter::ConstructL( CXnNodePluginIf& aNode )
     SetComponentsToInheritVisibility( ETrue );
         
     iAppUi.UiStateListener().AddObserver( *this );
+    
+    // By default all views are invisible during construction phase    
+    CXnDomStringPool* sp( aNode.Node().DomNode()->StringPool() );
+    
+    CXnProperty* prop = CXnProperty::NewL(
+        XnPropertyNames::style::common::KDisplay, 
+        XnPropertyNames::style::common::display::KNone,
+        CXnDomPropertyValue::EString, *sp );
+    CleanupStack::PushL( prop );    
+    
+    aNode.SetPropertyWithoutNotificationL( prop );
+    CleanupStack::Pop( prop );    
     }
     
 // -----------------------------------------------------------------------------
@@ -85,8 +121,7 @@ void CXnViewControlAdapter::ConstructL( CXnNodePluginIf& aNode )
 // -----------------------------------------------------------------------------
 //
 CXnViewControlAdapter::CXnViewControlAdapter( CXnNodePluginIf& aNode ) 
-    : iNode( aNode ), iAppUi( static_cast< CXnAppUiAdapter& >( *iAvkonAppUi ) ),
-    iHitpoint( TPoint( -1,-1 ) )
+    : iNode( aNode ), iAppUi( static_cast< CXnAppUiAdapter& >( *iAvkonAppUi ) )    
     {    
     }
 
@@ -146,14 +181,9 @@ void CXnViewControlAdapter::Draw( const TRect& aRect ) const
 //
 void CXnViewControlAdapter::HandlePointerEventL( 
     const TPointerEvent& aPointerEvent )
-    {
-    if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
-        {
-        iHitpoint = aPointerEvent.iPosition;
-        }
-    
+    {    
     iAppUi.UiEngine().DisableRenderUiLC();
-            
+        
     CXnControlAdapter::HandlePointerEventL( aPointerEvent );
     
     iAppUi.UiEngine().RenderUIL();
@@ -169,33 +199,13 @@ void CXnViewControlAdapter::HandlePointerEventL(
 void CXnViewControlAdapter::ResetGrabbing()
     {
     TPointerEvent event;
+    
+    event.iModifiers = 0;
+    event.iPosition = TPoint();
+    event.iParentPosition = TPoint();
     event.iType = TPointerEvent::EButton1Up;
     
-    TRAP_IGNORE( RemoveGrabbingControL( this, event ) );
-    
-    iHitpoint.SetXY( -1, -1 );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnViewControlAdapter::RemoveGrabbingControL()
-// Removes recursively grabbing controls
-// -----------------------------------------------------------------------------
-//
-void CXnViewControlAdapter::RemoveGrabbingControL( const CCoeControl* aControl,
-    const TPointerEvent& aEvent ) const
-    {
-    TInt count( aControl->CountComponentControls() );
-    
-    for( TInt i = 0; i < count; i++ )
-        {
-        CCoeControl* child( aControl->ComponentControl( i ) );
-        
-        if( child && child->Rect().Contains( iHitpoint ) )
-            {
-            child->CCoeControl::HandlePointerEventL( aEvent ); 
-            RemoveGrabbingControL( child, aEvent );
-            }
-        }
+    TRAP_IGNORE( ResetGrabbingL( this, event ) );        
     }
 
 // -----------------------------------------------------------------------------

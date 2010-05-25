@@ -1,5 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+	<tag name="target" value="core"/>
+	<tag name="target" value="rofs2"/>
+	<tag name="target" value="rofs3"/>
+	<tag name="target" value="uda"/>
+	<tag name="target" value="emmc"/>
+<phase name='post'/> <!-- post phase for making sure that data for all homescreen widgets is available in sequence -->
+
+  <ruleml xmlns="http://www.s60.com/xml/ruleml/3">
+    <rule>True configures ${HomescreenPlugins_2.Plugins} = {% mapBundleIds(@{DFSFeatures.HomescreenWidgets}, @{HomescreenPlugins_2.Plugins}) %}</rule>
+<eval_globals>      
+import logging
+#logger = logging.getLogger('cone.homescreen3')
+def mapBundleIds(dfswidgets, plugins):
+  # create a uid-bundle dictionary
+  dict = {}
+  #logger.debug('ws %s' % dfswidgets.value)
+  for widget in dfswidgets.value:
+    dict[widget[dfswidgets._order.index('Uid')].lower()] = widget[dfswidgets._order.index('Bundle')]
+  
+  #logger.debug('d %s' % dict)
+  new_plugins = []    
+  for plugin in plugins.value:
+    # update bundle only if it's 0 or None
+    if plugin[plugins._order.index('Uid')] is not None and (plugin[plugins._order.index('BundleIdentifier')] == '0' or plugin[plugins._order.index('BundleIdentifier')] == None):
+      bundle = dict.get(plugin[plugins._order.index('Uid')].lower())
+      if bundle is not None:
+        #logger.debug('Bundle id updated %s' % bundle)
+        plugin[plugins._order.index('BundleIdentifier')] = bundle
+    new_plugins.append(plugin)
+  
+  return new_plugins
+</eval_globals>
+  </ruleml>
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_200286e4\hsps\00\">
 	<setting ref="HomescreenPlugins_2/MaxWidgets"/>
 	<setting ref="HomescreenPlugins_2/UseEmptyWidgets"/>

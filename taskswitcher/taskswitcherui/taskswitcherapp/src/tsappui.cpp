@@ -254,7 +254,6 @@ void CTsAppUi::StartTransition( TUint aTranstionId,
                                 TBool /*aLayers*/, 
                                 TUint aSubCom )
     {
-    TRAP_IGNORE( RequestPopUpL() );
     const TDesC8* ptr = reinterpret_cast<const TDesC8*>(iAppView);
     GfxTransEffect::Abort(iAppView);
     GfxTransEffect::Begin( iAppView, aTranstionId );
@@ -286,7 +285,6 @@ void CTsAppUi::StartAppActivateTransition( TUid aNextAppUid, TInt aWgId )
     else
         {
         // App start animation
-        TRAP_IGNORE( RequestPopUpL() );
         const TDesC8* ptr = reinterpret_cast<const TDesC8*>(iAppView);
         GfxTransEffect::Abort(iAppView);
         TInt groupId = GfxTransEffect::BeginGroup();
@@ -312,13 +310,9 @@ void CTsAppUi::StartAppActivateTransition( TUid aNextAppUid, TInt aWgId )
 // CTsAppUi::TransitionFinished
 // -----------------------------------------------------------------------------
 //
-void CTsAppUi::TransitionFinished(const CCoeControl* aControl, 
+void CTsAppUi::TransitionFinished(const CCoeControl* /*aControl*/, 
                                   TUint /*aAction*/)
     {
-    if ( aControl == iAppView )
-        {
-        TRAP_IGNORE( DisablePopUpL() );
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -697,6 +691,7 @@ void CTsAppUi::RequestPopUpL()
             {
             SetOrientationL(EAppUiOrientationPortrait);
             }
+        SetFullScreenApp(EFalse);
         iEikonEnv->RootWin().SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
         }
     TSLOG_OUT();

@@ -394,7 +394,7 @@ void CTsFastSwapArea::SizeChanged()
         HandleFswContentChanged();
         iGrid->SetCurrentDataIndex(selIdx);
         UpdateGrid(ETrue, EFalse);
-        DrawDeferred();
+        iGrid->DrawDeferred();
         
         // Order full redraw after switch
         if(iRedrawTimer)
@@ -413,14 +413,14 @@ void CTsFastSwapArea::SizeChanged()
 //
 void CTsFastSwapArea::Draw( const TRect& /*aRect*/ ) const
     {
-    CWindowGc& gc = SystemGc();
-    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
-    AknsDrawUtils::Background( skin,
-           cc,
-           this,
-           gc,
-           Rect() );
+//    CWindowGc& gc = SystemGc();
+//    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+//    MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
+//    AknsDrawUtils::Background( skin,
+//           cc,
+//           this,
+//           gc,
+//           Rect() );
     }
 
 // --------------------------------------------------------------------------
@@ -720,7 +720,7 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
         static_cast<CTsAppView*>(&iParent)->EnableDragEvents(EFalse);
         }
         
-    for ( TInt i = 0, ie = iArray.Count(); i != ie; ++i )
+    for ( TInt i = 0; i < iArray.Count(); ++i )
         {
         const TDesC& appName( iArray[i]->AppName() );
         const TInt formatLen = 3 + 2;
@@ -785,17 +785,17 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     iGrid->SetCloseItemsL(closeItemArray);
     iGrid->SetStrokeItemsL(strokeItemArray);
     
+    // Update scrollbar visibility
+    if( iGrid->ScrollBarFrame() )
+        {
+        iGrid->SetScrollBarFrame(NULL,CEikListBox::EOwnedExternally);
+        }
+    
     // Cleanup
     CleanupStack::PopAndDestroy(&strokeItemArray);
     CleanupStack::PopAndDestroy(&closeItemArray);
     CleanupStack::Pop(textArray);
     CleanupStack::Pop(iconArray);
-    
-    if( iGrid->ScrollBarFrame() )
-        {
-        iGrid->ScrollBarFrame()->SetScrollBarVisibilityL(
-                CEikScrollBarFrame::EOff, CEikScrollBarFrame::EOff);
-        }
     
     // refresh the items in the grid
     iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
@@ -868,6 +868,8 @@ void CTsFastSwapArea::HandleSwitchToBackgroundEvent()
         iGrid->HideHighlight();
         }
     CancelLongTapAnimation();
+    iGrid->MakeVisible(EFalse);
+    iGrid->DrawNow();
     }
 
 // -----------------------------------------------------------------------------
@@ -915,12 +917,12 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     iRedrawTimer->Cancel();
     iRedrawTimer->After(KRedrawTime);
     
-    itemDrawer->SetRedrawBackground(EFalse);
-    
     // give feedback
     LaunchPopupFeedback();
     
     iPrevAppCount = iArray.Count();
+    
+    iGrid->MakeVisible(ETrue);
 
     TSLOG_OUT();
     }
@@ -959,6 +961,14 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
     CancelLongTapAnimation();
     
     iKeyEvent = ETrue;
+    
+    //do not forward the event until item is higlighted
+    TKeyResponse response = ShowHighlightOnKeyEvent(aKeyEvent, aType);
+    if( response == EKeyWasConsumed )
+        {
+        return EKeyWasConsumed;
+        }
+    
     // handle the 'clear' key
     if ( aType == EEventKey && aKeyEvent.iCode == EKeyBackspace )
         {
@@ -969,13 +979,6 @@ TKeyResponse CTsFastSwapArea::OfferKeyEventL(
             }
         return EKeyWasConsumed;
         }
-    
-    //do not forward the event until item is higlighted
-    TKeyResponse response = ShowHighlightOnKeyEvent(aKeyEvent, aType);
-    if( response == EKeyWasConsumed )
-    	{
-    	return EKeyWasConsumed;
-    	}
     
     // pass the event to grid
     // do not pass down and up arrow key events
@@ -1022,8 +1025,11 @@ TKeyResponse CTsFastSwapArea::ShowHighlightOnKeyEvent(
 	TKeyResponse retVal(EKeyWasNotConsumed);
 	
 	if (aKeyEvent.iScanCode == EStdKeyLeftArrow ||
-		aKeyEvent.iScanCode == EStdKeyRightArrow)
-		{
+		aKeyEvent.iScanCode == EStdKeyRightArrow ||
+		aKeyEvent.iScanCode == EStdKeyDevice3 ||
+        aKeyEvent.iScanCode == EStdKeyBackspace ||
+        aKeyEvent.iScanCode == EStdKeyEnter )
+	    {
 		if (!iGrid->IsHighlightVisible())
 			{
 			if (aType == EEventKey)
@@ -1075,6 +1081,7 @@ void CTsFastSwapArea::HandlePointerEventL( const TPointerEvent& aPointerEvent )
         CancelLongTapAnimation( EFalse );
         if( iActivateOnPointerRelease != TPoint() )
             {
+            iHandlePointerCandidate = ETrue;
             TapL(iActivateOnPointerRelease);
             iActivateOnPointerRelease = TPoint();
             }
@@ -1433,7 +1440,8 @@ void CTsFastSwapArea::CenterItem(TInt aRedrawDelay)
         if(visibleItem != SelectedIndex())
             {
             iGrid->SetCurrentDataIndex( visibleItem );
-            DrawDeferred();
+            iParent.DrawDeferred();
+            iGrid->DrawDeferred();
             }
         }
 
@@ -1516,12 +1524,6 @@ void CTsFastSwapArea::HandleAppKey(TInt aType)
 //
 void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
     {
-    TSLOG_CONTEXT( CTsFastSwapArea::MoveOffset, TSLOG_LOCAL );
-    TSLOG2_IN("Old position x: %d, y:%d", ViewPos().iX, ViewPos().iY);
-    TSLOG2_IN("New position x: %d, y:%d", aPoint.iX, aPoint.iY);
-    TSLOG_OUT();
-    
-    
     if( iHandlePointerCandidate )
         {
 		//pointer was pressed and it's being waiting for handling
@@ -1548,7 +1550,8 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
             // Center view
             gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
             }
-        DrawDeferred();
+        //iParent.DrawDeferred();
+        iGrid->DrawDeferred();
         iGrid->SetRect( gridViewRect );
         iLogicalViewPosOffset = 0;
         }
@@ -1650,7 +1653,7 @@ TSize CTsFastSwapArea::ViewSize()
 void CTsFastSwapArea::Stop()
     {    
     CenterItem( KUpdateGridTime );
-    DrawNow();
+    DrawDeferred();
     }
 
 // -----------------------------------------------------------------------------
@@ -1789,22 +1792,33 @@ TInt CTsFastSwapArea::ViewToVisibleItem( const TPoint aViewPos )
         }
     else
         {
+        TInt retItemPosX(0);
         TInt offsetCheck = GridWorldSize().iWidth;
         // View inside of grid world rect
         for ( TInt i = 0 ; i < GridItemCount(); i++ )
             {
-            TInt offset = aViewPos.iX - ItemViewPosition( i ).iX;
+            TInt itemPosX = ItemViewPosition( i ).iX;
+            TInt offset = aViewPos.iX - itemPosX;
             if ( Abs( offset ) <= offsetCheck )
                 {
                 offsetCheck = Abs( offset );
                 retVal = i;
+                retItemPosX = itemPosX;
                 }
             else
                 {
                 break;
                 }
             }
+        // Check if item is fully visible. If not
+        // return next one if possible
+        if ( retItemPosX - iGridItemWidth / 2 < absViewPos.iX &&
+             retVal + 1 < GridItemCount() )
+            {
+            retVal++;
+            }
         }
+    
     return retVal;
     }
 
@@ -1831,22 +1845,6 @@ void CTsFastSwapArea::LaunchPopupFeedback()
                                        ETouchFeedbackVibra,
                                        TPointerEvent() );
             }
-        }
-    }
-
-
-// -----------------------------------------------------------------------------
-// CTsFastSwapArea::UpdateComponentVisibility
-// -----------------------------------------------------------------------------
-//
-void CTsFastSwapArea::UpdateComponentVisibility()
-    {
-    // Switch off scrollbars
-    CEikScrollBarFrame* scrollBar = iGrid->ScrollBarFrame();
-    if(scrollBar)
-        {
-        TRAP_IGNORE( scrollBar->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, 
-                                                        CEikScrollBarFrame::EOff));
         }
     }
 
@@ -1916,12 +1914,13 @@ TBool CTsFastSwapArea::WgOnTaskList( TInt aWgId )
     {
     TBool retVal(EFalse);
     TInt appCount = iArray.Count();
+    
+    TApaTaskList taskList( iEikonEnv->WsSession() );
+    TApaTask task = taskList.FindApp( KTsHomescreenUid );
+    TInt homescrWgId = task.WgId();
+    
     if ( iPrevAppCount != appCount )
         {
-        TApaTaskList taskList( iEikonEnv->WsSession() );
-        TApaTask task = taskList.FindApp( KTsHomescreenUid );
-        TInt homescrWgId = task.WgId();
-        
         for ( TInt i = 0; i < iArray.Count(); i++ )
             {
             TInt wgId = iArray[i]->WgId();
@@ -1931,6 +1930,10 @@ TBool CTsFastSwapArea::WgOnTaskList( TInt aWgId )
                 retVal = ETrue;
                 }
             }
+        }
+    else if ( aWgId == homescrWgId )
+        {
+        retVal = ETrue;
         }
     iPrevAppCount = appCount;
     return retVal;
@@ -1966,13 +1969,11 @@ TBool CTsFastSwapArea::LongTapAnimForPos( const TPoint& aHitPoint )
     {
     if ( Rect().Contains(aHitPoint) )
         {
-        for ( TInt i = 0; i < GridItemCount(); i++ )
+        TInt itemIdx;
+        TBool isItemHit = iGrid->GridView()->XYPosToItemIndex( aHitPoint, itemIdx );
+        if ( isItemHit && ( CanClose( itemIdx ) || CanCloseAll( itemIdx ) ) )
             {
-            TBool isItemHit = iGrid->GridView()->XYPosToItemIndex( aHitPoint, i );
-            if ( isItemHit && ( CanClose( i ) || CanCloseAll( i ) ) )
-                {
-                return ETrue;
-                }
+            return ETrue;
             }
         }
     return EFalse;

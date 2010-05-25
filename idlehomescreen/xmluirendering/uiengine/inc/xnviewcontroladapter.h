@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  View control adater.
+* Description:  View control adapter
 *
 */
 
@@ -27,9 +27,7 @@
 
 // Forward declarations
 class CXnNodePluginIf;
-class CXnBackgroundManager;
 class CXnAppUiAdapter;
-class CXnViewFlicker;
 
 // Class declaration
 /**
@@ -75,18 +73,12 @@ public:
     // new functions
     
     /**
-     * Resets grabbing
+     * Resets pointer grabbing
      * 
      * @since S60 5.2
      */
     void ResetGrabbing();
-
-private:    
-    // new functions
-    
-    void RemoveGrabbingControL( 
-        const CCoeControl* aControl, const TPointerEvent& aEvent ) const;
-    
+            
 private:
     // from MXnUiStateObserver
     
@@ -125,10 +117,8 @@ private:
     CXnNodePluginIf& iNode;
     /** AppUi */
     CXnAppUiAdapter& iAppUi;
-    /** stored point of EButton1Down */
-    TPoint iHitpoint;   
     };
     
-#endif      // _XNVIEWCONTROLADAPTER_H
+#endif // _XNVIEWCONTROLADAPTER_H
             
 // End of File

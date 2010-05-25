@@ -35,9 +35,52 @@ class MXnExtEventHandler;
  *  process. Power save mode must be obeyed in order to maximize
  *  the standby times of the device.
  *
- *
  *  @code
- *
+ *  // External rendering plug-in mandatory functions
+ *  T_RenderingPlugin* T_RenderingPlugin::NewL()
+ *      {
+ *      T_RenderingPlugin* self = T_RenderingPlugin::NewLC();
+ *      CleanupStack::Pop( self );
+ *      return self;
+ *      }
+ *  //
+ *  T_RenderingPlugin* T_RenderingPlugin::NewLC()
+ *      {
+ *      T_RenderingPlugin* self = new( ELeave ) T_RenderingPlugin();
+ *      CleanupStack::PushL( self );
+ *      self->ConstructL();
+ *      return self;
+ *      }
+ *  //
+ *  T_RenderingPlugin::~T_RenderingPlugin()
+ *      {
+ *      }
+ * //
+ *  T_RenderingPlugin::T_RenderingPlugin()
+ *      {
+ *      // Do nothing
+ *      }
+ *  //
+ *  void T_RenderingPlugin::ConstructL()
+ *      {
+ *      }
+ *  //
+ *  const TImplementationProxy KImplementationTable[] =
+ *     {
+ *  #ifdef __EABI__
+ *      IMPLEMENTATION_PROXY_ENTRY( 0x22334455, T_RenderingPlugin::NewL )
+ *  #else
+ *      { { 0x22334455 }, T_RenderingPlugin::NewL }
+ *  #endif
+ *     };
+ *  //
+ *  EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
+ *      TInt& aTableCount )
+ *      {
+ *      aTableCount = sizeof( KImplementationTable ) / sizeof( TImplementationProxy );
+ *      return KImplementationTable;
+ *      }
+ *  
  *  @endcode
  *
  *  @lib extrenderingplugin.lib

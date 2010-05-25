@@ -94,11 +94,6 @@ public:
     CTsFsWidgetList* Widgets();
 
     /**
-     * Set flag iTaskListDirty;
-     */
-    void SetDirty();
-
-    /**
      * Set flag iAppDataRefreshNeeded
      */
     void SetAppDataRefreshNeeded();
@@ -122,7 +117,7 @@ public:
      * Moves entry on given window app/widget id to 
      * the first position on conten data list
      */
-    void MoveEntryAtStart( TInt aAppId, TBool aWidget );
+    TBool MoveEntryAtStart( TInt aAppId, TBool aWidget );
     
     /**
      * If application uid exists in the contained CTsFsAlwaysShownAppList 
@@ -266,6 +261,19 @@ private:
      */
     TBool CheckIfExists( const CTsFswEntry& aEntry,
             const RTsFswArray& aNewList ) const;
+    
+    /**
+     * Set flag iTaskListDirty;
+     * @param aDirty new flag value. 
+     */
+    void SetDirty( TBool aDirty );
+    
+    /**
+     * Removes the screenshot handle from content entry.
+     * Reverts to parental screenshot, if previously was set to embeded.
+     * @param aBmpHandle handle of removed screenshot. 
+     */
+    TBool RemoveScreenshotFromParent( TInt aBmpHandle );
 
 private:
     CTsFswEngine& iEngine;
