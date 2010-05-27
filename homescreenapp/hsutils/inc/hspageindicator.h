@@ -32,7 +32,7 @@ class HSUTILS_EXPORT HsPageIndicator : public HbWidget
     Q_OBJECT
 
 public:
-    HsPageIndicator(QGraphicsItem *parent = 0);
+    HsPageIndicator(qreal spacing, QGraphicsItem *parent = 0);
     ~HsPageIndicator();
 
     void initialize(int itemCount, int activeItemIndex);
@@ -47,6 +47,8 @@ public:
 
     bool isAnimationRunning() const;
 
+    void setSpacing(qreal spacing);
+
 private:
     Q_DISABLE_COPY(HsPageIndicator)
     void layoutItems();    
@@ -54,6 +56,7 @@ private:
 private:
     QList<HsPageIndicatorItem *> mItems;    
     int mActiveItemIndex;
+    qreal mSpacing;
 
     HOMESCREEN_TEST_FRIEND_CLASS(t_hsUtils)
 };

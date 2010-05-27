@@ -38,6 +38,7 @@ class QPointF;
 class HsMenuViewBuilder;
 class HsMenuItemModel;
 class HsMenuModeWrapper;
+class HsMainWindow;
 
 class HsAllAppsState: public QState
 {
@@ -46,6 +47,7 @@ class HsAllAppsState: public QState
 public:
     HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                    HsMenuModeWrapper &menuMode,
+                   HsMainWindow &mainWindow,
                    QState *parent = 0);
     ~HsAllAppsState();
 signals:
@@ -68,8 +70,8 @@ private slots:
     void stateEntered();
     void addModeEntered();
     void normalModeEntered();
-    void stateExited();	
-	void contextMenuAction(HbAction *action);
+    void stateExited();
+    void contextMenuAction(HbAction *action);
 private:
     void construct();
     void setMenuOptions();
@@ -81,8 +83,9 @@ private:
     HsMenuView mMenuView;
     HsMenuModeWrapper &mMenuMode;
     HsMenuItemModel *mAllAppsModel;
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
+    HsMainWindow &mMainWindow;
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
 };
 
 #endif // HSALLAPPSSTATE_H

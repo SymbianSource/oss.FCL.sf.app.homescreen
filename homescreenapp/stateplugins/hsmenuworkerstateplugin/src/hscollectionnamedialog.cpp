@@ -81,9 +81,6 @@ HsCollectionNameDialog::~HsCollectionNameDialog()
  \param item_id Item's id.
  \retval Selected action.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP // Reason: Modal inputdialog open
-#endif //COVERAGE_MEASUREMENT
 void HsCollectionNameDialog::open(QObject* receiver, const char* member)
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionNameDialog::open");
@@ -96,10 +93,6 @@ void HsCollectionNameDialog::open(QObject* receiver, const char* member)
 
     HSMENUTEST_FUNC_EXIT("HsCollectionNameDialog::open");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP // Reason: Modal inputdialog exec
-#endif //COVERAGE_MEASUREMENT
-
 
 /*!
     \reimp 

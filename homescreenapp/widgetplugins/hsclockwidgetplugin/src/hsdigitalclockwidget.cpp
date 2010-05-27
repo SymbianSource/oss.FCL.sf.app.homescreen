@@ -23,6 +23,7 @@
 #include <HbFrameItem>
 #include <HbFrameDrawer>
 #include <HbTouchArea>
+#include <HbInstantFeedback>
 
 #include "hsdigitalclockwidget.h"
 
@@ -246,6 +247,8 @@ void HsDigitalClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *eve
     if (!contains(event->pos())) {
         return;
     }
+
+    HbInstantFeedback::play(HbFeedback::BasicItem);
 
     emit clockTapped();
 }

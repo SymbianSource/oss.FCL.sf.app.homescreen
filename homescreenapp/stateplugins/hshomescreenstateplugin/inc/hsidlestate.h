@@ -21,6 +21,7 @@
 #include <QState>
 #include <QTimer>
 #include <QPointF>
+#include <QPointer>
 
 #include "hstest_global.h"
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
@@ -28,7 +29,6 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 class QGraphicsItem;
 class QGraphicsSceneMouseEvent;
 class QPropertyAnimation;
-class HbView;
 class HbAction;
 class HbContinuousFeedback;
 class HsIdleWidget;
@@ -75,6 +75,7 @@ private:
     void addPageToScene(int pageIndex);
     qreal parallaxFactor() const;
     void updateZoneAnimation();
+    void showTrashBin();
     void removeActivePage();
 
 private slots:
@@ -136,28 +137,25 @@ private slots:
         QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
 
     void onOrientationChanged(Qt::Orientation orientation);
-
     void widgetInteraction_onTapAndHoldTimeout();
     void sceneInteraction_onTapAndHoldTimeout();
-
     void onTitleChanged(QString title);
-
     void onAddContentActionTriggered();
-
     bool openTaskSwitcher();
     void zoneAnimationFinished();
-    void onSceneMenuAboutToClose();
+    void onSceneMenuTriggered(HbAction *action);
     void onRemovePageMessageBoxClosed(HbAction *action);
+    void onSceneMenuAboutToClose();
 
 private:
-    HbView *mView;
     HbAction *mNavigationAction;
     HsIdleWidget *mUiWidget;
+    
     QTimer mTimer;
     qreal mTapAndHoldDistance;
     qreal mPageChangeZoneWidth;
 
-    QPointF mSceneMenuPos;
+    QPointF mTouchScenePos;
     HsTitleResolver *mTitleResolver;
     QPropertyAnimation *mZoneAnimation;
     bool mPageChanged;
@@ -167,6 +165,7 @@ private:
     bool mTrashBinFeedbackAlreadyPlayed;
 
     qreal mDeltaX;
+    QPointer<HbMenu> mSceneMenu;
 #ifdef Q_OS_SYMBIAN    
     XQSettingsManager *mSettingsMgr;
 #endif    

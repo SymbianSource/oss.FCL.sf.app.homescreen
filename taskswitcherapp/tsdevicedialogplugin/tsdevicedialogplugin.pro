@@ -43,7 +43,7 @@ SOURCES +=  src/tsdevicedialog.cpp \
 INCLUDEPATH += . \
                ./inc \
 
-LIBS +=     -lcaclient           
+LIBS +=     -ltstaskmonitorclient
             
 TRANSLATIONS = taskswitcher.ts
 

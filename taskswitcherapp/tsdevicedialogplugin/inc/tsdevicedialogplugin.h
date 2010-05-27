@@ -27,7 +27,7 @@
 
 #include "tsdocumentloader.h"
 
-class CaService;
+class TsTaskMonitor;
 class TsDeviceDialogPlugin : public HbDeviceDialogPlugin
 {
     Q_OBJECT
@@ -43,20 +43,11 @@ public:
     PluginFlags pluginFlags() const;
     int error() const;
 
-private slots:
-    void activated(QModelIndex index);
-    void pressed();
-    void longPressed();
-
-signals:
-    void activate(QModelIndex);
-
 private:
     int mError;
     TsDocumentLoader mLoader;
     QAbstractListModel *mModel;
-    QSharedPointer<CaService> mStorage;
-    bool mLongPressed;
+    TsTaskMonitor *mStorage;
 
     Q_DISABLE_COPY(TsDeviceDialogPlugin)
 };

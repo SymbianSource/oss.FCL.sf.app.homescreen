@@ -17,6 +17,7 @@
 #include "tsentrymodelitem.h"
 #include "tsdataroles.h"
 
+#include <tstask.h>
 #include <HbIcon>
 
 /*!
@@ -27,15 +28,11 @@
 
 /*!
     Standard C++ constructor
-    /param service - reference to initialized Content Aresnal client instance
     /param entry - Content Arsenal data
-    /param size - icon size
 */
-TsEntryModelItem::TsEntryModelItem(CaService& service, QSharedPointer<CaEntry> entry, QSize size)
+TsEntryModelItem::TsEntryModelItem(QSharedPointer<TsTask> entry)
     :
-    mService(service),
-    mEntry(entry),
-    mSize(size)
+    mEntry(entry)
 {
     //no implementation required
 }
@@ -56,11 +53,18 @@ QVariant TsEntryModelItem::data(int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
-            return QVariant(mEntry->text());
+            return QVariant(mEntry->name());
         case Qt::DecorationRole:
-            return QVariant(mEntry->makeIcon(mSize));
+            {
+                QPixmap icon = mEntry->icon();
+                if (icon.isNull()) {
+                    return HbIcon("qtg_large_application");
+                } else {
+                    return QVariant::fromValue<HbIcon>(HbIcon(icon));
+                }
+            }
         case TsDataRoles::Closable:
-            return QVariant(closable());
+            return QVariant(mEntry->isClosable());
         case TsDataRoles::Visible:
             return QVariant(true);
         default:
@@ -73,7 +77,7 @@ QVariant TsEntryModelItem::data(int role) const
 */
 void TsEntryModelItem::close()
 {
-    mService.executeCommand(mEntry->id(), QString("close"));
+    mEntry->close();
 }
 
 /*!
@@ -81,15 +85,6 @@ void TsEntryModelItem::close()
 */
 void TsEntryModelItem::open()
 {
-    mService.executeCommand(mEntry->id(), QString("open"));
+    mEntry->open();
 }
 
-/*!
-    Check if application represented by entry is running.
-    /return true if application is running, false otherwise
-*/
-bool TsEntryModelItem::closable() const
-{
-    return (mEntry->flags().testFlag(RunningEntryFlag) &&
-            !mEntry->flags().testFlag(SystemEntryFlag));
-}

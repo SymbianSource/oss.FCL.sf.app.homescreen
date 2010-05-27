@@ -99,6 +99,9 @@ bool HsPage::load()
         connectWidget(widget.data());
         widget->setPage(this);
         widget->initializeWidget();
+        if (widget->state() != HsWidgetHost::Initialized) {
+            continue;
+        }
         widget->showWidget();
         mWidgets.append(widget.data());
         widget->setParentItem(this);
@@ -343,6 +346,11 @@ void HsPage::updateZValues()
             widget->setWidgetPresentation();
         }
     }
+}
+
+int HsPage::pageIndex()
+{
+    return HsScene::instance()->pages().indexOf(this);
 }
 
 void HsPage::connectWidget(HsWidgetHost *widget)

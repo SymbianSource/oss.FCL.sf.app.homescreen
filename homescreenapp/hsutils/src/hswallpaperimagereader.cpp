@@ -24,7 +24,7 @@
     Constructor.         
 */
 HsWallpaperImageReader::HsWallpaperImageReader(QObject *parent):
-    QObject(parent),
+    QThread(parent),
     mCenterTarget(false)
 {
 
@@ -49,7 +49,7 @@ void HsWallpaperImageReader::setSourcePath(const QString &sourcePath)
 /*!
     Returns image source path
 */
-QString HsWallpaperImageReader::getSourcePath() const
+QString HsWallpaperImageReader::sourcePath() const
 {
     return mSourcePath;
 }
@@ -65,7 +65,7 @@ void HsWallpaperImageReader::setSourceRect(const QRect &sourceRect)
 /*!
     Returns source rect
 */
-QRect HsWallpaperImageReader::getSourceRect() const
+QRect HsWallpaperImageReader::sourceRect() const
 {
     return mSourceRect;
 }
@@ -81,7 +81,7 @@ void HsWallpaperImageReader::setTargetRect(const QRect &targetRect)
 /*!
     Returns target rect
 */
-QRect HsWallpaperImageReader::getTargetRect() const
+QRect HsWallpaperImageReader::targetRect() const
 {
     return mTargetRect;
 }
@@ -97,7 +97,7 @@ void HsWallpaperImageReader::setCenterTarget(bool center)
 /*!
     Returns target centering
 */
-bool HsWallpaperImageReader::getCenterTarget()
+bool HsWallpaperImageReader::centerTarget()
 {
     return mCenterTarget;
 }
@@ -105,7 +105,7 @@ bool HsWallpaperImageReader::getCenterTarget()
 /*!
     Returns processed image
 */
-QImage HsWallpaperImageReader::getProcessedImage() const
+QImage HsWallpaperImageReader::processedImage() const
 {
     return mProcessedImage;
 }
@@ -117,10 +117,10 @@ QImage HsWallpaperImageReader::getProcessedImage() const
     Pass empty set sourceRect to empty to use full size source image as starting point. 
     Returns processed image or null image if operation fails.
 */
-void HsWallpaperImageReader::processImage() 
+void HsWallpaperImageReader::run() 
 {
     QImageReader imageReader(mSourcePath);
-    
+
     QRect tempTargetRect = mTargetRect;
     QRect tempSourceRect = mSourceRect;
     
@@ -130,7 +130,7 @@ void HsWallpaperImageReader::processImage()
             // If sourceRect not defined, uses full size image as source.
             tempSourceRect.setRect(0, 0, sourceSize.width(), sourceSize.height());
         }
-        sourceSize.scale(tempTargetRect.width(), tempTargetRect.height(), 
+        sourceSize.scale(tempTargetRect.width(), tempTargetRect.height(),
                          Qt::KeepAspectRatioByExpanding);
         imageReader.setScaledSize(sourceSize);
 
@@ -142,5 +142,4 @@ void HsWallpaperImageReader::processImage()
     } else {
         mProcessedImage = QImage();
     }
-    emit processingFinished();
 }

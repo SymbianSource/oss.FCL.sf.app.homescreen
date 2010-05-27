@@ -38,6 +38,42 @@
         <confml:option map="HomeScreenDbSettings/Widgets"/>
       </confml:setting>
     </confml:setting>
+    <confml:setting ref="SnapConfiguration" name="Snap Configuration">
+      <confml:setting ref="snappingEnabled" name="Snap enabled" type="int"/>
+      <confml:setting ref="showEffects" name="Show snap effects" type="int"/>
+      <confml:setting ref="snapForce" name="Snap force" type="real"/>
+      <confml:setting ref="snapGap" name="Snap gap" type="real"/>
+      <confml:setting ref="borderGap" name="Snap border gap" type="real"/>
+      <confml:setting ref="timeout" name="Snap timeout" type="int"/>
+    </confml:setting>
+    <confml:setting ref="FeedbackConfiguration" name="Feedback Configuration">
+      <confml:setting ref="pageChangeFeedbackType" name="Page change feedback delay" type="string"/>
+      <confml:setting ref="widgetPickFeedbackType" name="Widget pick feedback type" type="string"/>
+      <confml:setting ref="widgetDropFeedbackType" name="Widget drop feedback type" type="string"/>
+      <confml:setting ref="widgetRepositionFeedbackType" name="Widget forced reposition feedback type" type="string"/>
+      <confml:setting ref="widgetOverTrashbinFeedbackType" name="Widget move over trashbin feedback type" type="string"/>
+      <confml:setting ref="widgetDropToTrashbinFeedbackType" name="Widget drop to trashbin feedback type" type="string"/>
+      <confml:setting ref="shortcutWidgetTapFeedbackType" name="Shortcut widget tap feedback type" type="string"/>
+      <confml:setting ref="widgetMoveBlockedFeedbackType" name="Widget movement blocked feedback type" type="string"/>
+      <confml:setting ref="clockWidgetTapFeedbackType" name="Clock widget tap feedback type" type="string"/>
+      <confml:setting ref="widgetSnappingFeedbackType" name="Widget snapping feedback type" type="string"/>
+    </confml:setting>
+    <confml:setting ref="GeneralConfiguration" name="General Configuration">
+      <confml:setting ref="bounceEffect" name="Bounce effect" type="int"/>
+      <confml:setting ref="tapAndHoldDistance" name="Tap and hold distance" type="real"/>
+      <confml:setting ref="widgetTapAndHoldTimeout" name="Widget tap and hold timeout" type="int"/>
+      <confml:setting ref="sceneTapAndHoldTimeout" name="Scene tap and hold timeout" type="int"/>
+      <confml:setting ref="pageChangeZoneWidth" name="Page change zone width" type="real"/>
+      <confml:setting ref="pageIndicatorSpacing" name="Page indicator spacing" type="real"/>
+      <confml:setting ref="pageChangeAnimationDuration" name="Page change zone animation duration" type="int"/>
+      <confml:setting ref="pageChangeZoneAnimationDuration" name="Page change zone animation duration" type="int"/>
+      <confml:setting ref="pageChangeZoneReverseAnimationDuration" name="Page change zone reverse animation duration" type="int"/>
+      <confml:setting ref="pageRemovedAnimationDuration" name="Page removed animation duration" type="int"/>
+      <confml:setting ref="newPageAddedAnimationDuration" name="Page added animation duration" type="int"/>
+      <confml:setting ref="widgetDragEffectDuration" name="Widget drag effect duration" type="int"/>
+      <confml:setting ref="widgetDropEffectDuration" name="Widget drop effect duration" type="int"/>
+      <confml:setting ref="boundaryFeedbackEffectDistance" name="Boundary feedback effect distance" type="int"/>
+    </confml:setting>
   </confml:feature>
   <confml:data>
     <confml:HomeScreenDbSettings>
@@ -92,6 +128,42 @@
       <confml:Pages><confml:id>1</confml:id><confml:indexPosition>0</confml:indexPosition></confml:Pages>
       <confml:Pages><confml:id>2</confml:id><confml:indexPosition>1</confml:indexPosition></confml:Pages>
       <confml:Pages><confml:id>3</confml:id><confml:indexPosition>2</confml:indexPosition></confml:Pages>
+      <confml:SnapConfiguration>
+      	<confml:snappingEnabled>1</confml:snappingEnabled>
+      	<confml:showEffects>1</confml:showEffects>
+      	<confml:snapForce>30.0</confml:snapForce>
+      	<confml:snapGap>6.0</confml:snapGap>
+      	<confml:borderGap>0.0</confml:borderGap>
+      	<confml:timeout>500</confml:timeout>
+      </confml:SnapConfiguration> 
+      <confml:FeedbackConfiguration>
+      	<confml:pageChangeFeedbackType>Sensitive</confml:pageChangeFeedbackType>
+      	<confml:widgetPickFeedbackType>ItemPick</confml:widgetPickFeedbackType>
+      	<confml:widgetDropFeedbackType>ItemDrop</confml:widgetDropFeedbackType> 
+      	<confml:widgetRepositionFeedbackType>BounceEffect</confml:widgetRepositionFeedbackType> 
+      	<confml:widgetOverTrashbinFeedbackType>ItemMoveOver</confml:widgetOverTrashbinFeedbackType>
+      	<confml:widgetDropToTrashbinFeedbackType>ItemDrop</confml:widgetDropToTrashbinFeedbackType> 
+      	<confml:shortcutWidgetTapFeedbackType>BasicItem</confml:shortcutWidgetTapFeedbackType> 
+      	<confml:widgetMoveBlockedFeedbackType>Basic</confml:widgetMoveBlockedFeedbackType> 
+      	<confml:clockWidgetTapFeedbackType>BasicItem</confml:clockWidgetTapFeedbackType> 
+      	<confml:widgetSnappingFeedbackType>ItemMoveOver</confml:widgetSnappingFeedbackType>
+      </confml:FeedbackConfiguration>
+      <confml:GeneralConfiguration>
+      	<confml:bounceEffect>20</confml:bounceEffect>
+      	<confml:tapAndHoldDistance>16</confml:tapAndHoldDistance>
+      	<confml:widgetTapAndHoldTimeout>500</confml:widgetTapAndHoldTimeout>
+      	<confml:sceneTapAndHoldTimeout>500</confml:sceneTapAndHoldTimeout>
+      	<confml:pageChangeZoneWidth>60</confml:pageChangeZoneWidth>
+      	<confml:pageIndicatorSpacing>8</confml:pageIndicatorSpacing>
+      	<confml:pageChangeAnimationDuration>200</confml:pageChangeAnimationDuration>
+      	<confml:pageChangeZoneAnimationDuration>800</confml:pageChangeZoneAnimationDuration>
+      	<confml:pageChangeZoneReverseAnimationDuration>200</confml:pageChangeZoneReverseAnimationDuration>
+      	<confml:pageRemovedAnimationDuration>200</confml:pageRemovedAnimationDuration>
+      	<confml:newPageAddedAnimationDuration>700</confml:newPageAddedAnimationDuration>
+      	<confml:widgetDragEffectDuration>200</confml:widgetDragEffectDuration>
+      	<confml:widgetDropEffectDuration>200</confml:widgetDropEffectDuration>
+      	<confml:boundaryFeedbackEffectDistance>3</confml:boundaryFeedbackEffectDistance>
+      </confml:GeneralConfiguration>
     </confml:HomeScreenDbSettings>
   </confml:data>
 </confml:configuration>

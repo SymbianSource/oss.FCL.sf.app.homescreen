@@ -31,7 +31,7 @@
 #include "hstrashbinwidget.h"
 #include "hspageindicator.h"
 #include "hsdocumentloader.h"
-#include "hshomescreenstatecommon.h"
+#include "hsconfiguration.h"
 
 namespace
 {
@@ -111,7 +111,7 @@ void HsIdleWidget::setGeometry(const QRectF &rect)
     int n = HsScene::instance()->pages().count();
     mControlLayer->resize(rect.size());
     mPageLayer->resize(n * rect.width(), rect.height());
-    mSceneLayer->resize(2 * rect.width() + HSBOUNDARYEFFECT, rect.height());
+    mSceneLayer->resize(2 * rect.width() + HsConfiguration::bounceEffect(), rect.height());
     HbWidget::setGeometry(rect);
 }
 

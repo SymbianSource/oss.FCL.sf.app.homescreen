@@ -472,7 +472,7 @@ void HsAddAppsToCollectionState::listDialogFinished(HbAction* finishedAction)
     if (!mListFinishedEntered) {
         mListFinishedEntered = true;
 
-		if (finishedAction != mListDialog->actions().value(1)) {
+        if (finishedAction != mListDialog->actions().value(0)) {
             int itemId = mListDialog->getItemId();
             if (itemId) {
                 if (mActionType == ViaAllViewOptionMenuType) {

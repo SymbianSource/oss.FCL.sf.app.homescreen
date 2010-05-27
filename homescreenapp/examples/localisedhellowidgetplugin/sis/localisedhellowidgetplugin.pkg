@@ -33,15 +33,16 @@
 [0x102752AE],0,0,0,{"S60ProductID"}
 [0x1028315F],0,0,0,{"S60ProductID"}
  
-"/epoc32/release/armv5/urel/localisedhellowidgetplugin.dll"                                           - "!:/sys/bin/localisedhellowidgetplugin.dll"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.qtplugin"  - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.qtplugin"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"  - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"
-"../localisedhellowidgetplugin/resource/localisedhellowidgetplugin.xml_for_sisx"                          - "C:/data/widgets/servicefw/localisedhellowidgetplugin.xml"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"       - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"
+"../resource/localisedhellowidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest",FM,"application/hs-widget-uninstall+xml",RR,RW
 
-"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin.qm"      												- "!:/resource/qt/translations/localisedhellowidgetplugin.qm"
-"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_fi.qm"      											- "!:/resource/qt/translations/localisedhellowidgetplugin_fi.qm"
-"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_en_us.qm"      									- "!:/resource/qt/translations/localisedhellowidgetplugin_en_us.qm"
-"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_en_gb.qm"     										- "!:/resource/qt/translations/localisedhellowidgetplugin_en_gb.qm"  
+"/epoc32/release/armv5/urel/localisedhellowidgetplugin.dll"                                             - "!:/sys/bin/localisedhellowidgetplugin.dll"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.qtplugin"    - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"    - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"
+"../resource/localisedhellowidgetplugin.xml"                                                            - "!:/data/widgets/servicefw/localisedhellowidgetplugin.xml"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"         - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"
 
-"/epoc32/release/armv5/urel/localisedhellowidgetplugininstaller.exe" - "!:/sys/bin/localisedhellowidgetplugininstaller.exe", FR, RB, RW
+"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin.qm"      						    - "!:/resource/qt/translations/localisedhellowidgetplugin.qm"
+"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_fi.qm"                              - "!:/resource/qt/translations/localisedhellowidgetplugin_fi.qm"
+"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_en_us.qm"      	            	    - "!:/resource/qt/translations/localisedhellowidgetplugin_en_us.qm"
+"/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_en_gb.qm"     	                    - "!:/resource/qt/translations/localisedhellowidgetplugin_en_gb.qm"  
+

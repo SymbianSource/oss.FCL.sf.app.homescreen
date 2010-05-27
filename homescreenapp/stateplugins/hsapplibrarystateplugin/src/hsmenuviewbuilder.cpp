@@ -34,34 +34,6 @@
 #include "hsmenuviewbuilder.h"
 #include "hsmenustates_global.h"
 
-// TODO this class is temprary solution, proper one should come from Orbit
-class HsVkbHost : public HbStaticVkbHost
-{
-public:
-    explicit HsVkbHost(HbWidget *target):
-        HbStaticVkbHost(target), mWidget(target) {}
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT skipped: its very temporary TODO
-    void openFinished() {
-        updateViewHeight(applicationArea().height());
-    }
-
-    void closeFinished() {
-        updateViewHeight(-1);
-    }
-
-    void updateViewHeight(qreal height) {
-        HbView *view = mWidget->mainWindow()->currentView();
-        view->setMaximumHeight(height);
-    }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
-
-    HbWidget *mWidget;
-};
 
 /*!
     \class HsMenuViewBuilder
@@ -85,19 +57,12 @@ public:
 void HsMenuViewBuilder::searchPanelVisibilityChange(bool visible)
 {
     if (visible) {
-        // TODO this is temprary solution, proper solution should come from Orbit
-        if (!HbVkbHost::getVkbHost(currentSearchPanel())) {
-            new HsVkbHost(currentSearchPanel());
-        }
+
         HbLineEdit *const lineEdit(searchPanelLineEdit());
 
         lineEdit->setText("");
-    } else {
-        if (static_cast<HsVkbHost *>(HbVkbHost::getVkbHost(currentSearchPanel()))) {
-            static_cast<HsVkbHost *>(HbVkbHost::getVkbHost(currentSearchPanel()))->
-            updateViewHeight(-1);
-        }
-    }
+        lineEdit->setFocus();
+    } 
 
 }
 

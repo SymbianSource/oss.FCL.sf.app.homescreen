@@ -62,16 +62,5 @@
         <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_t.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_tl.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_fr_hsitems_pressed_tr.svg</file>
-
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_0.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_1.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_2.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_3.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_4.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_5.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_6.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_7.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_8.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_anim_longtap_9.svg</file>
     </qresource>
 </RCC>

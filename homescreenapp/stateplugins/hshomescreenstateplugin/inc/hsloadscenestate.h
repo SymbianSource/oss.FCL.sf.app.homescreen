@@ -29,7 +29,7 @@ public:
     ~HsLoadSceneState();
 
 signals:
-    void event_idle();
+    void event_history();
 
 private slots:
     void action_loadScene();

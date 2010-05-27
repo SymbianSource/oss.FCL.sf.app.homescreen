@@ -34,6 +34,7 @@
 #include "hsaddappstocollectionstate.h"
 #include "hsapp_defs.h"
 #include "hsmenumodetransition.h"
+#include "hsmainwindow.h"
 
 /*!
  \class HsInstalledAppsState
@@ -75,11 +76,13 @@
  \param parent Owner.
  */
 HsInstalledAppsState::HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
+        HsMainWindow &mainWindow,
         QState *parent):
     QState(parent),
     mMenuView(menuViewBuilder, HsInstalledAppsContext),
     mInstalledAppsModel(0),
     mSecondarySoftkeyAction(new HbAction(Hb::BackNaviAction, this)),
+    mMainWindow(mainWindow),
     mContextModelIndex(),mContextMenu(0)
 {
     construct();
@@ -146,6 +149,7 @@ void HsInstalledAppsState::stateEntered()
     qDebug("AllAppsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::stateEntered");
 
+    mMainWindow.setCurrentView(mMenuView);
     mMenuView.activate();
 
     if (!mInstalledAppsModel) {

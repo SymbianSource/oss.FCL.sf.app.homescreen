@@ -23,21 +23,16 @@
 #include <HbIcon>
 #include <qvariant.h>
 #include <qlist.h>
-#include <cadefs.h>
-
-#include <canotifier.h>
-#include <canotifierfilter.h>
 #include <hsactivitydbclientinterface.h>
 
 #ifdef Q_OS_SYMBIAN
 #include <XQSettingsManager>
+#include <apaid.h>
 
 const int TSDeviceDialogUid = 0x2002677F;
 const int ItemsLimit = 0x00000001;
 #endif
 
-const char entryTypeKeyword[] = "application";
-const char applicationUidKeyword [] = "application:uid";
 const int maxItems(10);
 /*!
     \class TsModel
@@ -50,33 +45,15 @@ const int maxItems(10);
     \param query used to create model
     \param pointer to parent object
 */
-TsModel::TsModel(CaService &applicationSrv, QObject &activitySrv, QObject *parent) :
+TsModel::TsModel(TsTaskMonitor &applicationSrv, QObject &activitySrv, QObject *parent) :
     QAbstractListModel(parent),
     mEntries(),
     mApplicationService(applicationSrv),
     mActivityService(activitySrv),
-    mNotifier(NULL),
     mSize(240, 240),
     mMaxItems(maxItems)
 {
-    // creating query
-    mQuery.setEntryRoles(ItemEntryRole);
-    mQuery.addEntryTypeName(entryTypeKeyword);
-    mQuery.setFlagsOn(VisibleEntryFlag);
-    mQuery.setFlagsOff(MissingEntryFlag);
-    mQuery.setFlagsOn(UsedEntryFlag);
-    mQuery.setSort(LastUsedSortAttribute, Qt::DescendingOrder);
-    // requesting new data
-    updateModel();
-    // creating notyfication filter
-    CaNotifierFilter filter(mQuery);
-    mNotifier = mApplicationService.createNotifier(filter);
-    connect(mNotifier, SIGNAL(entryChanged(CaEntry,ChangeType)), this, SLOT(entryChanged(CaEntry, ChangeType)));
-    connect(mNotifier, SIGNAL(entryTouched(int)), this, SLOT(updateModel()));
-    if (mQuery.parentId() > 0) {
-        connect(mNotifier, SIGNAL(groupContentChanged(int)), this, SLOT(updateModel()));
-    }
-
+    
 #ifdef Q_OS_SYMBIAN
     XQSettingsManager *crManager = new XQSettingsManager;
     XQCentralRepositorySettingsKey itemsNumberKey(TSDeviceDialogUid, ItemsLimit);
@@ -87,7 +64,12 @@ TsModel::TsModel(CaService &applicationSrv, QObject &activitySrv, QObject *paren
             mMaxItems = number;
         }
     }
+    iAppArcSession.Connect();
 #endif
+
+    connect(&activitySrv, SIGNAL(dataChanged()), this, SLOT(updateModel()));
+    connect(&applicationSrv, SIGNAL(taskListChanged()), this, SLOT(updateModel()));
+    updateModel();
 }
 
 /*!
@@ -95,8 +77,10 @@ TsModel::TsModel(CaService &applicationSrv, QObject &activitySrv, QObject *paren
 */
 TsModel::~TsModel()
 {
+#ifdef Q_OS_SYMBIAN
+    iAppArcSession.Close();
+#endif
     qDeleteAll(mEntries);
-    delete mNotifier;
 }
 
 /*!
@@ -177,18 +161,11 @@ void TsModel::getApplications()
 {
     //get running applications
     TsModelItem *entry(0);
-    QList< QSharedPointer<CaEntry> > applications(mApplicationService.getEntries(mQuery));
-    foreach(QSharedPointer<CaEntry> application, applications) {
-        //CA entry ownership is transfered to model item
-        entry = new TsEntryModelItem(mApplicationService, application, mSize);
-        if (entry) {
-            //add running application filtering
-            if (entry->data(TsDataRoles::Closable).toBool() && //running application filtering
-                    entry->data(TsDataRoles::Visible).toBool()) { //visible applications filtering
-                mEntries.append(entry);
-            } else {
-                delete entry;
-            }
+    QList< QSharedPointer<TsTask> > tasks(mApplicationService.taskList());
+    foreach (QSharedPointer<TsTask> taskData, tasks) {
+        entry = new TsEntryModelItem(taskData);
+        if (0 != entry) {
+            mEntries.append(entry);
         }
     }
 }
@@ -206,9 +183,9 @@ void TsModel::getActivities()
         prepareActivityEntry(activity);
         entry = new TsActivityModelItem(*this, mActivityService, activity);
         if (entry) {
-			if (maxRowCount() <= mEntries.count()) {
-				break;
-			}
+            if (maxRowCount() <= mEntries.count()) {
+                break;
+            }
             if (entry->data(TsDataRoles::Visible).toBool()) { //visible activity filtering
                 mEntries.append(entry);
             } else {
@@ -235,29 +212,14 @@ void TsModel::prepareActivityEntry(QVariantHash &activity)
 */
 QString TsModel::getApplicationName(int id)
 {
-    CaQuery query;
     QString retVal;
-    query.setEntryRoles(ItemEntryRole);
-    query.addEntryTypeName(entryTypeKeyword);
-    query.setAttribute(applicationUidKeyword, QString::number(id));
-    QList< QSharedPointer<CaEntry> > applications(mApplicationService.getEntries(query));
-    if (applications.begin() != applications.end()) {
-        retVal = (*applications.begin())->text();
-    }
+#ifdef Q_OS_SYMBIAN
+    TApaAppInfo info;
+    iAppArcSession.GetAppInfo( info, TUid::Uid(id));
+    retVal = QString::fromUtf16(info.iShortCaption.Ptr(),
+                                info.iShortCaption.Length());
+#endif
     return retVal;
-}
-
-/*!
-    Called when some entry was changed
-    \param updatedEntry entry that was changed
-    \param change change type
-*/
-void TsModel::entryChanged(CaEntry updatedEntry,
-                           ChangeType change)
-{
-    Q_UNUSED(updatedEntry);
-    Q_UNUSED(change)
-    updateModel();
 }
 
 /*!

@@ -76,6 +76,10 @@ void HsImageFetcherClient::fetch()
 
     mReq = mAppMgr.create(gFetcherInterface, gFetcherOperation, false);
     if (mReq) {
+        QList<QVariant> args;
+        args << QVariantMap();
+        args << QVariant();
+        mReq->setArguments(args);
         // Connect signals once
         connect(mReq, SIGNAL(requestOk(const QVariant&)), this, SLOT(handleOk(const QVariant&)));
         connect(mReq, SIGNAL(requestError(int,const QString&)), this, SLOT(handleError(int,const QString&)));

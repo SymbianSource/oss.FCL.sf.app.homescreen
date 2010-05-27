@@ -38,3 +38,43 @@ CREATE TABLE WidgetPreferences (
   widgetId INTEGER,
   UNIQUE(widgetId, key) ON CONFLICT REPLACE,
   FOREIGN KEY(widgetId) REFERENCES Widgets(id) ON DELETE CASCADE);
+
+DROP TABLE IF EXISTS SnapConfiguration;
+CREATE TABLE SnapConfiguration (
+	snappingEnabled INTEGER,
+	showEffects INTEGER,
+	snapForce REAL,
+	snapGap REAL,
+	borderGap REAL,
+	timeout INTEGER);
+	
+DROP TABLE IF EXISTS FeedbackConfiguration;
+CREATE TABLE FeedbackConfiguration (
+  pageChangeFeedbackType TEXT,
+  widgetPickFeedbackType TEXT, 
+  widgetDropFeedbackType TEXT,
+  widgetRepositionFeedbackType TEXT,
+  widgetOverTrashbinFeedbackType TEXT,
+  widgetDropToTrashbinFeedbackType TEXT,
+  shortcutWidgetTapFeedbackType TEXT,
+  widgetMoveBlockedFeedbackType TEXT,
+  clockWidgetTapFeedbackType TEXT,
+  widgetSnappingFeedbackType TEXT);
+
+DROP TABLE IF EXISTS GeneralConfiguration;
+CREATE TABLE GeneralConfiguration (
+  bounceEffect INTEGER, 
+  tapAndHoldDistance REAL, 
+  widgetTapAndHoldTimeout INTEGER,
+  sceneTapAndHoldTimeout INTEGER,  
+  pageChangeZoneWidth REAL,
+  pageIndicatorSpacing REAL,
+  pageChangeAnimationDuration INTEGER,
+  pageChangeZoneAnimationDuration INTEGER,
+  pageChangeZoneReverseAnimationDuration INTEGER,
+  pageRemovedAnimationDuration INTEGER, 
+  newPageAddedAnimationDuration INTEGER, 
+  widgetDragEffectDuration INTEGER, 
+  widgetDropEffectDuration INTEGER,
+  boundaryFeedbackEffectDistance INTEGER);
+ 

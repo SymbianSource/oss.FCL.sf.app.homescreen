@@ -28,8 +28,7 @@
 #include "hsdatabase.h"
 #include "hswallpaperhelper.h"
 #include "hswidgetcomponentregistry.h"
-
-#define HSBOUNDARYEFFECT 20 // amount of extra pixels in wallpaper width reserved for boundary effect 
+#include "hsconfiguration.h"
 
 namespace
 {
@@ -100,8 +99,10 @@ bool HsHomeScreenClientServiceProvider::setWallpaper(const QString &fileName)
     QString landscapePath = HsWallpaper::wallpaperPath(
         Qt::Horizontal, QString(), fileExtension);
     
-    QRect portraitRect = QRect(0, 0, (2 * 360) + HSBOUNDARYEFFECT, 640);
-    QRect landscapeRect = QRect(0, 0, (2 * 640) + HSBOUNDARYEFFECT, 360);
+    int bounceEffect = HsConfiguration::bounceEffect();
+
+    QRect portraitRect = QRect(0, 0, (2 * 360) + bounceEffect, 640);
+    QRect landscapeRect = QRect(0, 0, (2 * 640) + bounceEffect, 360);
     QRect sourceRect; // left empty to signal we want to use full size image as source
     
     QImage portraitImage = HsWallpaperHelper::processImage(fileName,

@@ -27,6 +27,7 @@
 #include <HbToolBar>
 #include <HbView>
 #include <HbToolBarExtension>
+#include <HbStaticVkbHost>
 
 #include "hsallappsstate.h"
 #include "hsallcollectionsstate.h"
@@ -62,7 +63,8 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext):
     mListView(NULL),
     mViewLabel(NULL),
     mSearchListView(NULL),
-    mSearchPanel(NULL)
+    mSearchPanel(NULL), 
+    mVkbHost(NULL)
 {
     mBuilder.setOperationalContext(HsItemViewContext);
     mBuilder.setViewContext(mViewContext);
@@ -75,6 +77,10 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext):
     mProxyModel->setFilterRole(CaItemModel::TextRole);
     mProxyModel->setFilterKeyColumn(1);
     mProxyModel->setSortRole(CaItemModel::TextRole);
+
+    mVkbHost = new HbStaticVkbHost(mView);
+    connect(mVkbHost, SIGNAL(keypadOpened()), this, SLOT(vkbOpened()));
+    connect(mVkbHost, SIGNAL(keypadClosed()), this, SLOT(vkbClosed()));
 
     connect(mListView,
             SIGNAL(activated(QModelIndex)),
@@ -103,18 +109,20 @@ void HsMenuView::setModel(HsMenuItemModel *model)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::setModel");
 
-    disconnect(mListView->model(),
-               SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
-               this,
-               SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
-
+    if (mListView->model()) {
+        disconnect(mListView->model(),
+                   SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
+                   this,
+                   SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
+    }
     mListView->setModel(model);
 
-    connect(mListView->model(),
-            SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
-            this,
-            SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
-
+    if (mListView->model()) {
+        connect(mListView->model(),
+                SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
+                this,
+                SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
+    }
     HSMENUTEST_FUNC_EXIT("HsMenuView::setModel");
 }
 
@@ -123,7 +131,7 @@ void HsMenuView::setModel(HsMenuItemModel *model)
     Returns label appropriate for the view.
     \return pointer to the label or NULL if the view has no label.
  */
-HbGroupBox *HsMenuView::viewLabel()
+HbGroupBox *HsMenuView::viewLabel() const
 {
     return mViewLabel;
 }
@@ -180,7 +188,7 @@ void HsMenuView::setSearchPanelVisible(bool visible)
 /*!
 \return View widget of the menu view.
  */
-HbView *HsMenuView::view()
+HbView *HsMenuView::view() const
 {
     return mView;
 }
@@ -188,7 +196,7 @@ HbView *HsMenuView::view()
 /*!
 \return List view widget of the menu view.
  */
-HbListView *HsMenuView::listView()
+HbListView *HsMenuView::listView() const
 {
     return mListView;
 }
@@ -392,6 +400,7 @@ void HsMenuView::searchFinished()
 
     mSearchListView = NULL;
     mSearchPanel = NULL;
+    vkbClosed();
     HSMENUTEST_FUNC_EXIT("hsmenuview::searchFinished");
 }
 
@@ -424,32 +433,13 @@ void HsMenuView::longPressedProxySlot(HbAbstractViewItem *item,
 }
 
 /*!
- Add the \view to first instance of HbMainWindow registered in HbInstance.
- \param view View to be added to HbMainWindow.
- */
-void HsMenuView::addViewToMainWindow(HbView *view)
-{
-    HbMainWindow *const hbW(
-        HbInstance::instance()->allMainWindows().value(0));
-
-    if (!hbW->views().contains(view)) {
-        hbW->addView(view);
-    }
-    hbW->setCurrentView(view);
-}
-
-
-/*!
  Add the view to main window and search action with \a showSearchPanel
  slot of the window.
  */
 void HsMenuView::activate()
 {
-    addViewToMainWindow(mView);
-
     connect(mBuilder.searchAction(), SIGNAL(triggered()),
             this, SLOT(showSearchPanel()));
-
 }
 
 /*!
@@ -465,4 +455,19 @@ void HsMenuView::inactivate()
 }
 
 
+/*!
+ change size of view when VKB is opened
+ */
+void HsMenuView::vkbOpened()
+{
+    mView->setMaximumHeight(mVkbHost->applicationArea().height());   
+}
+
+/*!
+ change size of view when VKB is closed
+ */
+void HsMenuView::vkbClosed()
+{
+     mView->setMaximumHeight(-1);   
+}
 

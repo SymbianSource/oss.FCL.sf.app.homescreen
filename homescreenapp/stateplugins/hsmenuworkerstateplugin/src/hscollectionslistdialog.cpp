@@ -79,10 +79,6 @@ HsCollectionsListDialog::~HsCollectionsListDialog()
     delete mModel;
 }
 
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP // Reason: Modal inputdialog open
-#endif //COVERAGE_MEASUREMENT
 /*!
  Executes dialog.
  \retval Selected action.
@@ -92,11 +88,6 @@ void HsCollectionsListDialog::open(QObject* receiver, const char* member)
     this->setAttribute(Qt::WA_DeleteOnClose);
     HbSelectionDialog::open(receiver, member);
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP // Reason: Modal inputdialog exec
-#endif //COVERAGE_MEASUREMENT
-
-
 
 /*!
     \reimp
@@ -107,7 +98,7 @@ void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
     qDebug("HsCollectionsListDialog::closeEvent");
     HbAction *closingAction = qobject_cast<HbAction *>(sender());
 
-	if (closingAction != actions().value(1)) {
+    if (closingAction != actions().value(0)) {
         QModelIndexList modlist = selectedModelIndexes();
         if (modlist.count()) {
             mItemId

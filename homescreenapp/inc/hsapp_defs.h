@@ -45,6 +45,7 @@ inline const QString javaSwType();
 inline const QString packageTypeName();
 inline const QString appSettingsPlugin();
 inline const QString groupNameAttributeName();
+inline const QString componentIdAttributeName();
 
 // Sort attribute
 enum HsSortAttribute {
@@ -68,7 +69,8 @@ enum HsContextAction {
     AppSettingContextAction,
     RenameContextAction, 
     DeleteContextAction, 
-    RemoveFromCollectionContextAction    
+    RemoveFromCollectionContextAction,
+    AppDetailsContextAction
 };
 
 

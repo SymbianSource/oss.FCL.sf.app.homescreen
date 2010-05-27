@@ -33,6 +33,7 @@
 #include "hsallcollectionsstate.h"
 #include "hsaddappstocollectionstate.h"
 #include "hsmenumodetransition.h"
+#include "hsmainwindow.h"
 
 /*!
  \class HsAllCollectionsState
@@ -74,12 +75,15 @@
 HsAllCollectionsState::HsAllCollectionsState(
     HsMenuViewBuilder &menuViewBuilder,
     HsMenuModeWrapper &menuMode,
+    HsMainWindow &mainWindow,
     QState *parent):
     QState(parent),
     mSortAttribute(CustomHsSortAttribute),
     mMenuView(menuViewBuilder, HsAllCollectionsContext),
     mMenuMode(menuMode),
-    mAllCollectionsModel(0), mContextModelIndex(), mContextMenu(0)
+    mAllCollectionsModel(0),
+    mMainWindow(mainWindow),
+    mContextModelIndex(), mContextMenu(0)
 {
     construct();
 }
@@ -214,6 +218,7 @@ void HsAllCollectionsState::stateEntered()
     qDebug("AllCollectionsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::stateEntered");
 
+    mMainWindow.setCurrentView(mMenuView);
     mMenuView.activate();
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::stateExited");

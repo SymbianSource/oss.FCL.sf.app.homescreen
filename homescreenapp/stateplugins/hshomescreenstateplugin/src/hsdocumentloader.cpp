@@ -18,6 +18,7 @@
 #include "hsdocumentloader.h"
 #include "hspageindicator.h"
 #include "hstrashbinwidget.h"
+#include "hsconfiguration.h"
 
 /*!
     \class HsDocumentLoader
@@ -50,7 +51,7 @@ HsDocumentLoader::~HsDocumentLoader()
 QObject *HsDocumentLoader::createObject(const QString &type, const QString &name)
 {
     if (type == HsPageIndicator::staticMetaObject.className()) {
-        QObject *object = new HsPageIndicator;
+        QObject *object = new HsPageIndicator(HsConfiguration::pageIndicatorSpacing());
         object->setObjectName(name);
         return object;
     }

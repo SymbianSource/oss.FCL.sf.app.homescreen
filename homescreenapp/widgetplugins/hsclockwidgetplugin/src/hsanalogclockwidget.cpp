@@ -21,7 +21,9 @@
 #include <HbStyleLoader>
 #include <HbIconItem>
 #include <HbTouchArea>
+#include <HbInstantFeedback>
 
+#include "hsconfiguration.h"
 #include "hsanalogclockwidget.h"
 
 /*!
@@ -146,6 +148,8 @@ void HsAnalogClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *even
     if (!contains(event->pos())) {
         return;
     }
+
+    HbInstantFeedback::play(HsConfiguration::clockWidgetTapFeedbackType());
 
     emit clockTapped();
 }

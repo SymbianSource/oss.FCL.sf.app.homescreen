@@ -65,6 +65,8 @@ public:
     static bool organizeCollection(int groupId, QList<int> &entryIdList);
 
     static int allCollectionsId();
+    
+    static int collectionIdByType(const QString& collectionType);
 
     static bool touch(int entryId);
     

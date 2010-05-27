@@ -56,7 +56,7 @@ bool HsWallpaper::setImagesByPaths(const QString &landscapeImagePath,
     mLImagePath = landscapeImagePath;
     mPImagePath = portraitImagePath;
     mOrientation = HsScene::orientation();
-    
+
     if (mOrientation == Qt::Horizontal) {
         setLandscapeImage(mLImagePath, true);
     } else {
@@ -90,7 +90,7 @@ bool HsWallpaper::removeImages()
     if (mPImagePath != wallpaperPath(Qt::Vertical)) {
         QFile::remove(mPImagePath);
         mPImagePath.clear();
-    }    
+    }
     return true;
 }
 
@@ -100,7 +100,7 @@ QString HsWallpaper::wallpaperDirectory()
     static QString directory =
         QDir::toNativeSeparators("c:/private/20022f35/wallpapers/");
 #else
-    static QString directory = 
+    static QString directory =
         QDir::toNativeSeparators(QDir::currentPath() + "/private/20022f35/wallpapers/");
 #endif
 

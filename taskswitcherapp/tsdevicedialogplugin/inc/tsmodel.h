@@ -22,10 +22,12 @@
 #include <QList>
 #include <QSize>
 #include <QSharedPointer>
-#include <caquery.h>
-#include <caentry.h>
+#include <tstaskmonitor.h>
+#ifdef Q_OS_SYMBIAN
+#include <apgcli.h>
+#endif
 
-class CaService;
+class TsTaskMonitor;
 class ActivityManager;
 class CaNotifier;
 class TsModelItem;
@@ -35,7 +37,7 @@ class TsModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit TsModel(CaService &applicationSrv,
+    explicit TsModel(TsTaskMonitor &applicationSrv,
                      QObject &activitySrv,
                      QObject *parent = 0);
     ~TsModel();
@@ -48,7 +50,6 @@ public slots:
     void openApplication(const QModelIndex &index);
     void closeApplication(const QModelIndex &index);
     void updateModel();
-    void entryChanged(CaEntry, ChangeType);
     void entryChanged(TsModelItem *);
 private:
     TsModelItem *entry(const QModelIndex &index) const;
@@ -63,25 +64,16 @@ private:
      */
     QList<TsModelItem *> mEntries;
 
-    /*
-     * Query
-     */
-    CaQuery mQuery;
-
-    /*
-     * Content Arsenal Service
-     */
-    CaService &mApplicationService;
+    TsTaskMonitor &mApplicationService;
 
     /*
      * Activity Service
      */
     QObject &mActivityService;
-
-    /*
-     * Content Arsenal Notifier
-     */
-    CaNotifier *mNotifier;
+    
+#ifdef Q_OS_SYMBIAN
+    RApaLsSession iAppArcSession;
+#endif
 
     /*
      * Icon size in model

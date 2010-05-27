@@ -31,6 +31,7 @@
 #include "caservice.h"
 #include "canotifier.h"
 #include "caquery.h"
+#include "hsconfiguration.h"
 
 /*!
     \class HsShortcutWidget
@@ -209,7 +210,7 @@ void HsShortcutWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    HbInstantFeedback::play(HbFeedback::BasicItem);
+    HbInstantFeedback::play(HsConfiguration::shortcutWidgetTapFeedbackType());
     
     if (mCaEntryRole == ItemEntryRole) {
         CaService::instance()->executeCommand(mCaEntryId);

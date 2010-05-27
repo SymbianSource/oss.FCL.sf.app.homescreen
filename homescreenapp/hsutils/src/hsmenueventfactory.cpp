@@ -265,6 +265,19 @@ QEvent *HsMenuEventFactory::createAppSettingsViewEvent(int entryId)
 }
 
 /*!
+    Creates an HsMenuEvent::ShowAppDetails event.
+    \param entryId Id of an item.
+    \return Event for view the Application Settings.
+*/
+QEvent *HsMenuEventFactory::createAppDetailsViewEvent(int entryId)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), entryId);
+
+    return new HsMenuEvent(HsMenuEvent::ShowAppDetails, params);
+}
+
+/*!
     Creates an HsMenuEvent::Unknown event.
 
     \return Unknown event.

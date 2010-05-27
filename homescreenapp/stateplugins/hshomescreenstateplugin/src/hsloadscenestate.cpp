@@ -56,5 +56,5 @@ void HsLoadSceneState::action_loadScene()
 {
     HsScene::instance()->load();
     HsScene::mainWindow()->show();
-    emit event_idle();
+    emit event_history();
 }

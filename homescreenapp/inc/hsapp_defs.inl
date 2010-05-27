@@ -271,5 +271,22 @@ inline const QString groupNameAttributeName()
     return key;
 }
 
+/*!
+    \return applibrary activate name to open downloaded
+*/
+inline const QString groupAppLibRecentView()
+{
+    static const QString key("AppLibRecentView");
+    return key;
+}
+
+/*!
+    \return application componentID atribute name
+*/
+inline const QString componentIdAttributeName()
+{
+    static const QString key("component_id");
+    return key;
+}
 
 #endif

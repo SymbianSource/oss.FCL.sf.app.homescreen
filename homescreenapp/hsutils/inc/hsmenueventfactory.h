@@ -79,7 +79,9 @@ public:
         const QString &library = QString()
     );
     
-    static QEvent *createAppSettingsViewEvent(int entryId);    
+    static QEvent *createAppSettingsViewEvent(int entryId);
+    
+    static QEvent *createAppDetailsViewEvent(int entryId);
 
     static QEvent *createUnknownEvent();
 

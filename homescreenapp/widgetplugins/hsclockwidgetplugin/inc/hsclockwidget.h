@@ -38,9 +38,6 @@ public:
     HsClockWidget(QGraphicsItem *parent = 0, Qt::WindowFlags flags = 0);
     ~HsClockWidget();
 
-signals:
-    void setPreferences(const QStringList &names);
-
 public slots:
     void onInitialize();
     void onShow();

@@ -47,6 +47,7 @@ public:
         CreateCollection,
         PreviewHSWidget,
         ShowAppSettings,
+        ShowAppDetails,
         Unknown
     };
 

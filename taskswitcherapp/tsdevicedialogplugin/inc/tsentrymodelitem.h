@@ -18,9 +18,11 @@
 #ifndef TSENTRYMODELITEM_H
 #define TSENTRYMODELITEM_H
 #include "tsmodelitem.h"
-#include <caservice.h>
 
-class CaEntry;
+#include <qsharedpointer.h>
+#include <qstring.h>
+
+class TsTask;
 
 /*!
     Class implements model item which represents Content Arsenal entry
@@ -28,19 +30,14 @@ class CaEntry;
 class TsEntryModelItem : public TsModelItem
 {
 public:
-    TsEntryModelItem(CaService &service, QSharedPointer<CaEntry> entry, QSize mSize);
+    TsEntryModelItem(QSharedPointer<TsTask> entry);
     ~TsEntryModelItem();
     QVariant data(int role) const;
     void close();
     void open();
 
 private:
-    bool closable() const;
-
-private:
-    CaService &mService;
-    const QSharedPointer<CaEntry> mEntry;
-    const QSize mSize;
+    const QSharedPointer<TsTask> mEntry;
 };
 
 #endif // TSMODEL_H

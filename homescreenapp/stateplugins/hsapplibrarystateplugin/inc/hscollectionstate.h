@@ -36,6 +36,7 @@ class QModelIndex;
 class HsMenuItemModel;
 class HsMenuModeWrapper;
 class HsMenuViewBuilder;
+class HsMainWindow;
 
 class HsCollectionState: public QState
 {
@@ -44,6 +45,7 @@ class HsCollectionState: public QState
 public:
     HsCollectionState(HsMenuViewBuilder &menuView,
                       HsMenuModeWrapper &menuMode,
+                      HsMainWindow &mainWindow,
                       QState *parent = 0);
     ~HsCollectionState();
 public slots:
@@ -66,7 +68,7 @@ private slots:
     void stateExited();
     void latestOnTopMenuAction();
     void oldestOnTopMenuAction();
-	void contextMenuAction(HbAction *action);
+    void contextMenuAction(HbAction *action);
 private:
     void construct();
     void constructMenu(bool isDynamic);
@@ -84,9 +86,9 @@ private:
     HbAction *const mSecondarySoftkeyAction;
     HsMenuItemModel *mCollectionModel;
     HbMenu *mOptions;
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
-
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
+    HsMainWindow &mMainWindow;
 };
 
 #endif // HSCOLLECTIONSTATE_H

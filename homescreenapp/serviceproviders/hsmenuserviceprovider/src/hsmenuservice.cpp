@@ -126,6 +126,9 @@ HsMenuItemModel *HsMenuService::getCollectionModel(int collectionId,
     } else {
         query.setFlagsOn(VisibleEntryFlag);
     }
+    if(!collectionId) {
+        collectionId = collectionIdByType(collectionType);
+    }
     query.setParentId(collectionId);
     query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
                   HsMenuServiceUtils::sortOrder(sortAttribute));
@@ -344,6 +347,33 @@ int HsMenuService::allCollectionsId()
     }
     HSMENUTEST_FUNC_EXIT("HsMenuService::allCollectionsId");
     return mAllCollectionsId;
+}
+
+/*!
+ Retrives the first found collection entry id
+ \param collectionType collection type.
+ \retval collectionType id
+ */
+int HsMenuService::collectionIdByType(const QString& collectionType)
+{
+    HSMENUTEST_FUNC_ENTRY("HsMenuService::collectionsIdByType");
+    int collectionId;
+    CaQuery collectionsQuery;
+    collectionsQuery.setEntryRoles(GroupEntryRole);
+    //sorting is set to (default, ascending) to assure that
+    //proper entry is fetched, somebody can add item with
+    //"menucollections" typename to the storage, but even if he or she
+    //do this we fetch entry that we wanted
+    collectionsQuery.setSort(DefaultSortAttribute, Qt::AscendingOrder);
+    collectionsQuery.addEntryTypeName(collectionType);
+    QList<int> ids = CaService::instance()->getEntryIds(
+                         collectionsQuery);
+    Q_ASSERT(ids.count() > 0);
+    collectionId = ids.at(0);
+    qDebug() << "HsMenuService::HsMenuService collectionsIdByType"
+             << collectionId;
+    HSMENUTEST_FUNC_EXIT("HsMenuService::collectionsIdByType");
+    return collectionId;
 }
 
 /*!

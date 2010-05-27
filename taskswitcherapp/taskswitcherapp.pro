@@ -18,18 +18,22 @@ TEMPLATE = subdirs
 
 SUBDIRS += tsdevicedialogplugin
 
-tests {
-    SUBDIRS += internal\tstestrunner    
-    SUBDIRS += tsdevicedialogplugin\tsrc
-    SUBDIRS += ..\..\homescreensrv\activityfw\activityserviceplugin\unittests
-    SUBDIRS += ..\..\homescreensrv\activityfw\activitydatabase\hsactivitydbclient\t_hsactivitydbclient
-    SUBDIRS += ..\..\homescreensrv\hsappkeyhandler\tsrc\t_hsappkeyhandler
-    SUBDIRS += ..\..\homescreensrv\activityfw\activityserviceplugin\s60\tsrc
+coverage {
+    SUBDIRS += ../../homescreensrv/activityfw
+    SUBDIRS += ../../homescreensrv/hsappkeyhandler
+    SUBDIRS += ../../homescreensrv/tstaskmonitor
 }
 
-coverage {
-    SUBDIRS += ..\..\homescreensrv\activityfw
-    SUBDIRS += ..\..\homescreensrv\hsappkeyhandler
+tests {
+    SUBDIRS += internal/tstestrunner    
+    SUBDIRS += tsdevicedialogplugin/tsrc
+    SUBDIRS += ../../homescreensrv/activityfw/activityserviceplugin/tsrc
+    SUBDIRS += ../../homescreensrv/activityfw/activitydatabase/hsactivitydbclient/t_hsactivitydbclient
+    SUBDIRS += ../../homescreensrv/hsappkeyhandler/tsrc/t_hsappkeyhandler
+    SUBDIRS += ../../homescreensrv/activityfw/activityserviceplugin/s60/tsrc
+    SUBDIRS += ../../homescreensrv/tstaskmonitor/client/tsrc
+    SUBDIRS += ../../homescreensrv/tstaskmonitor/server/tsrc
+    SUBDIRS += ../../homescreensrv/activityfw/tsutils/tsrc
 }
 
 symbian:include(rom.pri)

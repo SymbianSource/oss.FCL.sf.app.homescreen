@@ -35,6 +35,7 @@ class HbAbstractViewItem;
 class QPointF;
 class HsMenuViewBuilder;
 class HsMenuItemModel;
+class HsMainWindow;
 
 class HsInstalledAppsState: public QState
 {
@@ -45,6 +46,7 @@ class HsInstalledAppsState: public QState
 public:
 
     HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
+                         HsMainWindow &mainWindow,
                          QState *parent = 0);
 
     ~HsInstalledAppsState();
@@ -64,7 +66,7 @@ private slots:
 
     void stateExited();
 
-	void contextMenuAction(HbAction *action);
+    void contextMenuAction(HbAction *action);
 
 private:
 
@@ -91,9 +93,11 @@ private:
      * Own.
      */
     HbAction *const mSecondarySoftkeyAction;
+    
+    HsMainWindow &mMainWindow;
 
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H

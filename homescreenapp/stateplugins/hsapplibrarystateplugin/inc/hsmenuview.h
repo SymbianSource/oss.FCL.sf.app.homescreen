@@ -36,6 +36,7 @@ class HbAbstractItemView;
 class HbListView;
 class HbGroupBox;
 class HbWidget;
+class HbStaticVkbHost;
 class HsMenuItemModel;
 
 
@@ -51,14 +52,14 @@ public:
 
     void setSearchPanelVisible(bool visible);
 
-    HbView *view();
+    HbView *view() const;
 
-    HbListView *listView();
+    HbListView *listView() const;
 
     void activate();
     void inactivate();
 
-    HbGroupBox *viewLabel();
+    HbGroupBox *viewLabel() const;
 
     void setModel(HsMenuItemModel *model);
 
@@ -83,10 +84,10 @@ private slots:
                          QAbstractItemView::PositionAtTop);
     void findItem(QString criteriaStr);
 
+    void vkbOpened();
+    void vkbClosed();
 
 private:
-
-    void addViewToMainWindow(HbView *view);
 
     QModelIndex firstVisibleItemIndex(const HbListView *view) const;
 
@@ -117,6 +118,7 @@ private:
 
     HbListView *mSearchListView;
     HbSearchPanel *mSearchPanel;
+    HbStaticVkbHost* mVkbHost;
 
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };

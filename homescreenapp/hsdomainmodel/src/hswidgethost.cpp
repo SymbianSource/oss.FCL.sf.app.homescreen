@@ -70,8 +70,7 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
       mWidget(0),
       mPage(0),
       mState(Unloaded),
-      mDatabaseId(databaseId),
-      mTapAndHoldIcon(0)
+      mDatabaseId(databaseId)
 {
     setFlags(QGraphicsItem::ItemClipsChildrenToShape);
 
@@ -147,7 +146,8 @@ bool HsWidgetHost::load()
 
     setProperty("isOnline", mIsOnlineProperty);
 	setProperty("rootPath", mRootPathProperty);
-
+    
+    setMethod("isPannable(QGraphicsSceneMouseEvent*)", mIsPannable);
     setMethod("onInitialize()", mOnInitializeMethod);
     setMethod("onUninitialize()", mOnUninitializeMethod);
 
@@ -362,23 +362,37 @@ bool HsWidgetHost::deleteWidgetPresentation(Qt::Orientation orientation)
 
     return db->deleteWidgetPresentation(mDatabaseId, key);
 }
-
+/*!
+    Check wheter widget uses pan gestures
+    Return true if successfull.
+*/
+bool HsWidgetHost::isPannable(QGraphicsSceneMouseEvent *event)
+{
+    bool ret(false);
+    mIsPannable.invoke(mWidget,Q_RETURN_ARG(bool,ret),Q_ARG(QGraphicsSceneMouseEvent *,event));
+    return ret;
+}
 /*!
     \fn void HsWidgetHost::widgetFinished()
-    This signal is emitten after the contained widget
+    This signal is emitted after the contained widget
     reported is completion.
 */
 
 /*!
     \fn void HsWidgetHost::widgetError()
-    This signal is emitten after the contained widget
+    This signal is emitted after the contained widget
     reported an error.
 */
 
 /*!
     \fn void HsWidgetHost::widgetResized()
-    This signal is emitten after the contained widget
+    This signal is emitted after the contained widget
     sends a resize event.
+*/
+/*!
+    \fn void HsWidgetHost::mousePressEventIgnored()
+    This signal is emitted if managed widget ignores mouse press event
+
 */
 
 /*!
@@ -397,7 +411,10 @@ void HsWidgetHost::initializeWidget()
     setOnline(HsScene::instance()->isOnline());
     mOnInitializeMethod.invoke(mWidget);
 
-    mState = Initialized;
+    if (mState != Finished &&
+        mState != Faulted) {
+        mState = Initialized;
+    }
 }
 
 /*!
@@ -514,26 +531,34 @@ void HsWidgetHost::startDropEffect()
 
     animationGroup->start(QAbstractAnimation::DeleteWhenStopped);
 }
-
 /*!
-    Starts the tap-and-hold animation.
+    Overwritten to stop event propogation
 */
-void HsWidgetHost::startTapAndHoldAnimation()
-{
-    mTapAndHoldIcon = new HbIconItem("tapandhold_animation");
-    mTapAndHoldIcon->setZValue(1e6);
-    mTapAndHoldIcon->setParentItem(this);
+void HsWidgetHost::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) 
+{ 
+    Q_UNUSED(event) 
 }
-
 /*!
-    Stops the tap-and-hold animation.
+    Overwritten to stop event propogation
 */
-void HsWidgetHost::stopTapAndHoldAnimation()
-{
-    delete mTapAndHoldIcon;
-    mTapAndHoldIcon = 0;
+void HsWidgetHost::mouseMoveEvent(QGraphicsSceneMouseEvent *event) 
+{ 
+    Q_UNUSED(event)  
 }
-
+/*!
+    Overwritten to stop event propogation
+*/
+void HsWidgetHost::mousePressEvent(QGraphicsSceneMouseEvent *event) 
+{ 
+    Q_UNUSED(event)  
+    
+}
+/*!
+    Overwritten to stop event propogation
+*/
+void HsWidgetHost::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { 
+    Q_UNUSED(event)
+}    
 /*!
     Filters resize events from widgets and resizes inside max/min size boundaries if needed.
 */
@@ -660,6 +685,7 @@ void HsWidgetHost::onSetPreferences(const QStringList &names)
 */
 void HsWidgetHost::onFinished()
 {
+    mState = Finished;
     emit widgetFinished(this);
 }
 

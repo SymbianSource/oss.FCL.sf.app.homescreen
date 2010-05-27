@@ -17,14 +17,20 @@
 TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
+
+HB += hbfeedback
+
+LIBS += -lhsdomainmodel
+
 PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F6C
 include(../../common.pri)
 
 DEPENDPATH += ./inc \
               ./src
 
-INCLUDEPATH += ./inc 
-
+INCLUDEPATH += ./inc \
+                ../../hsdomainmodel/inc
+		
 symbian: {
     TARGET.UID3 = 0x20022F6C
     LIBS += -lbafl -lapgrfx -lcone

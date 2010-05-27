@@ -37,6 +37,10 @@ public:
     HsMenuWorkerState(QState *parent = 0);
 
     virtual ~HsMenuWorkerState();
+    
+signals:
+
+    void reset();    
 
 private:
 

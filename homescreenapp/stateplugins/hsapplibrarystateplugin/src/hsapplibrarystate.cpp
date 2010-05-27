@@ -119,10 +119,11 @@ void HsAppLibraryState::construct()
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::construct");
     setObjectName("homescreen.nokia.com/state/applibrarystate");
 
-    mAllAppsState = new HsAllAppsState(mMenuViewBuilder, mMenuMode, this);
+    mAllAppsState = new HsAllAppsState(mMenuViewBuilder, mMenuMode, mMainWindow, this);
     connect(this, SIGNAL(entered()),mAllAppsState, SLOT(scrollToBeginning()));
 
-    mAllCollectionsState = new HsAllCollectionsState(mMenuViewBuilder, mMenuMode, this);
+    mAllCollectionsState = new HsAllCollectionsState(mMenuViewBuilder, mMenuMode,
+            mMainWindow, this);
     connect(this, SIGNAL(entered()),
             mAllCollectionsState, SLOT(scrollToBeginning()));
 
@@ -138,14 +139,15 @@ void HsAppLibraryState::construct()
 
     mCollectionState = new HsCollectionState(mMenuViewBuilder,
             mMenuMode,
+            mMainWindow,
             this);
 
     connect(mCollectionState, SIGNAL(entered()),SLOT(clearToolbarLatch()));
 
     HsMenuEventTransition *eventTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenCollection,
-                                  mAllCollectionsState, mCollectionState);
-    mAllCollectionsState->addTransition(eventTransition);
+                                  this, mCollectionState);
+    this->addTransition(eventTransition);
 
     HsMenuEventTransition *collectionDeletedTransition =
         new HsMenuEventTransition(HsMenuEvent::CollectionDeleted,
@@ -159,7 +161,7 @@ void HsAppLibraryState::construct()
     mCollectionState->addTransition(collectionToAppLibTransition);
 
     mInstalledAppsState = new HsInstalledAppsState(
-        mMenuViewBuilder, this);
+        mMenuViewBuilder, mMainWindow, this);
 
     HsMenuEventTransition *installedToAppLibTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenApplicationLibrary,
@@ -294,6 +296,7 @@ void HsAppLibraryState::clearToolbarLatch()
     if (checkedAction != NULL) {
         checkedAction->setChecked(false);
     }
+    emit collectionEntered();
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::clearToolbarLatch");
 }
 

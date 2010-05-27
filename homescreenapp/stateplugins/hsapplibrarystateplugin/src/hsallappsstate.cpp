@@ -36,6 +36,7 @@
 #include "hsmenumodetransition.h"
 #include "caentry.h"
 #include "caservice.h"
+#include "hsmainwindow.h"
 
 /*!
  \class HsAllAppsState
@@ -75,12 +76,15 @@
  */
 HsAllAppsState::HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                                HsMenuModeWrapper &menuMode,
+                               HsMainWindow &mainWindow,
                                QState *parent) :
     QState(parent), mSortAttribute(AscendingNameHsSortAttribute),
     mCollectionsSortAttribute(LatestOnTopHsSortAttribute),
     mMenuView(menuViewBuilder, HsAllAppsContext),
     mMenuMode(menuMode),
-    mAllAppsModel(0), mContextModelIndex(), mContextMenu(0)
+    mAllAppsModel(0),
+    mMainWindow(mainWindow),
+    mContextModelIndex(), mContextMenu(0)
 {
     construct();
 }
@@ -207,6 +211,7 @@ void HsAllAppsState::stateEntered()
     qDebug("AllAppsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateEntered");
 
+    mMainWindow.setCurrentView(mMenuView);
     mMenuView.activate();
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::stateEntered");
@@ -345,6 +350,7 @@ void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
                                     "txt_common_menu_delete"));
     uninstallAction->setData(UninstallContextAction);
     HbAction *appSettingsAction(NULL);
+    HbAction *appDetailsAction(NULL);
 
     // check conditions and hide irrelevant menu items
 
@@ -355,6 +361,13 @@ void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
                                                 "txt_common_menu_settings"));
         appSettingsAction->setData(AppSettingContextAction);
     }
+    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) && 
+                entry->entryTypeName() == applicationTypeName() ) {
+        appDetailsAction = mContextMenu->addAction(hbTrId(
+                                                "txt_common_menu_details"));
+        appDetailsAction->setData(AppDetailsContextAction);
+    }    
+    
     EntryFlags flags = item->modelIndex().data(
                            CaItemModel::FlagsRole).value<EntryFlags> ();
 
@@ -399,6 +412,10 @@ void HsAllAppsState::contextMenuAction(HbAction *action)
             machine()->postEvent(
                 HsMenuEventFactory::createAppSettingsViewEvent(itemId));
             break;
+        case AppDetailsContextAction: 
+            machine()->postEvent(
+                HsMenuEventFactory::createAppDetailsViewEvent(itemId));
+            break;            
         default:
             break;
     }

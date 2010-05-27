@@ -17,6 +17,7 @@
 
 #include <QState>
 #include <QFinalState>
+#include <QHistoryState>
 #include <QSignalTransition>
 #include <QKeyEventTransition>
 #include <QKeyEvent>
@@ -26,10 +27,13 @@
 #include <qservicefilter.h>
 #include <qserviceinterfacedescriptor.h>
 
+#include <HbApplication>
+#include <HbActivityManager>
 #include <HbInstance>
 #include <HbIconAnimationManager>
 #include <HbIconAnimationDefinition>
 
+#include "hsmenueventfactory.h"
 #include "homescreendomainpskeys.h"
 #include "hsdefaultruntime.h"
 #include "hsdatabase.h"
@@ -39,12 +43,10 @@
 #include "hswidgetpositioningonorientationchange.h"
 #include "hswidgetpositioningonwidgetadd.h"
 #include "hstest_global.h"
-#ifdef Q_OS_SYMBIAN
-#include "hsbackuprestoreobserver.h"
-#endif
+#include "hsconfiguration.h"
 
 QTM_USE_NAMESPACE
-
+#define hbApp qobject_cast<HbApplication*>(qApp)
 
 #ifdef Q_OS_SYMBIAN
 const static Qt::Key applicationKey = Qt::Key_Menu;
@@ -54,10 +56,12 @@ const static Qt::Key applicationKey = Qt::Key_Home;
 
 namespace
 {
+    const char KHsRootStateInterface[] = "com.nokia.homescreen.state.HsRootState";
     const char KHsLoadSceneStateInterface[] = "com.nokia.homescreen.state.HsLoadSceneState";
     const char KHsIdleStateInterface[] = "com.nokia.homescreen.state.HsIdleState";
     const char KHsAppLibraryStateInterface[] = "com.nokia.homescreen.state.HsAppLibraryState";
     const char KHsMenuWorkerStateInterface[] = "com.nokia.homescreen.state.HsMenuWorkerState";
+    const char KHsBacupRestoreStateInterface[] = "com.nokia.homescreen.state.HsBackupRestoreState";
 }
 
 
@@ -83,7 +87,6 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 	  mPublisher(NULL)
 #ifdef Q_OS_SYMBIAN
 	  ,keyCapture()
-	  ,mBRObserver(NULL)
 #endif
 {
     HSTEST_FUNC_ENTRY("HS::HsDefaultRuntime::HsDefaultRuntime");
@@ -98,16 +101,13 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     db->open();
     HsDatabase::setInstance(db);
 
+    HsConfiguration::loadConfiguration();
+
     HsWidgetPositioningOnOrientationChange::setInstance(
         new HsAdvancedWidgetPositioningOnOrientationChange);
 
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
-    
-#ifdef Q_OS_SYMBIAN
-    mBRObserver = CHsBackupRestoreObserver::NewL();
-#endif
-    registerAnimations();
 
     createStatePublisher();
     createContentServiceParts();
@@ -115,7 +115,12 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     assignServices();
     
 	QCoreApplication::instance()->installEventFilter(this);
-    HSTEST_FUNC_EXIT("HS::HsDefaultRuntime::HsDefaultRuntime");
+
+    if (hbApp) { // Qt test framework uses QApplication.
+	    connect(hbApp->activityManager(), SIGNAL(activityRequested(QString)), 
+	            this, SLOT(activityRequested(QString)));
+    }
+	HSTEST_FUNC_EXIT("HS::HsDefaultRuntime::HsDefaultRuntime");
 }
 
 /*!
@@ -125,9 +130,6 @@ HsDefaultRuntime::~HsDefaultRuntime()
 {
     HsWidgetPositioningOnOrientationChange::setInstance(0);
 	delete mPublisher;
-#ifdef Q_OS_SYMBIAN	
-	delete mBRObserver;
-#endif
 }
 
 /*!
@@ -171,15 +173,6 @@ bool HsDefaultRuntime::eventFilter(QObject *watched, QEvent *event)
         result = (ke->key() == applicationKey) || ke->key() == Qt::Key_Launch0;        
 	}
 	return result;
-}
-
-/*!
-    Registers framework animations.
-*/
-void HsDefaultRuntime::registerAnimations()
-{
-    HbIconAnimationManager *manager = HbIconAnimationManager::global();
-    manager->addDefinitionFile(QLatin1String(":/resource/tapandhold.axml"));
 }
 
 /*!
@@ -232,19 +225,22 @@ void HsDefaultRuntime::createStates()
     loadSceneState->setParent(guiRootState);
     loadSceneState->setObjectName(KHsLoadSceneStateInterface);
 
+    QObject *rootStateObj = manager.loadInterface(KHsRootStateInterface);
+    QState *rootState = qobject_cast<QState *>(rootStateObj);   
+    rootState->setParent(guiRootState);
+    rootState->setObjectName(KHsRootStateInterface);       
+
     QObject *idleStateObj = manager.loadInterface(KHsIdleStateInterface);
     QState *idleState = qobject_cast<QState *>(idleStateObj);
-    idleState->setParent(guiRootState);
+    idleState->setParent(rootState);
     idleState->setObjectName(KHsIdleStateInterface);
 	connect(idleState, SIGNAL(entered()), SLOT(onIdleStateEntered()));
 	connect(idleState, SIGNAL(exited()), SLOT(onIdleStateExited()));
 
-    loadSceneState->addTransition(
-            loadSceneState, SIGNAL(event_idle()), idleState);
 
     //menu state
     QState *menuParallelState = new QState(
-            QState::ParallelStates, guiRootState);
+            QState::ParallelStates, rootState);
     QState *menuRootState = new QState(menuParallelState);
 
     QObject *appLibraryStateObj = manager.loadInterface(KHsAppLibraryStateInterface);
@@ -253,15 +249,31 @@ void HsDefaultRuntime::createStates()
     appLibraryState->setObjectName(KHsAppLibraryStateInterface);
     menuRootState->setInitialState(appLibraryState);
 
+    QHistoryState *historyState = new QHistoryState(rootState);
+    historyState->setDefaultState(idleState);
+    
+    loadSceneState->addTransition(
+            loadSceneState, SIGNAL(event_history()), historyState);            
+
     QObject *menuWorkerStateObj = manager.loadInterface(KHsMenuWorkerStateInterface);
     QState *menuWorkerState = qobject_cast<QState *>(menuWorkerStateObj);
     menuWorkerState->setParent(menuParallelState);
     menuWorkerState->setObjectName(KHsMenuWorkerStateInterface);
+    connect(appLibraryState, SIGNAL(collectionEntered()), 
+            menuWorkerState, SIGNAL(reset()));
+    //Backup/Restore state
+    QObject *backupRestoreStateObj = manager.loadInterface(KHsBacupRestoreStateInterface);
+    QState *backupRestoreState = qobject_cast<QState *>(backupRestoreStateObj);   
+    backupRestoreState->setParent(guiRootState);
+    backupRestoreState->setObjectName(KHsBacupRestoreStateInterface);
+    backupRestoreState->addTransition(
+            backupRestoreState, SIGNAL(event_loadScene()), loadSceneState);
 
     // root state transitions
     idleState->addTransition(idleState, SIGNAL(event_applicationLibrary()), menuRootState);
     appLibraryState->addTransition(
             appLibraryState, SIGNAL(toHomescreenState()), idleState);
+    rootState->addTransition(rootState, SIGNAL(event_backupRestore()), backupRestoreState);
     // opening shortcut to Application Library
     HsMenuEventTransition *idleToAppLibTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenApplicationLibrary,
@@ -386,4 +398,15 @@ void HsDefaultRuntime::onIdleStateExited()
 {
 	mIdleStateActive = false;
 	updatePSKeys();
+}
+
+/*!
+    Activity requested by another client 
+*/
+void HsDefaultRuntime::activityRequested(const QString &name) 
+{
+    if (name == groupAppLibRecentView()){
+        this->postEvent(HsMenuEventFactory::createOpenCollectionEvent(0, 
+                collectionDownloadedTypeName()));
+    }
 }

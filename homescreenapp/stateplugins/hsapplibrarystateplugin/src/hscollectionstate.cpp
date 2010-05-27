@@ -37,7 +37,7 @@
 #include "hscollectionstate.h"
 #include "hsaddappstocollectionstate.h"
 #include "hsapp_defs.h"
-
+#include "hsmainwindow.h"
 
 /*!
  \class HsCollectionState
@@ -118,6 +118,7 @@
 */
 HsCollectionState::HsCollectionState(HsMenuViewBuilder &menuViewBuilder,
                                      HsMenuModeWrapper &menuMode,
+                                     HsMainWindow &mainWindow,
                                      QState *parent) :
     QState(parent),
     mSortAttribute(LatestOnTopHsSortAttribute),
@@ -127,7 +128,8 @@ HsCollectionState::HsCollectionState(HsMenuViewBuilder &menuViewBuilder,
     mMenuMode(menuMode),
     mSecondarySoftkeyAction(new HbAction(Hb::BackNaviAction, this)),
     mCollectionModel(0),
-    mOptions(0), mContextModelIndex(), mContextMenu(0)
+    mOptions(0), mContextModelIndex(), mContextMenu(0),
+    mMainWindow(mainWindow)
 {
     construct();
 }
@@ -196,21 +198,16 @@ void HsCollectionState::stateEntered()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::stateEntered");
 
+    mMainWindow.setCurrentView(mMenuView);
     mMenuView.activate();
 
     if (!mCollectionModel) {
         mCollectionModel =
             HsMenuService::getCollectionModel(
                 mCollectionId, mSortAttribute, mCollectionType);
-    } else {
-        if (mCollectionType == collectionDownloadedTypeName()) {
-            mCollectionModel->setFlagsOn(RemovableEntryFlag | VisibleEntryFlag);
-        } else {
-            mCollectionModel->setFlagsOn(VisibleEntryFlag);
-        }
-        mCollectionModel->setParentId(mCollectionId);
-        mCollectionModel->setSort(LatestOnTopHsSortAttribute);
     }
+    
+    connect(mCollectionModel, SIGNAL(modelReset()), SLOT(updateLabel()));
 
     mMenuView.setModel(mCollectionModel);
 
@@ -285,6 +282,8 @@ void HsCollectionState::stateExited()
 
     mMenuView.setSearchPanelVisible(false);
     mMenuView.inactivate();
+    disconnect(mCollectionModel, SIGNAL(modelReset()),
+                   this, SLOT(updateLabel()));
     delete mCollectionModel;
     mCollectionModel = NULL;
     delete mOptions;
@@ -292,6 +291,7 @@ void HsCollectionState::stateExited()
     if (mContextMenu)
         mContextMenu->close();
     HSMENUTEST_FUNC_EXIT("HsCollectionState::stateExited");
+    this->mSortAttribute = NoHsSortAttribute;
     qDebug("CollectionState::stateExited()");
 }
 
@@ -308,7 +308,6 @@ void HsCollectionState::makeConnect()
     connect(&mMenuView,
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
-    connect(mCollectionModel, SIGNAL(modelReset()),SLOT(updateLabel()));
 }
 
 /*!
@@ -318,9 +317,6 @@ void HsCollectionState::makeDisconnect()
 {
     disconnect(mSecondarySoftkeyAction, SIGNAL(triggered()),
                this, SLOT(backSteppingAction()));
-
-    disconnect(mCollectionModel, SIGNAL(modelReset()),
-               this, SLOT(updateLabel()));
 
     disconnect(&mMenuView,
                SIGNAL(activated(QModelIndex)),
@@ -391,6 +387,7 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
     HbAction *removeAction(NULL);
     HbAction *uninstallAction(NULL);
     HbAction *appSettingsAction(NULL);
+    HbAction *appDetailsAction(NULL);
     // we do not add remove option in locked collection
     // check conditions and hide irrelevant menu items
     EntryFlags rootFlags =
@@ -417,7 +414,13 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
                                                 "txt_common_menu_settings"));
         appSettingsAction->setData(AppSettingContextAction);
     }
-
+    
+    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) && 
+                entry->entryTypeName() == applicationTypeName() ) {
+        appDetailsAction = mContextMenu->addAction(hbTrId(
+                                                "txt_common_menu_details"));
+        appDetailsAction->setData(AppDetailsContextAction);
+    }        
     mContextModelIndex = item->modelIndex();
     mContextMenu->setPreferredPos(coords);
     mContextMenu->setAttribute(Qt::WA_DeleteOnClose);
@@ -458,6 +461,10 @@ void HsCollectionState::contextMenuAction(HbAction *action)
             machine()->postEvent(
                 HsMenuEventFactory::createAppSettingsViewEvent(itemId));
             break;
+        case AppDetailsContextAction: 
+            machine()->postEvent(
+                HsMenuEventFactory::createAppDetailsViewEvent(itemId));
+            break;                 
         default:
             break;
     }

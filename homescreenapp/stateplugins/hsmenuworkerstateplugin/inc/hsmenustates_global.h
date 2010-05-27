@@ -44,6 +44,10 @@ static const char *const HS_ARRANGE_DIALOG_LAYOUT =
     ":/xml/hsarrangedialog.docml";
 static const char *const HS_ARRANGE_DIALOG_NAME="arrange_dialog";
 static const char *const HS_ARRANGE_LIST_NAME="arrange_list";
+
+static const char *const HS_DETAILS_DIALOG_LAYOUT =
+    ":/xml/hsdetailsdialog.docml";
+static const char *const HS_DETAILS_DIALOG_NAME="details_dialog";
 /*!
  To enable logging of function entry and exit use the following flag for qmake:
  -config nft

@@ -26,7 +26,6 @@
 #include "tstasksgriditem.h"
 #include "tsdocumentloader.h"
 #include "tsmodel.h"
-#include <caservice.h>
 
 /*!
     \class TsDeviceDialogPlugin
@@ -39,7 +38,7 @@ const QString KTsDialogType = "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
 /*!
     Constructor.
  */
-TsDeviceDialogPlugin::TsDeviceDialogPlugin() : mError(0), mModel(0), mStorage(CaService::instance()), mLongPressed(false)
+TsDeviceDialogPlugin::TsDeviceDialogPlugin() : mError(0), mModel(0), mStorage(0)
 {
 }
 
@@ -70,6 +69,10 @@ HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString 
     TsDeviceDialog *dialog(0);
     if (deviceDialogType == KTsDialogType) {
         if (0 == mModel) {
+            mStorage = new TsTaskMonitor(this);
+            if (0 == mStorage) {
+                return 0;
+            }
             QtMobility::QServiceManager serviceManager;
             QObject *objPtr(serviceManager.loadInterface("com.nokia.qt.activities.ActivityManager"));
             if (objPtr) {
@@ -96,23 +99,17 @@ HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString 
         grid->setItemPrototype(new TsTasksGridItem());
         grid->setModel(mModel);
 
-        static_cast<TsModel *>(mModel)->updateModel();
+        //static_cast<TsModel *>(mModel)->updateModel();
 
         // connect the grid and model
         qRegisterMetaType<QModelIndex>("QModelIndex");
         
-        disconnect(grid, SIGNAL(activated(QModelIndex)), this, SLOT(activated(QModelIndex)));
-        disconnect(grid, SIGNAL(pressed(QModelIndex)), this, SLOT(pressed()));
-        disconnect(grid, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)), this, SLOT(longPressed()));
-        disconnect(this, SIGNAL(activate(QModelIndex)), mModel, SLOT(openApplication(QModelIndex)));
-        disconnect(this, SIGNAL(activate(QModelIndex)), dialog, SLOT(close()));
+        disconnect(grid, SIGNAL(activated(QModelIndex)), mModel, SLOT(openApplication(QModelIndex)));
+        disconnect(grid, SIGNAL(activated(QModelIndex)), dialog, SLOT(close()));
         disconnect(grid, SIGNAL(deleteButtonClicked(QModelIndex)), mModel, SLOT(closeApplication(QModelIndex)));
         
-        connect(grid, SIGNAL(activated(QModelIndex)), this, SLOT(activated(QModelIndex)));
-        connect(grid, SIGNAL(pressed(QModelIndex)), this, SLOT(pressed()));
-        connect(grid, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)), this, SLOT(longPressed()));
-        connect(this, SIGNAL(activate(QModelIndex)), mModel, SLOT(openApplication(QModelIndex)));
-        connect(this, SIGNAL(activate(QModelIndex)), dialog, SLOT(close()));
+        connect(grid, SIGNAL(activated(QModelIndex)), mModel, SLOT(openApplication(QModelIndex)));
+        connect(grid, SIGNAL(activated(QModelIndex)), dialog, SLOT(close()));
         connect(grid, SIGNAL(deleteButtonClicked(QModelIndex)), mModel, SLOT(closeApplication(QModelIndex)), Qt::QueuedConnection);
     }
     return dialog;
@@ -155,23 +152,6 @@ HbDeviceDialogPlugin::PluginFlags TsDeviceDialogPlugin::pluginFlags() const
 int TsDeviceDialogPlugin::error() const
 {
     return mError;
-}
-
-void TsDeviceDialogPlugin::activated(QModelIndex index)
-{
-    if (!mLongPressed) {
-        emit activate(index);
-    }
-}
-
-void TsDeviceDialogPlugin::pressed()
-{
-    mLongPressed = false;
-}
-
-void TsDeviceDialogPlugin::longPressed()
-{
-    mLongPressed = true;
 }
 
 Q_EXPORT_PLUGIN2(tsdevicedialogplugin, TsDeviceDialogPlugin)

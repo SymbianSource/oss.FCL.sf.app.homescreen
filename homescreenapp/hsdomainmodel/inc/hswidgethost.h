@@ -28,10 +28,7 @@
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
-
-class HbIconItem;
 class HsPage;
-
 
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
@@ -81,12 +78,12 @@ public:
     HsWidgetPresentationData widgetPresentation(Qt::Orientation orientation);
     bool loadWidgetPresentation();
     bool deleteWidgetPresentation(Qt::Orientation orientation);
-
+    bool isPannable(QGraphicsSceneMouseEvent *event);
 signals:
     void widgetFinished(HsWidgetHost *widget);
     void widgetError(HsWidgetHost *widget);
     void widgetResized(HsWidgetHost *widget);
-
+   
 public slots:
     void initializeWidget();
     void showWidget();
@@ -96,15 +93,12 @@ public slots:
 
     void startDragEffect();
     void startDropEffect();
-    
-    void startTapAndHoldAnimation();
-    void stopTapAndHoldAnimation();
-
+  
 protected:    
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { Q_UNUSED(event) }    
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     bool eventFilter(QObject *obj, QEvent *event);
     
 private:
@@ -132,11 +126,10 @@ private:
     QMetaMethod mOnUninitializeMethod;
     QMetaProperty mIsOnlineProperty;
 	QMetaProperty mRootPathProperty;
+    QMetaMethod mIsPannable;
     State mState;
     QString mUri;
     int mDatabaseId;
-
-    HbIconItem *mTapAndHoldIcon;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

@@ -15,16 +15,13 @@
 *
 */
 
+#include <QAction>
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
-#include <QImageReader>
-#include <QThread>
-#include <QTimer>
 
 #include <HbMainWindow>
 #include <HbProgressDialog>
-#include <HbView>
 
 #include "hsselectbackgroundstate.h"
 #include "hsscene.h"
@@ -32,6 +29,7 @@
 #include "hswallpaper.h"
 #include "hsdatabase.h"
 #include "hshomescreenstatecommon.h"
+#include "hsconfiguration.h"
 
 #ifdef Q_OS_SYMBIAN
 #include "hsimagefetcherclient.h"
@@ -40,7 +38,8 @@
 #include "xqaiwcommon.h"
 #endif
 
-const char hsLocTextId_ProgressDialog_WallpaperLoading[] = "txt_homescreen_dpopinfo_loading_wallpaper";
+const char hsLocTextId_ProgressDialog_WallpaperLoading[] =
+            "txt_homescreen_dpopinfo_loading_wallpaper";
 
 /*! 
     \class HsSelectBackgroundState
@@ -58,10 +57,10 @@ HsSelectBackgroundState::HsSelectBackgroundState(QState *parent):
     QState(parent),
     mImageFetcher(0),
     mSourceView(0),
-    mWallpaperImageReaderThread(0),
-    mWallpaperImageReader(0),
+    mPortraitWallpaperImageReader(0),
+    mLandscapeWallpaperImageReader(0),
     mProgressDialog(0),
-    mImageProcessingState(NotRunning),
+    mRunningThreadAmount(0),
     mShowAnimation(false)
 {
 #ifdef Q_OS_SYMBIAN
@@ -82,8 +81,8 @@ HsSelectBackgroundState::HsSelectBackgroundState(QState *parent):
 HsSelectBackgroundState::~HsSelectBackgroundState()
 {
     delete mImageFetcher;
-    delete mWallpaperImageReaderThread;
-    delete mWallpaperImageReader;
+    delete mPortraitWallpaperImageReader;
+    delete mLandscapeWallpaperImageReader;
 }
 
 /*!
@@ -95,7 +94,7 @@ void HsSelectBackgroundState::action_selectWallpaper()
 {
     mSourceView = HsScene::mainWindow()->currentView();
 
-    mImageProcessingState = NotRunning;
+    mRunningThreadAmount = 0;
     mShowAnimation = false;
 
 #ifdef Q_OS_SYMBIAN
@@ -129,18 +128,12 @@ void HsSelectBackgroundState::action_disconnectImageFetcher()
 */
 void HsSelectBackgroundState::onFetchComplete(QStringList imageStringList)
 {
-    if (mImageProcessingState == NotRunning) {
-        // TODO: temporarily show animation immediately (~0.5 sec delay)
-        onShowAnimation();
-        // start counting time for possible animation
-        // TODO: from UX the real response time
-        // TODO: cannot use timer since UI does not respond during hardcore image processing
-        //QTimer::singleShot(1000, this, SLOT(onShowAnimation()));
-    }
+    // start animation immediately
+    onShowAnimation();
 
+    // check that sceneData is available
     HsDatabase *db = HsDatabase::instance();
     Q_ASSERT(db);
-
     HsSceneData sceneData;
     if (!db->scene(sceneData)) {
         emit handleError();
@@ -148,69 +141,54 @@ void HsSelectBackgroundState::onFetchComplete(QStringList imageStringList)
     }
 
     // clean thread instances
-    delete mWallpaperImageReader;
-    delete mWallpaperImageReaderThread;
-    mWallpaperImageReader = NULL;
-    mWallpaperImageReaderThread = NULL;
+    delete mPortraitWallpaperImageReader;
+    delete mLandscapeWallpaperImageReader;
+    mPortraitWallpaperImageReader = NULL;
+    mLandscapeWallpaperImageReader = NULL;
 
-    mWallpaperImageReaderThread = new QThread();
-    mWallpaperImageReader = new HsWallpaperImageReader();
+    mPortraitWallpaperImageReader = new HsWallpaperImageReader();
+    mLandscapeWallpaperImageReader = new HsWallpaperImageReader();
 
-    // setup processing when image is fetched at first time
-    if (mImageProcessingState == NotRunning) {
-        // delete old wallpapers
-        QFile::remove(sceneData.portraitWallpaper);
-        QFile::remove(sceneData.landscapeWallpaper);
-        
-        QString wallpaperDir = HsWallpaper::wallpaperDirectory();            
-        QDir dir(wallpaperDir);
-        if (!dir.exists()) {
-            dir.mkpath(wallpaperDir);
-        }
-        HsScene *scene = HsScene::instance();
-        Qt::Orientation orientation = scene->orientation();
-        // based on screen orientation select first image to process
-        if (orientation == Qt::Vertical) {
-            mImageProcessingState = ProcessPortraitAsFirst;
-        } else {
-            mImageProcessingState = ProcessLandscapeAsFirst;
-        }
-    }
+    mRunningThreadAmount = 2;
 
-    QRect targetRect;
+    // delete old wallpapers
+    QFile::remove(sceneData.portraitWallpaper);
+    QFile::remove(sceneData.landscapeWallpaper);
 
-    switch (mImageProcessingState) {
-    case ProcessPortraitAsFirst:
-    case ProcessPortraitAsSecond:
-        targetRect = QRect(0, 0, (2 * 360) + HSBOUNDARYEFFECT, 640);
-        break;
-    case ProcessLandscapeAsFirst:
-    case ProcessLandscapeAsSecond:
-        targetRect = QRect(0, 0, (2 * 640) + HSBOUNDARYEFFECT, 360);
-        break;
-    default:
-        emit handleError();
-        return;        
+    QString wallpaperDir = HsWallpaper::wallpaperDirectory();            
+    QDir dir(wallpaperDir);
+    if (!dir.exists()) {
+        dir.mkpath(wallpaperDir);
     }
 
     // left empty to signal we want to use full size image as source
     QRect sourceRect;
-    mWallpaperImageReader->setSourcePath(imageStringList.first());
-    mWallpaperImageReader->setSourceRect(sourceRect);
-    mWallpaperImageReader->setTargetRect(targetRect);
-    mWallpaperImageReader->setCenterTarget(true);
-    mWallpaperImageReader->moveToThread(mWallpaperImageReaderThread);
 
-    mWallpaperImageReader->connect(mWallpaperImageReaderThread,
-                      SIGNAL(started()),
-                      SLOT(processImage()));
-    
-    connect(mWallpaperImageReader,
-            SIGNAL(processingFinished()),
+    // Initialize portrait image threading
+    QRect targetRectPortrait(0, 0, (2 * 360) + HsConfiguration::bounceEffect(), 640);
+    mPortraitWallpaperImageReader->setSourcePath(imageStringList.first());
+    mPortraitWallpaperImageReader->setSourceRect(sourceRect);
+    mPortraitWallpaperImageReader->setTargetRect(targetRectPortrait);
+    mPortraitWallpaperImageReader->setCenterTarget(true);
+
+    connect(mPortraitWallpaperImageReader,
+            SIGNAL(finished()),
+            SLOT(onImageProcessed()));
+
+    // Initialize landscape image threading
+    QRect targetRectLandscape(0, 0, (2 * 640) + HsConfiguration::bounceEffect(), 360);
+    mLandscapeWallpaperImageReader->setSourcePath(imageStringList.first());
+    mLandscapeWallpaperImageReader->setSourceRect(sourceRect);
+    mLandscapeWallpaperImageReader->setTargetRect(targetRectLandscape);
+    mLandscapeWallpaperImageReader->setCenterTarget(true);
+
+    connect(mLandscapeWallpaperImageReader,
+            SIGNAL(finished()),
             SLOT(onImageProcessed()));
   
     // start image processing in thread
-    mWallpaperImageReaderThread->start(QThread::IdlePriority);
+    mPortraitWallpaperImageReader->start();
+    mLandscapeWallpaperImageReader->start();
 }
 
 /*!
@@ -229,7 +207,8 @@ void HsSelectBackgroundState::onFetchFailed(int error)
 */
 void HsSelectBackgroundState::onImageProcessed()
 {
-    HsScene *scene = HsScene::instance();
+    mRunningThreadAmount--;
+
     HsDatabase *db = HsDatabase::instance();
     Q_ASSERT(db);
     HsSceneData sceneData;
@@ -237,88 +216,74 @@ void HsSelectBackgroundState::onImageProcessed()
         emit handleError();
         return;
     }
-    QFileInfo fileInfo(mWallpaperImageReader->getSourcePath());
+
+    QFileInfo fileInfo;
+    // get image path
+    if (sender() == mPortraitWallpaperImageReader) {
+        fileInfo = mPortraitWallpaperImageReader->sourcePath();
+    } else {
+        fileInfo = mLandscapeWallpaperImageReader->sourcePath();
+    }
+    // suffix is same for both orientations
     QString fileExtension("");
     if (!fileInfo.suffix().isEmpty()) {
         fileExtension = fileInfo.suffix();
     }
-    // set image path to sceneData
-    QString path;
-    if (mImageProcessingState == ProcessPortraitAsFirst ||
-        mImageProcessingState == ProcessPortraitAsSecond) {
-        path = HsWallpaper::wallpaperPath(Qt::Vertical, QString(), fileExtension);
-        sceneData.portraitWallpaper = path;
+
+    QImage image;
+    // set portrait image path to sceneData
+    QString portraitPath(HsWallpaper::wallpaperPath(Qt::Vertical, QString(),
+                                                    fileExtension));
+    // we need to set this always as image to be activated can be either orientation
+    sceneData.portraitWallpaper = portraitPath;
+    QString landscapePath(HsWallpaper::wallpaperPath(Qt::Horizontal, QString(),
+                                                     fileExtension));
+    sceneData.landscapeWallpaper = landscapePath;
+
+    if (sender() == mPortraitWallpaperImageReader) {
+        // get image from thread
+        image = mPortraitWallpaperImageReader->processedImage();
+        // save image
+        image.save(portraitPath);
     } else {
-        path = HsWallpaper::wallpaperPath(Qt::Horizontal, QString(), fileExtension);
-        sceneData.landscapeWallpaper = path;
+        image = mLandscapeWallpaperImageReader->processedImage();
+        image.save(landscapePath);
     }
-    // get image from renderer and save it
-    QImage image = mWallpaperImageReader->getProcessedImage();
-    image.save(path);
-    if (!image.isNull()) {
-        // update scenedata and set new image to background
-        if (db->updateScene(sceneData)) {
-            switch (mImageProcessingState) {
-            case ProcessPortraitAsFirst:
-                scene->wallpaper()->setPortraitImage(path, true);
-                break;
-            case ProcessPortraitAsSecond:
-                // if orientation changed during first image settings
-                if (HsScene::orientation() == Qt::Vertical) {
-                    scene->wallpaper()->setPortraitImage(path, true);
-                } else {
-                    scene->wallpaper()->setPortraitImage(path);
-                }
-                break;
-            case ProcessLandscapeAsFirst:
-                scene->wallpaper()->setLandscapeImage(path, true);
-                break;
-            case ProcessLandscapeAsSecond:
-                if (HsScene::orientation() == Qt::Horizontal) {
-                    scene->wallpaper()->setLandscapeImage(path, true);
-                } else {
-                    scene->wallpaper()->setLandscapeImage(path);
-                }
-                break;
-            default:
-                emit handleError();
-                break;
-            }
-        }
-    } else {
+
+    if (image.isNull()) {
         emit handleError();
         return;
     }
-
-    switch (mImageProcessingState) {
-    case ProcessPortraitAsFirst:
-        mImageProcessingState = ProcessLandscapeAsSecond;
-        if (mShowAnimation) {
-            mProgressDialog->setProgressValue(2);
+    // update scenedata and set new image to background
+    if (db->updateScene(sceneData)) {
+        HsScene *scene = HsScene::instance();
+        // set image to wallpaper (don't activate yet)
+        if (sender() == mPortraitWallpaperImageReader) {
+            scene->wallpaper()->setPortraitImage(portraitPath, false);
+        } else {
+            scene->wallpaper()->setLandscapeImage(landscapePath, false);
         }
-        // process second orientation
-        onFetchComplete(QStringList(mWallpaperImageReader->getSourcePath()));
-        break;
-    case ProcessLandscapeAsFirst:
-        mImageProcessingState = ProcessPortraitAsSecond;
-        if (mShowAnimation) {
-            mProgressDialog->setProgressValue(2);
+        // if last thread running
+        if (mRunningThreadAmount == 0) {
+            // if current orientation matches -> set to active wallpaper
+            if (HsScene::orientation() == Qt::Vertical) {
+                scene->wallpaper()->setPortraitImage(portraitPath, true);
+            } else {
+                scene->wallpaper()->setLandscapeImage(landscapePath, true);
+            }
+            // finish progress bar
+            if (mShowAnimation) {
+                mProgressDialog->setProgressValue(3);
+            }
+            // let user control again homescreen
+            emit event_waitInput();
+        } else {
+            // update progress information
+            if (mShowAnimation) {
+                mProgressDialog->setProgressValue(2);
+            }
         }
-        onFetchComplete(QStringList(mWallpaperImageReader->getSourcePath()));
-        break;
-    case ProcessPortraitAsSecond:
-    case ProcessLandscapeAsSecond:
-        mImageProcessingState = NotRunning;
-        if (mShowAnimation) {
-            mProgressDialog->setProgressValue(3);
-        }
-        // let user control again homescreen
-        emit event_waitInput();
-        break;
-    default:
-        emit handleError();
-        break;
-    }
+    }     
 }
 
 /*!
@@ -329,18 +294,20 @@ void HsSelectBackgroundState::onShowAnimation()
 {
     delete mProgressDialog;
     mProgressDialog = new HbProgressDialog(HbProgressDialog::ProgressDialog);
-    // TODO: setPrimaryAction is deprecated, clearActions does the same but crashes when dialog closes, check orbit list
-    mProgressDialog->setPrimaryAction(0);
+    /* TODO: workaround to remove cancel button (setPrimaryAction(0) is deprecated).
+     * clearActions does the same but crashes, fix should be in wk16, check orbit list
+     */
+    QList<QAction*> actions = mProgressDialog->actions();
+    actions[0]->setVisible(false);
     mProgressDialog->setIcon(HbIcon("note_info"));
     mProgressDialog->setText(hbTrId(hsLocTextId_ProgressDialog_WallpaperLoading));
     mProgressDialog->setMinimum(0);
     mProgressDialog->setMaximum(3);
     mProgressDialog->setBackgroundFaded(true);
     mProgressDialog->setAutoClose(true);
+    // set initial value to appear as loading
     mProgressDialog->setProgressValue(1);
     mProgressDialog->show();
-    // TODO: temporary solution to minimize progress dialog resizing problem
-    QApplication::processEvents();
     mShowAnimation = true;
 }
 
@@ -350,7 +317,6 @@ void HsSelectBackgroundState::onShowAnimation()
 */
 void HsSelectBackgroundState::onHandleError()
 {
-    mImageProcessingState = Error;
     if (mShowAnimation) {
         mProgressDialog->close();
     }

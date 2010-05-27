@@ -9,6 +9,7 @@
             <string name="scrollDirections" value="Horizontal"/>
             <integer name="rowCount" value="1"/>
             <integer name="columnCount" value="2"/>
+            <bool name="longPressEnabled" value="FALSE"/>
         </widget>            
         <bool name="backgroundFaded" value="TRUE"/>
         <string name="dismissPolicy" value="TapOutside"/>

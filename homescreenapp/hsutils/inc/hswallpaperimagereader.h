@@ -18,12 +18,15 @@
 #ifndef HSWALLPAPERIMAGEREADER_H
 #define HSWALLPAPERIMAGEREADER_H
 
-#include <QObject>
+#include <QThread>
 #include <QImage>
 
 #include "hsutils_global.h"
 
-class HSUTILS_EXPORT HsWallpaperImageReader : public QObject
+#include "hstest_global.h"
+HOMESCREEN_TEST_CLASS(t_hsUtils)
+
+class HSUTILS_EXPORT HsWallpaperImageReader : public QThread
 {
     Q_OBJECT
 
@@ -32,31 +35,33 @@ public:
     ~HsWallpaperImageReader();
 
     void setSourcePath(const QString &sourcePath);
-    QString getSourcePath() const;
+    QString sourcePath() const;
     void setSourceRect(const QRect &sourceRect);
-    QRect getSourceRect() const;
+    QRect sourceRect() const;
     void setTargetRect(const QRect &targetRect);
-    QRect getTargetRect() const;
+    QRect targetRect() const;
     void setCenterTarget(bool center);
-    bool getCenterTarget();
-    QImage getProcessedImage() const;
+    bool centerTarget();
+    QImage processedImage() const;
+    
+signals:
+    void processingFinished();
+
+protected:
+    void run();
 
 private:
     Q_DISABLE_COPY(HsWallpaperImageReader)
 
-signals:
-    void processingFinished();
-
-public slots:
-    void processImage();
-
 private:
     QString mSourcePath;
-    QRect mTargetRect;
     QRect mSourceRect;
+    QRect mTargetRect;
     bool mCenterTarget;
-
+    QString mKey;
     QImage mProcessedImage;
+
+    HOMESCREEN_TEST_FRIEND_CLASS(t_hsUtils)
 };
 
 #endif // HSWALLPAPERIMAGEREADER_H

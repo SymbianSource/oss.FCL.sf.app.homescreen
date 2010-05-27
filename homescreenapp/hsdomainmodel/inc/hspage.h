@@ -30,15 +30,16 @@ HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
 class HSDOMAINMODEL_EXPORT HsPage : public HbWidget
 {
-	Q_OBJECT
+    Q_OBJECT
+    Q_PROPERTY(int pageIndex READ pageIndex)
 
 public:
     HsPage(QGraphicsItem *parent = 0);
-	~HsPage();
+    ~HsPage();
 
     int databaseId() const;
     void setDatabaseId(int id);
-    
+
     bool load();
 
     bool addExistingWidget(HsWidgetHost *widgetHost);
@@ -50,10 +51,10 @@ public:
     bool deleteFromDatabase();
 
     QList<HsWidgetHost *> widgets() const;
-        
+
     bool isRemovable() const;
     void setRemovable(bool removable);
-    
+
     static HsPage *createInstance(const HsPageData &pageData);
 
 public slots:
@@ -62,6 +63,8 @@ public slots:
     void setOnline(bool online = true);
 
     void updateZValues();
+
+    int pageIndex();
 
 private:
     void connectWidget(HsWidgetHost *widget);
@@ -72,12 +75,12 @@ private slots:
     void onWidgetResized(HsWidgetHost *widget);
 
 private:
-    int mDatabaseId;    
+    int mDatabaseId;
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
-    
+
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };
- 
+
 #endif

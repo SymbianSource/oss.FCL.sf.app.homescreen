@@ -24,10 +24,15 @@
 
 #include "hsdomainmodel_global.h"
 
+#include <HbFeedback>
+
 class HsSceneData;
 class HsPageData;
 class HsWidgetData;
 class HsWidgetPresentationData;
+class HsGeneralConfiguration;
+class HsFeedbackConfiguration;
+class HsSnapConfiguration;
 
 class HSDOMAINMODEL_EXPORT HsDatabase : public QObject
 {
@@ -75,9 +80,11 @@ public:
     bool widgetPreferences(int widgetId, QVariantHash &data);
     bool widgetPreference(int widgetId, const QString &key, QVariant &value);
     bool setWidgetPreferences(int widgetId, const QVariantHash &data);
+
+    bool generalConfiguration(HsGeneralConfiguration &data);
+    bool feedbackConfiguration(HsFeedbackConfiguration &data);
+    bool snapConfiguration(HsSnapConfiguration &data);
     
-    void setDataBaseBlocked(bool blocked);
-    bool getDataBaseBlocked();
 public:
     static void setInstance(HsDatabase *instance);
     static HsDatabase *instance();
@@ -92,7 +99,6 @@ private:
     QString mDatabaseName;
 
     static QScopedPointer<HsDatabase> mInstance;
-    bool mBlocked;
 };
 
 #endif // HSDATABASE_H

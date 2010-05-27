@@ -22,6 +22,7 @@
 #include <hbdocumentloader.h>
 #include "hsmenustates_global.h"
 #include "hsmenuview.h"
+#include "hsmainwindow.h"
 #include "hsmenumodewrapper.h"
 #include "hsapp_defs.h"
 
@@ -53,6 +54,8 @@ public:
     virtual ~HsAppLibraryState();
 
 signals:
+
+    void collectionEntered();
 
     void toHomescreenState();
 
@@ -108,6 +111,8 @@ private:
     HsInstalledAppsState *mInstalledAppsState;
 
     HsMenuModeWrapper mMenuMode;
+    
+    HsMainWindow mMainWindow;
 };
 
 #endif //HSAPPLIBRARYSTATE_H

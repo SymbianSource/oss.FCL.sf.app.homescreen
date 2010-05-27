@@ -26,15 +26,13 @@
 
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
-class QThread;
-class HbView;
 class HbProgressDialog;
+class HbView;
 #ifdef Q_OS_SYMBIAN
 class HsImageFetcherClient;
 #else
 class XQAIWGetImageClient;
 #endif
-class HsImageRender;
 
 class HsSelectBackgroundState : public QState
 {
@@ -46,15 +44,6 @@ public:
 
 private:
     Q_DISABLE_COPY(HsSelectBackgroundState)
-
-    enum ImageProcessingState {
-        NotRunning,
-        ProcessPortraitAsFirst,
-        ProcessLandscapeAsFirst,
-        ProcessPortraitAsSecond,
-        ProcessLandscapeAsSecond,
-        Error
-    };
 
 signals:
     void event_waitInput();
@@ -85,10 +74,10 @@ private:
 #endif
     
     HbView *mSourceView;
-    QThread *mWallpaperImageReaderThread;
-    HsWallpaperImageReader *mWallpaperImageReader;
+    HsWallpaperImageReader *mPortraitWallpaperImageReader;
+    HsWallpaperImageReader *mLandscapeWallpaperImageReader;
     HbProgressDialog *mProgressDialog;
-    ImageProcessingState mImageProcessingState;
+    int mRunningThreadAmount;
     bool mShowAnimation;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)

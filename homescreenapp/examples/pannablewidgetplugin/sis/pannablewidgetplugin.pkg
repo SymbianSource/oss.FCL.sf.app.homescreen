@@ -1,0 +1,44 @@
+;
+; Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+; Language
+&EN
+
+; SIS header: name, uid, version
+#{"pannablewidgetplugin"},(0x20022F7C),1,0,0
+
+; Localised Vendor name
+%{"Vendor"}
+
+; Unique Vendor name
+:"Vendor"
+
+; Manual PKG pre-rules from PRO files
+; Default HW/platform dependencies
+[0x101F7961],0,0,0,{"S60ProductID"}
+[0x102032BE],0,0,0,{"S60ProductID"}
+[0x102752AE],0,0,0,{"S60ProductID"}
+[0x1028315F],0,0,0,{"S60ProductID"}
+
+
+"../resource/pannablewidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.manifest",FM,"application/hs-widget-uninstall+xml",RR,RW
+ 
+"/epoc32/release/armv5/urel/pannablewidgetplugin.dll"                                             - "!:/sys/bin/pannablewidgetplugin.dll"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.qtplugin"    - "!:/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.qtplugin"
+"../resource/pannablewidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.manifest"
+"../resource/pannablewidgetplugin.xml"                                                            - "!:/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.xml"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.png"         - "!:/private/20022F35/import/widgetregistry/20022F7C/pannablewidgetplugin.png"
+
