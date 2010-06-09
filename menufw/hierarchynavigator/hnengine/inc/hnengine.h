@@ -27,7 +27,6 @@
 #include "hnglobals.h"
 #include "hninterface.h"
 #include "hnmdmodel.h"
-#include "hninstallnotifier.h"
 
 class CHnMdModel;
 class CHnSuiteModelContainer;
@@ -49,7 +48,6 @@ class MHnSuiteObserver;
  */
 NONSHARABLE_CLASS( CHnEngine ) : public CHnInterface,
                   public MHnMdModelEventObserver,
-                  public MHnInstallNotifierCallback,
                   public MHWRMLightObserver
     {
 public:
@@ -147,17 +145,6 @@ public:
      TInt HandleBackEventL( const TDesC& aGenre,
              TInt aIterations = KModelCountForRoot );
 
-    // from MHNMulModelInstallNotifierCallback
-
-     /**
-      * InstallChangeL is called when the subscribed key has been changed.
-      * 
-      * @since S60 v5.0
-      * @param aStatus Status of the installation event.
-      */
-    virtual void InstallChangeL( TInt aStatus );
-    
-    
     /**
      * Loads default root suite
      * 
@@ -389,15 +376,15 @@ private:
       * @param aUriFragment Descriptor containig parsed part of the uri.
       */
      void HighlightPlacementFromUriL( const TDesC8& aUriFragment );
-    
-     
+
+
      /**
       * Loads folder and sets focus through CR.
-      * 
+      *
       * @since S60 v5.0
       */
      void LoadFromCrL( const TDesC8& aUri );
-     
+
      /**
       * Handles loading suite from uri if suites names' are the same.
       * 
@@ -452,13 +439,7 @@ private: // data
      * Not own - Suite observer.
      */
     MHnControllerInterface& iControllerInterface;
-    
-    /**
-     * Installation observer.
-     * Own.
-     */
-    CHnInstallNotifier* iInstObserver;
-    
+
     /**
      * Edit mode
      */

@@ -8283,19 +8283,19 @@ TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
                         {
                         rect = node->BorderRect();
                         }
-                    if ( adapter->Rect() != rect )
+                    
+                    // popup calculates its position based on _s60-position-hint property
+                    // This needs to be done even if popup's rect has not been changed
+                    if( node->Type()->Type() == KPopUpNodeName )
+                        {
+                        adapter->DoHandlePropertyChangeL();
+                        }
+                    else if ( adapter->Rect() != rect )
                         {
                         AddToRedrawListL( node, rect );
                         
-                        // popup calculates its position based on _s60-position-hint property
-                        if( node->Type()->Type() == KPopUpNodeName )
-                            {
-                            adapter->DoHandlePropertyChangeL();
-                            }
-                        else
-                            {
-                            adapter->SetRect( rect );                        
-                            }
+                        adapter->SetRect( rect );                        
+
                         CXnProperty* prop = node->GetPropertyL(
                             XnPropertyNames::common::KSizeAware );
                         if ( prop && prop->StringValue() ==
@@ -9565,6 +9565,8 @@ void CXnUiEngineImpl::SetClientRectL( TRect aRect, TBool aDrawNow )
         UpdateInternalUnits( iHorizontalUnitInPixels, iVerticalUnitInPixels,
             iClientRect );
         
+        iEditMode->SetClientRect( aRect );
+
         if ( aDrawNow )
             {
             RootNode()->SetDirtyL();

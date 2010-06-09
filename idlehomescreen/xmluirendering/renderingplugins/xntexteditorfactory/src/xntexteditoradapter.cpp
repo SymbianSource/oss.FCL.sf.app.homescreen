@@ -57,12 +57,15 @@ enum TSplitInputState
     ESplitInputEnabled = 1,   
     ESplitInputOpen = 2,
     ESplitInputEditorInStack = 4,
+    EScreenDeviceChanged = 8
     };
 
 _LIT8( KCpsPublishing, "cpspublishing" );
 _LIT8( KMaxLineAmount, "max-line-amount" );
 _LIT8( KMaxCharAmount, "max-char-amount" );
 _LIT8( KEnablePartialInput, "splitinputenabled" );
+_LIT8( KSplitScreenEnabledTrigger , "splitscreenenabled" );
+_LIT8( KSplitScreenDisabledTrigger, "splitscreendisabled" );
 
 _LIT( KEnterChar, "\x2029" );
 
@@ -194,6 +197,7 @@ void CXnTextEditorAdapter::ConstructL()
 
     iEditor->SetContainerWindowL( *iParent );
     iEditor->ConstructL( 0, maxChars, maxChars, iMaxLines );
+    iEditor->SetBackground( this );
     
     // Set allowed input modes
     iEditor->SetAknEditorAllowedInputModes( EAknEditorAllInputModes );
@@ -213,8 +217,6 @@ void CXnTextEditorAdapter::ConstructL()
                                      
     // Set numeric keymap
     iEditor->SetAknEditorNumericKeymap( EAknEditorPlainNumberModeKeymap );
-    
-    iEditor->SetSuppressBackgroundDrawing( ETrue );
 
     // Enable partial Screen
     CXnProperty* enablepartialinput( iNode.GetPropertyL( KEnablePartialInput ) );
@@ -402,9 +404,10 @@ void CXnTextEditorAdapter::FocusChanged( TDrawNow aDrawNow )
 // Draws the editor component
 // -----------------------------------------------------------------------------
 //
-void CXnTextEditorAdapter::Draw( const TRect& aRect ) const
-    {                           
-    CXnControlAdapter::Draw( aRect );
+void CXnTextEditorAdapter::Draw( const TRect& /*aRect*/ ) const
+    { 
+    // Do nothing. 
+    // Background is drawn through MCoeControlBackground of CEikEdwin. 
     }
 
 // -----------------------------------------------------------------------------
@@ -421,6 +424,15 @@ void CXnTextEditorAdapter::HandleResourceChange( TInt aType )
             {
             iUiEngine->EnablePartialTouchInput( iNode, ETrue );
             SetFlag( iSplitInputFlags, ESplitInputOpen );
+            if ( !IsFlagSet( iSplitInputFlags, EScreenDeviceChanged ) )
+                {
+                TRAP_IGNORE( iNode.ReportTriggerEventL( KSplitScreenEnabledTrigger, 
+                    KNullDesC8, KNullDesC8) );
+                }
+            else
+                {
+                ClearFlag( iSplitInputFlags, EScreenDeviceChanged );
+                }
             }
         }    
     
@@ -431,41 +443,58 @@ void CXnTextEditorAdapter::HandleResourceChange( TInt aType )
             iUiEngine->EnablePartialTouchInput( iNode, EFalse );
             ClearFlag( iSplitInputFlags, ESplitInputOpen );
             
-            // If editor is not focused anymore, remove if from stack
-            CXnNodePluginIf* focusedNode( NULL );
-            TRAP_IGNORE( focusedNode = iUiEngine->FocusedNodeL() );
-            if( focusedNode != &iNode && 
-                IsFlagSet( iSplitInputFlags, ESplitInputEditorInStack ) )
+            // Note that after orientation switch, split screen is first closed and  
+            // then opened again. Therefore these must be discarded
+            if ( !IsFlagSet( iSplitInputFlags, EScreenDeviceChanged ) )
                 {
-                iAppui->RemoveFromStack( iEditor );
-                iEditor->SetFocus( EFalse );
-                ClearFlag( iSplitInputFlags, ESplitInputEditorInStack );
-
-                // Forward keys to phone again    
-                RProperty::Set( KPSUidAiInformation,            
-                                KActiveIdleForwardNumericKeysToPhone,
-                                EPSAiForwardNumericKeysToPhone );
+                TRAP_IGNORE( iNode.ReportTriggerEventL( KSplitScreenDisabledTrigger, 
+                    KNullDesC8, KNullDesC8) );
+            
+                // If editor is not focused anymore, remove if from stack
+                CXnNodePluginIf* focusedNode( NULL );
+                TRAP_IGNORE( focusedNode = iUiEngine->FocusedNodeL() );
+                if( focusedNode != &iNode && 
+                    IsFlagSet( iSplitInputFlags, ESplitInputEditorInStack ) )
+                    {
+                    iAppui->RemoveFromStack( iEditor );
+                    iEditor->SetFocus( EFalse );
+                    ClearFlag( iSplitInputFlags, ESplitInputEditorInStack );
+    
+                    // Forward keys to phone again    
+                    RProperty::Set( KPSUidAiInformation,            
+                                    KActiveIdleForwardNumericKeysToPhone,
+                                    EPSAiForwardNumericKeysToPhone );
+                    }
                 }
             }
         }
     CCoeControl::HandleResourceChange( aType );
     }
-    
+
 // -----------------------------------------------------------------------------
-// CXnTextEditorAdapter::HandleControlEventL
-// 
+// CXnTextEditorAdapter::HandleScreenDeviceChangedL
+//
 // -----------------------------------------------------------------------------
-//    
-void CXnTextEditorAdapter::HandleControlEventL( CCoeControl* aControl, 
-    TCoeEvent aEventType )
+//
+void CXnTextEditorAdapter::HandleScreenDeviceChangedL()
     {
-    if ( aControl == iEditor )
+    if( IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
         {
-        // If background drawing is suppressed, then we need to call draw here
-        if ( aEventType == EEventStateChanged )
-            {
-            DrawNow();                                    
-            }        
+        SetFlag( iSplitInputFlags, EScreenDeviceChanged );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// From MCoeControlBackground
+// CXnTextEditorAdapter::Draw
+// -----------------------------------------------------------------------------
+//
+void CXnTextEditorAdapter::Draw( CWindowGc& aGc, const CCoeControl& aControl, 
+    const TRect& aRect) const
+    {
+    if( &aControl == iEditor )
+        {
+        CXnControlAdapter::Draw( aRect, aGc );    
         }
     }
 

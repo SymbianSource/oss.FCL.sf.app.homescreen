@@ -259,6 +259,8 @@ void CTsFastSwapArea::LayoutGridL()
         {
         TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL());
         }
+    variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0; // double check to avoid layout panic
+    
     TAknLayoutScalableParameterLimits gridParams = 
         AknLayoutScalable_Apps::cell_tport_appsw_pane_ParamLimits( variety );
     TPoint empty( ELayoutEmpty, ELayoutEmpty );
@@ -322,6 +324,39 @@ void CTsFastSwapArea::LayoutGridL()
 
 
 // --------------------------------------------------------------------------
+// CTsFastSwapArea::LayoutGridView
+// --------------------------------------------------------------------------
+//
+void CTsFastSwapArea::LayoutGridViewL( TInt aItemCount )
+    {
+    RArray<TAknLayoutRect> rects;
+    CleanupClosePushL(rects);
+    rects.ReserveL(KLayoutItemCount);
+    GetFastSwapAreaRects(rects);
+    TAknLayoutRect gridItem = rects[1];
+    CleanupStack::PopAndDestroy(&rects);
+    if ( aItemCount )
+        {
+        iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(EFalse);
+        static_cast<CTsAppView*>(&iParent)->EnableDragEvents(ETrue);
+        if ( AknLayoutUtils::LayoutMirrored() )
+            {
+            iGrid->SetLayoutL( EFalse, EFalse, ETrue, aItemCount, 1, gridItem.Rect().Size(), iGridItemGap );
+            }
+        else
+            {
+            iGrid->SetLayoutL( EFalse, ETrue, ETrue, aItemCount, 1, gridItem.Rect().Size(), iGridItemGap );
+            }
+        }
+    else
+        {
+        iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(ETrue);
+        static_cast<CTsAppView*>(&iParent)->EnableDragEvents(EFalse);
+        }
+    }
+
+
+// --------------------------------------------------------------------------
 // CTsFastSwapArea::GetFastSwapAreaRects
 // --------------------------------------------------------------------------
 //
@@ -338,6 +373,7 @@ void CTsFastSwapArea::GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects )
         {
         TRAP_IGNORE(static_cast<CTsAppUi*>(iEikonEnv->AppUi())->RequestPopUpL());
         }
+    variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0; // double check to avoid layout panic
     
     gridAppPane.LayoutRect( Rect(), 
             AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
@@ -381,17 +417,22 @@ void CTsFastSwapArea::SizeChanged()
     
     if ( iGrid && !iIgnoreLayoutSwitch )
         {
+        // Cancel ongoing pointer event
+        iHandlePointerCandidate = EFalse;
         // Grid needs to be recreated to proper reinitilize
         // data with new layout values
         TInt selIdx = SelectedIndex();
-        TRAPD(err, 
-              /*ReCreateGridL()*/
-              LayoutGridL() );
+        TRAPD(err,
+              LayoutGridL();
+              LayoutGridViewL( iArray.Count() )
+              );
+        
         if ( err != KErrNone )
             {
             TSLOG1( TSLOG_INFO, "LayoutGridL leaves with %d", err );
             }
-        HandleFswContentChanged();
+        
+        // Update grid view
         iGrid->SetCurrentDataIndex(selIdx);
         UpdateGrid(ETrue, EFalse);
         iGrid->DrawDeferred();
@@ -497,11 +538,6 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
 
     if ( aIndex >= 0 && aIndex < iArray.Count() && CanClose( aIndex ) )
         {
-        TInt selIdx = SelectedIndex();
-        if ( selIdx > aIndex && selIdx > 0 )
-            {
-            selIdx--;
-            }
         TInt wgId = iArray[aIndex]->WgId();
         iFSClient->CloseApp( wgId );
         iIsClosing.Append(wgId);
@@ -509,45 +545,11 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
             {
             iWidgetClosingCount++;
             }
-        // The fsw content will change sooner or later
-        // but the updated content (without the closed app) will not
-        // come very fast. It looks better to the user if the item
-        // in the grid is removed right here, right now.
-        // If the app does not close for some reason then this is
-        // not fully correct but the app will then reappear on the next
-        // content-changed notification anyway.
-        delete iArray[aIndex];
-        iArray.Remove( aIndex );
-        NotifyChange();
-        
-        // Hide highlight
-        if ( iGrid->GridBehaviour() == CTsFastSwapGrid::ETouchOnly )
-            {
-            iGrid->HideHighlight();
-            }
-        // Update selection
-        TInt newItemCount = GridItemCount() - 1;
-        if ( aIndex == newItemCount )
-            {
-            newItemCount--;
-            iGrid->SetCurrentDataIndex(newItemCount);
-            }
-        else
-            {
-            iGrid->SetCurrentDataIndex(selIdx);
-            }
-        // Render contect
-        if ( !aSuppressRendering )
-            {
-            RenderContentL( ETrue );
-            }
         
         // Orientation update
         iPrevScreenOrientation = GetCurrentScreenOrientation();
         iOrientationSignalTimer->Cancel();
         iOrientationSignalTimer->After(KOrientationSwitchTime);
-        
-        iPrevAppCount = iArray.Count();
         }
 
     TSLOG_OUT();
@@ -559,22 +561,12 @@ void CTsFastSwapArea::TryCloseAppL( TInt aIndex,
 //
 void CTsFastSwapArea::TryCloseAllL()
     {
-    // note the direction of the loop, this is needed because
-    // TryCloseAppL may modify the array
-    TBool changed = EFalse;
     for ( TInt i = iArray.Count() - 1; i >= 0; --i )
         {
         if ( CanClose( i ) )
             {
             TryCloseAppL( i, ETrue );
-            changed = ETrue;
             }
-        }
-    if ( changed )
-        {
-        RenderContentL();
-        RestoreSelectedIndex();
-        UpdateGrid( ETrue, EFalse );
         }
     }
 
@@ -584,10 +576,14 @@ void CTsFastSwapArea::TryCloseAllL()
 //
 TBool CTsFastSwapArea::CanClose( TInt aIndex ) const
     {
-    CTsFswEntry* e = iArray[aIndex];
-    TBool canClose = !e->AlwaysShown() && !e->SystemApp();
-    // Special cases: Menu
-    canClose |= e->AppUid() == KTsMenuUid;
+    TBool canClose(EFalse);
+    if ( aIndex >= 0 && aIndex < iArray.Count() )
+        {
+        CTsFswEntry* e = iArray[aIndex];
+        canClose = !e->AlwaysShown() && !e->SystemApp();
+        // Special cases: Menu
+        canClose |= e->AppUid() == KTsMenuUid;
+        }
     return canClose;
     }
 
@@ -695,31 +691,9 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     RArray<TInt> strokeItemArray;
     CleanupClosePushL(strokeItemArray);
     
-    RArray<TAknLayoutRect> rects;
-    CleanupClosePushL(rects);
-    rects.ReserveL(KLayoutItemCount);
-    GetFastSwapAreaRects(rects);
-    TAknLayoutRect gridItem = rects[1];
-    CleanupStack::PopAndDestroy(&rects);
-    if ( iArray.Count() )
-        {
-        iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(EFalse);
-        static_cast<CTsAppView*>(&iParent)->EnableDragEvents(ETrue);
-        if ( AknLayoutUtils::LayoutMirrored() )
-            {
-            iGrid->SetLayoutL( EFalse, EFalse, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
-            }
-        else
-            {
-            iGrid->SetLayoutL( EFalse, ETrue, ETrue, iArray.Count(), 1, gridItem.Rect().Size(), iGridItemGap );
-            }
-        }
-    else
-        {
-        iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(ETrue);
-        static_cast<CTsAppView*>(&iParent)->EnableDragEvents(EFalse);
-        }
-        
+    // Update view based on number of items
+    LayoutGridViewL( iArray.Count() );
+    
     for ( TInt i = 0; i < iArray.Count(); ++i )
         {
         const TDesC& appName( iArray[i]->AppName() );
@@ -798,9 +772,13 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     CleanupStack::Pop(iconArray);
     
     // refresh the items in the grid
-    iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
-    UpdateGrid( ETrue, !aSuppressAnimation );
     iGrid->HandleItemAdditionL();
+    iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
+    if ( SelectedIndex() >= GridItemCount() && GridItemCount() )
+        {
+        iGrid->SetCurrentDataIndex( GridItemCount() - 1 );
+        }
+    UpdateGrid( ETrue, !aSuppressAnimation );
     
     TSLOG_OUT();
     }
@@ -1503,8 +1481,8 @@ void CTsFastSwapArea::HandleAppKey(TInt aType)
         {
         if( aType == KAppKeyTypeShort )
             {
-            // Switch to homescreen
-            SwitchToApp( KTsHomescreenUid );
+            //SwitchToApp( KTsHomescreenUid );
+            TRAP_IGNORE( iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit) );
             }
         else if( aType == KAppKeyTypeLong )
             {

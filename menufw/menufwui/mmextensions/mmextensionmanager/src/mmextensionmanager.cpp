@@ -45,17 +45,6 @@ CMMExtensionManager::~CMMExtensionManager()
             delete (CMMExtensionPlugin*)(*ptr);
         }    
 	iPluginMap.Close ();
-	
-	
-    //delete iPluginNameMap
-    /*THashMapIter< HBufC*, TInt32 > iter1( iPluginNameMap );
-    while ( HBufC*const* ptrHbuf = iter1.NextKey() )
-        {		
-        delete *ptrHbuf;
-        }  
-    iPluginNameMap.Close();*/
-	
-    delete iEcomObserver;
 	}
 
 // ---------------------------------------------------------------------------
@@ -88,7 +77,6 @@ EXPORT_C CMMExtensionManager* CMMExtensionManager::NewL(
 //
 void CMMExtensionManager::ConstructL()
 	{
-    iEcomObserver = CMMEcomObserver::NewL( this );
 	LoadPluginsL();
 	}
 
@@ -177,23 +165,6 @@ CMMExtensionPlugin* CMMExtensionManager::GetImplementationL(
         ret = *imp;
         }
     return ret;
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CMMExtensionManager::EcomChangedL()
-    {
-    THashMapIter< TInt32, CMMExtensionPlugin* > iter( iPluginMap );
-    for (CMMExtensionPlugin* const* ptr =
-                                ( CMMExtensionPlugin* const* ) iter.NextValue();
-        ptr; ptr = ( CMMExtensionPlugin* const* ) iter.NextValue())
-        {
-            delete (CMMExtensionPlugin*)(*ptr);
-        }
-    iPluginMap.Close();
-    LoadPluginsL();
     }
 
 // End of file

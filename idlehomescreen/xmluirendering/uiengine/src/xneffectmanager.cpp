@@ -366,16 +366,30 @@ TBool CXnEffectManager::BeginActivateViewEffect( const CXnViewData& aThis,
         
         iBgEffect = ETrue;
         }
-                  
+    
+    // because of changes in nga end has to call here. Effects below are
+    // grouped and those will be triggered when calling GfxTransEffect::EndGroup
     if ( iLandscape )
         {
         GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
         GfxTransEffect::Begin( otherView, KGfxControlActionAppearLsc );
+        
+        GfxTransEffect::SetDemarcation( otherView, otherView->Position() );
+        GfxTransEffect::End( otherView );
+            
+        GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
+        GfxTransEffect::End( thisView );
         }
     else
         {
         GfxTransEffect::Begin( thisView, KGfxControlActionDisappearPrt );
         GfxTransEffect::Begin( otherView, KGfxControlActionAppearPrt );
+        
+        GfxTransEffect::SetDemarcation( otherView, otherView->Position() );
+        GfxTransEffect::End( otherView );
+            
+        GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
+        GfxTransEffect::End( thisView );
         }    
     
     return ETrue;
@@ -396,7 +410,7 @@ void CXnEffectManager::EndActivateViewEffect( const CXnViewData& aThis,
         }
     
     CXnControlAdapter* thisView( aThis.ViewNode()->Control() );                             
-    CXnControlAdapter* otherView( aOther.ViewNode()->Control() ); 
+    CXnControlAdapter* otherView( aOther.ViewNode()->Control() );
     
     if ( iBgEffect )
         {    
@@ -405,17 +419,11 @@ void CXnEffectManager::EndActivateViewEffect( const CXnViewData& aThis,
         GfxTransEffect::SetDemarcation( bg, bg->Position() );
         GfxTransEffect::End( bg );        
         }
-        
-    GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
-    GfxTransEffect::End( thisView );
-    
-    GfxTransEffect::SetDemarcation( otherView, otherView->Position() );
-    GfxTransEffect::End( otherView );                     
                             
     GfxTransEffect::EndGroup( iGroupId );
     
+    GfxTransEffect::Deregister( otherView );
     GfxTransEffect::Deregister( thisView );
-    GfxTransEffect::Deregister( otherView );    
     }
 
 // -----------------------------------------------------------------------------

@@ -44,6 +44,7 @@
 #include <StringLoader.h>
 #include <aknnotewrappers.h>
 #include <bautils.h>
+#include <UTF.h>
 
 #include <AknsUtils.h>
 #include <AknsDrawUtils.h>
@@ -103,34 +104,32 @@ void HandleErrorL( TInt aErr )
     }
 
 // -----------------------------------------------------------------------------
-// CreateSkinBitmapL
+// CreateBitmapFromColorL
+// Creates a bitmap object with the given size and fill color
 // -----------------------------------------------------------------------------
 //
-CFbsBitmap* CreateSkinBitmapL( TAknsItemID aId, TRect aRect )
+static CFbsBitmap* CreateBitmapFromColorL( TSize aSize, TRgb aColor )
     {
     CFbsBitmap* newBitmap = new ( ELeave ) CFbsBitmap;
-    User::LeaveIfError( newBitmap->Create( aRect.Size(), EColor16M ) );
+    newBitmap->Create( aSize, EColor16M );
     CleanupStack::PushL( newBitmap );
-            
+
     CFbsBitmapDevice* bitmapDev = CFbsBitmapDevice::NewL( newBitmap );
     CleanupStack::PushL( bitmapDev );
 
-    CBitmapContext* bc( NULL );
-    User::LeaveIfError( bitmapDev->CreateBitmapContext( bc ) );
+    CFbsBitGc* bc = NULL;
+    User::LeaveIfError( bitmapDev->CreateContext( bc ) );
     CleanupStack::PushL( bc );
 
-    CAknsBasicBackgroundControlContext* context = 
-        CAknsBasicBackgroundControlContext::NewL( aId, aRect, EFalse );
-    CleanupStack::PushL( context );
+    bc->SetBrushColor( aColor );
+    bc->Clear(); // area is filled with the brush color
 
-    AknsDrawUtils::Background( AknsUtils::SkinInstance(),
-        context, static_cast< CWindowGc& >( *bc ), aRect );
-
-    CleanupStack::PopAndDestroy( 3, bitmapDev );
+    CleanupStack::PopAndDestroy( bc );
+    CleanupStack::PopAndDestroy( bitmapDev );
     CleanupStack::Pop( newBitmap );
     return newBitmap;
     }
-
+ 
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -329,7 +328,9 @@ void CXnBackgroundManager::MakeVisible( TBool aVisible )
 void CXnBackgroundManager::HandleNotifyDisk( TInt /*aError*/, 
     const TDiskEvent& aEvent )              
     {
-    if( aEvent.iType == MDiskNotifyHandlerCallback::EDiskStatusChanged )
+    if( aEvent.iType == MDiskNotifyHandlerCallback::EDiskStatusChanged || 
+        aEvent.iType == MDiskNotifyHandlerCallback::EDiskAdded  ||  
+        aEvent.iType == MDiskNotifyHandlerCallback::EDiskRemoved )
         {
         if( !( aEvent.iInfo.iDriveAtt & KDriveAttInternal ) ) 
             {        
@@ -530,11 +531,18 @@ void CXnBackgroundManager::SaveWallpaperL()
     // Save wallpaper to HSPS
     if( iType == EPageSpecific )
         {
-        TBuf8<KMaxFileName> wallpaper8;
         CXnViewData& viewData( iViewManager.ActiveViewData() );
-        wallpaper8.Copy( viewData.WallpaperImagePath() );    
-        SetSettingPropertyL( viewData.PluginId(), KWallpaper,
-                KPath, wallpaper8 );
+        
+        HBufC8* pUtf8String = CnvUtfConverter::ConvertFromUnicodeToUtf8L( viewData.WallpaperImagePath() );
+        CleanupStack::PushL( pUtf8String );
+        
+        SetSettingPropertyL( viewData.PluginId(),
+                            KWallpaper,
+                            KPath,
+                            *pUtf8String );
+        
+        CleanupStack::PopAndDestroy( pUtf8String );
+        pUtf8String = NULL;
         }
     else
         {
@@ -1156,16 +1164,23 @@ void CXnBackgroundManager::UpdateStatuspaneMaskL()
     TRect spRect;
     AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EStatusPane, spRect );
     
-    iSpBitmap = CreateSkinBitmapL( KAknsIIDQsnBgScreenIdle, spRect );
+    MAknsSkinInstance* skinInstance( AknsUtils::SkinInstance() );
+
+    // Get Homescreen status area mask color (EAknsCIQsnOtherColorsCG23)
+    TRgb color;
+    User::LeaveIfError( AknsUtils::GetCachedColor( skinInstance, color, 
+        KAknsIIDQsnOtherColors, EAknsCIQsnOtherColorsCG23 ) );
+
+    iSpBitmap = CreateBitmapFromColorL( spRect.Size(), color );
     
     if ( Layout_Meta_Data::IsLandscapeOrientation() )
         {
-        iSpMask = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+        iSpMask = AknsUtils::CreateBitmapL( skinInstance,
             KAknsIIDQgnGrafBgLscTopMaskIcon );
         }
     else
         {
-        iSpMask = AknsUtils::CreateBitmapL( AknsUtils::SkinInstance(),
+        iSpMask = AknsUtils::CreateBitmapL( skinInstance,
             KAknsIIDQgnGrafBgPrtTopMaskIcon );        
         }
     

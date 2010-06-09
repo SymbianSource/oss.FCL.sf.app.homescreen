@@ -17,6 +17,7 @@
 
 // System includes
 #include <s32file.h>
+#include <UTF.h>
 
 // User includes
 #include "xncomposer.h"
@@ -60,7 +61,9 @@ using namespace hspswrapper;
 // --------------------------------------------------------------------------
 //
 static HBufC* ItemValueL( CHspsConfiguration& aConfiguration, 
-    const TDesC8& aItemId, const TDesC8& aName )
+    const TDesC8& aItemId,
+    const TDesC8& aName,
+    const TBool aUseUtfConversion = EFalse )
     {
     HBufC* ret = NULL;
 
@@ -86,8 +89,16 @@ static HBufC* ItemValueL( CHspsConfiguration& aConfiguration,
                 
                 if( property->Name() == aName )
                     {
-                    ret = HBufC::NewL( property->Value().Length() );
-                    ret->Des().Copy( property->Value() );
+                    if( aUseUtfConversion )
+                        {
+                        ret = CnvUtfConverter::ConvertToUnicodeFromUtf8L( property->Value() );
+                        }
+                    else
+                        {
+                        ret = HBufC::NewL( property->Value().Length() );
+                        ret->Des().Copy( property->Value() );
+                        }
+                    
                     break;
                     }
                 }            
@@ -639,7 +650,10 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
         // if page specific wallpaper feature is enabled
         if( bgManager.WallpaperType() == CXnBackgroundManager::EPageSpecific )
             {
-            HBufC* bgImage = ItemValueL( *configuration, KWallpaper, KPath );
+            HBufC* bgImage = ItemValueL( *configuration,
+                                         KWallpaper,
+                                         KPath,
+                                         ETrue );
             if ( bgImage )
                 {
                 CleanupStack::PushL( bgImage );

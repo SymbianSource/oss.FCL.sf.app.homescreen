@@ -46,12 +46,9 @@ SOURCE          xmlnodeidgenerator.cpp
 SOURCE          aixmluiutils.cpp
 SOURCE          xmluicontrollerpanic.cpp
 SOURCE          databuffertransactionelement.cpp
-SOURCE          newstickercallbackhandler.cpp
 SOURCE          csspropertymap.cpp
 SOURCE          aipolicyelement.cpp
 SOURCE          policyevaluator.cpp
-SOURCE          psobserver.cpp
-SOURCE          pmodtiterator.cpp
 SOURCE          contentpublisher.cpp
 SOURCE          globalqueryhandler.cpp
 SOURCE          onlineofflinehelper.cpp
@@ -82,11 +79,10 @@ APP_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib efsrv.lib
 LIBRARY         ecom.lib centralrepository.lib
-LIBRARY         fbscli.lib apparc.lib cone.lib
+LIBRARY         apparc.lib cone.lib
 LIBRARY         eikcore.lib eikcoctl.lib egul.lib avkon.lib aknskins.lib
 LIBRARY         xn3layoutengine.lib xn3utils.lib xn3domdocument.lib
 LIBRARY         aiidleint.lib aiutils.lib
-LIBRARY         imageconversion.lib
 LIBRARY         apgrfx.lib
 LIBRARY         bafl.lib
 LIBRARY         flogger.lib

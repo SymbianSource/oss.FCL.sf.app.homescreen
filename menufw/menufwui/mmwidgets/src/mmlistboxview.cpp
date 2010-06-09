@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_53 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_54 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -199,29 +199,29 @@ void CMmListBoxView::CalcBottomItemIndex ()
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::Draw (const TRect* aClipRect) const
-  {
+    {
     TBool drawingInitiated(EFalse);
     if ( CAknEnv::Static()->TransparencyEnabled() &&
-        iWin && iWin->GetDrawRect() == TRect::EUninitialized )
+            iWin && iWin->GetDrawRect() == TRect::EUninitialized )
       {
       TRect a(ViewRect());
       if (!aClipRect || *aClipRect == TRect(0,0,0,0) )
-        {
-        aClipRect = &a;
-        }
+          {
+          aClipRect = &a;
+          }
       drawingInitiated=ETrue;
-    iWin->Invalidate( *aClipRect );
-    iWin->BeginRedraw( *aClipRect );
+      iWin->Invalidate( *aClipRect );
+      iWin->BeginRedraw( *aClipRect );
       }
 
-  DoDraw(aClipRect);
+    DoDraw(aClipRect);
 
-  CMmListBoxItemDrawer* itemDrawer =
-      static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
-    if (aClipRect)
+    CMmListBoxItemDrawer* itemDrawer =
+            static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
+    if( aClipRect )
         {
         TRect rect(*aClipRect);
-        rect.iTl.iY = ItemPos( BottomItemIndex() ).iY + ItemSize( BottomItemIndex() ).iHeight;
+        rect.iTl.iY = ItemPos( BottomItemIndex() ).iY;
 
 //      iGc->SetClippingRect( rect );
 //		removed to prevent non-redraw drawing. Was present to prevent out of view drawing when effects are on.
@@ -232,76 +232,76 @@ void CMmListBoxView::Draw (const TRect* aClipRect) const
 
     if ( CAknEnv::Static()->TransparencyEnabled() &&
         iWin && drawingInitiated )
-      {
-      drawingInitiated = EFalse;
-      iWin->EndRedraw( );
-      }
-  }
+        {
+        drawingInitiated = EFalse;
+        iWin->EndRedraw( );
+        }
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::DoDraw(const TRect* aClipRect) const
-  {
-  CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
-  view->UpdateAverageItemHeight ();
-
-  CMmListBoxModel* model = static_cast< CMmListBoxModel* > ( iModel );
-  if ( model && model->GetSuiteModel()
-      && !model->GetSuiteModel()->GetItemsOrder()->IsSuiteReadyToShow() )
     {
-    return;
-    }
+    CMmListBoxView* view= CONST_CAST( CMmListBoxView*, this );
+    view->UpdateAverageItemHeight ();
 
-  if ( RedrawDisabled () || !IsVisible () )
-    {
-    return;
-    }
-
-  TInt i = iTopItemIndex;
-  CMmListBoxItemDrawer* itemDrawer =
-      static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
-  MAknsSkinInstance *skin = AknsUtils::SkinInstance ();
-  CCoeControl* control = itemDrawer->FormattedCellData()->Control ();
-  MAknsControlContext *cc = AknsDrawUtils::ControlContext (control);
-
-  if ( !cc)
-    {
-    cc = itemDrawer->FormattedCellData()->SkinBackgroundContext ();
-    }
-
-  itemDrawer->SetTopItemIndex (iTopItemIndex);
-
-  if ( iModel->NumberOfItems () > 0)
-    {
-    TBool drawingInitiated = ETrue;
-    if ( CAknEnv::Static()->TransparencyEnabled () )
-      {
-      if ( iWin && iWin->GetDrawRect () == TRect::EUninitialized)
+    CMmListBoxModel* model = static_cast< CMmListBoxModel* > ( iModel );
+    if ( model && model->GetSuiteModel()
+            && !model->GetSuiteModel()->GetItemsOrder()->IsSuiteReadyToShow() )
         {
+        return;
+        }
+
+    if ( RedrawDisabled () || !IsVisible () )
+        {
+        return;
+        }
+
+    TInt i = iTopItemIndex;
+    CMmListBoxItemDrawer* itemDrawer =
+            static_cast<CMmListBoxItemDrawer*>(iItemDrawer );
+    MAknsSkinInstance *skin = AknsUtils::SkinInstance ();
+    CCoeControl* control = itemDrawer->FormattedCellData()->Control ();
+    MAknsControlContext *cc = AknsDrawUtils::ControlContext (control);
+
+    if ( !cc)
+        {
+        cc = itemDrawer->FormattedCellData()->SkinBackgroundContext ();
+        }
+
+    itemDrawer->SetTopItemIndex (iTopItemIndex);
+
+    if ( iModel->NumberOfItems () > 0)
+        {
+        TBool drawingInitiated = ETrue;
+        if ( CAknEnv::Static()->TransparencyEnabled () )
+            {
+            if ( iWin && iWin->GetDrawRect () == TRect::EUninitialized)
+                {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
                 MAknListBoxTfxInternal* transApi =
-                  CAknListLoader::TfxApiInternal( iGc );
+                        CAknListLoader::TfxApiInternal( iGc );
                 drawingInitiated = transApi && !transApi->EffectsDisabled();
 #else
-        drawingInitiated = EFalse;
+                drawingInitiated = EFalse;
 #endif
-        }
+                }
 
-      if ( !drawingInitiated)
-        {
-        iWin->Invalidate ( *aClipRect);
-        iWin->BeginRedraw ( *aClipRect);
-        }
-      }
+            if ( !drawingInitiated)
+                {
+                iWin->Invalidate ( *aClipRect);
+                iWin->BeginRedraw ( *aClipRect);
+                }
+            }
 
-    TInt lastPotentialItemIndex = Min( iModel->NumberOfItems(),
+        TInt lastPotentialItemIndex = Min( iModel->NumberOfItems(),
                 iTopItemIndex + NumberOfItemsThatFitInRect( ViewRect() ) );
 
-    if ( !itemDrawer->IsEditMode() )
-        {
-        itemDrawer->DrawBackground( ViewRect() );
+        if ( !itemDrawer->IsEditMode() )
+            {
+            itemDrawer->DrawBackground( ViewRect() );
             itemDrawer->SetRedrawItemBackground( EFalse );
             itemDrawer->SetDrawSeparatorLines( ETrue );
             while (i < lastPotentialItemIndex)
@@ -310,25 +310,25 @@ void CMmListBoxView::DoDraw(const TRect* aClipRect) const
                 }
             itemDrawer->SetRedrawItemBackground( ETrue );
             itemDrawer->SetDrawSeparatorLines( EFalse );
-        }
-    else
-        {
-        while (i < lastPotentialItemIndex)
+            }
+        else
+            {
+            while (i < lastPotentialItemIndex)
                 {
                 DrawItem(i++);
                 }
         // this redraws background in the view portion not covered by items
-        RedrawBackground();
+            RedrawBackground();
+            }
+
+
+        if ( CAknEnv::Static()->TransparencyEnabled () && !drawingInitiated)
+            {
+            iWin->EndRedraw ();
+            }
         }
 
-
-    if ( CAknEnv::Static()->TransparencyEnabled () && !drawingInitiated)
-      {
-      iWin->EndRedraw ();
-      }
     }
-
-  }
 
 // -----------------------------------------------------------------------------
 //
@@ -490,24 +490,24 @@ TInt CMmListBoxView::CalcNewTopItemIndexSoItemIsVisible (TInt aItemIndex) const
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxView::RedrawBackground (TRect aUsedPortionOfViewRect,
-    TRect aSmallerViewRect) const
-  {
+        TRect aSmallerViewRect) const
+    {
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-        MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(iGc);
+    MAknListBoxTfxInternal* transApi = CAknListLoader::TfxApiInternal(iGc);
     if (transApi)
         {
         transApi->StartDrawing(MAknListBoxTfxInternal::EListView);
         }
 #endif
 
-  CMmListBoxItemDrawer* itemDrawer = STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
+    CMmListBoxItemDrawer* itemDrawer = STATIC_CAST( CMmListBoxItemDrawer*, iItemDrawer );
     MAknsSkinInstance *skin = AknsUtils::SkinInstance();
     CCoeControl* control = itemDrawer->FormattedCellData()->Control();
     MAknsControlContext *cc = AknsDrawUtils::ControlContext(control);
 
-  if (control)
+    if (control)
         {
-        AknsDrawUtils::BackgroundBetweenRects(skin, cc, control, *iGc,
+        AknsDrawUtils::BackgroundBetweenRects( skin, cc, control, *iGc,
                 aSmallerViewRect, aUsedPortionOfViewRect);
         }
     else
@@ -518,7 +518,7 @@ void CMmListBoxView::RedrawBackground (TRect aUsedPortionOfViewRect,
         }
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST
-    if (transApi)
+    if( transApi )
         {
         transApi->StopDrawing();
         }

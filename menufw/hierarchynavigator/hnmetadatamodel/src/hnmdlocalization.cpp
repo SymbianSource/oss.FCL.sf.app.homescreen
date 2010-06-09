@@ -119,7 +119,6 @@ const CHnMdLocalizationElement* CHnMdLocalization::ElementByNamespace(
     {
     TInt count = iInternalLocalization.Count();
     const CHnMdLocalizationElement* element = NULL;
-    
     for ( TInt i = 0; i < count; i++ )
         {
         const CHnMdLocalizationElement* tmp = iInternalLocalization[i];
@@ -129,21 +128,6 @@ const CHnMdLocalizationElement* CHnMdLocalization::ElementByNamespace(
             break;
             }
         }
-    if( !element )
-        {
-        count = iDynamicLocalization.Count();
-            
-        for ( TInt i = 0; i < count; i++ )
-            {
-            const CHnMdLocalizationElement* tmp = iDynamicLocalization[i];
-            if ( !tmp->Namespace().Compare( aNamespace) )
-                {
-                element = tmp;
-                break;
-                }
-            }
-        }
-
     return element;
     }
 
@@ -161,55 +145,12 @@ CHnMdLocalization::CHnMdLocalization()
 //
 CHnMdLocalization::~CHnMdLocalization()
     {
-    iDynamicLocalization.ResetAndDestroy();
-    for( TInt i( 0 ); i < iDynamicOffset.Count(); i++ )
-        {
-        iCoeEnv->DeleteResourceFile( iDynamicOffset[i] );
-        }
-    iDynamicOffset.Close();
-    
     iInternalLocalization.ResetAndDestroy();
     for( TInt i( 0 ); i < iInternalOffset.Count(); i++ )
         {
         iCoeEnv->DeleteResourceFile( iInternalOffset[i] );
         }
     iInternalOffset.Close();
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnMdLocalization::ReloadResourceFilesL()
-    {
-    for( TInt i( 0 ); i < iDynamicLocalization.Count(); i++ )
-        {
-        iDynamicLocalization[i]->LocateLanguageFileL();
-        if( iDynamicLocalization[i]->SourcePath()  )
-            {        
-            TInt offset( 0 );
-            TRAPD( err, offset = iCoeEnv->AddResourceFileL(
-                    *(iDynamicLocalization[i]->SourcePath()) ) );
-            if ( !err )
-                {
-                iDynamicOffset.AppendL( offset );
-                }
-            }
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnMdLocalization::ReleaseResourceFiles()
-    {
-    iDynamicLocalization.ResetAndDestroy();
-    for( TInt i( 0 ); i < iDynamicOffset.Count(); i++ )
-        {
-        iCoeEnv->DeleteResourceFile( iDynamicOffset[i] );
-        }
-    iDynamicOffset.Reset();
     }
 
 // ---------------------------------------------------------------------------
@@ -228,19 +169,6 @@ void CHnMdLocalization::AppendElementL( CHnMdLocalizationElement* aElement )
             if ( !err )
                 {
                 iInternalOffset.AppendL( offset );
-                }
-            }
-        }
-    else
-        {
-        iDynamicLocalization.AppendL( aElement );
-        if( IsResourceFile (aElement->Source()) )
-            {
-            TInt offset( 0 );
-            TRAPD( err, offset = iCoeEnv->AddResourceFileL( *(aElement->SourcePath()) ) ); 
-            if ( !err )
-                {
-                iDynamicOffset.AppendL( offset );
                 }
             }
         }

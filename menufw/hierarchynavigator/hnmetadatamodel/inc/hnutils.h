@@ -61,15 +61,6 @@ public:
     */    
     IMPORT_C static HBufC8* ReadFileL(const TDesC& aPath);
     
-   /**
-    * Locates file.
-    *
-    * @since S60 v3.0
-    * @param aFile File name.
-    * @return File path.
-    */
-    IMPORT_C static HBufC* LocateFileLC( const TDesC& aFile );
-    
     /**
      * Locates nearest Language file.
      *

@@ -64,55 +64,73 @@ public:
     *
     * @param aTarget the target node of the transaction element
     * @param aText the text to update 
+    * @param aPriority Priority
     */
-    virtual MTransactionElement*
-        CreateTextTransactionElementL( CXnNodeAppIf& aTarget,
-                                       const TDesC& aText,
-                                       TInt aPriority ) = 0;
+    virtual MTransactionElement* CreateTextTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC& aText, TInt aPriority ) = 0;                                       
 
     /**
     * Creates a new data buffer transaction element.
     *
     * @param aTarget the traget node of the transaction element
     * @param aData the data to update
+    * @param aPriority Priority
+    * @param aCid Content selector id
+    * @param aIndex Content index
     */
-    virtual MTransactionElement*
-        CreateDataBufferTransactionElementL( CXnNodeAppIf& aTarget,
-                                             const TDesC8& aData,
-                                             TInt aPriority ) = 0;
-
+    virtual MTransactionElement* CreateDataBufferTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC8& aData, TInt aPriority, const TDesC& aCid, TInt aIndex ) = 0;
+    
+    /**
+    * Creates a new data buffer transaction element.
+    *
+    * @param aTarget the traget node of the transaction element
+    * @param aData the data to update
+    * @param aPriority Priority    
+    */
+    virtual MTransactionElement* CreateDataBufferTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC8& aData, TInt aPriority ) = 0;
+        
     /**
     * Creates a new empty content transaction element.
     *
     * @param aTarget the target node of the transaction element
     * @param aText the text to update 
     */
-    virtual MTransactionElement*
-        CreateEmptyContentTransactionElementL( CXnNodeAppIf& aTarget,
-                                               TInt aIndex ) = 0;
+    virtual MTransactionElement* CreateEmptyContentTransactionElementL( 
+        CXnNodeAppIf& aTarget, TInt aIndex ) = 0;
 
     /**
     * Creates a new image transaction element.
     *
     * @param aTarget the target node of the transaction element
     * @param aIcon the icon to update. Ownership transferred.
+    * @param aPriority Priority
     */
-    virtual MTransactionElement*
-        CreateImageTransactionElementL( CXnNodeAppIf& aTarget,
-                                        CGulIcon* aIcon,
-                                        TInt aPriority ) = 0;
+    virtual MTransactionElement* CreateImageTransactionElementL( 
+        CXnNodeAppIf& aTarget, CGulIcon* aIcon, TInt aPriority ) = 0;
     
     /**
     * Creates a new image transaction element.
     *
     * @param aTarget the target node of the transaction element
     * @param aFile the file to read image data from.
+    * @param aPriority Priority
     */
-    virtual MTransactionElement*
-        CreateImageTransactionElementL( CXnNodeAppIf& aTarget,
-                                        RFile& aFile,
-                                        TInt aPriority ) = 0;
+    virtual MTransactionElement* CreateImageTransactionElementL( 
+        CXnNodeAppIf& aTarget, RFile& aFile, TInt aPriority ) = 0;
 
+    /**
+    * Creates a new newsticker transaction element.
+    *
+    * @param aTarget the target node of the transaction element
+    * @param aText the text to update     
+    * @param aPriority Priority
+    * @param aIndex Newsticker title index
+    */
+    virtual MTransactionElement* CreateNewsTickerTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC& aText, TInt aPriority, TInt aIndex ) = 0;
+                                                        
     /**
     * Releases a transaction element.
     *
@@ -128,13 +146,12 @@ public:
     * @param aContentType the content type
     * @return ETrue if content type is supported, otherwise EFalse.
     */
-    virtual TBool IsSupported( CXnNodeAppIf& aTarget,
-                               const TDesC8& aContentType ) = 0;
+    virtual TBool IsSupported( 
+        CXnNodeAppIf& aTarget, const TDesC8& aContentType ) = 0;                               
 
 protected:
 
-    ~MTransactionFactory(){};
-        
+    ~MTransactionFactory(){};        
     };
 
 } // namespace AiXmlUiController

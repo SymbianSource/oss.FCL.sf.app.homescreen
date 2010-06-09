@@ -142,17 +142,6 @@ void CXnNewsticker::ClearTitles()
     }
 
 // ---------------------------------------------------------
-// CXnNewsticker::SetCallbackInterfaceL
-// ---------------------------------------------------------
-//
-void CXnNewsticker::SetCallbackInterfaceL(
-    XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback)
-    {
-    (static_cast<CXnNewstickerAdapter*>
-            (ControlAdapter()))->SetCallbackInterfaceL(aCallback);
-    }
-
-// ---------------------------------------------------------
 // CXnNewsticker::MakeInterfaceL
 // ---------------------------------------------------------
 //

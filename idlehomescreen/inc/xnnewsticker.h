@@ -36,18 +36,6 @@ namespace XnNewstickerInterface
 {
 _LIT8(KType, "newsticker");
 
-class MXnNewstickerCallbackInterface
-    {
-    public: // New functions
-
-        /**
-         * Called when the title has been shown and is now offscreen.
-         * @param aTitleIndex The title that has been completely shown.
-         */
-        virtual void TitleScrolled(TInt aTitleIndex) = 0;
-        
-    };
-
 class MXnNewstickerInterface : public XnComponentInterface::MXnComponentInterface
     {
     public: // New functions
@@ -100,12 +88,6 @@ class MXnNewstickerInterface : public XnComponentInterface::MXnComponentInterfac
          * Delete all titles.
          */
         virtual void ClearTitles() = 0;
-
-        /**
-         * Set callback interface.
-         * @param aCallback The callback interface pointer.
-         */
-        virtual void SetCallbackInterfaceL(MXnNewstickerCallbackInterface* aCallback) = 0;
     };
 }
 
@@ -176,25 +158,6 @@ class CXnNewsticker : public CXnComponent, public XnNewstickerInterface::MXnNews
          * Delete all titles.
          */
         void ClearTitles();
-
-        /**
-         * Append the SVG title to be shown.
-         * @param aByteData The SVG data.
-         */
-        void AppendSvgTitleL(const TDesC8& aByteData);
-
-        /**
-         * Insert the SVG title to be shown.
-         * @param aByteData The SVG data.
-         */
-        void InsertSvgTitleL(const TDesC8& aByteData, TInt aIndex);
-
-        /**
-         * Set callback interface.
-         * @param aCallback The callback interface pointer.
-         */
-        void SetCallbackInterfaceL(
-            XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback);
 
 	   	/**
         * Create a component interface according to the given type.

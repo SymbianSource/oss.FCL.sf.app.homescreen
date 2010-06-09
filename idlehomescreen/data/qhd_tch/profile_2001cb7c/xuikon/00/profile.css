@@ -115,9 +115,9 @@ newsticker.SIText
     
     _s60-scroll-behaviour: scroll-alternate;
     
-    _s60-display-time: 2000;
+    _s60-display-time: 5000;
+    _s60-start-delay: 2000;
     _s60-scroll-loop: false;
-    _s60-start-delay: 0;
     _s60-restart-after-update: true;
 }
 

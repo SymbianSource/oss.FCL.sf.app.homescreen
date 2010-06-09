@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   
-*  Version     : %version: MM_65 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_66 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -226,8 +226,6 @@ void CMmListBoxContainer::SetItemDrawerAndViewBgContext(
 void CMmListBoxContainer::SetSuiteModelL( CHnSuiteModel* aModel )
     {
     CMmWidgetContainer::SetSuiteModelL( aModel );
-    // highlight always active
-    aModel->SetActiveL( ETrue );
 	iMarqueeAdapter->StopMarqueeDrawing();
     }
 

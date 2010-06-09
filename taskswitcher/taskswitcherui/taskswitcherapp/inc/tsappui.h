@@ -173,7 +173,7 @@ private: // New functions
      *                             will be ignored when deteriminig window
      *                             group id
      */
-    TInt WgIdOfUnderlyingApp( TBool aIgnoreParentChild );
+    TInt WgIdOfUnderlyingAppL( TBool aIgnoreParentChild );
 
     static TInt GoToBackgroundTimerCallback( TAny* aParam );
     
@@ -190,6 +190,14 @@ private: // New functions
      * @return parent window group id or 0 in case od standlalone 
      */
     TInt GetParentWg( TInt aChildWg );
+
+    /*
+     * Returns window group id of camera app if it's lying beneath task
+     * switcher window group.
+     * This method considers also case, when camera window group is hidden.
+     * @return camera's window group id.
+     */
+    TInt CheckForUnderlyingHiddenAppsL();
 
 private:
 

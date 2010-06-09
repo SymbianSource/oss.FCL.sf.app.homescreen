@@ -73,16 +73,7 @@
                                     <trigger name="titletoscroll" titleindex="0"/>
                                     <event name="system/set">
                                         <property name="name" value="visibility"/>
-                                        <property name="value" value="hidden"/>
-                                        <property name="type" value="string"/>
-                                        <property name="id" value="SatIdleModeIcon"/>
-                                    </event>
-                                </action>
-                                <action>
-                                    <trigger name="titlescrolled" titleindex="0"/>
-                                    <event name="system/set">
-                                        <property name="name" value="visibility"/>
-                                        <property name="value" value="hidden"/>
+                                        <property name="value" value="visible"/>
                                         <property name="type" value="string"/>
                                         <property name="id" value="SatIdleModeIcon"/>
                                     </event>
@@ -91,16 +82,7 @@
                                     <trigger name="titletoscroll" titleindex="1"/>
                                     <event name="system/set">
                                         <property name="name" value="visibility"/>
-                                        <property name="value" value="visible"/>
-                                        <property name="type" value="string"/>
-                                        <property name="id" value="SatIdleModeIcon"/>
-                                    </event>
-                                </action>
-                                <action>
-                                    <trigger name="titlescrolled" titleindex="1"/>
-                                    <event name="system/set">
-                                        <property name="name" value="visibility"/>
-                                        <property name="value" value="visible"/>
+                                        <property name="value" value="hidden"/>
                                         <property name="type" value="string"/>
                                         <property name="id" value="SatIdleModeIcon"/>
                                     </event>

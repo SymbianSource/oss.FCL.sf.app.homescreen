@@ -32,7 +32,7 @@ class CXnTextEditorPublisher;
 class CXnAppUiAdapter;
 
 // CLASS DECLARATION
-class CXnTextEditorAdapter : public CXnControlAdapter
+class CXnTextEditorAdapter : public CXnControlAdapter, public MCoeControlBackground
     {
 public:
     // constructor and destructor
@@ -125,13 +125,18 @@ public: // from base classes
     */          
     void HandleResourceChange( TInt aType );
 
-private:
-    // from MCoeControlObserver
-    
     /**
-    * See MCoeControlObserver documentation
-    */
-    void HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType );
+     * See CCoeAppUiBase.
+     */
+    void HandleScreenDeviceChangedL();
+
+private: // from base classes
+
+    /**
+    * See MCoeControlBackground documentation
+    */          
+    void Draw( CWindowGc& aGc, const CCoeControl& aControl, 
+        const TRect& aRect ) const;
 
 private:
     // private constrcutors 

@@ -35,14 +35,12 @@
 #include "aixmluiconstants.h"
 #include "aifweventhandler.h"
 #include "databuffertransactionelement.h"
-#include "newstickercallbackhandler.h"
 #include "newstickertransactionelement.h"
 #include "csspropertymap.h"
 #include "policyevaluator.h"
 #include "debug.h"
 #include "xnuiengineappif.h"
 #include "xnnodeappif.h"
-#include "xncomponentnodeimpl.h"
 #include "xnproperty.h"
 #include "mxncomponentinterface.h"
 #include "xntext.h"
@@ -50,6 +48,7 @@
 #include "xntype.h"
 #include "xnmenuadapter.h"
 #include "xnlistquerydialogadapter.h"
+#include "xnnewsticker.h"
 #include "mxncomponentinterface.h"
 #include "aistrcnv.h"
 #include "contentprioritymap.h"
@@ -390,12 +389,9 @@ CContentRenderer::~CContentRenderer()
     
     iRefreshableUiElements.ResetAndDestroy();
     
-    delete iNTClass;
-    
     delete iPropertyMap;
     
-    delete iContentPriorityMap;
-    delete iCallbackHandler;
+    delete iContentPriorityMap;    
     }
 
 // ----------------------------------------------------------------------------
@@ -987,8 +983,7 @@ TInt CContentRenderer::DoPublishL( CHsContentPublisher& aPlugin, TInt aContent,
             MTransactionElement* element( NULL );
             
             if ( IsParentNewsticker( *target ) )
-                {
-                // Register callback interface for newsticker
+                {                
                 CXnNodeAppIf *parent( target->ParentL() );
                 
                 if( !parent )
@@ -996,11 +991,6 @@ TInt CContentRenderer::DoPublishL( CHsContentPublisher& aPlugin, TInt aContent,
                     return KErrNotFound;
                     }
                                 
-                RegisterNewstickerCallbackInterfaceL( *parent );
-                                               
-                iNTPublisher.Set( info.Name() );
-                iNTClass = AiUtility::CopyToBufferL( iNTClass, nodeId );
-                
                 element = iFactory->CreateNewsTickerTransactionElementL( 
                         *target, aText, priority, aIndex );
                 }
@@ -1077,8 +1067,7 @@ TInt CContentRenderer::DoPublishL( CHsContentPublisher& aPlugin, TInt aContent,
         // Publish icon
         retval = PublishIconL( aPlugin, nodeId, icon, aIndex );
         }
-    else if ( type == KContentTypeImageSvg ||
-        type == KContentTypeData )
+    else if ( type == KContentTypeImageSvg || type == KContentTypeData )        
         {
         // Publish data
         retval = PublishDataL( aPlugin, nodeId, aBuf, type, aIndex );
@@ -1135,24 +1124,7 @@ TInt CContentRenderer::DoPublishL( CHsContentPublisher& aPlugin, TInt aContent,
             }
 
         if ( AllowPublishByPriority( *target, priority ) )
-            {
-            // Check if target is newsticker
-            if ( IsParentNewsticker( *target ) )
-                {
-                // Register callback interface
-                CXnNodeAppIf *parent( target->ParentL() );
-                
-                if( !parent )
-                    {
-                    return KErrNotFound;
-                    }
-                                
-                RegisterNewstickerCallbackInterfaceL( *parent );
-                
-                iNTPublisher.Set( info.Name() );
-                iNTClass = AiUtility::CopyToBufferL( iNTClass, nodeId );           
-                }
-            
+            {            
             // Create transaction element for file
             MTransactionElement* element =
                 iFactory->CreateImageTransactionElementL( 
@@ -1225,21 +1197,6 @@ TInt CContentRenderer::DoCleanL( CHsContentPublisher& aPlugin, TInt aContent,
         return KErrAccessDenied;
         }
 
-    if ( IsParentNewsticker( *target ) )
-        {
-        CXnNodeAppIf *parent( target->ParentL() );
-        
-        if( !parent )
-            {
-            return KErrNotFound;
-            }
-               
-        RegisterNewstickerCallbackInterfaceL( *parent );
-        
-        iNTPublisher.Set( info.Name() );
-        iNTClass = AiUtility::CopyToBufferL( iNTClass, nodeId );
-        }
-    
     if( target->Type()->Type() ==
         XnListQueryDialogInterface::MXnListQueryDialogInterface::Type())
         {
@@ -1480,23 +1437,6 @@ TInt CContentRenderer::PublishIconL( CHsContentPublisher& aPlugin,
         return KErrAccessDenied;        
         }
     
-    // Special handling of newsticker
-    if ( IsParentNewsticker( *target ) )
-        {
-        // Register callback interface
-        CXnNodeAppIf *parent( target->ParentL() );
-        
-        if( !parent )
-            {
-            return KErrNotFound;
-            }
-                
-        RegisterNewstickerCallbackInterfaceL( *parent );
-        
-        iNTPublisher.Set( info.Name() );
-        iNTClass = AiUtility::CopyToBufferL( iNTClass, aCid );
-        }
-
     MTransactionElement* element =
         iFactory->CreateImageTransactionElementL( 
             *target, aIcon, priority );
@@ -1561,37 +1501,23 @@ TInt CContentRenderer::PublishDataL( CHsContentPublisher& aPlugin,
         return KErrAccessDenied;        
         }
 
-    if( aContentType == KContentTypeData )
-        {
-        CXnComponent& component( target->ParentL()->Component() );
-        component.SetDataL( aData, aCid, aIndex );
-        return KErrNone;
-        }
-
     if ( !CDataBufferTransactionElement::IsSupported( *target, aContentType ) )
         {
         return KErrNotSupported;        
         }
         
-    // Handle newsticker 
-    if ( IsParentNewsticker( *target ) )
+    MTransactionElement* element( NULL );
+    
+    if ( aContentType == KContentTypeData )
         {
-        CXnNodeAppIf *parent( target->ParentL() );
-        
-        if( !parent )
-            {
-            return KErrNotFound;
-            }
-                
-        RegisterNewstickerCallbackInterfaceL( *parent );
-        
-        iNTPublisher.Set( info.Name() );
-        iNTClass = AiUtility::CopyToBufferL( iNTClass, aCid );
+        element = iFactory->CreateDataBufferTransactionElementL( 
+            *target, aData, priority, aCid, aIndex );
         }
-        
-    MTransactionElement* element =
-        iFactory->CreateDataBufferTransactionElementL( 
-            *target, aData, priority );
+    else
+        {
+        element = iFactory->CreateDataBufferTransactionElementL(     
+            *target, aData, priority );    
+        }
                                                        
     if ( aResource )
         {
@@ -1919,35 +1845,7 @@ void CContentRenderer::SendRefreshContentEventL()
     // Continue content refresh for next ui element.
     StartContentRefresh();    
     }
-
-// ----------------------------------------------------------------------------
-// CContentRenderer::TitleScrolled
-// 
-// ----------------------------------------------------------------------------
-//
-void CContentRenderer::TitleScrolled( TInt aTitleIndex )
-    {
-    if ( iCallbackHandler )
-        {
-        TRAP_IGNORE( iCallbackHandler->TitleScrolledL( 
-            iNTPublisher, *iNTClass, aTitleIndex ) );
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CContentRenderer::TitleToScroll
-// 
-// ----------------------------------------------------------------------------
-//
-void CContentRenderer::TitleToScroll( TInt aTitleIndex )
-    {
-    if ( iCallbackHandler )
-        {
-        TRAP_IGNORE( iCallbackHandler->TitleToScrollL( 
-            iNTPublisher, *iNTClass, aTitleIndex ) );
-        }
-    }
-
+	
 // ----------------------------------------------------------------------------
 // CContentRenderer::IsParentNewsticker
 // 
@@ -1968,34 +1866,6 @@ TBool CContentRenderer::IsParentNewsticker( CXnNodeAppIf& aTarget )
             
     return ( type == XnNewstickerInterface::MXnNewstickerInterface::Type() );
     }
-    
-// ----------------------------------------------------------------------------
-// CContentRenderer::RegisterNewstickerCallbackInterfaceL
-// 
-// ----------------------------------------------------------------------------
-//
-void CContentRenderer::RegisterNewstickerCallbackInterfaceL( 
-    CXnNodeAppIf& aTarget )
-    {
-    if ( !iCallbackHandler )
-        {
-        // Instantiate callback handler
-        CNewstickerCallbackHandler* handler = 
-            CNewstickerCallbackHandler::NewLC( *iFwEventHandler );
-
-        // Set callback handler
-        iCallbackHandler = handler;
-        CleanupStack::Pop( handler );
-        }
-
-    // Obtain newsticker component interface
-    XnNewstickerInterface::MXnNewstickerInterface* newsticker( NULL );
-    XnComponentInterface::MakeInterfaceL( newsticker, aTarget );
-    
-    LeaveIfNull( newsticker, KErrGeneral );
-    
-    // Set callback interface
-    newsticker->SetCallbackInterfaceL( this );
-    }
+	
 
 //  End of File

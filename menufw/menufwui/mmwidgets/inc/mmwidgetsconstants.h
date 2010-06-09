@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Constants for the matrixmenu
-*  Version     : %version: 33.1.13 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 33.1.14 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -424,6 +424,7 @@ enum TMmFloatingItemType
     EPostDragRefreshItem,
     EPostHighlightChangeRefreshItem,
     ESwapTransition,
+    EDragStart,
     EDragTransition,
     EZoomTransition
     };

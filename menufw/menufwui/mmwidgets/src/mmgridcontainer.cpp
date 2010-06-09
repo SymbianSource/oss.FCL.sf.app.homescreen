@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_75 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_75 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_76 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_76 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -266,10 +266,6 @@ void CMmGridContainer::SetupWidgetLayoutL()
 void CMmGridContainer::SetSuiteModelL( CHnSuiteModel* aModel )
     {
     CMmWidgetContainer::SetSuiteModelL( aModel );
-    if ( aModel )
-        {
-        aModel->SetActiveL( !AknLayoutUtils::PenEnabled() );
-        }
     }
 
 // -----------------------------------------------------------------------------

@@ -32,7 +32,6 @@ VENDORID        VID_DEFAULT
 
 SOURCEPATH      ../src
 SOURCE          hnengine.cpp
-SOURCE          hninstallnotifier.cpp
 
 USERINCLUDE     ../inc
 

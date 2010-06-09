@@ -71,7 +71,6 @@ SOURCE          hnsimpleconditiongreater.cpp
 SOURCE          hnsimpleconditionhas.cpp
 SOURCE          hnsimpleconditionhasnot.cpp
 SOURCE          hnxmlmodelcache.cpp 
-SOURCE          hnxmlsuitefilesreg.cpp
 SOURCE          hnbitmapidcache.cpp
 
 USERINCLUDE     ../inc

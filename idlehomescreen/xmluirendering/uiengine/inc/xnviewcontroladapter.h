@@ -117,6 +117,8 @@ private:
     CXnNodePluginIf& iNode;
     /** AppUi */
     CXnAppUiAdapter& iAppUi;
+    /** HS foreground status*/
+    MXnUiStateObserver::TForegroundStatus iForegroundStatus;
     };
     
 #endif // _XNVIEWCONTROLADAPTER_H

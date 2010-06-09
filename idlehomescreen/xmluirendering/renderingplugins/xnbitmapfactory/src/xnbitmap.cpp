@@ -77,6 +77,15 @@ void CXnBitmap::SetContentBitmaps(CFbsBitmap* aBitmap, CFbsBitmap* aMask)
     }   
 
 // -----------------------------------------------------------------------------
+// CXnBitmap::SetContentBitmaps
+// -----------------------------------------------------------------------------
+//
+void CXnBitmap::SetContentBitmaps( TFileName& aFilename )
+    {
+    (static_cast<CXnBitmapAdapter*>(ControlAdapter()))->SetContentBitmaps(aFilename);
+    }   
+
+// -----------------------------------------------------------------------------
 // CXnBitmap::ContentBitmaps
 // -----------------------------------------------------------------------------
 //

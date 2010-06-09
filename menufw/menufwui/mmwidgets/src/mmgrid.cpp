@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_104 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_106 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -293,19 +293,19 @@ void CMmGrid::HandlePointerEventInEditModeL( const TPointerEvent& aPointerEvent 
         if ( CurrentItemIndex() != itemUnderPointerIndex )
             {
             CMmWidgetContainer* parent = static_cast<CMmWidgetContainer*>( Parent() );
-        if ( parent->IsNoItemDragged() )
-          {
-          if ( ItemDrawer()->Flags() & CListItemDrawer::EPressedDownState )
-            {
-            ItemDrawer()->ClearFlags( CListItemDrawer::EPressedDownState );
-            iView->DrawItem( CurrentItemIndex() );
-            }
-          }
-        else
-          {
-          iView->SetCurrentItemIndex( itemUnderPointerIndex );
-        iView->DrawItem(itemUnderPointerIndex);
-          }
+            if ( parent->IsNoItemDragged() )
+                {
+                if ( ItemDrawer()->Flags() & CListItemDrawer::EPressedDownState )
+                    {
+                    ItemDrawer()->ClearFlags( CListItemDrawer::EPressedDownState );
+                    iView->DrawItem( CurrentItemIndex() );
+                    }
+                }
+            else
+                {
+                iView->SetCurrentItemIndex( itemUnderPointerIndex );
+                iView->DrawItem(itemUnderPointerIndex);
+                }
             }
         }
 
@@ -697,12 +697,6 @@ void CMmGrid::AdjustTopItemIndex() const
         topRow = Min( topRow, maxPossibleTopRow );
         SetTopItemIndex( topRow * numOfCols );
         }
-    else if( ( (CMmWidgetContainer* ) Parent() )->IsEditMode()
-            && ( Abs(maxPossibleTopRow - topRow) == 1) // prevention scrolling both scrollbar and view too much rows
-            && !View()->ItemIsPartiallyVisible(TopItemIndex())) // prevention scrolling view during remove item via menu
-        {
-        SetTopItemIndex( maxPossibleTopRow * numOfCols );
-        }
 
     // prevent problems with view being scrolled up beyond limits
     if ( topRow == maxPossibleTopRow && VerticalItemOffset() < 0 )
@@ -815,6 +809,12 @@ void CMmGrid::UpdateScrollBarsL()
     TBool visibilityChanged = HandleScrollbarVisibilityChangeL();
     if (ScrollBarFrame()->VerticalScrollBar()->IsVisible())
         {
+        CMmWidgetContainer* widget = static_cast< CMmWidgetContainer* >(Parent());
+        if( widget->IsEditMode() && widget->WidgetPositionCache().iValid )
+            {
+            static_cast<CMmGridView*> ( View() )->SetItemOffsetInPixels(
+                    widget->WidgetPositionCache().iVerticalItemOffset );
+            }
         CAknGrid::UpdateScrollBarsL();
         }
     iCurrentTopItemIndex = TopItemIndex();
@@ -1017,9 +1017,9 @@ void CMmGrid::SetItemHeight( TInt aItemHeight )
 // -----------------------------------------------------------------------------
 //
 void CMmGrid::UpdateScrollBarThumbs()
-  {
-  CAknGrid::UpdateScrollBarThumbs();
-  }
+    {
+    CAknGrid::UpdateScrollBarThumbs();
+    }
 
 // -----------------------------------------------------------------------------
 //

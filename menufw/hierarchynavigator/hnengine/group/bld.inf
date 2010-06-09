@@ -23,7 +23,6 @@ PRJ_EXPORTS
 ../inc/hncontrollerinterface.h      |../../../inc/hncontrollerinterface.h
 ../inc/hnengine.h                   |../../../inc/hnengine.h
 ../inc/hninterface.h                |../../../inc/hninterface.h
-../inc/hninstallnotifier.h          |../../../inc/hninstallnotifier.h
 ../inc/hneventgenerator.h           |../../../inc/hneventgenerator.h
 ../inc/menudebug.h                  |../../../inc/menudebug.h
 

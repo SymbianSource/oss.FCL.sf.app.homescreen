@@ -30,7 +30,6 @@
 #include "hnattributetext.h"
 #include "hnitemsorder.h"
 #include "hneventhandler.h"
-#include "hnitemfocushandler.h"
 
 // ============================ MEMBER FUNCTIONS =============================
 
@@ -73,11 +72,6 @@ EXPORT_C CHnSuiteModel::~CHnSuiteModel()
         TRAP_IGNORE( iSuiteObservers[i]->HandleSuiteEventL( ESuiteModelDestroyed, this ) );
         }
 
-    if ( iIsVisible && iIsActive )
-    	{
-    	TRAP_IGNORE( HandleItemFocusL( iSuiteHighlight.iItemId, EFalse ) );
-    	}
-    delete iItemFocusHandler;
     TRAP_IGNORE( OfferHnEventL( KIdSuiteUnLoad, 
             GetItemsOrder()->GetSuiteId(), NULL ) );
 
@@ -697,13 +691,6 @@ EXPORT_C void CHnSuiteModel::SetSuiteHighlightL( TInt aHighLight )
 	    newCustomId = itemModel->CustomId();
     	}
     
-    if ( ( newCustomId != iSuiteHighlight.iCustomId ||
-            newItemId != iSuiteHighlight.iItemId ) && ( iIsActive && iIsVisible ) )
-        {
-        HandleItemFocusL( iSuiteHighlight.iItemId, EFalse );
-        HandleItemFocusL( newItemId, ETrue );
-        }
-    
     iSuiteHighlight.iCustomId = newCustomId;
     iSuiteHighlight.iItemId = newItemId;
     iSuiteHighlight.iWidgetIndex = aHighLight;
@@ -841,83 +828,6 @@ EXPORT_C TInt64 CHnSuiteModel::CustomId()
 	{
 	return iCustomId;
 	}
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-// 
-EXPORT_C void CHnSuiteModel::SetActiveL( TBool aActive )
-    {
-    DEBUG16(("_MM_:CHnSuiteModel::SetActiveL %S - IN",iSuiteName));
-    DEBUG(("\t_MM_:aActive: %d",aActive));
-    DEBUG(("\t_MM_:iIsActive: %d",iIsActive));
-    
-    if ( aActive != iIsActive )
-        {
-        iIsActive = aActive;
-        if ( iIsVisible )
-            {
-            HandleItemFocusL( iSuiteHighlight.iItemId, aActive );
-            }
-        }
-    
-    DEBUG(("_MM_:CHnSuiteModel::SetActiveL - OUT"));
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-// 
-EXPORT_C TBool CHnSuiteModel::IsActive()
-    {
-    return iIsActive;
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CHnSuiteModel::SetVisibleL( TBool aVisible )
-    {
-    DEBUG16(("_MM_:CHnSuiteModel::SetVisible %S - IN",iSuiteName));
-    DEBUG(("\t_MM_:aVisible: %d",aVisible));
-    DEBUG(("\t_MM_:iIsVisible: %d",iIsVisible));
-    
-    if ( aVisible != iIsVisible )
-        {
-        iIsVisible = aVisible;
-        if ( iIsActive )
-            {
-            HandleItemFocusL( iSuiteHighlight.iItemId, aVisible );
-            }
-        }
-    
-    DEBUG(("_MM_:CHnSuiteModel::SetVisible - OUT"));
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnSuiteModel::HandleItemFocusL( TInt aItemId, TBool aFocused )
-    {
-    DEBUG16(("_MM_:CHnSuiteModel::HandleItemFocusL %S - IN",iSuiteName));
-    DEBUG(("\t_MM_:aItemIndex: %d",aItemId));
-    DEBUG(("\t_MM_:aFocused: %d",aFocused));
-    
-    if ( aItemId >= 0 )
-        {
-        if ( !iItemFocusHandler )
-        	{
-        	iItemFocusHandler = CHnItemFocusHandler::NewL( this );
-        	}
-        TInt eventId = aFocused ? KIdFocusGain : KIdFocusLost;
-        iItemFocusHandler->SetFocusL( eventId, aItemId );
-//        TRAP_IGNORE( OfferHnEventL( eventId, aItemId, NULL ) );
-        }
-    
-    DEBUG(("_MM_:CHnSuiteModel::HandleItemFocusL - OUT"));
-    }
 
 // ---------------------------------------------------------------------------
 // 

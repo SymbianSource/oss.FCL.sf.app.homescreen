@@ -28,7 +28,6 @@ CAPABILITY    CAP_GENERAL_DLL
 SOURCEPATH    	../src
 
 SOURCE		mmextensionmanager.cpp
-SOURCE      mmecomobserver.cpp
 
 
 USERINCLUDE   	.

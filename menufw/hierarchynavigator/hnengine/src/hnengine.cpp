@@ -56,8 +56,6 @@ void CHnEngine::ConstructL()
     iSuiteContainer = CHnSuiteModelContainer::NewL( *this , iControllerInterface );
     iMetaDataModel = CHnMdModel::NewL( this, iSuiteContainer );
     iLight = CHWRMLight::NewL(this);
-    iInstObserver = CHnInstallNotifier::NewL( this,
-            KUidSystemCategory, KSAUidSoftwareInstallKeyValue  );
     }
 
 // ---------------------------------------------------------------------------
@@ -98,7 +96,6 @@ CHnEngine::CHnEngine( MHnControllerInterface& aController ):
 //
 CHnEngine::~CHnEngine()
     {
-    delete iInstObserver;
     delete iLight;
     if( iSuiteContainer )
         {
@@ -529,6 +526,11 @@ TInt CHnEngine::HandleNewSuiteLoadedEventL(
         param->Value().Get( genre );
         DEBUG16(("_MM_:\tSuite genre name: %S",&genre));
         // load and evaluate the suite
+        if( genre.Compare( KFolderSuite) )
+            {
+            //only folder suite is supported
+            User::Leave( KErrNotSupported );
+            }
         err = iMetaDataModel->LoadSuiteL( genre, &aParams );
         if ( !err )
             {
@@ -712,23 +714,22 @@ TInt CHnEngine::HandleDisableActionsForItemL( const CLiwGenericParamList& aParam
 //
 // ---------------------------------------------------------------------------
 //
-void CHnEngine::InstallChangeL( TInt aStatus )
-    {
-    switch ( aStatus)
-        {
-        case EInstOpNone:
-            {
-            iMetaDataModel->HandleSisInstallationEventL( iSuiteContainer );
-            break;
-            }
-        case EInstOpInstall:
-        case EInstOpUninstall:
-            {
-            iMetaDataModel->ReleaseLocalization();
-            break;
-            }
-        }
-    }
+//void CHnEngine::InstallChangeL( TInt aStatus )
+//    {
+//    switch ( aStatus)
+//        {
+//        case EInstOpNone:
+//            {
+//            break;
+//            }
+//        case EInstOpInstall:
+//        case EInstOpUninstall:
+//            {
+//            iMetaDataModel->ReleaseLocalization();
+//            break;
+//            }
+//        }
+//    }
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------

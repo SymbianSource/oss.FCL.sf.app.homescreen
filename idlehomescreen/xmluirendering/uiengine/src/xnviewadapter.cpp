@@ -557,26 +557,27 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         {
         return;
         }
-
-    // Get previous container and then deactivate it    
-    const CXnViewData* previous( iContainer ); 
-    const CXnViewData& active( iAppUiAdapter.ViewManager().ActiveViewData() );
     
-    DeactivateContainerL( EFalse );
-
     if ( iFlags.IsClear( EIsActivated ) )
         {
         // Some other view than this in this appui is currently active,
         // postpone container activation
         return;
         }
-        
-    // Update  
-    iContainer = &aContainer;
-        
+ 
+    const CXnViewData& active( iAppUiAdapter.ViewManager().ActiveViewData() );
+    
     CXnEffectManager* mgr( iAppUiAdapter.EffectManager() );
     
     CleanupStack::PushL( TCleanupItem( CleanupEffect, mgr ) );
+    
+    TBool started(
+        mgr->BeginActivateViewEffect( active, aContainer, aEffect ) );
+    
+    DeactivateContainerL( EFalse );
+        
+    // Update  
+    iContainer = &aContainer;
     
     // Disable layout and redraw until container activation is done
     iAppUiAdapter.UiEngine().DisableRenderUiLC();
@@ -620,18 +621,7 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         {
         EnterEditStateL( aContainer, EFalse );                                
         }
-   
-    TBool started(
-        mgr->BeginActivateViewEffect( active, aContainer, aEffect ) );
-            
-    if ( previous )
-        {
-        CXnControlAdapter* previousControl( 
-            previous->Node()->LayoutNode()->Control() );
-                                      
-        previousControl->MakeVisible( EFalse );
-        }
-              
+    
     CXnControlAdapter* adapter( node->Control() );
     adapter->MakeVisible( ETrue );
            
@@ -907,6 +897,11 @@ void CXnViewAdapter::ChangeControlsStateL( TBool aAwake )
             else
                 {
                 controls[i]->EnterPowerSaveModeL();
+                if ( controls[i]->LongTapDetector() && 
+                        controls[i]->LongTapDetector()->IsActive() )
+                    {
+                    controls[i]->LongTapDetector()->Cancel();
+                    }
                 }               
             }
             

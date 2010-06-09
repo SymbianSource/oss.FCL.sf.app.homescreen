@@ -627,7 +627,7 @@ void CTsAppView::HandlePointerEventL( const TPointerEvent &aPointerEvent )
             !iFastSwapArea->Count() )
             {
             LaunchFeedback(ETouchFeedbackBasic, TTouchFeedbackType(
-                    ETouchFeedbackVibra | ETouchFeedbackAudio), aPointerEvent);
+                    ETouchFeedbackVibra ), aPointerEvent);
             iEikonEnv->EikAppUi()->HandleCommandL(EAknSoftkeyExit);
             }
         }

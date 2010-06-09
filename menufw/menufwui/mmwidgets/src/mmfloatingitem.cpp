@@ -22,15 +22,15 @@
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 TMmFloatingItem::TMmFloatingItem( TInt aDrawnIndex, TPoint aStartPosition,
-        TMmFloatingItemType aType, TInt aAnimationFrames, CListBoxView* aView ) 
+        TMmFloatingItemType aType, TInt aAnimationFrames, CListBoxView* aView )
     {
     iView = aView;
     iSizeStep = 0;
     iZoomRatio = 1;
     iManualDelete = EFalse;
-    
+
     if ( iView )
         {
         // item position is relative
@@ -52,7 +52,7 @@ TMmFloatingItem::TMmFloatingItem( TInt aDrawnIndex, TPoint aStartPosition,
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void TMmFloatingItem::SetPositionStep( TPoint aDiffetenceVector  )
      {
      ASSERT( iFrames );
@@ -62,35 +62,35 @@ void TMmFloatingItem::SetPositionStep( TPoint aDiffetenceVector  )
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
-void TMmFloatingItem::CalculateSteps(TPoint aVector) 
+//
+void TMmFloatingItem::CalculateSteps(TPoint aVector)
     {
     iPositionStep.Reset();
 
     TReal x = aVector.iX;
     TReal y = aVector.iY;
-    
+
     TReal sx = 0.0;
     TReal sy = 0.0;
-    
+
     for( TInt i = 0; i < iFrames; i++ )
-    	{
-    	TReal sin;
-    	Math::Sin( sin, (i+1) * KPi/iFrames + KPi * 3./2.  );
-    	TReal xx = x * (0.5*( sin + 1.0 ) ) - sx;
-    	TReal yy = y * (0.5*( sin + 1.0 ) ) - sy;
-    	
-    	sx += xx;
-    	sy += yy;
-    	
-    	iPositionStep.At(i) = TPoint( xx, yy );
-    	}
+      {
+      TReal sin;
+      Math::Sin( sin, (i+1) * KPi/iFrames + KPi * 3./2.  );
+      TReal xx = x * (0.5*( sin + 1.0 ) ) - sx;
+      TReal yy = y * (0.5*( sin + 1.0 ) ) - sy;
+
+      sx += xx;
+      sy += yy;
+
+      iPositionStep.At(i) = TPoint( xx, yy );
+      }
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void TMmFloatingItem::SetSizeStep( TReal aStartSize, TReal aFinalSize )
     {
     ASSERT( iFrames );
@@ -103,32 +103,32 @@ void TMmFloatingItem::SetSizeStep( TReal aStartSize, TReal aFinalSize )
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-//   
-TBool TMmFloatingItem::MakeStep() 
+//
+TBool TMmFloatingItem::MakeStep()
     {
     TBool ret(EFalse);
-    
-    if(iFrameCounter >= iFrames && iManualDelete == EFalse)
+
+    if( iFrameCounter >= iFrames && iManualDelete == EFalse )
         {
         InvalidateFloatingItem();
         }
-    else if (iFrameCounter < iFrames)
+    else if( iFrameCounter < iFrames )
         {
         iItemPosition += iPositionStep[iFrameCounter];
         iZoomRatio += iSizeStep;
-        ret = Abs(iPositionStep[iFrameCounter].iX) > 0 
-			|| Abs(iPositionStep[iFrameCounter].iY > 0)
-			|| Abs(iSizeStep) > 0;
-		iFrameCounter++;
+        ret = Abs(iPositionStep[iFrameCounter].iX) > 0
+                || Abs(iPositionStep[iFrameCounter].iY > 0)
+                || Abs(iSizeStep) > 0;
+        iFrameCounter++;
         }
-    
+
     return ret;
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 void TMmFloatingItem::SetManualDelete(TBool aManual)
     {
     iManualDelete = aManual;
@@ -137,7 +137,7 @@ void TMmFloatingItem::SetManualDelete(TBool aManual)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 TReal TMmFloatingItem::GetCurrentZoomRatio() const
     {
     return iZoomRatio;
@@ -146,7 +146,7 @@ TReal TMmFloatingItem::GetCurrentZoomRatio() const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-// 
+//
 TMmFloatingItemType TMmFloatingItem::GetFloatingItemType() const
     {
     return iType;
@@ -180,9 +180,9 @@ void TMmFloatingItem::InvalidateFloatingItem()
 
 TBool TMmFloatingItem::IsFloatingItemValid() const
     {
-    return GetDrawnItemIndex() != KErrNotFound 
-		&& iType != EPostDragRefreshItem 
-		&& iType != EPostHighlightChangeRefreshItem;
+    return GetDrawnItemIndex() != KErrNotFound
+    && iType != EPostDragRefreshItem
+    && iType != EPostHighlightChangeRefreshItem;
     }
 
 TBool TMmFloatingItem::IsManualDelete()

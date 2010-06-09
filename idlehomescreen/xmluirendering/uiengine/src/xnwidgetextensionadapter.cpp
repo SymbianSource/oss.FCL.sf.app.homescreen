@@ -22,6 +22,9 @@
 #include <gfxtranseffect/gfxtranseffect.h>
 #include <akntransitionutils.h>
 #include <AknPriv.hrh>
+#ifdef RD_TACTILE_FEEDBACK
+#include <touchfeedback.h>
+#endif // RD_TACTILE_FEEDBACK
 
 // User includes
 #include "xnwidgetextensionadapter.h"
@@ -147,14 +150,12 @@ void CXnWidgetExtensionAdapter::ConstructL()
             iPermanent = ETrue;
             }        
         }
-    else
+     
+    if ( Window().SetTransparencyAlphaChannel() == KErrNone )
         {
-        if ( Window().SetTransparencyAlphaChannel() == KErrNone )
-            {
-            Window().SetBackgroundColor( ~0 );
-            }                     
-        }
-    
+        Window().SetBackgroundColor( ~0 );
+        }                     
+       
     iUiEngine = iNode.Node().UiEngine();
     CXnControlAdapter::ConstructL( iNode );
     
@@ -253,10 +254,11 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
     if ( iPopup )
         {        
         // check if the tap was inside of popup
-        TRect popupRect = this->Rect();
-        popupRect.Move(this->Position() );
-        TBool isInPopupWindow = popupRect.Contains(
-                aPointerEvent.iParentPosition );
+        TRect popupRect( Rect() );
+        popupRect.Move( Position() );
+        
+        TBool isInPopupWindow( popupRect.Contains(
+                aPointerEvent.iParentPosition ) );
 
         if ( !isInPopupWindow )
             {            
@@ -267,15 +269,17 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
             
             if ( parentIdProp )
                 {                
-                const TDesC8& parentIdVal = parentIdProp->StringValue();
-                CXnNode* parentN(iUiEngine->FindNodeByIdL( parentIdVal,
-                        iNode.Node().Namespace() ) );
+                const TDesC8& id( parentIdProp->StringValue() );
                 
-                if ( parentN )
+                CXnNode* parent( 
+                    iUiEngine->FindNodeByIdL( id, iNode.Node().Namespace() ) );
+                        
+                
+                if ( parent )
                     {
-                    TRect clientRect =
-                            static_cast<CEikAppUi&> ( *iAppUiAdapter ).ClientRect();
-                    TRect parentRect = parentN->Rect();
+                    TRect clientRect( iAppUiAdapter->ClientRect() );
+                            
+                    TRect parentRect( parent->Rect() );
                     parentRect.Move( clientRect.iTl );
                     
                     if ( !parentRect.Contains( aPointerEvent.iParentPosition ) )
@@ -284,6 +288,14 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                         // we can close it
                         if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
                             {
+#ifdef RD_TACTILE_FEEDBACK                    
+                            MTouchFeedback* fb( MTouchFeedback::Instance() );
+    
+                            if ( fb )
+                                {
+                                fb->InstantFeedback( ETouchFeedbackBasic );
+                                }                        
+#endif                    
                             HidePopupL();
                             return;
                             }
@@ -294,17 +306,30 @@ void CXnWidgetExtensionAdapter::HandlePointerEventL(
                         // we pass the event to it after
                         // recalculating the taping point
                         TPointerEvent newPointerEvent;
+                        
                         newPointerEvent.Copy( aPointerEvent );
+                        
                         newPointerEvent.iPosition = TPoint(
-                                 aPointerEvent.iParentPosition - clientRect.iTl );
-                        parentN->Control()->HandlePointerEventL( newPointerEvent );
-                        return;
+                             aPointerEvent.iParentPosition - clientRect.iTl );
+                        
+                        parent->Control()->HandlePointerEventL( newPointerEvent );                        
                         }
                     }
                 }
             else
                 {
-                HidePopupL();
+#ifdef RD_TACTILE_FEEDBACK
+                if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+                    {
+                    MTouchFeedback* fb( MTouchFeedback::Instance() );
+
+                    if ( fb )
+                        {
+                        fb->InstantFeedback( ETouchFeedbackBasic );
+                        }                        
+#endif                                
+                    HidePopupL();                    
+                    }
                 }
             }
         }
@@ -708,11 +733,6 @@ void CXnWidgetExtensionAdapter::NotifyResourceChanged( TInt aType )
             {
             DrawableWindow()->FadeBehind( ETrue );
             }
-        }
-    
-    else if( iPopup && aType == KAknSplitInputDisabled )
-        {
-        TRAP_IGNORE( HidePopupL() );
         }
     }
 

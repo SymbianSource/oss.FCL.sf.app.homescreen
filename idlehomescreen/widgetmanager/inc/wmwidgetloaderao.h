@@ -35,7 +35,7 @@ class RWidgetRegistryClientSession;
 /**
  * Active object to load widgets into list
  */
-NONSHARABLE_CLASS( CWmWidgetLoaderAo ) : public CAsyncOneShot
+NONSHARABLE_CLASS( CWmWidgetLoaderAo ) : public CActive
     {
     
 public:
@@ -78,14 +78,25 @@ private:
 protected: // from CActive
     
     /**
-     * AO body
-     */
+    * Handles an active object's request completion event.
+    * 
+    * @see CActive::RunL
+    */
     void RunL();
 
     /**
-     * AO error handler
+     * RunError
+     * 
+     * @see CActive::RunError
      */
     TInt RunError( TInt aError );
+    
+    /**
+     * Implements cancellation of an outstanding request.
+     * 
+     * @see CActive::DoCancel
+     */
+    void DoCancel();
 
 private:
 
@@ -93,6 +104,11 @@ private:
      * connects to wrt registry
      */
     void OpenSessionL();
+
+    /**
+     * disconnects from wrt registry
+     */
+    void CloseSession();
     
     /**
      * loads widgets into the listbox

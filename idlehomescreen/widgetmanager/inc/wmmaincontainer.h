@@ -27,6 +27,7 @@
 #include <AknsUtils.h>
 #include <gulicon.h>
 #include <eiklbo.h>  // MEikListBoxObserver
+#include <aknsfld.h>  // MAdaptiveSearchTextObserver
 
 // FORWARD DECLARATIONS
 class CWmPlugin;
@@ -47,7 +48,8 @@ class CWmConfiguration;
  * @class	CWmMainContainer WmMainContainer.h
  */
 NONSHARABLE_CLASS( CWmMainContainer ) : public CCoeControl,
-                                        public MEikListBoxObserver
+                                        public MEikListBoxObserver,
+                                        public MAdaptiveSearchTextObserver
 	{
 public: // constructors and destructor
 	
@@ -301,6 +303,14 @@ private: // from MEikListBoxObserver
                         CEikListBox* aListBox,
                         TListBoxEvent aEventType);
 
+private: // from MAdaptiveSearchTextObserver    
+    /**
+     * Adaptive search observer interface.
+     * 
+     * @see MAdaptiveSearchTextObserver::AdaptiveSearchTextChanged
+     */
+    void AdaptiveSearchTextChanged( CAknSearchField* aSearchField );
+    
 private: // New functions
     
     void AddControlL( CCoeControl* aControl, TInt aControlId );

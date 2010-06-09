@@ -291,6 +291,13 @@ private:
     void LayoutGridL();
     
     /**
+     * Setup grid layout for view
+     * 
+     * @param  aItemCount  number of items in grid
+     */
+    void LayoutGridViewL( TInt aItemCount );
+    
+    /**
      * Returns rectangles for fast swap area controls
      */
     void GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects );

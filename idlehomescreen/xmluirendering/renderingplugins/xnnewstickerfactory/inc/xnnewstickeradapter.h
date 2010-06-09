@@ -29,13 +29,6 @@ class CXnNewstickerControl;
 class CAknMarqueeControl;
 
 // CONSTANTS
-// The default values for the newsticker control
-const TInt KXnNewstickerDelay = 1000000;   // start scrolling after a delay of 1 second
-const TInt KXnNewstickerInterval = 100000; // scroll 10 times in a second
-const TInt KXnNewstickerScrollAmount = 6;  // scroll 6 pixels at time
-const TInt KXnNewstickerLoops = 1;         // loop amount
-const TInt KNoDelay = 0;                   //  No delay to start the animation
-const TInt KAnimationTime = 6000000;       //  The animation lasts 6 seconds
 
 // CLASS DECLARATION
 
@@ -47,8 +40,7 @@ const TInt KAnimationTime = 6000000;       //  The animation lasts 6 seconds
 *  @lib xnnewstickerfactory.dll
 *  @since Series 60 3.2
 */
-class CXnNewstickerAdapter : public CXnControlAdapter,
-            XnNewstickerInterface::MXnNewstickerCallbackInterface
+class CXnNewstickerAdapter : public CXnControlAdapter    
     {
     public:
           
@@ -120,16 +112,14 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         void ClearTitles();
 
         /**
-         * Set callback interface.
-         * @param aCallback The callback interface pointer.
+         * Restarts current title
          */
-        void SetCallbackInterfaceL(
-            XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback );
-
+        void Restart();
+        
         /**
          * Start showing the titles.
          */
-        void Start();
+        void Start( TBool aSelectTitle = EFalse );
 
         /**
          * Stop showing the titles.
@@ -157,17 +147,13 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
          * @return ETrue if the method should be called again.
          */
         static TInt PeriodicEventL( TAny * aPtr );
-     
-        void MakeVisible( TBool aVisible );
-        
+
     public: // from base classes
 
-        //  From MXnNewstickerCallbackInterface
         /**
-         * Called when the title has been shown and is now offscreen.
-         * @param aTitleIndex The title that has been completely shown.
-         */
-        void TitleScrolled( TInt aTitleIndex );
+        * See CCoeControl documentation
+        */      
+        void MakeVisible( TBool aVisible );
 
         /**
         * See CCoeControl documentation
@@ -208,20 +194,14 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         * Reports newsticker event
         * 
         */   
-        void ReportNewstickerEvent( const TDesC8& aEventName );
+        void ReportNewstickerEvent( const TDesC8& aEventName, TInt aIndex );
         
         /**
         * Draws text
         * Text drawing function is selected by scrolling behaviour
         */
-        void DrawText( const TDesC& aText, const TRect& aRect  );
+        void DrawText( const TDesC& aText );
         
-        /**
-        * ETrue if marquee control redrawing is needed. EFalse if truncated text is needed
-        */
-        TBool Redraw() { return iRedraw; }
-
-
     private:
 
     	CXnNewstickerAdapter( CXnControlAdapter* aParent, CXnNodePluginIf& aNode );
@@ -256,12 +236,12 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
         /**
         *  FScrolls alternative text. Function is called by periodic timer
         */    
-        void DoScroll();
+        void DoScroll( TBool aEndOfLoop );
         
         /**
         *  Draws text directly to screen if scrollins is not needed
         */  
-        void DrawStaticText( CWindowGc& aGc, const TDesC& aText ) const;
+        void DrawStaticText( CWindowGc& aGc, const TDesC& aText, TBool aTruncate = ETrue ) const;
         
         /**
         *  Draws scrolling text to screen via marquee control
@@ -277,26 +257,15 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
 	    CPeriodic*                  iPeriodicTimer;
 
         /**
-        * The callback interface which is used when a title has been shown.
-        * Not own.
-        */
-        XnNewstickerInterface::MXnNewstickerCallbackInterface*  iCallback;
-
-        /**
         * The control handling the text title showing
         * Own.
         */
         CXnNewstickerControl*       iControl;
 	    
         /**
-         * The delay before first event
+         * Alternate delay, i.e. display time
          */  
-	    TInt                        iAlternateDelay;
-        
-        /**
-         * The alternate interval between ticks.
-         */	    
-	    TInt                        iAlternateInterval;
+	    TInt                        iAlternateDelay;        
 
         /**
         * UI node
@@ -360,19 +329,11 @@ class CXnNewstickerAdapter : public CXnControlAdapter,
        * Current strikethrough behaviour
        */ 
        TFontStrikethrough          iStrikethrough;
-       
-       /**
-       * is scroll looping activated
-       */ 
-       TBool                    iScrollLooping;
-       
+              
        /**
        * is marquee control redraw needed
        */ 
        TBool                    iRedraw;
-        
-        
-        
     };
 
 #endif // XNNEWSTICKERADAPTER_H

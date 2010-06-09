@@ -20,7 +20,6 @@
 #define C_MM_EXTENSION_MANAGER_H
 
 // INCLUDES
-#include "mmecomobserver.h"
 #include <e32std.h>
 #include <e32base.h>
 #include <e32hashtab.h>
@@ -38,9 +37,7 @@ class MMmActionRequest;
  * @since S60 5.0
  * @ingroup group_mmextensions
  */
-NONSHARABLE_CLASS( CMMExtensionManager ):
-    public CBase,
-    public MHNEcomInstallNotifierCallback
+NONSHARABLE_CLASS( CMMExtensionManager ): public CBase
 	{
 public: // Constructors and destructor
 
@@ -79,11 +76,6 @@ public:
 		const TUid aUid,
         const TDesC& aCommand,
         CLiwGenericParamList* aEventParamList );
-	
-	/**
-	 * Refreshes list of MultimediaMenu plugins implementations.
-	 */
-	void EcomChangedL();
 
 private:
 
@@ -124,12 +116,7 @@ private:
 	 * Reference to the App UI.
 	 */	
 	MMmActionRequest& iActionRequest;
-	
-	/**
-	 * Pointer to ECom observer.
-	 * Own.
-	 */
-    CMMEcomObserver *iEcomObserver;
+
 };
 
 #endif // C_MM_EXTENSION_MANAGER_H

@@ -931,7 +931,8 @@ void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
                         CAknSearchField::EAdaptiveSearch,
                         0, KTextLimit );
     AddControlL( iFindbox, EFindBox );
-
+    iFindbox->AddAdaptiveSearchTextObserverL(this);
+    
     UpdateFocusMode();
     StartLoadingWidgetsL();
     }
@@ -1643,6 +1644,17 @@ void CWmMainContainer::FocusChanged( TDrawNow aDrawNow )
         }
     }
 
+// ----------------------------------------------------
+// CWmMainContainer::AdaptiveSearchTextChanged
+// ----------------------------------------------------
+//
+void CWmMainContainer::AdaptiveSearchTextChanged( 
+        CAknSearchField* aSearchField )
+    {
+    // fix for ou1cimx1#376818. aknfind will call drawDeferred for lisbox. 
+    // We need to be sure that button area is also drawn.
+    DrawDeferred();
+    }
 
 // End of File
 

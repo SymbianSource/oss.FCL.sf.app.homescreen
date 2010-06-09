@@ -61,6 +61,8 @@ _LIT8( KToolTip, "tooltip" );
 _LIT8( KMenuBar, "menubar" );
 _LIT8( KTextEditor, "texteditor" );
 _LIT8( KPlugin, "plugin" );
+_LIT8( KTemplate, "template" );
+_LIT8( KIndex, "index" );
 
 _LIT8( KActionsHandler, "actionshandler" );
 
@@ -424,9 +426,75 @@ static void DisableStatePropertyL(
     TBool aInformChange = EFalse );
 static TBool MatchTitleScrollTriggerL(
     CXnNode& aEventData, CXnDomNode& aTriggerNode );
+static CXnDomNode* GetTemplateEventL( 
+    const TDesC8& aTemplate, 
+    CXnNode& aNode, 
+    CXnDomNode& aEventNode );    
 
 // ============================= LOCAL FUNCTIONS ===============================
+// -----------------------------------------------------------------------------
+// GetTemplateEventL
+// -----------------------------------------------------------------------------
+//
+static CXnDomNode* GetTemplateEventL( const TDesC8& aTemplate, CXnNode& aNode, 
+    CXnDomNode& aEventNode )
+    {
+    CXnDomNode* retval( NULL );
+    
+    if ( aTemplate == KIndex() )
+        {
+        _LIT8( KTemplateIndex, "(#)" );
+        
+        const TDesC8& eventString( aEventNode.AttributeValue( KName ) );
+        
+        TInt index( eventString.Find( KTemplateIndex ) );
+        
+        CXnNode* parent( aNode.Parent() );
+        
+        if ( index != KErrNotFound && parent )
+            {                                
+            RPointerArray< CXnNode >& siblings( parent->Children() );
+            
+            TInt itemindex( siblings.Find( &aNode ) );
+            
+            if ( itemindex != KErrNotFound )
+                {
+                TBuf8< 4 > buf;
+                buf.AppendNum( itemindex );
+    
+                CXnDomNode* clone( 
+                    aEventNode.CloneL( *aEventNode.StringPool() ) );
+                CleanupStack::PushL( clone );
+                
+                HBufC8* templateString = 
+                    HBufC8::NewLC( eventString.Length() + 4 );
 
+                TPtr8 ptr( templateString->Des() );
+                
+                ptr.Copy( eventString );
+                ptr.Delete( index + 1, 1 );                    
+                ptr.Insert( index + 1, buf );
+                                
+                CXnDomAttribute* attribute = static_cast< CXnDomAttribute* > 
+                    ( clone->AttributeList().FindByName( 
+                        XnPropertyNames::action::event::KName ) );
+                                                
+                if ( attribute )
+                    {                                        
+                    attribute->SetValueL( ptr );
+                    }
+                                
+                CleanupStack::PopAndDestroy( templateString );
+                
+                CleanupStack::Pop( clone );
+                retval = clone;
+                }
+            }    
+        }
+    
+    return retval;
+    }
+    
 // -----------------------------------------------------------------------------
 // ResolveEffectId
 // -----------------------------------------------------------------------------
@@ -2719,8 +2787,28 @@ static void RunAppUiNotificationL(
     {       
     CXnAppUiAdapter& adapter( aEngine.AppUiAdapter() );
     
-    adapter.HandleXuikonEventL(
-        aNode.AppIfL(), aEventData.AppIfL(), aTriggerNode, aEventNode );
+    // Check if event is template
+    const TDesC8& templateEvent( aEventNode.AttributeValue( KTemplate ) );
+    
+    if ( templateEvent != KNullDesC8() )
+        {
+        CXnDomNode* event( 
+            GetTemplateEventL( templateEvent, aNode, aEventNode ) );
+        CleanupStack::PushL( event );
+
+        if ( event )
+            {
+            adapter.HandleXuikonEventL(
+                aNode.AppIfL(), aEventData.AppIfL(), aTriggerNode, *event );            
+            }
+        
+        CleanupStack::PopAndDestroy( event );        
+        }
+    else
+        {
+        adapter.HandleXuikonEventL(
+            aNode.AppIfL(), aEventData.AppIfL(), aTriggerNode, aEventNode );    
+        }
     }
 
 // -----------------------------------------------------------------------------

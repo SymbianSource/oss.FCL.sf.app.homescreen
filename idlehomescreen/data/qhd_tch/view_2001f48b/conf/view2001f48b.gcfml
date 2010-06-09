@@ -3,10 +3,11 @@
 	<tag name="target" value="core"/>
 	<tag name="target" value="rofs2"/>
 	<tag name="target" value="rofs3"/>
-	<tag name="target" value="uda"/>
-	<tag name="target" value="emmc"/>
+<!--	<tag name="target" value="uda"/>
+	<tag name="target" value="emmc"/> -->
 <phase name='post'/> <!-- post phase for making sure that data for all homescreen widgets is available in sequence -->
 
+<!--
   <ruleml xmlns="http://www.s60.com/xml/ruleml/3">
     <rule>True configures ${HomescreenPlugins_1.Plugins} = {% mapBundleIds(@{DFSFeatures.HomescreenWidgets}, @{HomescreenPlugins_1.Plugins}) %}</rule>
 <eval_globals>      
@@ -32,7 +33,8 @@ def mapBundleIds(dfswidgets, plugins):
   
   return new_plugins
 </eval_globals>
-  </ruleml>
+  </ruleml> 
+-->
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_2001f48b\hsps\00\">
 	<setting ref="HomescreenPlugins_1/MaxWidgets"/>
 	<setting ref="HomescreenPlugins_1/UseEmptyWidgets"/>

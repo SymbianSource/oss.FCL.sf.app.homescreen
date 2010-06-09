@@ -19,6 +19,7 @@
 #include    "databuffertransactionelement.h"
 #include    "aixmluiutils.h"
 
+#include    "xncomponent.h"
 #include    "xntype.h"
 #include    "xntext.h"
 #include    "xnnewsticker.h"
@@ -51,13 +52,32 @@ CDataBufferTransactionElement* CDataBufferTransactionElement::NewL(AiUtility::CC
 
 CDataBufferTransactionElement::~CDataBufferTransactionElement()
     {
+    delete iNewData;
+    delete iCid;
     }
 
 void CDataBufferTransactionElement::InitializeL( CXnNodeAppIf& aTarget, const TDesC8& aData )
     {
     CheckTypeL( aTarget );
     SetTarget( aTarget );
-    iNewData.Set( aData );
+    
+    delete iNewData;
+    iNewData = NULL;
+
+    iNewData = aData.AllocL();    
+    }
+
+void CDataBufferTransactionElement::InitializeL( CXnNodeAppIf& aTarget, const TDesC8& aData,
+    const TDesC& aCid, TInt aIndex )
+    {
+    InitializeL( aTarget, aData );
+    
+    iIndex = aIndex;
+    
+    delete iCid;
+    iCid = NULL;
+    
+    iCid = aCid.AllocL();
     }
 
 void CDataBufferTransactionElement::UpdateDataL()
@@ -73,7 +93,13 @@ void CDataBufferTransactionElement::Reset()
     {
     CTransactionElement::Reset();
     
-    iNewData.Set( KNullDesC8);
+    delete iNewData;
+    iNewData = NULL;
+    
+    delete iCid;
+    iCid = NULL;
+    
+    iIndex = KErrNotFound;    
     }
 
 TBool CDataBufferTransactionElement::IsSupported( CXnNodeAppIf& aTarget,
@@ -103,6 +129,10 @@ TBool CDataBufferTransactionElement::IsSupported( CXnNodeAppIf& aTarget,
         // Newsticker support
         return ( type == XnNewstickerInterface::MXnNewstickerInterface::Type() );
         }
+    else if ( aContentType == KContentTypeData )
+        {
+        return ( type == AiUiDef::xml::element::KData() );
+        }
         
     return EFalse;
     }
@@ -112,13 +142,14 @@ void CDataBufferTransactionElement::CheckTypeL( CXnNodeAppIf& aTarget )
     // Get type info
     const TDesC8& type = LeaveIfNull( aTarget.Type(), KErrNotSupported )->Type();
     
-    // Text element, menu item, and newsticker supported
+    // Text element, menu item, data and newsticker supported
     if ( type != XnTextInterface::MXnTextInterface::Type() &&
          type != KXnMenuItem &&
          type != KXnMenu &&
          type != XnPropertyNames::softkey::KNodeName && 
          type != XnPropertyNames::volumecontrol::KSlider &&
-         type != XnNewstickerInterface::MXnNewstickerInterface::Type() )
+         type != XnNewstickerInterface::MXnNewstickerInterface::Type() && 
+         type != AiUiDef::xml::element::KData() )
         {
         User::Leave( KErrNotSupported );
         }
@@ -132,7 +163,7 @@ void CDataBufferTransactionElement::SetDataL()
     if ( type == XnTextInterface::MXnTextInterface::Type() ) // Text element
         {
         // Set character data directly to target
-        Target().SetPCDataL( iNewData );
+        Target().SetPCDataL( iNewData ? *iNewData : KNullDesC8() );
         }
     else if (  type == XnPropertyNames::softkey::KNodeName ||
             type == KXnMenuItem || 
@@ -150,7 +181,7 @@ void CDataBufferTransactionElement::SetDataL()
         CleanupStack::PushL( propertyValue );
     
         propertyValue->SetStringValueL( CXnDomPropertyValue::EString,
-                                        iNewData );
+                                        iNewData ? *iNewData : KNullDesC8() );
     
         CXnProperty* newProperty = CXnProperty::NewL( XnPropertyNames::menu::KLabel,
                                                       propertyValue,
@@ -175,8 +206,13 @@ void CDataBufferTransactionElement::SetDataL()
         LeaveIfNull( volumeControl, KErrNotSupported );
         
         TInt32 volume = 0;
-        User::LeaveIfError( AiUtility::ParseInt( volume, iNewData ) );
+        User::LeaveIfError( AiUtility::ParseInt( volume, iNewData ? *iNewData : KNullDesC8() ) );
         volumeControl->SetValue( volume );
+        }
+    else if ( type == AiUiDef::xml::element::KData() )
+        {
+        CXnComponent& component( Target().ParentL()->Component() );
+        component.SetDataL( iNewData ? *iNewData : KNullDesC8(), iCid ? *iCid : KNullDesC(), iIndex );
         }
     else
         {

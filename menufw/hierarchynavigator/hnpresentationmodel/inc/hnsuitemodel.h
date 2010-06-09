@@ -378,32 +378,6 @@ public:
      * @return Custom identifier of the suite.
      */
     IMPORT_C TInt64 CustomId();
-    
-    /**
-     * Activates highlight handling.
-     * Used for highlight events for items.
-     * 
-     * @since S60 v5.0
-     * @param aActive ETrue if active.
-     */
-    IMPORT_C void SetActiveL( TBool aActive );
-    
-    /**
-     * Returns the state of the suite.
-     * 
-     * @since S60 v5.0
-     * @return ETrue if active.
-     */
-    IMPORT_C TBool IsActive();
-    
-    /**
-     * Notifies the model that the suite is visible.
-     * Used for highlight events for items.
-     * 
-     * @since S60 v5.0
-     * @param aVisible ETrue if visible.
-     */
-    IMPORT_C void SetVisibleL( TBool aVisible );
 
     /**
      * Returns item model matching given criteria.
@@ -468,17 +442,7 @@ private:
      * @param aGenreName Genre name for model
      */
     void ConstructL( const TDesC& aGenreName );
-    
-    /**
-     * Launches the appropriate action if allowed.
-     * Used for highlight events for items.
-     * 
-     * @since S60 v5.0
-     * @param aItemId ID of the item.
-     * @param aFocused ETrue if focused.
-     */
-    void HandleItemFocusL( TInt aItemId, TBool aFocused );
-    
+
     /**
      * Set highlight on item.
      * 
@@ -572,18 +536,6 @@ private:
      * Not Own.
      */ 
     CHnEventHandler& iEventHandler;
-		
-    /**
-     * Indicates if the suite is active.
-     * Used for handling highlight events for items.
-     */ 
-    TBool iIsActive;
-    
-    /**
-     * Indicates if the suite is visible.
-     * Used for handling highlight events for items.
-     */ 
-    TBool iIsVisible;
     
     /**
      * Exit mode.

@@ -394,21 +394,6 @@ public:
      */
     IMPORT_C void DeleteLastSuite();
 
-
-    /**
-     * Realeses localization files.
-     *
-     * @since S60 5.0
-     */
-    IMPORT_C void ReleaseLocalization();
-
-    /**
-     * Reloads localization.
-     *
-     * @since S60 5.0
-     */
-    IMPORT_C void ReloadLocalizationL();
-
     /**
      * Informs metadatamodel to ignore evaluations or
      * to performing evaluations, according to the
@@ -451,16 +436,6 @@ public:
      *                            has completed
      */
     void SuiteModelReadyToShowL( CHnSuiteModel* aJustEvaluatedSuite );
-
-    /**
-     * Causes all of the loades suites except for the suite at the bottom
-     * of the stack to be reloaded from their corresponding xml file
-     * definitions.
-     *
-     * @since S60 5.0
-     * @param aIgnore aModelContainer Model container object.
-     */
-    void ReloadStackSuitesL( CHnSuiteModelContainer* aModelContainer );
 
     /**
      * Counts number of loaded suites.

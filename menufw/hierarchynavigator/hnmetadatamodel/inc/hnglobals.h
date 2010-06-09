@@ -140,7 +140,11 @@ namespace HnEvent
 
     }
 
+//paths
+_LIT( KFolderSuitePath, "Z:\\private\\101F4CD2\\import\\suites\\foldersuite\\suite.xml" );
+_LIT( KFolderItemsPath, "Z:\\private\\101F4CD2\\import\\suites\\foldersuite\\items.xml" );
 
+//XML tags
 _LIT8( KMm8,                        "mm" );
 _LIT8( KContentElementName8,        "content" );
 _LIT8( KSuiteElementName8,          "suite" );
@@ -324,6 +328,7 @@ _LIT8 ( KHnRequest, "KHnRequest" );
 // widget types
 _LIT8 ( KSuite8,                    "suite" );
 _LIT  ( KFolderSuite,               "foldersuite" );
+_LIT8 ( KFolderSuite8,              "foldersuite" );
 _LIT8 ( KWidgetType8,               "type" );
 _LIT8 ( KAllowedTypes8,             "allowed_types" );
 _LIT8 ( KWidgetTypeList8,           "list" );

@@ -41,11 +41,17 @@ static void ResetGrabbingL( CXnControlAdapter* aControl,
     const TPointerEvent& aEvent ) 
     {       
     if ( aControl )
-        {                              
+        {
         CCoeControl* grabber( aControl->GrabbingComponent() );
         
         if ( grabber )
-            {                        
+            {
+            // cancel longtap detector before reset grabbing.
+            CAknLongTapDetector* detector = aControl->LongTapDetector();
+            if ( detector && detector->IsActive() )
+                {
+                detector->Cancel();
+                }
             grabber->IgnoreEventsUntilNextPointerUp();
             
             aControl->CCoeControl::HandlePointerEventL( aEvent );
@@ -53,7 +59,7 @@ static void ResetGrabbingL( CXnControlAdapter* aControl,
             CXnControlAdapter* adapter = 
                 dynamic_cast< CXnControlAdapter* >( grabber );
             
-            ResetGrabbingL( adapter, aEvent );            
+            ResetGrabbingL( adapter, aEvent );
             }        
         }    
     }
@@ -182,13 +188,16 @@ void CXnViewControlAdapter::Draw( const TRect& aRect ) const
 void CXnViewControlAdapter::HandlePointerEventL( 
     const TPointerEvent& aPointerEvent )
     {    
-    iAppUi.UiEngine().DisableRenderUiLC();
+    if ( iForegroundStatus != EBackground )
+        {
+        iAppUi.UiEngine().DisableRenderUiLC();
+            
+        CXnControlAdapter::HandlePointerEventL( aPointerEvent );
         
-    CXnControlAdapter::HandlePointerEventL( aPointerEvent );
-    
-    iAppUi.UiEngine().RenderUIL();
-    
-    CleanupStack::PopAndDestroy();    
+        iAppUi.UiEngine().RenderUIL();
+        
+        CleanupStack::PopAndDestroy();    
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -215,6 +224,7 @@ void CXnViewControlAdapter::ResetGrabbing()
 //
 void CXnViewControlAdapter::NotifyForegroundChanged( TForegroundStatus aStatus )
     {
+    iForegroundStatus = aStatus;
     if ( aStatus == EBackground || aStatus == EPartialForeground )
         {
         ResetGrabbing();

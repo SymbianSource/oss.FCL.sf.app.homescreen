@@ -21,7 +21,6 @@ DEFAULT
 
 PRJ_EXPORTS
 ../inc/mmextensionmanager.h 		|../../../../inc/mmextensionmanager.h
-../inc/mmecomobserver.h             |../../../../inc/mmecomobserver.h
 
 PRJ_MMPFILES
 mmextensionmanager.mmp

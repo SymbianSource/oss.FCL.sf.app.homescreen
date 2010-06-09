@@ -49,7 +49,6 @@ SOURCE          hnattributetext.cpp
 SOURCE          hneventhandler.cpp
 SOURCE          hnitemsorder.cpp 
 SOURCE          hnattrimgprovsvgimage.cpp
-SOURCE          hnitemfocushandler.cpp
 SOURCE          hniconholder.cpp
 SOURCE          hnextbmpiconholder.cpp
 

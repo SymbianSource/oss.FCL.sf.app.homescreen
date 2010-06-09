@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmGrid declaration
-*  Version     : %version: MM_32.1.24 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_32.1.25 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -131,7 +131,7 @@ public:
      * @param aBgContext Background context to be set in view and item drawer.
      */
     void SetItemDrawerAndViewBgContext(
-    		CAknsBasicBackgroundControlContext* aBgContext );
+        CAknsBasicBackgroundControlContext* aBgContext );
 
     /**
      * Handles changes in scrollbar visibility.
@@ -362,7 +362,7 @@ private:
      * @param aPointerEvent Type of pointer event.
      */
     void HandleOverridenHighlightDrawing( const TPointerEvent& aPointerEvent,
-    		TInt aIndexBefore, TInt aIndexAfter );
+        TInt aIndexBefore, TInt aIndexAfter );
 
     /**
      * Ensures that elements are drawn correctly when mirrored layout is

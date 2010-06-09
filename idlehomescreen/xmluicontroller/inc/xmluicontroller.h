@@ -246,9 +246,6 @@ private:
     
     static TInt ExitTimerCallBack( TAny *aSelf );
        
-    void GetContentItemL( CXnNodeAppIf& aNode, 
-        RAiSettingsItemArray& aSettings, HBufC*& aItemName );
-    
     void GetConfigurationsL( CXnNodeAppIf& aNode, 
         RAiSettingsItemArray& aSettings, const TDesC& aConfOwner );
     

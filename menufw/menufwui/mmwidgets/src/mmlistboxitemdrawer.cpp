@@ -317,13 +317,21 @@ void CMmListBoxItemDrawer::DrawFloatingItems( TRect currentlyDrawnRect )
                 iZoomIconIndex = iFloatingItems[i].GetDrawnItemIndex();
                 iIconAnimationZoomRatio = iFloatingItems[i].GetCurrentZoomRatio();
 
-                if ( ItemHasFloatingType( drawnItemIndex, EDrag) ||
-                        ItemHasFloatingType( drawnItemIndex, EDragTransition) )
+                if ( ItemHasFloatingType( drawnItemIndex, EDrag)
+                        || ItemHasFloatingType( drawnItemIndex, EDragTransition)
+                        || ItemHasFloatingType( drawnItemIndex, EDragStart ) )
                     {
                     ClearFlags( CListItemDrawer::EPressedDownState );
                     }
                 type == ESwapTransition ? iIsSwapFloating = ETrue : iIsSwapFloating = EFalse;
-                DrawActualItem( drawnItemIndex, rect, ETrue, EFalse, EFalse, EFalse );
+                if( ( type == EDrag && !ItemHasFloatingType( drawnItemIndex, EDragStart ) )
+                        || ( type != EDragTransition && type != EDrag
+                                && !ItemHasFloatingType( drawnItemIndex, EDragTransition ) )
+                        || ( type == EDragTransition )
+                    )
+					{
+                    DrawActualItem( drawnItemIndex, rect, ETrue, EFalse, EFalse, EFalse );
+					}
                 iIconAnimationZoomRatio = tempZoomRatio;
                 iZoomIconIndex = tempZoomIconIndex;
                 }
@@ -600,6 +608,17 @@ void CMmListBoxItemDrawer::DrawBackground( const TRect& aItemTextRect ) const
 //
 // -----------------------------------------------------------------------------
 //
+void CMmListBoxItemDrawer::AnimateDragItemStartL( TInt aDraggedIndex,
+        TPoint aPoint )
+    {
+    iAnimator->AnimateDragItemStartL( aDraggedIndex, aPoint );
+    iAnimator->Trigger();
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CMmListBoxItemDrawer::SetupSubNoCellL( TInt aIndex,
         TInt aItemIndex ) const
     {
@@ -739,7 +758,7 @@ TInt CMmListBoxItemDrawer::GetItemHeight( TInt aItemIndex, TBool aItemIsCurrent 
 //
 TInt CMmListBoxItemDrawer::GetFloatingItemCount()
     {
-    for( TInt i = 0; i < iFloatingItems.Count(); i++ )
+    for( TInt i( iFloatingItems.Count() - 1 ); i >= 0; i-- )
         {
         TMmFloatingItem& current = GetFloatingItemAtIndex( i );
         if( current.GetDrawnItemIndex() == KErrNotFound )
@@ -935,22 +954,36 @@ CMmDrawerAnimator* CMmListBoxItemDrawer::GetAnimator()
 // -----------------------------------------------------------------------------
 //
 void CMmListBoxItemDrawer::SetDraggedPointL( TPoint aPoint )
-  {
-  TInt dragFloatingItem = GetFloatingItemIndex(EDrag);
-  if (dragFloatingItem != KErrNotFound )
     {
-    TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
-    TMmFloatingItem floatingItem( item.GetDrawnItemIndex(),
-        aPoint,	EDrag, MmEffects::KNoAnimationFramesCount, NULL );
-    floatingItem.SetManualDelete( ETrue );
+    TInt dragFloatingItem = GetFloatingItemIndex( EDragStart );
+    if( KErrNotFound != dragFloatingItem )
+        {
+        TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
+        TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
+                item.GetItemPosition(), EPostDragRefreshItem,
+                MmEffects::KNoAnimationFramesCount, iWidget->View() );
+        if( postDragRefresh.GetItemPosition() != aPoint )
+            {
+            iFloatingItems.Append( postDragRefresh );
+            }
+        }
 
-    TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
+    if( dragFloatingItem == KErrNotFound
+            && ( dragFloatingItem = GetFloatingItemIndex( EDrag ) )
+                != KErrNotFound )
+        {
+        TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
+        TMmFloatingItem floatingItem( item.GetDrawnItemIndex(),
+                aPoint,	EDrag, MmEffects::KNoAnimationFramesCount, NULL );
+        floatingItem.SetManualDelete( ETrue );
+
+        TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
                 item.GetItemPosition(), EPostDragRefreshItem,
                 MmEffects::KNoAnimationFramesCount, iWidget->View() );
 
         iFloatingItems.Remove( dragFloatingItem );
 
-    if (postDragRefresh.GetItemPosition() != floatingItem.GetItemPosition())
+        if (postDragRefresh.GetItemPosition() != floatingItem.GetItemPosition())
             {
             iFloatingItems.Append( postDragRefresh );
             }
@@ -968,10 +1001,12 @@ void CMmListBoxItemDrawer::SetDraggedIndexL( TInt aDraggedItemIndex,
     TInt dragFloatingItem = KErrNotFound;
     do
         {
-        dragFloatingItem = GetFloatingItemIndex( EDrag );
+        dragFloatingItem = GetFloatingItemIndex( EDragStart );
+        if( dragFloatingItem == KErrNotFound )
+            dragFloatingItem = GetFloatingItemIndex( EDrag );
         if( dragFloatingItem != KErrNotFound )
             {
-        TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
+            TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
 
             TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
                     item.GetItemPosition(), EPostDragRefreshItem,
@@ -981,12 +1016,11 @@ void CMmListBoxItemDrawer::SetDraggedIndexL( TInt aDraggedItemIndex,
                 {
                 iFloatingItems.Append( postDragRefresh );
                 }
+            if( item.GetFloatingItemType() == EDrag )
+                RemoveFloatingItem( dragFloatingItem );
             }
-
-        RemoveFloatingItem( dragFloatingItem );
-
         }
-    while( dragFloatingItem != KErrNotFound );
+    while( GetFloatingItemIndex( EDrag ) != KErrNotFound );
 
     if( aDraggedItemIndex != KErrNotFound )
         {
@@ -994,6 +1028,11 @@ void CMmListBoxItemDrawer::SetDraggedIndexL( TInt aDraggedItemIndex,
                 MmEffects::KNoAnimationFramesCount, iWidget->View() );
         floatingItem.SetManualDelete( ETrue );
         AddFloatingItemL( floatingItem, 0 );
+
+        TMmFloatingItem postDragRefresh( aDraggedItemIndex,
+                iWidget->View()->ItemPos( aDraggedItemIndex ), EPostDragRefreshItem,
+                MmEffects::KNoAnimationFramesCount, iWidget->View() );
+        AddFloatingItemL( postDragRefresh );
 
         ClearFlags( CListItemDrawer::EPressedDownState );
         }
@@ -1523,6 +1562,10 @@ TBool CMmListBoxItemDrawer::IsFloating( TInt aItemIndex ) const
         {
         index = GetFloatingItemIndex( EDragTransition );
         }
+    if( index == KErrNotFound )
+        {
+        index = GetFloatingItemIndex( EDragStart );
+        }
 
     if( KErrNotFound != index )
         {
@@ -1564,8 +1607,9 @@ TBool CMmListBoxItemDrawer::GetHighlightVisibility( TInt aItemIndex,
     if( !iItemHasBackdrop && !iLeftOverAreaUnderAnimatedItem ) //never draw highlight when item has backdrop or when left over area under animated item
         {
         TBool currentlyDraggedItem =
-                ItemHasFloatingType( aItemIndex, EDrag ) ||
-                ItemHasFloatingType( aItemIndex, EDragTransition );
+                ItemHasFloatingType( aItemIndex, EDrag )
+                || ItemHasFloatingType( aItemIndex, EDragTransition )
+                || ItemHasFloatingType( aItemIndex, EDragStart );
 
         if( ( STATIC_CAST(CMmWidgetContainer*,Widget()->Parent())->IsHighlightVisible()
                 && aItemIsCurrent && aAllowHighlightForNonDraggedItem )
@@ -1585,8 +1629,9 @@ TBool CMmListBoxItemDrawer::GetBackdropVisibility( TInt aItemIndex,
         TBool aItemIsCurrent ) const
     {
     TBool currentlyDraggedItem =
-    ItemHasFloatingType( aItemIndex, EDrag ) ||
-    ItemHasFloatingType( aItemIndex, EDragTransition );
+            ItemHasFloatingType( aItemIndex, EDrag )
+            || ItemHasFloatingType( aItemIndex, EDragTransition )
+            || ItemHasFloatingType( aItemIndex, EDragStart );
 
     return 	IsEditMode() /* draw the backdrop only in edit mode */
         && !currentlyDraggedItem /* backdrop is disabled for dragged items */

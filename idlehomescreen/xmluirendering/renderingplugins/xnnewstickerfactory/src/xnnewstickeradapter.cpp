@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Implementation for wrapper for a label
+* Description:  Marquee control
 *
 */
 
@@ -37,9 +37,12 @@
 #include "xnnewstickercontrol.h"
 #include "xncomponentnodeimpl.h"
 
-
+// Constants
 const TInt KThousandCoef = 1000;
 const TInt KByteLength = 8;
+const TInt KXnNewstickerDelay = 1000000;   // start scrolling after a delay of 1 second
+const TInt KXnNewstickerInterval = 100000; // scroll 10 times in a second
+const TInt KXnNewstickerScrollAmount = 6;  // scroll 6 pixels at time
 
 
 // ============================= LOCAL FUNCTIONS ===============================
@@ -79,160 +82,132 @@ static TInt GetIntPropertyL( CXnNodePluginIf& aNode, const TDesC8& aProperty )
 void CXnNewstickerAdapter::SetNewstickerPropertiesL()
     {
     // scroll amount 
-    TInt scrollamount = GetIntPropertyL( iNode, 
-        XnPropertyNames::newsticker::KXnScrollAmount );   // px
+    TInt scrollamount( GetIntPropertyL( iNode, 
+        XnPropertyNames::newsticker::KXnScrollAmount ) );   // px
     
-    if( KErrNotFound == scrollamount )
+    if ( scrollamount == KErrNotFound )
         {
         scrollamount = KXnNewstickerScrollAmount;
         }
 
     CXnProperty* prop( iNode.GetPropertyL(
-            XnPropertyNames::newsticker::KScrollBehaviour ) );
+        XnPropertyNames::newsticker::KScrollBehaviour ) );
     
-    if( prop )
+    // Default
+    iScrollBehaviour = EScroll;
+    
+    if ( prop )
         {
-        if ( prop->StringValue() == 
-                XnPropertyNames::newsticker::scroll_behaviour::KAlternate )
+        const TDesC8& value( prop->StringValue() );
+        
+        if ( value == XnPropertyNames::newsticker::scroll_behaviour::KAlternate )                 
             {
             scrollamount = 0;
             iScrollBehaviour = EAlternate;
             }
-        else if ( prop->StringValue() == 
-                XnPropertyNames::newsticker::scroll_behaviour::KScrollAlternate )
+        else if ( value == XnPropertyNames::newsticker::scroll_behaviour::KScrollAlternate )                 
             {
             iScrollBehaviour = EScrollAlternate;
             }
-        else
-            {
-            iScrollBehaviour = EScroll;
-            }
         }
-    else
-        {
-        iScrollBehaviour = EScroll;
-        }        
-        
+    
     iMarqueeControl->SetSpeedInPixels( scrollamount );
     
-    if( iScrollBehaviour == EScroll )
+    if ( iScrollBehaviour == EScroll || iScrollBehaviour == EScrollAlternate )
         {                    
-        // scroll delay
-        TInt scrolldelay = GetIntPropertyL( iNode, 
-            XnPropertyNames::newsticker::KXnScrollDelay );  // ms
+        // scroll delay, i.e. fps
+        TInt scrolldelay( GetIntPropertyL( iNode, 
+            XnPropertyNames::newsticker::KXnScrollDelay ) );  // ms
         
-        if( KErrNotFound == scrolldelay )
+        if ( scrolldelay == KErrNotFound )
             {
             scrolldelay = KXnNewstickerInterval;
             }
         else 
             {
-            scrolldelay *= KThousandCoef;    // change to microseconds
+            // change to seconds
+            scrolldelay *= KThousandCoef;
             }
         
-        iMarqueeControl->SetInterval( scrolldelay ); 
-        iAlternateInterval = scrolldelay;
-            
+        iMarqueeControl->SetInterval( scrolldelay );         
+                                    
         // start delay
-        TInt startdelay = GetIntPropertyL( iNode, 
-            XnPropertyNames::newsticker::KXnStartDelay ); // ms
+        TInt startdelay( GetIntPropertyL( iNode, 
+            XnPropertyNames::newsticker::KXnStartDelay ) ); // ms
         
-        if( KErrNotFound == startdelay )
+        if ( startdelay == KErrNotFound )
             {
             startdelay = KXnNewstickerDelay;
             }
         else 
             {
-            startdelay *= KThousandCoef;    // change to microseconds
+            // change to seconds
+            startdelay *= KThousandCoef;
             }
         
         iMarqueeControl->SetDelay( startdelay );
         iAlternateDelay = startdelay;
-        }
-    else if( iScrollBehaviour == EScrollAlternate )
-		{
-        // scroll delay
-        TInt scrolldelay = GetIntPropertyL( iNode, 
-            XnPropertyNames::newsticker::KXnScrollDelay );  // ms
         
-        if( KErrNotFound == scrolldelay )
+        if ( iScrollBehaviour == EScrollAlternate )
             {
-            scrolldelay = KXnNewstickerInterval;
-            }
-        else 
-            {
-            scrolldelay *= KThousandCoef;    // change to microseconds
-            }
-        
-        iMarqueeControl->SetInterval( scrolldelay );
-        iAlternateInterval = scrolldelay;
-
-        TInt alternateTime( GetIntPropertyL( iNode, XnPropertyNames::newsticker::KDisplayTime ) );
-        
-        if( alternateTime == KErrNotFound )
-            {
-            alternateTime = 0;
-            }
-
-        alternateTime *= KThousandCoef; // change to ms                        
-
-        iAlternateInterval = alternateTime;
-
-        // start delay
-        TInt startdelay = GetIntPropertyL( iNode, 
-            XnPropertyNames::newsticker::KXnStartDelay ); // ms
-        
-        if( KErrNotFound == startdelay )
-            {
-            startdelay = 0;
-            }
-        else 
-            {
-            startdelay *= KThousandCoef;    // change to microseconds
-            }
-        
-        iMarqueeControl->SetDelay( startdelay );
-        iAlternateDelay = startdelay;
-        }
+            TInt alternateTime( GetIntPropertyL( iNode,  
+                XnPropertyNames::newsticker::KDisplayTime ) );
+            
+            if( alternateTime == KErrNotFound )
+                {
+                alternateTime = KXnNewstickerDelay;            
+                }
+            else
+                {
+                // change to seconds
+                alternateTime *= KThousandCoef; 
+                }
+                    
+            iAlternateDelay = alternateTime;            
+            }                    
+        }                
     else // TScrollBehaviour::EAlternate
         {
-        TInt alternateTime( GetIntPropertyL( iNode, XnPropertyNames::newsticker::KDisplayTime ) );
+        TInt alternateTime( GetIntPropertyL( 
+            iNode, XnPropertyNames::newsticker::KDisplayTime ) );
         
-        if( alternateTime == KErrNotFound )
+        if ( alternateTime == KErrNotFound )
             {
-            alternateTime = 0;
+            alternateTime = KXnNewstickerDelay;
+            }
+        else
+            {
+            // change to seconds    
+            alternateTime *= KThousandCoef; 
             }
 
-        alternateTime *= KThousandCoef; // change to ms                        
-
         iMarqueeControl->SetDelay( 0 );
-        iMarqueeControl->SetInterval( alternateTime );
+        iMarqueeControl->SetInterval( 0 );
         
-        iAlternateDelay = 0;
-        iAlternateInterval = alternateTime;
+        iAlternateDelay = alternateTime;        
         }        
     
     // _s60-scroll-loop property. True by default.
     CXnProperty* loopProp( iNode.GetPropertyL(
-            XnPropertyNames::newsticker::KScrollLoop ) );
+        XnPropertyNames::newsticker::KScrollLoop ) );
     
-    if( loopProp && loopProp->StringValue() == XnPropertyNames::KFalse )
+    TBool looping( ETrue );
+    
+    if ( loopProp && loopProp->StringValue() == XnPropertyNames::KFalse )
         {
-        iScrollLooping = EFalse;
+        looping = EFalse;
         }
-    else
-        {
-        iScrollLooping = ETrue;
-        }    
+    
+    iControl->SetScrollLooping( looping );
     
     CXnProperty* restartProperty( iNode.GetPropertyL(
-            XnPropertyNames::newsticker::KRestartAfterUpdate ) );
+        XnPropertyNames::newsticker::KRestartAfterUpdate ) );
     
     if ( restartProperty && restartProperty->StringValue() == XnPropertyNames::KTrue )
         {
         iRestartAfterUpdate = ETrue;
         }
-     }
+    }  
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -269,7 +244,7 @@ void CXnNewstickerAdapter::ConstructL( CXnControlAdapter* aParent )
     iMarqueeControl->SetContainerWindowL( *aParent );
     iMarqueeControl->ActivateL();
     
-    iPeriodicTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iPeriodicTimer = CPeriodic::NewL( CActive::EPriorityLow );
     
     SetTextPropertiesL();
     SetNewstickerPropertiesL();
@@ -281,39 +256,15 @@ void CXnNewstickerAdapter::ConstructL( CXnControlAdapter* aParent )
         {
         CXnNodePluginIf* child( children[i] );
         
-        CXnType* xnType = child->Type();
-        
+        const TDesC8& type( child->Type()->Type() );
+                
         // We only care for <title> nodes
-        if ( xnType && xnType->Type() == XnPropertyNames::title::KTitle )
+        if ( type == XnPropertyNames::title::KTitle )
             {
-            // Append  title, if one is given from the theme use that.
-            // If no content yet available create empty title so that 
-            // indexing is always current
-            const TDesC8& pcData( child->GetPCData() );
-    
-            HBufC* pcData16 = CnvUtfConverter::ConvertToUnicodeFromUtf8L( pcData );
-            CleanupStack::PushL( pcData16 );
-    
-            TPtr ptr( pcData16->Des() );
-    
-            CXnUtils::CollapseWhiteSpace( iNode, ptr );
-    
-            if( ptr.Length() > 0 )
-                {
-                iControl->AppendTitleL( *pcData16 );
-                }
-            else
-                {
-                iControl->AppendTitleL( KNullDesC );
-                }
-    
-            CleanupStack::PopAndDestroy( pcData16 );
+            iControl->AppendTitleL( KNullDesC );    
             }
         }
-    CleanupStack::PopAndDestroy( &children );
-    
-    iControl->SetCurrentTitle( ETrue );
-    
+    CleanupStack::PopAndDestroy( &children );          
     }
 
 // -----------------------------------------------------------------------------
@@ -324,14 +275,13 @@ void CXnNewstickerAdapter::ConstructL( CXnControlAdapter* aParent )
 CXnNewstickerAdapter::CXnNewstickerAdapter( CXnControlAdapter* /*aParent*/, 
     CXnNodePluginIf& aNode )
     : iNode( aNode ),
-      iPowerSaveMode( ETrue ),
+      iPowerSaveMode( EFalse ),
       iRestartAfterUpdate( EFalse ),
       iTextColor( KRgbBlack ),
-      iTextAlignment( ELayoutAlignLeft ),
+      iTextAlignment( CGraphicsContext::ELeft ),
       iTextBaseline( 0 ),
       iUnderlining( EUnderlineOff ),
-      iStrikethrough( EStrikethroughOff ),
-      iScrollLooping( ETrue ),
+      iStrikethrough( EStrikethroughOff ),      
       iRedraw( ETrue )
     {
     }
@@ -343,11 +293,6 @@ CXnNewstickerAdapter::CXnNewstickerAdapter( CXnControlAdapter* /*aParent*/,
 //
 CXnNewstickerAdapter::~CXnNewstickerAdapter()
     {           
-    if( iPeriodicTimer && iPeriodicTimer->IsActive() )
-        {
-        iPeriodicTimer->Cancel();
-        }
-        
     delete iPeriodicTimer;
 
     if( iFont && ( iReleaseFont == 1 ) )
@@ -358,7 +303,6 @@ CXnNewstickerAdapter::~CXnNewstickerAdapter()
     
     delete iMarqueeControl;
     delete iControl;
-
     }
 
 // -----------------------------------------------------------------------------
@@ -477,15 +421,13 @@ void CXnNewstickerAdapter::SetTextPropertiesL()
     switch( alignment )
         {
         case EHCenterVCenter:            
-            iTextAlignment = ELayoutAlignCenter;                 
-            break;
-            
+            iTextAlignment = CGraphicsContext::ECenter;                 
+            break;            
         case EHRightVCenter:            
-            iTextAlignment = ELayoutAlignRight;                
-            break;
-            
+            iTextAlignment = CGraphicsContext::ERight;                
+            break;            
         default: 
-            iTextAlignment = ELayoutAlignLeft;
+            iTextAlignment = CGraphicsContext::ELeft;
             break;    
         }   
     }
@@ -520,9 +462,8 @@ void CXnNewstickerAdapter::UpdateTitleL( const TDesC& aTitle, TInt aIndex )
     iNode.SetDirtyL();
     
     if ( iRestartAfterUpdate )
-        {
-        Stop();
-        Start();
+        {        
+        Restart();
         }
     }
 
@@ -565,68 +506,63 @@ void CXnNewstickerAdapter::ClearTitles()
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::SetCallbackInterfaceL
+// CXnNewstickerAdapter::Restart
 // -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::SetCallbackInterfaceL(
-        XnNewstickerInterface::MXnNewstickerCallbackInterface* aCallback )
+void CXnNewstickerAdapter::Restart()
     {
-    iCallback = aCallback;
+    Stop();
+    Start( ETrue );                
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::TitleScrolled
+// CXnNewstickerAdapter::Start
 // -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::TitleScrolled( TInt aTitleIndex )
+void CXnNewstickerAdapter::Start( TBool aSelectTitle )
     {
-    if( iCallback )
+    if ( IsVisible() && !iPowerSaveMode && !iNode.Rect().IsEmpty() )
         {
-        iCallback->TitleScrolled( aTitleIndex );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNewstickerAdapter::StartL
-// -----------------------------------------------------------------------------
-//
-void CXnNewstickerAdapter::Start()
-    {
-    if( IsVisible() && !iPowerSaveMode )
-        {
-        if( iControl->TitleCount() < 1 )
+        if ( aSelectTitle )
             {
-            // Nothing to show
-            return;
+            if ( iControl->SelectTitle() == KErrNotFound )
+                {
+                return;
+                }
             }
         
-        switch( iScrollBehaviour )
+        const TDesC& title( iControl->CurrentTitle() );
+                                
+        switch ( iScrollBehaviour )
             {
             case EScroll:
+            case EScrollAlternate:
                 {
                 iMarqueeControl->EnableMarquee( ETrue );
                 iRedraw = ETrue;
-                }
-                break;
+
+                TInt textWidth( 
+                    iFont->TextWidthInPixels( title ) );
                 
+                TInt rectWidth( iNode.Rect().Width() );
+                
+                if ( textWidth < rectWidth )
+                    {
+                    StartAlternateCounter();
+                    }                                
+                }
+                break;                
             case EAlternate:
                 {
                 iMarqueeControl->EnableMarquee( EFalse );
                 StartAlternateCounter();  
                 }
-                break;
-                
-            case EScrollAlternate:
-                {
-                iMarqueeControl->EnableMarquee( ETrue );
-                StartAlternateCounter(); 
-                iRedraw = ETrue;
-                }
-                break;
-                
+                break;                
             default:
                 break;
             }
+        
+        DrawDeferred();
         }
     }
 
@@ -646,10 +582,7 @@ void CXnNewstickerAdapter::Stop()
 //
 void CXnNewstickerAdapter::StopAlternateCounter()
     {
-    if( iPeriodicTimer && iPeriodicTimer->IsActive() )
-        {
-        iPeriodicTimer->Cancel();
-        }
+    iPeriodicTimer->Cancel();    
     }
 
 // -----------------------------------------------------------------------------
@@ -668,15 +601,12 @@ void CXnNewstickerAdapter::StopMarquee()
 //
 void CXnNewstickerAdapter::StartAlternateCounter()
     {
-    if( iPeriodicTimer && iPeriodicTimer->IsActive() )
-        {
-        iPeriodicTimer->Cancel();
-        }
-
+    iPeriodicTimer->Cancel();
+    
     iPeriodicTimer->Start(                
         TTimeIntervalMicroSeconds32( iAlternateDelay ),
-        TTimeIntervalMicroSeconds32( iAlternateInterval ), 
-        TCallBack( CXnNewstickerAdapter::PeriodicEventL, this ) ); 
+        TTimeIntervalMicroSeconds32( 0 ), 
+        TCallBack( PeriodicEventL, this ) ); 
     }
 
 // -----------------------------------------------------------------------------
@@ -686,9 +616,17 @@ void CXnNewstickerAdapter::StartAlternateCounter()
 TInt CXnNewstickerAdapter::PeriodicEventL( TAny* aPtr )
     {
     __PRINTS( "CXnNewstickerAdapter::PeriodicEventL, timer runs" );
+    
     CXnNewstickerAdapter* self = static_cast< CXnNewstickerAdapter* >( aPtr );
-    self->DoScroll();
+    
+    self->iPeriodicTimer->Cancel();
+    
+    TBool endOfLoop( self->iControl->SelectNextTitle() );
+    
+    self->DoScroll( endOfLoop );
   
+    self->DrawNow();
+    
     return KErrNone;
     }
 
@@ -700,9 +638,9 @@ void CXnNewstickerAdapter::MakeVisible( TBool aVisible )
     {
     CCoeControl::MakeVisible( aVisible );
 
-    if( aVisible )
+    if ( aVisible )
         {
-        Start();
+        Restart();
         }
     else
         {
@@ -719,7 +657,7 @@ void CXnNewstickerAdapter::SizeChanged()
     CXnControlAdapter::SizeChanged();         
     iMarqueeControl->SetExtent( iNode.Rect().iTl, iNode.Rect().Size() );
     
-    iTextBaseline = iNode.Rect().Height() / 2 + iFont->AscentInPixels() / 2;
+    iTextBaseline = iNode.Rect().Height() / 2 + iFont->AscentInPixels() / 2;    
     }
 
 // -----------------------------------------------------------------------------
@@ -737,14 +675,12 @@ TInt CXnNewstickerAdapter::CountComponentControls() const
 //
 CCoeControl* CXnNewstickerAdapter::ComponentControl( TInt aIndex ) const
     {
-    switch ( aIndex )
+    if ( aIndex == 0 )
         {
-        case 0:
-            return iMarqueeControl;
-            
-        default:
-            return NULL;
+        return iMarqueeControl;
         }
+
+    return NULL;        
     }
 
 // -----------------------------------------------------------------------------
@@ -771,10 +707,11 @@ void CXnNewstickerAdapter::SkinChanged()
 // CXnNewstickerAdapter::ReportNewstickerEventL
 // -----------------------------------------------------------------------------
 // 
-void CXnNewstickerAdapter::ReportNewstickerEvent( const TDesC8& aEventName )
+void CXnNewstickerAdapter::ReportNewstickerEvent( const TDesC8& aEventName,
+    TInt aIndex )
     { 
-    TBuf8<KByteLength>index( KNullDesC8 );
-    index.Num( CurrentTitleIndex() );
+    TBuf8< KByteLength >index( KNullDesC8 );
+    index.Num( aIndex );
     
     TRAP_IGNORE( iNode.ReportTriggerEventL( aEventName,
             XnPropertyNames::action::trigger::name::KTitleIndex, index ); )
@@ -786,7 +723,14 @@ void CXnNewstickerAdapter::ReportNewstickerEvent( const TDesC8& aEventName )
 // -----------------------------------------------------------------------------
 void CXnNewstickerAdapter::Draw( const TRect& aRect ) const
     {    
-    const_cast<CXnNewstickerAdapter*>(this)->DrawText( iControl->SelectTitle(), aRect );
+    CXnControlAdapter::Draw( aRect );
+    
+    if ( iControl->CurrentTitleIndex() != KErrNotFound )
+        {
+        const TDesC& title( iControl->CurrentTitle() );
+        
+        const_cast< CXnNewstickerAdapter* >( this )->DrawText( title );             
+        }
     }
     
 // -----------------------------------------------------------------------------
@@ -796,6 +740,7 @@ void CXnNewstickerAdapter::Draw( const TRect& aRect ) const
 void CXnNewstickerAdapter::DoEnterPowerSaveModeL( TModeEvent /*aEvent*/ )
     {     
     iPowerSaveMode = ETrue;
+    
     Stop();
     }
 
@@ -807,9 +752,9 @@ void CXnNewstickerAdapter::DoExitPowerSaveModeL( TModeEvent /*aEvent*/ )
     {
     iPowerSaveMode = EFalse;
     
-    if( IsVisible() )
+    if ( IsVisible() )
         {
-        Start();
+        Restart();
         }
     }
 
@@ -817,61 +762,65 @@ void CXnNewstickerAdapter::DoExitPowerSaveModeL( TModeEvent /*aEvent*/ )
 // CXnNewstickerAdapter::DrawText
 // Text drawing function is selected by scrolling behaviour
 // -----------------------------------------------------------------------------
-void CXnNewstickerAdapter::DrawText( const TDesC& aText, const TRect& aRect )
+void CXnNewstickerAdapter::DrawText( const TDesC& aText )
     {    
-    CWindowGc& gc = SystemGc();
+    CWindowGc& gc( SystemGc() );
     
-    TRect rect = iNode.Rect();
-           
-    CXnControlAdapter::Draw( aRect );
-    
+    TRect rect( iNode.Rect() );
+                  
     gc.SetPenColor( iTextColor );
     gc.UseFont( iFont );
     gc.SetUnderlineStyle( iUnderlining );
     gc.SetStrikethroughStyle( iStrikethrough );
            
-    TInt textWidth = iFont->TextWidthInPixels( aText );
-    TInt rectWidth = rect.Width();
+    TInt textWidth( iFont->TextWidthInPixels( aText ) );
+    TInt rectWidth( rect.Width() );
     
-    switch( iScrollBehaviour )
+    switch ( iScrollBehaviour )
         {  
         case EScroll:
         case EScrollAlternate:
             {
-            if( !iRedraw || textWidth < rectWidth )
+            if ( !iRedraw || textWidth < rectWidth )                 
                 {
                 iMarqueeControl->Stop();
-                DrawStaticText( gc, aText );
+                DrawStaticText( gc, aText );                
                 }
             else
                 {
                 iMarqueeControl->Start();
-                TBool isLast = DrawMarqueeText( gc, aText );
-                
-                if( isLast )
+
+                iRedraw = !DrawMarqueeText( gc, aText );   
+                                                   
+                if ( !iRedraw )                    
                     {
-                    if( !iScrollLooping )
+                    // Marquee is in end
+                    if ( iPeriodicTimer && !iPeriodicTimer->IsActive() )
                         {
-                        iRedraw = EFalse;
+                        iPeriodicTimer->Start(                
+                            TTimeIntervalMicroSeconds32( 0 ),
+                            TTimeIntervalMicroSeconds32( 0 ), 
+                            TCallBack( PeriodicEventL, this ) );                         
                         }
                     
-                    iMarqueeControl->Reset();
-                    StartAlternateCounter();
-                    }
-                }
+                    TBool endOfLoop;
+                    
+                    const TDesC& next( iControl->PeekNextTitle( endOfLoop ) );
+                    
+                    DrawStaticText( gc, next, endOfLoop );                    
+                    }                
+                }                        
             }
-            break;
-            
+            break;            
         case EAlternate:
             {
             DrawStaticText( gc, aText );
             }
-            break;
-            
+            break;            
         default:
             break;
         }
-      }
+    }
 
 // -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::RedrawCallback
@@ -880,31 +829,35 @@ void CXnNewstickerAdapter::DrawText( const TDesC& aText, const TRect& aRect )
 //
 TInt CXnNewstickerAdapter::RedrawCallback( TAny* aPtr )
     {
-    CXnNewstickerAdapter* self = static_cast<CXnNewstickerAdapter*>( aPtr );
-    self->DrawNow();
-
-    return self->Redraw();
- 
+    CXnNewstickerAdapter* self = static_cast< CXnNewstickerAdapter* >( aPtr );
+    
+    if ( self->iRedraw )
+        {
+        self->DrawNow();        
+        }
+            
+    return self->iRedraw; 
     }
 
 // -----------------------------------------------------------------------------
 // CXnNewstickerAdapter::DoScroll
-// Scrolls alternative text. Function is called by periodic timer
+// 
 // -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::DoScroll()
+void CXnNewstickerAdapter::DoScroll( TBool aEndOfLoop )
     {
-    ReportNewstickerEvent( XnPropertyNames::action::trigger::name::KTitleScrolled );
+    iMarqueeControl->Reset();
+        
+    iRedraw = EFalse;
     
-    if( iControl->SetCurrentTitle() )
-        {
-        // stop alternate scrolling if current index is last
-        StopAlternateCounter();
+    if ( !aEndOfLoop )
+        {        
+        Start();
         }
-    
-    DrawNow();
- 
-    ReportNewstickerEvent( XnPropertyNames::action::trigger::name::KTitleToScroll );
+    else 
+        {
+        Stop();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -912,17 +865,22 @@ void CXnNewstickerAdapter::DoScroll()
 // Draws text directly to screen when scrolling is not needed
 // -----------------------------------------------------------------------------
 //
-void CXnNewstickerAdapter::DrawStaticText( CWindowGc& aGc, const TDesC& aText ) const
+void CXnNewstickerAdapter::DrawStaticText( CWindowGc& aGc, 
+    const TDesC& aText, TBool aTruncate ) const
     { 
     HBufC* text = HBufC::New( aText.Length() + KAknBidiExtraSpacePerLine );
     
-    if( text )
+    if ( text )
         {
-        TRect rect = iNode.Rect();
+        TRect rect = iNode.Rect();        
         TInt maxLength = rect.Width();
+        
+        TChar clipChar( aTruncate ? KEllipsis : 0xFFFF );
+        
         TPtr ptr = text->Des();
         AknBidiTextUtils::ConvertToVisualAndClip(
-                aText, ptr, *iFont, maxLength, maxLength );
+                aText, ptr, *iFont, maxLength, maxLength, 
+                AknBidiTextUtils::EImplicit, clipChar );
         
         aGc.DrawText( *text, rect, iTextBaseline,
                 ( CGraphicsContext::TTextAlign )iTextAlignment );
@@ -936,9 +894,10 @@ void CXnNewstickerAdapter::DrawStaticText( CWindowGc& aGc, const TDesC& aText ) 
 // Draws scrolling text to screen via marquee control
 // -----------------------------------------------------------------------------
 //
-TBool CXnNewstickerAdapter::DrawMarqueeText( CWindowGc& aGc, const TDesC& aText ) const
+TBool CXnNewstickerAdapter::DrawMarqueeText( CWindowGc& aGc, 
+    const TDesC& aText ) const
     {
-    TRect rect = iNode.Rect();
+    TRect rect( iNode.Rect() );
     
     // returns true when all loops have been executed
     return iMarqueeControl->DrawText( aGc, rect, aText, iTextBaseline,

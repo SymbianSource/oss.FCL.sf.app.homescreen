@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxItemDrawer
-*  Version     : %version: MM_38.1.18 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_38.1.19 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -484,6 +484,17 @@ public:
      * @param aItemTextRect Item rectangle.
      */
     void DrawBackground( const TRect& aItemTextRect ) const;
+
+    /**
+     * Animates transition of the dragged item.
+     * The animation starts in the original place of dragging item,
+     * and end in the EDrag floating item position, when item had been start drag.
+     *
+     * @since S60 v5.0
+	 * @param aDraggedIndex Draged item index to be animated.
+	 * @param aPoint End position of animated item.
+     */
+    void AnimateDragItemStartL( TInt aDraggedIndex, TPoint aPoint );
 
 protected:
     /**

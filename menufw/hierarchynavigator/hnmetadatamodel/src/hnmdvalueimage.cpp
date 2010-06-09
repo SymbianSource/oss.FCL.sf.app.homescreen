@@ -36,6 +36,7 @@
 #include "menudebug.h"
 #include "hnbitmapidcache.h"
 
+_LIT( KGridRootMif, "gridroot.mif" );
 // ======== MEMBER FUNCTIONS ========
 
 // ---------------------------------------------------------------------------
@@ -277,26 +278,9 @@ HBufC* CHnMdValueImage::GetFileNameSrcL()
 HBufC* CHnMdValueImage::FindMatchigMifFileL( const RFs& aFs, TDesC& aFileName )
     {
     DEBUG16(("_MM_: CHnMdValueImage::FindMatchigMifFileL IN"));
-
-    _LIT( KGridRootMif, "gridroot.mif" );
-
-    // whole path to the mif file was not specified
-    TDriveList driveList;
     HBufC* ret = NULL;
-
-    if ( aFileName == KGridRootMif )
-        {
-        ret = HBufC::NewL(
-                1 + KRscPath().Length() + // 1 - drive letter len.
-                aFileName.Length() );
-        TPtr ptr( ret->Des() );
-        TChar driveLetter;
-        aFs.DriveToChar( EDriveZ, driveLetter );
-        ptr.Append( driveLetter );
-        ptr.Append( KRscPath );
-        ptr.Append( aFileName );
-        }
-    else if ( KErrNone == aFs.DriveList( driveList ) )
+    TDriveList driveList;
+    if ( KErrNone == aFs.DriveList( driveList ) )
         {
         TInt driveNumber( EDriveY ); // start with drive Y
         do // iterates through drives: Y, X, W, ..., C, B, A, Z
@@ -352,7 +336,21 @@ HBufC* CHnMdValueImage::GetMifFileNameL()
     TInt errCode = HnLiwUtils::GetStringL( *iParamList, iMifFile8, iPos, tmpBuf );
     if ( tmpBuf.Length() )
         {
-        if ( BaflUtils::FileExists( iCmnPtrs->iFs, tmpBuf ) )
+        TDriveList driveList;
+        if ( tmpBuf == KGridRootMif )
+            {
+            HBufC* temp = HBufC::NewL(
+                   1 + KRscPath().Length() + // 1 - drive letter len.
+                   tmpBuf.Length() );
+            TPtr ptr( temp->Des() );
+            TChar driveLetter;
+            iCmnPtrs->iFs.DriveToChar( EDriveZ, driveLetter );
+            ptr.Append( driveLetter );
+            ptr.Append( KRscPath );
+            ptr.Append( tmpBuf );
+            ret = temp;
+            }
+        else if ( BaflUtils::FileExists( iCmnPtrs->iFs, tmpBuf ) )
             {
             // return fileName as it is
             ret = tmpBuf.AllocL();
@@ -572,64 +570,4 @@ void CHnMdValueImage::CreateKeysLC( RBuf8& aKeyBitmap, RBuf8& aBitmapIdBuf,
 	aKeyMask.Append( aMaskIdBuf );
 	}
 
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//  
-//CGulIcon* CHnMdValueImage::GetIconL(
-//        const CLiwGenericParamList* aQueriesResultsList, TInt aPos )
-//    {
-//    CGulIcon* gulIcon = NULL;
-//
-//    iParamList = aQueriesResultsList;
-//    iPos = aPos;
-//    
-//    // only to set iImageSource, to be optimized    
-//    SetImageSourceL();
-//    
-//    TSize defaultSize( KDefaultIconSize, KDefaultIconSize );
-//    
-//    CFbsBitmap* bitmap = NULL; 
-//    CFbsBitmap* mask = NULL;
-//        
-//    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-//    
-//    switch( iImageSource )
-//        {
-//        case EImageSourceResource:
-//            {
-//            TInt bitmapId = 0;
-//            TInt maskId = 0;
-//            GetBitmapAndMaskIdL(bitmapId, maskId);
-//            if ( iMifFileName && bitmapId != KErrNotFound )
-//                {
-//                AknsUtils::CreateIconL(
-//                        skin, SkinIdL(), bitmap, mask,
-//                        *iMifFileName, bitmapId, maskId );
-//                }
-//            }
-//            break;
-//        default:
-//            {
-//            User::Panic( KMatrixPanic , 1 );
-//            }    
-//        }
-//       
-//    if ( EImageSourceUndefined != iImageSource )
-//        {        
-//        if ( EImageSourceFile != iImageSource )
-//            {
-//            gulIcon = CGulIcon::NewL( bitmap, mask );
-//            AknIconUtils::SetSize( mask, defaultSize );
-//            AknIconUtils::SetSize( bitmap, defaultSize );
-//            }
-//        else
-//            {
-//            gulIcon = CGulIcon::NewL( bitmap );
-//            AknIconUtils::SetSize( bitmap, defaultSize );
-//            }
-//        }
-//    
-//    return gulIcon;
-//    }
 

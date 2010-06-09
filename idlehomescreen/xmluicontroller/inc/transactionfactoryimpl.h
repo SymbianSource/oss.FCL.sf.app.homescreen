@@ -60,36 +60,27 @@ public:  // Constructors and destructor
     
     void ReleaseTransaction( MTransaction* aTransaction );
 
-    MTransactionElement* CreateTextTransactionElementL( CXnNodeAppIf& aTarget,
-                                                        const TDesC& aText,
-                                                        TInt aPriority );
-    
+    MTransactionElement* CreateTextTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC& aText, TInt aPriority );
+                                                                                                                   
     MTransactionElement* CreateDataBufferTransactionElementL( 
-                                                        CXnNodeAppIf& aTarget,
-                                                        const TDesC8& aData,
-                                                        TInt aPriority );
+        CXnNodeAppIf& aTarget, const TDesC8& aData, TInt aPriority );
+                                                                                                                
+    MTransactionElement* CreateDataBufferTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC8& aData, TInt aPriority, 
+        const TDesC& aCid, TInt aIndex );
+                                                        
+    MTransactionElement* CreateEmptyContentTransactionElementL( 
+        CXnNodeAppIf& aTarget, TInt aIndex );
+                                                                
+    MTransactionElement* CreateImageTransactionElementL( 
+        CXnNodeAppIf& aTarget, CGulIcon* aIcon, TInt aPriority );
+                                                                                                                            
+    MTransactionElement* CreateImageTransactionElementL( 
+        CXnNodeAppIf& aTarget, RFile& aFile, TInt aPriority );
 
-    MTransactionElement* CreateEmptyContentTransactionElementL( CXnNodeAppIf& aTarget,
-                                                                TInt aIndex );
-
-    MTransactionElement* CreateImageTransactionElementL( CXnNodeAppIf& aTarget,
-                                                         CGulIcon* aIcon,        
-                                                         TInt aPriority );
-    
-    MTransactionElement* CreateImageTransactionElementL( CXnNodeAppIf& aTarget,
-                                                         RFile& aFile,
-                                                         TInt aPriority );
-    
-    /**
-     * @param aTarget
-     * @param aText new text
-     * @param aPriority
-     * @param aIndex Index of the news ticker element updated
-     */
-    MTransactionElement* CreateNewsTickerTransactionElementL( CXnNodeAppIf& aTarget,
-                                                        const TDesC& aText,
-                                                        TInt aPriority,
-                                                        TInt aIndex );
+    MTransactionElement* CreateNewsTickerTransactionElementL( 
+        CXnNodeAppIf& aTarget, const TDesC& aText, TInt aPriority, TInt aIndex );
     
     void ReleaseTransactionElement( MTransactionElement* aElement );
 

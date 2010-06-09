@@ -122,6 +122,13 @@ public:
     void HandleScreenDeviceChangedL();
 
     /**
+     * Sets control rect.
+     *
+     * @since Series 60 5.0
+     */
+    void SetClientRect( TRect aRect );
+
+    /**
      * Reset the dragging state and update screen
      *
      * @since Series 60 5.0

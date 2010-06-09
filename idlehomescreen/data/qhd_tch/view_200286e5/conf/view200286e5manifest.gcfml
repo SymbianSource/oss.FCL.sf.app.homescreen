@@ -3,8 +3,8 @@
 	<tag name="target" value="core"/>
 	<tag name="target" value="rofs2"/>
 	<tag name="target" value="rofs3"/>
-	<tag name="target" value="uda"/>
-	<tag name="target" value="emmc"/>
+<!--	<tag name="target" value="uda"/>
+	<tag name="target" value="emmc"/> -->
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="manifest.dat" target="\private\200159c0\install\view_200286e5\hsps\00\">
 	<setting ref="Homescreen3manifest/PackageVersion"/>
 	<setting ref="Homescreen3manifest/DeviceFamily"/>

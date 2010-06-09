@@ -18,7 +18,6 @@
 #include <sysutil.h> 
 #include "hnxmlmodelprovider.h"
 #include "hnxmlmodelcache.h"	
-#include "hnxmlsuitefilesreg.h"
 #include "hnglobals.h"
 #include "hnconvutils.h"
 #include "menudebug.h"
@@ -36,75 +35,9 @@ void CHnXmlModelProvider::ConstructL()
 	{
 	iDomImpl.OpenL();
 	User::LeaveIfError(iDomParser.Open(iDomImpl));
-	User::LeaveIfError(iFs.Connect());
-	iFileMan = CFileMan::NewL(iFs);
-
-	iPath.CreateL(KMaxPath);
-	User::LeaveIfError(iFs.PrivatePath(iPath));
-	iPath.Insert(0, KDrive);
-	iPath.Append(KEntriesSuffix);
 	iCache = CHnXmlModelCache::NewL();
-	
-	CActiveScheduler::Add( this);
 	}
 
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnXmlModelProvider::DoCancel()
-	{
-	
-	}
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnXmlModelProvider::SynchronizationFinishedL()
-	{
-	ResetCache();
-	THnMdCommonPointers &cmnPtr = *THnMdCommonPointers::Static();
-	CHnMdModel* model = cmnPtr.iModel;
-	if ( iSuiteFilesUpdated )
-	    {
-	    model->ReloadStackSuitesL( cmnPtr.iContainer );
-	    }
-	}
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnXmlModelProvider::RunL()
-	{
-	if ( !iSuiteSetIterator )
-		{
-		CheckDrivesL();
-	    iSuiteSetIterator = new ( ELeave ) THashSetIter<HBufC*>( iInstSuites );
-	    iSuiteSetIterator->Reset();
-	    iStatus = KRequestPending;
-	    SetActive();
-	    TRequestStatus* status = &iStatus;
-	    User::RequestComplete( status, KErrNone );
-		}
-	else if ( iSuiteSetIterator->Next() )
-		{
-		TBool filesUpdated = CHnXmlSuiteFilesReg::SynchronizeL(
-                iFs, **(iSuiteSetIterator->Current()) );
-        iSuiteFilesUpdated = ( iSuiteFilesUpdated || filesUpdated ); 
-	    iStatus = KRequestPending;
-	    SetActive();
-	    TRequestStatus* status = &iStatus;
-	    User::RequestComplete( status, KErrNone );
-		}
-	else
-		{
-		delete iSuiteSetIterator;
-		iSuiteSetIterator = NULL;
-		SynchronizationFinishedL();
-		}
-	}
-	
 // ---------------------------------------------------------------------------
 // 
 // ---------------------------------------------------------------------------
@@ -132,11 +65,7 @@ EXPORT_C CHnXmlModelProvider* CHnXmlModelProvider::NewLC()
 // 
 // ---------------------------------------------------------------------------
 //
-CHnXmlModelProvider::CHnXmlModelProvider() :
-	CActive( EPriorityLow ),	
-	iInstSuites(&HBuf16Hash, &HBuf16Ident),
-	iEventMap(&HBuf16Hash, &HBuf16Ident), 
-	iSuiteSetIterator( NULL )
+CHnXmlModelProvider::CHnXmlModelProvider(): iEventMap(&HBuf16Hash, &HBuf16Ident)
 	{
 	 
 	}
@@ -147,15 +76,9 @@ CHnXmlModelProvider::CHnXmlModelProvider() :
 //
 EXPORT_C CHnXmlModelProvider::~CHnXmlModelProvider()
 	{
-	Cancel(); 
-	
-	delete iSuiteSetIterator;
 	delete iCache;
 	iDomParser.Close();
 	iDomImpl.Close();
-	delete iFileMan;
-	iFs.Close();
-	iPath.Close();
 
 	// clean up eventmap
 	THashMapIter<HBufC*, TInt> iter(iEventMap);
@@ -164,14 +87,6 @@ EXPORT_C CHnXmlModelProvider::~CHnXmlModelProvider()
 		delete *ptr;
 		}
 	iEventMap.Close();
-
-	THashSetIter<HBufC*> iterSuites(iInstSuites);
-	while ( iterSuites.Next())
-		{
-		delete *iterSuites.Current();
-		}
-	iInstSuites.Close();
-
 	}
 
 #ifdef _DEBUG
@@ -275,7 +190,8 @@ RXmlEngDocument CHnXmlModelProvider::ParseDocL( const TDesC8& aDoc )
 HBufC8* CHnXmlModelProvider::ReadFileLC(const TDesC& aPath)
     {
     RFile file;
-    User::LeaveIfError( file.Open(iFs, aPath, EFileRead) );
+    User::LeaveIfError( file.Open( CEikonEnv::Static()->FsSession(),
+                                   aPath, EFileRead) );
     CleanupClosePushL( file );
     
     TInt fileSize(0);
@@ -326,25 +242,13 @@ void CHnXmlModelProvider::ChangeEventsToIdsInChildrenL(
 // 
 // ---------------------------------------------------------------------------
 //
-TInt CHnXmlModelProvider::CollectSuiteL(const TDesC& aSuiteName,
-		RXmlEngDocument& aXmlDoc)
+TInt CHnXmlModelProvider::CollectSuiteL( RXmlEngDocument& aXmlDoc )
 	{
-	TInt err(KErrNotFound);
-	TBuf<KMaxPath> filePath;
-	TBuf<KMaxPath> KsuitePath;
-	KsuitePath.Zero();
-	KsuitePath.Copy(iPath);
-	KsuitePath.Append(aSuiteName);
-	KsuitePath.Append(Kbackslash);
-
-	filePath.Zero();
-	filePath.Copy(KsuitePath);
-	filePath.Append(KSuiteDefFileName);
-
-	RXmlEngDocument suiteDoc;
-	CleanupClosePushL(suiteDoc);
-	
-	suiteDoc = ParseFileL(filePath);
+    TInt err(KErrNotFound);
+    RXmlEngDocument suiteDoc;
+	CleanupClosePushL( suiteDoc );
+	//hardcoded path for suites as there is only foldersuite
+	suiteDoc = ParseFileL( KFolderSuitePath );
     
     // one suite per file
     RXmlEngNodeList<TXmlEngElement> elements;
@@ -372,133 +276,86 @@ TInt CHnXmlModelProvider::CollectSuiteL(const TDesC& aSuiteName,
 // 
 // ---------------------------------------------------------------------------
 //
-TBool CHnXmlModelProvider::SuiteExistsL( const TDesC& aSuite )
+void CHnXmlModelProvider::CollectItemsL( RXmlEngDocument& aXmlDoc )
     {
-    TBuf<KMaxPath> filePath;
-    TBuf<KMaxPath> KsuitePath;
-    KsuitePath.Zero();
-    KsuitePath.Copy( iPath );
-    KsuitePath.Append( aSuite );
-    KsuitePath.Append( Kbackslash );
-
-    filePath.Zero();
-    filePath.Copy( KsuitePath );
-    filePath.Append( KSuiteDefFileName );
-    
-    return BaflUtils::FileExists( iFs, filePath );
-    }
-
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnXmlModelProvider::CollectItemsL( const TDesC& aSuiteName,
-        RXmlEngDocument& aXmlDoc )
-    {
-    TBuf<KMaxPath> filePath;
-    TBuf<KMaxPath> KsuitePath;
-    KsuitePath.Zero();
-    KsuitePath.Copy( iPath );
-    KsuitePath.Append( aSuiteName ); 
-    KsuitePath.Append( Kbackslash ); 
-    CDir* fileList;                  
-    iFs.GetDir( KsuitePath, KEntryAttMaskSupported, ESortByName, fileList);
-    CleanupStack::PushL(fileList);
-
-    //for each file with entries definitions         
-    for( TInt i(0); i<fileList->Count(); i++ )  
-        {            
-        TPtrC fileName = (*fileList)[i].iName;   
+    RXmlEngDocument itemDoc;
+    CleanupClosePushL( itemDoc );
+    //hardcoded path for items as there is only foldersuite
+    TInt err( KErrNone );
+    TRAP( err , itemDoc = ParseFileL(KFolderItemsPath) );
+    if( !err )
+        {
+        RXmlEngNodeList< TXmlEngElement > children;
+        CleanupClosePushL(children);
+        itemDoc.DocumentElement().GetChildElements(children);
         
-        if(!fileName.Compare(KSuiteDefFileName))
-            continue;
-        
-        filePath.Zero();
-        filePath.Copy(KsuitePath);
-        filePath.Append(fileName);  
+        TPtrC8 itemGenre =
+            itemDoc.DocumentElement().AttributeNodeL(KGenreName8).Value();
             
-        RXmlEngDocument itemDoc;
-        CleanupClosePushL( itemDoc );
-        
-        TInt err( KErrNone );
-        TRAP( err , itemDoc = ParseFileL(filePath) );
-        if( !err )
+        TInt amount = children.Count();
+        for( TInt i(0); i<amount; i++ )
             {
-            RXmlEngNodeList< TXmlEngElement > children;
-            CleanupClosePushL(children);
-            itemDoc.DocumentElement().GetChildElements(children);
-            
-            TPtrC8 itemGenre =
-                itemDoc.DocumentElement().AttributeNodeL(KGenreName8).Value();
-                
-            TInt amount = children.Count();
-            for( TInt i(0); i<amount; i++ )
+            TXmlEngElement child = children.Next();
+            TPtrC8 tempChildName = child.Name();
+            // append localizations to root
+            if (!child.Name().Compare(KLocalizationName8))
                 {
-                TXmlEngElement child = children.Next();
-                TPtrC8 tempChildName = child.Name();
-                // append localizations to root
-                if (!child.Name().Compare(KLocalizationName8)) 
-                    {                
-                    aXmlDoc.DocumentElement().AsElement().AppendChildL(child);
-                    child.ReconcileNamespacesL();
-                    } 
-                // append itmes to proper suite 
-                else if (!child.Name().Compare(KItemName8) )
-                    {                                    
-                    // go througs item's children to change event names to ids
-                    ChangeEventsToIdsInChildrenL(child);
-                    
-                    // edit_mode item
-                    RXmlEngNodeList< TXmlEngElement > editModeItems;
-                    CleanupClosePushL( editModeItems );
-                    child.GetChildElements( editModeItems );
-                    TInt count = editModeItems.Count();
-                    for ( TInt ic( 0 ); ic < count; ic++ )
+                aXmlDoc.DocumentElement().AsElement().AppendChildL(child);
+                child.ReconcileNamespacesL();
+                }
+            // append itmes to proper suite
+            else if (!child.Name().Compare(KItemName8) )
+                {
+                // go througs item's children to change event names to ids
+                ChangeEventsToIdsInChildrenL(child);
+                
+                // edit_mode item
+                RXmlEngNodeList< TXmlEngElement > editModeItems;
+                CleanupClosePushL( editModeItems );
+                child.GetChildElements( editModeItems );
+                TInt count = editModeItems.Count();
+                for ( TInt ic( 0 ); ic < count; ic++ )
+                    {
+                    TXmlEngElement editModeItem = editModeItems.Next();
+                    if ( !editModeItem.Name().Compare( KEditModeItem8 ))
                         {
-                        TXmlEngElement editModeItem = editModeItems.Next();
-                        if ( !editModeItem.Name().Compare( KEditModeItem8 ))
+                        editModeItem.AddNewAttributeL(KSuiteElementName8,
+                                itemGenre);
+                        }
+                    }
+                CleanupStack::PopAndDestroy(&editModeItems);
+                // edit_mode items - end
+
+                RXmlEngNodeList<TXmlEngElement> suites;
+                CleanupClosePushL(suites);
+                aXmlDoc.DocumentElement().GetChildElements(suites);
+                TInt amountSuites = suites.Count();
+                for (TInt i(0); i < amountSuites; i++)
+                    {
+                    TXmlEngElement childSuite = suites.Next();
+                    TPtrC8 tempName = child.Name();
+                    //find suite
+                    if (!childSuite.Name().Compare(KTitleName8))
+                        {
+                        TPtrC8 suiteGenre = childSuite.AttributeNodeL(
+                                KGenreName8).Value();
+
+                        //find proper suite to append item
+                        if (!suiteGenre.Compare(itemGenre))
                             {
-							editModeItem.AddNewAttributeL(KSuiteElementName8,
-									itemGenre);
-							}
-						}
-					CleanupStack::PopAndDestroy(&editModeItems);
-					// edit_mode items - end
-
-					RXmlEngNodeList<TXmlEngElement> suites;
-					CleanupClosePushL(suites);
-					aXmlDoc.DocumentElement().GetChildElements(suites);
-					TInt amountSuites = suites.Count();
-					for (TInt i(0); i < amountSuites; i++)
-						{
-						TXmlEngElement childSuite = suites.Next();
-						TPtrC8 tempName = child.Name();
-						//find suite
-						if (!childSuite.Name().Compare(KTitleName8))
-							{
-							TPtrC8 suiteGenre = childSuite.AttributeNodeL(
-									KGenreName8).Value();
-
-							//find proper suite to append item
-							if (!suiteGenre.Compare(itemGenre))
-								{
-								child.AddNewAttributeL(KSuiteElementName8,
-										itemGenre);
-								childSuite.AppendChildL(child);
-                                }                        
+                            child.AddNewAttributeL(KSuiteElementName8,
+                                    itemGenre);
+                            childSuite.AppendChildL(child);
                             }
                         }
-					aXmlDoc.DocumentElement().ReconcileNamespacesL();
-                    CleanupStack::PopAndDestroy( &suites );                    
-                    }                                
-                }                   
-            CleanupStack::PopAndDestroy( &children );
+                    }
+                aXmlDoc.DocumentElement().ReconcileNamespacesL();
+                CleanupStack::PopAndDestroy( &suites );
+                }
             }
-        CleanupStack::PopAndDestroy( &itemDoc );
-        } 
-    
-    CleanupStack::PopAndDestroy(fileList);
+        CleanupStack::PopAndDestroy( &children );
+        }
+    CleanupStack::PopAndDestroy( &itemDoc );
     }        
 
 
@@ -672,111 +529,19 @@ void CHnXmlModelProvider::ChangeEventNamesToIdsL( TXmlEngElement& aElement )
 // ---------------------------------------------------------------------------
 // 
 // ---------------------------------------------------------------------------
-//
-TBool CHnXmlModelProvider::SynchronizeSuitesL()
-    {
-    MMPERF(("CHnXmlModelProvider::SynchronizeSuitesL - START"));
-    iSuiteFilesUpdated = EFalse;
-    TBool refresh( EFalse );   
-
-    if (IsActive())
-    	{
-    	Cancel();
-    	}
-    
-    delete iSuiteSetIterator;
-    iSuiteSetIterator = NULL;
-    
-    iStatus = KRequestPending;
-    SetActive();
-    TRequestStatus* status = &iStatus;
-    User::RequestComplete( status, KErrNone );
-   
-    MMPERF(("CHnXmlModelProvider::SynchronizeSuitesL - DONE"));
-    return refresh;
-    }
- 
-// ---------------------------------------------------------------------------
 // 
-// ---------------------------------------------------------------------------
-// 
-void CHnXmlModelProvider::ResetCache()
-    {
-    iCache->Reset();
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//   
-void CHnXmlModelProvider::SetupSuitePathL()
-	{
-	iPath.Close();
-	iPath.CreateL(KMaxPath);
-	User::LeaveIfError(iFs.PrivatePath(iPath));
-	TChar drive;
-	TBuf<1> driveLetter;
-	
-	iFs.DriveToChar( EDriveC, drive );
-	iPath.Insert(0, KColon );
-	driveLetter.Append( drive );
-	iPath.Insert(0, driveLetter );
-	iPath.Append(KEntriesSuffix);
-	}
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//   
-void CHnXmlModelProvider::SetupFailSafeSuitePathL()
-	{
-	iPath.Close();
-	iPath.CreateL(KMaxPath);
-	User::LeaveIfError(iFs.PrivatePath(iPath));
-	TChar drive;
-	TBuf<1> driveLetter;
-	
-	iFs.DriveToChar( EDriveZ, drive );
-	iPath.Insert(0, KColon );
-	driveLetter.Append( drive );
-	iPath.Insert(0, driveLetter );
-	iPath.Append(KSuitesDir);
-	}
-
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-// 
-EXPORT_C void CHnXmlModelProvider::ReloadModelL()
-	{
-	SynchronizeSuitesL();
-	}
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-// 
-void CHnXmlModelProvider::CreateModelL(const TDesC& aSuiteName,
-        RXmlEngDocument& aXmlDoc )
+void CHnXmlModelProvider::CreateModelL( RXmlEngDocument& aXmlDoc )
     {
     MMPERF( ( "CHnXmlModelProvider::CreateModelL IN") );
     MMPERF( ( "    Suite name: %S", &aSuiteName ) );
     
     TBool suiteCollected = EFalse;
-	
-    SetupSuitePathL();	
-    TRAPD( failSafeErr, suiteCollected = CollectSuiteL( aSuiteName, aXmlDoc ));
-    if (failSafeErr)
-    	{
-    	SetupFailSafeSuitePathL();
-    	suiteCollected = CollectSuiteL( aSuiteName, aXmlDoc );
-    	}
+    suiteCollected = CollectSuiteL( aXmlDoc );
     
     if ( !suiteCollected )
         {
         MMPERF(("CHnXmlModelProvider::CreateModelL - suite collected"));
-        CollectItemsL( aSuiteName, aXmlDoc );
+        CollectItemsL( aXmlDoc );
         MMPERF(("CHnXmlModelProvider::CreateModelL - items collected"));
         }
     MMPERF( ( "CHnXmlModelProvider::CreateModelL OUT") );
@@ -795,7 +560,7 @@ EXPORT_C TInt CHnXmlModelProvider::GetModelL(
         RXmlEngDocument newXmlDoc;
         CleanupClosePushL( newXmlDoc );
         
-        CreateModelL( aSuiteName, newXmlDoc );
+        CreateModelL( newXmlDoc );
         
         #ifdef _DEBUG
             DEBUG(("_MM_:CHnXmlModelProvider::GetModelL _DEBUG IN"));
@@ -814,68 +579,3 @@ EXPORT_C TInt CHnXmlModelProvider::GetModelL(
     
     return KErrNone;
     }   
-   
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnXmlModelProvider::SearchPathForSuitesL( const TDesC& aPath )
-	{
-	CDir* fileList = NULL;            
-	iFs.GetDir( aPath, KEntryAttMaskSupported, ESortByName, fileList );  
-	if ( fileList )                        
-		{                
-		CleanupStack::PushL( fileList );      
-		for( TInt i( 0 ); i < fileList->Count(); i++ ) 
-			{  
-			if ( (*fileList)[ i ].IsDir() )
-				{
-				HBufC* suiteName = (*fileList)[i].iName.AllocLC();
-				if ( !iInstSuites.Find(suiteName) )
-					{
-					iInstSuites.InsertL( suiteName );
-					CleanupStack::Pop(suiteName);
-					}
-				else
-					{
-					CleanupStack::PopAndDestroy(suiteName);
-					}
-				}
-			}
-			CleanupStack::PopAndDestroy( fileList );
-		}
-    }
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//
-void CHnXmlModelProvider::CheckDrivesL()
-    { 
-    TDriveList driveList;
-    User::LeaveIfError( iFs.DriveList( driveList ) );
-    
-    TFixedArray< TInt, KMaxDrives > driveSearchOrder( KDriveSearchOrder, KMaxDrives );
-    for(TInt iterator(0); iterator < driveSearchOrder.Count(); iterator++ )
-     	{        
-        if ( driveList[ driveSearchOrder[ iterator ] ] )
-            {
-            TBuf<KMaxPath> filePath;
-
-            TChar driveLetter;
-            User::LeaveIfError( iFs.DriveToChar( driveSearchOrder[ iterator ], driveLetter ) );  
-            
-            TBuf< KSingleChar > driveLetterConst;
-            driveLetterConst.Append( driveLetter );
-            User::LeaveIfError( iFs.PrivatePath( filePath ) );
-            filePath.Insert( 0, driveLetterConst );
-            filePath.Insert( 1, KColon );
-            filePath.Append( KSuitesDir );
-                         
-            SearchPathForSuitesL( filePath );           
-            }
-    	}
-    
-    SearchPathForSuitesL( iPath );
-    }
-

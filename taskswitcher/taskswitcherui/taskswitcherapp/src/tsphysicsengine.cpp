@@ -117,6 +117,12 @@ void CTsPhysicsEngine::HandleDragEvent(
         {
         TPoint drag(iStartPosition - aEvent.CurrentPosition());
         iPhysics->StartPhysics(drag, iStartTime);
+        if( Abs(drag.iX) < iPhysics->DragThreshold() &&
+            (TInt)CAknPhysics::EAknPhysicsActionBouncing != 
+            iPhysics->OngoingPhysicsAction() )
+            {
+            iPhysics->StopPhysics();
+            }
         }
     }
 

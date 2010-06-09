@@ -17,13 +17,9 @@
 
 
 // INCLUDE FILES
-#include <AknUtils.h>
-#include <AknsDrawUtils.h>
-#include <AknBidiTextUtils.h>
-
 #include "xnnewstickercontrol.h"
 #include "xnnewstickeradapter.h"
-
+#include "xnproperty.h"
 
 // CONSTANTS
    
@@ -36,8 +32,9 @@
 // -----------------------------------------------------------------------------
 //
 CXnNewstickerControl::CXnNewstickerControl( CXnNewstickerAdapter* aAdapter ) :     
-    iCurrentTitleIndex( -1 ),
-    iAdapter( aAdapter )
+    iCurrentTitleIndex( KErrNotFound ),
+    iAdapter( aAdapter ), 
+    iScrollLooping( ETrue )
     {
     }
 
@@ -73,6 +70,16 @@ CXnNewstickerControl* CXnNewstickerControl::NewL( CXnNewstickerAdapter* aAdapter
 CXnNewstickerControl::~CXnNewstickerControl()
     {
     iTitleTexts.ResetAndDestroy();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerControl::SetScrollLooping()
+// 
+// -----------------------------------------------------------------------------
+//
+void CXnNewstickerControl::SetScrollLooping( TBool aLooping )
+    {
+    iScrollLooping = aLooping;
     }
 
 // -----------------------------------------------------------------------------
@@ -143,7 +150,7 @@ void CXnNewstickerControl::DeleteTitleL( TInt aIndex )
         if(count == 1)
             {
             iAdapter->Stop();
-            iCurrentTitleIndex = -1;
+            iCurrentTitleIndex = KErrNotFound;
             }
 
         UpdateTitleL( KNullDesC, aIndex );      
@@ -177,15 +184,18 @@ const TDesC& CXnNewstickerControl::Title( TInt aIndex ) const
 // CXnNewstickerControl::LastIndexWithContent
 // -----------------------------------------------------------------------------
 //
-TInt CXnNewstickerControl::LastIndexWithContent()
+TInt CXnNewstickerControl::LastIndexWithContent() const
     {
     for( TInt i(iTitleTexts.Count()-1); i>=0; --i )
         {
-        if ( iTitleTexts[ i ]->Des().Length() > 0 )
+        const TDesC& title( *iTitleTexts[i] );
+        
+        if( title != KNullDesC() )
             {
             return i;
-            }
+            }   
         }
+    
     return KErrNotFound;
     }
 
@@ -196,7 +206,7 @@ TInt CXnNewstickerControl::LastIndexWithContent()
 void CXnNewstickerControl::ClearTitles()
     {
     iAdapter->Stop();
-    iCurrentTitleIndex = -1;
+    iCurrentTitleIndex = KErrNotFound;
     // Don't delete just clear the contents
     for( TInt i=0; i < iTitleTexts.Count(); i++ )
         {
@@ -214,26 +224,13 @@ TInt CXnNewstickerControl::TitleCount() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerControl::SelectTitle
+// CXnNewstickerControl::CurrentTitle
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-const TDesC& CXnNewstickerControl::SelectTitle()
+const TDesC& CXnNewstickerControl::CurrentTitle() const
     {
-    if( IsVisibleTitles() ) 
-        { 
-        if( iCurrentTitleIndex < 0 || iCurrentTitleIndex >= iTitleTexts.Count() )
-            {
-            // Get the last title
-            TInt index = 
-                    GetNextTitleWithContent( iTitleTexts.Count() - 1, ETrue );
-            iCurrentTitleIndex = index;
-            }
-        
-        return Title( iCurrentTitleIndex );
-        }  
-    
-    return KNullDesC;
+    return Title( iCurrentTitleIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -241,7 +238,7 @@ const TDesC& CXnNewstickerControl::SelectTitle()
 // -----------------------------------------------------------------------------
 //
 TInt CXnNewstickerControl::GetNextTitleWithContent( TInt aStartSearch, 
-        TBool aBackwards ) const
+    TBool aBackwards ) const
     {
     TInt dir = 1;
     if( aBackwards )
@@ -251,59 +248,157 @@ TInt CXnNewstickerControl::GetNextTitleWithContent( TInt aStartSearch,
     
     for( TInt i = aStartSearch; i < iTitleTexts.Count() && i >= 0; i += dir )
         {
-        if( iTitleTexts[i]->Compare( KNullDesC ) != KErrNone )
+        const TDesC& title( *iTitleTexts[i] );
+        
+        if( title != KNullDesC() )
             {
             return i;
             }
         }
     
-    return aStartSearch;
+    return KErrNotFound;
     }
 
 // -----------------------------------------------------------------------------
-// CXnNewstickerControl::SetCurrentTitle
+// CXnNewstickerControl::SelectTitle
 // -----------------------------------------------------------------------------
 //
-TBool CXnNewstickerControl::SetCurrentTitle( TBool aSetDefault )
+TInt CXnNewstickerControl::SelectTitle()
+    {    
+    TInt index( GetNextTitleWithContent( 0 ) );
+    
+    TInt currentIndex( iCurrentTitleIndex );
+    
+    iCurrentTitleIndex = index;
+    
+    if ( currentIndex != iCurrentTitleIndex )
+        {
+        if ( currentIndex != KErrNotFound )
+            {
+            iAdapter->ReportNewstickerEvent( 
+                XnPropertyNames::action::trigger::name::KTitleScrolled, 
+                currentIndex );        
+            }
+        
+        if ( iCurrentTitleIndex != KErrNotFound )
+            {
+            iAdapter->ReportNewstickerEvent( 
+                XnPropertyNames::action::trigger::name::KTitleToScroll, 
+                iCurrentTitleIndex );            
+            }    
+        }
+    
+    return iCurrentTitleIndex;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerControl::SelectNextTitle
+// -----------------------------------------------------------------------------
+//
+TBool CXnNewstickerControl::SelectNextTitle()
     {
     TBool ret( EFalse );
     TInt lastIndex( iTitleTexts.Count() - 1 );
-    TInt lastIndexWithContent = LastIndexWithContent();
+    TInt lastIndexWithContent( LastIndexWithContent() );
     
-    if( aSetDefault )
-        {
-        // set last index as default
-        iCurrentTitleIndex = GetNextTitleWithContent( lastIndex, ETrue );
+    TInt currentIndex( iCurrentTitleIndex );
+                                
+    if ( lastIndexWithContent == KErrNotFound )
+        {               
+        // Loop done
+        ret = ETrue;                
         }
-    else if( iCurrentTitleIndex >= lastIndex )
+    else if ( !iScrollLooping && iCurrentTitleIndex == lastIndexWithContent )
         {
-        // if iCurrentTitleIndex is in last position start from beginning
-        iCurrentTitleIndex = GetNextTitleWithContent( 0 );
-        }
+        // Loop done
+        ret = ETrue;
+        }        
     else
         {
         if ( iCurrentTitleIndex + 1 > lastIndexWithContent )
             {
-            // if lastIndexWithContent is creater than next item 
-            // it means all next items are empty strings
-            iCurrentTitleIndex = lastIndexWithContent;
+            // At the end, get first
+            iCurrentTitleIndex = 
+                GetNextTitleWithContent( 0 );
             }
         else
             {
             // find next index with content
-            iCurrentTitleIndex
-                = GetNextTitleWithContent( iCurrentTitleIndex + 1 );
-            }
+            iCurrentTitleIndex =
+                    GetNextTitleWithContent( iCurrentTitleIndex + 1 );
+            }               
         }
-    
-    if( iCurrentTitleIndex == lastIndexWithContent || 
-            lastIndexWithContent == KErrNotFound )
+            
+    if ( ret )
         {
-        // loop done stop periodic timer.
+        if ( iCurrentTitleIndex != KErrNotFound )
+            {
+            iAdapter->ReportNewstickerEvent( 
+                XnPropertyNames::action::trigger::name::KTitleScrolled, 
+                iCurrentTitleIndex );            
+            }    
+        }
+    else
+        {
+        if ( currentIndex != iCurrentTitleIndex && currentIndex != KErrNotFound )
+            {
+            iAdapter->ReportNewstickerEvent( 
+                XnPropertyNames::action::trigger::name::KTitleScrolled, 
+                currentIndex );        
+            }
+        
+        if ( currentIndex != iCurrentTitleIndex && iCurrentTitleIndex != KErrNotFound )
+            {
+            iAdapter->ReportNewstickerEvent( 
+                XnPropertyNames::action::trigger::name::KTitleToScroll, 
+                iCurrentTitleIndex );            
+            }    
+        }
+              
+   return ret;
+   }
+
+// -----------------------------------------------------------------------------
+// CXnNewstickerControl::PeekNextTitle
+// -----------------------------------------------------------------------------
+//
+TPtrC CXnNewstickerControl::PeekNextTitle( TBool& aEndOfLoop ) const
+    {
+    TBool ret( EFalse );
+    TInt lastIndex( iTitleTexts.Count() - 1 );
+    TInt lastIndexWithContent = LastIndexWithContent();
+           
+    TPtrC retval( KNullDesC() );
+    
+    if ( lastIndexWithContent == KErrNotFound )
+        {               
+        // Loop done
+        ret = ETrue;                
+        }
+    else if ( !iScrollLooping && iCurrentTitleIndex == lastIndexWithContent )
+        {
+        // Loop done
         ret = ETrue;
+        
+        retval.Set( CurrentTitle() );
+        }        
+    else
+        {
+        if ( iCurrentTitleIndex + 1 > lastIndexWithContent )
+            {
+            // At the end, get first
+            retval.Set( Title( GetNextTitleWithContent( 0 ) ) );                
+            }
+        else
+            {
+            // find next index with content
+            retval.Set( Title( GetNextTitleWithContent( iCurrentTitleIndex + 1 ) ) );                    
+            }               
         }
     
-    return ret;
+    aEndOfLoop = ret;
+    
+    return retval;
     }
 
 // -----------------------------------------------------------------------------
@@ -312,9 +407,11 @@ TBool CXnNewstickerControl::SetCurrentTitle( TBool aSetDefault )
 //
 TBool CXnNewstickerControl::IsVisibleTitles() const
     {
-    for( TInt i=0; i < iTitleTexts.Count(); i++ )
+    for( TInt i = 0; i < iTitleTexts.Count(); i++ )
         {
-        if( iTitleTexts[i]->Compare( KNullDesC ) != KErrNone )
+        const TDesC& title( *iTitleTexts[i] );
+        
+        if( title != KNullDesC() )
             {
             return ETrue;
             }

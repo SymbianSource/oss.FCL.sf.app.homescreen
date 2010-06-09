@@ -43,7 +43,6 @@
 #include "aixuikoneventhandler.h"
 #include "aixmluiconstants.h"
 #include "contentrenderer.h"
-#include "psobserver.h"
 
 #include "aicontentmodel.h"
 #include "aiuiidleintegration.h"

@@ -55,7 +55,7 @@ CWmWidgetLoaderAo* CWmWidgetLoaderAo::NewL(
 CWmWidgetLoaderAo::CWmWidgetLoaderAo(
         CWmPlugin& aWmPlugin,
         CWmListBox& aTargetList )
-    : CAsyncOneShot( EPriorityHigh )
+    : CActive( EPriorityNormal )
     , iWmPlugin( aWmPlugin )
     , iWidgetsList( aTargetList )
     {
@@ -70,6 +70,7 @@ CWmWidgetLoaderAo::CWmWidgetLoaderAo(
 //
 void CWmWidgetLoaderAo::ConstructL()
     {
+    CActiveScheduler::Add( this );
     }
 
 // ---------------------------------------------------------------------------
@@ -81,9 +82,9 @@ CWmWidgetLoaderAo::~CWmWidgetLoaderAo()
     // cancel ongoing operation
     Cancel();
 
-    // cleanup run data
+    // cleanup and close session
     Cleanup();
-    
+    CloseSession();
     }
 
 // ---------------------------------------------------------------------------
@@ -94,10 +95,14 @@ void CWmWidgetLoaderAo::StartLoading()
     {
     if ( IsActive() )
         {
-        // cancel ongoing process
-        Cancel();
+        return; // already active                
         }
-    Call();
+
+    // call itself
+    iStatus = KRequestPending;
+    TRequestStatus *pS = (&iStatus);
+    User::RequestComplete( pS, KErrNone );
+    SetActive();
     }
 
 // ---------------------------------------------------------------------------
@@ -108,6 +113,7 @@ void CWmWidgetLoaderAo::RunL()
     {
     DoLoadWidgetsL();
     Cleanup();
+    CloseSession();
     }
 
 // ---------------------------------------------------------------------------
@@ -117,7 +123,16 @@ void CWmWidgetLoaderAo::RunL()
 TInt CWmWidgetLoaderAo::RunError( TInt /*aError*/ )
     {
     Cleanup();
+    CloseSession();
     return KErrNone;
+    }
+
+// ---------------------------------------------------------
+// CWmWidgetLoaderAo::DoCancel
+// ---------------------------------------------------------
+//
+void CWmWidgetLoaderAo::DoCancel()
+    {
     }
 
 // ---------------------------------------------------------
@@ -280,6 +295,22 @@ void CWmWidgetLoaderAo::OpenSessionL()
     }
 
 // ---------------------------------------------------------
+// CWmWidgetLoaderAo::CloseSession
+// ---------------------------------------------------------
+//
+void CWmWidgetLoaderAo::CloseSession()
+    {
+    // disconnect widget registry
+    if ( iWidgetRegistry )
+        {
+        iWidgetRegistry->Disconnect();
+        iWidgetRegistry->Close();
+        delete iWidgetRegistry;
+        iWidgetRegistry = NULL;
+        }
+    }
+
+// ---------------------------------------------------------
 // CWmWidgetLoaderAo::AddWidgetDataL
 // ---------------------------------------------------------
 //
@@ -344,15 +375,6 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
 void CWmWidgetLoaderAo::Cleanup()
     {
     iLoading = EFalse;
-    
-    // disconnect widget registry
-    if ( iWidgetRegistry )
-        {
-        iWidgetRegistry->Disconnect();
-        iWidgetRegistry->Close();
-        delete iWidgetRegistry;
-        iWidgetRegistry = NULL;
-        }
     
     // delete widget order and references to it
     for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )

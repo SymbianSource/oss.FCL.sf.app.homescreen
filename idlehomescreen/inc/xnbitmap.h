@@ -53,6 +53,13 @@ public: // New functions
     virtual void SetContentBitmaps(CFbsBitmap* aBitmap, CFbsBitmap* aMask) = 0;   
 
     /**
+    * Sets content bitmaps from file path.
+    * @since S60 5.2
+    * @param aFilename Bitmap filename.    
+    */            
+    virtual void SetContentBitmaps( TFileName& aFilename ) = 0;
+    
+    /**
     * Gets content bitmaps. Ownership is not transferred.
     * @since Series 60 3.1
     * @param aBitmap Bitmap to draw
@@ -94,6 +101,13 @@ public: // New functions
     */        
     void SetContentBitmaps(CFbsBitmap* aBitmap, CFbsBitmap* aMask);   
 
+    /**
+    * Sets content bitmaps from file path.
+    * @since S60 5.2
+    * @param aFilename Bitmap filename.    
+    */            
+    void SetContentBitmaps( TFileName& aFilename );
+    
     /**
     * Gets content bitmaps. Ownership is not transferred.
     * @since Series 60 3.1

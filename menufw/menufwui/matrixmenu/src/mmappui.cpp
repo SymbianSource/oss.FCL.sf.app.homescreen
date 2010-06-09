@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.78 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.78 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.82 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.82 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -77,6 +77,8 @@ enum TMenuTransEffectContext
     EMenuCloseFolderEffect = 1002
     };
 
+#define AI_UID3_AIFW_COMMON 0x102750F0
+
 // ============================ MEMBER FUNCTIONS =============================
 
 // ---------------------------------------------------------------------------
@@ -112,10 +114,9 @@ void CMmAppUi::ConstructL()
     iDummyContainer = CMmWidgetContainer::NewGridContainerL( ClientRect(),
             this, iDummyTemplateLib );
     iDummyContainer->SetEmptyTextL( KNullDesC );
+    iDummyContainer->MakeVisible( EFalse );
     AddToStackL( iDummyContainer, ECoeStackPriorityDefault,
             ECoeStackFlagRefusesFocus | ECoeStackFlagRefusesAllKeys );
-    iDummyContainer->MakeVisible( ETrue );
-    iDummyContainer->DrawNow();
 
     iHNInterface = CHnEngine::NewL( *this );
     iTemplateLibrary = CMmTemplateLibrary::NewL();
@@ -785,10 +786,6 @@ void CMmAppUi::NotifyUiRefreshL( const THnUiRefreshType aRefreshType )
             {
             DEBUG(("_Mm_:CMmAppUi::NotifyUiRefreshL - ELightOn"));
             iScreenOn = ETrue;
-            if ( IsForeground() && iCurrentSuiteModel )
-                {
-                iCurrentSuiteModel->SetVisibleL( ETrue );
-                }
             if ( iCurrentContainer )
                 {
                 iCurrentContainer->HandleForegroundGainedL();
@@ -807,11 +804,6 @@ void CMmAppUi::NotifyUiRefreshL( const THnUiRefreshType aRefreshType )
                     iCurrentContainer->CancelDragL(EFalse);
                     }
                 }
-            if (iCurrentSuiteModel)
-                {
-                iCurrentSuiteModel->SetVisibleL(EFalse);
-                }
-
             }
             break;
         case ERemoveLiwObjects:
@@ -1225,9 +1217,9 @@ void CMmAppUi::HandleListBoxEventL( CEikListBox* /*aListBox*/,
         HandleHighlightItemSingleClickedL(  iCurrentContainer->Widget()->CurrentItemIndex() );
         }
     else if ( aEventType == MEikListBoxObserver::EEventPanningStarted )
-      {
-      iKeyClickLocked = ETrue;
-      }
+        {
+        iKeyClickLocked = ETrue;
+        }
 
     DEBUG(("_Mm_:CMmAppUi::HandleListBoxEventL OUT"));
     }
@@ -1488,25 +1480,25 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
                     {
                     TInt itemId( KErrNotFound );
                     TBool suiteModelHasItems = iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1;
-          TBool highlightVisible = iCurrentContainer->IsHighlightVisible();
-          if ( !highlightVisible && suiteModelHasItems )
-            {
+                    TBool highlightVisible = iCurrentContainer->IsHighlightVisible();
+                    if ( !highlightVisible && suiteModelHasItems )
+                        {
 //						if there is no highlight, but there are items, show menuitems for logically
 //						current suite highlight fetched from suite model.
-            TInt suiteHighlight = iCurrentSuiteModel->GetSuiteHighlight();
-            ASSERT( suiteHighlight != KErrNotFound );
-            itemId = iCurrentSuiteModel->IdByIndex( suiteHighlight );
-            ignoreItemSpecific = ETrue;
-            }
-          else
-            {
-                      TBool idByContainer = highlightVisible && suiteModelHasItems;
-                      itemId = idByContainer ?
-                          iCurrentSuiteModel->IdByIndex( iCurrentContainer->GetHighlight() ) :
-                          iCurrentSuiteModel->IdByIndex( KErrNotFound );
-            }
+                        TInt suiteHighlight = iCurrentSuiteModel->GetSuiteHighlight();
+                        ASSERT( suiteHighlight != KErrNotFound );
+                        itemId = iCurrentSuiteModel->IdByIndex( suiteHighlight );
+                        ignoreItemSpecific = ETrue;
+                        }
+                    else
+                        {
+                        TBool idByContainer = highlightVisible && suiteModelHasItems;
+                        itemId = idByContainer
+                                ? iCurrentSuiteModel->IdByIndex( iCurrentContainer->GetHighlight() )
+                                : iCurrentSuiteModel->IdByIndex( KErrNotFound );
+                        }
                     menuIterator = iCurrentSuiteModel->GetMenuStructureL( itemId );
-                }
+                    }
 
                 // check if there is a menu structure available
                 // for the specified item
@@ -1536,42 +1528,42 @@ void CMmAppUi::DynInitMenuPaneL( TInt aResourceId,
                         {
                         CHnMenuItemModel* menuItem = menuIterator->GetNext();
                         if ( (menuItem->MenuItemType() == CHnMenuItemModel::EItemApplication) || !ignoreItemSpecific )
-                          {
-                          CEikMenuPaneItem::SData menuData;
-              menuData.iCommandId = menuItem->Command();
-              menuData.iText = menuItem->NameL().
-                Left( CEikMenuPaneItem::SData::ENominalTextLength );
-              menuData.iFlags = 0;
+                            {
+                            CEikMenuPaneItem::SData menuData;
+                            menuData.iCommandId = menuItem->Command();
+                            menuData.iText = menuItem->NameL().
+                                    Left( CEikMenuPaneItem::SData::ENominalTextLength );
+                            menuData.iFlags = 0;
 
-              //check for children
-              MHnMenuItemModelIterator* childIterator =
-                menuItem->GetMenuStructure();
-              if ( childIterator->HasNext() )
-                {
-                //this is a cascade item
-                //one menu item can contain only one cascade menu
-                //check if there are available cascade menu containers
-                TInt freeResource = GetNextCascadeMenuResourceId();
-                if ( freeResource != KErrNotFound )
-                  {
-                  //error checking
-                  if( !iCascadeMenuMap.Insert( freeResource,
-                                childIterator ) )
-                    {
-                    //add item only if there is an
-                    //available resource
-                    menuData.iCascadeId = freeResource;
-                    }
-                  }
-                }
-              else
-                {
-                //normal entry
-                menuData.iCascadeId = 0;
-                }
-              positionArray.AppendL( menuItem->Position() );
-              menuItemMap.InsertL( menuItem->Position(), menuData );
-                          }
+                            //check for children
+                            MHnMenuItemModelIterator* childIterator =
+                                    menuItem->GetMenuStructure();
+                            if ( childIterator->HasNext() )
+                                {
+                                //this is a cascade item
+                                //one menu item can contain only one cascade menu
+                                //check if there are available cascade menu containers
+                                TInt freeResource = GetNextCascadeMenuResourceId();
+                                if ( freeResource != KErrNotFound )
+                                    {
+                                    //error checking
+                                    if( !iCascadeMenuMap.Insert( freeResource,
+                                            childIterator ) )
+                                        {
+                                        //add item only if there is an
+                                        //available resource
+                                        menuData.iCascadeId = freeResource;
+                                        }
+                                    }
+                                }
+                            else
+                                {
+                                //normal entry
+                                menuData.iCascadeId = 0;
+                                }
+                            positionArray.AppendL( menuItem->Position() );
+                            menuItemMap.InsertL( menuItem->Position(), menuData );
+                            }
                         }
 
                     aMenuPane->Reset();
@@ -1742,7 +1734,15 @@ void CMmAppUi::HandleWidgetChangeRefreshL(
 
     iCurrentContainer = aWidgetContainer;
     iCurrentContainer->Widget()->View()->SetDisableRedraw(ETrue);
-    iDummyContainer->MakeVisible( ETrue );
+    if( isHiddenFromFS )
+        {
+        iCurrentContainer->MakeVisible( EFalse );
+        }
+    else
+        {
+        iDummyContainer->MakeVisible( ETrue );
+        }
+
     RefreshCbaL();
     iCurrentContainer->SetEditModeL( IsEditMode() );
     iCurrentContainer->SetSuiteModelL( iCurrentSuiteModel );
@@ -2378,9 +2378,9 @@ void CMmAppUi::ResetToInitialStateL()
 //
 void CMmAppUi::HandleSuiteModelInitializedL( CHnSuiteModel* aModel )
     {
+
     StatusPane()->MakeVisible( ETrue );
     Cba()->MakeVisible( ETrue );
-
     if ( aModel == iHNInterface->GetLastSuiteModelL() )
         {
         TBool showOpenFolderEffect(iCurrentSuiteModel
@@ -2392,12 +2392,6 @@ void CMmAppUi::HandleSuiteModelInitializedL( CHnSuiteModel* aModel )
             StartLayoutSwitchFullScreen( EMenuOpenFolderEffect );
             }
 
-        if ( iCurrentSuiteModel )
-            {
-            iCurrentSuiteModel->SetVisibleL( EFalse );
-            DEBUG16(("\t\t_Mm_:SetVisible EFalse - %S",
-                    &(iCurrentSuiteModel->SuiteName())));
-            }
         iCurrentSuiteModel = aModel;
         ShowSuiteL();
         iGarbage.ResetAndDestroy();
@@ -2409,13 +2403,6 @@ void CMmAppUi::HandleSuiteModelInitializedL( CHnSuiteModel* aModel )
         else if ( iEditModeStatus == ETransitionFromEditMode )
             {
             iEditModeStatus = ENoEditMode;
-            }
-
-        if (iScreenOn && IsForeground())
-            {
-            iCurrentSuiteModel->SetVisibleL( ETrue );
-            DEBUG16(("\t\t_Mm_:SetVisible ETrue - %S",
-                    &(iCurrentSuiteModel->SuiteName())));
             }
 
         HideMenuPaneIfVisibleL();
@@ -2755,15 +2742,20 @@ void CMmAppUi::StartLayoutSwitchFullScreen( TInt aKastorEffect )
             aKastorEffect == AknTransEffect::EApplicationExit )
         {
         DEBUG(("_MM_:CMmAppUi::StartLayoutSwitchFullScreen Foreground"));
-        TUid uid1( KUidMatrixMenuApp );
-        TUid uid2( KUidMatrixMenuApp );
-        if ( aKastorEffect == AknTransEffect::EApplicationExit )
+        TUid uidNext( KUidMatrixMenuApp );
+        TUid uidPrev( KUidMatrixMenuApp );
+
+        if( aKastorEffect == AknTransEffect::EApplicationExit )
             {
-            uid2 = TUid::Null();
+            uidPrev = TUid::Null();
+            }
+        else if( aKastorEffect == AknTransEffect::EApplicationStart )
+            {
+            uidPrev = uidPrev.Uid( AI_UID3_AIFW_COMMON );
             }
 
         AknTransEffect::TParamBuffer params = AknTransEffect::GfxTransParam(
-                uid1, uid2, AknTransEffect::TParameter::EFlagNone );
+                uidNext, uidPrev, AknTransEffect::TParameter::EFlagNone );
 
         GfxTransEffect::BeginFullScreen( aKastorEffect, TRect(),
                 AknTransEffect::EParameterType, params );
@@ -2990,10 +2982,6 @@ void CMmAppUi::HandleFocusGainedL()
         {
         iCurrentContainer->SetHasFocusL( ETrue );
         }
-    if ( iCurrentSuiteModel )
-        {
-        iCurrentSuiteModel->SetVisibleL( ETrue );
-        }
     }
 
 // ---------------------------------------------------------------------------
@@ -3031,11 +3019,6 @@ void CMmAppUi::HandleFocusLostL()
       }
     iCurrentContainer->SetHasFocusL( EFalse );
     }
-  if ( iCurrentSuiteModel )
-    {
-    iCurrentSuiteModel->SetVisibleL( EFalse );
-    }
-
   }
 
 // ---------------------------------------------------------------------------

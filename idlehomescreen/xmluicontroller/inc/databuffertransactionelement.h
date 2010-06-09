@@ -57,6 +57,18 @@ public:  // Constructors and destructor
     * @param aData - the content. 
     */
     void InitializeL(CXnNodeAppIf& aTarget, const TDesC8& aData);
+
+    /**
+    * Initializes this transaction element to publish content aData
+    * to node aTarget.
+    *
+    * @param aTarget - the target of publishing.
+    * @param aData - the content. 
+    * @param aCid - the content id.
+    * @param aIndex - the content index.
+    */    
+    void InitializeL(CXnNodeAppIf& aTarget, const TDesC8& aData, 
+        const TDesC& aCid, TInt aIndex);
     
     /**
      * Checks if given content type is supported by target ui element.
@@ -86,10 +98,19 @@ private:
 private:    // Data
 
     /**
-     * New content.
+     * New content, owned.
      */
-    TPtrC8 iNewData;
-        
+    HBufC8* iNewData;
+    
+    /**
+     * Content id, owned.
+     */
+    HBufC* iCid;
+    
+    /*
+     * Content index
+     */
+    TInt iIndex;
     };
 
 }   // namespace AiXmlUiController

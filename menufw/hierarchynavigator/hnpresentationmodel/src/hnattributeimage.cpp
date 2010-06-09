@@ -187,6 +187,10 @@ void CHnAttributeImage::PrepareProviderL()
         {
         iAttrImgProvider = CHnAttrImgProvAppImage::NewL( iApplicationUid );
         }
+    else if ( IsLiwImage() )
+        {
+        iAttrImgProvider = CHnAttrImgProvLiwImage::NewL( iBitmap, iMask );
+        }
     else if ( IsFileImageL() )
         {
         if ( iFileNameSrc.Find( KSvgFileExtension() ) != KErrNotFound )
@@ -197,10 +201,6 @@ void CHnAttributeImage::PrepareProviderL()
         	{
         	iAttrImgProvider = CHnAttrImgProvFileImage::NewL( iFileNameSrc );
         	}
-        }
-    else if ( IsLiwImage() )
-        {
-        iAttrImgProvider = CHnAttrImgProvLiwImage::NewL( iBitmap, iMask );
         }
     // if strin couldn't be resolved then provide empty one
     else

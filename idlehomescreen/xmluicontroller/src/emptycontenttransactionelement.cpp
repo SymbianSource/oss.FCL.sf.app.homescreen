@@ -73,58 +73,66 @@ void CEmptyContentTransactionElement::UpdateDataL()
 
     if ( type->Type() == XnImageInterface::MXnImageInterface::Type() )
         {
-        MXnImageInterface* imageIntr = NULL;
-        if ( !XnComponentInterface::MakeInterfaceL( imageIntr, Target() ) )
-            {
-            User::Leave( KErrNotSupported );
-            }
+        MXnImageInterface* image( NULL );
+        XnComponentInterface::MakeInterfaceL( image, Target() );
+
+        LeaveIfNull( image, KErrNotSupported );
+        
         // Clears the bitmaps from component
-        imageIntr->SetContentBitmaps( NULL, NULL );
+        image->SetContentBitmaps( NULL, NULL );
         }
     else if ( type->Type() == XnTextInterface::MXnTextInterface::Type() ) // text element
         {
         // Get control interface
-        XnTextInterface::MXnTextInterface* textControl = NULL;
-        XnComponentInterface::MakeInterfaceL( textControl, Target() );
-        LeaveIfNull( textControl, KErrNotSupported );
+        XnTextInterface::MXnTextInterface* text( NULL );
+        XnComponentInterface::MakeInterfaceL( text, Target() );
+        
+        LeaveIfNull( text, KErrNotSupported );
         
         // Clears the text from component
-        textControl->SetTextL( KNullDesC );
+        text->SetTextL( KNullDesC );
         }
     else if ( type->Type() == XnTextEditorInterface::MXnTextEditorInterface::Type() ) // texteditor element
         {
         // Get control interface
-        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;
-        XnComponentInterface::MakeInterfaceL( editorControl, Target() );
-        LeaveIfNull( editorControl, KErrNotSupported );
+        XnTextEditorInterface::MXnTextEditorInterface* editor( NULL );
+        XnComponentInterface::MakeInterfaceL( editor, Target() );
+        
+        LeaveIfNull( editor, KErrNotSupported );
         
         // Clears the text from component
-        editorControl->SetTextL( KNullDesC );
+        editor->SetTextL( KNullDesC );
         }
     else
         {
-        CXnNodeAppIf* parent = Target().ParentL();
+        CXnNodeAppIf* parent( Target().ParentL() );
         LeaveIfNull( parent, KErrNotSupported );
-        const TDesC8& type = LeaveIfNull( parent->Type(), KErrNotSupported )->Type();
+        
+        const TDesC8& parentType( parent->Type()->Type() );
             
-        if ( type == XnNewstickerInterface::MXnNewstickerInterface::Type() )
+        if ( parentType == XnNewstickerInterface::MXnNewstickerInterface::Type() )
             {
-            XnNewstickerInterface::MXnNewstickerInterface* newsticker = NULL;
+            XnNewstickerInterface::MXnNewstickerInterface* newsticker( NULL );
             XnComponentInterface::MakeInterfaceL( newsticker, *parent );
-            LeaveIfNull( newsticker, KErrGeneral );
-            TInt titleIndexVal = -1;
-            CXnProperty* titleIndex = Target().GetPropertyL( XnPropertyNames::title::KTitleIndex );
-            if ( titleIndex )
-                {
-                TLex8 lex( titleIndex->StringValue() );
-                TInt err = lex.Val( titleIndexVal );
-                if ( err == KErrNone && titleIndexVal > -1 )
-                    {
-                    newsticker->DeleteTitle( titleIndexVal );
-                    }
-                }
+            
+            LeaveIfNull( newsticker, KErrNotSupported );
+            
+            CXnProperty* prop( Target().GetPropertyL( 
+                XnPropertyNames::title::KTitleIndex ) );
+    
+            LeaveIfNull( prop, KErrNotSupported );
+
+            TInt index( KErrNotFound );
+            
+            TLex8 lex( prop->StringValue() );
+            lex.Val( index );
+            
+            newsticker->DeleteTitle( index );
             }
         }
+    
     // Clear current content priority
     ClearContentPriorityL();
     }
+
+// End of file

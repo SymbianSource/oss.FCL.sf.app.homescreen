@@ -52,18 +52,66 @@
 #include "aiconsts.h"
 #include "contentrenderer.h"
 #include "xmluicontrollerpanic.h"
-#include "pmodtiterator.h"
 #include "contentpublisher.h"
 #include "xnplugindefs.h"
 #include "ainativeuiplugins.h"
 
 // Constants
 const TInt KOneSecondInMicroS = 1000*1000;
-_LIT8( KData, "data" );
 
+// Macros
+#define IS_KNOWN_CONTENT_MODEL_ELEMENT( e ) \
+    ( e == AiUiDef::xml::element::KImage || \
+      e == AiUiDef::xml::element::KText || \
+      e == AiUiDef::xml::element::KAnimation || \
+      e == AiUiDef::xml::element::KTextEditor || \
+      e == AiUiDef::xml::element::KTitle || \
+      e == AiUiDef::xml::element::KData )
+    
 using namespace AiXmlUiController;
 
 // ======== LOCAL FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// BuildModelL()
+// ----------------------------------------------------------------------------
+//
+static void BuildModelL( CXnNodeAppIf* aParent, const TDesC8& aKey, 
+    const TDesC8& aNs, RPointerArray< CXnNodeAppIf >& aModel )     
+    {
+    if ( !aParent || aParent->Namespace() != aNs )
+        {
+        // No parent or traversed out from the namespace
+        return;
+        }
+
+    if ( aParent->Type()->Type() == XnPropertyNames::action::KProperty )
+        {
+        CXnProperty* prop( 
+            aParent->GetPropertyL( XnPropertyNames::common::KClass ) );
+        
+        if ( prop )
+            {
+            const TDesC8& value( prop->StringValue() );
+                        
+            if ( value.Find( aKey ) != KErrNotFound )
+                {
+                aModel.AppendL( aParent );
+                }                                  
+            }        
+        }
+    
+    RPointerArray< CXnNodeAppIf > children( aParent->ChildrenL() );
+    CleanupClosePushL( children );
+    
+    for ( TInt i = 0; i < children.Count(); i++ )
+        {
+        // Recurse children
+        BuildModelL( children[i], aKey, aNs, aModel );
+        }
+    
+    CleanupStack::PopAndDestroy( &children );             
+    }
+
 // ----------------------------------------------------------------------------
 // ResolveEventParameters()
 // ----------------------------------------------------------------------------
@@ -403,7 +451,6 @@ void CXmlUiController::GetSettingsL( const THsPublisherInfo& aPublisherInfo,
 // CXmlUiController::GetContentModelL()
 // ----------------------------------------------------------------------------
 //
-// ContentModelL()
 void CXmlUiController::GetContentModelL( const THsPublisherInfo& aPublisherInfo,         
     RAiSettingsItemArray& aSettings )
     {
@@ -413,136 +460,101 @@ void CXmlUiController::GetContentModelL( const THsPublisherInfo& aPublisherInfo,
         return;
         }
     
-    // Find the node for the publisher
-	// TODO Does not work if widget is in view  
+    // Find the node for the publisher	
     RPointerArray<CXnNodeAppIf> list( 
         UiEngineL()->FindContentSourceNodesL( aPublisherInfo.Namespace() ) );
     
     CleanupClosePushL( list );
     
-    CXnNodeAppIf* publisherNode( NULL );
+    CXnNodeAppIf* publisher( NULL );
     
     if ( list.Count() > 0 )
         {
-        publisherNode = list[0];
+        publisher = list[0];
         }
          
     CleanupStack::PopAndDestroy( &list );
     
-    if( !publisherNode )
+    if( !publisher )
         {
         return;
         }
     
-    // Find ui plugin node for the data plugin
-    CXnNodeAppIf* parentNode( publisherNode->ParentL() );
+    // Find plugin node for the <contentsource> element 
+    CXnNodeAppIf* parent( publisher->ParentL() );
     
-    // parent must be correct type
-    if( parentNode->InternalDomNodeType() == _L8("widget") )
+    if ( parent && parent->InternalDomNodeType() == XnPropertyNames::KWidget )
         {
-        // Get plugin configurations
-        GetConfigurationsL( *parentNode, aSettings, AiUiDef::xml::element::K16Plugin());
-        CPmODTIterator* iter = CPmODTIterator::NewL( *parentNode );
-        CleanupStack::PushL( iter );
-        CXnNodeAppIf* node = iter->First();
-        while( node )
-            {
-            const TDesC8& nodeType = node->Type()->Type();
-            if( nodeType == XnPropertyNames::action::KActions)
+        // Get <contentsource> element configurations
+        GetConfigurationsL( 
+            *parent, aSettings, AiUiDef::xml::element::K16Plugin() );
+            
+        RPointerArray< CXnNodeAppIf > model;
+        CleanupClosePushL( model );
+        
+        HBufC8* key = HBufC8::NewLC( aPublisherInfo.Name().Length() + 1 );
+        
+        _LIT( KSlash, "/" );
+        
+        key->Des().Copy( aPublisherInfo.Name() );
+        key->Des().Append( KSlash );
+                
+        BuildModelL( parent, *key, parent->Namespace(), model );
+        
+        for ( TInt i = 0; i < model.Count(); i++ )
+            {            
+            CXnNodeAppIf* parent( model[i]->ParentL() );
+            
+            if ( parent )
                 {
-                node = iter->SkipBranchL();
-                }
-            // Get the content model and configuration for the supported elements
-            else if( nodeType == AiUiDef::xml::element::KImage ||
-                     nodeType == AiUiDef::xml::element::KText ||
-                     nodeType == AiUiDef::xml::element::KNewsTicker ||
-                     nodeType == AiUiDef::xml::element::KAnimation ||
-					 nodeType == AiUiDef::xml::element::KTextEditor || 
-                     nodeType == KData )
-                {
-                // Is created in GetContenItem and used in GetConfigurationsL
-                HBufC* confOwner( NULL );
-                // get content item for the element, confOwner is filled
-                GetContentItemL( *node, aSettings, confOwner );
-                if( confOwner )
-                    {
-                    CleanupStack::PushL( confOwner );
-                    // get configurations for the element
-                    GetConfigurationsL( *node, aSettings, *confOwner );
-                    CleanupStack::PopAndDestroy( confOwner );
+                const TDesC8& type( parent->Type()->Type() );
+                
+                if ( IS_KNOWN_CONTENT_MODEL_ELEMENT( type ) )
+                    {                
+                    // Content model found for the element, create content item
+                    MAiPluginSettings* settings( 
+                        AiUtility::CreatePluginSettingsL() );
+                    
+                    CleanupDeletePushL( settings );
+                                        
+                    MAiPluginContentItem& item( 
+                        settings->AiPluginContentItem() );
+                                        
+                    // Type of the element is needed in content model                     
+                    HBufC* type16( NULL );
+                    
+                    type16 = AiUtility::CopyToBufferL( type16, type ); 
+                                            
+                    CleanupStack::PushL( type16 );
+                    
+                    item.SetTypeL( *type16 );
+                                                           
+                    HBufC* name( PropertyValueL( 
+                        *model[i], AiUiDef::xml::property::KClass ) );
+                    CleanupStack::PushL( name );
+                    
+                    item.SetNameL( *name );
+                                                                                              
+                    // Get content model configurations, 
+                    // i.e. <property> element's <configuration> siblings
+                    GetConfigurationsL( *parent, aSettings, *name );
+                    
+                    CleanupStack::PopAndDestroy( 2, type16 ); // name
+                    
+                    aSettings.AppendL( settings );
+                    CleanupStack::Pop( settings );
                     }
-                node = iter->SkipBranchL();
-                }
-            else
-                {
-                node = iter->NextL();
-                }
+                }           
             }
-        CleanupStack::PopAndDestroy( iter );
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CXmlUiController::GetContentItemL()
-// ----------------------------------------------------------------------------
-//
-// ContentItemL()
-void CXmlUiController::GetContentItemL( CXnNodeAppIf& aNode, 
-    RAiSettingsItemArray& aSettings, HBufC*& aItemName )
-    {
-    // Find property node
-    RPointerArray<CXnNodeAppIf> childNodes( aNode.ChildrenL() );
-    CleanupClosePushL( childNodes );
-    
-    TInt count( childNodes.Count() );
-    
-    for ( TInt i = 0; i < count; i++ )
-        {
-        CXnNodeAppIf* node( childNodes[i] );
         
-        if( node->Type()->Type() == XnPropertyNames::action::KProperty )
-            {
-            HBufC* name = PropertyValueL( *node, AiUiDef::xml::property::KClass );
-            CleanupStack::PushL( name );
-        
-            if( name )
-                {
-                // Content model found for the element, create content item
-                MAiPluginSettings* settings = AiUtility::CreatePluginSettingsL();
-                CleanupDeletePushL( settings );
-                
-                MAiPluginContentItem& item = settings->AiPluginContentItem();
-                
-                // Type of the element is needed in content model 
-                HBufC* type( NULL ); 
-                type = AiUtility::CopyToBufferL( type, aNode.Type()->Type());
-                CleanupStack::PushL( type );
-                item.SetTypeL( *type );
-                CleanupStack::PopAndDestroy( type );
-                
-                item.SetNameL( *name );
-                
-                aItemName = name;
-                aSettings.AppendL( settings );
-                CleanupStack::Pop( settings );
-                }
-            
-            // Ownership is given to aItemName
-            CleanupStack::Pop( name );
-            
-            // First property element, which has class attribute is selected
-            break;
-            }
-        }
-    
-    CleanupStack::PopAndDestroy( &childNodes );
+        CleanupStack::PopAndDestroy( 2, &model ); // key
+        }   
     }
 
 // ----------------------------------------------------------------------------
 // CXmlUiController::GetConfigurationsL()
 // ----------------------------------------------------------------------------
 //
-// ConfigurationItemsL()
 void CXmlUiController::GetConfigurationsL( CXnNodeAppIf& aNode, 
     RAiSettingsItemArray& aSettings, const TDesC& aConfOwner  )
     {    
@@ -553,9 +565,9 @@ void CXmlUiController::GetConfigurationsL( CXnNodeAppIf& aNode,
     // Collect settings
     TInt count( nodes.Count() );
     
-    for( TInt j = 0; j < count; j++ )
+    for( TInt i = 0; i < count; i++ )
         {
-        CXnNodeAppIf* node( nodes[j] );
+        CXnNodeAppIf* node( nodes[i] );
         
         if( node->Type()->Type() == AiUiDef::xml::element::KConfiguration )
             {

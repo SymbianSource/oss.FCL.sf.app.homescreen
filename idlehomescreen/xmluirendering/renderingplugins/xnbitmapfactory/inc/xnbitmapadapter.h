@@ -26,6 +26,7 @@
 
 // FORWARD DECLARATIONS
 class CXnNodePluginIf;
+class CXnImageDecoder;
 
 // CLASS DECLARATION
 /**
@@ -57,6 +58,13 @@ public: // New functions
     void SetContentBitmaps(CFbsBitmap* aBitmap, CFbsBitmap* aMask);   
 
     /**
+    * Sets content bitmaps from file.
+    * @since S60 5.2
+    * @param aFilename Bitmap filename.    
+    */            
+    void SetContentBitmaps( TFileName& aFilename );
+    
+    /**
     * Gets content bitmaps. Ownership not is transferred.
     * @since Series 60 3.1
     * @param aBitmap Bitmap to draw
@@ -73,18 +81,6 @@ public: // From Base classes
     void DoHandlePropertyChangeL(CXnProperty* aProperty = NULL);
     
     /**
-    * From CCoeControl Handles the resource change.
-    * @since Series 60 3.1
-    * @param aType A type of the resource change
-    * @return void.
-    */
-    void HandleScreenDeviceChangedL();
-
-    /**
-    * See CCoeControl documentation
-    */    	
-    void HandlePointerEventL( const TPointerEvent& aPointerEvent );
-    /**
     * From CCoeControl Handles the skin change
     * @since Series 60 3.2
     * @return void.
@@ -96,8 +92,7 @@ protected:
     * Size change notification
     */ 
     void SizeChanged();    
-	void Draw(const TRect& aRect) const;
-
+	
 private:
 	CXnBitmapAdapter(CXnNodePluginIf& aNode);
 	void ConstructL(CXnNodePluginIf& aNode);
@@ -106,15 +101,17 @@ private:
 private: // Data
     // UI node, not owned
     CXnNodePluginIf& iNode;
+    // Image decoder, owned
+    CXnImageDecoder* iDecoder;
     // Whether the bitmaps has been loaded or not.
     mutable TBool iAreBitmapsLoaded;
     // Whether the data API has been used or not.
     TBool iAreBitmapsSet;
-    // Path of the bitmap
+    // Path of the bitmap, owned
     HBufC* iPath;
     // The size of the current bitmap
     TSize iBitmapSize;
-	// The path of the fallback image
+	// The path of the fallback image, owned
     HBufC* iFallbackPath;
 	// Whether fallback path has changed and bitmaps need to be reloaded
     TBool iFallbackPathChange;

@@ -227,19 +227,19 @@ void CMmGridView::DoDraw(const TRect* aClipRect) const
     CMmListBoxItemDrawer* itemDrawer = static_cast< CMmListBoxItemDrawer*> ( ItemDrawer() );
     TBool drawingInitiated(EFalse);
     if ( CAknEnv::Static()->TransparencyEnabled() &&
-    		iWin && iWin->GetDrawRect() == TRect::EUninitialized )
-    	{
-    	TRect a;
-    	if (!aClipRect || *aClipRect == TRect(0,0,0,0) )
-    		{
-    		a = ViewRect();
-    		aClipRect = &a;
-    		}
+            iWin && iWin->GetDrawRect() == TRect::EUninitialized )
+        {
+        TRect a;
+        if (!aClipRect || *aClipRect == TRect(0,0,0,0) )
+            {
+            a = ViewRect();
+            aClipRect = &a;
+            }
 
-    	drawingInitiated=ETrue;
-		iWin->Invalidate( *aClipRect );
-		iWin->BeginRedraw( *aClipRect );
-    	}
+        drawingInitiated=ETrue;
+        iWin->Invalidate( *aClipRect );
+        iWin->BeginRedraw( *aClipRect );
+        }
 
     if ( !itemDrawer->IsEditMode() )
         {
@@ -253,18 +253,18 @@ void CMmGridView::DoDraw(const TRect* aClipRect) const
         CAknGridView::Draw( aClipRect );
         }
 
-	if ( aClipRect )
-	    {
-    	TRect rect(*aClipRect);
-    	TInt lastItemInView = (iModel->NumberOfItems() <= BottomItemIndex() )
-    	    ? iModel->NumberOfItems()-1 : BottomItemIndex();
-    	rect.iTl.iY = ItemPos( lastItemInView ).iY + ItemSize( lastItemInView ).iHeight;
+  if ( aClipRect )
+      {
+      TRect rect(*aClipRect);
+      TInt lastItemInView = (iModel->NumberOfItems() <= BottomItemIndex() )
+          ? iModel->NumberOfItems()-1 : BottomItemIndex();
+      rect.iTl.iY = ItemPos( lastItemInView ).iY + ItemSize( lastItemInView ).iHeight;
 //      iGc->SetClippingRect( rect );
 //		removed to prevent non-redraw drawing. Was present to prevent out of view drawing when effects are on.
 //      could be removed because effects were disabled at some point in edit mode to enhance performance.
-    	itemDrawer->DrawFloatingItems( rect );
+      itemDrawer->DrawFloatingItems( rect );
 //      iGc->CancelClippingRect();
-	    }
+      }
 
 //    if (aClipRect)
 //    	{
@@ -272,36 +272,36 @@ void CMmGridView::DoDraw(const TRect* aClipRect) const
 //    	}
 
     if ( CAknEnv::Static()->TransparencyEnabled() &&
-    		iWin && drawingInitiated )
-    	{
-    	drawingInitiated = EFalse;
-    	iWin->EndRedraw( );
-    	}
+        iWin && drawingInitiated )
+      {
+      drawingInitiated = EFalse;
+      iWin->EndRedraw( );
+      }
 
-	}
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 TInt CMmGridView::VerticalItemOffset() const
-	{
-	return iVerticalOffset;
-	}
+  {
+  return iVerticalOffset;
+  }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CMmGridView::SetItemHeight(TInt aItemHeight)
-	{
-	//	we need to update the iItemHeight member in grid also (there are two different item height value holders - in grid and here in grid view)
-	CMmListBoxItemDrawer* itemDrawer =
-	        STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
-	static_cast<CMmGrid*>(itemDrawer->Widget())->SetItemHeight( aItemHeight );
+  {
+  //	we need to update the iItemHeight member in grid also (there are two different item height value holders - in grid and here in grid view)
+  CMmListBoxItemDrawer* itemDrawer =
+          STATIC_CAST( CMmListBoxItemDrawer*, ItemDrawer() );
+  static_cast<CMmGrid*>(itemDrawer->Widget())->SetItemHeight( aItemHeight );
 
-	CAknGridView::SetItemHeight(aItemHeight);
-	}
+  CAknGridView::SetItemHeight(aItemHeight);
+  }
 
 // -----------------------------------------------------------------------------
 //

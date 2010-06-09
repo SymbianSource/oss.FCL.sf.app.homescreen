@@ -97,20 +97,6 @@ public:
      HBufC* LoadL( const TDesC& aResourceName, 
                    const CDesC16Array* aDesParams, 
                    const CArrayFix<TInt>* aIntParams );
-     
-     /**
-      * Realeses loaded resources.
-      *
-      * @since S60 5.0
-      */
-     void ReleaseResourceFiles();
-     /**
-      * Reloads realesed resources.
-      *
-      * @since S60 5.0
-      */
-     void ReloadResourceFilesL();
-
 private:
 
     /**
@@ -189,17 +175,7 @@ private: // data
      * Not own.
      */
     CCoeEnv* iCoeEnv;
-    
-    /**
-     * Own - Dynamic offset.
-     */
-    RArray< TInt > iDynamicOffset;
-    
-    /**
-     * Own - Dynamic localization.
-     */
-    RPointerArray<CHnMdLocalizationElement> iDynamicLocalization;
-    
+
     /**
      * Own - Internal offset.
      */

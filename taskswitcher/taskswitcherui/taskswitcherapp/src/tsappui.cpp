@@ -65,6 +65,9 @@ const TInt KWaitBeforeGoingToBackground = 200000;
 
 const TUid KTsAppUid = { KTsAppUidValue };
 
+const TUid KTsCameraUid = { 0x101F857a };
+const TUid KTsTelephoneUid = { 0x100058b3 };
+
 // -----------------------------------------------------------------------------
 // CTsAppUi::ConstructL()
 // ConstructL is called by the application framework
@@ -160,6 +163,11 @@ void CTsAppUi::ConstructL()
     iIsPopUpShown = EFalse;
     iUiStarted = EFalse;
     iDisableAppKeyHandling = EFalse;
+    
+    // Set process priority to high to avoid being
+    // locked by heavy ui apps processing
+    iEikonEnv->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
+    RProcess().SetPriority(EPriorityHigh);
     
     TSLOG_OUT();
     }
@@ -691,6 +699,7 @@ void CTsAppUi::RequestPopUpL()
             {
             SetOrientationL(EAppUiOrientationPortrait);
             }
+        RProcess().SetPriority(EPriorityForeground);
         SetFullScreenApp(EFalse);
         iEikonEnv->RootWin().SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
         }
@@ -712,6 +721,7 @@ void CTsAppUi::DisablePopUpL()
         iEikonEnv->RootWin().SetOrdinalPosition(-1, ECoeWinPriorityNeverAtFront);
         SetOrientationL(EAppUiOrientationAutomatic);
         SetFullScreenApp(EFalse);
+        RProcess().SetPriority(EPriorityHigh);
         }
     TSLOG_OUT();
     }
@@ -752,7 +762,7 @@ void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
     TInt eventType = aEvent.Type();
     if ( eventType == EEventWindowGroupListChanged )
         {
-        TInt wgId = WgIdOfUnderlyingApp(EFalse);
+        TInt wgId = WgIdOfUnderlyingAppL(EFalse); 
         if ( iForeground &&
              wgId != iUnderAppWgId &&
              !iAppView->AppCloseInProgress(iUnderAppWgId) &&
@@ -760,7 +770,7 @@ void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
             {
             MoveAppToBackground( ENoneTransition );
             }
-        if ( WgIdOfUnderlyingApp(ETrue) != iUnderAppWgId )
+        if ( WgIdOfUnderlyingAppL(ETrue) != iUnderAppWgId )
             {
             HandleResourceChangeL(KEikDynamicLayoutVariantSwitch);
             }
@@ -773,11 +783,16 @@ void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
 // CTsAppUi::WgIdOfUnderlyingApp
 // -----------------------------------------------------------------------------
 //
-TInt CTsAppUi::WgIdOfUnderlyingApp( TBool aIgnoreParentChild )
+TInt CTsAppUi::WgIdOfUnderlyingAppL( TBool aIgnoreParentChild )
     {
     TInt retVal(0);
-    TApaTaskList taskList( iEikonEnv->WsSession() );
-    TInt underlyingWg = taskList.FindByPos(0).WgId();
+    TInt underlyingWg = CheckForUnderlyingHiddenAppsL();
+    if ( !underlyingWg )
+        {
+        TApaTaskList taskList( iEikonEnv->WsSession() );
+        underlyingWg = taskList.FindByPos(0).WgId();
+        }
+    
     if ( aIgnoreParentChild )
         {
         retVal = underlyingWg;
@@ -835,7 +850,6 @@ TInt CTsAppUi::GetParentWg( TInt aChildWg )
 	return retVal;
 	}
 
-
 // -----------------------------------------------------------------------------
 // CTsAppUi::IsForeground
 // -----------------------------------------------------------------------------
@@ -843,6 +857,31 @@ TInt CTsAppUi::GetParentWg( TInt aChildWg )
 TBool CTsAppUi::IsForeground() const
     {
     return iForeground;
+    }
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::CheckForUnderlyingCameraL
+// -----------------------------------------------------------------------------
+//
+TInt CTsAppUi::CheckForUnderlyingHiddenAppsL()
+    {
+    TInt wgId(0);
+    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
+    CleanupClosePushL(allWgIds);
+    User::LeaveIfError(iEikonEnv->WsSession().WindowGroupList(0, &allWgIds));
+    TInt underlyingWg(allWgIds[0].iId);
+    CleanupStack::PopAndDestroy(&allWgIds);
+    
+    CApaWindowGroupName* windowName =
+        CApaWindowGroupName::NewLC( iEikonEnv->WsSession(), underlyingWg );
+    TUid appUid = windowName->AppUid();
+    CleanupStack::PopAndDestroy( windowName );
+    if( appUid == KTsCameraUid ||
+        appUid == KTsTelephoneUid )
+        {
+        wgId = underlyingWg;
+        }
+    return wgId;
     }
 
 // End of file

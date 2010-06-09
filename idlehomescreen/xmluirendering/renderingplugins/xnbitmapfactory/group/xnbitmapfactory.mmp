@@ -29,7 +29,8 @@ VENDORID        VID_DEFAULT
 SOURCEPATH      ../src 
 SOURCE          xnbitmapfactory.cpp
 SOURCE          xnbitmap.cpp
-SOURCE			xnbitmapadapter.cpp
+SOURCE		xnbitmapadapter.cpp
+SOURCE          xnimagedecoder.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../../inc
@@ -41,7 +42,8 @@ LIBRARY         cone.lib
 LIBRARY	        xn3layoutengine.lib
 LIBRARY	        xn3utils.lib
 LIBRARY         avkon.lib
-
+LIBRARY         imageconversion.lib
+LIBRARY         fbscli.lib
 LANG            SC
 
 START RESOURCE  xn3bitmapfactory.rss

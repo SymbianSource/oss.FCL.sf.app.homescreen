@@ -74,6 +74,8 @@ const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s
 
 const TInt KDragThreshold = 20; // pixels
 
+const TReal KEps( 3e-16 ); // proximite EPS value for double FP numbers
+
 // LOCAL FUNCTION PROTOTYPES
 static TRgb ConvertHslToRgb( TInt aHue, TInt aSaturation, TInt aLightness );
 static void ConvertRgbToHsl( TRgb aRGB, TUint& aHue, TUint& aSaturation,
@@ -3433,6 +3435,42 @@ static void CancelFocusRefusalL( CXnUiEngine& aUiEngine )
     }
 
 // -----------------------------------------------------------------------------
+// Calculates scaled bitmap size (rect)
+// -----------------------------------------------------------------------------
+//
+void CalculateScaledBitmapRect( TSize& aScaledSize, const TSize& aDrawSize,
+    const TSize& aImageSize )    
+    {
+    //no scaling as default
+    TReal scaleRatio( 1.0f ); 
+    aScaledSize.SetSize( aDrawSize.iWidth, aDrawSize.iHeight );
+    
+    //If any dimension is 0, then we do not bother to scale
+    if ( aDrawSize.iWidth == 0 || aDrawSize.iHeight == 0 )
+        {
+        return;
+        }
+    
+    TReal xRatio = 
+        ( ( TReal )aImageSize.iWidth / ( TReal )aDrawSize.iWidth );
+    TReal yRatio = 
+        ( ( TReal )aImageSize.iHeight / ( TReal )aDrawSize.iHeight );
+    //Find out appropriate scaling factor
+    xRatio > yRatio ? ( scaleRatio = xRatio ) : ( scaleRatio = yRatio );
+    
+    // ratio is too small (can be considered as division by zero)
+    if ( scaleRatio < KEps && scaleRatio > -KEps )
+        {
+        return;
+        }
+    
+    // Otherwise scaling can be done
+    aScaledSize.iWidth = ( TInt )( ( TReal )aImageSize.iWidth / scaleRatio );
+    aScaledSize.iHeight = 
+        ( TInt )( ( TReal )aImageSize.iHeight / scaleRatio );
+    }
+
+// -----------------------------------------------------------------------------
 // BuildSwipeTriggerNodeLC
 // Build trigger node for swipe event
 // -----------------------------------------------------------------------------
@@ -4479,7 +4517,7 @@ void CXnControlAdapterImpl::Draw( const TRect& aRect, CWindowGc& aGc ) const
         return;
         }
 
-    aGc.SetClippingRect( aRect );
+//    aGc.SetClippingRect( aRect );
 #ifdef _XN_DEBUG_
     CXnComponent* comp = Component();
     CXnNode& node = comp->Node()->Node();
@@ -4495,7 +4533,7 @@ void CXnControlAdapterImpl::Draw( const TRect& aRect, CWindowGc& aGc ) const
     aGc.DrawRect( contentRect );
 #endif
     TRAP_IGNORE( DoDrawL( aRect, aGc ) );
-    aGc.CancelClippingRect();
+//    aGc.CancelClippingRect();
     }
 
 // -----------------------------------------------------------------------------
@@ -4969,14 +5007,28 @@ void CXnControlAdapterImpl::DrawContentImageL( CWindowGc& aGc ) const
 
     TRect bitmapRect = rect;
     bitmapRect.Move( -rect.iTl.iX, -rect.iTl.iY );
+    // Finds appropriate method of scaling
     if ( AknIconUtils::IsMifIcon( iContentBitmap ) )
         {
         if ( preserveAspectRatio )
             {
             AknIconUtils::SetSize(
-                iContentBitmap, bitmapRect.Size(), EAspectRatioPreserved );
+                iContentBitmap, bitmapRect.Size(), 
+                EAspectRatioPreservedAndUnusedSpaceRemoved );
             AknIconUtils::SetSize(
-                iContentMask, bitmapRect.Size(), EAspectRatioPreserved );
+                iContentMask, bitmapRect.Size(), 
+                EAspectRatioPreservedAndUnusedSpaceRemoved );
+            // In some cases resizing might fail with previous settings
+            if ( iContentBitmap->SizeInPixels().iHeight == 0 || 
+                iContentBitmap->SizeInPixels().iWidth == 0 )
+                {
+                AknIconUtils::SetSize(
+                    iContentBitmap, bitmapRect.Size(), 
+                    EAspectRatioPreserved );
+                AknIconUtils::SetSize(
+                    iContentMask, bitmapRect.Size(), 
+                    EAspectRatioPreserved );
+                }
             }
         else
             {
@@ -4984,6 +5036,20 @@ void CXnControlAdapterImpl::DrawContentImageL( CWindowGc& aGc ) const
                 iContentBitmap, bitmapRect.Size(), EAspectRatioNotPreserved );
             AknIconUtils::SetSize(
                 iContentMask, bitmapRect.Size(), EAspectRatioNotPreserved );
+            }
+        // Set a new bitmap size
+        bitmapRect.SetSize( iContentBitmap->SizeInPixels() );
+        }
+    else
+        {
+        if ( preserveAspectRatio )
+            {
+            TSize newBitmapSize;
+            // scaling is done in bitmap drawing routine, here only the
+            // sacling rect is calculated
+            CalculateScaledBitmapRect( newBitmapSize, rect.Size(), 
+                iContentBitmap->SizeInPixels() );
+            bitmapRect.SetSize( newBitmapSize );
             }
         }
     
@@ -4993,6 +5059,8 @@ void CXnControlAdapterImpl::DrawContentImageL( CWindowGc& aGc ) const
         ( rect.Height() - bitmapRect.Height() ) / 2;
     rect.iTl.iX +=
         ( rect.Width() - bitmapRect.Width() ) / 2;
+    // sets a new size to draw
+    rect.SetSize( bitmapRect.Size() );
     
     if ( iContentBitmap && iContentMask )
         {

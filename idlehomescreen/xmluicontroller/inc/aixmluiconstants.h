@@ -113,6 +113,8 @@ namespace AiUiDef
             _LIT8( KNewsTicker, "newsticker" );            
             _LIT8( KAnimation, "animation" ); 
             _LIT8( KTextEditor, "texteditor" );
+            _LIT8( KData, "data" );
+            _LIT8( KTitle, "title" );
             }
         
          }   // End of namespace xml

@@ -75,44 +75,6 @@ EXPORT_C HBufC8* HnUtils::ReadFileL( const TDesC& aPath )
 // 
 // ---------------------------------------------------------------------------
 //      
-EXPORT_C HBufC* HnUtils::LocateFileLC( const TDesC& aFile )
-    {
-    HBufC* filePath = HBufC::NewLC(KMaxName);
-    RFs& fs = CEikonEnv::Static()->FsSession();
-
-    TDriveList driveList;
-    TChar driveLetter;
-    TInt driveNumber=EDriveY;
-    User::LeaveIfError(fs.DriveList(driveList));
-    for(; driveNumber>=EDriveA-1; driveNumber-- )
-        {
-        if (driveNumber==EDriveA-1)
-        driveNumber = EDriveZ;
-        if (driveList[driveNumber])
-            {
-            User::LeaveIfError(fs.DriveToChar(driveNumber, driveLetter));
-            filePath->Des().Zero();
-            filePath->Des().Append(driveLetter);
-            filePath->Des().Append(KRscPath);
-            filePath->Des().Append(aFile);
-
-            if (BaflUtils::FileExists(fs,*filePath))
-                {
-                return filePath;
-                }
-            }
-        if (driveNumber == EDriveZ)
-        break;
-        }
-
-    User::Leave(KErrNotFound);
-    return filePath;
-    }
-
-// ---------------------------------------------------------------------------
-// 
-// ---------------------------------------------------------------------------
-//      
 EXPORT_C HBufC* HnUtils::LocateNearestLanguageFileLC( const TDesC& aFile )
     {
     _LIT( KExtRSC, ".r");
@@ -122,31 +84,22 @@ EXPORT_C HBufC* HnUtils::LocateNearestLanguageFileLC( const TDesC& aFile )
         RFs& fs = CEikonEnv::Static()->FsSession();
         TDriveList driveList;
         TChar driveLetter;
-        TInt driveNumber=EDriveY;
-        User::LeaveIfError(fs.DriveList(driveList));
+        //locate resources only on Z drive for foldersuite
+        //no need to scan all drives
+        TInt driveNumber=EDriveZ;
         TFileName file;
-        for(; driveNumber>=EDriveA-1; driveNumber-- )
+        User::LeaveIfError(fs.DriveToChar(driveNumber, driveLetter));
+        filePath->Des().Zero();
+        filePath->Des().Append(driveLetter);
+        filePath->Des().Append(KRscPath);
+        filePath->Des().Append(aFile);
+
+        file = *filePath;
+        BaflUtils::NearestLanguageFile( fs, file);
+        if( BaflUtils::FileExists( fs, file))
             {
-            if (driveNumber==EDriveA-1)
-            driveNumber = EDriveZ;
-            if (driveList[driveNumber])
-                {
-                User::LeaveIfError(fs.DriveToChar(driveNumber, driveLetter));
-                filePath->Des().Zero();
-                filePath->Des().Append(driveLetter);
-                filePath->Des().Append(KRscPath);
-                filePath->Des().Append(aFile);
-    
-                file = *filePath;
-                BaflUtils::NearestLanguageFile( fs, file);
-                if( BaflUtils::FileExists( fs, file))
-                    {
-                    CleanupStack::PopAndDestroy(filePath);    
-                    return file.AllocLC();
-                    }
-                }
-            if (driveNumber == EDriveZ)
-            break;
+            CleanupStack::PopAndDestroy(filePath);
+            return file.AllocLC();
             }
         CleanupStack::PopAndDestroy(filePath);
         }

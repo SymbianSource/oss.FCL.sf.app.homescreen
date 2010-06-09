@@ -50,8 +50,6 @@ void CHnMdModel::ConstructL( MHnMdModelEventObserver *aModelObserver,
     MMPERF(("CHnMetaDataModel::ConstructL - bitmap and mask ids cache ready"));
     iBitmapIdCache = CHnBitmapIdCache::NewL();
     MMPERF(("CHnMetaDataModel::ConstructL - model privider ready"));
-    iXmlModelProvider->ReloadModelL();
-    MMPERF(("CHnMetaDataModel::ConstructL - model reloaded"));
 
     iCmnPtrs.iLocalization = iLocalization;
     iCmnPtrs.iIdGenerator = &iIdGenerator;
@@ -165,101 +163,11 @@ EXPORT_C TInt CHnMdModel::HandleBackEventL(
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CHnMdModel::HandleSisInstallationEventL(
-        CHnSuiteModelContainer* /*aModelContainer*/ )
-    {
-    iXmlModelProvider->ReloadModelL();
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CHnMdModel::ReloadStackSuitesL( CHnSuiteModelContainer* aModelContainer )
-	{
-    RPointerArray< CLiwGenericParamList > paramsArray;
-    CleanupResetAndDestroyPushL( paramsArray );
-
-    TBool rootDisplayed( iLoadedSuites.Count() == 1 );
-    while( iLoadedSuites.Count() > 0 )
-        {
-        // break loop to leave root suite on the stack
-        if( ( iLoadedSuites.Count() == 1 && paramsArray.Count() > 0 )
-                || rootDisplayed )
-            {
-            break;
-            }
-
-        CHnMdSuite* suite = GetLastSuite();
-        if( iXmlModelProvider->SuiteExistsL( suite->SuiteName() ) )
-            {
-            CLiwGenericParamList* suiteParams = CLiwGenericParamList::NewL();
-            CleanupStack::PushL( suiteParams );
-            suiteParams->AppendL( suite->GetSuiteParameters() );
-            paramsArray.Append( suiteParams );
-            CleanupStack::Pop( suiteParams );
-            }
-        aModelContainer->PopSuiteModelL( suite->SuiteName() );
-        DeleteLastSuite();
-        }
-
-    TInt err( KErrNone );
-    CHnFilter* filter = CHnFilter::NewLC();
-    filter->SetEvaluateSuiteL( ETrue );
-
-    SetModeL( iMode );
-
-    for( TInt i( paramsArray.Count() - 1 ); i >= 0 && !err; i-- )
-        {
-        CLiwGenericParamList* suiteParams = CLiwGenericParamList::NewL();
-        CleanupStack::PushL(suiteParams);
-        suiteParams->AppendL( *(paramsArray[ i ]));
-        TInt pos( 0 );
-        const TLiwGenericParam* param = suiteParams->FindFirst( pos, KSuiteName8 );
-        if ( param && pos >= 0)
-            {
-            TPtrC suiteName;
-            param->Value().Get( suiteName );
-            err = LoadSuiteL( suiteName, suiteParams );
-            }
-        CleanupStack::PopAndDestroy( suiteParams );
-
-        GetLastSuite()->SetModeL( iMode );
-        GetLastSuite()->MarkEvaluationL(
-                *filter, *iCmnPtrs.iContainer->GetLastSuiteModel() );
-        GetLastSuite()->EvaluateL( *iCmnPtrs.iContainer->GetLastSuiteModel() );
-        }
-
-    CleanupStack::PopAndDestroy( filter );
-    CleanupStack::PopAndDestroy( &paramsArray );
-	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
 EXPORT_C void CHnMdModel::DeleteLastSuite()
     {
     CHnMdSuite* tmpPtr = GetLastSuite();
     iLoadedSuites.Remove( iLoadedSuites.Count() - 1 );
     delete tmpPtr;
-    }
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CHnMdModel::ReleaseLocalization()
-    {
-    iLocalization->ReleaseResourceFiles();
-    iXmlModelProvider->ResetCache();
-    }
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CHnMdModel::ReloadLocalizationL()
-    {
-    iLocalization->ReloadResourceFilesL();
     }
 
 // ---------------------------------------------------------------------------
@@ -461,27 +369,12 @@ EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
 EXPORT_C TBool CHnMdModel::SuiteModelExistsL( const TDesC8& aSuiteModel )
     {
     TBool res( EFalse );
-    HBufC* suiteName = HnConvUtils::Str8ToStrLC( aSuiteModel );
-    res = iXmlModelProvider->SuiteExistsL( *suiteName ) ||
-            aSuiteModel.Compare( KRoot8 ) == KErrNone ;
-    CleanupStack::PopAndDestroy( suiteName );
-    return res;
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CHnMdModel::GetCurrentUriL( TDes& aUri )
-    {
-    iXmlModelProvider->ReloadModelL();
-
-    aUri.Append( KPrefMm );
-    for( TInt i(0); i < iLoadedSuites.Count(); i++ )
+    if( !aSuiteModel.Compare( KFolderSuite8 ) ||
+        !aSuiteModel.Compare( KRoot8 ) )
         {
-        aUri.Append( iLoadedSuites[ i ]->SuiteName() );
-        aUri.Append( KSlash );
+        res = ETrue;
         }
+    return res;
     }
 
 // ---------------------------------------------------------------------------

@@ -152,6 +152,31 @@ MTransactionElement*
     }    
 
 MTransactionElement*
+    CTransactionFactoryImpl::CreateDataBufferTransactionElementL(
+        CXnNodeAppIf& aTarget,
+        const TDesC8& aData,
+        TInt aPriority,
+        const TDesC& aCid, 
+        TInt aIndex )
+    {
+    // Instantiate element
+    CDataBufferTransactionElement* element = NewInstanceL< CDataBufferTransactionElement >();
+    CleanupStack::PushL( element );
+    
+    // Initialize
+    element->InitializeL( aTarget, aData, aCid, aIndex );
+    CleanupStack::Pop( element );
+    
+    // Reserve
+    iReservedElements.AddLast( *element );
+    
+    // Set content priority
+    element->SetContentPriority( aPriority );
+        
+    return element;
+    }    
+
+MTransactionElement*
     CTransactionFactoryImpl::CreateEmptyContentTransactionElementL(
         CXnNodeAppIf& aTarget,
         TInt aIndex)

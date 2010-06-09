@@ -344,6 +344,7 @@ void CXnListQueryDialogAdapter::TryDisplayingDialogL( )
     
     if ( dialog->RunLD() )
         {
+        iDialog = NULL;
         ActivateItemL( selectedIndex );
         }            
            

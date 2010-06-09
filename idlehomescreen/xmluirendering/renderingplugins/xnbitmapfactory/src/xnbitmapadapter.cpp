@@ -20,7 +20,7 @@
 #include "xndomproperty.h"
 #include "xnproperty.h"
 #include "xncontroladapter.h"
-
+#include "xnimagedecoder.h"
 #include "xnbitmapadapter.h"
 
 _LIT(KSkin, "skin(");
@@ -55,6 +55,8 @@ void CXnBitmapAdapter::ConstructL(CXnNodePluginIf& aNode)
     iAreBitmapsLoaded = EFalse;
     
     iFallbackPathChange = ETrue;
+    
+    iDecoder = CXnImageDecoder::NewL( *this, iCoeEnv->FsSession() );
     }
     
 // -----------------------------------------------------------------------------
@@ -73,6 +75,7 @@ CXnBitmapAdapter::CXnBitmapAdapter(CXnNodePluginIf& aNode) : iNode( aNode )
 //
 CXnBitmapAdapter::~CXnBitmapAdapter()
     {
+    delete iDecoder;
     delete iPath;
     delete iFallbackPath;
     }
@@ -82,7 +85,9 @@ CXnBitmapAdapter::~CXnBitmapAdapter()
 // -----------------------------------------------------------------------------
 //
 void CXnBitmapAdapter::SetContentBitmaps(CFbsBitmap* aBitmap, CFbsBitmap* aMask)
-    {    
+    {
+    iDecoder->Cancel();
+    
     CXnControlAdapter::SetContentBitmaps( aBitmap, aMask );
     
     iAreBitmapsSet = ETrue;
@@ -91,21 +96,26 @@ void CXnBitmapAdapter::SetContentBitmaps(CFbsBitmap* aBitmap, CFbsBitmap* aMask)
     }   
 
 // -----------------------------------------------------------------------------
+// CXnBitmapAdapter::SetContentBitmaps
+// -----------------------------------------------------------------------------
+//
+void CXnBitmapAdapter::SetContentBitmaps( TFileName& aFilename )
+    {       
+    TRAPD( err, iDecoder->DecodeL( aFilename ) );
+    
+    if ( err )
+        {
+        SetContentBitmaps( NULL, NULL );
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // CXnBitmapAdapter::ContentBitmaps
 // -----------------------------------------------------------------------------
 //
 void CXnBitmapAdapter::ContentBitmaps(CFbsBitmap*& aBitmap, CFbsBitmap*& aMask)
     {    
     CXnControlAdapter::ContentBitmaps( aBitmap, aMask );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnBitmapAdapter::Draw
-// -----------------------------------------------------------------------------
-//
-void CXnBitmapAdapter::Draw(const TRect& aRect) const
-    {        
-    CXnControlAdapter::Draw( aRect );    
     }
 
 // -----------------------------------------------------------------------------
@@ -187,25 +197,6 @@ void CXnBitmapAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
         {
         InitializeBitmapsL();
         }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnTextAdapter::HandleResourceChange
-// -----------------------------------------------------------------------------
-//
-void CXnBitmapAdapter::HandleScreenDeviceChangedL( )
-    {
-    CXnControlAdapter::HandleScreenDeviceChangedL();        
-    }
-
-// -----------------------------------------------------------------------------
-// CXnBitmapAdapter::HandlePointerEventL
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-// 
-void CXnBitmapAdapter::HandlePointerEventL( const TPointerEvent& aPointerEvent )
-    {        
-    CXnControlAdapter::HandlePointerEventL( aPointerEvent );    
     }
 
 // -----------------------------------------------------------------------------

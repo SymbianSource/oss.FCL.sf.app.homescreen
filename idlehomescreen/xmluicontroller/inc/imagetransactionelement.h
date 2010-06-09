@@ -23,7 +23,6 @@
 
 class CGulIcon;
 class CXnNodeAppIf;
-class RFile;
 
 namespace AiUtility
     {
@@ -31,8 +30,7 @@ namespace AiUtility
     }
 
 namespace AiXmlUiController
-{
-class CKamikazeImageDecoder;    
+{    
     
 /**
  *  @ingroup group_xmluicontroller
@@ -88,16 +86,17 @@ private: // data
      * Icon to be published.
      * Own.
      */
-    CGulIcon* iNewIcon;
-
-    /**
-     * Asynchronous image decoder. Executed and 
-     * self destroyed when decoding is ready. Not own.
-     */
-    CKamikazeImageDecoder* iImageDecoder;
+    CGulIcon* iIcon;    
     
+    /**
+     * Icon filename.     
+     */
+    TFileName iFilename;
     };
     
 } // namespace AiXmlUiController
 
 #endif // C_IMAGETRANSACTIONELEMENT_H
+
+// End of file
+

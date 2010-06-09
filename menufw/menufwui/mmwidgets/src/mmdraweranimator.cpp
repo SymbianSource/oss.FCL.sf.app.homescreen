@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:
- *  Version     : %version: MM_41 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_43 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -120,7 +120,9 @@ void CMmDrawerAnimator::RunL()
             current.MakeStep();
             TRect afterRect( current.GetItemPosition(), itemSize );
 
-            if( current.GetFloatingItemType() == EDrag )
+            if( ( current.GetFloatingItemType() == EDrag
+                        && iDrawer.GetFloatingItemIndex( EDragStart ) == KErrNotFound )
+                    || current.GetFloatingItemType() == EDragStart )
                 {
                 TInt dragTrail = iDrawer.GetFloatingItemIndex( EPostDragRefreshItem );
                 if( dragTrail != KErrNotFound )
@@ -131,7 +133,9 @@ void CMmDrawerAnimator::RunL()
                             SetAllowMove( EFalse );
                     }
                 }
-            else
+            else if( ( current.GetFloatingItemType() == EDrag
+                            && iDrawer.GetFloatingItemIndex( EDragStart ) == KErrNotFound )
+                        || current.GetFloatingItemType() != EDrag )
                 {
                 refreshRect = (refreshRect == TRect() ) ? beforeRect : refreshRect;
                 refreshRect.BoundingRect( beforeRect );
@@ -149,7 +153,7 @@ void CMmDrawerAnimator::RunL()
             }
 
 
-      TInt currentVerticalOffset = static_cast<CMmWidgetContainer*>(
+        TInt currentVerticalOffset = static_cast<CMmWidgetContainer*>(
               iDrawer.Widget()->Parent() )->VerticalItemOffset();
 
         if( iLastNotedTopItem != iDrawer.Widget()->TopItemIndex()
@@ -249,7 +253,7 @@ TInt CMmDrawerAnimator::Trigger()
 
             if( iTransTfxInternal )
                 {
-        iTransTfxInternal->Remove( MAknListBoxTfxInternal::EListEverything );
+                iTransTfxInternal->Remove( MAknListBoxTfxInternal::EListEverything );
                 iTransTfxInternal->Draw( iDrawer.Widget()->Rect() );
                 }
             }
@@ -277,17 +281,30 @@ TInt CMmDrawerAnimator::RunError( TInt aError )
 //
 void CMmDrawerAnimator::AnimateDragItemTransitionL()
     {
-    if( KErrNotFound != iDrawer.GetFloatingItemIndex( EDrag ) )
+    if( KErrNotFound != iDrawer.GetFloatingItemIndex( EDrag )
+            || KErrNotFound != iDrawer.GetFloatingItemIndex( EDragStart ) )
         {
+        TMmFloatingItemType floatingType =
+                iDrawer.GetFloatingItemIndex( EDrag ) != KErrNotFound
+                    ? EDrag : EDragStart;
         TMmFloatingItem floatingItem(
-                iDrawer.GetFloatingItemL( EDrag ).GetDrawnItemIndex(),
-                iDrawer.GetFloatingItemL( EDrag ).GetItemPosition(),
-                EDragTransition, iUsualAnimationFramesCount,
+                iDrawer.GetFloatingItemL( floatingType ).GetDrawnItemIndex(),
+                iDrawer.GetFloatingItemL( floatingType ).GetItemPosition(),
+                EDragTransition, floatingType == EDrag
+                    ? iUsualAnimationFramesCount : MmEffects::KNoAnimationFramesCount,
                 iDrawer.Widget()->View() );
         TPoint pointEnd = iDrawer.Widget()->View()->ItemPos( floatingItem.GetDrawnItemIndex() );
         floatingItem.SetPositionStep( pointEnd - floatingItem.GetItemPosition() );
         iDrawer.AddFloatingItemL( floatingItem, 0 );
+
+        TMmFloatingItem postDragRefresh(
+                iDrawer.GetFloatingItemL( floatingType ).GetDrawnItemIndex(),
+                pointEnd, EPostDragRefreshItem,
+                MmEffects::KNoAnimationFramesCount, iDrawer.Widget()->View() );
+        iDrawer.AddFloatingItemL( postDragRefresh );
+
         iDrawer.RemoveFloatingItem( iDrawer.GetFloatingItemIndex( EDrag ) );
+        iDrawer.RemoveFloatingItem( iDrawer.GetFloatingItemIndex( EDragStart ) );
         }
     }
 
@@ -428,5 +445,21 @@ void CMmDrawerAnimator::TriggerMoveItemL()
     {
     static_cast<CMmWidgetContainer*> ( iDrawer.Widget()->Parent() )->
             TriggerMoveItemL();
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmDrawerAnimator::AnimateDragItemStartL( TInt aDraggedIndex, TPoint aPoint )
+    {
+    TMmFloatingItem floatingItem(
+            aDraggedIndex,
+            iDrawer.Widget()->View()->ItemPos( aDraggedIndex ),
+            EDragStart,
+            MmEffects::KUsualAnimationFramesCountNonTouch,
+            iDrawer.Widget()->View() );
+    floatingItem.SetPositionStep( aPoint - floatingItem.GetItemPosition() );
+    iDrawer.AddFloatingItemL( floatingItem, 0 );
     }
 //End of file

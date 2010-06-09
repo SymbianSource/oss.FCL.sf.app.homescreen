@@ -24,7 +24,6 @@
 #include <e32hashtab.h>
 
 // User includes
-#include "xnnewsticker.h"
 #include "aicontentobserver.h"
 #include "xnproperty.h"
 
@@ -49,7 +48,6 @@ namespace AiXmlUiController
     class MTransaction;
     class CAppUi;
     class CXmlNodeIdGenerator;
-    class CNewstickerCallbackHandler;
     class CCssPropertyMap;
     class CPolicyEvaluator;
     class TAiPolicyElement;
@@ -66,8 +64,7 @@ namespace AiXmlUiController
 *  @lib AiXmlUiMain
 */
 class CContentRenderer : public CBase,
-    public MAiContentObserver,
-    public XnNewstickerInterface::MXnNewstickerCallbackInterface
+    public MAiContentObserver    
     {
 public:  
     // Constructors and destructor
@@ -244,8 +241,6 @@ private:
     void SendRefreshContentEventL();
     
     TBool IsParentNewsticker( CXnNodeAppIf& aTarget );
-    
-    void RegisterNewstickerCallbackInterfaceL( CXnNodeAppIf& aTarget );
 
     void ProcessContentChangesL( MTransaction& aTr );
     void ProcessContentChangeL( TAiPolicyElement& aElement );         
@@ -257,13 +252,6 @@ private:
     CXnDomPropertyValue::TPrimitiveValueType DomPropertyValueType( 
         MAiContentObserver::TValueType aValueType ); 
             
-private:    
-    // From XnNewstickerInterface::MXnNewstickerCallbackInterface    
-
-    void TitleScrolled(TInt aTitleIndex);
-    
-    void TitleToScroll(TInt aTitleIndex);
-    
 private:    
     // data
     
@@ -285,12 +273,6 @@ private:
     CPeriodic* iTimer;    
     /** Fw event handler, Not owned. */
     MAiFwEventHandler* iFwEventHandler;
-    /** Newsticker callback handler, Owned */
-    CNewstickerCallbackHandler* iCallbackHandler;    
-    /** Pointer descriptor to newsticker plugin name */
-    TPtrC iNTPublisher;    
-    /** Newsticker element property class, Owned */
-    HBufC* iNTClass;    
     /** CSS property map, Owned. */
     CCssPropertyMap* iPropertyMap;    
     /** Publishing policy evaluator, Owned. */

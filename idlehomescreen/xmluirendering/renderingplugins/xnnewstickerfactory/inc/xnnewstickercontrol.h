@@ -95,7 +95,7 @@ class CXnNewstickerControl : public CBase
 		 * Returns last index from iTitleTexts
 		 * Which is not empty string
 		 */
-        TInt LastIndexWithContent();
+        TInt LastIndexWithContent() const;
         
         /**
          * Delete all titles.
@@ -116,14 +116,33 @@ class CXnNewstickerControl : public CBase
 	    /**
         * Selects title to be shown
         */
-        const TDesC& SelectTitle();
+        const TDesC& CurrentTitle() const;
+
+        /**
+        * Selects current title to display
+        */
+        TInt SelectTitle();
         
         /**
-        * Sets the current title to default ( last one ) or move to next one
+        * Selects next title to display
         */
-        TBool SetCurrentTitle( TBool aSetDefault = EFalse );
+        TBool SelectNextTitle();
 
+        /**
+        * Checks is there any visible titles in array
+        */
+        TBool IsVisibleTitles() const;
+        
+        /**
+         * Sets scroll looping
+         */
+        void SetScrollLooping( TBool aLooping );
 
+        /**
+         * Peeks next title, return loop status in aEndOfLoop.         
+         */
+        TPtrC PeekNextTitle( TBool& aEndOfLoop ) const;
+        
     private: 
 
         CXnNewstickerControl(CXnNewstickerAdapter* aAdapter);
@@ -139,11 +158,6 @@ class CXnNewstickerControl : public CBase
          * @return The next index that has content or -1 if nothing was found 
          */
         TInt GetNextTitleWithContent( TInt aStartSearch, TBool aBackwards = EFalse ) const;
-
-        /**
-        * Checks is there any visible titles in array
-        */
-        TBool IsVisibleTitles() const;
         
     private:    // Data
         
@@ -165,9 +179,10 @@ class CXnNewstickerControl : public CBase
          */	            
         CXnNewstickerAdapter*       iAdapter;
         
-
-
-        
+        /**
+        * is scroll looping activated
+        */ 
+        TBool                    iScrollLooping;
     };
 
 #endif // XNNEWSTICKERCONTROL_H

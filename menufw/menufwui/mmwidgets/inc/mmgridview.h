@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmGridView declaration
-*  Version     : %version: MM_24.1.10 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_24.1.11 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -63,9 +63,9 @@ public:
      * @since S60 v3.0
      * @param aClipRect Clipping rectangle.
      */
-	void Draw( const TRect* aClipRect ) const;
+  void Draw( const TRect* aClipRect ) const;
 
-	/**
+  /**
      * Gets item position.
      *
      * This fuction from @c CAknGridView is overridden so that it
@@ -90,12 +90,12 @@ public:
      */
     TBool XYPosToItemIndex(TPoint aPosition, TInt& aItemIndex) const;
 
-	/**
-	 * Returns this view's gc.
-	 *
-	 * @return pointer to gc
-	 */
-	CWindowGc* Gc();
+  /**
+   * Returns this view's gc.
+   *
+   * @return pointer to gc
+   */
+  CWindowGc* Gc();
 
     /**
      * @see CAknGridView::UpdateSelectionL
@@ -108,15 +108,15 @@ public:
      */
     void UpdateSelectionL( TSelectionMode aSelectionMode );
 
-	/**
-	 * @see CAknGridView::MoveCursorL
-	 *
-	 * This method of CAknGridView is overriden to so that
-	 * correct effects are displayed when moving highlight with
-	 * rocker key in mirrored layout.
+  /**
+   * @see CAknGridView::MoveCursorL
+   *
+   * This method of CAknGridView is overriden to so that
+   * correct effects are displayed when moving highlight with
+   * rocker key in mirrored layout.
      * Please note that it is necessary because of the hackish
      * solution used to draw items in mirrored layout.
-	 */
+   */
     void MoveCursorL( TCursorMovement aCursorMovement,
             TSelectionMode aSelectionMode );
 
@@ -128,10 +128,10 @@ public:
      */
     TInt VerticalItemOffset() const;
 
-	/**
-	* This function sets item height in pixels.
-	* @param aItemHeight New height in pixels for this view’s items.
-	*/
+  /**
+  * This function sets item height in pixels.
+  * @param aItemHeight New height in pixels for this view’s items.
+  */
     void SetItemHeight(TInt aItemHeight);
 
     /**

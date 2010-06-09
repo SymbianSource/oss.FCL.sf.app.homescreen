@@ -807,10 +807,17 @@ void CXnEditMode::HandleScreenDeviceChangedL()
         
         StopDragL();               
         }
-
-    SetRect( iUiEngine.ClientRect() );
-                       
+   
     UpdateScreen();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnEditMode::HandleScreenDeviceChangedL
+// -----------------------------------------------------------------------------
+//
+void CXnEditMode::SetClientRect( TRect aRect )
+    {
+    SetRect( aRect );
     }
 
 // -----------------------------------------------------------------------------
