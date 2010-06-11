@@ -66,6 +66,8 @@ private slots:
 
     void stateExited();
 
+    void setEmptyLabelVisibility(bool visibility);
+
     void contextMenuAction(HbAction *action);
 
 private:

@@ -18,118 +18,125 @@
 #ifndef HSWIDGETHOST_H
 #define HSWIDGETHOST_H
 
-#include <QVariantMap>
+#include <HbWidget>
 #include <QMetaMethod>
 #include <QMetaProperty>
 
-#include <HbWidget>
-
-#include "hsdomainmodeldatastructures.h"
 #include "hsdomainmodel_global.h"
+#include "hsdomainmodeldatastructures.h"
+
 #include "hstest_global.h"
-
-class HsPage;
-
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+
+class QStateMachine;
+
+class HsWidgetComponent;
+class HsPage;
 
 class HSDOMAINMODEL_EXPORT HsWidgetHost : public HbWidget
 {
     Q_OBJECT
 
 public:
-    enum State {
-        Unloaded,
-        Loaded,
-        Initialized,
-        Visible,
-        Hidden,
-        Uninitialized,
-        Finished,
-        Faulted,
-        UninstallingOrUpdating
-    };
-
-public:
-    static HsWidgetHost *createInstance(HsWidgetData &widgetData, 
-                                        const QVariantHash &preferences = QVariantHash());
-
     HsWidgetHost(int databaseId, QGraphicsItem *parent = 0);
-    
     ~HsWidgetHost();
-    
-    bool load();
-    void unload();
-    
-    bool setPage(HsPage *page);
-    HsPage *page() const;
 
-    bool isValid() const;
+    static HsWidgetHost *createInstance(
+        HsWidgetData &widgetData, 
+        const QVariantHash &preferences = QVariantHash());
 
     int databaseId() const;
 
-    State state() const { return mState; }
+    bool setPage(HsPage *page);
+    HsPage *page() const; 
 
-    bool deleteFromDatabase();
-    
-    bool setWidgetPresentation();
-    bool setWidgetPresentationData(HsWidgetPresentationData &presentationData);
-    bool widgetPresentationData(const QString &key, HsWidgetPresentationData &presentationData);
-
-    HsWidgetPresentationData widgetPresentation(Qt::Orientation orientation);
-    bool loadWidgetPresentation();
-    bool deleteWidgetPresentation(Qt::Orientation orientation);
     bool isPannable(QGraphicsSceneMouseEvent *event);
+    
+    bool loadPresentation();
+    bool loadPresentation(Qt::Orientation orientation);
+    bool savePresentation();
+    bool savePresentation(Qt::Orientation orientation);    
+    bool savePresentation(HsWidgetPresentationData &presentation);
+    bool getPresentation(HsWidgetPresentationData &presentation);
+    bool removePresentation(Qt::Orientation orientation);
+
 signals:
-    void widgetFinished(HsWidgetHost *widget);
-    void widgetError(HsWidgetHost *widget);
-    void widgetResized(HsWidgetHost *widget);
-   
+    void event_startAndShow();
+    void event_startAndHide();
+    void event_unload();
+    void event_show();
+    void event_hide();
+    void event_remove();
+    void event_close();
+    void event_finished();
+    void event_faulted();
+    
+    void finished();
+    void faulted();
+    void resized();
+    void available();
+    void unavailable();
+
 public slots:
-    void initializeWidget();
+    void startWidget(bool show = true);
     void showWidget();
     void hideWidget();
-    void uninitializeWidget();
     void setOnline(bool online = true);
+    
+    void remove();
+    void close();
 
     void startDragEffect();
     void startDropEffect();
-  
-protected:    
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-    bool eventFilter(QObject *obj, QEvent *event);
-    
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event);    
+    void mousePressEvent(QGraphicsSceneMouseEvent *) {}
+
 private:
+    Q_DISABLE_COPY(HsWidgetHost)    
+    void setupEffects();
+    void setupStates();
+
     bool setProperty(const char *name, QMetaProperty &property); 
     bool setMethod(const char *signature, QMetaMethod &method);    
     bool hasSignal(const char *signature);
+
+    void setNewSize(const QSizeF &size);
+
     bool setPreferencesToWidget();
-    void setNewSize(const QSizeF &newSize);
 
 private slots:
-    void onSetPreferences(const QStringList &names);
+    void action_connectComponent();
+    void action_disconnectComponent();
+    void action_load();
+    void action_unload();
+    void action_initialize();
+    void action_uninitialize();
+    void action_show();
+    void action_hide();
+    void action_finished();
+    void action_faulted();
+    void action_remove();
+    
     void onFinished();
     void onError();
-    void onAboutToUninstall();
-    void onUpdated();
-    void onUnavailable();
-    void onAvailable();
+    void onSetPreferences(const QStringList &names);
+
 private:
-    Q_DISABLE_COPY(HsWidgetHost)
+    int mDatabaseId;        
+    QStateMachine *mStateMachine;
     QGraphicsWidget *mWidget;
-    HsPage *mPage;
+    HsPage *mPage;    
+    HsWidgetComponent *mComponent;    
     QMetaMethod mOnInitializeMethod;
     QMetaMethod mOnShowMethod;
     QMetaMethod mOnHideMethod;
     QMetaMethod mOnUninitializeMethod;
+    QMetaMethod mIsPannableMethod;
     QMetaProperty mIsOnlineProperty;
-	QMetaProperty mRootPathProperty;
-    QMetaMethod mIsPannable;
-    State mState;
-    QString mUri;
-    int mDatabaseId;
+	QMetaProperty mRootPathProperty;        
+    bool mIsFinishing;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

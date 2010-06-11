@@ -48,7 +48,7 @@ private:
 
 private:
 	QScopedPointer<HsShortcutServicePrivate> mD; 	
-    static QScopedPointer<HsShortcutService> mInstance;    
+    static HsShortcutService *mInstance;    
     
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

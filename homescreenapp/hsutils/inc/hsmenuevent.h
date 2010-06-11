@@ -40,6 +40,7 @@ public:
         CollectionDeleted,
         AddAppsToCollection,
         RemoveAppFromCollection,
+        UninstallApplication,
         OpenApplicationLibrary,
         OpenInstalledView,
         OpenHomeScreen,

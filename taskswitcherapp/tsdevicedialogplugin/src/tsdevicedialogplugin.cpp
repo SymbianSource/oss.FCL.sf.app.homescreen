@@ -154,4 +154,12 @@ int TsDeviceDialogPlugin::error() const
     return mError;
 }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+
 Q_EXPORT_PLUGIN2(tsdevicedialogplugin, TsDeviceDialogPlugin)
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

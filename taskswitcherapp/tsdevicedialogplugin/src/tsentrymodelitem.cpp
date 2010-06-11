@@ -56,7 +56,9 @@ QVariant TsEntryModelItem::data(int role) const
             return QVariant(mEntry->name());
         case Qt::DecorationRole:
             {
-                QPixmap icon = mEntry->icon();
+                QPixmap icon = mEntry->screenshot().isNull() ? 
+                               mEntry->icon() :
+                               mEntry->screenshot();
                 if (icon.isNull()) {
                     return HbIcon("qtg_large_application");
                 } else {

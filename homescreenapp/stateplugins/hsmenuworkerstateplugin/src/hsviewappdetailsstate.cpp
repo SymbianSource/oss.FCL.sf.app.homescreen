@@ -89,14 +89,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     nameLabel->setPlainText(detailMap[CaSoftwareRegistry::componentNameKey()]);
     versionLabel->setPlainText(detailMap[CaSoftwareRegistry::componentVersionKey()]);
     supplierLabel->setPlainText(detailMap[CaSoftwareRegistry::componentVendorKey()]);
-    if(detailMap[CaSoftwareRegistry::componentDriveInfoKey()] == "C:")
-        memoryLabel->setPlainText(QString("%1 txt_applib_dialog_1_device_memory").arg(detailMap[CaSoftwareRegistry::componentDriveInfoKey()]));
-    else if (detailMap[CaSoftwareRegistry::componentDriveInfoKey()] == "E:")
-        memoryLabel->setPlainText(QString("%1 txt_applib_dialog_1_mass_storage").arg(detailMap[CaSoftwareRegistry::componentDriveInfoKey()]));
-    else if (detailMap[CaSoftwareRegistry::componentDriveInfoKey()] == "F:")
-        memoryLabel->setPlainText(QString("%1 txt_applib_dialog_1_memory_card").arg(detailMap[CaSoftwareRegistry::componentDriveInfoKey()]));
-    else
-        memoryLabel->setPlainText(detailMap[CaSoftwareRegistry::componentDriveInfoKey()]);
+    memoryLabel->setPlainText(detailMap[CaSoftwareRegistry::componentDriveInfoKey()]);
     sizeLabel->setPlainText(detailMap[CaSoftwareRegistry::componentSizeKey()]);
     typeLabel->setPlainText(detailMap[CaSoftwareRegistry::componentTypeKey()]);
     

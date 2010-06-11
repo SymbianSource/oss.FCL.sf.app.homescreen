@@ -126,19 +126,12 @@ HsShortcutService *HsDeleteCollectionState::shortcutService() const
 //
 void HsDeleteCollectionState::deleteMessageFinished(HbAction* finishedAction)
 {
-    if (mItemId !=0 ) { // (work-around for crash if more then one action is selected in HbDialog)
-
-        if (finishedAction == mConfirmAction) {
-            HsMenuService::removeCollection(mItemId);
-            machine()->postEvent(
-            HsMenuEventFactory::createCollectionDeletedEvent());
-        }
-        mItemId = 0;
-        emit exit();
-    } else {
-        // (work-around for crash if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+    if (finishedAction == mConfirmAction) {
+        HsMenuService::removeCollection(mItemId);
+        machine()->postEvent(
+        HsMenuEventFactory::createCollectionDeletedEvent());
     }
+    emit exit();
 }
 
 /*!
@@ -149,10 +142,11 @@ void HsDeleteCollectionState::cleanUp()
 {
     // Close messagebox if App key was pressed
     if (mDeleteMessage) {
+        disconnect(mDeleteMessage, SIGNAL(finished(HbAction*)), this, SLOT(deleteMessageFinished(HbAction*)));
         mDeleteMessage->close();
+        mDeleteMessage = NULL;
     }
 
-    mDeleteMessage = NULL;
-    mConfirmAction= NULL;
+    mConfirmAction = NULL;
     mItemId = 0;
 }

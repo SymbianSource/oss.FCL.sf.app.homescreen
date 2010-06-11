@@ -1,12 +1,6 @@
 {%- set portraitWallpaper = feat_tree.HomeScreenDbSettings.portraitWallpaper._value or '' -%}
 {%- set landscapeWallpaper = feat_tree.HomeScreenDbSettings.landscapeWallpaper._value or '' -%}
-{%- set defaultPageId = feat_tree.HomeScreenDbSettings.defaultPageId._value -%}
-{%- set maximumPageCount = feat_tree.HomeScreenDbSettings.maximumPageCount._value -%}
-{%- set maximumWidgetHeight = feat_tree.HomeScreenDbSettings.maximumWidgetHeight._value -%}
-{%- set maximumWidgetWidth = feat_tree.HomeScreenDbSettings.maximumWidgetWidth._value -%}
-{%- set minimumWidgetHeight = feat_tree.HomeScreenDbSettings.minimumWidgetHeight._value -%}
-{%- set minimumWidgetWidth = feat_tree.HomeScreenDbSettings.minimumWidgetWidth._value -%}
-INSERT INTO Scene (portraitWallpaper, landscapeWallpaper, defaultPageId, maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, minimumWidgetHeight, minimumWidgetWidth) VALUES ('{{portraitWallpaper}}', '{{landscapeWallpaper}}', {{defaultPageId}}, {{maximumPageCount}}, {{maximumWidgetHeight}}, {{maximumWidgetWidth}}, {{minimumWidgetHeight}}, {{minimumWidgetWidth}});
+INSERT INTO Scene (portraitWallpaper, landscapeWallpaper) VALUES ('{{portraitWallpaper}}', '{{landscapeWallpaper}}');
 
 {% for index in range(feat_tree.HomeScreenDbSettings.Pages._value|length) -%}
     {%- set id = feat_tree.HomeScreenDbSettings.Pages.id._value[index] -%}
@@ -62,7 +56,15 @@ INSERT INTO SnapConfiguration (snappingEnabled, showEffects, snapForce, snapGap,
 {%- set widgetDragEffectDuration = feat_tree.HomeScreenDbSettings.GeneralConfiguration.widgetDragEffectDuration._value -%}
 {%- set widgetDropEffectDuration = feat_tree.HomeScreenDbSettings.GeneralConfiguration.widgetDropEffectDuration._value -%}
 {%- set boundaryFeedbackEffectDistance = feat_tree.HomeScreenDbSettings.GeneralConfiguration.boundaryFeedbackEffectDistance._value -%}
-INSERT INTO GeneralConfiguration (bounceEffect, tapAndHoldDistance, widgetTapAndHoldTimeout, sceneTapAndHoldTimeout, pageChangeZoneWidth, pageIndicatorSpacing, pageChangeAnimationDuration, pageChangeZoneAnimationDuration, pageChangeZoneReverseAnimationDuration, pageRemovedAnimationDuration, newPageAddedAnimationDuration, widgetDragEffectDuration, widgetDropEffectDuration, boundaryFeedbackEffectDistance ) VALUES ({{bounceEffect}}, {{tapAndHoldDistance}}, {{widgetTapAndHoldTimeout}}, {{widgetTapAndHoldTimeout}}, {{pageChangeZoneWidth}}, {{pageIndicatorSpacing}}, {{pageChangeAnimationDuration}}, {{pageChangeZoneAnimationDuration}}, {{pageChangeZoneReverseAnimationDuration}}, {{pageRemovedAnimationDuration}}, {{newPageAddedAnimationDuration}}, {{widgetDragEffectDuration}}, {{widgetDropEffectDuration}}, {{boundaryFeedbackEffectDistance}});
+{%- set defaultPageId = feat_tree.HomeScreenDbSettings.GeneralConfiguration.defaultPageId._value -%}
+{%- set maximumPageCount = feat_tree.HomeScreenDbSettings.GeneralConfiguration.maximumPageCount._value -%}
+{%- set maximumWidgetHeight = feat_tree.HomeScreenDbSettings.GeneralConfiguration.maximumWidgetHeight._value -%}
+{%- set maximumWidgetWidth = feat_tree.HomeScreenDbSettings.GeneralConfiguration.maximumWidgetWidth._value -%}
+{%- set minimumWidgetHeight = feat_tree.HomeScreenDbSettings.GeneralConfiguration.minimumWidgetHeight._value -%}
+{%- set minimumWidgetWidth = feat_tree.HomeScreenDbSettings.GeneralConfiguration.minimumWidgetWidth._value -%}
+{%- set shortcutLabelsVisible = feat_tree.HomeScreenDbSettings.GeneralConfiguration.shortcutLabelsVisible._value -%}
+{%- set pageChangePanDistance = feat_tree.HomeScreenDbSettings.GeneralConfiguration.pageChangePanDistance._value -%}
+INSERT INTO GeneralConfiguration (bounceEffect, tapAndHoldDistance, widgetTapAndHoldTimeout, sceneTapAndHoldTimeout, pageChangeZoneWidth, pageIndicatorSpacing, pageChangeAnimationDuration, pageChangeZoneAnimationDuration, pageChangeZoneReverseAnimationDuration, pageRemovedAnimationDuration, newPageAddedAnimationDuration, widgetDragEffectDuration, widgetDropEffectDuration, boundaryFeedbackEffectDistance, defaultPageId, maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, minimumWidgetHeight, minimumWidgetWidth, shortcutLabelsVisible, pageChangePanDistance) VALUES ({{bounceEffect}}, {{tapAndHoldDistance}}, {{widgetTapAndHoldTimeout}}, {{widgetTapAndHoldTimeout}}, {{pageChangeZoneWidth}}, {{pageIndicatorSpacing}}, {{pageChangeAnimationDuration}}, {{pageChangeZoneAnimationDuration}}, {{pageChangeZoneReverseAnimationDuration}}, {{pageRemovedAnimationDuration}}, {{newPageAddedAnimationDuration}}, {{widgetDragEffectDuration}}, {{widgetDropEffectDuration}}, {{boundaryFeedbackEffectDistance}}, {{defaultPageId}}, {{maximumPageCount}}, {{maximumWidgetHeight}}, {{maximumWidgetWidth}}, {{minimumWidgetHeight}}, {{minimumWidgetWidth}}, {{shortcutLabelsVisible}}, {{pageChangePanDistance}});
 
 {%- set pageChangeFeedbackType = feat_tree.HomeScreenDbSettings.FeedbackConfiguration.pageChangeFeedbackType._value -%}
 {%- set widgetPickFeedbackType = feat_tree.HomeScreenDbSettings.FeedbackConfiguration.widgetPickFeedbackType._value -%}

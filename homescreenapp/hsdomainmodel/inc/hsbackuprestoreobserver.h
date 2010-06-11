@@ -63,7 +63,7 @@ private:
     
     bool mBUROngoing;
 
-    static QScopedPointer<HsBackupRestoreObserver> mInstance;
+    static HsBackupRestoreObserver *mInstance;
 #ifdef Q_OS_SYMBIAN
     friend class HsBackupRestoreObserverPrivate;
 #endif //Q_OS_SYMBIAN

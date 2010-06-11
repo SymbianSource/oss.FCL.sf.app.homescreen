@@ -27,6 +27,7 @@
 #include "hswidgethost.h"
 #include "hsdatabase.h"
 #include "hswallpaper.h"
+#include "hsconfiguration.h"
 
 /*!
     Destructor.
@@ -57,9 +58,9 @@ bool HsScene::load()
         return false;
     }
 
-    mMaximumPageCount = sceneData.maximumPageCount;
+    mMaximumPageCount = HsConfiguration::maximumPageCount();
 
-    calculateWidgetSizeLimitations(sceneData);
+    calculateWidgetSizeLimitations();
 
     if (sceneData.portraitWallpaper.isEmpty()) {
         mWallpaper->setImagesById();
@@ -83,7 +84,7 @@ bool HsScene::load()
             delete page;
             continue;
         }
-        if (pageData.id == sceneData.defaultPageId) {
+        if (pageData.id == HsConfiguration::defaultPageId()) {
             mActivePage = page;
             mActivePage->setRemovable(false);
         }
@@ -97,19 +98,17 @@ bool HsScene::load()
 /*!
     Calculate maximum and minimum widget sizes 
 */
-void HsScene::calculateWidgetSizeLimitations(HsSceneData &sceneData)
+void HsScene::calculateWidgetSizeLimitations()
 {
     // 1un = 6.7px = 2mm
-    mMaximumWidgetSizeInUnits = QSizeF(sceneData.maximumWidgetWidth,
-                                       sceneData.maximumWidgetHeight);
-    mMinimumWidgetSizeInUnits = QSizeF(sceneData.minimumWidgetWidth,
-                                       sceneData.minimumWidgetHeight);
+    mMaximumWidgetSizeInUnits = QSizeF(HsConfiguration::maximumWidgetWidth(),
+                                       HsConfiguration::maximumWidgetHeight());
+    mMinimumWidgetSizeInUnits = QSizeF(HsConfiguration::minimumWidgetWidth(),
+                                       HsConfiguration::minimumWidgetHeight());
     HbDeviceProfile profile;
     qreal unitToPixelFactor = profile.unitValue();
-    mMaximumWidgetSizeInPixels = QSizeF(sceneData.maximumWidgetWidth * unitToPixelFactor,
-                                        sceneData.maximumWidgetHeight * unitToPixelFactor);
-    mMinimumWidgetSizeInPixels = QSizeF(sceneData.minimumWidgetWidth * unitToPixelFactor,
-                                        sceneData.minimumWidgetHeight * unitToPixelFactor);
+    mMaximumWidgetSizeInPixels = unitToPixelFactor * mMaximumWidgetSizeInUnits;
+    mMinimumWidgetSizeInPixels = unitToPixelFactor * mMinimumWidgetSizeInUnits;
 }
 
 /*!
@@ -149,6 +148,8 @@ bool HsScene::addPage(HsPage *page)
         return false;
     }
 
+    int addPosition = data.indexPosition;
+
     db->transaction();
 
     for (int i = data.indexPosition; i < mPages.count(); ++i) {
@@ -162,7 +163,7 @@ bool HsScene::addPage(HsPage *page)
     
     db->commit();
     
-    mPages.insert(data.indexPosition, page);
+    mPages.insert(addPosition, page);
     return true;
 }
     

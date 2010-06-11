@@ -69,6 +69,9 @@ private slots:
     void latestOnTopMenuAction();
     void oldestOnTopMenuAction();
     void contextMenuAction(HbAction *action);
+    void handleEmptyChange(bool empty);
+    void lockSearchButton(bool lock);
+
 private:
     void construct();
     void constructMenu(bool isDynamic);

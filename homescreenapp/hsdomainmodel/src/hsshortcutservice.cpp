@@ -68,9 +68,9 @@ bool HsShortcutServicePrivate::isItemShortcutWidget(int itemId)
 HsShortcutService *HsShortcutService::instance(QStateMachine *stateMachine)
 {
     if (!mInstance && stateMachine) {
-        mInstance.reset(new HsShortcutService(stateMachine));
+        mInstance = new HsShortcutService(stateMachine);
     }
-    return mInstance.data();
+    return mInstance;
 }
 
 HsShortcutService::~HsShortcutService()
@@ -94,4 +94,4 @@ HsShortcutService::HsShortcutService(QStateMachine *stateMachine, QObject *paren
     mD.reset(new HsShortcutServicePrivate(stateMachine));
 }
 
-QScopedPointer<HsShortcutService> HsShortcutService::mInstance(0);
+HsShortcutService *HsShortcutService::mInstance(0);

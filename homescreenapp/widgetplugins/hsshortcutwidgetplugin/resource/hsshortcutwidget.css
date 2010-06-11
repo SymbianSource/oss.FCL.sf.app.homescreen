@@ -1,30 +1,30 @@
 HsShortcutWidget {
+  layout: icon_shortcut;
+}
+
+HsShortcutWidget[text] {
   layout: icon_text_shortcut;
 }
 
-HsShortcutWidget[icon][text] {
-  layout: icon_text_shortcut;
-}
-
-HsShortcutWidget[icon][!text] {
+HsShortcutWidget[!text] {
   layout: icon_shortcut;
 }
 
 HsShortcutWidget::background {
   border-width: 0.0un;
   fixed-width: 12un;
-  fixed-height: expr(12.5un + var(hb-param-text-height-tiny));
+  fixed-height: 12un;
   zvalue: 0;
 }
 
-HsShortcutWidget[icon][text]::background {
+HsShortcutWidget[text]::background {
   border-width: 0.0un;
   fixed-width: 12un;
   fixed-height: expr(12.5un + var(hb-param-text-height-tiny));
   zvalue: 0;
 }
 
-HsShortcutWidget[icon][!text]::background {
+HsShortcutWidget[!text]::background {
   border-width: 0.0un;
   fixed-width: 12un;
   fixed-height: 12un;

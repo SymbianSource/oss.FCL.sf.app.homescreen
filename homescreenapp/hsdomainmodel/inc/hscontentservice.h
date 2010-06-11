@@ -42,7 +42,7 @@ public:
     static HsContentService *instance();
 
 private:
-    static QScopedPointer<HsContentService> mInstance;
+    static HsContentService *mInstance;
 
     Q_DISABLE_COPY(HsContentService)
 };

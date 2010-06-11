@@ -15,21 +15,20 @@
  *
  */
 
-#ifndef COLLECTIONANAMESTATE_H
-#define COLLECTIONANAMESTATE_H
+#ifndef HSUNINSTALLITEMSTATE_H
+#define HSUNINSTALLITEMSTATE_H
 
 #include <QState>
-#include <QTextCursor>
 
-#include "hsaddappstocollectionstate.h"
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbAction;
+class HbMessageBox;
 class HsShortcutService;
-class HsCollectionNameDialog;
+class HsMenuService;
 
-class HsCollectionNameState: public QState
+class HsUninstallItemState: public QState
 {
     Q_OBJECT
 
@@ -37,40 +36,38 @@ class HsCollectionNameState: public QState
 
 public:
 
-    HsCollectionNameState(QState *parent = 0);
+    HsUninstallItemState(QState *parent = 0);
 
-    virtual ~HsCollectionNameState();
-
-signals:
-
-    void commit(const QString &collectionName);
-
-    void commitCheckList(const QString &collectionName);
-
-    void cancel();
-
-    void exit();
-
-private slots:
-
-    void dialogFinished(HbAction* finishedAction);
-
-    void cleanUp();
+    virtual ~HsUninstallItemState();
 
 protected:
 
     void onEntry(QEvent *event);
 
+private slots:
+
+    void uninstallMessageFinished(HbAction* finishedAction);
+
+    void cleanUp();
+
+signals:
+
+    void exit();
+
 private:
 
     void construct();
+
+    HsShortcutService *shortcutService() const;
 
 private:
 
     int mItemId;
 
-    HsCollectionNameDialog *mCollectionNameDialog;
+    HbMessageBox *mUninstallMessage; // deletes itself automatically on close
+
+    HbAction *mConfirmAction; // child for mConfirmMessage
 
 };
 
-#endif /* COLLECTIONANAMESTATE_H */
+#endif //HSUNINSTALLITEMSTATE_H

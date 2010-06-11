@@ -349,9 +349,6 @@ void HsAllCollectionsState::listItemLongPressed(HbAbstractViewItem *item,
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::listItemLongPressed");
 
-
-    const int itemId = item->modelIndex().data(CaItemModel::IdRole).toInt();
-
     mContextMenu = new HbMenu;
 
     // create context menu

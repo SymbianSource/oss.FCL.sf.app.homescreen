@@ -16,13 +16,13 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += tsdevicedialogplugin
-
 coverage {
     SUBDIRS += ../../homescreensrv/activityfw
     SUBDIRS += ../../homescreensrv/hsappkeyhandler
     SUBDIRS += ../../homescreensrv/tstaskmonitor
 }
+
+SUBDIRS += tsdevicedialogplugin
 
 tests {
     SUBDIRS += internal/tstestrunner    
@@ -33,7 +33,10 @@ tests {
     SUBDIRS += ../../homescreensrv/activityfw/activityserviceplugin/s60/tsrc
     SUBDIRS += ../../homescreensrv/tstaskmonitor/client/tsrc
     SUBDIRS += ../../homescreensrv/tstaskmonitor/server/tsrc
+    SUBDIRS += ../../homescreensrv/tstaskmonitor/screenshotplugin/tsrc
     SUBDIRS += ../../homescreensrv/activityfw/tsutils/tsrc
+    SUBDIRS += ../../homescreensrv/tstaskmonitor/utils/tsrc
+    SUBDIRS += ../../homescreensrv/tstaskmonitor/backstepping/tsrc
 }
 
 symbian:include(rom.pri)

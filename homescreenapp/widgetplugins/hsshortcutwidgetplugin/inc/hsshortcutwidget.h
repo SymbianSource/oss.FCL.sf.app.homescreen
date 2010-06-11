@@ -37,6 +37,8 @@ class HsShortcutWidget : public HbWidget
     Q_PROPERTY(int caEntryId READ caEntryId WRITE setCaEntryId)
     Q_PROPERTY(QString uid READ uid WRITE setUid)
     
+    Q_PROPERTY(QString text READ text WRITE setText )
+    
 public:
     HsShortcutWidget(QGraphicsItem *parent = 0, Qt::WindowFlags flags = 0);
     ~HsShortcutWidget();
@@ -45,6 +47,9 @@ public:
     int caEntryId() const;
     void setUid(const QString &uid);
     QString uid() const;
+
+    QString text() const;
+    void setText(const QString& textItem);
 
     bool eventFilter(QObject *watched, QEvent *event);
 

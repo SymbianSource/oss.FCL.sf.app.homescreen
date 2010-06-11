@@ -212,7 +212,7 @@ inline const QString defaultCollectionIconId()
 */
 inline const QString newIconId()
 {
-    static const QString name("qtg_large_super_new");
+    static const QString name("qtg_small_new_event");
     return name;
 }
 

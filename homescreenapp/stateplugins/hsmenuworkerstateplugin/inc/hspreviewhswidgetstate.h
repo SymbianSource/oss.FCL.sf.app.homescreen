@@ -53,8 +53,6 @@ private slots:
 
     void cleanUp();
 
-    void memoryCardRemoved();
-
 signals:
     void exit();
 
@@ -79,7 +77,7 @@ private:
     int mEntryId;
 
     HbMessageBox *mCorruptedMessage;
-
+    
 };
 
 

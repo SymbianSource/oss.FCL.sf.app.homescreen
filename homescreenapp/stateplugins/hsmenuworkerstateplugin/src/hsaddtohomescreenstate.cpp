@@ -27,6 +27,8 @@
 
 #include "hsaddtohomescreenstate.h"
 #include "hsmenuevent.h"
+#include "canotifier.h"
+#include "canotifierfilter.h"
 #include "caservice.h"
 #include "caquery.h"
 #include "hsmenuservice.h"
@@ -54,7 +56,8 @@ const char ADD_TO_HOMESCREEN_STATE[] = "AddToHomeScreenState";
 HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
     HsMenuBaseState(ADD_TO_HOMESCREEN_STATE, parent), 
     mCorruptedMessage(NULL), mConfirmAction(NULL),
-    mMenuMode(NormalHsMenuMode)
+    mMenuMode(NormalHsMenuMode),
+    mNotifier(0)
 {
     requestServices(QList<QVariant> () << SHORTCUT_SERVICE_KEY
                     << CONTENT_SERVICE_KEY);
@@ -105,6 +108,7 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
     if (success && (mMenuMode == NormalHsMenuMode)) {
         HbNotificationDialog *notificationDialog = new HbNotificationDialog();
         notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
+        notificationDialog->setSequentialShow(false);
         notificationDialog->setTitle(hbTrId(
                                      "txt_applib_dpophead_added_to_homescreen") );
         notificationDialog->show();
@@ -130,6 +134,7 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
     params[URI] = uri;
     bool success = contentService.createWidget(params);
     if (!success) {
+        subscribeForMemoryCardRemove();
         showMessageWidgetCorrupted();
     } else {
         emit exit();
@@ -154,6 +159,7 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
 void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
+
     mCorruptedMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
     mCorruptedMessage->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -184,20 +190,13 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 void HsAddToHomeScreenState::messageWidgetCorruptedFinished
         (HbAction* finishedAction)
 {
-    if (mCorruptedMessage) {
-        if (finishedAction == mConfirmAction) {
-            HsMenuService::executeAction(mEntryId, removeActionIdentifier());
-        }
-        mCorruptedMessage = NULL;
-        emit exit();
-        if (mMenuMode == AddHsMenuMode) {
-            machine()->postEvent(
-                HsMenuEventFactory::createOpenHomeScreenEvent());
-        }
-
-    } else {
-        // (work-around for crash if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+    if (finishedAction == mConfirmAction) {
+        HsMenuService::executeAction(mEntryId, removeActionIdentifier());
+    }
+    emit exit();
+    if (mMenuMode == AddHsMenuMode) {
+        machine()->postEvent(
+            HsMenuEventFactory::createOpenHomeScreenEvent());
     }
 }
 
@@ -210,9 +209,18 @@ void HsAddToHomeScreenState::cleanUp()
 {
     // Close popups if App key was pressed
     if (mCorruptedMessage) {
+        disconnect(mCorruptedMessage, SIGNAL(finished(HbAction*)),
+                   this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
         mCorruptedMessage->close();
         mCorruptedMessage = NULL;
     }
+    
+    disconnect(mNotifier,
+               SIGNAL(entryChanged(CaEntry,ChangeType)),
+               this, SLOT(memoryCardRemoved()));
+
+    delete mNotifier;
+    mNotifier = NULL;
 }
 
 
@@ -304,4 +312,34 @@ void HsAddToHomeScreenState::logActionResult(QString operationName,
     } else {
         qWarning() << message;
     }
+}
+
+/*!
+ Subscribe for memory card remove.
+ \retval void
+ */
+void HsAddToHomeScreenState::subscribeForMemoryCardRemove()
+{
+    CaNotifierFilter filter;
+    QList<int> entryIds;
+    entryIds.append(mEntryId);
+    filter.setIds(entryIds);
+    mNotifier = CaService::instance()->createNotifier(filter);
+    mNotifier->setParent(this);
+    connect(mNotifier,
+            SIGNAL(entryChanged(CaEntry,ChangeType)),
+            SLOT(memoryCardRemoved()));
+}
+
+/*!
+ Memory card with instaled widget was removed.
+ \retval void
+ */
+void HsAddToHomeScreenState::memoryCardRemoved()
+{
+    if (mCorruptedMessage) {
+        mCorruptedMessage->close();
+        mCorruptedMessage = NULL;
+    }
+    // exit not needed, it is called after dialog closed
 }

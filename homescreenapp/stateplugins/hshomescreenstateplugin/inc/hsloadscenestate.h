@@ -19,6 +19,11 @@
 #define HSLOADSCENESTATE_H
 
 #include <QState>
+#ifdef Q_OS_SYMBIAN
+#include <XQSettingsKey>
+
+class XQSettingsManager;
+#endif
 
 class HsLoadSceneState : public QState
 {
@@ -27,7 +32,10 @@ class HsLoadSceneState : public QState
 public:
     HsLoadSceneState(QState *parent = 0);
     ~HsLoadSceneState();
-
+#ifdef Q_OS_SYMBIAN
+public slots:
+     void handleKeyChange(XQSettingsKey key, const QVariant &value);
+#endif
 signals:
     void event_history();
 
@@ -36,6 +44,12 @@ private slots:
 
 private:
     Q_DISABLE_COPY(HsLoadSceneState)
+    void showUi();
+    
+#ifdef Q_OS_SYMBIAN
+    XQPublishAndSubscribeSettingsKey    mStartupKey;
+    XQSettingsManager                   *mSettingsMgr;
+#endif
 };
 
 #endif // HSLOADSCENESTATE_H

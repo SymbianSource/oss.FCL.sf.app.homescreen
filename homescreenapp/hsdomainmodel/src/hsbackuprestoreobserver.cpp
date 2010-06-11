@@ -48,9 +48,7 @@ HsBackupRestoreObserverPrivate::HsBackupRestoreObserverPrivate(HsBackupRestoreOb
     Destructor.
 */
 HsBackupRestoreObserverPrivate::~HsBackupRestoreObserverPrivate()
-{   
-    disconnect(sender(), SIGNAL(valueChanged(XQSettingsKey, const QVariant &)),
-			   this, SLOT(handleKeyChange(XQSettingsKey, const QVariant&)));
+{
     delete mCallBack;
     delete mActiveBackupClient;
 }
@@ -130,9 +128,9 @@ void HsBackupRestoreObserverPrivate::handleKeyChange(XQSettingsKey key, const QV
 HsBackupRestoreObserver *HsBackupRestoreObserver::instance()
 {
     if (!mInstance) {
-        mInstance.reset(new HsBackupRestoreObserver);
+        mInstance = new HsBackupRestoreObserver();
     }
-    return mInstance.data();
+    return mInstance;
 }
 
 /*!
@@ -195,6 +193,6 @@ bool HsBackupRestoreObserver::checkBUR()
 /*!
     Points to the observer instance.
 */
-QScopedPointer<HsBackupRestoreObserver> HsBackupRestoreObserver::mInstance(0);
+HsBackupRestoreObserver *HsBackupRestoreObserver::mInstance(0);
 
 // End of File

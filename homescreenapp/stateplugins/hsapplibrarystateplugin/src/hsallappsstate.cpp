@@ -355,6 +355,8 @@ void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
     // check conditions and hide irrelevant menu items
 
     QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(item->modelIndex());
+    EntryFlags flags = item->modelIndex().data(
+                           CaItemModel::FlagsRole).value<EntryFlags> ();
 
     if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
         appSettingsAction = mContextMenu->addAction(hbTrId(
@@ -362,14 +364,11 @@ void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
         appSettingsAction->setData(AppSettingContextAction);
     }
     if (!(entry->attribute(componentIdAttributeName()).isEmpty()) && 
-                entry->entryTypeName() == applicationTypeName() ) {
+            (flags & RemovableEntryFlag) ) {
         appDetailsAction = mContextMenu->addAction(hbTrId(
                                                 "txt_common_menu_details"));
         appDetailsAction->setData(AppDetailsContextAction);
-    }    
-    
-    EntryFlags flags = item->modelIndex().data(
-                           CaItemModel::FlagsRole).value<EntryFlags> ();
+    }        
 
     if (!(flags & RemovableEntryFlag)) {
         uninstallAction->setVisible(false);
@@ -406,7 +405,9 @@ void HsAllAppsState::contextMenuAction(HbAction *action)
                     mSortAttribute, mCollectionsSortAttribute, itemId));
             break;
         case UninstallContextAction:
-            HsMenuService::executeAction(itemId, removeActionIdentifier());
+            machine()->postEvent(
+                HsMenuEventFactory::createUninstallApplicationEvent(
+                    itemId));
             break;
         case AppSettingContextAction: 
             machine()->postEvent(

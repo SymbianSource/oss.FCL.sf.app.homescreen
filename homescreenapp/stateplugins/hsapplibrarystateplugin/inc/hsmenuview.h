@@ -51,10 +51,13 @@ public:
     ~HsMenuView();
 
     void setSearchPanelVisible(bool visible);
+    void setContext(HsViewContext viewContext,
+                    HsOperationalContext context);
 
     HbView *view() const;
 
     HbListView *listView() const;
+    HbPushButton *collectionButton() const;
 
     void activate();
     void inactivate();
@@ -76,6 +79,8 @@ public slots:
 
     void showSearchPanel();
     void hideSearchPanel();
+
+    void disableSearch(bool disable);
 
 
 private slots:
@@ -119,6 +124,8 @@ private:
     HbListView *mSearchListView;
     HbSearchPanel *mSearchPanel;
     HbStaticVkbHost* mVkbHost;
+
+    HbPushButton *mCollectionButton;
 
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };

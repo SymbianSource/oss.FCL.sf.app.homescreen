@@ -55,6 +55,8 @@ public:
     bool isRemovable() const;
     void setRemovable(bool removable);
 
+    bool isActivePage() const;
+    
     static HsPage *createInstance(const HsPageData &pageData);
 
 public slots:
@@ -67,18 +69,25 @@ public slots:
     int pageIndex();
 
 private:
+    Q_DISABLE_COPY(HsPage)
     void connectWidget(HsWidgetHost *widget);
     void disconnectWidget(HsWidgetHost *widget);
 
 private slots:
-    void onWidgetFinished(HsWidgetHost *widget);
-    void onWidgetResized(HsWidgetHost *widget);
+    void onWidgetFinished();
+    void onWidgetFaulted();
+    void onWidgetResized();
+    void onWidgetAvailable();
+    void onWidgetUnavailable();
+
+    void onOrientationChanged(Qt::Orientation orientation);
 
 private:
     int mDatabaseId;
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
+    QList<HsWidgetHost*> mUnavailableWidgets;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
 };

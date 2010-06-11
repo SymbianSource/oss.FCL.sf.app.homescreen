@@ -26,11 +26,6 @@
 #include "hstest_global.h"
 HOMESCREEN_TEST_CLASS(TestRuntimeServices)
 
-#include "cadefs.h"
-
-class CaEntry;
-class HsWidgetComponentDescriptor;
-
 class HSDOMAINMODEL_EXPORT HsWidgetComponent : public QObject
 {
     Q_OBJECT

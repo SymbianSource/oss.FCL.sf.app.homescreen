@@ -55,7 +55,7 @@
  */
 HsCollectionNameState::HsCollectionNameState(QState *parent) :
     QState(parent),
-    mItemId(0), mCollectionNameDialog(NULL), mFinishedEntered(false)
+    mItemId(0), mCollectionNameDialog(NULL)
 {
     construct();
 }
@@ -76,7 +76,6 @@ void HsCollectionNameState::construct()
 {
     setObjectName(this->parent()->objectName() + "/collectionnamestate");
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
-
 }
 
 /*!
@@ -93,7 +92,6 @@ void HsCollectionNameState::onEntry(QEvent *event)
     QState::onEntry(event);
 
     mItemId = 0;
-    mFinishedEntered = false;
     if (event->type() == HsMenuEvent::eventType()) {
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
@@ -115,24 +113,18 @@ void HsCollectionNameState::onEntry(QEvent *event)
 //
 void HsCollectionNameState::dialogFinished(HbAction* finishedAction)
 {
-    if (!mFinishedEntered) {
-        mFinishedEntered = true;
-        if (finishedAction == mCollectionNameDialog->actions().value(0)) {
-            QString newName(mCollectionNameDialog->newName(mCollectionNameDialog->value().toString(), true));
-            if (mItemId) {
-                if (newName != HsMenuService::getName(mItemId)) {
-                    HsMenuService::renameCollection(mItemId, newName);
-                }
-            } else {
-                HsMenuService::createCollection(newName);
+    if (finishedAction == mCollectionNameDialog->actions().value(0)) {
+        QString newName(mCollectionNameDialog->newName(mCollectionNameDialog->value().toString(), true));
+        if (mItemId) {
+            if (newName != HsMenuService::getName(mItemId)) {
+                HsMenuService::renameCollection(mItemId, newName);
             }
+        } else {
+            HsMenuService::createCollection(newName);
         }
-        mCollectionNameDialog = NULL; //set to NULL since this will be deleted atfer close
-        emit exit();
-    } else {
-        // (work-around if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
     }
+    mCollectionNameDialog = NULL; //set to NULL since this will be deleted atfer close
+    emit exit();
 }
 
 // ---------------------------------------------------------------------------
@@ -141,6 +133,7 @@ void HsCollectionNameState::dialogFinished(HbAction* finishedAction)
 void HsCollectionNameState::cleanUp()
 {
     if (mCollectionNameDialog) {
+        disconnect(mCollectionNameDialog, SIGNAL(finished(HbAction*)), this, SLOT(dialogFinished(HbAction*)));
         mCollectionNameDialog->close();
         mCollectionNameDialog = NULL;
     }

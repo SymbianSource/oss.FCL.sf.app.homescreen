@@ -1,13 +1,5 @@
 <RCC>
     <qresource prefix="/" >
-        <file>themes/icons/hbdefault/scalable/qtg_mono_applications_all.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_mono_applications_collections.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_mono_search.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_mono_ovistore.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_large_applications_download.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_large_applications_user.svg</file>
-        <file>themes/icons/hbdefault/scalable/qtg_large_super_new.svg</file>
-
         <file>themes/icons/hbdefault/scalable/qtg_graf_hspage_normal.svg</file>
         <file>themes/icons/hbdefault/scalable/qtg_graf_hspage_highlight.svg</file>
         <file>themes/icons/hbdefault/scalable/hs_shortcut_bg.svg</file>

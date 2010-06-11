@@ -2,13 +2,7 @@ DROP TABLE IF EXISTS Scene;
 CREATE TABLE Scene (
   id INTEGER PRIMARY KEY,
   portraitWallpaper TEXT,
-  landscapeWallpaper TEXT,
-  defaultPageId INTEGER,
-  maximumPageCount INTEGER,
-  maximumWidgetHeight REAL,
-  maximumWidgetWidth REAL,
-  minimumWidgetHeight REAL,
-  minimumWidgetWidth REAL);
+  landscapeWallpaper TEXT);
 
 DROP TABLE IF EXISTS Pages;
 CREATE TABLE Pages (
@@ -76,5 +70,13 @@ CREATE TABLE GeneralConfiguration (
   newPageAddedAnimationDuration INTEGER, 
   widgetDragEffectDuration INTEGER, 
   widgetDropEffectDuration INTEGER,
-  boundaryFeedbackEffectDistance INTEGER);
+  boundaryFeedbackEffectDistance INTEGER,
+  defaultPageId INTEGER,
+  maximumPageCount INTEGER,
+  maximumWidgetHeight REAL,
+  maximumWidgetWidth REAL,
+  minimumWidgetHeight REAL,
+  minimumWidgetWidth REAL,
+  shortcutLabelsVisible INTEGER,
+  pageChangePanDistance REAL);
  

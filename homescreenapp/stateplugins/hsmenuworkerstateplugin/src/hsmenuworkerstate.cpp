@@ -21,6 +21,7 @@
 #include "hsaddappstocollectionstate.h"
 #include "hsdeletecollectionstate.h"
 #include "hsdeletecollectionitemstate.h"
+#include "hsuninstallitemstate.h"
 #include "hsmenuworkerstate.h"
 #include "hscollectionnamestate.h"
 #include "hsarrangestate.h"
@@ -75,6 +76,8 @@ void HsMenuWorkerState::construct()
         HsMenuEvent::DeleteCollection);
     createChildState<HsDeleteCollectionItemState> (
         HsMenuEvent::RemoveAppFromCollection);
+    createChildState<HsUninstallItemState> (
+        HsMenuEvent::UninstallApplication);
     createChildState<HsArrangeState> (HsMenuEvent::ArrangeCollection);
 
     // create a new child state based on the template

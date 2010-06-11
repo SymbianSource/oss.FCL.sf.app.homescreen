@@ -20,8 +20,10 @@
 
 #include <QObject>
 
-#include "hsdomainmodel_global.h"
 #include <HbFeedback>
+#include <HbDeviceProfile>
+
+#include "hsdomainmodel_global.h"
 
 class HsGeneralConfiguration;
 class HsFeedbackConfiguration;
@@ -36,11 +38,11 @@ public:
     static void loadConfiguration();
 
     static inline int bounceEffect() { return mBounceEffect; };
-    static inline int tapAndHoldDistance() { return mTapAndHoldDistance; };
+    static inline qreal tapAndHoldDistance() { return mTapAndHoldDistance; };
     static inline int widgetTapAndHoldTimeout() { return mWidgetTapAndHoldTimeout; };
     static inline int sceneTapAndHoldTimeout() { return mSceneTapAndHoldTimeout; };
-    static inline int pageChangeZoneWidth() { return mPageChangeZoneWidth; };
-    static inline int pageIndicatorSpacing() { return mPageIndicatorSpacing; };
+    static inline qreal pageChangeZoneWidth() { return mPageChangeZoneWidth; };
+    static inline qreal pageIndicatorSpacing() { return mPageIndicatorSpacing; };
     static inline int pageChangeAnimationDuration() { return mPageChangeAnimationDuration; };
     static inline int pageChangeZoneAnimationDuration() { return mPageChangeZoneAnimationDuration; };
     static inline int pageChangeZoneReverseAnimationDuration() { return mPageChangeZoneReverseAnimationDuration; };
@@ -49,6 +51,15 @@ public:
     static inline int widgetDragEffectDuration() { return mWidgetDragEffectDuration; };
     static inline int widgetDropEffectDuration() { return mWidgetDropEffectDuration; };
     static inline int bounceFeedbackEffectDistance() { return mBounceFeedbackEffectDistance; };
+    static inline int defaultPageId() { return mDefaultPageId; };
+    static inline int maximumPageCount() { return mMaximumPageCount; };
+    static inline qreal maximumWidgetHeight() { return mMaximumWidgetHeight; };
+    static inline qreal maximumWidgetWidth() { return mMaximumWidgetWidth; };
+    static inline qreal minimumWidgetHeight() { return mMinimumWidgetHeight; };
+    static inline qreal minimumWidgetWidth() { return mMinimumWidgetWidth; };
+    static inline bool shortcutLabelsVisible() { return mShortcutLabelsVisible; };
+    static inline qreal pageChangePanDistance() { return mPageChangePanDistance; };
+    static inline int pageChangePanDistanceInPixels() { return mPageChangePanDistanceInPixels; };
 
     static inline HbFeedback::InstantEffect pageChangeFeedbackType() { return mPageChangeFeedbackType; };
     static inline HbFeedback::InstantEffect widgetPickFeedbackType() { return mWidgetPickFeedbackType; };
@@ -69,11 +80,11 @@ public:
 
     // setters should be removed before code is released to SF
     static void setBounceEffect(int bounceEffect) { mBounceEffect = bounceEffect; };
-    static void setTapAndHoldDistance(int tapAndHoldDistance) { mTapAndHoldDistance = tapAndHoldDistance; };
+    static void setTapAndHoldDistance(qreal tapAndHoldDistance) { mTapAndHoldDistance = tapAndHoldDistance; };
     static void setWidgetTapAndHoldTimeout(int tapAndHoldTimeout) { mWidgetTapAndHoldTimeout = tapAndHoldTimeout; };
     static void setSceneTapAndHoldTimeout(int tapAndHoldTimeout) { mSceneTapAndHoldTimeout = tapAndHoldTimeout; };
-    static void setPageChangeZoneWidth(int pageChangeZoneWidth) { mPageChangeZoneWidth = pageChangeZoneWidth; };
-    static void setPageIndicatorSpacing(int pageIndicatorSpacing) { mPageIndicatorSpacing = pageIndicatorSpacing; };
+    static void setPageChangeZoneWidth(qreal pageChangeZoneWidth) { mPageChangeZoneWidth = pageChangeZoneWidth; };
+    static void setPageIndicatorSpacing(qreal pageIndicatorSpacing) { mPageIndicatorSpacing = pageIndicatorSpacing; };
     static void setPageChangeAnimationDuration(int pageChangeAnimationDuration) { mPageChangeAnimationDuration = pageChangeAnimationDuration; };
     static void setPageChangeZoneAnimationDuration(int pageChangeZoneAnimationDuration) { mPageChangeZoneAnimationDuration = pageChangeZoneAnimationDuration; };
     static void setPageChangeZoneReverseAnimationDuration(int pageChangeZoneReverseAnimationDuration) { mPageChangeZoneReverseAnimationDuration = pageChangeZoneReverseAnimationDuration; };
@@ -82,6 +93,15 @@ public:
     static void setWidgetDragEffectDuration(int widgetDragEffectDuration) { mWidgetDragEffectDuration = widgetDragEffectDuration; };
     static void setWidgetDropEffectDuration(int widgetDropEffectDuration) { mWidgetDropEffectDuration = widgetDropEffectDuration; };
     static void setBounceFeedbackEffectDistance(int bounceFeedbackEffectDistance) { mBounceFeedbackEffectDistance = bounceFeedbackEffectDistance; };
+    static void setDefaultPageId(int defaultPageId) { mDefaultPageId = defaultPageId;  };
+    static void setMaximumPageCount(int maximumPageCount) { mMaximumPageCount = maximumPageCount; };
+    static void setMaximumWidgetHeight(qreal maximumWidgetHeight) { mMaximumWidgetHeight = maximumWidgetHeight; };
+    static void setMaximumWidgetWidth(qreal maximumWidgetWidth) { mMaximumWidgetWidth = maximumWidgetWidth; };
+    static void setMinimumWidgetHeight(qreal minimumWidgetHeight) { mMinimumWidgetHeight = minimumWidgetHeight; };
+    static void setMinimumWidgetWidth(qreal minimumWidgetWidth) { mMinimumWidgetWidth = minimumWidgetWidth; };
+    static void setShortcutLabelsVisible(bool shortcutLabelsVisible) { mShortcutLabelsVisible = shortcutLabelsVisible; };
+    static void setPageChangePanDistance(qreal pageChangePanDistance) { mPageChangePanDistance = pageChangePanDistance; 
+                                                                        mPageChangePanDistanceInPixels = pageChangePanDistance * HbDeviceProfile::current().unitValue(); };
 
     static void setPageChangeFeedbackType(HbFeedback::InstantEffect pageChangeFeedbackType ) { mPageChangeFeedbackType = pageChangeFeedbackType; };
     static void setWidgetPickFeedbackType(HbFeedback::InstantEffect widgetPickFeedbackType ) { mWidgetPickFeedbackType = widgetPickFeedbackType; };
@@ -102,11 +122,11 @@ public:
 
 private:
     static int mBounceEffect;		
-	static int mTapAndHoldDistance;
+	static qreal mTapAndHoldDistance;
 	static int mWidgetTapAndHoldTimeout;
 	static int mSceneTapAndHoldTimeout;
-    static int mPageChangeZoneWidth;
-	static int mPageIndicatorSpacing;
+    static qreal mPageChangeZoneWidth;
+	static qreal mPageIndicatorSpacing;
     static int mPageChangeAnimationDuration;
 	static int mPageChangeZoneAnimationDuration;
     static int mPageChangeZoneReverseAnimationDuration;
@@ -114,7 +134,16 @@ private:
 	static int mNewPageAddedAnimationDuration;
 	static int mWidgetDragEffectDuration;
 	static int mWidgetDropEffectDuration;
-	static int mBounceFeedbackEffectDistance; 
+	static int mBounceFeedbackEffectDistance;
+    static int mDefaultPageId;
+    static int mMaximumPageCount;
+    static qreal mMaximumWidgetHeight;
+    static qreal mMaximumWidgetWidth;
+    static qreal mMinimumWidgetHeight;
+    static qreal mMinimumWidgetWidth;
+    static bool mShortcutLabelsVisible;
+    static qreal mPageChangePanDistance;
+    static int mPageChangePanDistanceInPixels;
 
     static HbFeedback::InstantEffect mPageChangeFeedbackType;
 	static HbFeedback::InstantEffect mWidgetPickFeedbackType;

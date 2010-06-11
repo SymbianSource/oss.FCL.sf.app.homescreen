@@ -19,8 +19,6 @@
 #include <QDir>
 
 #include "hswidgetcomponent.h"
-#include "hswidgetcomponentdescriptor.h"
-#include "hswidgetcomponentregistry.h"
 #include "hsapp_defs.h"
 #include "caservice.h"
 #include "caquery.h"
@@ -171,9 +169,3 @@ void HsWidgetComponent::emitAvailable()
         emit available();
     }
 }
-
-
-
-
-    
-

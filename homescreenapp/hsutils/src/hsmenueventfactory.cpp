@@ -207,6 +207,20 @@ QEvent *HsMenuEventFactory::createRemoveAppFromCollectionEvent(int aItemId,
 }
 
 /*!
+    Creates an HsMenuEvent::UninstallApplication event.
+
+    \param aItemId Item id of the application to be removed from a collection.
+    \param aCollectionId Item id of the collection the application is to be removed from.
+    \return UninstallApplication event.
+ */
+QEvent *HsMenuEventFactory::createUninstallApplicationEvent(int aItemId)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), aItemId);
+    return new HsMenuEvent(HsMenuEvent::UninstallApplication, params);
+}
+
+/*!
     Creates an HsMenuEvent::ArrangeCollection event.
 
     \param aTopItemId Item id to be scrolled.

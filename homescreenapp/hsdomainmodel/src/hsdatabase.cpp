@@ -185,21 +185,13 @@ bool HsDatabase::scene(HsSceneData &data)
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
-        "SELECT id, portraitWallpaper, landscapeWallpaper, defaultPageId, "
-        "maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, "
-        "minimumWidgetHeight, minimumWidgetWidth "
+        "SELECT id, portraitWallpaper, landscapeWallpaper "
         "FROM Scene";
     
     if (query.prepare(statement) && query.exec() && query.next()) {        
         data.id                  = query.value(0).toInt();
         data.portraitWallpaper   = query.value(1).toString();
         data.landscapeWallpaper  = query.value(2).toString();
-        data.defaultPageId       = query.value(3).toInt();
-        data.maximumPageCount    = query.value(4).toInt();
-        data.maximumWidgetHeight = query.value(5).toReal();
-        data.maximumWidgetWidth  = query.value(6).toReal();
-        data.minimumWidgetHeight = query.value(7).toReal();
-        data.minimumWidgetWidth  = query.value(8).toReal();
         return true;
     }
     
@@ -573,6 +565,9 @@ bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
         return false;
     }
 
+    QString key = data.orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
+
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
@@ -581,7 +576,7 @@ bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
         "WHERE key = ? AND widgetId = ?";
 
     if (query.prepare(statement)) {
-        query.addBindValue(data.key);
+        query.addBindValue(key);
         query.addBindValue(data.widgetId);
         if (query.exec() && query.next()) {
             data.x      = query.value(0).toReal();
@@ -603,6 +598,9 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
         return false;
     }
 
+    QString key = data.orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
+
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
@@ -611,7 +609,7 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
         "VALUES (?, ?, ?, ?, ?)";
 
     if (query.prepare(statement)) {
-        query.addBindValue(data.key);
+        query.addBindValue(key);
         query.addBindValue(data.x);
         query.addBindValue(data.y);
         query.addBindValue(data.zValue);
@@ -625,11 +623,14 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
 /*!
 
 */
-bool HsDatabase::deleteWidgetPresentation(int widgetId, const QString &key)
+bool HsDatabase::deleteWidgetPresentation(int widgetId, Qt::Orientation orientation)
 {
     if (!checkConnection()) {
         return false;
     }
+
+    QString key = orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
 
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
@@ -776,16 +777,19 @@ bool HsDatabase::generalConfiguration(HsGeneralConfiguration &data)
         "pageIndicatorSpacing, pageChangeAnimationDuration, pageChangeZoneAnimationDuration, "
         "pageChangeZoneReverseAnimationDuration, "
         "pageRemovedAnimationDuration, newPageAddedAnimationDuration, widgetDragEffectDuration, "
-        "widgetDropEffectDuration, boundaryFeedbackEffectDistance "
+        "widgetDropEffectDuration, boundaryFeedbackEffectDistance, "
+        "defaultPageId, maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, "
+        "minimumWidgetHeight, minimumWidgetWidth, shortcutLabelsVisible,  "
+        "pageChangePanDistance "
         "FROM GeneralConfiguration";
 
     if (query.prepare(statement) && query.exec() && query.next()) {        
         data.bounceEffect                           = query.value(0).toInt();
-        data.tapAndHoldDistance                     = query.value(1).toInt();
+        data.tapAndHoldDistance                     = query.value(1).toReal();
         data.widgetTapAndHoldTimeout                = query.value(2).toInt();
         data.sceneTapAndHoldTimeout                 = query.value(3).toInt();
-        data.pageChangeZoneWidth                    = query.value(4).toInt();
-        data.pageIndicatorSpacing                   = query.value(5).toInt();
+        data.pageChangeZoneWidth                    = query.value(4).toReal();
+        data.pageIndicatorSpacing                   = query.value(5).toReal();
         data.pageChangeAnimationDuration            = query.value(6).toInt();
         data.pageChangeZoneAnimationDuration        = query.value(7).toInt();
         data.pageChangeZoneReverseAnimationDuration = query.value(8).toInt();
@@ -794,6 +798,14 @@ bool HsDatabase::generalConfiguration(HsGeneralConfiguration &data)
         data.widgetDragEffectDuration               = query.value(11).toInt();
         data.widgetDropEffectDuration               = query.value(12).toInt();
         data.boundaryFeedbackEffectDistance         = query.value(13).toInt();
+        data.defaultPageId                          = query.value(14).toInt();
+        data.maximumPageCount                       = query.value(15).toInt();
+        data.maximumWidgetHeight                    = query.value(16).toReal();
+        data.maximumWidgetWidth                     = query.value(17).toReal();
+        data.minimumWidgetHeight                    = query.value(18).toReal();
+        data.minimumWidgetWidth                     = query.value(19).toReal();
+        data.shortcutLabelsVisible                  = query.value(20).toBool();
+        data.pageChangePanDistance                  = query.value(21).toReal();
         return true;
     }
     
@@ -848,10 +860,7 @@ bool HsDatabase::snapConfiguration(HsSnapConfiguration &data)
         "FROM SnapConfiguration";
 
     if (query.prepare(statement) && query.exec() && query.next()) {
-        data.snappingEnabled = false;
-        if (query.value(0).toInt() == 1) {
-            data.snappingEnabled = true;
-        }
+        data.snappingEnabled = query.value(0).toBool();
         data.snapForce = query.value(1).toReal();
         data.snapGap   = query.value(2).toReal();
         data.borderGap = query.value(3).toReal();
@@ -867,7 +876,11 @@ bool HsDatabase::snapConfiguration(HsSnapConfiguration &data)
 */
 void HsDatabase::setInstance(HsDatabase *instance)
 {
-    mInstance.reset(instance);
+    if (mInstance != instance) {
+        HsDatabase *oldInstance = mInstance;
+        mInstance = instance;
+        delete oldInstance;
+    }
 }
 
 /*!
@@ -875,7 +888,7 @@ void HsDatabase::setInstance(HsDatabase *instance)
 */
 HsDatabase *HsDatabase::instance()
 {
-    return mInstance.data();
+    return mInstance;
 }
 
 /*!
@@ -885,7 +898,9 @@ HsDatabase *HsDatabase::instance()
 */
 HsDatabase *HsDatabase::takeInstance()
 {
-    return mInstance.take();
+    HsDatabase *instance = mInstance;
+    mInstance = 0;
+    return instance;
 }
   
 /*!
@@ -900,4 +915,4 @@ bool HsDatabase::checkConnection() const
 /*!
     Points to the database instance.
 */
-QScopedPointer<HsDatabase> HsDatabase::mInstance(0);
+HsDatabase *HsDatabase::mInstance(0);

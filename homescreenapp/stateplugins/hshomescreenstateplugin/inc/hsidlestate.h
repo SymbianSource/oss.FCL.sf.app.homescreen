@@ -136,7 +136,6 @@ private slots:
     void moveScene_onMouseReleased(
         QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
 
-    void onOrientationChanged(Qt::Orientation orientation);
     void widgetInteraction_onTapAndHoldTimeout();
     void sceneInteraction_onTapAndHoldTimeout();
     void onTitleChanged(QString title);
@@ -144,7 +143,7 @@ private slots:
     bool openTaskSwitcher();
     void zoneAnimationFinished();
     void onSceneMenuTriggered(HbAction *action);
-    void onRemovePageMessageBoxClosed(HbAction *action);
+    void onRemovePageConfirmationOk();
     void onSceneMenuAboutToClose();
 
 private:
@@ -152,8 +151,6 @@ private:
     HsIdleWidget *mUiWidget;
     
     QTimer mTimer;
-    qreal mTapAndHoldDistance;
-    qreal mPageChangeZoneWidth;
 
     QPointF mTouchScenePos;
     HsTitleResolver *mTitleResolver;

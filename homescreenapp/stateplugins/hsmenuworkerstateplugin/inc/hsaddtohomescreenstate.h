@@ -27,9 +27,9 @@
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbAction;
-class CaEntry;
 class HbMessageBox;
-
+class CaEntry;
+class CaNotifier;
 
 class HsAddToHomeScreenState: public  HsMenuBaseState
 {
@@ -50,6 +50,8 @@ private slots:
     void cleanUp();
 
     void messageWidgetCorruptedFinished(HbAction* finishedAction);
+    
+    void memoryCardRemoved();
 
 signals:
 
@@ -67,6 +69,7 @@ private:
 
     void logActionResult(QString operationName, int entryId,
                          bool operationSucceded);
+    void subscribeForMemoryCardRemove();
 
 private:
 
@@ -78,7 +81,10 @@ private:
     HbMessageBox *mCorruptedMessage;
 
     HbAction *mConfirmAction;
+    
     HsMenuMode mMenuMode;
+    
+    CaNotifier *mNotifier;
 
 };
 

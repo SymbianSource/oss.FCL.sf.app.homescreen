@@ -98,6 +98,28 @@ QString HsShortcutWidget::uid() const
 }
 
 /*!
+    Returns the text property. This property is needed by css selector.
+*/
+QString HsShortcutWidget::text() const
+{
+    if ( mText ) {
+        return mText->text();
+    } else {
+        return QString();
+        }
+}
+
+/*!
+    Sets the text property. This property is needed by css selector.
+*/
+void HsShortcutWidget::setText(const QString& textItem)
+{
+    if ( mText ) {
+        mText->setText(textItem);
+    }
+}
+
+/*!
     Filters touch area events.
 */
 bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
@@ -239,11 +261,10 @@ void HsShortcutWidget::createPrimitives()
     }
 
     // Text
-    if (!mText) {
+    if ( HsConfiguration::shortcutLabelsVisible() && !mText ) {
         mText = new HbTextItem(this);
         HbStyle::setItemName(mText, QLatin1String("text"));
-    }
-
+        }
     // Touch Area
     if (!mTouchArea) {
         mTouchArea = new HbTouchArea(this);
@@ -261,7 +282,9 @@ void HsShortcutWidget::updateContent(const CaEntry &caEntry)
     mCaEntryFlags = caEntry.flags();
     mCaEntryTypeName = caEntry.entryTypeName();
     mIcon->setIcon(caEntry.makeIcon());
-    mText->setText(caEntry.text());
+    if (mText) {
+        mText->setText(caEntry.text());
+        }
 }
 
 /*!
@@ -320,3 +343,5 @@ void HsShortcutWidget::onEntryChanged(const CaEntry &caEntry, ChangeType changeT
         emit finished();
     }
 }
+
+

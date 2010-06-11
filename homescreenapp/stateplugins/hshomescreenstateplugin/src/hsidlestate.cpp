@@ -46,7 +46,6 @@
 #include "hsselectbackgroundstate.h"
 #include "hstrashbinwidget.h"
 #include "hspageindicator.h"
-#include "hswidgetpositioningonorientationchange.h"
 #include "hsmenueventfactory.h"
 #include "hshomescreenstatecommon.h"
 #include "hstitleresolver.h"
@@ -137,8 +136,6 @@ HsIdleState::HsIdleState(QState *parent)
     ,mSettingsMgr(0)
 #endif
 {
-    mTapAndHoldDistance = HsConfiguration::tapAndHoldDistance();
-    mPageChangeZoneWidth = HsConfiguration::pageChangeZoneWidth();
     setupStates();
     mTimer.setSingleShot(true);
     mTitleResolver = new HsTitleResolver(this);
@@ -479,7 +476,7 @@ bool HsIdleState::isInPageChangeZone()
 */
 bool HsIdleState::isInLeftPageChangeZone()
 {
-    return mTouchScenePos.x() < mPageChangeZoneWidth;
+    return mTouchScenePos.x() < HsConfiguration::pageChangeZoneWidth();
 }
 
 /*!
@@ -489,7 +486,7 @@ bool HsIdleState::isInLeftPageChangeZone()
 bool HsIdleState::isInRightPageChangeZone()
 {
     qreal pageWidth = HsScene::mainWindow()->layoutRect().width();
-    return mTouchScenePos.x() > pageWidth - mPageChangeZoneWidth;
+    return mTouchScenePos.x() > pageWidth - HsConfiguration::pageChangeZoneWidth();;
 }
 
 /*!
@@ -634,9 +631,7 @@ void HsIdleState::action_idle_setupView()
         mNavigationAction->setIcon(HbIcon(gApplicationLibraryIconName));
         connect(mNavigationAction, SIGNAL(triggered()), SIGNAL(event_applicationLibrary()));
         idleView->setNavigationAction(mNavigationAction);
-
-        // TODO: Workaround to Qt/Hb layouting bugs.
-        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        
         HsGui::setIdleView(idleView);
 
         if (mPageChangeAnimation) {
@@ -702,8 +697,7 @@ void HsIdleState::action_idle_layoutNewWidgets()
     }
 
     foreach (HsWidgetHost *widget, widgets) {
-        widget->initializeWidget();
-        widget->showWidget();
+        widget->startWidget();
     }
 
     page->layoutNewWidgets();
@@ -728,7 +722,7 @@ void HsIdleState::action_idle_connectOrientationChangeEventHandler()
 {
     connect(HsScene::mainWindow(),
         SIGNAL(orientationChanged(Qt::Orientation)),
-        SLOT(onOrientationChanged(Qt::Orientation)));
+        SLOT(action_idle_showActivePage()));
 }
 
 /*!
@@ -785,7 +779,7 @@ void HsIdleState::action_idle_disconnectOrientationChangeEventHandler()
 {
     disconnect(HsScene::mainWindow(),
         SIGNAL(orientationChanged(Qt::Orientation)),
-        this, SLOT(onOrientationChanged(Qt::Orientation)));
+        this, SLOT(action_idle_showActivePage()));
 }
 
 /*!
@@ -986,18 +980,16 @@ void HsIdleState::action_moveWidget_reparentToPage()
     if (mUiWidget->trashBin()->isUnderMouse()) {
         HbInstantFeedback::play(HsConfiguration::widgetDropToTrashbinFeedbackType());
         widget->page()->removeWidget(widget);
-        widget->uninitializeWidget();
-        widget->deleteFromDatabase();
-        widget->deleteLater();
+        widget->remove();
         scene->setActiveWidget(0);
     } else {
         if (widget->page() != page) {
             widget->page()->removeWidget(widget);
             page->addExistingWidget(widget);
             if (HsScene::orientation() == Qt::Horizontal) {
-                widget->deleteWidgetPresentation(Qt::Vertical);
+                widget->removePresentation(Qt::Vertical);
             } else {
-                widget->deleteWidgetPresentation(Qt::Horizontal);
+                widget->removePresentation(Qt::Horizontal);
             }
         }
 
@@ -1012,7 +1004,7 @@ void HsIdleState::action_moveWidget_reparentToPage()
         }
         widget->setPos(widgetX, widgetY);
 
-        widget->setWidgetPresentation();
+        widget->savePresentation();
         page->updateZValues();
     }
     mAllowZoneAnimation = true;
@@ -1061,9 +1053,9 @@ void HsIdleState::action_moveScene_moveToNearestPage()
 
     int pageIndex = HsScene::instance()->activePageIndex();
 
-    if (mDeltaX < -pageSize.width() / 3) {
+    if (mDeltaX < -HsConfiguration::pageChangePanDistanceInPixels()) {
         pageIndex = qMin(pageIndex + 1, pages.count() - 1);
-    } else if (pageSize.width() / 3 < mDeltaX) {
+    } else if (HsConfiguration::pageChangePanDistanceInPixels() < mDeltaX) {
         pageIndex = qMax(pageIndex - 1, 0);
     }
 
@@ -1116,7 +1108,7 @@ void HsIdleState::action_sceneMenu_showMenu()
 void HsIdleState::action_addPage_addPage()
 {
     HsScene *scene = HsScene::instance();
-    int pageIndex = scene->pages().count();
+	  int pageIndex = scene->activePageIndex() + 1;
     addPageToScene(pageIndex);
     scene->setActivePageIndex(pageIndex);
     startPageChangeAnimation(pageIndex, HsConfiguration::newPageAddedAnimationDuration());
@@ -1136,16 +1128,18 @@ void HsIdleState::action_removePage_removePage()
 #ifndef HOMESCREEN_TEST //We don't want to test message box.
         //Confirm removal of page having content
         HbMessageBox *box = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+        box->setAttribute(Qt::WA_DeleteOnClose);
         box->setHeadingWidget(new HbLabel
                                 (hbTrId(hsLocTextId_Title_RemovePage)));
         box->setText(hbTrId(hsLocTextId_Confirmation_RemovePage));
-        box->setPrimaryAction(new HbAction(hbTrId(hsLocTextId_ConfirmationButton_Ok)));
-        box->setSecondaryAction(new HbAction(hbTrId(hsLocTextId_ConfirmationButton_Cancel)));
-        box->setAttribute(Qt::WA_DeleteOnClose);
+        
+        QAction *buttonOk = box->actions().at(0);
+        //We are keen only from OK button. Cancel is not connected to any slot.
+        connect(buttonOk, SIGNAL(triggered()), SLOT(onRemovePageConfirmationOk()));
 
         HsScene::mainWindow()->setInteractive(true);
 
-        box->open(this,SLOT(onRemovePageMessageBoxClosed(HbAction*)));
+        box->open();
 #endif //HOMESCREEN_TEST
     } else {
         //Empty page can be removed without confirmation
@@ -1217,7 +1211,7 @@ void HsIdleState::widgetInteraction_onMouseMoved(
 
     QPointF point =
         event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
-    if (mTapAndHoldDistance < point.manhattanLength()) {
+    if (HsConfiguration::tapAndHoldDistance() < point.manhattanLength()) {
         // Threshold area for tap exceeded. This is pan or swipe
         mTimer.stop();
         if (HsScene::instance()->activeWidget()->isPannable(event)) {
@@ -1278,7 +1272,7 @@ void HsIdleState::sceneInteraction_onMouseMoved(
 
     QPointF point =
         event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
-    if (mTapAndHoldDistance < point.manhattanLength()) {
+    if (HsConfiguration::tapAndHoldDistance() < point.manhattanLength()) {
         mTimer.stop();
         mUiWidget->clearDelayedPress();
         emit event_moveScene();
@@ -1328,37 +1322,32 @@ void HsIdleState::moveWidget_onMouseMoved(
     QPointF delta(event->scenePos() - event->lastScenePos());
     widgetRect.moveTopLeft(widgetRect.topLeft() + delta);
 
-    //Widget can be moved over the pages left border if not in the first page.
-    //In the first page widget cannot cross the page's left border at all.
+    //Widget can be moved over the pages left border
     qreal lowerBoundX = -widgetRect.width();
     HsPage *page = scene->activePage();
-    if (page == scene->pages().first()) {
-        lowerBoundX = 0;
-    }
-
-    //Widget can be moved over the pages right border if not in the last page when maximum amount
-    //of pages exist. Widget cannot cross the lastest page's right border at all.
     QRectF pageRect = HsGui::idleView()->rect();
-    qreal upperBoundX = pageRect.width() + widgetRect.width();
-    if (page == scene->pages().last() && scene->pages().count() == scene->maximumPageCount()) {
-        upperBoundX = pageRect.width() - widgetRect.width();
-    }
+    //Widget can be moved over the pages right border
+    qreal upperBoundX = pageRect.width();
 
-    //Widget cannot cross over top or bottom edges of the page.
+    //Notice that chrome height is 64 pixels
+    qreal lowerBoundY = qreal(64) - widgetRect.height();
+    //Widget can be moved over the pages down border
+    qreal upperBoundY = pageRect.height();
+
+    qreal widgetX = qBound(lowerBoundX, widgetRect.x(), upperBoundX);
+    qreal widgetY = qBound(lowerBoundY, widgetRect.y(), upperBoundY);
     /* if using ItemClipsChildrenToShape-flag in widgethost then
        setPos does not update position here, however setGeometry does it, QT bug?
     */
-    qreal widgetX = qBound(lowerBoundX, widgetRect.x(), upperBoundX);
-    qreal widgetY = qBound(qreal(64), widgetRect.y(), pageRect.height() - widgetRect.height());
     widget->setGeometry(widgetX, widgetY, widgetRect.width(), widgetRect.height());
 
     int bounceFeedbackEffectDistance = HsConfiguration::bounceFeedbackEffectDistance();
     //Handle effects:
     //User is indicated by a tactile feedback if he/she is trying to move
     //widget over the first or the last page.
-    if( (page == scene->pages().first() && widgetRect.x() < bounceFeedbackEffectDistance ) ||
+    if( (page == scene->pages().first() && mTouchScenePos.x() < bounceFeedbackEffectDistance ) ||
         (page == scene->pages().last() && scene->pages().count() == scene->maximumPageCount()
-         && widgetRect.x()+ widgetRect.width() > pageRect.width() - bounceFeedbackEffectDistance)) {
+         && mTouchScenePos.x() > pageRect.width() - bounceFeedbackEffectDistance)) {
              HbInstantFeedback::play(HsConfiguration::widgetMoveBlockedFeedbackType());
             // TODO: use code below when Orbit has updated ContinuousFeedback API
             //if (!mContinuousFeedback->isPlaying()) {
@@ -1434,56 +1423,6 @@ void HsIdleState::moveScene_onMouseReleased(
     mDeltaX = event->scenePos().x() - event->buttonDownScenePos(Qt::LeftButton).x();
 
     emit event_waitInput();
-}
-
-/*!
-    Handles orientation change events. \a orientation is the
-    new orientation.
-*/
-void HsIdleState::onOrientationChanged(Qt::Orientation orientation)
-{
-    QList<HsPage *> pages = HsScene::instance()->pages();
-    QList<HsWidgetHost *> widgets;
-    HsWidgetHost *widget = 0;
-
-    QRectF pageRect = HsScene::mainWindow()->layoutRect();
-
-    // TODO: Temporary workaround for the Orbit bug.
-    if (orientation == Qt::Horizontal) {
-        pageRect = QRectF(0, 0, 640, 360);
-    } else {
-        pageRect = QRectF(0, 0, 360, 640);
-    }
-    // End of the workaround.
-
-    const int chromeHeight = 64; // TODO: get this somewhere
-
-    for (int i = 0; i < pages.count(); ++i) {
-        widgets = pages[i]->widgets();
-        for (int j = 0; j < widgets.count(); ++j) {
-            widget = widgets[j];
-            HsWidgetPresentationData presentation = widget->widgetPresentation(orientation);
-            if (presentation.widgetId < 0) {
-                QList<QRectF> geometries =
-                    HsWidgetPositioningOnOrientationChange::instance()->convert(
-                        QRectF(0, chromeHeight,
-                            pageRect.height(),
-                            pageRect.width() - chromeHeight),
-                        QList<QRectF>() << widget->geometry(),
-                        QRectF(0, chromeHeight,
-                            pageRect.width(),
-                            pageRect.height() - chromeHeight));
-                widget->setGeometry(geometries.first());
-                widget->setWidgetPresentation();
-            } else {
-                widget->setPos(presentation.x, presentation.y);
-                widget->setZValue(presentation.zValue);
-            }
-        }
-    }
-    // TODO: Workaround to Qt/Hb layouting bugs.
-    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    action_idle_showActivePage();
 }
 
 /*!
@@ -1594,13 +1533,9 @@ void HsIdleState::onSceneMenuTriggered(HbAction *action)
 /*!
     Handles the close of remove page confirmation dialog for page having content.
 */
-void HsIdleState::onRemovePageMessageBoxClosed(HbAction *action)
+void HsIdleState::onRemovePageConfirmationOk()
 {
-    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
-    if(action == dlg->primaryAction()) {
-        //Page removal accepted
-        removeActivePage();
-    }
+    removeActivePage();
 }
 
 /*!
@@ -1621,9 +1556,3 @@ void HsIdleState::onSceneMenuAboutToClose() {
         emit event_waitInput();
     }
 }
-
-// Undefine the helper macros.
-#undef ENTRY_ACTION
-#undef EXIT_ACTION
-#undef CONNECT_MOUSE_EVENT_HANDLER
-#undef DISCONNECT_MOUSE_EVENT_HANDLER

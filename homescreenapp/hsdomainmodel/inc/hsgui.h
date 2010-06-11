@@ -15,8 +15,8 @@
 *
 */
 
-#ifndef HSVIEW_H
-#define HSVIEW_H
+#ifndef HSGUI_H
+#define HSGUI_H
 
 #include <QPointer>
 
@@ -31,17 +31,21 @@ class HbMainWindow;
 class HSDOMAINMODEL_EXPORT HsGui
 {
 public:
-	HsGui();
-	~HsGui();
 	static HbView *idleView();	
 	static HbView *takeIdleView();
 	static void setIdleView(HbView *idleView);	
-	static HbMainWindow *mainWindow();
+	
+    static HbMainWindow *mainWindow();
+
+private:
+    HsGui() {}
 
 private:
 	static QPointer<HbView> mIdleView;
-	HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
+	
+    HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };
 
 Q_DECLARE_METATYPE(HsGui*)
-#endif //HSVIEW_H
+
+#endif // HSGUI_H

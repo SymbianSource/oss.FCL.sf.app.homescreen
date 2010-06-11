@@ -19,6 +19,7 @@
 
 #include <HbGroupBox>
 #include <HbListView>
+#include <HbPushButton>
 #include <hbview.h>
 #include <hbaction.h>
 #include <hbabstractviewitem.h>
@@ -140,17 +141,16 @@ HsCollectionState::HsCollectionState(HsMenuViewBuilder &menuViewBuilder,
 void HsCollectionState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::construct");
+
     const QString parentName =
         parent() != 0 ? parent()->objectName() : QString("");
     setObjectName(parentName + "/collectionstate");
-
 
     connect(this, SIGNAL(entered()),SLOT(stateEntered()));
     connect(this, SIGNAL(exited()),SLOT(stateExited()));
 
     makeConnect();
-    mMenuView.view()->
-    setNavigationAction(mSecondarySoftkeyAction);
+    mMenuView.view()->setNavigationAction(mSecondarySoftkeyAction);
 
     HSMENUTEST_FUNC_EXIT("HsCollectionState::construct");
 }
@@ -207,7 +207,27 @@ void HsCollectionState::stateEntered()
                 mCollectionId, mSortAttribute, mCollectionType);
     }
     
+    EntryFlags flags =
+        mCollectionModel->root().data(CaItemModel::FlagsRole).value<
+        EntryFlags> ();
+
+    if (mCollectionModel->rowCount() == 0){
+        if (flags & RemovableEntryFlag){
+            mMenuView.setContext(HsCollectionContext,HsButtonContext);
+        } else {
+            mMenuView.setContext(HsCollectionContext,HsEmptyLabelContext);
+        }
+        mMenuView.disableSearch(true);
+    } else {
+        mMenuView.setContext(HsCollectionContext,HsItemViewContext);
+        mMenuView.disableSearch(false);
+    }
+
     connect(mCollectionModel, SIGNAL(modelReset()), SLOT(updateLabel()));
+    connect(mCollectionModel, SIGNAL(empty(bool)),this,
+            SLOT(handleEmptyChange(bool)));
+    connect(mCollectionModel, SIGNAL(empty(bool)),this,
+            SLOT(lockSearchButton(bool)));
 
     mMenuView.setModel(mCollectionModel);
 
@@ -222,10 +242,6 @@ void HsCollectionState::stateEntered()
         mOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                             this,
                             SLOT(openTaskSwitcher()));
-
-        EntryFlags flags =
-            mCollectionModel->root().data(CaItemModel::FlagsRole).value<
-            EntryFlags> ();
 
         if (flags & RemovableEntryFlag) {
             mOptions->addAction(hbTrId("txt_applib_opt_add_content"), this,
@@ -280,8 +296,15 @@ void HsCollectionState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::stateExited");
 
-    mMenuView.setSearchPanelVisible(false);
     mMenuView.inactivate();
+    mMenuView.setSearchPanelVisible(false);
+    mMenuView.disableSearch(false);
+    disconnect(mCollectionModel, SIGNAL(empty(bool)),this,
+               SLOT(handleEmptyChange(bool)));
+
+    disconnect(mCollectionModel, SIGNAL(empty(bool)),this,
+               SLOT(lockSearchButton(bool)));
+
     disconnect(mCollectionModel, SIGNAL(modelReset()),
                    this, SLOT(updateLabel()));
     delete mCollectionModel;
@@ -308,6 +331,9 @@ void HsCollectionState::makeConnect()
     connect(&mMenuView,
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
+    connect(mMenuView.collectionButton(),
+            SIGNAL(released()), this, SLOT(addAppsAction()));
+
 }
 
 /*!
@@ -315,6 +341,9 @@ void HsCollectionState::makeConnect()
  */
 void HsCollectionState::makeDisconnect()
 {
+    disconnect(mMenuView.collectionButton(),
+            SIGNAL(pressed()), this, SLOT(addAppsAction()));
+
     disconnect(mSecondarySoftkeyAction, SIGNAL(triggered()),
                this, SLOT(backSteppingAction()));
 
@@ -416,7 +445,7 @@ void HsCollectionState::listItemLongPressed(HbAbstractViewItem *item,
     }
     
     if (!(entry->attribute(componentIdAttributeName()).isEmpty()) && 
-                entry->entryTypeName() == applicationTypeName() ) {
+            (flags & RemovableEntryFlag) ) {
         appDetailsAction = mContextMenu->addAction(hbTrId(
                                                 "txt_common_menu_details"));
         appDetailsAction->setData(AppDetailsContextAction);
@@ -450,7 +479,9 @@ void HsCollectionState::contextMenuAction(HbAction *action)
                     mCollectionId, itemId, mCollectionsSortAttribute));
             break;
         case UninstallContextAction:
-            HsMenuService::executeAction(itemId, removeActionIdentifier());
+            machine()->postEvent(
+                HsMenuEventFactory::createUninstallApplicationEvent(
+                    itemId));
             break;
         case RemoveFromCollectionContextAction:
             machine()->postEvent(
@@ -471,6 +502,36 @@ void HsCollectionState::contextMenuAction(HbAction *action)
                                     
     mMenuView.setSearchPanelVisible(false);
 }
+
+/*!
+ Handles button visibility
+ */
+void HsCollectionState::handleEmptyChange(bool empty)
+{
+    EntryFlags flags =
+        mCollectionModel->root().data(CaItemModel::FlagsRole).value<
+        EntryFlags> ();
+
+    if (empty){
+        if (flags & RemovableEntryFlag){
+            mMenuView.setContext(HsCollectionContext,HsButtonContext);
+        } else {
+            mMenuView.setContext(HsCollectionContext,HsEmptyLabelContext);
+        }
+    } else {
+        mMenuView.setContext(HsCollectionContext,HsItemViewContext);
+    }
+}
+
+
+/*!
+ Handles lock serch button
+ */
+void HsCollectionState::lockSearchButton(bool lock)
+{
+    mMenuView.disableSearch(lock);
+}
+
 
 /*!
  Menu add applications action slot

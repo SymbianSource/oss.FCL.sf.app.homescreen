@@ -23,6 +23,7 @@
 #include <HbListView>
 #include <HbLineEdit>
 #include <HbSearchPanel>
+#include <HbPushButton>
 #include <HbToolBar>
 #include <HbView>
 #include <HbWidget>
@@ -83,7 +84,6 @@ HbView *HsMenuViewBuilder::currentView() const
     if (view != NULL && mViewContext != HsInstalledAppsContext) {
         view->setToolBar(mToolBar);
     }
-
     return view;
 }
 
@@ -95,9 +95,11 @@ HbView *HsMenuViewBuilder::currentView() const
  */
 HbListView *HsMenuViewBuilder::currentListView() const
 {
-    const QString LIST_VIEW_NAME = mViewContextToStringMap[mViewContext]
-                                   + mOperationalContextToStringMap[mOperationalContext]
-                                   + "ListView";
+    QString LIST_VIEW_NAME = mViewContextToStringMap[mViewContext];
+    if (mOperationalContext == HsSearchContext) {
+        LIST_VIEW_NAME.append(mOperationalContextToStringMap[mOperationalContext]);
+    }
+    LIST_VIEW_NAME.append("ListView");
 
     return qobject_cast<HbListView *>(
                mDocumentLoader.findWidget(LIST_VIEW_NAME));
@@ -128,6 +130,17 @@ HbSearchPanel *HsMenuViewBuilder::currentSearchPanel() const
 {
     return qobject_cast<HbSearchPanel *>(mDocumentLoader.findWidget(
             SEARCH_PANEL_NAME));
+}
+
+/*!
+ \return pointer to a button
+ The pointer is valid until the HsMenuViewBuilder instance is destroyed.
+ Memory ownership is not changed.
+ */
+HbPushButton *HsMenuViewBuilder::collectionButton() const
+{
+    return qobject_cast<HbPushButton *>(mDocumentLoader.findWidget(
+            BUTTON_NAME));
 }
 
 /*!
@@ -230,13 +243,13 @@ bool HsMenuViewBuilder::build()
  */
 HsMenuViewBuilder::HsMenuViewBuilder():
     DOCUMENT_FILE_NAME(":/xml/applibrary.docml"),
-    COMMON_SECTION_NAME("commonDefinitions"),
     ALL_APPS_ACTION_NAME("allAppsAction"),
     ALL_COLLECTIONS_ACTION_NAME("allCollectionsAction"),
     SEARCH_ACTION_NAME("searchAction"),
     OVI_STORE_ACTION_NAME("oviStoreAction"),
     OPERATOR_ACTION_NAME("operatorAction"),
     SEARCH_PANEL_NAME("searchPanel"),
+    BUTTON_NAME("collectionButton"),
     TOOL_BAR_NAME("toolBar"),
     mToolBar(new HbToolBar),
     mToolBarExtension(new HbToolBarExtension),
@@ -246,7 +259,7 @@ HsMenuViewBuilder::HsMenuViewBuilder():
     init();
 
     // parse common section and the one specified by view options
-    const bool result = parseSection(COMMON_SECTION_NAME);
+    const bool result = parseSection();
 
     Q_ASSERT_X(result,
                "HsMenuViewBuilder::HsMenuViewBuilder()",
@@ -284,12 +297,10 @@ bool HsMenuViewBuilder::parseSection(const QString &sectionName)
     HSMENUTEST_FUNC_ENTRY("HsMenuViewBuilder::parseSection");
 
     bool loadStatusOk = false;
-
     const QObjectList loadedObjects =
         mDocumentLoader.load(DOCUMENT_FILE_NAME,
                              sectionName,
-                             &loadStatusOk);
-
+                             &loadStatusOk); 
     mLoadedObjects |= loadedObjects.toSet();
 
     Q_ASSERT_X(loadStatusOk,
@@ -342,6 +353,9 @@ void HsMenuViewBuilder::init()
     mViewContextToStringMap[HsCollectionContext] = "collection";
     mOperationalContextToStringMap[HsItemViewContext] = "";
     mOperationalContextToStringMap[HsSearchContext] = "Search";
+    mOperationalContextToStringMap[HsButtonContext] = "Button";
+    mOperationalContextToStringMap[HsEmptyLabelContext] = "EmptyLabel";
+
 }
 
 /*!
@@ -360,7 +374,6 @@ void HsMenuViewBuilder::setViewContext(HsViewContext viewContext)
 void HsMenuViewBuilder::setOperationalContext(
     HsOperationalContext operationalContext)
 {
-
     mOperationalContext = operationalContext;
 }
 

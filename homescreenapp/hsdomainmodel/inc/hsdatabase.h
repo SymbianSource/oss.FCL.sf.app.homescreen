@@ -75,7 +75,7 @@ public:
 
     bool widgetPresentation(HsWidgetPresentationData &data);
     bool setWidgetPresentation(const HsWidgetPresentationData &data);
-    bool deleteWidgetPresentation(int widgetId, const QString &key);
+    bool deleteWidgetPresentation(int widgetId, Qt::Orientation orientation);
 
     bool widgetPreferences(int widgetId, QVariantHash &data);
     bool widgetPreference(int widgetId, const QString &key, QVariant &value);
@@ -98,7 +98,7 @@ private:
     QString mConnectionName;
     QString mDatabaseName;
 
-    static QScopedPointer<HsDatabase> mInstance;
+    static HsDatabase *mInstance;
 };
 
 #endif // HSDATABASE_H

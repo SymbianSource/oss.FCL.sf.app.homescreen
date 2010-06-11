@@ -17,8 +17,6 @@
 #ifndef __TSAPP_CORE_IBY__
 #define __TSAPP_CORE_IBY__
 
-data=\epoc32\data\z\resource\qt\crml\tsexternalactivation.qcrml             resource\qt\crml\tsexternalactivation.qcrml
-
 file=ABI_DIR\BUILD_DIR\tsdevicedialogplugin.dll					       SHARED_LIB_DIR\tsdevicedialogplugin.dll
 data=\epoc32\data\z\resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin    resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin
 

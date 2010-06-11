@@ -109,10 +109,17 @@ HsIdleWidget::~HsIdleWidget()
 void HsIdleWidget::setGeometry(const QRectF &rect)
 {
     int n = HsScene::instance()->pages().count();
-    mControlLayer->resize(rect.size());
-    mPageLayer->resize(n * rect.width(), rect.height());
-    mSceneLayer->resize(2 * rect.width() + HsConfiguration::bounceEffect(), rect.height());
-    HbWidget::setGeometry(rect);
+	QRectF layoutRect(HsScene::instance()->mainWindow()->layoutRect());
+    if (layoutRect == rect || (layoutRect.height() == rect.width() && layoutRect.width() == rect.height())) {
+        mControlLayer->resize(rect.size());
+		mPageLayer->resize(n * rect.width(), rect.height());
+		mSceneLayer->resize(2 * rect.width() + HsConfiguration::bounceEffect(), rect.height());
+		HbWidget::setGeometry(rect);
+	} else {
+		QRectF sceneRect = mapToScene(rect).boundingRect();
+		sceneRect.setTop(-sceneRect.top());
+		HbWidget::setGeometry(sceneRect);
+	}
 }
 
 /*!
@@ -257,6 +264,7 @@ void HsIdleWidget::showPageIndicator()
 {
     mTrashBin->hide();
     mTrashBin->deactivate();
+    mPageIndicator->setSpacing(HsConfiguration::pageIndicatorSpacing()); // for usability optimization widget, can be removed later on
     mPageIndicator->setVisible(1 < mPageIndicator->itemCount());
 }
 

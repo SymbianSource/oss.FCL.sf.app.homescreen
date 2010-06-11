@@ -39,8 +39,7 @@ bool HsContentService::createWidget(const QVariantHash &params)
     HsWidgetHost *widget = createWidgetForPreview(params);
     if (!widget) {
         return false;
-    }
-     
+    }     
     return HsScene::instance()->activePage()->addNewWidget(widget);
 }
 
@@ -49,20 +48,8 @@ HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &param
     HsWidgetData widgetData;
     widgetData.uri = params.value("uri").toString();
 
-
-    HsWidgetHost *widget = HsWidgetHost::createInstance(widgetData,
-                                                        params.value("preferences").toHash());
-
-    if (!widget) {
-        return NULL;
-    }
-    if (!widget->load()) {
-        widget->deleteFromDatabase();
-        delete widget;
-        return NULL;
-    }
-
-    return widget;
+    return HsWidgetHost::createInstance(
+        widgetData, params.value("preferences").toHash());
 }
 
 /*!
@@ -70,24 +57,22 @@ HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &param
 */
 bool HsContentService::addWidget(const QString &uri, const QVariantHash &preferences)
 {
-    HsWidgetData widgetData;
-    widgetData.uri = uri;
+    HsWidgetData data;
+    data.uri = uri;
 
-    QScopedPointer<HsWidgetHost> widget(HsWidgetHost::createInstance(widgetData, preferences));
-    if (!widget.data()) {
+    HsWidgetHost *widget = HsWidgetHost::createInstance(data, preferences);    
+    if (!widget) {
         return false;
     }
 
-    HsPage *activePage = HsScene::instance()->activePage();
-    if (!widget->load() || !activePage->addNewWidget(widget.data())) {
-        widget->deleteFromDatabase();
+    HsPage *page = HsScene::instance()->activePage();
+    if (!page->addNewWidget(widget)) {
+        widget->remove();
         return false;
     }
 
-    HsWidgetHost *taken = widget.take();
-    taken->initializeWidget();
-    taken->showWidget();
-    activePage->layoutNewWidgets();
+    widget->startWidget();
+    page->layoutNewWidgets();
     return true;
 }
 
@@ -97,12 +82,12 @@ bool HsContentService::addWidget(const QString &uri, const QVariantHash &prefere
 HsContentService *HsContentService::instance()
 {
     if (!mInstance) {
-        mInstance.reset(new HsContentService);
+        mInstance = new HsContentService();
     }
-    return mInstance.data();
+    return mInstance;
 }
 
 /*!
     Points to the content service instance.
 */
-QScopedPointer<HsContentService> HsContentService::mInstance(0);
+HsContentService *HsContentService::mInstance(0);

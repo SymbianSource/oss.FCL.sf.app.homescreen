@@ -27,6 +27,7 @@
 #include "hswidgethost.h"
 #include "hswallpaper.h"
 #include "hswidgetpositioningonwidgetadd.h"
+#include "hswidgetpositioningonorientationchange.h"
 
 
 /*!
@@ -92,21 +93,17 @@ bool HsPage::load()
     }
 
     foreach (HsWidgetData data, datas) {
-        QScopedPointer<HsWidgetHost> widget(new HsWidgetHost(data.id));
-        if(!widget->load() || !widget->isValid()) {
-            continue;
-		}
-        connectWidget(widget.data());
+        HsWidgetHost *widget = new HsWidgetHost(data.id);
+        mWidgets.append(widget);
+        connectWidget(widget);
         widget->setPage(this);
-        widget->initializeWidget();
-        if (widget->state() != HsWidgetHost::Initialized) {
-            continue;
-        }
-        widget->showWidget();
-        mWidgets.append(widget.data());
         widget->setParentItem(this);
-        widget.take(); // now this page owns widget
+        widget->startWidget();
     }
+
+    connect(HsScene::mainWindow(),
+        SIGNAL(orientationChanged(Qt::Orientation)),
+        SLOT(onOrientationChanged(Qt::Orientation)));
 
     return true;
 }
@@ -163,16 +160,13 @@ bool HsPage::addNewWidget(HsWidgetHost* widgetHost)
         return true;
     }
 
-    // Set presentation.
-    QString key = HsScene::orientation() == Qt::Horizontal ?
-        "landscape" : "portrait";
-
     HsWidgetPresentationData presentation;
-    if (!widgetHost->widgetPresentationData(key, presentation)) {
-        presentation.key = key;
+    presentation.orientation = HsScene::orientation();
+    if (!widgetHost->getPresentation(presentation)) {
+        presentation.orientation = HsScene::orientation();
         presentation.setPos(QPointF());
         presentation.zValue = 0;
-        widgetHost->setWidgetPresentationData(presentation);
+        widgetHost->savePresentation(presentation);
     }
 
     widgetHost->hide();
@@ -215,9 +209,10 @@ void HsPage::layoutNewWidgets()
     for (int i = 0; i < mNewWidgets.count(); ++i) {
         widget = mNewWidgets.at(i);
         widget->setGeometry(calculatedRects.at(i));
-        widget->setWidgetPresentation();
+        widget->savePresentation();
         widget->setPage(this);
         widget->setParentItem(this);
+        widget->showWidget();
         widget->show();
     }
     mWidgets << mNewWidgets;
@@ -227,19 +222,22 @@ void HsPage::layoutNewWidgets()
 
 bool HsPage::deleteFromDatabase()
 {
-    HsDatabase *db = HsDatabase::instance();
-
     foreach (HsWidgetHost *widget, mWidgets) {
-        if (!widget->deleteFromDatabase()) {
-            return false;
-        }
+        widget->remove();
     }
-
-    if (!db->deletePage(mDatabaseId))  {
-        return false;
+    mWidgets.clear();
+    
+    foreach (HsWidgetHost *widget, mNewWidgets) {
+        widget->remove();
     }
+    mNewWidgets.clear();
 
-    return true;
+    foreach (HsWidgetHost *widget, mUnavailableWidgets) {
+        widget->remove();
+    }
+    mUnavailableWidgets.clear();
+
+    return HsDatabase::instance()->deletePage(mDatabaseId);
 }
 
 QList<HsWidgetHost *> HsPage::widgets() const
@@ -262,6 +260,11 @@ bool HsPage::isRemovable() const
 void HsPage::setRemovable(bool removable)
 {
     mRemovable = removable;
+}
+
+bool HsPage::isActivePage() const
+{
+    return this == HsScene::instance()->activePage();
 }
 
 HsPage *HsPage::createInstance(const HsPageData &pageData)
@@ -336,14 +339,14 @@ void HsPage::updateZValues()
 
         foreach (HsWidgetHost *widget, sortedWidgets) {
             widget->setZValue(z++);
-            widget->setWidgetPresentation();
+            widget->savePresentation();
         }
     }
 
     if (!mNewWidgets.isEmpty()) {
         foreach (HsWidgetHost *widget, mNewWidgets) {
             widget->setZValue(z++);
-            widget->setWidgetPresentation();
+            widget->savePresentation();
         }
     }
 }
@@ -355,10 +358,11 @@ int HsPage::pageIndex()
 
 void HsPage::connectWidget(HsWidgetHost *widget)
 {
-    connect(widget, SIGNAL(widgetFinished(HsWidgetHost*)),
-            SLOT(onWidgetFinished(HsWidgetHost*)));
-    connect(widget, SIGNAL(widgetResized(HsWidgetHost*)),
-            SLOT(onWidgetResized(HsWidgetHost*)));
+    connect(widget, SIGNAL(finished()), SLOT(onWidgetFinished()));
+    connect(widget, SIGNAL(faulted()), SLOT(onWidgetFaulted()));
+    connect(widget, SIGNAL(resized()), SLOT(onWidgetResized()));
+    connect(widget, SIGNAL(available()), SLOT(onWidgetAvailable()));
+    connect(widget, SIGNAL(unavailable()), SLOT(onWidgetUnavailable()));
 }
 
 void HsPage::disconnectWidget(HsWidgetHost *widget)
@@ -366,9 +370,10 @@ void HsPage::disconnectWidget(HsWidgetHost *widget)
     widget->disconnect(this);
 }
 
-void HsPage::onWidgetFinished(HsWidgetHost *widget)
+void HsPage::onWidgetFinished()
 {
-    Q_ASSERT(widget);
+    HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+
     // It can be in new widget list if we haven't layouted it yet
     // or layouted new widget and widget list
     if (!mNewWidgets.removeOne(widget)) {
@@ -376,16 +381,21 @@ void HsPage::onWidgetFinished(HsWidgetHost *widget)
     }
 
     disconnectWidget(widget);
-    widget->uninitializeWidget();
-    widget->deleteFromDatabase();
-    widget->deleteLater();
+    widget->remove();
+}
+
+void HsPage::onWidgetFaulted()
+{
+    onWidgetFinished();
 }
 
 /*!
     Calculates new widget position on page when widget size changes
 */
-void HsPage::onWidgetResized(HsWidgetHost *widget)
+void HsPage::onWidgetResized()
 {
+    HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+
     QRectF widgetRect = widget->geometry();
 
     QRectF pageRect = HsScene::mainWindow()->layoutRect();
@@ -401,3 +411,59 @@ void HsPage::onWidgetResized(HsWidgetHost *widget)
     widget->setPos(widgetX, widgetY);
 }
 
+void HsPage::onWidgetAvailable()
+{
+    HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+    
+    mUnavailableWidgets.removeOne(widget);
+    mWidgets.append(widget);
+
+    widget->setParentItem(this);
+    widget->startWidget(isActivePage());
+    widget->show();
+}
+ 
+void HsPage::onWidgetUnavailable()
+{
+    HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+
+    if (mWidgets.contains(widget)) {
+        mWidgets.removeOne(widget);
+    } else if (mNewWidgets.contains(widget)) {
+        mNewWidgets.removeOne(widget);
+    } else {
+        return;
+    }
+
+    mUnavailableWidgets.append(widget);
+
+    widget->hide();
+    widget->setParentItem(0);
+}
+
+void HsPage::onOrientationChanged(Qt::Orientation orientation)
+{
+    QRectF rect = HsScene::mainWindow()->layoutRect();    
+    
+    HsWidgetPositioningOnOrientationChange *converter =
+        HsWidgetPositioningOnOrientationChange::instance();
+
+    qreal chrome = 64;
+    QRectF from(0, chrome, rect.height(), rect.width() - chrome);
+    QRectF to(0, chrome, rect.width(), rect.height() - chrome);
+
+    HsWidgetPresentationData presentation;
+    presentation.orientation = orientation;
+
+    foreach (HsWidgetHost *widget, mWidgets) {
+        if (!widget->getPresentation(presentation)) {
+            QList<QRectF> geometries = converter->convert(
+                from, QList<QRectF>() << widget->geometry(), to);
+            widget->setGeometry(geometries.first());
+            widget->savePresentation();
+        } else {
+            widget->setPos(presentation.pos());
+            widget->setZValue(presentation.zValue);
+        }
+    }   
+}

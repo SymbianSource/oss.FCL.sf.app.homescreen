@@ -76,7 +76,7 @@ protected:
 
 private:
     HsScene(QObject *parent = 0);
-    void calculateWidgetSizeLimitations(HsSceneData &sceneData);
+    void calculateWidgetSizeLimitations();
     Q_DISABLE_COPY(HsScene)
 
 private:

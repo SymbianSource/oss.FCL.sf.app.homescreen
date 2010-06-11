@@ -43,13 +43,21 @@ void HsConfiguration::loadConfiguration()
         mWidgetDragEffectDuration = generalConfiguration.widgetDragEffectDuration;
         mWidgetDropEffectDuration = generalConfiguration.widgetDropEffectDuration;
         mBounceFeedbackEffectDistance = generalConfiguration.boundaryFeedbackEffectDistance;
+        mDefaultPageId = generalConfiguration.defaultPageId;
+        mMaximumPageCount = generalConfiguration.maximumPageCount;
+        mMaximumWidgetHeight = generalConfiguration.maximumWidgetHeight;
+        mMaximumWidgetWidth = generalConfiguration.maximumWidgetWidth;
+        mMinimumWidgetHeight = generalConfiguration.minimumWidgetHeight;
+        mMinimumWidgetWidth = generalConfiguration.minimumWidgetWidth;
+        mShortcutLabelsVisible = generalConfiguration.shortcutLabelsVisible;
+        mPageChangePanDistance = generalConfiguration.pageChangePanDistance;
+        mPageChangePanDistanceInPixels = mPageChangePanDistance * HbDeviceProfile::current().unitValue();
     } else {
         Q_ASSERT_X(1, "Configuration", "Homescreen configuration could not be loaded from database");
     }
 
     HsFeedbackConfiguration feedbackConfiguration;
     if (db->feedbackConfiguration(feedbackConfiguration)) {
-	    mBounceFeedbackEffectDistance = 3;
         mPageChangeFeedbackType = feedbackConfiguration.pageChangeFeedbackType;
 	    mWidgetPickFeedbackType = feedbackConfiguration.widgetPickFeedbackType;
 	    mWidgetDropFeedbackType = feedbackConfiguration.widgetDropFeedbackType;
@@ -78,11 +86,11 @@ void HsConfiguration::loadConfiguration()
 
 // static member variables initilized here, these values will be used if fetching from database fails
 int HsConfiguration::mBounceEffect = 20;
-int HsConfiguration::mTapAndHoldDistance = 16;
+qreal HsConfiguration::mTapAndHoldDistance = 16.0;
 int HsConfiguration::mWidgetTapAndHoldTimeout = 500;
 int HsConfiguration::mSceneTapAndHoldTimeout = 500;
-int HsConfiguration::mPageChangeZoneWidth = 60;
-int HsConfiguration::mPageIndicatorSpacing = 8;
+qreal HsConfiguration::mPageChangeZoneWidth = 60.0;
+qreal HsConfiguration::mPageIndicatorSpacing = 8.0;
 int HsConfiguration::mPageChangeAnimationDuration = 200;
 int HsConfiguration::mPageChangeZoneAnimationDuration = 800;
 int HsConfiguration::mPageChangeZoneReverseAnimationDuration = 200;
@@ -91,6 +99,15 @@ int HsConfiguration::mNewPageAddedAnimationDuration = 700;
 int HsConfiguration::mWidgetDragEffectDuration = 200;
 int HsConfiguration::mWidgetDropEffectDuration = 200;
 int HsConfiguration::mBounceFeedbackEffectDistance = 3;
+int HsConfiguration::mDefaultPageId = 1;
+int HsConfiguration::mMaximumPageCount = 8;
+qreal HsConfiguration::mMaximumWidgetHeight = 39;
+qreal HsConfiguration::mMaximumWidgetWidth = 48;
+qreal HsConfiguration::mMinimumWidgetHeight = 8.75;
+qreal HsConfiguration::mMinimumWidgetWidth = 8.75;
+bool HsConfiguration::mShortcutLabelsVisible = false;
+qreal HsConfiguration::mPageChangePanDistance = 17.91;
+int HsConfiguration::mPageChangePanDistanceInPixels = 120;
 
 HbFeedback::InstantEffect HsConfiguration::mPageChangeFeedbackType = HbFeedback::None;
 HbFeedback::InstantEffect HsConfiguration::mWidgetPickFeedbackType = HbFeedback::None;

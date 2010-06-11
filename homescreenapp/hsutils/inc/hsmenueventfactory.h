@@ -70,6 +70,8 @@ public:
 
     static QEvent *createRemoveAppFromCollectionEvent(int aItemId, int aCollectionId);
 
+    static QEvent *createUninstallApplicationEvent(int aItemId);
+
     static QEvent *createArrangeCollectionEvent(int aTopItemId);
 
     static QEvent *createPreviewHSWidgetEvent(

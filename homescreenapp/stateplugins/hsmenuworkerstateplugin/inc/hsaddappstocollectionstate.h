@@ -134,11 +134,7 @@ private:
 
     HsCollectionNameDialog *mEditorDialog;
 
-    bool mEditorFinishedEntered;
-
     HsCollectionsListDialog *mListDialog;
-
-    bool mListFinishedEntered;
 
 };
 

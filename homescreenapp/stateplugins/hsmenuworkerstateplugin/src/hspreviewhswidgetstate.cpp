@@ -41,10 +41,8 @@
 #include "canotifier.h"
 #include "canotifierfilter.h"
 #include "caservice.h"
-
 #include "hsdomainmodel_global.h"
 #include <hscontentservice.h>
-
 
 const char HS_PREVIEW_HS_WIDGET_STATE[] = "HsPreviewHSWidgetState";
 
@@ -147,13 +145,13 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
             mScrollArea->setContentWidget(mWidget); // ownership transferred
             
             subscribeForMemoryCardRemove();
-            mWidget->initializeWidget();
-            mWidget->showWidget();
+            mWidget->startWidget();
             // Launch popup asyncronously
             mPopupDialog->open(this, SLOT(previewDialogFinished(HbAction*)));    
         }
 
     } else {
+        subscribeForMemoryCardRemove();
         showMessageWidgetCorrupted();
     }
 
@@ -169,39 +167,28 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
  */
 void HsPreviewHSWidgetState::cleanUp()
 {
-    // Close popups if App key was pressed
+    // Close popups if App key was pressed or memory card removed
     if (mPopupDialog) {
+        disconnect(mPopupDialog, SIGNAL(finished(HbAction*)), this, SLOT(previewDialogFinished(HbAction*)));
         mPopupDialog->close();
+        mPopupDialog = NULL;
     }
 
     if (mCorruptedMessage) {
+        disconnect(mCorruptedMessage, SIGNAL(finished(HbAction*)), this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
         mCorruptedMessage->close();
+        mCorruptedMessage = NULL;
     }
 
-    mPopupDialog = NULL;
     mScrollArea = NULL;
     mWidget = NULL;
-    mCorruptedMessage = NULL;
 
     disconnect(mNotifier,
                SIGNAL(entryChanged(CaEntry,ChangeType)),
-               this, SLOT(memoryCardRemoved()));
+               this, SIGNAL(exit()));
 
     delete mNotifier;
     mNotifier = NULL;
-}
-
-/*!
- Memory card with instaled widget was removed.
- \retval void
- */
-void HsPreviewHSWidgetState::memoryCardRemoved()
-{
-    if (mPopupDialog) {
-        mPopupDialog->close();
-    }
-    // exit not needed, it is called after dialog closed
-
 }
 
 /*!
@@ -210,31 +197,23 @@ void HsPreviewHSWidgetState::memoryCardRemoved()
  */
 void HsPreviewHSWidgetState::previewDialogFinished(HbAction* finishedAction)
 {
-    if (mPopupDialog != NULL) { 
-        // (work-around for crash if more then one action is selected in HbDialog)
-        if (finishedAction == mPopupDialog->actions().value(0)) {
-            mWidget->hideWidget();
-            mScrollArea->takeContentWidget();
-            HsScene::instance()->activePage()->addNewWidget(
-                mWidget); // ownership transferred
-            HbNotificationDialog *notificationDialog = new HbNotificationDialog();
-            notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
-            notificationDialog->setTitle(hbTrId(
-                                         "txt_applib_dpophead_added_to_homescreen") );
-            notificationDialog->show();
-        } else {
-            mWidget->uninitializeWidget();
-            mWidget->deleteFromDatabase();
-        }
-        mPopupDialog = NULL;
-        emit exit();
+    if (finishedAction == mPopupDialog->actions().value(0)) {
+        mWidget->hideWidget();
+        mScrollArea->takeContentWidget();
+        HsScene::instance()->activePage()->addNewWidget(
+            mWidget); // ownership transferred
+        HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+        notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
+        notificationDialog->setTitle(hbTrId(
+                                     "txt_applib_dpophead_added_to_homescreen") );
+        notificationDialog->show();
     } else {
-        // (work-around for crash if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+            mScrollArea->takeContentWidget();
+            mWidget->remove();
+            mWidget = NULL;
     }
+    emit exit();
 }
-
-
 
 /*!
  Subscribe for memory card remove.
@@ -250,9 +229,8 @@ void HsPreviewHSWidgetState::subscribeForMemoryCardRemove()
     mNotifier->setParent(this);
     connect(mNotifier,
             SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SLOT(memoryCardRemoved()));
+            SIGNAL(exit()));
 }
-
 
 /*!
  Shows message about corrupted widget library. Deletes widget eventually
@@ -271,9 +249,9 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
     QString message(hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
     mCorruptedMessage->setText(message);
 
-	mCorruptedMessage->clearActions();
+    mCorruptedMessage->clearActions();
     HbAction *primaryAction = new HbAction(hbTrId("txt_common_button_ok"), mCorruptedMessage);
-	mCorruptedMessage->addAction(primaryAction);
+    mCorruptedMessage->addAction(primaryAction);
 
     HbAction *secondaryAction = new HbAction(hbTrId("txt_common_button_cancel"), mCorruptedMessage);
     mCorruptedMessage->addAction(secondaryAction);
@@ -291,14 +269,8 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
  */
 void HsPreviewHSWidgetState::messageWidgetCorruptedFinished(HbAction* finishedAction)
 {
-    if (mCorruptedMessage) {
-        if (finishedAction == mCorruptedMessage->actions().value(0)) {
-            HsMenuService::executeAction(mEntryId, removeActionIdentifier());
-        }
-        mCorruptedMessage = NULL;
-        emit exit();
-    } else {
-        // (work-around for crash if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+    if (finishedAction == mCorruptedMessage->actions().value(0)) {
+        HsMenuService::executeAction(mEntryId, removeActionIdentifier());
     }
+    emit exit();
 }

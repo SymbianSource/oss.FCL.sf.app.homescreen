@@ -62,7 +62,10 @@ HsCollectionsListDialog::HsCollectionsListDialog(HsSortAttribute sortOrder,
         int collectionId) :
     HbSelectionDialog(), mItemId(0)
 {
-    setPrimaryAction(NULL);
+    clearActions();
+    HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"), this);
+    addAction(cancelAction);
+
     setHeadingWidget(new HbLabel(hbTrId("txt_applib_title_add_to")));
     // it must be single selection, although it shows checkboxes -
     // it is Orbit defect and will be fixed in next release
@@ -108,8 +111,6 @@ void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
 
     HbDialog::closeEvent(event); // emits finished(HbAction*)
 }
-
-
 
 /*!
  Creates standard item model.

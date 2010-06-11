@@ -24,6 +24,7 @@
 #include <HbMainWindow>
 #include <HbInstance>
 #include <HbSearchPanel>
+#include <HbPushButton>
 #include <HbToolBar>
 #include <HbView>
 #include <HbToolBarExtension>
@@ -73,6 +74,8 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext):
     mView = mBuilder.currentView();
     mListView = mBuilder.currentListView();
     mViewLabel= mBuilder.currentViewLabel();
+
+    mCollectionButton = mBuilder.collectionButton();
 
     mProxyModel->setFilterRole(CaItemModel::TextRole);
     mProxyModel->setFilterKeyColumn(1);
@@ -186,6 +189,20 @@ void HsMenuView::setSearchPanelVisible(bool visible)
 }
 
 /*!
+    Makes the UI to show or hide view add collection button
+    \param visibility When true button will be shown,
+     otherwise it will be hidden.
+ */
+void HsMenuView::setContext(HsViewContext viewContext,
+                            HsOperationalContext context)
+{
+    mBuilder.setViewContext(viewContext);
+    mBuilder.setOperationalContext(context);
+    mBuilder.build();
+}
+
+
+/*!
 \return View widget of the menu view.
  */
 HbView *HsMenuView::view() const
@@ -199,6 +216,14 @@ HbView *HsMenuView::view() const
 HbListView *HsMenuView::listView() const
 {
     return mListView;
+}
+
+/*!
+\return Collection button
+ */
+HbPushButton *HsMenuView::collectionButton() const
+{
+    return mCollectionButton;
 }
 
 /*!
@@ -230,6 +255,15 @@ void HsMenuView::hideSearchPanel()
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+/*!
+ Disable or enable search action button.
+ \param disable If true action is disabled.
+ */
+void HsMenuView::disableSearch(bool disable)
+{
+    mBuilder.searchAction()->setDisabled(disable);
+}
 
 /*!
  Scrolls item view to requested row.
@@ -336,6 +370,8 @@ void HsMenuView::findItem(QString criteriaStr)
     HSMENUTEST_FUNC_ENTRY("hsmenuview::findItem");
 
     if ("" != criteriaStr) {
+        mProxyModel->invalidate();
+        mProxyModel->setSourceModel(mListView->model());
         mProxyModel->setFilterRegExp(QRegExp(criteriaStr,
                                              Qt::CaseInsensitive, QRegExp::FixedString));
         mSearchListView->scrollTo(mProxyModel->index(0,0),

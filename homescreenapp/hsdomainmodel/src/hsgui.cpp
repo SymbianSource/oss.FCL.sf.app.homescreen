@@ -17,6 +17,7 @@
 
 #include <HbInstance>
 #include <HbView>
+
 #include "hsgui.h"
 
 /*!
@@ -27,25 +28,11 @@
 */
 
 /*!
-    Constructor
-*/
-HsGui::HsGui()	
-{    
-}
-
-/*!
-    Destructor.
-*/
-HsGui::~HsGui()
-{
-}
-
-/*!
-    Returns idle view. 
+    Returns the idle view. 
 */
 HbView *HsGui::idleView()
 {
-	return mIdleView.data();    
+    return mIdleView;    
 }
 
 /*!
@@ -55,9 +42,9 @@ HbView *HsGui::idleView()
 */
 HbView *HsGui::takeIdleView()
 {	
-    HbView *view = mIdleView;
+    HbView *idleView = mIdleView;
     mIdleView = 0;
-    return view;
+    return idleView;
 }
 
 /*!
@@ -67,14 +54,13 @@ HbView *HsGui::takeIdleView()
 void HsGui::setIdleView(HbView *idleView)
 {
     if (mIdleView != idleView) {
-        HbView *oldView = mIdleView;
+        delete mIdleView;
         mIdleView = idleView;
-        delete oldView;
     }
 }
 
 /*!
-    Return main window.
+    Returns the main window.
 */
 HbMainWindow *HsGui::mainWindow()
 {
@@ -82,6 +68,6 @@ HbMainWindow *HsGui::mainWindow()
 }
 
 /*!
-    Points to the view instance.
+    Points to the idle view instance.
 */
 QPointer<HbView> HsGui::mIdleView(0);

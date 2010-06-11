@@ -23,6 +23,10 @@
     \class HsWidgetComponentDescriptor
     \ingroup group_hsdomainmodel
     \brief Homescreen widget component descriptor class.
+    
+    Homescreen widget component descriptor class hosts meta data of
+    widget component. Meta data is delivered in manifest file.
+    \see page_widgetsispackage
 */
 
 

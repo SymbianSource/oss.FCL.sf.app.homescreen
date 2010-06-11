@@ -180,8 +180,7 @@ HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
     mNewCollectionState(0), mAppsCheckListState(0), mActionType(
         NoActionType), mApplicationsSortAttribute(NoHsSortAttribute),
     mCollectionsSortAttribute(NoHsSortAttribute), mAppsCheckList(0),
-    mEditorDialog(0), mEditorFinishedEntered(false), mListDialog(0),
-    mListFinishedEntered(false)
+    mEditorDialog(0), mListDialog(0)
 {
     construct();
 }
@@ -376,11 +375,15 @@ void HsAddAppsToCollectionState::stateExited()
     mAppsCheckList = NULL;
 
     if (mEditorDialog) {
+        disconnect(mEditorDialog, SIGNAL(finished(HbAction*)),
+                   this, SLOT(editorDialogFinished(HbAction*)));
         mEditorDialog->close();
         mEditorDialog = NULL;
     }
 
     if (mListDialog) {
+        disconnect(mListDialog, SIGNAL(finished(HbAction*)),
+                   this, SLOT(listDialogFinished(HbAction*)));
         mListDialog->close();
         mListDialog = NULL;
     }
@@ -399,7 +402,6 @@ void HsAddAppsToCollectionState::newCollection()
 {
     qDebug("HsAddAppsToCollectionState::newCollection");
     HSMENUTEST_FUNC_ENTRY("HsAddAppsToCollectionState::newCollection");
-    mEditorFinishedEntered = false;
     mEditorDialog = new HsCollectionNameDialog();
     mEditorDialog->open(this, SLOT(editorDialogFinished(HbAction*)));
 
@@ -415,31 +417,23 @@ void HsAddAppsToCollectionState::newCollection()
 //
 void HsAddAppsToCollectionState::editorDialogFinished(HbAction* finishedAction)
 {
-    if (!mEditorFinishedEntered) {
-        mEditorFinishedEntered = true;
-
-        if (finishedAction == mEditorDialog->actions().value(0)) {
-            QString newName(mEditorDialog->newName(mEditorDialog->value().toString(), true));
-            if (mActionType == ViaAllViewOptionMenuType) {
-                qDebug("HsAddAppsToCollectionState::newCollection() "
-                       "- emit collectionNameSelectedCl(newName)");
-                emit transitToAppsCheckListState(newName);
-            } else {
-                qDebug("HsAddAppsToCollectionState::newCollection() "
-                       "- emit collectionNameSelected(newName)");
-                emit transitToSaveState(newName);
-            }
+    if (finishedAction == mEditorDialog->actions().value(0)) {
+        QString newName(mEditorDialog->newName(mEditorDialog->value().toString(), true));
+        if (mActionType == ViaAllViewOptionMenuType) {
+            qDebug("HsAddAppsToCollectionState::newCollection() "
+                   "- emit collectionNameSelectedCl(newName)");
+            emit transitToAppsCheckListState(newName);
         } else {
-            qDebug(
-                "HsAddAppsToCollectionState::newCollection() - emit cancel()");
-            emit transitToFinalState();
+            qDebug("HsAddAppsToCollectionState::newCollection() "
+                   "- emit collectionNameSelected(newName)");
+            emit transitToSaveState(newName);
         }
-        mEditorDialog = NULL; // set to null since this will be deleted after close
-
     } else {
-        // (work-around if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+        qDebug(
+            "HsAddAppsToCollectionState::newCollection() - emit cancel()");
+        emit transitToFinalState();
     }
+    mEditorDialog = NULL; // set to null since this will be deleted after close
 }
 
 /*!
@@ -452,7 +446,6 @@ void HsAddAppsToCollectionState::selectCollection()
 {
     qDebug("HsAddAppsToCollectionState::selectCollection()");
     HSMENUTEST_FUNC_ENTRY("HsAddAppsToCollectionState::selectCollection");
-    mListFinishedEntered = false;
     mListDialog = new HsCollectionsListDialog(mCollectionsSortAttribute,
                                                        mCollectionId);
     mListDialog->open(this, SLOT(listDialogFinished(HbAction*)));
@@ -469,34 +462,25 @@ void HsAddAppsToCollectionState::selectCollection()
 //
 void HsAddAppsToCollectionState::listDialogFinished(HbAction* finishedAction)
 {
-    if (!mListFinishedEntered) {
-        mListFinishedEntered = true;
-
-        if (finishedAction != mListDialog->actions().value(0)) {
-            int itemId = mListDialog->getItemId();
-            if (itemId) {
-                if (mActionType == ViaAllViewOptionMenuType) {
-                    qDebug("emit collectionSelectedCl(%d)", itemId);
-                    emit transitToAppsCheckListState(itemId);
-                } else {
-                    qDebug("emit collectionSelected(%d)", itemId);
-                    emit transitToSaveState(itemId);
-                }
+    if (finishedAction != mListDialog->actions().value(0)) {
+        int itemId = mListDialog->getItemId();
+        if (itemId) {
+            if (mActionType == ViaAllViewOptionMenuType) {
+                qDebug("emit collectionSelectedCl(%d)", itemId);
+                emit transitToAppsCheckListState(itemId);
             } else {
-                qDebug("emit createNewCollection()");
-                emit transitToNewCollectionState();
+                qDebug("emit collectionSelected(%d)", itemId);
+                emit transitToSaveState(itemId);
             }
         } else {
-            qDebug("emit cancel()");
-            emit transitToFinalState();
+            qDebug("emit createNewCollection()");
+            emit transitToNewCollectionState();
         }
-
-        mListDialog = NULL; // set to null since this will be deleted after close
-
     } else {
-        // (work-around if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+        qDebug("emit cancel()");
+        emit transitToFinalState();
     }
+    mListDialog = NULL; // set to null since this will be deleted after close
 }
 
 /*!
