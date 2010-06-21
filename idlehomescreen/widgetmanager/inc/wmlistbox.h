@@ -52,10 +52,10 @@ class CWmListItemDrawer;
  * CWmListItemDrawer
  */
 NONSHARABLE_CLASS( CWmListItemDrawer ): public CFormattedCellListBoxItemDrawer
-	{
+    {
 public:
     /** Two-phased constructor. */
-	static CWmListItemDrawer* NewL(
+    static CWmListItemDrawer* NewL(
                 CWmPlugin& aWmPlugin,
                 MTextListBoxModel* aTextListBoxModel,
                 const CFont* aFont,
@@ -123,7 +123,7 @@ private: // data members
      */
     CFbsBitmap*         iDefaultLogoImageMask;
     
-	};
+    };
 
 
 // CLASS DECLARATIONS
@@ -132,14 +132,14 @@ private: // data members
  */
 NONSHARABLE_CLASS( CWmListBox ): public CEikFormattedCellListBox,
                       public MWmWidgetDataObserver
-	{
+    {
 public:
     
     /**
      * Two-phased constructor.
      */
-	static CWmListBox* NewL(
-	        CWmPlugin& aWmPlugin,
+    static CWmListBox* NewL(
+            CWmPlugin& aWmPlugin,
             const TRect& aRect,
             const CCoeControl* aParent,  
             TInt aFlags = 0 );
@@ -173,7 +173,7 @@ public: // API for manipulating list content
      * 
      * @return return index from original list for currently selected item
      */
-    TInt RealIndex( TInt aIndex );
+    TInt RealIndex( TInt aIndex, TBool aIgnoreSearchIndex = EFalse );
     
     /** 
      * number of items in the widget data array (also items on the list) 
@@ -192,8 +192,11 @@ public: // API for manipulating list content
      * gets an item by index 
      * 
      * @param aItemIndex index for item to return
+     * @param aIgnoreSearchIndex if true will get widget from full list
+     * even when search is open
      */
-    CWmWidgetData& WidgetData( TInt aItemIndex );
+    CWmWidgetData& WidgetData( TInt aItemIndex, 
+            TBool aIgnoreSearchIndex = EFalse );
 
     /**
      * gets the constant widget data array
@@ -224,7 +227,7 @@ public: // API for manipulating list content
      * 
      * @param aItemIndex index to remove
      * */
-    void RemoveWidgetData( TInt aItemIndex/*, TBool aRedraw = ETrue*/ );
+    void RemoveWidgetData( TInt aItemIndex, TBool aIgnoreSearchIndex = EFalse );
     
     /** 
      * requests to redraw item in given index position 
@@ -280,10 +283,15 @@ public: // API for manipulating list content
      */
     void AddOrderDataL( CWmWidgetOrderData* aOrderData );
     
-    /*
+    /**
      * Returns orderdata object by index
      */
     CWmWidgetOrderData* OrderData( TInt aItemIndex );
+    
+    /**
+     * Returns true if findpane is in use
+     */
+    TBool IsFindPaneIsVisible();
     
 private: // from CEikTextListBox
     /**
@@ -291,7 +299,7 @@ private: // from CEikTextListBox
      * 
      * @see CEikTextListBox::CreateItemDrawerL
      */
-	void CreateItemDrawerL();
+    void CreateItemDrawerL();
 
 protected: // from base class CCoeControl
     
@@ -310,9 +318,9 @@ private: // from base class CCoeControl
      * @see CCoeControl::Draw
      */
     void Draw( const TRect& aRect ) const;
-	
+    
 private:
-  	 /** Constructor for performing 1st stage construction */
+    /** Constructor for performing 1st stage construction */
     CWmListBox( CWmPlugin& aWmPlugin );
 
     /** 2nd phase constructor */
@@ -362,7 +370,7 @@ private:
      * state of list box find pane 
      */
     TBool               iFindPaneIsVisible;
-	
+    
     /** size of logo rect in list item */
     TSize               iLogoSize;
     
@@ -370,7 +378,7 @@ private:
      * array of widget order objects
      */
     ROrderArray         iOrderDataArray;
-	};
+    };
 #include "wmlistbox.inl"
 
 #endif ___WMLISTBOX_H__

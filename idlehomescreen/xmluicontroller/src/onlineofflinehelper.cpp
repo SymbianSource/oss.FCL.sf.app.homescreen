@@ -443,11 +443,11 @@ void COnlineOfflineHelper::CurrentNetworkSetting()
 //
 void COnlineOfflineHelper::HandleConnectionQueryL( const TDesC& aConnection)
     {
-    if ( aConnection == KDisConnected() ) 
+    if ( aConnection == KDisConnected() && ShowOfflineItem() ) 
         {
         ShowGlobalQueryL(R_QTN_HS_DISABLE_NETWORK, EFalse );
         }
-    else if ( aConnection == KConnected() )
+    else if ( aConnection == KConnected() && ShowOnlineItem() )
         {
         ShowGlobalQueryL(R_QTN_HS_SWITCH_ONLINE, ETrue );
         }

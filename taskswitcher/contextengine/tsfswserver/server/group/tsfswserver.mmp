@@ -21,6 +21,7 @@
 TARGET tsfswserver.exe
 TARGETTYPE EXE
 UID 0x0 0x2001CBE1
+EPOCSTACKSIZE   0x3000 // 12KB
 // AllFiles cap needed to get icon for wrt widgets
 CAPABILITY CAP_SERVER AllFiles
 

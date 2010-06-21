@@ -307,7 +307,13 @@ void CMmListBoxItemDrawer::DrawFloatingItems( TRect currentlyDrawnRect )
             {
             TInt drawnItemIndex = iFloatingItems[i].GetDrawnItemIndex();
             TSize size = iWidget->View()->ItemSize( drawnItemIndex );
-            TRect rect( iFloatingItems[i].GetItemPosition(), iFloatingItems[i].GetItemPosition() + size);
+            if ( iWidgetType == EListbox 
+                    && TemplateLibrary()->GetScrollbarVisibility())
+                {
+                size.iWidth -= TemplateLibrary()->ScrollbarWidth();
+                }
+            TRect rect( iFloatingItems[i].GetItemPosition(),
+                    iFloatingItems[i].GetItemPosition() + size);
 
             if( rect.Intersects( currentlyDrawnRect ) )
                 {
@@ -998,16 +1004,17 @@ void CMmListBoxItemDrawer::SetDraggedPointL( TPoint aPoint )
 void CMmListBoxItemDrawer::SetDraggedIndexL( TInt aDraggedItemIndex,
         TPoint aPoint )
     {
-    TInt dragFloatingItem = KErrNotFound;
+    TInt dragStartFloatingItem( KErrNotFound );
+    TInt dragFloatingItem( KErrNotFound );
     do
         {
-        dragFloatingItem = GetFloatingItemIndex( EDragStart );
-        if( dragFloatingItem == KErrNotFound )
-            dragFloatingItem = GetFloatingItemIndex( EDrag );
-        if( dragFloatingItem != KErrNotFound )
+        dragStartFloatingItem = GetFloatingItemIndex( EDragStart );
+        dragFloatingItem = GetFloatingItemIndex( EDrag );
+        if( dragStartFloatingItem == KErrNotFound )
+            dragStartFloatingItem = dragFloatingItem;
+        if( dragStartFloatingItem != KErrNotFound )
             {
-            TMmFloatingItem & item = GetFloatingItemAtIndex( dragFloatingItem );
-
+            TMmFloatingItem & item = GetFloatingItemAtIndex( dragStartFloatingItem );
             TMmFloatingItem postDragRefresh( item.GetDrawnItemIndex(),
                     item.GetItemPosition(), EPostDragRefreshItem,
                     MmEffects::KNoAnimationFramesCount, iWidget->View() );
@@ -1015,12 +1022,11 @@ void CMmListBoxItemDrawer::SetDraggedIndexL( TInt aDraggedItemIndex,
             if( postDragRefresh.GetItemPosition() != aPoint )
                 {
                 iFloatingItems.Append( postDragRefresh );
-                }
-            if( item.GetFloatingItemType() == EDrag )
-                RemoveFloatingItem( dragFloatingItem );
+                }                
             }
+        RemoveFloatingItem( dragFloatingItem );
         }
-    while( GetFloatingItemIndex( EDrag ) != KErrNotFound );
+    while( dragFloatingItem != KErrNotFound );
 
     if( aDraggedItemIndex != KErrNotFound )
         {

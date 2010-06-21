@@ -112,7 +112,7 @@ void CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL()
 // -----------------------------------------------------------------------------
 //
 CXnWidgetExtensionAdapter::CXnWidgetExtensionAdapter( CXnNodePluginIf& aNode )
-    : iNode( aNode ), iPositionHint( ENone )
+    : iNode( aNode ), iPositionHint( EAboveLeft )
     {
     }
 
@@ -349,16 +349,14 @@ void CXnWidgetExtensionAdapter::Draw( const TRect& aRect ) const
     }
 
 // -----------------------------------------------------------------------------
-// CXnWidgetExtensionAdapter::DoHandlePropertyChangeL
+// CXnWidgetExtensionAdapter::SizeChanged
 // 
 // -----------------------------------------------------------------------------
 //    
-void CXnWidgetExtensionAdapter::DoHandlePropertyChangeL( CXnProperty* /*aProperty*/ )
+void CXnWidgetExtensionAdapter::SizeChanged()
     {
-    if( iNode.Node().IsLaidOut() && IsVisible() )
-        {
-        ChangePopupPosition();
-        }
+    ChangePopupPosition();
+    CXnControlAdapter::SizeChanged();
     }
 
 // -----------------------------------------------------------------------------
@@ -639,7 +637,8 @@ void CXnWidgetExtensionAdapter::CalculatePosition()
         rect.Move( contentRect.iBr.iX - rect.iBr.iX, 0 );
         }
     
-    this->SetRect( rect );
+    SetPosition( rect.iTl );
+    SetSizeWithoutNotification( rect.Size() );
     }
 
 

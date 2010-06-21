@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_12.1.8 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_12.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -226,11 +226,6 @@ private:
     void SetPreviouslyDrawnCurrentItemIndex( TBool aIndex );
 
 private:
-
-  /**
-   * Scrollbar visibility flag.
-   */
-  TBool iScrollbarIsVisible;
 
   /**
    * iCurrentItemIndex

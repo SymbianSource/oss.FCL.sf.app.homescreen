@@ -88,7 +88,7 @@
 #define qtn_idle_navi_tapped_all_prof "Show all profiles"
 
 // d: Back text for SK2
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: 3.2
 //
@@ -316,3 +316,10 @@
 // w:
 // r: TB9.2
 #define qtn_hs_backup_use_prevented  "Home screen is not in use during backup or restore operation. Wait to finish."
+
+// d: Back text for SK2
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: 3.2
+//
+#define qtn_hs_text_softkey_back "Back"

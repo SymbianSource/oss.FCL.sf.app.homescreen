@@ -84,14 +84,36 @@ void CAppUi::ConstructL()
     
     iUiCtl.SetAppUi( *this );
     
+    iCoeEnv->DisableExitChecks( ETrue );
+       
+    TRAPD( err, DoConstructL() );
+    
+    if ( err )
+        {
+        __TICK( "CAppUi::ConstructL - failed" );
+        
+        // HandleUiShutdown must be called here 
+        // to free all control environment dependent framework objects
+        iUiCtl.FwEventHandler()->HandleUiShutdown( iUiCtl );    
+        }
+    
+    User::LeaveIfError( err );
+    
+    __TICK( "CAppUi::ConstructL - done" );
+    }
+
+// ----------------------------------------------------------------------------
+// CAppUi::DoConstructL()
+// ----------------------------------------------------------------------------
+//
+void CAppUi::DoConstructL()
+    {
     iUiCtl.NotifyAppEnvReadyL();
            
     // Always reset the phoneforward P&S key on startup just in case
     RProperty::Set( KPSUidAiInformation,
       KActiveIdleForwardNumericKeysToPhone, EPSAiForwardNumericKeysToPhone );
-        
-    iEditModeTitle = StringLoader::LoadL( R_QTN_HS_TITLE_EDITMODE );
-    
+               
     // Initialize with empty title pane so it's not shown on startup.                  
     __HEAP("XML UI: Init - Construct App UI")
     
@@ -101,13 +123,11 @@ void CAppUi::ConstructL()
     CAknAppUiBase::SetKeyEventFlags( CAknAppUiBase::EDisableSendKeyShort |
                                      CAknAppUiBase::EDisableSendKeyLong );
     
+    iEditModeTitle = StringLoader::LoadL( R_QTN_HS_TITLE_EDITMODE );
+    
     // Register for XML UI view activation & deactivation
     AddViewActivationObserverL( this );
-    
-    // Disable CCoeEnv exit checks.
-    // Active Idle Framework will perform the checks.
-    iCoeEnv->DisableExitChecks( ETrue );
-    
+        
     __TIME("XML UI: Construct Content Renderer",
         iContentRenderer = CContentRenderer::NewL( *this );
     )
@@ -167,24 +187,6 @@ CAppUi::~CAppUi()
 //
 void CAppUi::ActivateUi()
     {
-    __PRINTS( "*** CAppUi::ActivateUi" );
-       
-    if ( iDeviceStatusInfo.Uid() == TUid::Null() )
-        {
-        __PRINTS( "*** CAppUi::ActivateUI - Loading DeviceStatus plugin" );
-        
-        _LIT8( KNs, "namespace" );
-        
-        // Load device status plugin here because it is always needed    
-        iDeviceStatusInfo = THsPublisherInfo( KDeviceStatusPluginUid, 
-            KDeviceStatusPluginName, KNs ); 
-                           
-        TAiFwPublisherInfo info( iDeviceStatusInfo,
-            TAiFwCallback(), EAiFwSystemStartup );
-        
-        iUiCtl.FwStateHandler()->LoadPlugin( info );
-        }        
-    
     __PRINTS( "*** CAppUi::ActivateUi - done" );
     }
 

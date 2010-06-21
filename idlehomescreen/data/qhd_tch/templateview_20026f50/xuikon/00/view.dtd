@@ -42,7 +42,7 @@ qtn_msk_open.parents "control_pane"
 
 <!--
 text_softkey_done.attributes
-text_softkey_done.layout "control_pane_t1/opt7"
+text_softkey_done.layout "nhd_control_pane_t2/opt7"
 text_softkey_done.release "TB9.2"
 text_softkey_done.description "Done"
 text_softkey_done.grammar "Done"
@@ -62,7 +62,7 @@ qtn_options_open.parents "list_single_pane_cp2"
 
 <!--
 text_softkey_back.attributes
-text_softkey_back.layout "control_pane_t1/opt7"
+text_softkey_back.layout "nhd_control_pane_t2/opt7"
 text_softkey_back.release "TB9.2"
 text_softkey_back.description "Back text for SK2"
 text_softkey_back.parents "control_pane"
@@ -120,7 +120,7 @@ qtn_hs_widget_catalog.parents "list_single_pane_cp2"
 
 <!--
 text_softkey_search.attributes
-text_softkey_search.layout "control_pane_t1/opt7"
+text_softkey_search.layout "nhd_control_pane_t2/opt7"
 text_softkey_search.release "TB9.2"
 text_softkey_search.description "Search"
 text_softkey_search.grammar "Search"
@@ -130,7 +130,7 @@ text_softkey_search.parents "control_pane"
 
 <!--
 text_softkey_options.attributes
-text_softkey_options.layout "control_pane_t1/opt7"
+text_softkey_options.layout "nhd_control_pane_t2/opt7"
 text_softkey_options.release "TB9.2"
 text_softkey_options.description "Options"
 text_softkey_options.grammar "Options"
@@ -280,7 +280,7 @@ qtn_set_right_idle_softkey.parents "list_single_pane_cp2"
 
 <!--
 text_softkey_select.attributes
-text_softkey_select.layout "control_pane_t1/opt7"
+text_softkey_select.layout "nhd_control_pane_t2/opt7"
 text_softkey_select.release "TB9.2"
 text_softkey_select.description "Select"
 text_softkey_select.grammar "Select"
@@ -290,7 +290,7 @@ text_softkey_select.parents "control_pane"
 
 <!--
 text_softkey_cancel.attributes
-text_softkey_cancel.layout "control_pane_t1/opt7"
+text_softkey_cancel.layout "nhd_control_pane_t2/opt7"
 text_softkey_cancel.release "TB9.2"
 text_softkey_cancel.description "Cancel"
 text_softkey_cancel.grammar "Cancel"
@@ -401,7 +401,7 @@ qtn_hs_title_editing_view.parents ""
 
 <!--
 text_softkey_call.attributes
-text_softkey_call.layout "control_pane_t1/opt7"
+text_softkey_call.layout "nhd_control_pane_t2/opt7"
 text_softkey_call.release "TB9.2"
 text_softkey_call.description "RSK caption call inactive"
 text_softkey_call.parents ""
@@ -426,3 +426,71 @@ qtn_hs_page_edit_options_delete.description "Deletes the current Home screen pag
 qtn_hs_page_edit_options_delete.parents ""
 -->
 <!ENTITY qtn_hs_page_edit_options_delete "Delete page">
+
+<!--
+qtn_hs_text_softkey_done.attributes
+qtn_hs_text_softkey_done.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_done.release "TB9.2"
+qtn_hs_text_softkey_done.description "Done"
+qtn_hs_text_softkey_done.grammar "Done"
+qtn_hs_text_softkey_done.parents "control_pane"
+-->
+<!ENTITY qtn_hs_text_softkey_done "Done">
+
+<!--
+qtn_hs_text_softkey_search.attributes
+qtn_hs_text_softkey_search.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_search.release "TB9.2"
+qtn_hs_text_softkey_search.description "Search"
+qtn_hs_text_softkey_search.grammar "Search"
+qtn_hs_text_softkey_search.parents "control_pane"
+-->
+<!ENTITY qtn_hs_text_softkey_search "Search">
+
+<!--
+qtn_hs_text_softkey_options.attributes
+qtn_hs_text_softkey_options.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_options.release "TB9.2"
+qtn_hs_text_softkey_options.description "Options"
+qtn_hs_text_softkey_options.grammar "Options"
+qtn_hs_text_softkey_options.parents "control_pane"
+-->
+<!ENTITY qtn_hs_text_softkey_options "Options">
+
+<!--
+qtn_hs_text_softkey_back.attributes
+qtn_hs_text_softkey_back.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_back.release "TB9.2"
+qtn_hs_text_softkey_back.description "Back text for SK2"
+qtn_hs_text_softkey_back.parents "control_pane"
+-->
+<!ENTITY qtn_hs_text_softkey_back "Back">
+
+<!--
+qtn_hs_text_softkey_select.attributes
+qtn_hs_text_softkey_select.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_select.release "TB9.2"
+qtn_hs_text_softkey_select.description "Select"
+qtn_hs_text_softkey_select.grammar "Select"
+qtn_hs_text_softkey_select.parents "control_pane"
+-->
+<!ENTITY qtn_hs_text_softkey_select "Select">
+
+<!--
+qtn_hs_text_softkey_cancel.attributes
+qtn_hs_text_softkey_cancel.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_cancel.release "TB9.2"
+qtn_hs_text_softkey_cancel.description "Cancel"
+qtn_hs_text_softkey_cancel.grammar "Cancel"
+qtn_hs_text_softkey_cancel.parents "control_pane"
+-->
+<!ENTITY qtn_hs_text_softkey_cancel "Cancel">
+
+<!--
+qtn_hs_text_softkey_call.attributes
+qtn_hs_text_softkey_call.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_call.release "TB9.2"
+qtn_hs_text_softkey_call.description "RSK caption call inactive"
+qtn_hs_text_softkey_call.parents ""
+-->
+<!ENTITY qtn_hs_text_softkey_call "Call">

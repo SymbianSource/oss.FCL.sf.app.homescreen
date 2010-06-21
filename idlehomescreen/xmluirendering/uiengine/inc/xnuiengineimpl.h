@@ -653,17 +653,27 @@ private:
     /** 
      * from MXnViewObserver
      */
-   void NotifyWidgetRemovalL( const CXnPluginData& /*aPluginData*/ );
+    void NotifyWidgetRemovalL( const CXnPluginData& /*aPluginData*/ );
 
-   /** 
-    * from MXnViewObserver 
-    */
-   void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ ){};
+    /** 
+     * from MXnViewObserver 
+     */
+    void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ ){};
 
-   /** 
-    * from MXnViewObserver
-    */
-  void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ ){};
+    /** 
+     * from MXnViewObserver
+     */
+    void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ ){};
+
+    /** 
+     * from MXnViewObserver
+     */
+    void NotifyAllViewsLoadedL(){};
+
+    /** 
+     * from MXnViewObserver
+     */
+    void NotifyContainerActivatedL( const CXnViewData& /*aViewData*/ ){};
 
 private:
     // from MXnMenuObserver

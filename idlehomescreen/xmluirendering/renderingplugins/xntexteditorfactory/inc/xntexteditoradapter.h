@@ -124,6 +124,11 @@ public: // from base classes
     * See CCoeControl documentation
     */          
     void HandleResourceChange( TInt aType );
+    
+    /**
+    * See CCoeControl documentation
+    */  
+    void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 
     /**
      * See CCoeAppUiBase.

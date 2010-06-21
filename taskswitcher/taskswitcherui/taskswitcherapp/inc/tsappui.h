@@ -111,6 +111,13 @@ public: //effects
      */
     TBool IsForeground() const;
     
+    /**
+     * Checks if delayed foreground launch is taking place.
+     * 
+     * @return  ETrue if delayed foreground launch is in progress
+     */
+    TBool DelayedForegroundLaunched();
+    
 public:
     /**
      * From MTsCenrepChangeObserver
@@ -176,6 +183,7 @@ private: // New functions
     TInt WgIdOfUnderlyingAppL( TBool aIgnoreParentChild );
 
     static TInt GoToBackgroundTimerCallback( TAny* aParam );
+    static TInt DelayedForegroundCallback( TAny* aParam );
     
     /*
      * Returns id of top parent window group for embeded window group.
@@ -198,6 +206,14 @@ private: // New functions
      * @return camera's window group id.
      */
     TInt CheckForUnderlyingHiddenAppsL();
+    
+    /**
+     * Checks if underlying application is multimedia application.
+     * 
+     * @return  ETrue if aplication on top of the app stack is multimedia application.
+     *          Currently it recognises only camera app as multimedia app.
+     */
+    TBool IsUnderlyingAppMultimediaL();
 
 private:
 
@@ -220,6 +236,11 @@ private:
     CTsDeviceState* iDeviceState;
 
     CPeriodic* iGoToBackgroundTimer;
+    
+    // Delayed launch handling variables
+    CPeriodic* iForegroundDelayTimer;
+    TBool iForegroundDelayed;
+    TBool iDelayedForegroundInProgress;
     
     TBool iEffectsEnabled;
     

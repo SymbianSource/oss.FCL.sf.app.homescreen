@@ -96,7 +96,7 @@ public:
      * @since S60 5.2
      * @param aItemToActivate Item to activate
      */
-    void Activate( CXnNode* aItemToActivate );
+    void ActivateL( CXnNode* aItemToActivate );
             
 private:
     // data

@@ -8284,13 +8284,7 @@ TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
                         rect = node->BorderRect();
                         }
                     
-                    // popup calculates its position based on _s60-position-hint property
-                    // This needs to be done even if popup's rect has not been changed
-                    if( node->Type()->Type() == KPopUpNodeName )
-                        {
-                        adapter->DoHandlePropertyChangeL();
-                        }
-                    else if ( adapter->Rect() != rect )
+                    if ( adapter->Rect() != rect )
                         {
                         AddToRedrawListL( node, rect );
                         

@@ -27,6 +27,12 @@
  inline void CWmListBox::SetFindPaneIsVisible( TBool aVisibility )
         { iFindPaneIsVisible = aVisibility; }
  
+/**
+ * Returns true if findpane is in use
+ */
+ inline TBool CWmListBox::IsFindPaneIsVisible()
+        { return iFindPaneIsVisible; }
+ 
  /** 
   * number of items in the widget data array (also items on the list) 
   * 

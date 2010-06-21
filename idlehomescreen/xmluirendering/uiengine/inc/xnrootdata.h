@@ -169,13 +169,19 @@ public:
      * @return number of pages allowed
      */
     TInt32 MaxPages();
-    
+
+    /**
+     * Returns ETrue, if all views are loaded
+     */
+    TBool AllViewsLoaded() const;
+
+    /**
+     * Returns ETrue, if all views are destoyed
+     */
+    TBool AllViewsDestroyed() const;
+
 private:
     // New functions
-    
-    TBool AllViewsLoaded() const;
-    TBool AllViewsDestroyed() const;
-    
     static TInt RunLoadL( TAny* aAny );
     static TInt RunDestroyL( TAny *aAny );
                

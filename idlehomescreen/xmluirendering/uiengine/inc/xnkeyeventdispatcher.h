@@ -210,6 +210,8 @@ private:
     void NotifyWidgetRemovalL( const CXnPluginData& aPluginData );
     void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ ){};
     void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ ){};
+    void NotifyAllViewsLoadedL(){};
+    void NotifyContainerActivatedL( const CXnViewData& /*aViewData*/ ){};
 
 private:
     // Data

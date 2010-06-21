@@ -89,9 +89,10 @@ private:
     void Draw( const TRect& aRect ) const;        
 
     /**
-    * @see CXnControlAdapter
-    */
-    void DoHandlePropertyChangeL( CXnProperty* aProperty = NULL );
+     * From CCoeControl.
+     * Size change notification
+     */
+    void SizeChanged();
 
 private:
     // from MXnUiStateObserver

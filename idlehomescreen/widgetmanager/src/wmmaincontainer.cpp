@@ -81,24 +81,28 @@ const TInt KMinWidgets = 1; // minimum number of widgets to show findpane
 //
 CWmMainContainer::CWmMainContainer( CWmPlugin& aWmPlugin ) :
     iWmPlugin( aWmPlugin )
-	{
+    {
     iWidgetsList = NULL;
     iFindbox = NULL;
     iFindPaneIsVisible = EFalse;
     iBgContext = NULL;
     iFocusMode = ENowhere;
     iClosingDown = ETrue;
-	}
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::~CWmMainContainer()
 // ---------------------------------------------------------
 //
 CWmMainContainer::~CWmMainContainer()
-	{
+    {
     TRAP_IGNORE(DeactivateFindPaneL(EFalse));
     
-    delete iWidgetLoader;
+    if ( iWidgetLoader )
+        {
+        iWidgetLoader->SetObserver( NULL );
+        delete iWidgetLoader;
+        }
 
     RemoveCtrlsFromStack();
     Components().ResetAndDestroy();
@@ -107,9 +111,9 @@ CWmMainContainer::~CWmMainContainer()
     iPortalButtonOne = NULL;
     iPortalButtonTwo = NULL;
     iFindbox = NULL;
-	delete iBgContext;
-	delete iConfiguration;
-	}
+    delete iBgContext;
+    delete iConfiguration;
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::NewL
@@ -118,13 +122,13 @@ CWmMainContainer::~CWmMainContainer()
 CWmMainContainer* CWmMainContainer::NewL( 
     const TRect& aRect,
     CWmPlugin& aWmPlugin )
-	{
-	CWmMainContainer* self = CWmMainContainer::NewLC( 
+    {
+    CWmMainContainer* self = CWmMainContainer::NewLC( 
         aRect, 
         aWmPlugin );
-	CleanupStack::Pop( self );
-	return self;
-	}
+    CleanupStack::Pop( self );
+    return self;
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::NewLC
@@ -133,12 +137,12 @@ CWmMainContainer* CWmMainContainer::NewL(
 CWmMainContainer* CWmMainContainer::NewLC( 
     const TRect& aRect,
     CWmPlugin& aWmPlugin )
-	{
-	CWmMainContainer* self = new (ELeave) CWmMainContainer( aWmPlugin );
-	CleanupStack::PushL( self );
-	self->ConstructL( aRect );
-	return self;
-	}
+    {
+    CWmMainContainer* self = new (ELeave) CWmMainContainer( aWmPlugin );
+    CleanupStack::PushL( self );
+    self->ConstructL( aRect );
+    return self;
+    }
 
 // ---------------------------------------------------------
 // ScreenRect
@@ -163,48 +167,48 @@ TRect ScreenRect()
 // ---------------------------------------------------------
 //
 void CWmMainContainer::ConstructL( 
-		const TRect& aRect )
-	{  
+        const TRect& aRect )
+    {  
     // Initialize control array
-	InitComponentArrayL();
-	Components().SetControlsOwnedExternally( ETrue );
+    InitComponentArrayL();
+    Components().SetControlsOwnedExternally( ETrue );
 
     // create the UI
     CreateWindowL();
 
-	// background context
-	iBgContext = CAknsBasicBackgroundControlContext::NewL( 
-	        KAknsIIDQsnBgScreen, ScreenRect() , ETrue);
+    // background context
+    iBgContext = CAknsBasicBackgroundControlContext::NewL( 
+            KAknsIIDQsnBgScreen, ScreenRect() , ETrue);
 
     // load configuration
     iConfiguration = CWmConfiguration::NewL( iWmPlugin.ResourceLoader() );
     
-	// set up controls
-	InitializeControlsL( aRect );
+    // set up controls
+    InitializeControlsL( aRect );
 
-	// set size and activate
-	SetRect( aRect );
+    // set size and activate
+    SetRect( aRect );
     ActivateL();
-	
-	}
+    
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::SizeChanged
 // ---------------------------------------------------------
 //
 void CWmMainContainer::SizeChanged()
-	{
-	CCoeControl::SizeChanged();
+    {
+    CCoeControl::SizeChanged();
     iBgContext->SetRect( ScreenRect() );
-	LayoutControls();
-	}
+    LayoutControls();
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::LayoutControls
 // ---------------------------------------------------------
 //
 void CWmMainContainer::LayoutControls()
-	{
+    {
     TRect rect( Rect() );
 
     // determine layout type
@@ -212,16 +216,16 @@ void CWmMainContainer::LayoutControls()
     iMirrored = Layout_Meta_Data::IsMirrored();
     
     // layout iPortalButtons
-	if ( iConfiguration->PortalButtonCount() == 1 )
-	    {
-	    // one button
-	    TAknWindowLineLayout btnPane = AknLayoutScalable_Apps
-	       ::wgtman_btn_pane( iLandscape ? 1 : 0 ).LayoutLine();
-	    AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, btnPane );
-	    }
-	else
-	    {
-	    // two buttons
+    if ( iConfiguration->PortalButtonCount() == 1 )
+        {
+        // one button
+        TAknWindowLineLayout btnPane = AknLayoutScalable_Apps
+           ::wgtman_btn_pane( iLandscape ? 1 : 0 ).LayoutLine();
+        AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, btnPane );
+        }
+    else
+        {
+        // two buttons
         TInt variety = (iLandscape ? 3 : 2);
         TAknWindowLineLayout oviBtnLayout = AknLayoutScalable_Apps
                 ::wgtman_btn_pane( variety ).LayoutLine();
@@ -239,16 +243,16 @@ void CWmMainContainer::LayoutControls()
             AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, oviBtnLayout );
             AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, operatorBtnLayout );
             }
-	    }
+        }
     
-	// layout iWidgetsList
+    // layout iWidgetsList
     TAknWindowLineLayout listPane = AknLayoutScalable_Apps
         ::listscroll_wgtman_pane( iLandscape ? 1 : 0 ).LayoutLine();
     if( iFindbox && iFindPaneIsVisible )
         {
-		TAknLayoutRect layoutRect;
+        TAknLayoutRect layoutRect;
         layoutRect.LayoutRect( rect, listPane );
-		iWidgetsList->SetRect( layoutRect.Rect() );
+        iWidgetsList->SetRect( layoutRect.Rect() );
         HandleFindSizeChanged();
         }
     else
@@ -257,7 +261,7 @@ void CWmMainContainer::LayoutControls()
         }
 
     DrawDeferred();
-	}
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::OfferKeyEventL
@@ -836,60 +840,60 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
         TBool eatEvent( EFalse );
         TPointerEvent event( aPointerEvent );
 
-		if (aPointerEvent.iType == TPointerEvent::EButton1Down)
-			{
-	        // Check if user clicked a child control
-	        CCoeControl* control = FindChildControlByPoint( aPointerEvent.iPosition );
-	        if ( control && !control->IsFocused() )
-	            {
-	            // remove focus from ALL other child controls.
-	            CCoeControlArray::TCursor cursor = Components().Begin();
-	            CCoeControl* c;
-	            while ((c=cursor.Control<CCoeControl>()) != NULL )
-	                {
-	                if ( c != control && c->IsFocused() ) c->SetFocus( EFalse );
-	                cursor.Next();
-	                }
-	            
-	            // Set focus to the control that was clicked
-	            control->SetFocus( ETrue );
-	                            
-	            // update focus mode accordingly
-	            UpdateFocusMode();
-	            // repaint
-	            DrawDeferred();
-	            }
-	        
-	        // stylus popup should not be opened when uninstalling. 
-	        // ou1cimx1#302973
-	        if ( control == iWidgetsList && iWidgetsList->IsFocused() )
-	             {
-	             TInt itemIndex = iWidgetsList->CurrentListBoxItemIndex();
-	             TBool itemPointed = iWidgetsList->View()->XYPosToItemIndex(
-	                                     aPointerEvent.iPosition,
-	                                     itemIndex );
-	             if ( itemIndex >= 0 && itemPointed )
-	                 {
-	                 CWmWidgetData& data = iWidgetsList->WidgetData( itemIndex );                
-	                 if ( &data && data.IsUninstalling() )
-	                     {
+        if (aPointerEvent.iType == TPointerEvent::EButton1Down)
+            {
+            // Check if user clicked a child control
+            CCoeControl* control = FindChildControlByPoint( aPointerEvent.iPosition );
+            if ( control && !control->IsFocused() )
+                {
+                // remove focus from ALL other child controls.
+                CCoeControlArray::TCursor cursor = Components().Begin();
+                CCoeControl* c;
+                while ((c=cursor.Control<CCoeControl>()) != NULL )
+                    {
+                    if ( c != control && c->IsFocused() ) c->SetFocus( EFalse );
+                    cursor.Next();
+                    }
+                
+                // Set focus to the control that was clicked
+                control->SetFocus( ETrue );
+                                
+                // update focus mode accordingly
+                UpdateFocusMode();
+                // repaint
+                DrawDeferred();
+                }
+            
+            // stylus popup should not be opened when uninstalling. 
+            // ou1cimx1#302973
+            if ( control == iWidgetsList && iWidgetsList->IsFocused() )
+                 {
+                 TInt itemIndex = iWidgetsList->CurrentListBoxItemIndex();
+                 TBool itemPointed = iWidgetsList->View()->XYPosToItemIndex(
+                                         aPointerEvent.iPosition,
+                                         itemIndex );
+                 if ( itemIndex >= 0 && itemPointed )
+                     {
+                     CWmWidgetData& data = iWidgetsList->WidgetData( itemIndex );                
+                     if ( &data && data.IsUninstalling() )
+                         {
                          event.iType = TPointerEvent::EButton1Up;
-	                     eatEvent = ETrue;
-	                     }
-	                 }
-	             }
-	        
-			}
-		
-		// set downkey event to base class
-		CCoeControl::HandlePointerEventL( aPointerEvent );
-		
-		// send key up event if selected widget is being uninstalled.
-		// stylus popup shouldn't be displayed for this item.
-		if ( eatEvent )
-		    {
+                         eatEvent = ETrue;
+                         }
+                     }
+                 }
+            
+            }
+        
+        // set downkey event to base class
+        CCoeControl::HandlePointerEventL( aPointerEvent );
+        
+        // send key up event if selected widget is being uninstalled.
+        // stylus popup shouldn't be displayed for this item.
+        if ( eatEvent )
+            {
             CCoeControl::HandlePointerEventL( event );
-		    }
+            }
         }
     }
 
@@ -898,8 +902,8 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 // ---------------------------------------------------------
 //
 void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
-	{
-	// Create portal buttons
+    {
+    // Create portal buttons
     iPortalButtonOne = CWmPortalButton::NewL( this, 0 );
     iPortalButtonOne->SetMopParent( this );    
     AddControlL( iPortalButtonOne, EPortalOne );
@@ -917,7 +921,7 @@ void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
             this );
     iWidgetsList->SetMopParent( this );
     AddControlL( iWidgetsList, EWidgetsList );
-	iWidgetsList->ActivateL();
+    iWidgetsList->ActivateL();
     iWidgetsList->SetListBoxObserver( this );
     
     // Create scroll bar.
@@ -952,22 +956,11 @@ void CWmMainContainer::HandleWidgetListChanged()
 //
 void CWmMainContainer::StartLoadingWidgetsL()
     {
-    if ( iFindbox && iFindPaneIsVisible )
-        {
-        iFindbox->ResetL();        
-        CAknFilteredTextListBoxModel* m = 
-                static_cast <CAknFilteredTextListBoxModel*> ( iWidgetsList->Model() );
-        if ( m && m->Filter() )
-            {
-            m->Filter()->ResetFilteringL();
-            }
-        iFindbox->SetSearchTextL( KNullDesC );
-        iFindbox->DrawNow();
-        }
     if ( !iWidgetLoader )
         {
         // create the widget loader AO
         iWidgetLoader = CWmWidgetLoaderAo::NewL( iWmPlugin, *iWidgetsList );
+        iWidgetLoader->SetObserver( this );
         }
     iWidgetLoader->StartLoading();
     }
@@ -977,9 +970,9 @@ void CWmMainContainer::StartLoadingWidgetsL()
 // ---------------------------------------------------------
 //
 void CWmMainContainer::HandleResourceChange( TInt aType )
-	{
+    {
     CCoeControl::HandleResourceChange( aType );
-	
+    
     if ( KEikDynamicLayoutVariantSwitch == aType )
         {
         TRect rect;
@@ -990,7 +983,7 @@ void CWmMainContainer::HandleResourceChange( TInt aType )
         // notify widgetlist
         iWidgetsList->HandleLayoutChanged();
         }
-	}
+    }
 
 
 // ---------------------------------------------------------
@@ -1012,12 +1005,12 @@ TTypeUid::Ptr CWmMainContainer::MopSupplyObject( TTypeUid aId )
 // ---------------------------------------------------------
 //
 void CWmMainContainer::Draw( const TRect& aRect ) const
-	{
-	CWindowGc& gc = SystemGc();	
+    {
+    CWindowGc& gc = SystemGc();    
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     MAknsControlContext* cc = AknsDrawUtils::ControlContext( this );
     AknsDrawUtils::Background( skin, cc, this, gc, aRect );
-	}
+    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::AddControlL
@@ -1032,13 +1025,13 @@ void CWmMainContainer::AddControlL(
     CAknView* view = iWmPlugin.ViewAppUi().View( 
             TUid::Uid(EWmMainContainerViewId) );
     if ( view )
-		{
+        {
         iWmPlugin.ViewAppUi().AddToStackL( *view, aControl );
-		}
-	else
-		{
+        }
+    else
+        {
         iWmPlugin.ViewAppUi().AddToStackL( aControl );
-		}
+        }
     aControl->MakeVisible( ETrue );
     }
 
@@ -1357,7 +1350,7 @@ void CWmMainContainer::SortListAlphabeticallyL()
             CWmPersistentWidgetOrder::NewL( iWmPlugin.FileServer() );
         CleanupStack::PushL( widgetOrder );
         widgetOrder->StoreL( iWidgetsList->OrderDataArray() );
-		
+        
         CleanupStack::PopAndDestroy( widgetOrder );
         }
     }
@@ -1593,7 +1586,7 @@ void CWmMainContainer::ProcessForegroundEvent( TBool aForeground )
     else if ( aForeground )
         {
         // set init state when wm comes to foreground.
-		// remove focus from all controls when activating view.
+        // remove focus from all controls when activating view.
         ResetFocus( EDrawNow );
         }
     }
@@ -1648,12 +1641,29 @@ void CWmMainContainer::FocusChanged( TDrawNow aDrawNow )
 // CWmMainContainer::AdaptiveSearchTextChanged
 // ----------------------------------------------------
 //
-void CWmMainContainer::AdaptiveSearchTextChanged( 
-        CAknSearchField* aSearchField )
+void CWmMainContainer::AdaptiveSearchTextChanged( CAknSearchField* /*aSearchField*/ )
     {
     // fix for ou1cimx1#376818. aknfind will call drawDeferred for lisbox. 
     // We need to be sure that button area is also drawn.
     DrawDeferred();
+    }
+
+
+// ----------------------------------------------------
+// CWmMainContainer::LoadDone
+// ----------------------------------------------------
+//
+void CWmMainContainer::LoadDoneL( TBool aWidgetListChanged )
+    {
+    if ( aWidgetListChanged && iFindbox && iFindPaneIsVisible )
+        {
+        CAknFilteredTextListBoxModel* m = 
+                static_cast <CAknFilteredTextListBoxModel*> ( iWidgetsList->Model() );
+        if ( m && m->Filter() )
+            {
+            m->Filter()->HandleItemArrayChangeL();
+            }
+        }
     }
 
 // End of File

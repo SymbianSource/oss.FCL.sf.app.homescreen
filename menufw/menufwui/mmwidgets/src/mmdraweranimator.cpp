@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:
- *  Version     : %version: MM_43 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_44 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -180,9 +180,6 @@ void CMmDrawerAnimator::RunL()
                 iDrawer.Widget()->View()->Draw( &refreshRect );
                 }
             }
-
-        iLastRedrawTime.HomeTime();
-
         }
 
     if( iDrawer.GetFloatingItemCount() > 0 )

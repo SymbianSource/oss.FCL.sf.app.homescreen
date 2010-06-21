@@ -118,7 +118,7 @@ void CWmPlugin::ConstructL()
 	CleanupStack::Pop( mainView );
 	
 	// laucher for adding widgets.
-	iLauncher = CPeriodic::NewL( CActive::EPriorityIdle );
+	iLauncher = CPeriodic::NewL( CActive::EPriorityUserInput + 1 );
     }
 
 // ---------------------------------------------------------
@@ -127,23 +127,27 @@ void CWmPlugin::ConstructL()
 //
 void CWmPlugin::Activate()
     {
-    CWmMainContainerView* view = static_cast<CWmMainContainerView*>(
-            iViewAppUi->View( TUid::Uid(EWmMainContainerViewId) ) );
-    if ( !IsActive() && view && iHsContentController )
+	// prevents opening wm if adding widget is ongoing.
+    if ( !iLauncher->IsActive() )
         {
-        // stop displaying menubar before starting fullscreen effects
-        CEikMenuBar* menuBar = CEikonEnv::Static()->AppUiFactory()->MenuBar();
-        if ( menuBar && menuBar->IsDisplayed() )
+        CWmMainContainerView* view = static_cast<CWmMainContainerView*>(
+                iViewAppUi->View( TUid::Uid(EWmMainContainerViewId) ) );
+        if ( !IsActive() && view && iHsContentController )
             {
-            menuBar->StopDisplayingMenuBar();
+            // stop displaying menubar before starting fullscreen effects
+            CEikMenuBar* menuBar = CEikonEnv::Static()->AppUiFactory()->MenuBar();
+            if ( menuBar && menuBar->IsDisplayed() )
+                {
+                menuBar->StopDisplayingMenuBar();
+                }
+    
+            TRAP_IGNORE( 
+                iEffectManager->BeginFullscreenEffectL( 
+                    KAppStartEffectStyle );
+                iViewAppUi->ActivateLocalViewL(
+                    TUid::Uid( EWmMainContainerViewId ) );
+                );
             }
-
-        TRAP_IGNORE( 
-            iEffectManager->BeginFullscreenEffectL( 
-                KAppStartEffectStyle );
-            iViewAppUi->ActivateLocalViewL(
-                TUid::Uid( EWmMainContainerViewId ) );
-            );
         }
     }
 
@@ -262,8 +266,11 @@ void CWmPlugin::MainViewDeactivated()
     if ( !iEffectManager->IsEffectActive() )
         {
         // launch effect without delay
-        iExecutionCount = KMaxCmdExecutionCount;
-        iLauncher->Start( 0, 0, TCallBack( ExecuteCommand, this ) );
+        if ( !iLauncher->IsActive() )
+            {
+            iExecutionCount = KMaxCmdExecutionCount;
+            iLauncher->Start( 0, 0, TCallBack( ExecuteCommand, this ) );
+            }
         }
     else
         {

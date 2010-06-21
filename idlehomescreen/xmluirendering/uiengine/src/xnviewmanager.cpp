@@ -352,8 +352,8 @@ void CXnViewManager::LoadUiL()
            
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
     
-    // Load initial view publishers         
-    ActiveViewData().LoadPublishers( EAiFwSystemStartup );    
+    // Load initial view publishers    
+    ActiveViewData().SetActive( ETrue );    
     }
 
 // -----------------------------------------------------------------------------
@@ -378,6 +378,16 @@ void CXnViewManager::ReloadUiL()
     delete iWidgetAmountTrigger;
     iWidgetAmountTrigger = NULL;
           
+    // Destroy all publishers
+    RPointerArray< CXnPluginData >& views( iRootData->PluginData() );
+    
+    for ( TInt i = 0; i < views.Count(); i++ )
+        {
+        CXnViewData* view = static_cast< CXnViewData* >( views[i] );
+                
+        view->DestroyPublishers( EAiFwSystemShutdown );        
+        }
+    
     // Destroy active view data
     ActiveViewData().Destroy();
          
@@ -386,6 +396,8 @@ void CXnViewManager::ReloadUiL()
     iRootData = NULL;
        
     User::Heap().Compress();
+    
+    iUiReady = EFalse;
     
     LoadUiL();
     
@@ -1405,6 +1417,19 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewManager::NotifyAllViewsLoadedL()
+// Notifies that all views included in root configuration are loaded
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::NotifyAllViewsLoadedL()
+    {
+    for ( TInt i = 0; i < iObservers.Count(); i++ )
+        {
+        iObservers[i]->NotifyAllViewsLoadedL();
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewManager::PublishersReadyL()
 // Notifies that aViewData activation is complete
 // -----------------------------------------------------------------------------
@@ -1456,6 +1481,8 @@ void CXnViewManager::PublishersReadyL( CXnViewData& aViewData, TInt aResult )
     CXnBackgroundManager& bg( self->iAppUiAdapter.ViewAdapter().BgManager() ); 
         
     TRAP_IGNORE( bg.StoreWallpaperL() );
+
+    self->NotifyContainerActivatedL( active );
     
     return KErrNone;
     }
@@ -1560,6 +1587,19 @@ void CXnViewManager::NotifyWidgetRemovalL( const CXnPluginData& aPluginData )
     for ( TInt i = iObservers.Count() - 1; i >= 0 ; i-- )
         {
         iObservers[i]->NotifyWidgetRemovalL( aPluginData ); 
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::NotifyContainerActivatedL()
+// Notifies view container is activated
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::NotifyContainerActivatedL( const CXnViewData& aViewData )
+    {
+    for ( TInt i = 0; i < iObservers.Count(); i++ )
+        {
+        iObservers[i]->NotifyContainerActivatedL( aViewData );
         }
     }
 

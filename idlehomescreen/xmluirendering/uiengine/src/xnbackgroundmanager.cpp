@@ -44,7 +44,7 @@
 #include <StringLoader.h>
 #include <aknnotewrappers.h>
 #include <bautils.h>
-#include <UTF.h>
+#include <utf.h>
 
 #include <AknsUtils.h>
 #include <AknsDrawUtils.h>

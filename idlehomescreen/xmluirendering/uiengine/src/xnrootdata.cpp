@@ -252,15 +252,22 @@ void CXnRootData::Destroy()
 //
 void CXnRootData::LoadRemainingViews()
     {
-    if ( iFlags.IsClear( EIsDispose ) && !AllViewsLoaded() )
+    if ( iFlags.IsClear( EIsDispose ) )
         {
-        iLoadForward = ETrue;
-        
-        iLoadTimer->Cancel();
-        
-        iLoadTimer->Start( TTimeIntervalMicroSeconds32( KScheduleInterval ),
-                           TTimeIntervalMicroSeconds32( KScheduleInterval ),
-                           TCallBack( RunLoadL, this ) );       
+        if ( !AllViewsLoaded() )
+            {
+            iLoadForward = ETrue;
+            
+            iLoadTimer->Cancel();
+            
+            iLoadTimer->Start( TTimeIntervalMicroSeconds32( KScheduleInterval ),
+                               TTimeIntervalMicroSeconds32( KScheduleInterval ),
+                               TCallBack( RunLoadL, this ) );
+            }
+        else
+            {
+            iManager.NotifyAllViewsLoadedL();
+            }
         }
     }
 
@@ -546,7 +553,8 @@ TBool CXnRootData::AllViewsDestroyed() const
         
         if ( self->AllViewsLoaded() )
             {            
-            self->iLoadTimer->Cancel();            
+            self->iLoadTimer->Cancel();
+            self->iManager.NotifyAllViewsLoadedL();
             }                    
         }
         

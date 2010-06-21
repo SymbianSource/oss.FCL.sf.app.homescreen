@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.82 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.82 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.83 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.83 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -1229,13 +1229,13 @@ void CMmAppUi::HandleListBoxEventL( CEikListBox* /*aListBox*/,
 // ---------------------------------------------------------------------------
 //
 void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
-  {
+    {
     TBool popupMenuDisplayed(EFalse);
-  if (iPopupMenu)
-      {
-      delete iPopupMenu;
-      iPopupMenu = NULL;
-      }
+    if (iPopupMenu)
+        {
+        delete iPopupMenu;
+        iPopupMenu = NULL;
+        }
     iPopupMenu = CAknStylusPopUpMenu::NewL(this,aPenEventLocation);
 
     if ( AknLayoutUtils::LayoutMirrored() )
@@ -1250,70 +1250,69 @@ void CMmAppUi::HandleLongTapEventL( const TPoint& aPenEventLocation )
         }
 
     if( iCurrentSuiteModel == iHNInterface->GetLastSuiteModelL()
-        && iCurrentContainer->IsHighlightVisible()
-        && iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1 )
-      {
-    MMPERF(("CMmAppUi::DynInitMenuPaneL - START"));
-    //fill the main menu structure, look for cascade menus
-    //reset the helper hash map
-    iCascadeMenuMap.Close();
-
-    MHnMenuItemModelIterator* menuIterator =
-      iCurrentSuiteModel->GetMenuStructureL(
-        iCurrentSuiteModel->IdByIndex(
-            iCurrentContainer->GetHighlight() ) );
-
-    // check if there is a menu structure available
-    // for the specified item
-    if ( menuIterator )
-      {
-      //create item sorting helper objects
-      RArray<TInt> positionArray;
-      CleanupClosePushL( positionArray );
-      RHashMap<TInt, CEikMenuPaneItem::SData> menuItemMap;
-      CleanupClosePushL( menuItemMap );
-
-      while ( menuIterator->HasNextSpecific() )
-          {
-          CHnMenuItemModel* childItem = menuIterator->GetNextSpecific();
-          CEikMenuPaneItem::SData childData;
-          childData.iCommandId = childItem->Command();
-          childData.iText = childItem->NameL().
-                  Left( CEikMenuPaneItem::SData::ENominalTextLength );
-          childData.iFlags = 0;
-          childData.iCascadeId = 0;
-
-          positionArray.AppendL( childItem->Position() );
-          menuItemMap.InsertL( childItem->Position(), childData );
-          }
-
-      positionArray.Sort();
-
-      //add items in correct order
-      for ( TInt i = 0; i < positionArray.Count(); ++i )
+            && iCurrentContainer->IsHighlightVisible()
+            && iCurrentContainer->GetSuiteModelL()->GetItemModelsCount() > 1 )
         {
-        iPopupMenu->
-          AddMenuItemL(
-            menuItemMap.FindL( positionArray[i] ).iText,
-            menuItemMap.FindL( positionArray[i] ).iCommandId );
-        }
+        MMPERF(("CMmAppUi::DynInitMenuPaneL - START"));
+        //fill the main menu structure, look for cascade menus
+        //reset the helper hash map
+        iCascadeMenuMap.Close();
 
-      if (positionArray.Count()>0)
-        {
-        iPopupMenu->ShowMenu();
-        popupMenuDisplayed = ETrue;
+        MHnMenuItemModelIterator* menuIterator =
+                iCurrentSuiteModel->GetMenuStructureL(
+                        iCurrentSuiteModel->IdByIndex(
+                                iCurrentContainer->GetHighlight() ) );
+
+        // check if there is a menu structure available
+        // for the specified item
+        if ( menuIterator )
+            {
+            //create item sorting helper objects
+            RArray<TInt> positionArray;
+            CleanupClosePushL( positionArray );
+            RHashMap<TInt, CEikMenuPaneItem::SData> menuItemMap;
+            CleanupClosePushL( menuItemMap );
+
+            while ( menuIterator->HasNextSpecific() )
+                {
+                CHnMenuItemModel* childItem = menuIterator->GetNextSpecific();
+                CEikMenuPaneItem::SData childData;
+                childData.iCommandId = childItem->Command();
+                childData.iText = childItem->NameL().
+                        Left( CEikMenuPaneItem::SData::ENominalTextLength );
+                childData.iFlags = 0;
+                childData.iCascadeId = 0;
+
+                positionArray.AppendL( childItem->Position() );
+                menuItemMap.InsertL( childItem->Position(), childData );
+                }
+
+            positionArray.Sort();
+
+            //add items in correct order
+            for ( TInt i = 0; i < positionArray.Count(); ++i )
+                {
+                iPopupMenu->AddMenuItemL(
+                        menuItemMap.FindL( positionArray[i] ).iText,
+                        menuItemMap.FindL( positionArray[i] ).iCommandId );
+                }
+
+            if (positionArray.Count()>0)
+                {
+                iPopupMenu->ShowMenu();
+                popupMenuDisplayed = ETrue;
+                }
+            CleanupStack::PopAndDestroy( &menuItemMap );
+            CleanupStack::PopAndDestroy( &positionArray );
+            }
+        MMPERF(("CMmAppUi::DynInitMenuPaneL - STOP"));
         }
-      CleanupStack::PopAndDestroy( &menuItemMap );
-      CleanupStack::PopAndDestroy( &positionArray );
-      }
-    MMPERF(("CMmAppUi::DynInitMenuPaneL - STOP"));
-    }
 
     if ( !popupMenuDisplayed && iCurrentContainer )
         {
         iCurrentContainer->EndLongTapL( ETrue );
         HandleHighlightItemSingleClickedL(
-            iCurrentContainer->Widget()->CurrentItemIndex() );
+                iCurrentContainer->Widget()->CurrentItemIndex() );
         }
     }
 

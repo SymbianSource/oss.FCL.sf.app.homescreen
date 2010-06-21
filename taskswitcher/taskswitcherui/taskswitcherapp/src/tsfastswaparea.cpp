@@ -353,6 +353,12 @@ void CTsFastSwapArea::LayoutGridViewL( TInt aItemCount )
         iGrid->ItemDrawer()->ColumnData()->SetDrawBackground(ETrue);
         static_cast<CTsAppView*>(&iParent)->EnableDragEvents(EFalse);
         }
+    
+    // Update scrollbar frame
+    if( iGrid->ScrollBarFrame() )
+        {
+        iGrid->SetScrollBarFrame(NULL,CEikListBox::EOwnedExternally);
+        }
     }
 
 
@@ -424,7 +430,8 @@ void CTsFastSwapArea::SizeChanged()
         TInt selIdx = SelectedIndex();
         TRAPD(err,
               LayoutGridL();
-              LayoutGridViewL( iArray.Count() )
+              LayoutGridViewL( iArray.Count() );
+              iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
               );
         
         if ( err != KErrNone )
@@ -900,7 +907,10 @@ void CTsFastSwapArea::HandleSwitchToForegroundEvent()
     
     iPrevAppCount = iArray.Count();
     
-    iGrid->MakeVisible(ETrue);
+    if ( !appUi->DelayedForegroundLaunched() )
+        {
+        iGrid->MakeVisible(ETrue);
+        }
 
     TSLOG_OUT();
     }
@@ -1182,6 +1192,7 @@ void CTsFastSwapArea::TimerCompletedL( CTsFastSwapTimer* aSource )
         }
     else if(aSource == iRedrawTimer)
         {
+        iGrid->MakeVisible(ETrue);
         static_cast<CTsAppView*>(&iParent)->OrderFullWindowRedraw();
         }
     else if( aSource == iUpdateGridTimer )

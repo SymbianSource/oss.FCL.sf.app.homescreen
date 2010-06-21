@@ -77,10 +77,10 @@ CWmListItemDrawer::CWmListItemDrawer(
         CWmListBox* aListBox )
     : CFormattedCellListBoxItemDrawer( aTextListBoxModel,aFont,aFormattedCellData ),
     iWmPlugin( aWmPlugin )
-	{
+    {
     iCellData = aFormattedCellData;
     iListBox = aListBox;
-	}
+    }
 
 // ---------------------------------------------------------
 // CWmListItemDrawer::ConstructL
@@ -136,14 +136,14 @@ void CWmListItemDrawer::ConstructL()
 // ---------------------------------------------------------
 //
 CWmListItemDrawer::~CWmListItemDrawer()
-	{
+    {
     iCellData = NULL;
     iListBox = NULL;
 
     // dispose icons
     delete iDefaultLogoImage;
     delete iDefaultLogoImageMask;
-	}
+    }
 
 // ---------------------------------------------------------
 // CWmListItemDrawer::UpdateItemHeight
@@ -156,6 +156,7 @@ void CWmListItemDrawer::UpdateItemHeight()
         ::list_wgtman_pane().LayoutLine();
     TAknLayoutRect listPaneRect;
     listPaneRect.LayoutRect( iListBox->Rect(), listPane );
+
     TAknWindowLineLayout listRowPane = AknLayoutScalable_Apps
         ::listrow_wgtman_pane().LayoutLine();
     TAknLayoutRect listRowPaneRect;
@@ -163,6 +164,9 @@ void CWmListItemDrawer::UpdateItemHeight()
     TRect itemRect = listRowPaneRect.Rect();
     TRAP_IGNORE( iListBox->SetItemHeightL( itemRect.Height() ); );
     iListBox->View()->ItemDrawer()->SetItemCellSize( itemRect.Size() );
+    
+    // update view rect according to layout ( ou1cimx1#402776 )
+    iListBox->View()->SetViewRect( listPaneRect.Rect() );
     }
 
 // ---------------------------------------------------------
@@ -190,9 +194,9 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     if ( aItemIsCurrent && listFocused && highlightEnabled )
         {
         TRect innerRect( itemRect );
-        const TInt highlightOffset = 2;
+        const TInt highlightOffset = 5;
         innerRect.Shrink( highlightOffset, highlightOffset );
-		
+        
         AknsDrawUtils::DrawFrame( skin,
                                   gc,
                                   itemRect,
@@ -323,7 +327,7 @@ CWmListBox::CWmListBox( CWmPlugin& aWmPlugin ):
     iWmPlugin( aWmPlugin )
     {
     iFindPaneIsVisible = EFalse;
-	iLogoSize = TSize( 0, 0);
+    iLogoSize = TSize( 0, 0);
     }
 
 // ---------------------------------------------------------
@@ -372,9 +376,9 @@ CWmWidgetData* CWmListBox::WidgetData()
 // CWmListBox::WidgetData
 // ---------------------------------------------------------
 //
-CWmWidgetData& CWmListBox::WidgetData( TInt aItemIndex )
+CWmWidgetData& CWmListBox::WidgetData( TInt aItemIndex, TBool aIgnoreSearchIndex )
     {
-    return *iVisibleWidgetArray[ RealIndex( aItemIndex ) ];
+    return *iVisibleWidgetArray[ RealIndex( aItemIndex, aIgnoreSearchIndex ) ];
     }
 
 // ---------------------------------------------------------
@@ -397,17 +401,14 @@ void CWmListBox::AddWidgetDataL( CWmWidgetData* aWidgetData,
 // CWmListBox::RemoveWidgetData
 // ---------------------------------------------------------
 //
-void CWmListBox::RemoveWidgetData( TInt aItemIndex )
+void CWmListBox::RemoveWidgetData( TInt aItemIndex, TBool aIgnoreSearchIndex )
     {
-    TInt realIndex = RealIndex( aItemIndex );
+    TInt realIndex = RealIndex( aItemIndex, aIgnoreSearchIndex );
     TBool current = ( aItemIndex == CurrentItemIndex() );
     // remove widget data
     CWmWidgetData* data = iVisibleWidgetArray[realIndex];
     iVisibleWidgetArray.Remove( realIndex );
-    // reorganise
-    TRAP_IGNORE(
-        AknListBoxUtils::HandleItemRemovalAndPositionHighlightL(
-            this, realIndex, current ) );
+    
 
     // Remove item from order array
     for ( TInt i = 0; i < iOrderDataArray.Count(); i++ )
@@ -422,6 +423,14 @@ void CWmListBox::RemoveWidgetData( TInt aItemIndex )
             }
         }
     
+    if ( aIgnoreSearchIndex )
+        {
+        // reorganise
+        TRAP_IGNORE(
+            AknListBoxUtils::HandleItemRemovalAndPositionHighlightL(
+                this, realIndex, current ) );
+
+        }
     // delete now
     delete data;
     data = NULL;
@@ -475,7 +484,7 @@ void CWmListBox::CreateItemDrawerL()
 void CWmListBox::HandleLayoutChanged()
     {
     iLogoSize = TSize( 0, 0);
-	iLogoSize = LogoSize();
+    iLogoSize = LogoSize();
     for ( TInt i=0; i<iVisibleWidgetArray.Count(); i++)
         {
         iVisibleWidgetArray[i]->UpdateLogo( iLogoSize, EFalse );
@@ -541,10 +550,10 @@ TInt CWmListBox::CurrentListBoxItemIndex()
 // CWmListBox::RealIndex
 // ---------------------------------------------------------
 //
-TInt CWmListBox::RealIndex( TInt aIndex )
+TInt CWmListBox::RealIndex( TInt aIndex, TBool aIgnoreSearchIndex )
     {
     TInt realIndex = aIndex;
-    if ( iFindPaneIsVisible && aIndex >= 0 )
+    if ( ( iFindPaneIsVisible && aIndex >= 0 ) && !aIgnoreSearchIndex )
         {
         realIndex = static_cast<CAknFilteredTextListBoxModel*>(Model())->Filter()
                 ->FilteredItemIndex( aIndex );

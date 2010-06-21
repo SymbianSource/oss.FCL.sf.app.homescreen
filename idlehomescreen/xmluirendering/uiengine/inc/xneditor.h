@@ -311,9 +311,22 @@ private:
      */
     TBool IsViewFull( CXnViewData& aViewData );
     
+    /*
+     * Notifies observers that widget list is changed
+     */
+    void NotifyWidgetListChanged();
+    
     /** callback for notify widget launcher */
     static TInt WidgetListChangedCallBack( TAny* aSelf );
+
+    /*
+     * Notifies observers that view list is changed
+     */
+    void NotifyViewListChanged();
     
+    /** callback for notify view launcher */
+    static TInt ViewListChangedCallBack( TAny* aSelf );
+
 private:
     // from MXnViewObserver    
     
@@ -331,6 +344,10 @@ private:
     void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ );
     
     void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ );
+    
+    void NotifyAllViewsLoadedL();
+
+    void NotifyContainerActivatedL( const CXnViewData& aViewData );
 
 private:
     // from MCpsWrapperObserver    
@@ -371,8 +388,10 @@ private:
     RPointerArray< hspswrapper::CPluginInfo > iPluginConfigurations;
 	/** Oom handler, owned. */
     CXnOomSysHandler* iOomSysHandler;
-	/** Launcher for notifying widget updates */    
-    CPeriodic* iNotifyWidgetUpdate;
+	/** Launcher for notifying widget list changes */    
+    CPeriodic* iNotifyWidgetListChanged;
+    /** Launcher for notifying view list changes */    
+    CPeriodic* iNotifyViewListChanged;
     };
 
 #endif // C_XNEDITOR_H

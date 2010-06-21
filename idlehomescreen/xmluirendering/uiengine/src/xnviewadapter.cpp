@@ -322,6 +322,7 @@ void CXnViewAdapter::ReloadUiL()
 void CXnViewAdapter::PrepareToExit()
     {                
     iAppUiAdapter.RemoveFromStack( iEventDispatcher );
+    
     delete iEventDispatcher;
     iEventDispatcher = NULL;
     
@@ -388,15 +389,15 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
 
     __TICK( "CXnViewAdapter::DoActivateL" );
     __TIME_MARK( time );
+
+    TBool wasActive( iFlags.IsSet( EIsActivated ) );
     
     iFlags.Set( EIsActivated );
     
-    // State must be cleared before adding to stack
     iEventDispatcher->ClearStateL();
+           
+    iAppUiAdapter.RemoveFromStack( iEventDispatcher );
     iAppUiAdapter.AddToStackL( *this, iEventDispatcher );
-
-    // enable statuspane transparancy 
-    CEikStatusPane* sp( iAppUiAdapter.StatusPane() );
 
     CEikButtonGroupContainer* bgc( iAppUiAdapter.Cba() );
     
@@ -408,30 +409,37 @@ void CXnViewAdapter::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
 
         iAppUiAdapter.RemoveFromStack( cba );        
         }
-        
+       
     iBgManager->MakeVisible( ETrue );
-
-    // Set status pane layout
+        
     CXnViewData& viewData( iAppUiAdapter.ViewManager().ActiveViewData() );
-    CXnProperty* prop( viewData.Node()->LayoutNode()->GetPropertyL( 
-        XnPropertyNames::view::KStatusPaneLayout ) );
-
-    // Is there status pane declaration available
-    TInt spane( DetermineStatusPaneLayout( prop ) );
-
-    if ( spane != KErrNotFound )
-        {
-        if ( sp && sp->CurrentLayoutResId() != spane )
-            {
-            sp->SwitchLayoutL( spane );
-            sp->ApplyCurrentSettingsL();
-            }
-        }    
     
-    if ( sp && !sp->IsTransparent() ) 
-        { 
-        sp->EnableTransparent( ETrue );
-        sp->DrawNow();
+    if ( !wasActive )
+        {
+        // Set status pane layout        
+        CXnProperty* prop( viewData.Node()->LayoutNode()->GetPropertyL( 
+            XnPropertyNames::view::KStatusPaneLayout ) );
+    
+        CEikStatusPane* sp( iAppUiAdapter.StatusPane() );
+        
+        // Is there status pane declaration available
+        TInt spane( DetermineStatusPaneLayout( prop ) );
+    
+        if ( spane != KErrNotFound )
+            {
+            if ( sp && sp->CurrentLayoutResId() != spane )
+                {
+                sp->SwitchLayoutL( spane );
+                sp->ApplyCurrentSettingsL();
+                }
+            }    
+        
+        // enable statuspane transparancy        
+        if ( sp && !sp->IsTransparent() ) 
+            { 
+            sp->EnableTransparent( ETrue );
+            sp->DrawNow();
+            }    
         }
 
     if ( aCustomMessage == KSetWallpaper )

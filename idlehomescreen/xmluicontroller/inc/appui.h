@@ -183,6 +183,8 @@ private:
     CAppUi( CXmlUiController& aUiCtl, TUid aAppUid );
     
     void ConstructL();
+    
+    void DoConstructL();
           
 private:     
     // data

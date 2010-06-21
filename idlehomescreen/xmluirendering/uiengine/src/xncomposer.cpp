@@ -17,7 +17,7 @@
 
 // System includes
 #include <s32file.h>
-#include <UTF.h>
+#include <utf.h>
 
 // User includes
 #include "xncomposer.h"

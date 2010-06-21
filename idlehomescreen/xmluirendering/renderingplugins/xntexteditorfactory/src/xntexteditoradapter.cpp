@@ -472,6 +472,42 @@ void CXnTextEditorAdapter::HandleResourceChange( TInt aType )
     }
 
 // -----------------------------------------------------------------------------
+// CXnTextEditorAdapter::HandlePointerEventL
+//
+// -----------------------------------------------------------------------------
+//
+void CXnTextEditorAdapter::HandlePointerEventL( const TPointerEvent& aPointerEvent )
+    {
+    TPointerEvent pointerEvent( aPointerEvent ); 
+    TRect rect( iEditor->TextView()->ViewRect() );
+    TPoint point( aPointerEvent.iPosition );
+    
+    // this opens partial screen also when margin is tapped
+    if( !IsFlagSet( iSplitInputFlags, ESplitInputOpen ) )
+        {
+        if( point.iX < rect.iTl.iX )
+            {
+            pointerEvent.iPosition.iX = rect.iTl.iX;
+            }
+        else if( point.iX > rect.iBr.iX )
+            {
+            pointerEvent.iPosition.iX = rect.iBr.iX;
+            }
+        
+        if( point.iY < rect.iTl.iY )
+            {
+            pointerEvent.iPosition.iY = rect.iTl.iY;
+            }
+        else if( point.iY > rect.iBr.iY )
+            {
+            pointerEvent.iPosition.iY = rect.iBr.iY;
+            }
+        }
+    
+    CXnControlAdapter::HandlePointerEventL( pointerEvent );
+    }
+
+// -----------------------------------------------------------------------------
 // CXnTextEditorAdapter::HandleScreenDeviceChangedL
 //
 // -----------------------------------------------------------------------------

@@ -32,6 +32,17 @@ class RWidgetRegistryClientSession;
 
 // CLASS DECLARATIONS
 
+class MWmWidgetloaderObserver
+    {
+public:
+    /**
+     * Notifies client when widget list is succesfully loaded
+     *
+     * @param aWidgetListChanged true if widget list changed
+     */
+    virtual void LoadDoneL( TBool aWidgetListChanged ) = 0;
+    };
+    
 /**
  * Active object to load widgets into list
  */
@@ -39,17 +50,17 @@ NONSHARABLE_CLASS( CWmWidgetLoaderAo ) : public CActive
     {
     
 public:
-	/**
+    /**
      * Static constructor
      */
-	static CWmWidgetLoaderAo* NewL(
-	        CWmPlugin& aWmPlugin,
-	        CWmListBox& aTargetList );
-	
+    static CWmWidgetLoaderAo* NewL(
+            CWmPlugin& aWmPlugin,
+            CWmListBox& aTargetList );
+    
     /**
      * Destructor.
      */
-	~CWmWidgetLoaderAo();
+    ~CWmWidgetLoaderAo();
 
     /**
      * Starts the load process by activating the AO
@@ -61,6 +72,10 @@ public:
      */
     TBool IsLoading();
 
+    /**
+     * Set MWmWidgetloaderObserver observer
+      */
+    void SetObserver( MWmWidgetloaderObserver* aObserver );
 private:
     
     /**
@@ -150,11 +165,17 @@ private: // data
     /** persistent widget order */
     CWmPersistentWidgetOrder* iWidgetOrder;
     
-	/** uid of currently unistalled widget */
+    /** uid of currently unistalled widget */
     TUid iUninstallUid;
     
     /** switch for loading operation */
     TBool iLoading;
+    
+    /** Notifies client when widget list is fully loaded */
+    MWmWidgetloaderObserver* iObserver;
+    
+    /** tells if widgetlist has changed */
+    TBool iWidgetListChanged;
     };
 
 #endif // WMWIDGETLOADERAO_H_

@@ -27,8 +27,8 @@
 // r: TB9.2
 #define qtn_msk_open "Open"
 
-// d: Options
-// l: control_pane_t1/opt7
+// d: Done
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_done "Done"
@@ -40,7 +40,7 @@
 #define qtn_options_open "Open"
 
 // d: Back
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_back "Back"
@@ -76,13 +76,13 @@
 #define qtn_hs_widget_catalog "Widget catalog"
 
 // d: Search
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_search "Search"
 
 // d: Options
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_options "Options"
@@ -172,13 +172,13 @@
 #define qtn_set_right_idle_softkey "Right selection key"
 
 // d: Select
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_select "Select"
 
 // d: Cancel
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_cancel "Cancel"
@@ -250,7 +250,7 @@
 #define qtn_hs_title_editing_view "Editing view"
 
 // d: Call
-// l: control_pane_t1/opt7
+// l: nhd_control_pane_t2/opt7
 // w:
 // r: TB9.2
 #define text_softkey_call "Call"
@@ -266,3 +266,45 @@
 // w:
 // r: TB9.2
 #define qtn_hs_page_edit_options_delete "Delete page"
+
+// d: Done
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_done "Done"
+
+// d: Search
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_search "Search"
+
+// d: Options
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_options "Options"
+
+// d: Back
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_back "Back"
+
+// d: Select
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_select "Select"
+
+// d: Cancel
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_cancel "Cancel"
+
+// d: Call
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: TB9.2
+#define qtn_hs_text_softkey_call "Call"

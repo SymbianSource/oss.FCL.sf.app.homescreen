@@ -68,6 +68,8 @@ const TUid KTsAppUid = { KTsAppUidValue };
 const TUid KTsCameraUid = { 0x101F857a };
 const TUid KTsTelephoneUid = { 0x100058b3 };
 
+const TInt KTsMultimediaAppActivationDelay = 1500000;
+
 // -----------------------------------------------------------------------------
 // CTsAppUi::ConstructL()
 // ConstructL is called by the application framework
@@ -117,6 +119,7 @@ void CTsAppUi::ConstructL()
 
     // Create timer
     iGoToBackgroundTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iForegroundDelayTimer = CPeriodic::NewL( CActive::EPriorityStandard );
 
     // Create commonly used instances (device state only?)
     iDeviceState = CTsDeviceState::NewL();
@@ -169,6 +172,9 @@ void CTsAppUi::ConstructL()
     iEikonEnv->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
     RProcess().SetPriority(EPriorityHigh);
     
+    iForegroundDelayed = EFalse;
+    iDelayedForegroundInProgress = EFalse;
+    
     TSLOG_OUT();
     }
 
@@ -198,6 +204,7 @@ CTsAppUi::~CTsAppUi()
     GfxTransEffect::SetTransitionObserver(0);
     
     delete iGoToBackgroundTimer;
+    delete iForegroundDelayTimer;
     delete iPropListener;
     delete iLayoutListener;
 
@@ -548,6 +555,27 @@ TInt CTsAppUi::GoToBackgroundTimerCallback( TAny* aParam )
     }
 
 // -----------------------------------------------------------------------------
+// CTsAppUi::DelayedForegroundCallback
+// -----------------------------------------------------------------------------
+//
+TInt CTsAppUi::DelayedForegroundCallback( TAny* aParam )
+    {
+    CTsAppUi* self = static_cast<CTsAppUi*>( aParam );
+    self->iDelayedForegroundInProgress = ETrue;
+    
+    if ( self->iForegroundDelayTimer )
+        {
+        self->iForegroundDelayTimer->Cancel();
+        }
+    self->iForegroundDelayed = EFalse;
+    self->HandleSwitchToForegroundEvent();
+    
+    self->iDelayedForegroundInProgress = EFalse;
+    
+    return 0;
+    }
+
+// -----------------------------------------------------------------------------
 // CTsAppUi::MoveAppToForeground()
 // -----------------------------------------------------------------------------
 //
@@ -563,7 +591,21 @@ void CTsAppUi::MoveAppToForeground( TUint  /*aTransitionType*/ )
     iApplicationTask.BringToForeground();
 
     // Notify
-    HandleSwitchToForegroundEvent();
+    TBool delayForeground(EFalse);
+    TRAP_IGNORE( delayForeground = IsUnderlyingAppMultimediaL() );
+    if ( delayForeground )
+        {
+        iForegroundDelayed = ETrue;
+        iForegroundDelayTimer->Cancel();
+        iForegroundDelayTimer->Start( 
+                KTsMultimediaAppActivationDelay, 
+                0,
+                TCallBack( DelayedForegroundCallback, this ) );
+        }
+    else
+        {
+        HandleSwitchToForegroundEvent();
+        }
 
     TSLOG_OUT();
     }
@@ -589,6 +631,8 @@ void CTsAppUi::HandleSwitchToBackgroundEvent()
         iAppView->HandleSwitchToBackgroundEvent();
         
         iWg.SetOrdinalPosition(-1, ECoeWinPriorityNormal);
+        
+        iForegroundDelayed = EFalse;
         }
 
     TSLOG_OUT();
@@ -604,7 +648,7 @@ void CTsAppUi::HandleSwitchToForegroundEvent()
     TSLOG_IN();
 
     // must not do anything if iForeground is already up-to-date
-    if ( !iForeground )
+    if ( !iForeground && !iForegroundDelayed )
         {
         TInt freeRamMemory;
         HAL::Get( HALData::EMemoryRAMFree, freeRamMemory );
@@ -882,6 +926,39 @@ TInt CTsAppUi::CheckForUnderlyingHiddenAppsL()
         wgId = underlyingWg;
         }
     return wgId;
+    }
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::IsUnderlyingAppMultimediaL
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppUi::IsUnderlyingAppMultimediaL()
+    {
+    TBool retVal(EFalse);
+    
+    TApaTaskList taskList( iEikonEnv->WsSession() );
+    TInt underlyingWg = taskList.FindByPos(0).WgId();
+    
+    CApaWindowGroupName* windowName =
+        CApaWindowGroupName::NewLC( iEikonEnv->WsSession(), underlyingWg );
+    TUid appUid = windowName->AppUid();
+    CleanupStack::PopAndDestroy( windowName );
+    if ( appUid == KTsCameraUid )
+        {
+        retVal = ETrue;
+        }
+    
+    return retVal;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CTsAppUi::DelayedForegroundLaunched
+// -----------------------------------------------------------------------------
+//
+TBool CTsAppUi::DelayedForegroundLaunched()
+    {
+    return iDelayedForegroundInProgress;
     }
 
 // End of file

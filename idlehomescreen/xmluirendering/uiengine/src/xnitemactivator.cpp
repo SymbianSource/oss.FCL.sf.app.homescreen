@@ -170,10 +170,9 @@ void CXnItemActivator::RunL()
 // 
 // -----------------------------------------------------------------------------
 //
-TInt CXnItemActivator::RunError( TInt /*aError*/ )
-    {
-    // Ignore
-    return KErrNone;
+TInt CXnItemActivator::RunError( TInt aError )
+    {    
+    return aError;
     }
 
 // -----------------------------------------------------------------------------
@@ -187,11 +186,11 @@ void CXnItemActivator::DoCancel()
     }
 
 // -----------------------------------------------------------------------------
-// CXnItemActivator::Activate()
+// CXnItemActivator::ActivateL()
 // 
 // -----------------------------------------------------------------------------
 //
-void CXnItemActivator::Activate( CXnNode* aItemToActivate )
+void CXnItemActivator::ActivateL( CXnNode* aItemToActivate )
     {
     if ( aItemToActivate )
         {
@@ -201,7 +200,7 @@ void CXnItemActivator::Activate( CXnNode* aItemToActivate )
         
         if ( IsMenuItem( *aItemToActivate ) )
             {
-            TRAP_IGNORE( RunL() );
+            RunL();
             }
         else
             {                              

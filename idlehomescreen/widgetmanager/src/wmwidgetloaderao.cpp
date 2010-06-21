@@ -114,6 +114,10 @@ void CWmWidgetLoaderAo::RunL()
     DoLoadWidgetsL();
     Cleanup();
     CloseSession();
+    if ( iObserver )
+        {
+        iObserver->LoadDoneL( iWidgetListChanged );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -141,8 +145,9 @@ void CWmWidgetLoaderAo::DoCancel()
 //
 void CWmWidgetLoaderAo::DoLoadWidgetsL()
     {
+    iWidgetListChanged = EFalse;
     // Check if unistallation is ongoing for for some widget
-	// iUninstallUid is null no uninstallation is ongoing
+    // iUninstallUid is null no uninstallation is ongoing
     iUninstallUid = iWmPlugin.WmInstaller().UninstallUid();
     
     // connect to widget registry
@@ -162,8 +167,8 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     // 3. prepare the widget data array & sort order array
     for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
         {
-        iWidgetsList.WidgetData(i).SetPersistentWidgetOrder( iWidgetOrder );
-        iWidgetsList.WidgetData(i).SetValid( EFalse );
+        iWidgetsList.WidgetData(i, ETrue ).SetPersistentWidgetOrder( iWidgetOrder );
+        iWidgetsList.WidgetData(i, ETrue ).SetValid( EFalse );
         }
     for( TInt i = 0; i < iWidgetsList.OrderDataArray().Count(); ++i )
         {
@@ -216,15 +221,15 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     TInt widgetsRemoved = 0;
     for( TInt i=0; i<iWidgetsList.WidgetDataCount(); i++ )
         {
-        if( !iWidgetsList.WidgetData(i).IsValid() )
+        if( !iWidgetsList.WidgetData(i, ETrue ).IsValid() )
             {
-            iWidgetsList.RemoveWidgetData( i );
+            iWidgetsList.RemoveWidgetData( i, ETrue );
             ++widgetsRemoved;
             }
         }
     
     // update listbox
-    if ( widgetsAdded > 0 )
+    if ( widgetsAdded > 0 && !iWidgetsList.IsFindPaneIsVisible() )
         {
         iWidgetsList.HandleItemAdditionL();
         }
@@ -232,9 +237,12 @@ void CWmWidgetLoaderAo::DoLoadWidgetsL()
     if ( widgetsRemoved > 0 || widgetsAdded > 0 ||
         widgetsChanged > 0 )
         {
-        iWidgetsList.DrawDeferred();
+        if ( !iWidgetsList.IsFindPaneIsVisible() )
+            {
+            iWidgetsList.DrawDeferred();
+            }
+        iWidgetListChanged = ETrue;
         }
-
     // 6: cleanup
     CleanupStack::PopAndDestroy( contentInfoArray );
 
@@ -267,9 +275,9 @@ CWmWidgetData* CWmWidgetLoaderAo::FindWidgetData(
     CWmWidgetData* data = NULL;
     for( TInt i=0; i<iWidgetsList.WidgetDataCount() && !data; ++i )
         {
-        if ( iWidgetsList.WidgetData(i).EqualsTo( aContentInfo ) )
+        if ( iWidgetsList.WidgetData(i, ETrue ).EqualsTo( aContentInfo ) )
             {
-            data = &iWidgetsList.WidgetData(i);
+            data = &iWidgetsList.WidgetData(i, ETrue );
             }
         }
     return data;
@@ -359,7 +367,7 @@ void CWmWidgetLoaderAo::AddWidgetDataL(
         // add to visible data
         iWidgetsList.AddWidgetDataL( widgetData, EFalse );
         CleanupStack::Pop( widgetData );
-		aCount++;
+        aCount++;
         }
     else
         {
@@ -379,7 +387,7 @@ void CWmWidgetLoaderAo::Cleanup()
     // delete widget order and references to it
     for( TInt i=0; i<iWidgetsList.WidgetDataCount(); ++i )
         {
-        iWidgetsList.WidgetData(i).SetPersistentWidgetOrder( NULL );
+        iWidgetsList.WidgetData(i, ETrue ).SetPersistentWidgetOrder( NULL );
         }
     delete iWidgetOrder;
     iWidgetOrder = NULL;
@@ -412,6 +420,15 @@ TUid CWmWidgetLoaderAo::UidFromString( const TDesC8& aUidString ) const
 TBool CWmWidgetLoaderAo::IsLoading()
     {
     return iLoading;
+    }
+
+// ----------------------------------------------------
+// CWmWidgetData::SetObserver
+// ----------------------------------------------------
+//
+void CWmWidgetLoaderAo::SetObserver( MWmWidgetloaderObserver* aObserver )
+    {
+    iObserver = aObserver;
     }
 
 // end of file

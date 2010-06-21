@@ -19,6 +19,7 @@
 
 // User includes
 #include <aifwdefs.h>
+#include <aifwpublisherinfo.h>
 #include "xnappuiadapter.h"
 #include "xncomposer.h"
 #include "xnodtparser.h"
@@ -29,12 +30,14 @@
 #include "xndomnode.h"
 #include "xnnode.h"
 #include "xnoomsyshandler.h"
+#include "ainativeuiplugins.h"
 #include "xnpanic.h"
 
 #include "debug.h"
 
 // Constants
-
+_LIT8( KNs, "namespace" );
+        
 // ============================ LOCAL FUNCTIONS ================================
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -118,6 +121,21 @@ TInt CXnViewData::SetActive( TBool aActive )
         {
         if ( aActive )
             {
+            if ( iFlags.IsSet( EIsInitial ) )
+                {
+                // Load device status plugin here because it is always needed
+                THsPublisherInfo devstat( KDeviceStatusPluginUid, 
+                    KDeviceStatusPluginName, KNs ); 
+                                   
+                TAiFwPublisherInfo publisher( devstat,
+                    TAiFwCallback(), EAiFwSystemStartup );
+                
+                CXnAppUiAdapter* appui = 
+                    static_cast< CXnAppUiAdapter* >( iAvkonAppUi );
+                
+                appui->LoadPublisher( publisher );
+                }
+            
             iFlags.Set( EIsActive );
             iFlags.Clear( EIsInitial );
             

@@ -93,7 +93,8 @@ enum
     ECanBeRemoved
     };
 
-const TInt KNotifyWidgetUpdateDelay( 1000000 ); //1sec
+const TInt KNotifyWidgetListChangedDelay( 1000000 ); //1sec
+const TInt KNotifyViewListChangedDelay( 1000000 );   //1sec
 
 // ====================== LOCAL FUNTION PROTOTYPES ============================
 static void DeletePluginInfos( TAny* aObject );
@@ -312,7 +313,8 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
     iHspsWrapper = CHspsWrapper::NewL( aUid, this );
     iRepository= CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
     iOomSysHandler = CXnOomSysHandler::NewL();
-    iNotifyWidgetUpdate = CPeriodic::New( CActive::EPriorityIdle );
+    iNotifyWidgetListChanged = CPeriodic::New( CActive::EPriorityIdle );
+    iNotifyViewListChanged = CPeriodic::New( CActive::EPriorityIdle );
     }
 
 // ---------------------------------------------------------------------------
@@ -321,12 +323,18 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
 // 
 CXnEditor::~CXnEditor()
     {
-    if ( iNotifyWidgetUpdate->IsActive() )
+    if ( iNotifyWidgetListChanged->IsActive() )
         {
-        iNotifyWidgetUpdate->Cancel();
+        iNotifyWidgetListChanged->Cancel();
         }
-    delete iNotifyWidgetUpdate;
-    
+    delete iNotifyWidgetListChanged;
+
+    if ( iNotifyViewListChanged->IsActive() )
+        {
+        iNotifyViewListChanged->Cancel();
+        }
+    delete iNotifyViewListChanged;
+
     iViewManager.RemoveObserver( *this );
     if( iPluginConfigurations.Count() )
         {
@@ -610,7 +618,7 @@ void CXnEditor::AddWidgetL()
     	return;
         }
     
-    TBuf8<KOpaQDataLen> oPaqDataStr;
+    TBuf8<KOpaQDataLen> oPaqDataStr = KNullDesC8();
            
     MHsContentControlUi* ui( NULL );
     if ( IdFromCrep ( oPaqDataStr ) == KErrNone )
@@ -1240,7 +1248,7 @@ void CXnEditor::NotifyWidgetAdditionL( const CXnPluginData& aPluginData )
     
     node->SetDirtyL( XnDirtyLevel::ELayoutAndRenderSiblings );
     
-    WidgetListChanged();
+    NotifyWidgetListChanged();
     }
 
 // ---------------------------------------------------------------------------
@@ -1322,7 +1330,7 @@ void CXnEditor::NotifyWidgetRemovalL( const CXnPluginData& aPluginData )
             }               
         }
     
-    WidgetListChanged();
+    NotifyWidgetListChanged();
     }
 
 // ---------------------------------------------------------------------------
@@ -1331,7 +1339,7 @@ void CXnEditor::NotifyWidgetRemovalL( const CXnPluginData& aPluginData )
 //
 void CXnEditor::NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ )
     {
-    ViewListChanged();
+    NotifyViewListChanged();
     }
 
 // ---------------------------------------------------------------------------
@@ -1340,7 +1348,7 @@ void CXnEditor::NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ )
 //
 void CXnEditor::NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ )
     {
-    ViewListChanged();
+    NotifyViewListChanged();
     }
 
 // ---------------------------------------------------------------------------
@@ -1351,7 +1359,7 @@ void CXnEditor::NotifyWidgetUnregisteredL( const TDesC& aPublisher )
     {
     ResetPluginsAndPublishers();
     RemoveUnRegisteredWidgetL( aPublisher );
-    WidgetListChanged();    
+    NotifyWidgetListChanged();    
     }
 
 // ---------------------------------------------------------------------------
@@ -1361,7 +1369,7 @@ void CXnEditor::NotifyWidgetUnregisteredL( const TDesC& aPublisher )
 void CXnEditor::NotifyWidgetRegisteredL()
     {
     ResetPluginsAndPublishers();        
-    WidgetListChanged();
+    NotifyWidgetListChanged();
     }
 
 // ---------------------------------------------------------------------------
@@ -1370,17 +1378,49 @@ void CXnEditor::NotifyWidgetRegisteredL()
 //
 void CXnEditor::NotifyWidgetUpdatedL()
     {
-    if ( iNotifyWidgetUpdate->IsActive() )
+    NotifyWidgetListChanged();
+    }
+
+// ---------------------------------------------------------------------------
+// CXnEditor::NotifyAllViewsLoadedL
+// ---------------------------------------------------------------------------
+//
+void CXnEditor::NotifyAllViewsLoadedL()
+    {
+    NotifyViewListChanged();
+    NotifyWidgetListChanged();
+    }
+
+// -----------------------------------------------------------------------------
+// CXnEditor::NotifyContainerActivatedL
+// -----------------------------------------------------------------------------
+//
+void CXnEditor::NotifyContainerActivatedL( const CXnViewData& /* aViewData */ )
+    {
+    if ( iViewManager.ActiveAppData().AllViewsLoaded() )
         {
-        iNotifyWidgetUpdate->Cancel();
+        NotifyWidgetListChanged();
         }
-    // start waiting for widget updates (wait time is 1sec).
-	// if no new updates, notify views about changes. otherwise
-	// start waiting for new updates again. 
-    iNotifyWidgetUpdate->Start(
-        KNotifyWidgetUpdateDelay,
-        KNotifyWidgetUpdateDelay,
+    }
+
+// ---------------------------------------------------------------------------
+// CXnEditor::NotifyWidgetListChanged
+// ---------------------------------------------------------------------------
+//
+void CXnEditor::NotifyWidgetListChanged()
+    {
+    if ( iNotifyWidgetListChanged->IsActive() )
+        {
+        iNotifyWidgetListChanged->Cancel();
+        }
+    // start waiting for widget list changes (wait time is 1sec).
+    // if no new changes, notify observers about changes. otherwise
+    // start waiting for new updates again. 
+    iNotifyWidgetListChanged->Start(
+        KNotifyWidgetListChangedDelay,
+        KNotifyWidgetListChangedDelay,
         TCallBack( WidgetListChangedCallBack, this ) );
+
     }
 
 // ---------------------------------------------------------------------------
@@ -1390,11 +1430,47 @@ void CXnEditor::NotifyWidgetUpdatedL()
 TInt CXnEditor::WidgetListChangedCallBack( TAny* aSelf )
     {
     CXnEditor* editor = static_cast<CXnEditor*>( aSelf );
-    if ( editor && editor->iNotifyWidgetUpdate->IsActive() )
+    if ( editor && editor->iNotifyWidgetListChanged->IsActive() )
         {
         // prevent multiple events
-        editor->iNotifyWidgetUpdate->Cancel();
+        editor->iNotifyWidgetListChanged->Cancel();
         editor->WidgetListChanged();
+        }
+    return KErrNone;
+    }
+
+// ---------------------------------------------------------------------------
+// CXnEditor::NotifyViewListChanged
+// ---------------------------------------------------------------------------
+//
+void CXnEditor::NotifyViewListChanged()
+    {
+    if ( iNotifyViewListChanged->IsActive() )
+        {
+        iNotifyViewListChanged->Cancel();
+        }
+    // start waiting for widget list changes (wait time is 1sec).
+    // if no new changes, notify observer about changes. otherwise
+    // start waiting for new changes again. 
+    iNotifyViewListChanged->Start(
+        KNotifyViewListChangedDelay,
+        KNotifyViewListChangedDelay,
+        TCallBack( ViewListChangedCallBack, this ) );
+
+    }
+
+// ---------------------------------------------------------------------------
+// CXnEditor::ViewListChangedCallBack
+// ---------------------------------------------------------------------------
+//
+TInt CXnEditor::ViewListChangedCallBack( TAny* aSelf )
+    {
+    CXnEditor* editor = static_cast<CXnEditor*>( aSelf );
+    if ( editor && editor->iNotifyViewListChanged->IsActive() )
+        {
+        // prevent multiple events
+        editor->iNotifyViewListChanged->Cancel();
+        editor->ViewListChanged();
         }
     return KErrNone;
     }
@@ -1468,7 +1544,7 @@ TInt CXnEditor::HandleNotifyL(
         info->SetPluginIdL( aPluginId );
 
         RemoveUnInstalledWidgetL( *info );
-        WidgetListChanged();
+        NotifyWidgetListChanged();
 
         CleanupStack::PopAndDestroy( info );
         }
@@ -1480,7 +1556,7 @@ TInt CXnEditor::HandleNotifyL(
         {        
         ResetPluginsAndPublishers();
         
-        WidgetListChanged();        
+        NotifyWidgetListChanged();        
         }
     else if ( aEvent == KEventPluginUpdated )
         {
@@ -1496,7 +1572,7 @@ TInt CXnEditor::HandleNotifyL(
             ReplaceWidgetL( *info );                
             CleanupStack::PopAndDestroy( info );
             }
-        WidgetListChanged();
+        NotifyWidgetListChanged();
         }
  
     return KErrNone;
@@ -1508,7 +1584,7 @@ TInt CXnEditor::HandleNotifyL(
 //
 void CXnEditor::WidgetListChanged()
     {
-    TBuf8<KOpaQDataLen> oPaqDataStr;
+    TBuf8<KOpaQDataLen> oPaqDataStr = KNullDesC8();
               
    MHsContentControlUi* ui( NULL );
    if ( IdFromCrep ( oPaqDataStr ) == KErrNone )
@@ -1532,7 +1608,7 @@ void CXnEditor::WidgetListChanged()
 //
 void CXnEditor::ViewListChanged()
     {
-    TBuf8<KOpaQDataLen> oPaqDataStr;
+    TBuf8<KOpaQDataLen> oPaqDataStr = KNullDesC8();
               
    MHsContentControlUi* ui( NULL );
    if ( IdFromCrep ( oPaqDataStr ) == KErrNone )
@@ -1850,22 +1926,11 @@ TInt CXnEditor::AddWidgetL( CHsContentInfo& aInfo )
     const TDesC8& type( aInfo.Type() );
     
     if ( ( type != KKeyWidget && type != KKeyTemplate ) ||
-         aInfo.Uid() == KNullDesC8 )
+         aInfo.Uid() == KNullDesC8  || !aInfo.CanBeAdded() )
         {
         // malformed content info
         return KErrArgument;
         }
-
-    // the widget can not be added. Return proper error code
-    if ( IsCurrentViewFull() )
-        {
-        return KHsErrorViewFull;
-        }
-    else if ( !aInfo.CanBeAdded() )
-        {
-        return KHsErrorMaxInstanceCountExceeded;
-        }
-
 
     CXnPluginData* plugin( NULL );
     
@@ -1880,9 +1945,27 @@ TInt CXnEditor::AddWidgetL( CHsContentInfo& aInfo )
     
     iTargetPlugin = NULL;
     
-    if ( !plugin )
+    // the widget can not be added. Return proper error code
+    if ( IsCurrentViewFull() || !plugin )
         {
-        return KErrGeneral;
+        return KHsErrorViewFull;
+        }
+    else
+        {
+        TInt result;
+        if ( aInfo.Type() != KKeyTemplate() )
+            { 
+            result = NonTemplateWidgetCanBeAddedRemovedL( aInfo ); 
+            }
+        else
+            {
+            result = TemplateWidgetCanBeAddedRemovedL( aInfo );
+            } 
+        
+        if ( !( result & ECanBeAdded ) )
+            {
+            return KHsErrorMaxInstanceCountExceeded;
+            } 
         }
     
     ret = iViewManager.LoadWidgetToPluginL( aInfo, *plugin );

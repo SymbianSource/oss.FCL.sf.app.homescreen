@@ -28,6 +28,7 @@
 #include <gulicon.h>
 #include <eiklbo.h>  // MEikListBoxObserver
 #include <aknsfld.h>  // MAdaptiveSearchTextObserver
+#include "wmwidgetloaderao.h"
 
 // FORWARD DECLARATIONS
 class CWmPlugin;
@@ -38,30 +39,30 @@ class CAknSearchField;
 class CCoeControl;
 class CAknSearchField;
 class CWmPortalButton;
-class CWmWidgetLoaderAo;
 class CWmMainContainerView;
 class CWmConfiguration;
 
 /**
  * Container class for WmMainContainer
  * 
- * @class	CWmMainContainer WmMainContainer.h
+ * @class    CWmMainContainer WmMainContainer.h
  */
 NONSHARABLE_CLASS( CWmMainContainer ) : public CCoeControl,
                                         public MEikListBoxObserver,
-                                        public MAdaptiveSearchTextObserver
-	{
+                                        public MAdaptiveSearchTextObserver,
+                                        public MWmWidgetloaderObserver
+    {
 public: // constructors and destructor
-	
+    
     /*
      * Two-phased constructor.
      * 
      * @param aRect container rect
      * @param aWmPlugin wm plugin
      */
-	static CWmMainContainer* NewL( 
-		const TRect& aRect,
-		CWmPlugin& aWmPlugin );
+    static CWmMainContainer* NewL( 
+        const TRect& aRect,
+        CWmPlugin& aWmPlugin );
 
     /*
      * Two-phased constructor.
@@ -69,23 +70,23 @@ public: // constructors and destructor
      * @param aRect container rect
      * @param aWmPlugin wm plugin
      */
-	static CWmMainContainer* NewLC( 
-		const TRect& aRect,
-		CWmPlugin& aWmPlugin );	
+    static CWmMainContainer* NewLC( 
+        const TRect& aRect,
+        CWmPlugin& aWmPlugin );    
 
-	 /** Destructor */
-	virtual ~CWmMainContainer();
-	
+    /** Destructor */
+    virtual ~CWmMainContainer();
+    
 private:
     /** constructor */
-	CWmMainContainer(
-	    CWmPlugin& aWmPlugin );
+    CWmMainContainer(
+        CWmPlugin& aWmPlugin );
     
     /** 2nd phase constructor */
     void ConstructL( 
             const TRect& aRect );
 
-public: // new functions	
+public: // new functions    
     
     /** 
      * @return true, if widgets loading operation is ongoing. 
@@ -143,34 +144,34 @@ public: // new functions
     void LaunchDetailsDialogL();
 
     /** 
-	 * executes widget addition to home screen 
-	 */
-	void AddWidgetToHomeScreenL();
-	
-	/** 
-	 * executes widget launch 
-	 */
-	void LaunchWidgetL();
-	
-	/** 
-	 * executes findbox activation 
-	 */
-	void ActivateFindPaneL( TBool aActivateAdaptive = EFalse );
+     * executes widget addition to home screen 
+     */
+    void AddWidgetToHomeScreenL();
+    
+    /** 
+     * executes widget launch 
+     */
+    void LaunchWidgetL();
+    
+    /** 
+     * executes findbox activation 
+     */
+    void ActivateFindPaneL( TBool aActivateAdaptive = EFalse );
 
     /** 
-	 * executes findbox deactivation 
-	 */
+     * executes findbox deactivation 
+     */
     void DeactivateFindPaneL(TBool aLayout = ETrue);
-	
+    
     /** 
      * sorts the widget list in alphabetical order
      */
     void SortListAlphabeticallyL();
 
-	/** 
-	 * executes widget uninstall 
-	 */
-	void UninstallWidgetL();
+    /** 
+     * executes widget uninstall 
+     */
+    void UninstallWidgetL();
 
     /**
      * opens currently selected portal
@@ -192,44 +193,44 @@ public: // new functions
      * in practice reloads the widget list from the widgets API
      * and redraws the screen.
      */
-	void HandleWidgetListChanged();
+    void HandleWidgetListChanged();
 
 public:
 
-	/**
+    /**
      * Handles focus changed events.
      *
      * @see CCoeControl::FocusChanged
      */    
     void FocusChanged( TDrawNow aDrawNow );    
-	
+    
     /**
      * Handles key events.
      * 
      * @see CCoeControl::OfferKeyEventL
      */
-	TKeyResponse OfferKeyEventL( 
-			const TKeyEvent& aKeyEvent, 
-			TEventCode aType );
-	
-	/**
-	 * Handles a change to the control's resources
-	 * 
-	 * @see CCoeControl::HandleResourceChange
-	 */
-	void HandleResourceChange( TInt aType );
-	
-	/**
-	 * Handles pointer events.
-	 * 
-	 * @see CCoeControl::HandlePointerEventL
-	 */
-	void HandlePointerEventL( const TPointerEvent& aPointerEvent );
-	
-	/**
-	 * Moves focus to the OVI button
-	 * @param aIndex 0=first button, 1=second (if it exists)
-	 */
+    TKeyResponse OfferKeyEventL( 
+            const TKeyEvent& aKeyEvent, 
+            TEventCode aType );
+    
+    /**
+     * Handles a change to the control's resources
+     * 
+     * @see CCoeControl::HandleResourceChange
+     */
+    void HandleResourceChange( TInt aType );
+    
+    /**
+     * Handles pointer events.
+     * 
+     * @see CCoeControl::HandlePointerEventL
+     */
+    void HandlePointerEventL( const TPointerEvent& aPointerEvent );
+    
+    /**
+     * Moves focus to the OVI button
+     * @param aIndex 0=first button, 1=second (if it exists)
+     */
     void SetFocusToPortalButton( TInt aIndex );
 
     /**
@@ -336,6 +337,9 @@ private: // New functions
             TEventCode aType );
     TInt OperatorButtonHigherPriority( TInt aIndex );
     
+public: // from MWmWidgetloaderObserver
+    void LoadDoneL( TBool aWidgetListChanged );
+    
 private:
 
     /**
@@ -349,14 +353,14 @@ private:
     CWmListBox*             iWidgetsList;
 
     /**
-	 * search filed
-	 */
-    CAknSearchField* 		iFindbox;
+     * search filed
+     */
+    CAknSearchField*         iFindbox;
     
     /**
-	 * search filed visibility switch
-	 */
-    TBool            		iFindPaneIsVisible;
+     * search filed visibility switch
+     */
+    TBool                    iFindPaneIsVisible;
     
     /**
      * background

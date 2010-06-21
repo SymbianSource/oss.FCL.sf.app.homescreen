@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_54 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_55 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -80,7 +80,6 @@ CMmListBoxView* CMmListBoxView::NewL ()
 //
 void CMmListBoxView::ConstructL ()
   {
-  iScrollbarIsVisible = ETrue;
   iPreviouslyDrawnCurrentItemIndex = KErrNotFound;
   }
 

@@ -75,6 +75,10 @@ public:
     virtual void NotifyViewAdditionL( const CXnPluginData& aPluginData ) = 0;
 
     virtual void NotifyViewRemovalL( const CXnPluginData& aPluginData ) = 0;
+    
+    virtual void NotifyAllViewsLoadedL() = 0;
+    
+    virtual void NotifyContainerActivatedL( const CXnViewData& aViewData ) = 0;
     };
 
 /**
@@ -206,6 +210,8 @@ public:
     
     void PublishersReadyL( CXnViewData& aViewData, TInt aResult );
         
+    void NotifyAllViewsLoadedL();
+        
 private:
     // new functions
     
@@ -226,6 +232,8 @@ private:
     void NotifyWidgetAdditionL( const CXnPluginData& aPluginData );
 
     void NotifyWidgetRemovalL( const CXnPluginData& aPluginData );
+
+    void NotifyContainerActivatedL( const CXnViewData& aViewData );
 
     CXnViewData* ViewData( CXnNode& aNode ) const;
 

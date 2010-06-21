@@ -3979,7 +3979,7 @@ static TBool RunEventL(
         
         if ( focusedNode )
             {
-            aEngine.AppUiAdapter().ItemActivator().Activate( focusedNode );            
+            aEngine.AppUiAdapter().ItemActivator().ActivateL( focusedNode );            
             }
         
         return ETrue;
@@ -7632,7 +7632,7 @@ void CXnNodeImpl::SetStateL( const TDesC8& aState, TInt aSource )
 
     if ( activated )
         {
-        iUiEngine->AppUiAdapter().ItemActivator().Activate( iNode );
+        iUiEngine->AppUiAdapter().ItemActivator().ActivateL( iNode );
         }
 
     if ( stateChanged )
