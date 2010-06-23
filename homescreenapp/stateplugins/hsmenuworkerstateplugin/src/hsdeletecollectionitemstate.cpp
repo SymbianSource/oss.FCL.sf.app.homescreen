@@ -17,6 +17,7 @@
 
 #include <hbmessagebox.h>
 #include <hbaction.h>
+#include <HbParameterLengthLimiter>
 #include <hsmenuservice.h>
 #include <hsmenueventfactory.h>
 
@@ -32,7 +33,7 @@
 
 /*!
  Constructor.
- \param parent Owner.
+ \param parent Parent state. 
  */
 HsDeleteCollectionItemState::HsDeleteCollectionItemState(QState *parent) :
     QState(parent),
@@ -57,8 +58,10 @@ HsDeleteCollectionItemState::~HsDeleteCollectionItemState()
  */
 void HsDeleteCollectionItemState::construct()
 {
-    setObjectName(this->parent()->objectName()
-                  + "/DeleteCollectionItemState");
+    setObjectName("/DeleteCollectionItemState");
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
@@ -79,7 +82,7 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
 
     QString message;
     message.append(
-        hbTrId("txt_applib_dialog_remove_1_from_collection").arg(
+        HbParameterLengthLimiter("txt_applib_dialog_remove_1_from_collection").arg(
             HsMenuService::getName(mItemId)));
 
     // create and show message box

@@ -22,7 +22,7 @@
 
 /*!
     \class HsGui
-    \ingroup group_hsutils
+    \ingroup group_hsdomainmodel
     \brief Represents a view in the framework.
     HsGui includes common UI components for Home screen.
 */

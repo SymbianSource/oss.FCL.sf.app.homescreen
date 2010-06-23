@@ -15,13 +15,18 @@
 *
 */
 
+#include <QTranslator>
+#include <QCoreApplication>
+#include <QLocale>
 #include <QtPlugin>
-#include <hbdevicedialog.h>
-#include <HbMainWindow>
+
 #include <qservicemanager.h>
 
+#include <hbdevicedialog.h>
+#include <HbMainWindow>
+
 #include "tsdevicedialogplugin.h"
-#include "tsdevicedialog.h"
+#include "tsdevicedialogcontainer.h"
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
 #include "tsdocumentloader.h"
@@ -33,12 +38,16 @@
     \brief TaskSwitcher Device Dialog Plug-in.
  */
 
-const QString KTsDialogType = "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
-
+namespace
+{
+    const char KTranslationPath[] = "resource/qt/translations";
+    const char KTsDialogType[] = "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
+} 
+ 
 /*!
     Constructor.
  */
-TsDeviceDialogPlugin::TsDeviceDialogPlugin() : mError(0), mModel(0), mStorage(0)
+TsDeviceDialogPlugin::TsDeviceDialogPlugin() : mError(0), mModel(0), mStorage(0), mTriedToLoadTranslation(false)
 {
 }
 
@@ -56,7 +65,7 @@ bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType, const 
     Q_UNUSED(securityInfo)
 
     // This plugin doesn't perform operations that may compromise security.
-    // All clients are allowed to use.
+    // All clients are allowed to use it.
     return true;
 }
 
@@ -66,53 +75,50 @@ bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType, const 
 HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType, const QVariantMap &parameters)
 {
     Q_UNUSED(parameters)
-    TsDeviceDialog *dialog(0);
-    if (deviceDialogType == KTsDialogType) {
+    HbDeviceDialogInterface *dialogInterface(0);
+    if (deviceDialogType == QString(KTsDialogType)) {
+        // lazy loading of translation
+        if (!mTriedToLoadTranslation) {
+            mTriedToLoadTranslation = true;
+
+            QTranslator *translator = new QTranslator(this);
+            QString translationFile = QString("taskswitcher_%1").arg(QLocale::system().name());
+    
+            bool translationLoaded(false);
+            #ifdef Q_OS_SYMBIAN
+                translationLoaded = translator->load(translationFile, QString("z:/") + KTranslationPath);
+                if (!translationLoaded) {
+                    translationLoaded = translator->load(translationFile, QString("c:/") + KTranslationPath);
+                }
+            #else
+                translationLoaded = translator->load(translationFile, QString(KTranslationPath));
+            #endif //Q_OS_SYMBIAN
+
+            Q_ASSERT(translationLoaded);
+            qApp->installTranslator(translator);
+        }
+    
+        // lazy loading of model
         if (0 == mModel) {
             mStorage = new TsTaskMonitor(this);
             if (0 == mStorage) {
-                return 0;
+                return 0; // provider of running application list is critical
             }
+            
             QtMobility::QServiceManager serviceManager;
-            QObject *objPtr(serviceManager.loadInterface("com.nokia.qt.activities.ActivityManager"));
-            if (objPtr) {
-                objPtr->setParent(this);//make it autodestucted
+            QObject *activityManager(serviceManager.loadInterface("com.nokia.qt.activities.ActivityManager"));
+            if (activityManager) {
+                activityManager->setParent(this); //make it autodestructed
             } else {
-                objPtr = this;//activity plugin is not present. provide invalid instance because its not critical functionality.
+                activityManager = this; //activity plugin is not present. provide invalid instance because its not critical functionality.
                 //QMetaObject::invokeMethod is safe to use in such a case.
             }
-            mModel = new TsModel(*mStorage, *objPtr);
+            mModel = new TsModel(*mStorage, *activityManager);
         }
-
-        mLoader.reset();
-        bool ok(true);
-        mLoader.load(":/xml/resource/layout.docml", &ok);
-        Q_ASSERT(ok);
-
-        dialog = qobject_cast<TsDeviceDialog *>(mLoader.findWidget("tsdevicedialog"));
-        TsTasksGrid *grid = qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
-        Q_ASSERT(dialog);
-        Q_ASSERT(grid);
-
-        dialog->changeOrientation(dialog->mainWindow()->orientation());
-
-        grid->setItemPrototype(new TsTasksGridItem());
-        grid->setModel(mModel);
-
-        //static_cast<TsModel *>(mModel)->updateModel();
-
-        // connect the grid and model
-        qRegisterMetaType<QModelIndex>("QModelIndex");
         
-        disconnect(grid, SIGNAL(activated(QModelIndex)), mModel, SLOT(openApplication(QModelIndex)));
-        disconnect(grid, SIGNAL(activated(QModelIndex)), dialog, SLOT(close()));
-        disconnect(grid, SIGNAL(deleteButtonClicked(QModelIndex)), mModel, SLOT(closeApplication(QModelIndex)));
-        
-        connect(grid, SIGNAL(activated(QModelIndex)), mModel, SLOT(openApplication(QModelIndex)));
-        connect(grid, SIGNAL(activated(QModelIndex)), dialog, SLOT(close()));
-        connect(grid, SIGNAL(deleteButtonClicked(QModelIndex)), mModel, SLOT(closeApplication(QModelIndex)), Qt::QueuedConnection);
+        dialogInterface = new TsDeviceDialogContainer(mModel);
     }
-    return dialog;
+    return dialogInterface;
 }
 
 /*!
@@ -135,7 +141,7 @@ bool TsDeviceDialogPlugin::deviceDialogInfo(const QString &deviceDialogType, con
  */
 QStringList TsDeviceDialogPlugin::deviceDialogTypes() const
 {
-    return QStringList(KTsDialogType);
+    return QStringList(QString(KTsDialogType));
 }
 
 /*!

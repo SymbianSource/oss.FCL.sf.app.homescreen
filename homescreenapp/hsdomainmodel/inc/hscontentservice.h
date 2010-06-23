@@ -40,11 +40,14 @@ public:
     bool addWidget(const QString &uri, const QVariantHash &preferences);
 
     static HsContentService *instance();
+private slots:
+    void widgetStartFaulted();
+private:
+    Q_DISABLE_COPY(HsContentService)
 
 private:
     static HsContentService *mInstance;
-
-    Q_DISABLE_COPY(HsContentService)
+    bool mWidgetStartFaulted;
 };
 
 Q_DECLARE_METATYPE(HsContentService*)

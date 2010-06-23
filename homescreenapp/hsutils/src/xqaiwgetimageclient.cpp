@@ -33,6 +33,12 @@
 #endif //COVERAGE_MEASUREMENT
 
 
+/*!
+    \class XQAIWGetImageClient
+    \ingroup group_hsutils
+    \brief 
+*/
+
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
@@ -56,11 +62,8 @@ XQAIWGetImageClient::~XQAIWGetImageClient()
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-void XQAIWGetImageClient::fetch( QVariantMap filter, XQAIWMultimediaFlags flag)
+void XQAIWGetImageClient::fetch()
 {
-    Q_UNUSED(filter)
-    Q_UNUSED(flag)
-
     QStringList imageDirNames;
     QStringList imageDirs;
 
@@ -124,14 +127,11 @@ void XQAIWGetImageClient::imageSelected(const QString& val)
 {
     Q_UNUSED(val)
     mImageGrid->disconnect(this);
-    QStringList list;
-
-    list << val;
 
     HbMainWindow *window = HbInstance::instance()->allMainWindows().first();
     window->removeView(mImageGrid);
     
-    emit fetchComplete(list);
+    emit fetchCompleted(val);
     QStringList images;
     mImageGrid->setContent(images);
 }
@@ -151,7 +151,8 @@ void XQAIWGetImageClient::imageSelectionCancelled()
     HbMainWindow *window = HbInstance::instance()->allMainWindows().first();
     window->removeView(mImageGrid);
     
-    emit fetchFailed(-1);//KErrNotFound
+    emit fetchFailed(-1, QString("")); //KErrNotFound
+
     QStringList images;
     mImageGrid->setContent(images);
 }

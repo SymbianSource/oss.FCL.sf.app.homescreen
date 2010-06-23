@@ -31,10 +31,14 @@ class HsPageIndicator;
 class HsIdleWidget : public HbWidget
 {
     Q_OBJECT
+    Q_PROPERTY(qreal sceneX READ sceneX WRITE setSceneX)
 
 public:
     HsIdleWidget(QGraphicsItem *parent = 0);
 	~HsIdleWidget();
+
+    qreal sceneX() const;
+    void setSceneX(qreal x);
 
     void setGeometry(const QRectF &rect);
 
@@ -48,10 +52,13 @@ public:
 
     HbWidget *controlLayer() const { return mControlLayer; }
     HbWidget *pageLayer() const { return mPageLayer; }
+    HbWidget *pageWallpaperLayer() const { return mPageWallpaperLayer; }
     HbWidget *sceneLayer() const { return mSceneLayer; }
 
     HsTrashBinWidget *trashBin() const { return mTrashBin; }
     HsPageIndicator *pageIndicator() const { return mPageIndicator; }
+
+    qreal parallaxFactor() const;
 
 signals:    
     void mousePressed(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
@@ -70,20 +77,17 @@ protected:
 private:
     Q_DISABLE_COPY(HsIdleWidget)
     void loadControlLayer();
-    void setItemsUnfocusable(QGraphicsSceneMouseEvent *event);
-    void setItemsFocusable();
-
+        
 private:
     HbWidget *mControlLayer;
     HbWidget *mPageLayer;
+    HbWidget *mPageWallpaperLayer;
     HbWidget *mSceneLayer;
 
     QMouseEvent *mDelayedPressEvent;
 
     HsTrashBinWidget *mTrashBin;
     HsPageIndicator *mPageIndicator;
-
-    QList<QGraphicsItem *> mFocusableItems;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };

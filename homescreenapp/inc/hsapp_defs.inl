@@ -289,4 +289,15 @@ inline const QString componentIdAttributeName()
     return key;
 }
 
+/*!
+    \return entry short name
+*/
+inline const QString entryShortName()
+{
+    static const QString key("short_name");
+    return key;
+}
+
+
+
 #endif

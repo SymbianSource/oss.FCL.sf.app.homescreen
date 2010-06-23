@@ -149,7 +149,7 @@ void HsAnalogClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *even
         return;
     }
 
-    HbInstantFeedback::play(HsConfiguration::clockWidgetTapFeedbackType());
+    HbInstantFeedback::play(HSCONFIGURATION_GET(clockWidgetTapFeedbackEffect));
 
     emit clockTapped();
 }

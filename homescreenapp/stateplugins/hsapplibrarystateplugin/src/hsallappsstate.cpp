@@ -293,21 +293,25 @@ void HsAllAppsState::listItemActivated(const QModelIndex &index)
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::listItemActivated");
 
     QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(index);
-
+    
     if (entry->entryTypeName() == widgetTypeName()) {
-        machine()->postEvent(
-            HsMenuEventFactory::createPreviewHSWidgetEvent(
-                entry->id(), entry->entryTypeName(), entry->attribute(
-                    widgetUriAttributeName()), entry->attribute(
-                    widgetLibraryAttributeName())));
+        EntryFlags flags = index.data(CaItemModel::FlagsRole).value<
+                               EntryFlags> ();
+        if (!(flags & UninstallEntryFlag)) {
+            machine()->postEvent(
+                HsMenuEventFactory::createPreviewHSWidgetEvent(
+                    entry->id(), entry->entryTypeName(), entry->attribute(
+                        widgetUriAttributeName()), entry->attribute(
+                        widgetLibraryAttributeName())));
 
-        const int itemId = index.data(CaItemModel::IdRole).toInt();
-        HsMenuService::touch(itemId);
+            const int itemId = index.data(CaItemModel::IdRole).toInt();
+            HsMenuService::touch(itemId);
+        }
     } else {
         QVariant data = mAllAppsModel->data(index, CaItemModel::IdRole);
         HsMenuService::executeAction(data.toInt());
     }
-
+    
     mMenuView.setSearchPanelVisible(false);
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::listItemActivated");
@@ -334,50 +338,51 @@ void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::listItemLongPressed");
 
-
-    // create context menu
-    mContextMenu = new HbMenu;
-
-    HbAction *addToHomeScreenAction = mContextMenu->addAction(hbTrId(
-                                          "txt_applib_menu_add_to_home_screen"));
-    addToHomeScreenAction->setData(AddToHomeScreenContextAction);
-
-    HbAction *addToCollectionAction = mContextMenu->addAction(hbTrId(
-                                          "txt_applib_menu_add_to_collection"));
-    addToCollectionAction->setData(AddToCollectionContextAction);
-
-    HbAction *uninstallAction = mContextMenu->addAction(hbTrId(
-                                    "txt_common_menu_delete"));
-    uninstallAction->setData(UninstallContextAction);
-    HbAction *appSettingsAction(NULL);
-    HbAction *appDetailsAction(NULL);
-
-    // check conditions and hide irrelevant menu items
-
-    QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(item->modelIndex());
     EntryFlags flags = item->modelIndex().data(
                            CaItemModel::FlagsRole).value<EntryFlags> ();
 
-    if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
-        appSettingsAction = mContextMenu->addAction(hbTrId(
-                                                "txt_common_menu_settings"));
-        appSettingsAction->setData(AppSettingContextAction);
-    }
-    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) && 
-            (flags & RemovableEntryFlag) ) {
-        appDetailsAction = mContextMenu->addAction(hbTrId(
-                                                "txt_common_menu_details"));
-        appDetailsAction->setData(AppDetailsContextAction);
-    }        
+    if (!(flags & UninstallEntryFlag)) {
+        // create context menu
+        mContextMenu = new HbMenu;
 
-    if (!(flags & RemovableEntryFlag)) {
-        uninstallAction->setVisible(false);
-    }
+        HbAction *addToHomeScreenAction = mContextMenu->addAction(
+            hbTrId("txt_applib_menu_add_to_home_screen"));
+        addToHomeScreenAction->setData(AddToHomeScreenContextAction);
 
-    mContextModelIndex = item->modelIndex();
-    mContextMenu->setPreferredPos(coords);
-    mContextMenu->setAttribute(Qt::WA_DeleteOnClose);
-    mContextMenu->open(this, SLOT(contextMenuAction(HbAction*)));
+        HbAction *addToCollectionAction = mContextMenu->addAction(
+            hbTrId("txt_applib_menu_add_to_collection"));
+        addToCollectionAction->setData(AddToCollectionContextAction);
+
+        HbAction *uninstallAction = mContextMenu->addAction(
+            hbTrId("txt_common_menu_delete"));
+        uninstallAction->setData(UninstallContextAction);
+        HbAction *appSettingsAction(NULL);
+        HbAction *appDetailsAction(NULL);
+
+        // check conditions and hide irrelevant menu items
+        QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(item->modelIndex());
+
+        if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
+            appSettingsAction = mContextMenu->addAction(
+                hbTrId("txt_common_menu_settings"));
+            appSettingsAction->setData(AppSettingContextAction);
+        }
+        if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
+                (flags & RemovableEntryFlag) ) {
+            appDetailsAction = mContextMenu->addAction(
+                hbTrId("txt_common_menu_details"));
+            appDetailsAction->setData(AppDetailsContextAction);
+        }
+
+        if (!(flags & RemovableEntryFlag)) {
+            uninstallAction->setVisible(false);
+        }
+
+        mContextModelIndex = item->modelIndex();
+        mContextMenu->setPreferredPos(coords);
+        mContextMenu->setAttribute(Qt::WA_DeleteOnClose);
+        mContextMenu->open(this, SLOT(contextMenuAction(HbAction*)));
+    }
 
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::listItemLongPressed");
@@ -406,8 +411,7 @@ void HsAllAppsState::contextMenuAction(HbAction *action)
             break;
         case UninstallContextAction:
             machine()->postEvent(
-                HsMenuEventFactory::createUninstallApplicationEvent(
-                    itemId));
+                HsMenuEventFactory::createUninstallApplicationEvent(itemId));
             break;
         case AppSettingContextAction: 
             machine()->postEvent(

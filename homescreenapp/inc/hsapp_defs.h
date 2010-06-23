@@ -46,6 +46,7 @@ inline const QString packageTypeName();
 inline const QString appSettingsPlugin();
 inline const QString groupNameAttributeName();
 inline const QString componentIdAttributeName();
+inline const QString entryShortName();
 
 // Sort attribute
 enum HsSortAttribute {

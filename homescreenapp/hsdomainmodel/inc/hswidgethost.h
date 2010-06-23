@@ -26,7 +26,7 @@
 #include "hsdomainmodeldatastructures.h"
 
 #include "hstest_global.h"
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class QStateMachine;
 
@@ -138,7 +138,7 @@ private:
 	QMetaProperty mRootPathProperty;        
     bool mIsFinishing;
 
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSWIDGETHOST_H

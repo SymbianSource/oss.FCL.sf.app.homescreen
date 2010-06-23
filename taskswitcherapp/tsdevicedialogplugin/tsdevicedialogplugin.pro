@@ -20,7 +20,7 @@ MOBILITY = serviceframework
 
 include (../common.pri)
 
-HEADERS +=  inc/tsdevicedialog.h \
+HEADERS +=  inc/tsdevicedialogcontainer.h \
             inc/tsdevicedialogplugin.h \
             inc/tsmodel.h \
             inc/tsmodelitem.h \
@@ -31,7 +31,7 @@ HEADERS +=  inc/tsdevicedialog.h \
             inc/tsdocumentloader.h \
             inc/tsdataroles.h \
 
-SOURCES +=  src/tsdevicedialog.cpp \
+SOURCES +=  src/tsdevicedialogcontainer.cpp \
             src/tsdevicedialogplugin.cpp \
             src/tsmodel.cpp \
             src/tsentrymodelitem.cpp \
@@ -55,7 +55,7 @@ symbian {
     pluginstub.sources = tsdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs
     
-    LIBS += -lxqsettingsmanager
+    LIBS += -lxqsettingsmanager -lapparc -lapgrfx
     
     # ugly hack
     translation.sources = ./*.qm

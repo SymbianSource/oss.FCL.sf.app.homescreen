@@ -19,20 +19,14 @@
 #define HSDATABASE_H
 
 #include <QObject>
-#include <QScopedPointer>
 #include <QVariantHash>
 
 #include "hsdomainmodel_global.h"
-
-#include <HbFeedback>
 
 class HsSceneData;
 class HsPageData;
 class HsWidgetData;
 class HsWidgetPresentationData;
-class HsGeneralConfiguration;
-class HsFeedbackConfiguration;
-class HsSnapConfiguration;
 
 class HSDOMAINMODEL_EXPORT HsDatabase : public QObject
 {
@@ -57,8 +51,7 @@ public:
     bool commit();
 
     bool scene(HsSceneData &data);
-    bool updateScene(const HsSceneData &data);
-
+    
     bool pages(QList<HsPageData> &data);
     bool page(HsPageData &data);
     bool insertPage(HsPageData &data);
@@ -81,10 +74,8 @@ public:
     bool widgetPreference(int widgetId, const QString &key, QVariant &value);
     bool setWidgetPreferences(int widgetId, const QVariantHash &data);
 
-    bool generalConfiguration(HsGeneralConfiguration &data);
-    bool feedbackConfiguration(HsFeedbackConfiguration &data);
-    bool snapConfiguration(HsSnapConfiguration &data);
-    
+    bool configuration(QVariantHash &configuration);
+
 public:
     static void setInstance(HsDatabase *instance);
     static HsDatabase *instance();

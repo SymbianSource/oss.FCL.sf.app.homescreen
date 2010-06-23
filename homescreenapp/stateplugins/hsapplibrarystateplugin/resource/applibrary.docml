@@ -38,9 +38,6 @@
         <widget name="allAppsView" type="HbView">
             <widget name="allAppsContainer" role="HbView:widget" type="HbWidget">
                 <widget name="allAppsListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -75,9 +72,6 @@
                     <bool name="visible" value="FALSE"/>
                 </widget>
                 <widget name="allAppsSearchListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -98,9 +92,6 @@
         <widget name="allCollectionsView" type="HbView">
             <widget name="allCollectionsContainer" role="HbView:widget" type="HbWidget">
                 <widget name="allCollectionsListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -136,9 +127,6 @@
                     <bool name="visible" value="FALSE"/>
                 </widget>
                 <widget name="allCollectionsSearchListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -166,9 +154,6 @@
                     <integer name="groupBoxType" value="1"/>
                 </widget>
                 <widget name="installedAppsListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -217,9 +202,6 @@
                     <bool name="visible" value="FALSE"/>
                 </widget>
                 <widget name="installedAppsSearchListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -303,9 +285,6 @@
                     <integer name="groupBoxType" value="1"/>
                 </widget>
                 <widget name="collectionListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>
@@ -357,9 +336,6 @@
                     <bool name="visible" value="FALSE"/>
                 </widget>
                 <widget name="collectionSearchListView" type="HbListView">
-                    <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
-                        <enums name="graphicsSize" value="LargeIcon"/>
-                    </widget>
                     <bool name="itemRecycling" value="TRUE"/>
                     <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
                     <sizehint height="100un" type="MAXIMUM" width="100un"/>

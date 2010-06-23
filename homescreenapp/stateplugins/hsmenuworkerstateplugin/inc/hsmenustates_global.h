@@ -38,7 +38,9 @@ static const char *const HS_APP_CHECK_LIST_LAYOUT =
 static const char *const HS_WIDGET_PREVIEW_DIALOG_LAYOUT =
     ":/xml/hswidgetpreviewdialog.docml";
 static const char *const HS_WIDGET_PREVIEW_DIALOG_NAME="preview_dialog";
-static const char *const HS_WIDGET_PREVIEW_SCROLL_AREA_NAME="preview_scroll_area";
+static const char *const HS_WIDGET_PREVIEW_LABEL_NAME="label";
+static const char *const HS_WIDGET_PREVIEW_ICON_BOX_NAME="icon_box";
+static const char *const HS_PREVIEW_ATTRIBUTE_NAME="preview_image_name";
 
 static const char *const HS_ARRANGE_DIALOG_LAYOUT =
     ":/xml/hsarrangedialog.docml";
@@ -48,6 +50,17 @@ static const char *const HS_ARRANGE_LIST_NAME="arrange_list";
 static const char *const HS_DETAILS_DIALOG_LAYOUT =
     ":/xml/hsdetailsdialog.docml";
 static const char *const HS_DETAILS_DIALOG_NAME="details_dialog";
+
+static const char *const HS_UNINSTALL_DIALOG_LAYOUT =
+    ":/xml/hsuninstalldialog.docml";
+static const char *const HS_UNINSTALL_DIALOG_NAME ="uninstall_dialog";
+static const char *const HS_UNINSTALL_DIALOG_DELETE_LABEL ="delete_message_label";
+static const char *const HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_LABEL ="confirmation_dialog_label";
+static const char *const HS_UNINSTALL_DIALOG_LIST_VIEW_LABEL ="list_view_label";
+static const char *const HS_UNINSTALL_DIALOG_CONFIRMATION_ACTION ="qtl_dialog_softkey_2_left";
+static const char *const HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_ICON ="icon";
+
+
 /*!
  To enable logging of function entry and exit use the following flag for qmake:
  -config nft

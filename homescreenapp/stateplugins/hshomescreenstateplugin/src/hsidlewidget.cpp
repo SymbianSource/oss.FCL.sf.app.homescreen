@@ -46,8 +46,8 @@ namespace
     \ingroup group_hshomescreenstateplugin
     \brief View part of the home screen idle state.
 
-    Maintains the idle view ui layers and takes care of 
-    receiving user input and communicating it to the idle 
+    Maintains the idle view ui layers and takes care of
+    receiving user input and communicating it to the idle
     state for further processing.
 */
 
@@ -56,12 +56,12 @@ namespace
 */
 HsIdleWidget::HsIdleWidget(QGraphicsItem *parent)
   : HbWidget(parent),
-    mControlLayer(0), mPageLayer(0), mSceneLayer(0),
-    mDelayedPressEvent(0),
+    mControlLayer(0), mPageLayer(0), mPageWallpaperLayer(0),
+    mSceneLayer(0), mDelayedPressEvent(0),
     mTrashBin(0), mPageIndicator(0)
 {
     setFlag(ItemHasNoContents);
-    
+
     loadControlLayer();
 
     QGraphicsLinearLayout *linearLayout = 0;
@@ -71,7 +71,14 @@ HsIdleWidget::HsIdleWidget(QGraphicsItem *parent)
     linearLayout->setSpacing(0);
     mPageLayer = new HbWidget(this);
     mPageLayer->setLayout(linearLayout);
-    mPageLayer->setZValue(1);
+    mPageLayer->setZValue(2);
+    
+    linearLayout = new QGraphicsLinearLayout(Qt::Horizontal);
+    linearLayout->setContentsMargins(0, 0, 0, 0);
+    linearLayout->setSpacing(0);
+    mPageWallpaperLayer = new HbWidget(this);
+    mPageWallpaperLayer->setLayout(linearLayout);
+    mPageWallpaperLayer->setZValue(1);
     
     linearLayout = new QGraphicsLinearLayout(Qt::Horizontal);
     linearLayout->setContentsMargins(0, 0, 0, 0);
@@ -94,12 +101,37 @@ HsIdleWidget::~HsIdleWidget()
         if (page->scene()) {
             page->scene()->removeItem(page);
         }
+        HsWallpaper *pageWallpaper = page->wallpaper();
+        if (pageWallpaper) {
+            pageWallpaper->setParentItem(0);
+            if (pageWallpaper->scene()) {
+                pageWallpaper->scene()->removeItem(pageWallpaper);
+            }
+        }
     }
 
-    HsWallpaper *wallpaper = HsScene::instance()->wallpaper();
-    wallpaper->setParentItem(0);
-    if (wallpaper->scene()) {
-        wallpaper->scene()->removeItem(wallpaper);
+    HsWallpaper *sceneWallpaper = HsScene::instance()->wallpaper();
+    if (sceneWallpaper) {
+        sceneWallpaper->setParentItem(0);
+        if (sceneWallpaper->scene()) {
+            sceneWallpaper->scene()->removeItem(sceneWallpaper);
+        }
+    }
+}
+
+qreal HsIdleWidget::sceneX() const
+{
+    return mPageLayer->x();
+}
+
+void HsIdleWidget::setSceneX(qreal x)
+{
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::SceneWallpaper) {
+        mPageLayer->setX(x);
+        mSceneLayer->setX((parallaxFactor() * x) - HSCONFIGURATION_GET(bounceEffect) / 2);
+    } else {
+        mPageLayer->setX(x);
+        mPageWallpaperLayer->setX(x);
     }
 }
 
@@ -113,7 +145,10 @@ void HsIdleWidget::setGeometry(const QRectF &rect)
     if (layoutRect == rect || (layoutRect.height() == rect.width() && layoutRect.width() == rect.height())) {
         mControlLayer->resize(rect.size());
 		mPageLayer->resize(n * rect.width(), rect.height());
-		mSceneLayer->resize(2 * rect.width() + HsConfiguration::bounceEffect(), rect.height());
+        if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+            mPageWallpaperLayer->resize(n * rect.width(), rect.height());
+        }
+		mSceneLayer->resize(2 * rect.width() + HSCONFIGURATION_GET(bounceEffect), rect.height());
 		HbWidget::setGeometry(rect);
 	} else {
 		QRectF sceneRect = mapToScene(rect).boundingRect();
@@ -141,7 +176,7 @@ void HsIdleWidget::sendDelayedPress()
 {
     if (mDelayedPressEvent) {
         QApplication::sendEvent(HsScene::mainWindow()->viewport(), mDelayedPressEvent);
-        clearDelayedPress();     
+        clearDelayedPress();
     }
 }
 
@@ -149,7 +184,7 @@ void HsIdleWidget::sendDelayedPress()
     Deletes the stored mouse press event.
 */
 void HsIdleWidget::clearDelayedPress()
-{    
+{
     if (mDelayedPressEvent) {
         delete mDelayedPressEvent;
         mDelayedPressEvent = 0;
@@ -157,7 +192,7 @@ void HsIdleWidget::clearDelayedPress()
 }
 
 /*!
-    Sets the active page \a index to the page 
+    Sets the active page \a index to the page
     indicator.
 */
 void HsIdleWidget::setActivePage(int index)
@@ -171,11 +206,19 @@ void HsIdleWidget::setActivePage(int index)
 */
 void HsIdleWidget::insertPage(int index, HsPage *page)
 {
-    QGraphicsLinearLayout *layout = 
+    QGraphicsLinearLayout *layout =
         static_cast<QGraphicsLinearLayout *>(mPageLayer->layout());
     layout->insertItem(index, page);
     mPageLayer->resize(
         layout->count() * size().width(), size().height());
+
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        QGraphicsLinearLayout *layout =
+            static_cast<QGraphicsLinearLayout *>(mPageWallpaperLayer->layout());
+        layout->insertItem(index, page->wallpaper());
+        mPageWallpaperLayer->resize(
+            layout->count() * size().width(), size().height());
+    }
 }
 
 /*!
@@ -184,11 +227,19 @@ void HsIdleWidget::insertPage(int index, HsPage *page)
 */
 void HsIdleWidget::removePage(int index)
 {
-    QGraphicsLinearLayout *layout = 
+    QGraphicsLinearLayout *layout =
         static_cast<QGraphicsLinearLayout *>(mPageLayer->layout());
     layout->removeAt(index);
     mPageLayer->resize(
         layout->count() * size().width(), size().height());
+
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        QGraphicsLinearLayout *layout =
+            static_cast<QGraphicsLinearLayout *>(mPageWallpaperLayer->layout());
+        layout->removeAt(index);
+        mPageWallpaperLayer->resize(
+            layout->count() * size().width(), size().height());
+    }
 }
 
 /*!
@@ -225,8 +276,8 @@ void HsIdleWidget::removePage(int index)
     \fn HsIdleWidget::mousePressed(QGraphicsItem *, QGraphicsSceneMouseEvent *, bool &)
 
     The idle state connects to this signal for handling mouse
-    press events. It filters events for the item \a watched. 
-    \a event is the filtered event. Sets the \a filtered true 
+    press events. It filters events for the item \a watched.
+    \a event is the filtered event. Sets the \a filtered true
     if the event was filtered by this handler.
 */
 
@@ -234,8 +285,8 @@ void HsIdleWidget::removePage(int index)
     \fn HsIdleWidget::mouseMoved(QGraphicsItem *, QGraphicsSceneMouseEvent *, bool &)
 
     The idle state connects to this signal for handling mouse
-    move events. It filters events for the item \a watched. 
-    \a event is the filtered event. Sets the \a filtered true 
+    move events. It filters events for the item \a watched.
+    \a event is the filtered event. Sets the \a filtered true
     if the event was filtered by this handler.
 */
 
@@ -243,8 +294,8 @@ void HsIdleWidget::removePage(int index)
     \fn HsIdleWidget::mouseReleased(QGraphicsItem *, QGraphicsSceneMouseEvent *, bool &)
 
     The idle state connects to this signal for handling mouse
-    release events. It filters events for the item \a watched. 
-    \a event is the filtered event. Sets the \a filtered true 
+    release events. It filters events for the item \a watched.
+    \a event is the filtered event. Sets the \a filtered true
     if the event was filtered by this handler.
 */
 
@@ -256,7 +307,7 @@ void HsIdleWidget::showTrashBin()
     mPageIndicator->hide();
     mTrashBin->show();
 }
- 
+
 /*!
     Sets the page indicator visible and hides the trashbin.
 */
@@ -264,7 +315,7 @@ void HsIdleWidget::showPageIndicator()
 {
     mTrashBin->hide();
     mTrashBin->deactivate();
-    mPageIndicator->setSpacing(HsConfiguration::pageIndicatorSpacing()); // for usability optimization widget, can be removed later on
+    mPageIndicator->setSpacing(HSCONFIGURATION_GET(pageIndicatorSpacing)); // for usability optimization widget, can be removed later on
     mPageIndicator->setVisible(1 < mPageIndicator->itemCount());
 }
 
@@ -274,31 +325,29 @@ void HsIdleWidget::showPageIndicator()
 bool HsIdleWidget::eventFilter(QObject *object, QEvent *event)
 {
     Q_UNUSED(object)
-
-    if (HbVkbHost::activeVkbHost()) {
-        setFiltersChildEvents(false);
-        return false;
-    }
-
+    
     bool filtered = false;
 
     switch (event->type()) {
     case QEvent::GraphicsSceneMousePress:
+        if (HbVkbHost::activeVkbHost()) {
+            setFiltersChildEvents(false);
+            break;
+        }
         if (mDelayedPressEvent &&
             scene()->mouseGrabberItem()) {
             scene()->mouseGrabberItem()->ungrabMouse();
         }
         setFiltersChildEvents(!mDelayedPressEvent);
         break;
-    case QEvent::GraphicsSceneMouseMove:
+    case QEvent::GraphicsSceneMouseMove:        
         emit mouseMoved(0, static_cast<QGraphicsSceneMouseEvent *>(event), filtered);
         break;
     case QEvent::GraphicsSceneMouseRelease:
-        setItemsFocusable();
         emit mouseReleased(0, static_cast<QGraphicsSceneMouseEvent *>(event), filtered);
         if (filtered && scene()->mouseGrabberItem()) {
             scene()->mouseGrabberItem()->ungrabMouse();
-        }        
+        }
         break;
     default:
         break;
@@ -317,10 +366,7 @@ bool HsIdleWidget::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
     switch (event->type()) {
     case QEvent::GraphicsSceneMousePress:
         emit mousePressed(watched, static_cast<QGraphicsSceneMouseEvent *>(event), filtered);
-        if (filtered) {
-            setItemsUnfocusable(static_cast<QGraphicsSceneMouseEvent *>(event));
-        }
-        break;    
+        break;
     default:
         break;
     }
@@ -336,16 +382,25 @@ void HsIdleWidget::polishEvent()
     HsScene *scene = HsScene::instance();
     Q_ASSERT(scene);
 
-    QGraphicsLinearLayout *layout = 
+    QGraphicsLinearLayout *pageLayout = 
         static_cast<QGraphicsLinearLayout *>(mPageLayer->layout());
-    QList<HsPage *> pages = scene->pages();
-    foreach (HsPage *page, pages) {
-        layout->addItem(page);
-    }
 
-    layout = static_cast<QGraphicsLinearLayout *>(mSceneLayer->layout());
-    HsWallpaper *wallpaper = HsScene::instance()->wallpaper();
-    layout->addItem(wallpaper);
+    QList<HsPage *> pages = scene->pages();
+
+    foreach (HsPage *page, pages) {
+        pageLayout->addItem(page);
+        if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+            QGraphicsLinearLayout *pageWallpaperLayout = 
+                static_cast<QGraphicsLinearLayout *>(mPageWallpaperLayer->layout());
+            pageWallpaperLayout->addItem(page->wallpaper());
+        }
+    }
+   if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::SceneWallpaper) {
+        QGraphicsLinearLayout *sceneLayout = 
+            static_cast<QGraphicsLinearLayout *>(mSceneLayer->layout());
+    	HsWallpaper *wallpaper = HsScene::instance()->wallpaper();
+        sceneLayout->addItem(wallpaper);
+    }
            
     mPageIndicator->initialize(pages.count(), scene->activePageIndex());    
     showPageIndicator();
@@ -376,12 +431,12 @@ void HsIdleWidget::loadControlLayer()
             loader.load(fallbackPath, &loaded);
         }
     } else {
-        loader.load(fallbackPath, &loaded);       
+        loader.load(fallbackPath, &loaded);
     }
 
     if (loaded) {
         mControlLayer = qobject_cast<HbWidget *>(loader.findWidget(gControlLayerName));
-        mControlLayer->setZValue(2);
+        mControlLayer->setZValue(3);
         mControlLayer->setParentItem(this);
 
         mTrashBin = qobject_cast<HsTrashBinWidget *>(loader.findWidget(gTrashBinName));
@@ -394,56 +449,14 @@ void HsIdleWidget::loadControlLayer()
     }
 }
 
-/*!
-    Sets the items under the given mouse \a event scene position 
-    unfocusable and stores the items.
-*/
-void HsIdleWidget::setItemsUnfocusable(QGraphicsSceneMouseEvent *event)
-{
-    mFocusableItems.clear();
-
-    if (!scene()) {
-        return;
+qreal HsIdleWidget::parallaxFactor() const
+{   
+    qreal clw = mControlLayer->size().width();
+    qreal slw = mSceneLayer->size().width() - HSCONFIGURATION_GET(bounceEffect);
+    int n = HsScene::instance()->pages().count();
+    if (n < 2) {
+        return 1;
+    } else {
+        return (slw - clw) / ((n - 1) * clw);
     }
-
-    QList<QGraphicsItem *> items = scene()->items(event->scenePos());
-    if (items.isEmpty()) {
-        return;
-    }
-
-    int i = 0;
-    for (; i < items.count(); ++i) {
-        if (mPageLayer->isAncestorOf(items[i])) {
-            ++i;
-            break;
-        }
-    }
- 
-    HsPage *page = HsScene::instance()->activePage();
-    QList<HsWidgetHost *> widgets = page->widgets();
-    
-    for (; i < items.count(); ++i) {
-        QGraphicsItem *item = items.at(i);
-        if (page->isAncestorOf(item)) {
-            foreach (HsWidgetHost *widget, widgets) {
-                if ((item == widget || widget->isAncestorOf(item))&& item->isEnabled() && (item->flags() & QGraphicsItem::ItemIsFocusable)) {
-                    if (!item->isWidget() || static_cast<QGraphicsWidget *>(item)->focusPolicy() & Qt::ClickFocus) {
-                        item->setFlag(QGraphicsItem::ItemIsFocusable, false);
-                        mFocusableItems.append(item);
-                    }
-                }
-            }
-        }
-    }
-}
- 
-/*!
-    Sets the stored items focusable.
-*/
-void HsIdleWidget::setItemsFocusable()
-{
-    foreach (QGraphicsItem *item, mFocusableItems) {
-        item->setFlag(QGraphicsItem::ItemIsFocusable);
-    }
-    mFocusableItems.clear();
 }

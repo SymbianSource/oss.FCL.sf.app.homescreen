@@ -17,12 +17,13 @@
 
 
 #include <hblabel.h>
-//#include <hsiwidgetprovider.h>
 #include <hbmessagebox.h>
 #include <qstatemachine.h>
 #include <hbaction.h>
 #include <HbDocumentLoader>
 #include <hbdialog.h>
+#include <HbIcon>
+#include <HbLabel>
 #include <hbwidget.h>
 #include <hbscrollarea.h>
 #include <hbscrollbar.h>
@@ -44,7 +45,6 @@
 #include "hsdomainmodel_global.h"
 #include <hscontentservice.h>
 
-const char HS_PREVIEW_HS_WIDGET_STATE[] = "HsPreviewHSWidgetState";
 
 /*!
  \class HsPreviewHSWidgetState
@@ -57,19 +57,21 @@ const char HS_PREVIEW_HS_WIDGET_STATE[] = "HsPreviewHSWidgetState";
 
 /*!
  Constructor
- \param parent: parent state
+ \param parent Parent state.
  \retval void
  */
 HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
-    HsMenuBaseState(HS_PREVIEW_HS_WIDGET_STATE, parent),
-    mPopupDialog(0),
+    QState(parent),
+    mPreviewDialog(0),
     mNotifier(0),
-    mScrollArea(0),
     mWidget(0),
     mEntryId(0),
     mCorruptedMessage(0)
 {
-    requestServices(QList<QVariant> () << CONTENT_SERVICE_KEY);
+    setObjectName("/HsPreviewHSWidgetState");
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
@@ -93,13 +95,10 @@ HsPreviewHSWidgetState::~HsPreviewHSWidgetState()
  \param shortcutService: service for adding shortcuts
  \retval void
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsPreviewHSWidgetState::onEntry(QEvent *event)
 {
     HSMENUTEST_FUNC_ENTRY("HsPreviewHSWidgetState::onEntry");
-    HsMenuBaseState::onEntry(event);
+    QState::onEntry(event);
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
@@ -109,47 +108,21 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
     widgetData.insert(LIBRARY, data.value(widgetLibraryAttributeName()).toString());
     widgetData.insert(URI, data.value(widgetUriAttributeName()).toString());
 
-    QScopedPointer<HsWidgetHost> widget(contentService()->createWidgetForPreview(widgetData));
+    mWidget.reset(
+        HsContentService::instance()->createWidgetForPreview(widgetData));
 
-    if (widget) {
-        widget->setMinimumSize(widget->preferredWidth(),widget->preferredHeight());
-
-        HbDocumentLoader loader;
-
-        bool loadStatusOk = false;
-        mObjectList = 
-            loader.load(HS_WIDGET_PREVIEW_DIALOG_LAYOUT, &loadStatusOk);
-        Q_ASSERT_X(loadStatusOk,
-            HS_WIDGET_PREVIEW_DIALOG_LAYOUT,
-               "Error while loading docml file.");
-
-        mPopupDialog = 
-            qobject_cast<HbDialog*>(
-                loader.findWidget(HS_WIDGET_PREVIEW_DIALOG_NAME));
-
-        mScrollArea =
-            qobject_cast<HbScrollArea*>(
-                loader.findWidget(HS_WIDGET_PREVIEW_SCROLL_AREA_NAME));
-
-        // set parent to actions to delete them together with dialog
-        mPopupDialog->actions()[0]->setParent(mPopupDialog);
-        mPopupDialog->actions()[1]->setParent(mPopupDialog);
-
-        if (mPopupDialog != NULL && mScrollArea != NULL) {
-            mPopupDialog->setContentWidget(mScrollArea); // ownership transferred
-            mPopupDialog->setTimeout(HbPopup::NoTimeout);
-            mPopupDialog->setAttribute(Qt::WA_DeleteOnClose, true);
-            mScrollArea->verticalScrollBar()->setInteractive(true);
-            mScrollArea->horizontalScrollBar()->setInteractive(true);
-            mWidget = widget.take(); // ownership transfered
-            mScrollArea->setContentWidget(mWidget); // ownership transferred
-            
+    if (!mWidget.isNull()) {
+        
+        QSharedPointer<CaEntry> entry = 
+            CaService::instance()->getEntry(mEntryId);
+        
+        mPreviewDialog = buildPreviewDialog(*entry);
+        
+        if (mPreviewDialog != NULL) {
             subscribeForMemoryCardRemove();
-            mWidget->startWidget();
             // Launch popup asyncronously
-            mPopupDialog->open(this, SLOT(previewDialogFinished(HbAction*)));    
+            mPreviewDialog->open(this, SLOT(previewDialogFinished(HbAction*)));    
         }
-
     } else {
         subscribeForMemoryCardRemove();
         showMessageWidgetCorrupted();
@@ -157,9 +130,6 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
 
     HSMENUTEST_FUNC_EXIT("HsPreviewHSWidgetState::onEntry");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot launched after state has exited and in destructor.
@@ -168,20 +138,21 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
 void HsPreviewHSWidgetState::cleanUp()
 {
     // Close popups if App key was pressed or memory card removed
-    if (mPopupDialog) {
-        disconnect(mPopupDialog, SIGNAL(finished(HbAction*)), this, SLOT(previewDialogFinished(HbAction*)));
-        mPopupDialog->close();
-        mPopupDialog = NULL;
+    if (mPreviewDialog) {
+        disconnect(mPreviewDialog, SIGNAL(finished(HbAction*)), 
+            this, SLOT(previewDialogFinished(HbAction*)));
+        mPreviewDialog->close();
+        mPreviewDialog = NULL;
     }
 
     if (mCorruptedMessage) {
-        disconnect(mCorruptedMessage, SIGNAL(finished(HbAction*)), this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
+        disconnect(mCorruptedMessage, SIGNAL(finished(HbAction*)), 
+            this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
         mCorruptedMessage->close();
         mCorruptedMessage = NULL;
     }
 
-    mScrollArea = NULL;
-    mWidget = NULL;
+    mWidget.reset();
 
     disconnect(mNotifier,
                SIGNAL(entryChanged(CaEntry,ChangeType)),
@@ -197,20 +168,19 @@ void HsPreviewHSWidgetState::cleanUp()
  */
 void HsPreviewHSWidgetState::previewDialogFinished(HbAction* finishedAction)
 {
-    if (finishedAction == mPopupDialog->actions().value(0)) {
-        mWidget->hideWidget();
-        mScrollArea->takeContentWidget();
+    if (finishedAction == mPreviewDialog->actions().value(0)) {
+
         HsScene::instance()->activePage()->addNewWidget(
-            mWidget); // ownership transferred
+            mWidget.take()); // ownership transferred
         HbNotificationDialog *notificationDialog = new HbNotificationDialog();
         notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
         notificationDialog->setTitle(hbTrId(
                                      "txt_applib_dpophead_added_to_homescreen") );
         notificationDialog->show();
     } else {
-            mScrollArea->takeContentWidget();
             mWidget->remove();
-            mWidget = NULL;
+            mWidget.take();   
+            mWidget.reset();
     }
     emit exit();
 }
@@ -236,9 +206,6 @@ void HsPreviewHSWidgetState::subscribeForMemoryCardRemove()
  Shows message about corrupted widget library. Deletes widget eventually
  \retval void
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
@@ -259,9 +226,6 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
     mCorruptedMessage->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot launched on dismissing the corrupted widget error note
@@ -274,3 +238,56 @@ void HsPreviewHSWidgetState::messageWidgetCorruptedFinished(HbAction* finishedAc
     }
     emit exit();
 }
+
+/*!
+ \param entry The entry which is to be presented by the preview dialog.
+ \return Preview popup for a given entry on success, NULL otherwise. 
+  Ownership is passed to the caller.
+ */
+HbDialog* HsPreviewHSWidgetState::buildPreviewDialog(const CaEntry& entry) const
+{
+    HbDocumentLoader loader;
+
+    bool loadStatusOk = false;
+    loader.load(HS_WIDGET_PREVIEW_DIALOG_LAYOUT, &loadStatusOk);
+    
+    HbDialog *const previewDialog = 
+        qobject_cast<HbDialog*>(
+            loader.findWidget(HS_WIDGET_PREVIEW_DIALOG_NAME));
+    HbLabel *const headingLabel =
+        qobject_cast<HbLabel*>(
+            loader.findWidget(HS_WIDGET_PREVIEW_LABEL_NAME));
+    HbLabel *const iconBox =
+        qobject_cast<HbLabel*>(
+            loader.findWidget(HS_WIDGET_PREVIEW_ICON_BOX_NAME));
+    
+    loadStatusOk = loadStatusOk && (previewDialog != NULL)
+        && (headingLabel != NULL) && (iconBox != NULL);
+    
+    Q_ASSERT_X(loadStatusOk,
+        HS_WIDGET_PREVIEW_DIALOG_LAYOUT,
+           "Cannot initialize widgets based on docml file.");
+    
+    if (loadStatusOk) {
+        previewDialog->actions()[0]->setParent(previewDialog);
+        previewDialog->actions()[1]->setParent(previewDialog);
+        
+        previewDialog->setTimeout(HbPopup::NoTimeout);
+        previewDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+        
+        headingLabel->setPlainText(entry.text());
+        
+        const QString previewImageName(entry.attribute(
+            QLatin1String(HS_PREVIEW_ATTRIBUTE_NAME))); 
+        
+        if (!previewImageName.isEmpty()) {
+            const HbIcon previewImage(previewImageName);
+            if (previewImage.size().isValid()) {
+                iconBox->setIcon(previewImage);
+            }
+        }
+    }
+    
+    return previewDialog;
+}
+

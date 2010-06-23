@@ -49,11 +49,6 @@ void HsMainWindow::setCurrentView(const HsMenuView &menuView)
     if (!hbW->views().contains(view)) {
         hbW->addView(view);
     }
-    if (hbW->currentView() && !hbW->currentView()->isContentFullScreen()) {
-        // quick trick to know if we are not comming from IDLE
-        hbW->setCurrentView(view, true, Hb::ViewSwitchUseAltEvent);
-    } else {
-        hbW->setCurrentView(view);
-    }    
+    hbW->setCurrentView(view);
 }
 

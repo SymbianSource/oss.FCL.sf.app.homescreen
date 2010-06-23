@@ -16,10 +16,13 @@
 */
 #include "tstasksgriditem.h"
 
-#include <hblabel.h>
-#include <hbpushbutton.h>
-#include <hbabstractitemview.h>
-#include <hbanchorlayout.h>
+#include <HbPushButton>
+#include <HbAbstractItemView>
+#include <HbFrameItem>
+#include <HbTextItem>
+#include <HbIconItem>
+#include <HbStyleLoader>
+
 #include "tsdataroles.h"
 
 /*!
@@ -29,51 +32,44 @@
 */
 
 
-TsTasksGridItem::TsTasksGridItem() : HbAbstractViewItem(), mScreenshotLabel(0), mApplicationNameLabel(0), mDeleteButton(0)
+TsTasksGridItem::TsTasksGridItem() : HbAbstractViewItem(), mScreenshotLabel(0), mApplicationNameLabel(0), mDeleteButton(0), mActiveLabelFrame(0), mActiveLabel(0)
 {
+    // Register the custom docml and css to provide our own style to the list items
+    bool widgetmlLoaded = HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.widgetml");
+    Q_ASSERT(widgetmlLoaded);
+    bool cssLoaded = HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.css");
+    Q_ASSERT(cssLoaded);
 }
 
 TsTasksGridItem::TsTasksGridItem(const TsTasksGridItem &item) : HbAbstractViewItem(item)
 {
-    // add screenshot
-    mScreenshotLabel = new HbLabel();
-    mScreenshotLabel->setAlignment(Qt::AlignHCenter);
+    mScreenshotLabel = new HbIconItem(this);
+    mApplicationNameLabel = new HbTextItem(this);
+    mDeleteButton = new HbPushButton(this);
+    HbFrameItem *screenshotFrame = new HbFrameItem(this);    
+    screenshotFrame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+    screenshotFrame->frameDrawer().setFrameGraphicsName("qtg_fr_multimedia_trans");
 
-    // add application name label
-    mApplicationNameLabel = new HbLabel();
-    mApplicationNameLabel->setAlignment(Qt::AlignCenter);
+    HbFrameItem *applicationLabelFrame = new HbFrameItem(this);
+    applicationLabelFrame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+    applicationLabelFrame->frameDrawer().setFrameGraphicsName("qtg_fr_multimedia_trans");
 
-    // add close app button
-    HbIcon deleteIcon(":/resource/delete.png");
-    mDeleteButton = new HbPushButton();
-    mDeleteButton->setIcon(deleteIcon);
-    mDeleteButton->setPreferredSize(48, 48);
-    mDeleteButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    mDeleteButton->setEnabled(true);
+    mActiveLabel = new HbTextItem(hbTrId("txt_tsw_label_active"), this);
+    mActiveLabelFrame = new HbFrameItem(this);
+    mActiveLabelFrame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+    mActiveLabelFrame->frameDrawer().setFrameGraphicsName("qtg_fr_multimedia_trans");
+
+    mDeleteButton->setIcon(HbIcon("qtg_mono_exit"));
+
+    HbStyle::setItemName(mScreenshotLabel, "screenshot");
+    HbStyle::setItemName(mApplicationNameLabel, "appname");
+    HbStyle::setItemName(mDeleteButton, "closebadge");
+    mDeleteButton->setObjectName("closebadge");
+    HbStyle::setItemName(screenshotFrame, "screenshotFrame");
+    HbStyle::setItemName(applicationLabelFrame, "applicationLabelFrame");
+    HbStyle::setItemName(mActiveLabel, "activeLabel");
+    HbStyle::setItemName(mActiveLabelFrame, "activeLabelFrame");
     connect(mDeleteButton, SIGNAL(clicked()), this, SLOT(handleDeleteClicked()));
-    mDeleteButton->hide();
-
-    setContentsMargins(5, 5, 5, 5);
-
-    // add all items to layout
-    HbAnchorLayout *anchorLayout = new HbAnchorLayout();
-    anchorLayout->setAnchor(mApplicationNameLabel, Hb::LeftEdge, anchorLayout, Hb::LeftEdge, 0);
-    anchorLayout->setAnchor(mApplicationNameLabel, Hb::TopEdge, anchorLayout, Hb::TopEdge, 0);
-    anchorLayout->setAnchor(mApplicationNameLabel, Hb::RightEdge, anchorLayout, Hb::RightEdge, 0);
-
-    anchorLayout->setAnchor(mScreenshotLabel, Hb::TopEdge, mApplicationNameLabel, Hb::BottomEdge, 0);
-    anchorLayout->setAnchor(mScreenshotLabel, Hb::LeftEdge, anchorLayout, Hb::LeftEdge, 0);
-    anchorLayout->setAnchor(mScreenshotLabel, Hb::RightEdge, anchorLayout, Hb::RightEdge, 0);
-    anchorLayout->setAnchor(mScreenshotLabel, Hb::BottomEdge, anchorLayout, Hb::BottomEdge, 0);
-
-    anchorLayout->setAnchor(mDeleteButton, Hb::RightEdge, mScreenshotLabel, Hb::RightEdge, 0);
-    anchorLayout->setAnchor(mDeleteButton, Hb::TopEdge, mScreenshotLabel, Hb::TopEdge, 0);
-
-    setLayout(anchorLayout);
-}
-
-TsTasksGridItem::~TsTasksGridItem()
-{
 }
 
 HbAbstractViewItem *TsTasksGridItem::createItem()
@@ -91,12 +87,16 @@ void TsTasksGridItem::handleDeleteClicked()
 void TsTasksGridItem::updateChildItems()
 {
     mScreenshotLabel->setIcon(modelIndex().data(Qt::DecorationRole).value<HbIcon>());
-    mApplicationNameLabel->setPlainText(modelIndex().data(Qt::DisplayRole).toString());
+    mApplicationNameLabel->setText(modelIndex().data(Qt::DisplayRole).toString());
     QVariant status(modelIndex().data(TsDataRoles::Closable));
     const bool isRunning(status.isValid() && status.toBool());
     if (isRunning) {
         mDeleteButton->show();
+        mActiveLabel->show();
+        mActiveLabelFrame->show();
     } else {
         mDeleteButton->hide();
+        mActiveLabel->hide();
+        mActiveLabelFrame->hide();
     }
 }

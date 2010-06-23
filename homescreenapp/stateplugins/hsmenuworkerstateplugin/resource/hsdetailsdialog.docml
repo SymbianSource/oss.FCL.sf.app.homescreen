@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="0.9">
+<hbdocument version="1.1">
     <object name="qtl_dialog_softkey_left" type="HbAction">
         <string name="role" value="HbDialog:primaryAction"/>
-        <string name="role" value="HbDialog:primaryAction"/>
-        <string locid="txt_common_button_ok" name="text"/>
+        <string locid="txt_common_button_ok" name="text" value="Ok"/>
     </object>
     <widget name="details_dialog" type="HbDialog">
+        <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
         <widget name="qtl_dialog_pri_heading" role="HbDialog:headingWidget" type="HbLabel">
             <enums name="alignment" value="AlignLeft|AlignLeading"/>
             <contentsmargins bottom="var(hb-param-margin-gene-popup)" left="var(hb-param-margin-gene-popup)" right="var(hb-param-margin-gene-popup)" top="var(hb-param-margin-gene-popup)"/>
-            <string locid="txt_applib_title_details" name="plainText"/>
+            <string locid="txt_applib_title_details" name="plainText" value="Details"/>
             <fontspec name="fontSpec" role="Primary" textheight="var(hb-param-text-height-primary)"/>
             <string name="dismissPolicy" value="HbPopup::NoDismiss"/>
         </widget>
@@ -17,7 +17,7 @@
             <widget name="scrollAreaContents" role="HbScrollArea:contents" type="HbWidget">
                 <widget name="_name" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <string name="plainText" value="txt_applib_dialog_name"/>
+                    <string locid="txt_applib_dialog_name" name="plainText" value="Name:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="name" type="HbLabel">
@@ -26,7 +26,7 @@
                 </widget>
                 <widget name="_version" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <string name="plainText" value="txt_applib_dialog_version"/>
+                    <string locid="txt_applib_dialog_version" name="plainText" value="Version:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="version" type="HbLabel">
@@ -35,7 +35,7 @@
                 </widget>
                 <widget name="_vendor" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <string name="plainText" value="txt_applib_dialog_supplier"/>
+                    <string locid="txt_applib_dialog_supplier" name="plainText" value="Supplier:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="vendor" type="HbLabel">
@@ -44,25 +44,27 @@
                 </widget>
                 <widget name="_driveInfo" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <string name="plainText" value="txt_applib_dialog_memory_in_use"/>
+                    <string locid="txt_applib_dialog_memory_in_use" name="plainText" value="Memory in use:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="driveInfo" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <string locid="txt_applib_dialog_1_device_memory" name="plainText" value="%1 Device memory"/>
                 </widget>
                 <widget name="_size" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <string name="plainText" value="txt_applib_dialog_size"/>
+                    <string locid="txt_applib_dialog_size" name="plainText" value="Size:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="size" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <string locid="txt_applib_dialog_l1_kb" name="plainText" value="%L1 KB"/>
                 </widget>
                 <widget name="_type" type="HbLabel">
                     <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <string name="plainText" value="txt_applib_dialog_format"/>
+                    <string locid="txt_applib_dialog_format" name="plainText" value="Format:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="type" type="HbLabel">
@@ -86,10 +88,9 @@
                 </layout>
             </widget>
         </widget>
-        <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
-        <ref object="qtl_dialog_softkey_left" role="HbDialog:primaryAction"/>
+        <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
     </widget>
-    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
     </metadata>
 </hbdocument>

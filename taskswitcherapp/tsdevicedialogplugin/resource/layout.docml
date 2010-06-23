@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hbdocument version="0.10">
-    <widget name="tsdevicedialog" type="TsDeviceDialog">
+    <widget name="tsdevicedialog" type="HbDialog">
         <widget name="heading" role="HbDialog:headingWidget" type="HbLabel">
             <string name="alignment" value="AlignVCenter|AlignHCenter" />
             <string locid="txt_tsw_title_task_switcher" name="plainText" value="Task switcher" />
         </widget>
         <widget name="taskgrid" role="HbDialog:contentWidget" type="TsTasksGrid">
-            <string name="scrollDirections" value="Horizontal"/>
-            <integer name="rowCount" value="1"/>
-            <integer name="columnCount" value="2"/>
+            <widget name="item" role="HbAbstractView:prototype" type="TsTasksGridItem"/>
             <bool name="longPressEnabled" value="FALSE"/>
+            <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
         </widget>            
         <bool name="backgroundFaded" value="TRUE"/>
         <string name="dismissPolicy" value="TapOutside"/>
         <integer name="timeout" value="0"/>
         <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-        <sizehint type="PREFERRED" width="320.0px" height="320.0px"/>
     </widget>
     <section name="portrait">
         <widget name="tsdevicedialog">
-            <sizehint type="PREFERRED" width="320.0px" height="320.0px"/>
+            <sizehint type="PREFERRED" width="48un" height="40un"/>
         </widget>
         <widget name="taskgrid">
             <string name="scrollDirections" value="Horizontal"/>
@@ -29,7 +27,7 @@
     </section>
     <section name="landscape">
         <widget name="tsdevicedialog">
-            <sizehint type="PREFERRED" width="500.0px" height="320.0px"/>
+            <sizehint type="PREFERRED" width="60un" height="40un"/>
         </widget>
         <widget name="taskgrid">
             <string name="scrollDirections" value="Horizontal"/>

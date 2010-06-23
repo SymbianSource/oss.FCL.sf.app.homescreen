@@ -201,7 +201,7 @@ void TsModel::getActivities()
 void TsModel::prepareActivityEntry(QVariantHash &activity)
 {
     activity.insert(TsActivityModelItem::applicationKeyword(),
-                    activity.find(ActivityActivityKeyword) == activity.end() ?
+                    activity.find(ActivityApplicationKeyword) == activity.end() ?
                     QString::null :
                     getApplicationName(activity[ActivityApplicationKeyword].toInt()));
 }
@@ -228,12 +228,9 @@ QString TsModel::getApplicationName(int id)
 */
 void TsModel::entryChanged(TsModelItem *itemPtr)
 {
-    QList<TsModelItem *>::const_iterator iter(mEntries.constBegin());
-    for (int offset(0); iter != mEntries.constEnd(); ++iter, ++offset) {
-        if ((*iter) == itemPtr) {
-            emit dataChanged(index(offset, 0), index(offset, 0));
-            break;
-        }
+    const int itemIndex = mEntries.indexOf(itemPtr);
+    if (itemIndex != -1) {
+        emit dataChanged(index(itemIndex, 0), index(itemIndex, 0));
     }
 }
 

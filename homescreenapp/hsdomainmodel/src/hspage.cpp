@@ -22,17 +22,19 @@
 
 #include "hsdomainmodeldatastructures.h"
 #include "hspage.h"
+#include "hspagenewwidgetlayout.h"
 #include "hsscene.h"
 #include "hsdatabase.h"
 #include "hswidgethost.h"
 #include "hswallpaper.h"
 #include "hswidgetpositioningonwidgetadd.h"
 #include "hswidgetpositioningonorientationchange.h"
+#include "hsconfiguration.h"
 
 
 /*!
     \class HsPage
-    \ingroup group_hsutils
+    \ingroup group_hsdomainmodel
     \brief Represents a page in the framework.
     HsPage is a parent for a group of widgets. HsPage can have a wallpaper.
 */
@@ -46,6 +48,7 @@
 HsPage::HsPage(QGraphicsItem* parent)
     : HbWidget(parent),
       mDatabaseId(-1),
+      mWallpaper(0),
       mRemovable(true)
 {
     setFlag(QGraphicsItem::ItemHasNoContents);
@@ -58,6 +61,7 @@ HsPage::HsPage(QGraphicsItem* parent)
 */
 HsPage::~HsPage()
 {
+    delete mWallpaper;
 }
 
 /*!
@@ -92,13 +96,17 @@ bool HsPage::load()
         return false;
     }
 
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        mWallpaper = new HsPageWallpaper(this);
+    }
+
     foreach (HsWidgetData data, datas) {
         HsWidgetHost *widget = new HsWidgetHost(data.id);
         mWidgets.append(widget);
         connectWidget(widget);
         widget->setPage(this);
         widget->setParentItem(this);
-        widget->startWidget();
+        widget->startWidget(isDefaultPage());
     }
 
     connect(HsScene::mainWindow(),
@@ -106,6 +114,14 @@ bool HsPage::load()
         SLOT(onOrientationChanged(Qt::Orientation)));
 
     return true;
+}
+
+/*!
+    Return wallpaper. 
+*/
+HsWallpaper *HsPage::wallpaper() const
+{
+    return mWallpaper;
 }
 
 bool HsPage::addExistingWidget(HsWidgetHost *widgetHost)
@@ -199,15 +215,24 @@ void HsPage::layoutNewWidgets()
 
     HsWidgetPositioningOnWidgetAdd *algorithm =
         HsWidgetPositioningOnWidgetAdd::instance();
+        
+    QRectF pageRect = HsScene::mainWindow()->layoutRect();
+    // chrome needs to be removed from the rect.
+    pageRect.adjust( (qreal)0,(qreal)64,(qreal)0,(qreal)0);
 
     QList<QRectF> calculatedRects =
-        algorithm->convert(HsScene::mainWindow()->layoutRect(), rects, QPointF());
-
+        algorithm->convert(pageRect, rects, QPointF());
+    
+    HsPageNewWidgetLayout *newWidgetLayout = static_cast<HsPageNewWidgetLayout *>(layout());
+    if (!newWidgetLayout) {
+        newWidgetLayout = new HsPageNewWidgetLayout();
+        setLayout(newWidgetLayout);
+    }    
     updateZValues();
-
     HsWidgetHost *widget = 0;
     for (int i = 0; i < mNewWidgets.count(); ++i) {
         widget = mNewWidgets.at(i);
+        newWidgetLayout->addItem(widget);
         widget->setGeometry(calculatedRects.at(i));
         widget->savePresentation();
         widget->setPage(this);
@@ -226,7 +251,7 @@ bool HsPage::deleteFromDatabase()
         widget->remove();
     }
     mWidgets.clear();
-    
+
     foreach (HsWidgetHost *widget, mNewWidgets) {
         widget->remove();
     }
@@ -260,6 +285,11 @@ bool HsPage::isRemovable() const
 void HsPage::setRemovable(bool removable)
 {
     mRemovable = removable;
+}
+
+bool HsPage::isDefaultPage() const
+{
+    return mDatabaseId == HSCONFIGURATION_GET(defaultPageId);
 }
 
 bool HsPage::isActivePage() const
@@ -390,31 +420,27 @@ void HsPage::onWidgetFaulted()
 }
 
 /*!
-    Calculates new widget position on page when widget size changes
+    Calculates new widget position on page when widget size changes. If page has layout then there are new widgets
+    and we use layout to calculate new widget positions.
 */
 void HsPage::onWidgetResized()
 {
-    HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
-
-    QRectF widgetRect = widget->geometry();
-
-    QRectF pageRect = HsScene::mainWindow()->layoutRect();
-
-    qreal lowerBoundX = 0;
-
-    qreal upperBoundX = pageRect.width() - widgetRect.width() / 2 - 10;
-    upperBoundX = pageRect.width() - widgetRect.width();
-
-    qreal widgetX = qBound(lowerBoundX, widgetRect.x(), upperBoundX);
-    qreal widgetY = qBound(qreal(64), widgetRect.y(), pageRect.height() - widgetRect.height());
-
-    widget->setPos(widgetX, widgetY);
+    if ( !layout() ) {
+        HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+        QRectF widgetRect = widget->geometry();
+        QRectF pageRect = HsScene::mainWindow()->layoutRect();
+        qreal widgetX = qBound(qreal(0), widgetRect.x(), pageRect.width() - widgetRect.width());
+        qreal widgetY = qBound(qreal(64), widgetRect.y(), pageRect.height() - widgetRect.height());
+        widget->setPos(widgetX, widgetY);
+    } else {
+        layout()->invalidate();
+    }
 }
 
 void HsPage::onWidgetAvailable()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
-    
+
     mUnavailableWidgets.removeOne(widget);
     mWidgets.append(widget);
 
@@ -422,7 +448,7 @@ void HsPage::onWidgetAvailable()
     widget->startWidget(isActivePage());
     widget->show();
 }
- 
+
 void HsPage::onWidgetUnavailable()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
@@ -443,8 +469,8 @@ void HsPage::onWidgetUnavailable()
 
 void HsPage::onOrientationChanged(Qt::Orientation orientation)
 {
-    QRectF rect = HsScene::mainWindow()->layoutRect();    
-    
+    QRectF rect = HsScene::mainWindow()->layoutRect();
+
     HsWidgetPositioningOnOrientationChange *converter =
         HsWidgetPositioningOnOrientationChange::instance();
 
@@ -465,5 +491,16 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
             widget->setPos(presentation.pos());
             widget->setZValue(presentation.zValue);
         }
-    }   
+    }
 }
+
+/*!
+    Clears new widgets list and resets layout.
+*/
+void HsPage::resetNewWidgets()
+{
+    mNewWidgets.clear();
+    setLayout(0);
+
+}
+

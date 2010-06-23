@@ -32,6 +32,13 @@ namespace
     const char hsLocTextId_Title_NoService[] = "txt_homescreen_title_no_service";
 }
 
+
+/*!
+    \class HsTitleResolver
+    \ingroup group_hsutils
+    \brief 
+*/
+
 /*!
 
 */

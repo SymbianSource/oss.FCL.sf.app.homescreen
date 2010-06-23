@@ -21,8 +21,9 @@ INCLUDEPATH += . \
 HEADERS += ./inc/*.h
 SOURCES += ./src/*.cpp
 
-
 DEFINES += MENUSERVICE_LIB
+
 LIBS += -lcaclient
+
 symbian::TARGET.UID3 = 0x20026FA9
 win32:exportResources(./resource/*.png, resource)

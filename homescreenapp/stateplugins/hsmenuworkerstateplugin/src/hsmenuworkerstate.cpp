@@ -43,7 +43,7 @@
 
 /*!
  Constructor.
- \param parent Owner.
+ \param parent Parent state. 
  */
 HsMenuWorkerState::HsMenuWorkerState(QState *parent) :
     QState(parent), mInitialState(0)

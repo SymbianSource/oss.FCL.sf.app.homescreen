@@ -55,7 +55,7 @@ signals:
     void event_moveWidget();
     void event_moveScene();
     void event_sceneMenu();
-    void event_selectSceneWallpaper();
+    void event_selectWallpaper();
     void event_addPage();
     void event_removePage();
     void event_toggleConnection();
@@ -72,11 +72,11 @@ private:
     bool isInPageChangeZone();
     bool isInLeftPageChangeZone();
     bool isInRightPageChangeZone();
-    void addPageToScene(int pageIndex);
-    qreal parallaxFactor() const;
+    void addPageToScene(int pageIndex);    
     void updateZoneAnimation();
     void showTrashBin();
     void removeActivePage();
+    void deleteZoneAnimation();
 
 private slots:
     void action_disableUserInteraction();
@@ -93,6 +93,7 @@ private slots:
     void action_waitInput_connectMouseEventHandlers();
     void action_waitInput_publishIdleKey();
     void action_waitInput_disconnectMouseEventHandlers();
+    void action_waitInput_resetNewWidgets();
     void action_widgetInteraction_connectMouseEventHandlers();
     void action_widgetInteraction_connectGestureTimers();
     void action_widgetInteraction_disconnectMouseEventHandlers();
@@ -107,6 +108,7 @@ private slots:
     void action_moveWidget_reparentToPage();
     void action_moveWidget_startWidgetDropEffect();
     void action_moveWidget_disconnectMouseEventHandlers();
+    void action_moveWidget_preventZoneAnimation();
     void action_moveScene_connectMouseEventHandlers();
     void action_moveScene_moveToNearestPage();
     void action_moveScene_disconnectMouseEventHandlers();
@@ -142,6 +144,7 @@ private slots:
     void onAddContentActionTriggered();
     bool openTaskSwitcher();
     void zoneAnimationFinished();
+    void pageChangeAnimationFinished();
     void onSceneMenuTriggered(HbAction *action);
     void onRemovePageConfirmationOk();
     void onSceneMenuAboutToClose();
@@ -155,11 +158,13 @@ private:
     QPointF mTouchScenePos;
     HsTitleResolver *mTitleResolver;
     QPropertyAnimation *mZoneAnimation;
-    bool mPageChanged;
     bool mAllowZoneAnimation;
-    QParallelAnimationGroup *mPageChangeAnimation;
+    QPropertyAnimation *mPageChangeAnimation;
     HbContinuousFeedback *mContinuousFeedback;
     bool mTrashBinFeedbackAlreadyPlayed;
+    // TODO: remove
+    bool mParallaxEnabled;
+    bool mPageWallpaperEnabled;
 
     qreal mDeltaX;
     QPointer<HbMenu> mSceneMenu;

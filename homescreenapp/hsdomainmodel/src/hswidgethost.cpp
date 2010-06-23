@@ -50,6 +50,16 @@
 
 QTM_USE_NAMESPACE
 
+
+/*!
+    \class HsWidgetHost
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
+/*!
+
+*/
 HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
   : HbWidget(parent),
     mDatabaseId(databaseId),
@@ -253,7 +263,7 @@ void HsWidgetHost::startDragEffect()
     QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup();
 
     QPropertyAnimation *animation = new QPropertyAnimation(this, "scale");
-    animation->setDuration(HsConfiguration::widgetDragEffectDuration());
+    animation->setDuration(HSCONFIGURATION_GET(widgetDragEffectDuration));
     animation->setEndValue(1.1);
     animationGroup->addAnimation(animation);
 
@@ -278,7 +288,7 @@ void HsWidgetHost::startDropEffect()
     QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup;
 
     QPropertyAnimation *animation = new QPropertyAnimation(this, "scale");
-    animation->setDuration(HsConfiguration::widgetDropEffectDuration());
+    animation->setDuration(HSCONFIGURATION_GET(widgetDropEffectDuration));
     animation->setEndValue(1);
     animationGroup->addAnimation(animation);
 
@@ -527,10 +537,9 @@ void HsWidgetHost::action_load()
 
     mWidget->installEventFilter(this);
 
-    HsScene *scene = HsScene::instance();
-    setMaximumSize(scene->maximumWidgetSizeInPixels());
-    setMinimumSize(scene->minimumWidgetSizeInPixels());
-
+    setMinimumSize(HSCONFIGURATION_GET(minimumWidgetSizeInPixels));
+    setMaximumSize(HSCONFIGURATION_GET(maximumWidgetSizeInPixels));
+    
     loadPresentation();
 
     mWidget->setParentItem(this);

@@ -25,6 +25,12 @@
 
 
 /*!
+    \class HsWidgetComponent
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
+/*!
 
 */
 HsWidgetComponent::~HsWidgetComponent()

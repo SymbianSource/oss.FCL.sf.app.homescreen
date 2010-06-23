@@ -20,12 +20,20 @@
 
 // ---- hsapplication --------------------------------------------
 
-file=ABI_DIR\BUILD_DIR\hsapplication.exe                  PROGRAMS_DIR\hsapplication.exe
-data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc  private\10003a3f\import\apps\hsapplication_reg.rsc
-data=\epoc32\data\z\resource\apps\hsapplication.mif       resource\apps\hsapplication.mif
-data=ZPRIVATE\20022f35\homescreen.db                      private\20022f35\homescreen.db
-data=ZPRIVATE\20022f35\wallpapers\d_portrait.png          private\20022f35\wallpapers\d_portrait.png
-data=ZPRIVATE\20022f35\wallpapers\d_landscape.png         private\20022f35\wallpapers\d_landscape.png
+file=ABI_DIR\BUILD_DIR\hsapplication.exe                        PROGRAMS_DIR\hsapplication.exe
+data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc        private\10003a3f\import\apps\hsapplication_reg.rsc
+data=\epoc32\data\z\resource\apps\hsapplication.mif             resource\apps\hsapplication.mif
+data=ZPRIVATE\20022f35\homescreen.db                            private\20022f35\homescreen.db
+data=ZPRIVATE\20022f35\wallpapers\scene\default_portrait.png    private\20022f35\wallpapers\scene\default_portrait.png
+data=ZPRIVATE\20022f35\wallpapers\scene\default_landscape.png   private\20022f35\wallpapers\scene\default_landscape.png
+data=ZPRIVATE\20022f35\wallpapers\page\default_portrait.png     private\20022f35\wallpapers\page\default_portrait.png
+data=ZPRIVATE\20022f35\wallpapers\page\default_landscape.png    private\20022f35\wallpapers\page\default_landscape.png
+data=ZPRIVATE\20022f35\wallpapers\page\1_portrait.png           private\20022f35\wallpapers\page\1_portrait.png
+data=ZPRIVATE\20022f35\wallpapers\page\1_landscape.png          private\20022f35\wallpapers\page\1_landscape.png
+data=ZPRIVATE\20022f35\wallpapers\page\2_portrait.png           private\20022f35\wallpapers\page\2_portrait.png
+data=ZPRIVATE\20022f35\wallpapers\page\2_landscape.png          private\20022f35\wallpapers\page\2_landscape.png
+data=ZPRIVATE\20022f35\wallpapers\page\3_portrait.png           private\20022f35\wallpapers\page\3_portrait.png
+data=ZPRIVATE\20022f35\wallpapers\page\3_landscape.png          private\20022f35\wallpapers\page\3_landscape.png
 
 // ---- hswidgetuninstaller --------------------------------------------
 file=ABI_DIR\BUILD_DIR\hswidgetuninstaller.exe            PROGRAMS_DIR\hswidgetuninstaller.exe

@@ -1,0 +1,37 @@
+/*
+HsListViewItem[layoutName="default"][!text-2][!progress] { 
+	layout:applib_text1;
+}
+
+HsListViewItem[layoutName="default"][text-2][!progress]{
+	layout:applib_text2;
+}*/
+
+HsListViewItem[layoutName="default"][progress] {
+	layout:applib_progress;
+}
+
+/*
+HsListViewItem::text-1{
+
+	font-variant: primary;
+	pref-width:-1;
+	text-align: left;
+}
+
+HsListViewItem::text-2 {
+
+	font-variant: secondary;
+	pref-width:-1;
+	text-align: left top;	 
+}
+*/
+HsListViewItem::progress {
+
+}
+/*
+HsListViewItem::icon-1{
+	fixed-height: 63px;
+	fixed-width: 63px; 
+}*/
+

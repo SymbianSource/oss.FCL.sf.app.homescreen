@@ -30,7 +30,6 @@ tests {
     SUBDIRS += ../../homescreensrv/activityfw/activityserviceplugin/tsrc
     SUBDIRS += ../../homescreensrv/activityfw/activitydatabase/hsactivitydbclient/t_hsactivitydbclient
     SUBDIRS += ../../homescreensrv/hsappkeyhandler/tsrc/t_hsappkeyhandler
-    SUBDIRS += ../../homescreensrv/activityfw/activityserviceplugin/s60/tsrc
     SUBDIRS += ../../homescreensrv/tstaskmonitor/client/tsrc
     SUBDIRS += ../../homescreensrv/tstaskmonitor/server/tsrc
     SUBDIRS += ../../homescreensrv/tstaskmonitor/screenshotplugin/tsrc

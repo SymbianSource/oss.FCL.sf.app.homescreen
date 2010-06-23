@@ -49,7 +49,6 @@ protected:
 private slots:
 
     void stateExited();
-    void memoryCardRemoved();
     
 signals:
     void exit();    

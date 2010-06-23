@@ -22,8 +22,8 @@
 #include "helloworldwidgetplugin.h"
 #include "helloworldwidget.h"
 
-/**
-    @page page_creating_widget_plugin Creating Home Screen Widget Plugin
+/*!
+    @page page_creatingwidgetplugin Creating Home Screen Widget Plugin
 
     Widgets are exposed to the home screen through QT Service Framework.
     Widget plugins are implemented according to
@@ -73,8 +73,8 @@
     @endcode
 */
 
-/**
-    @page page_deploying_widget_plugin Deploying Home Screen Widget Plugin
+/*!
+    @page page_deployingwidgetplugin Deploying Home Screen Widget Plugin
     
     Widget's binaries and xml file(s) must be deployed to correct folders on emulator and in target. 
     Below are the needed .pro file for the \c helloworldwidgetplugin.
@@ -90,12 +90,12 @@
     
     HEADERS += ./inc/ .h
     SOURCES += ./src/ .cpp
-  
-    DESTDIR = $${EPOCROOT}epoc32/data/c/private/20022F35/import/widgetregistry/20022F7E
     
     INCLUDEPATH += ./inc               
     
     symbian: {
+
+        DESTDIR = /private/20022F35/import/widgetregistry/20022F7E
         INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
     
         TARGET.UID3 = 0x20022F7E
@@ -103,17 +103,17 @@
         TARGET.CAPABILITY = ALL -TCB
         
         plugins.path = $${DESTDIR}
-        plugins.sources = $${TARGET}.dll
+        plugins.sources = $${TARGET}.dll 
         
         widgetResources.path = $${DESTDIR}
         widgetResources.sources += resource/$${TARGET}.xml    
         widgetResources.sources += resource/$${TARGET}.manifest
         widgetResources.sources += resource/$${TARGET}.png
-        
+            
         DEPLOYMENT += plugins \
                       widgetResources
     }
-    
+
     @endcode
     
     For detailed information on DEPLOYMENT macro, see <a HREF="http://pepper.troll.no/s60prereleases/doc/qmake-variable-reference.html#deployment">here</a>.

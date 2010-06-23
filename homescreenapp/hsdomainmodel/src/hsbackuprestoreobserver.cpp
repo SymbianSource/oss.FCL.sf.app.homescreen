@@ -26,6 +26,12 @@
 #include "hsbackuprestoreobserver_p.h"
 
 /*!
+    \class HsBackupRestoreObserver
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
+/*!
     Constructs a new observer with the given \a parent object.
 */
 HsBackupRestoreObserverPrivate::HsBackupRestoreObserverPrivate(HsBackupRestoreObserver *observer,
@@ -108,7 +114,7 @@ void HsBackupRestoreObserverPrivate::handleKeyChange(XQSettingsKey key, const QV
             if ( (mLastType == conn::EBURBackupFull || mLastType == conn::EBURBackupPartial) ||
             	 (mLastType == conn::EBURRestorePartial || mLastType == conn::EBURRestoreFull) )
             {                
-                mQ->backupRestoreComplited();
+                mQ->backupRestoreCompleted();
             }         
             // delete once back to normal.
             delete mCallBack;
@@ -167,10 +173,10 @@ void HsBackupRestoreObserver::backupRestoreStarted()
 /*!
     Called when backup/restore is completed.
 */
-void HsBackupRestoreObserver::backupRestoreComplited()
+void HsBackupRestoreObserver::backupRestoreCompleted()
 {
 	mBUROngoing = false;
-	emit event_backupRestoreComplited();
+	emit event_backupRestoreCompleted();
 }
 
 /*!

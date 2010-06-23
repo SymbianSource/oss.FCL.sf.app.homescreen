@@ -49,6 +49,13 @@ namespace
     }
 }
 
+
+/*!
+    \class HsDatabase
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
 /*!
     Constructs a new database with the given \a parent object.
 */
@@ -185,43 +192,15 @@ bool HsDatabase::scene(HsSceneData &data)
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
-        "SELECT id, portraitWallpaper, landscapeWallpaper "
+        "SELECT id "
         "FROM Scene";
     
     if (query.prepare(statement) && query.exec() && query.next()) {        
-        data.id                  = query.value(0).toInt();
-        data.portraitWallpaper   = query.value(1).toString();
-        data.landscapeWallpaper  = query.value(2).toString();
+        data.id = query.value(0).toInt();        
         return true;
     }
     
-    return false;
-}
-
-/*!
-
-*/
-bool HsDatabase::updateScene(const HsSceneData &data)
-{
-    if (!checkConnection()) {
-        return false;
-    }
-
-    QSqlQuery query(QSqlDatabase::database(mConnectionName));
-
-    QString statement =
-        "UPDATE Scene "
-        "SET portraitWallpaper = ?, landscapeWallpaper = ? "
-        "WHERE id = ?";
-
-    if (query.prepare(statement)) {
-        query.addBindValue(data.portraitWallpaper);
-        query.addBindValue(data.landscapeWallpaper);    
-        query.addBindValue(data.id);
-        return  query.exec();
-    }
-    
-    return false;
+    return false;    
 }
 
 /*!
@@ -760,10 +739,7 @@ bool HsDatabase::setWidgetPreferences(int widgetId, const QVariantHash &data)
     return true;
 }
 
-/*!
-
-*/
-bool HsDatabase::generalConfiguration(HsGeneralConfiguration &data)
+bool HsDatabase::configuration(QVariantHash &configuration)
 {
     if (!checkConnection()) {
         return false;
@@ -772,101 +748,18 @@ bool HsDatabase::generalConfiguration(HsGeneralConfiguration &data)
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
-        "SELECT bounceEffect, tapAndHoldDistance, widgetTapAndHoldTimeout, sceneTapAndHoldTimeout, "
-        "pageChangeZoneWidth, "
-        "pageIndicatorSpacing, pageChangeAnimationDuration, pageChangeZoneAnimationDuration, "
-        "pageChangeZoneReverseAnimationDuration, "
-        "pageRemovedAnimationDuration, newPageAddedAnimationDuration, widgetDragEffectDuration, "
-        "widgetDropEffectDuration, boundaryFeedbackEffectDistance, "
-        "defaultPageId, maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, "
-        "minimumWidgetHeight, minimumWidgetWidth, shortcutLabelsVisible,  "
-        "pageChangePanDistance "
-        "FROM GeneralConfiguration";
+        "SELECT key, value "
+        "FROM Configuration";
 
-    if (query.prepare(statement) && query.exec() && query.next()) {        
-        data.bounceEffect                           = query.value(0).toInt();
-        data.tapAndHoldDistance                     = query.value(1).toReal();
-        data.widgetTapAndHoldTimeout                = query.value(2).toInt();
-        data.sceneTapAndHoldTimeout                 = query.value(3).toInt();
-        data.pageChangeZoneWidth                    = query.value(4).toReal();
-        data.pageIndicatorSpacing                   = query.value(5).toReal();
-        data.pageChangeAnimationDuration            = query.value(6).toInt();
-        data.pageChangeZoneAnimationDuration        = query.value(7).toInt();
-        data.pageChangeZoneReverseAnimationDuration = query.value(8).toInt();
-        data.pageRemovedAnimationDuration           = query.value(9).toInt();
-        data.newPageAddedAnimationDuration          = query.value(10).toInt();
-        data.widgetDragEffectDuration               = query.value(11).toInt();
-        data.widgetDropEffectDuration               = query.value(12).toInt();
-        data.boundaryFeedbackEffectDistance         = query.value(13).toInt();
-        data.defaultPageId                          = query.value(14).toInt();
-        data.maximumPageCount                       = query.value(15).toInt();
-        data.maximumWidgetHeight                    = query.value(16).toReal();
-        data.maximumWidgetWidth                     = query.value(17).toReal();
-        data.minimumWidgetHeight                    = query.value(18).toReal();
-        data.minimumWidgetWidth                     = query.value(19).toReal();
-        data.shortcutLabelsVisible                  = query.value(20).toBool();
-        data.pageChangePanDistance                  = query.value(21).toReal();
+    if (query.prepare(statement) && query.exec()) {
+        configuration.clear();
+        while (query.next()) {
+            configuration.insert(query.value(0).toString(), 
+                                 query.value(1));
+        }
         return true;
     }
-    
-    return false;
-}
 
-/*!
-
-*/
-bool HsDatabase::feedbackConfiguration(HsFeedbackConfiguration &data)
-{
-    if (!checkConnection()) {
-        return false;
-    }
-
-    QSqlQuery query(QSqlDatabase::database(mConnectionName));
-
-    QString statement =
-        "SELECT pageChangeFeedbackType, widgetPickFeedbackType, widgetDropFeedbackType,  "
-        "widgetRepositionFeedbackType, widgetOverTrashbinFeedbackType, widgetDropToTrashbinFeedbackType,  "
-        "shortcutWidgetTapFeedbackType, widgetMoveBlockedFeedbackType, clockWidgetTapFeedbackType, "
-        "widgetSnappingFeedbackType "
-        "FROM FeedbackConfiguration";
-
-    if (query.prepare(statement) && query.exec() && query.next()) {        
-        data.pageChangeFeedbackType           = data.feedbackFromString(query.value(0).toString());
-        data.widgetPickFeedbackType           = data.feedbackFromString(query.value(1).toString());
-        data.widgetDropFeedbackType           = data.feedbackFromString(query.value(2).toString());
-        data.widgetRepositionFeedbackType     = data.feedbackFromString(query.value(3).toString());
-        data.widgetOverTrashbinFeedbackType   = data.feedbackFromString(query.value(4).toString());
-        data.widgetDropToTrashbinFeedbackType = data.feedbackFromString(query.value(5).toString());
-        data.shortcutWidgetTapFeedbackType    = data.feedbackFromString(query.value(6).toString());
-        data.widgetMoveBlockedFeedbackType    = data.feedbackFromString(query.value(7).toString());
-        data.clockWidgetTapFeedbackType       = data.feedbackFromString(query.value(8).toString());
-        data.widgetSnappingFeedbackType       = data.feedbackFromString(query.value(9).toString());
-        return true;
-    }
-    
-    return false;
-}
-
-bool HsDatabase::snapConfiguration(HsSnapConfiguration &data)
-{   
-    if (!checkConnection()) {
-        return false;
-    }
-
-    QSqlQuery query(QSqlDatabase::database(mConnectionName));
-
-    QString statement =
-        "SELECT snappingEnabled, snapForce, snapGap, borderGap, timeout "
-        "FROM SnapConfiguration";
-
-    if (query.prepare(statement) && query.exec() && query.next()) {
-        data.snappingEnabled = query.value(0).toBool();
-        data.snapForce = query.value(1).toReal();
-        data.snapGap   = query.value(2).toReal();
-        data.borderGap = query.value(3).toReal();
-        data.timeout   = query.value(4).toInt();
-        return true;
-    }
     return false;
 }
 

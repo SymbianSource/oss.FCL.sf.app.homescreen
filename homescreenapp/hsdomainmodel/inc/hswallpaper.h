@@ -19,13 +19,13 @@
 #define HSWALLPAPER_H
 
 #include <HbWidget>
-#include <QScopedPointer>
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
 class HbIconItem;
+class HsWallpaperLoader;
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HSDOMAINMODEL_EXPORT HsWallpaper : public HbWidget
 {
@@ -35,36 +35,89 @@ public:
     HsWallpaper(QGraphicsItem *parent = 0);
     ~HsWallpaper();
 
-    bool setImagesById(const QString &id = "d",
-                       const QString &ext = "png");
+signals:
+    void imageSet();
+    void imageSetFailed();
 
-    bool setImagesByPaths(const QString &landscapeImagePath,
-                          const QString &portraitImagePath);
+public slots:
+    void setImage(const QString &path);
+    void setDefaultImage();
+    void remove();
 
-    void setPortraitImage(const QString &path, bool activate = false);
-    void setLandscapeImage(const QString &path, bool activate = false);
+protected:
+    virtual QString wallpaperDirectory() const = 0;
+    virtual QVariantHash createTargets(const QString &sourcePath) = 0;
 
-    bool removeImages();
+    bool setExistingImage();
+    QString rootDirectory() const;
 
-    static QString wallpaperDirectory();
-    static QString wallpaperPath(Qt::Orientation orientation,
-                                 const QString &id = "d",
-                                 const QString &ext = "png");
-
-private:    
+private:
     Q_DISABLE_COPY(HsWallpaper)
 
 private slots:
-    void onOrientationChanged(Qt::Orientation orientation);
+    void onLoaderFinished();
+    void onLoaderFailed();
+    void updateIconItem(Qt::Orientation orientation);
+
+protected:
+    int mId;
 
 private:
-    QString mLImagePath;
-    QString mPImagePath;
-    Qt::Orientation mOrientation;
-
+    bool mIsDefaultImage;
+    QString mPortraitImagePath;
+    QString mLandscapeImagePath;
     HbIconItem *mIconItem;
+    HsWallpaperLoader *mLoader;
+
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
+};
+
+class HsScene;
+class HSDOMAINMODEL_EXPORT HsSceneWallpaper : public HsWallpaper
+{
+    Q_OBJECT
+
+public:
+    HsSceneWallpaper(HsScene *scene, QGraphicsItem *parent = 0);
+    ~HsSceneWallpaper();
+
+    HsScene *scene() const { return mScene; }
+    void setScene(HsScene *scene);
+
+protected:
+    QString wallpaperDirectory() const;
+    QVariantHash createTargets(const QString &sourcePath);
+
+private:
+    Q_DISABLE_COPY(HsSceneWallpaper)
+
+private:
+    HsScene *mScene;
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
+};
+
+class HsPage;
+class HSDOMAINMODEL_EXPORT HsPageWallpaper : public HsWallpaper
+{
+    Q_OBJECT
+
+public:
+    HsPageWallpaper(HsPage *page, QGraphicsItem *parent = 0);
+    ~HsPageWallpaper();
     
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HsPage *page() const { return mPage; }
+    void setPage(HsPage *page);
+
+protected:
+    QString wallpaperDirectory() const;
+    QVariantHash createTargets(const QString &sourcePath);
+
+private:
+    Q_DISABLE_COPY(HsPageWallpaper)
+
+private:
+    HsPage *mPage;
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSWALLPAPER_H

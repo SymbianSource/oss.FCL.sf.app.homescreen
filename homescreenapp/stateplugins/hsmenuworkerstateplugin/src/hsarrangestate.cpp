@@ -73,7 +73,7 @@
 
 /*!
  Constructor
- \param parent owner
+ \param parent Parent state.
  \retval void
  */
 HsArrangeState::HsArrangeState(QState *parent) :
@@ -132,9 +132,6 @@ void HsArrangeState::save(const HbListWidget& listWidget)
  Method invoked when a state is entered.
  \param event an event causing the entrance the state.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsArrangeState::onEntry(QEvent *event)
 {
     qDebug("HsArrangeState::onEntry()");
@@ -184,9 +181,6 @@ void HsArrangeState::onEntry(QEvent *event)
     }
     HSMENUTEST_FUNC_EXIT("HsArrangeState::onEntry");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot invoked on closing the dialog.

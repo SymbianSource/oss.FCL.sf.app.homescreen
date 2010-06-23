@@ -19,7 +19,7 @@
 #ifndef HSADDSHORTCUTSTATE_H
 #define HSADDSHORTCUTSTATE_H
 
-#include <hsmenubasestate.h>
+#include <QState>
 
 #include "hsmenustates_global.h"
 #include "hsapp_defs.h"
@@ -30,8 +30,9 @@ class HbAction;
 class HbMessageBox;
 class CaEntry;
 class CaNotifier;
+class HsContentService;
 
-class HsAddToHomeScreenState: public  HsMenuBaseState
+class HsAddToHomeScreenState: public  QState
 {
     Q_OBJECT
 

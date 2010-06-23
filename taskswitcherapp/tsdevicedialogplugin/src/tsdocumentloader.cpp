@@ -17,7 +17,7 @@
 
 #include "tsdocumentloader.h"
 #include "tstasksgrid.h"
-#include "tsdevicedialog.h"
+#include "tstasksgriditem.h"
 
 /*!
     \class TsDocumentLoader
@@ -33,8 +33,8 @@ QObject *TsDocumentLoader::createObject(const QString &type, const QString &name
         QObject *object = new TsTasksGrid();
         object->setObjectName(name);
         return object;
-    } else if (type == TsDeviceDialog::staticMetaObject.className()) {
-        QObject *object = new TsDeviceDialog(*this);
+    } else if (type == TsTasksGridItem::staticMetaObject.className()) {
+        QObject *object = new TsTasksGridItem();
         object->setObjectName(name);
         return object;
     }

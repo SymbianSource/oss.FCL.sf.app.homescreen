@@ -51,7 +51,7 @@ HsDocumentLoader::~HsDocumentLoader()
 QObject *HsDocumentLoader::createObject(const QString &type, const QString &name)
 {
     if (type == HsPageIndicator::staticMetaObject.className()) {
-        QObject *object = new HsPageIndicator(HsConfiguration::pageIndicatorSpacing());
+        QObject *object = new HsPageIndicator(HSCONFIGURATION_GET(pageIndicatorSpacing));
         object->setObjectName(name);
         return object;
     }

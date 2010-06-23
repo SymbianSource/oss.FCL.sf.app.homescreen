@@ -11,31 +11,33 @@
 *
 * Contributors:
 *
-* Description:
+* Description: 
 *
 */
+#ifndef TSDEVICEDIALOGCONTAINER_H
+#define TSDEVICEDIALOGCONTAINER_H
 
-#ifndef TSDEVICEDIALOG_H
-#define TSDEVICEDIALOG_H
+#include <QObject>
 
-#include <HbDialog>
 #include <HbDeviceDialogInterface>
 
-class QGraphicsLinearLayout;
-class HbDocumentLoader;
+#include "tsdocumentloader.h"
 
-class TsDeviceDialog : public HbDialog, public HbDeviceDialogInterface
+class QAbstractListModel;
+
+class TsDeviceDialogContainer : public QObject, public HbDeviceDialogInterface
 {
-    Q_OBJECT
+Q_OBJECT
+public:
+    explicit TsDeviceDialogContainer(QAbstractListModel *model, QObject *parent = 0);
+    ~TsDeviceDialogContainer();
 
 public:
-    TsDeviceDialog(HbDocumentLoader &loader, QGraphicsItem *parent = 0);
-    ~TsDeviceDialog();
-
     virtual bool setDeviceDialogParameters(const QVariantMap &parameters);
     virtual int deviceDialogError() const;
     virtual void closeDeviceDialog(bool byClient);
     virtual HbPopup *deviceDialogWidget() const;
+    virtual QObject *signalSender() const;
 
 signals:
     void deviceDialogClosed();
@@ -44,8 +46,8 @@ public slots:
     void changeOrientation(Qt::Orientation orientation);
 
 private:
-    HbDocumentLoader &mLoader;
+    TsDocumentLoader mLoader;
 
 };
 
-#endif // TSDEVICEDIALOG_H
+#endif // TSDEVICEDIALOGCONTAINER_H

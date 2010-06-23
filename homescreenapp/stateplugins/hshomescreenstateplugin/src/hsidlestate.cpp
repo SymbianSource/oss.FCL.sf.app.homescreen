@@ -43,7 +43,7 @@
 #include "hspage.h"
 #include "hswidgethost.h"
 #include "hswallpaper.h"
-#include "hsselectbackgroundstate.h"
+#include "hswallpaperselectionstate.h"
 #include "hstrashbinwidget.h"
 #include "hspageindicator.h"
 #include "hsmenueventfactory.h"
@@ -114,7 +114,7 @@ namespace
     Controls the home screen idle state execution. See the
     state chart below for the state structure.
 
-    \image html hsidlestate_statechart.png
+    \imageDEPRECATED html hsidlestate_statechart.png
 */
 
 /*!
@@ -125,8 +125,7 @@ HsIdleState::HsIdleState(QState *parent)
     mNavigationAction(0), mUiWidget(0),
     mTitleResolver(0),
     mZoneAnimation(0),
-    mPageChanged(false),
-    mAllowZoneAnimation(true),
+    mAllowZoneAnimation(false),
     mPageChangeAnimation(0),
     mContinuousFeedback(0),
     mTrashBinFeedbackAlreadyPlayed(false),
@@ -139,7 +138,7 @@ HsIdleState::HsIdleState(QState *parent)
     setupStates();
     mTimer.setSingleShot(true);
     mTitleResolver = new HsTitleResolver(this);
-
+	
     // TODO: Uncomment when updated API available
     //mContinuousFeedback = new HbContinuousFeedback;
     //mContinuousFeedback->setContinuousEffect(HbFeedback::ContinuousSmooth);
@@ -218,7 +217,7 @@ bool HsIdleState::eventFilter(QObject *watched, QEvent *event)
 */
 
 /*!
-    \fn HsIdleState::event_selectSceneWallpaper()
+    \fn HsIdleState::event_selectWallpaper()
 
     This signal initiates a transition to the selectSceneWallpaper state.
 */
@@ -256,8 +255,8 @@ void HsIdleState::setupStates()
     QState *state_moveWidget = new QState(this);
     QState *state_moveScene = new QState(this);
     QState *state_sceneMenu = new QState(this);
-    HsSelectBackgroundState *state_selectSceneWallpaper =
-        new HsSelectBackgroundState(this);
+    HsWallpaperSelectionState *state_wallpaperSelectionState =
+        new HsWallpaperSelectionState(this);
     QState *state_addPage = new QState(this);
     QState *state_removePage = new QState(this);
     QState *state_toggleConnection = new QState(this);
@@ -275,7 +274,7 @@ void HsIdleState::setupStates()
     state_waitInput->addTransition(
         this, SIGNAL(event_toggleConnection()), state_toggleConnection);
     state_waitInput->addTransition(
-        this, SIGNAL(event_selectSceneWallpaper()), state_selectSceneWallpaper);
+        this, SIGNAL(event_selectWallpaper()), state_wallpaperSelectionState);
 
     state_widgetInteraction->addTransition(
         this, SIGNAL(event_waitInput()), state_waitInput);
@@ -300,12 +299,12 @@ void HsIdleState::setupStates()
     state_sceneMenu->addTransition(
         this, SIGNAL(event_waitInput()), state_waitInput);
     state_sceneMenu->addTransition(
-        this, SIGNAL(event_selectSceneWallpaper()), state_selectSceneWallpaper);
+        this, SIGNAL(event_selectWallpaper()), state_wallpaperSelectionState);
     state_sceneMenu->addTransition(
         this, SIGNAL(event_addPage()), state_addPage);
 
-    state_selectSceneWallpaper->addTransition(
-        state_selectSceneWallpaper, SIGNAL(event_waitInput()), state_waitInput);
+    state_wallpaperSelectionState->addTransition(
+        state_wallpaperSelectionState, SIGNAL(event_waitInput()), state_waitInput);
 
     state_addPage->addTransition(state_waitInput);
 
@@ -330,6 +329,7 @@ void HsIdleState::setupStates()
     ENTRY_ACTION(state_waitInput, action_waitInput_connectMouseEventHandlers)
     ENTRY_ACTION(state_waitInput, action_waitInput_publishIdleKey)
     EXIT_ACTION(state_waitInput, action_waitInput_disconnectMouseEventHandlers)
+    EXIT_ACTION(state_waitInput, action_waitInput_resetNewWidgets)
 
     ENTRY_ACTION(state_widgetInteraction, action_widgetInteraction_connectMouseEventHandlers)
     ENTRY_ACTION(state_widgetInteraction, action_widgetInteraction_connectGestureTimers)
@@ -348,6 +348,7 @@ void HsIdleState::setupStates()
     EXIT_ACTION(state_moveWidget, action_moveWidget_reparentToPage)
     EXIT_ACTION(state_moveWidget, action_moveWidget_startWidgetDropEffect)
     EXIT_ACTION(state_moveWidget, action_moveWidget_disconnectMouseEventHandlers)
+    EXIT_ACTION(state_moveWidget, action_moveWidget_preventZoneAnimation)
 
     ENTRY_ACTION(state_moveScene, action_moveScene_connectMouseEventHandlers)
     EXIT_ACTION(state_moveScene, action_moveScene_moveToNearestPage)
@@ -373,7 +374,7 @@ void HsIdleState::setupStates()
 */
 qreal HsIdleState::pageLayerXPos(int pageIndex) const
 {
-    return -pageIndex * HsScene::mainWindow()->layoutRect().width() - 0.5;
+    return -pageIndex * HsScene::mainWindow()->layoutRect().width();
 }
 
 /*!
@@ -383,33 +384,21 @@ qreal HsIdleState::pageLayerXPos(int pageIndex) const
 void HsIdleState::startPageChangeAnimation(int targetPageIndex, int duration)
 {
     if (!mPageChangeAnimation) {
-        mPageChangeAnimation = new QParallelAnimationGroup(this);
-
-        QPropertyAnimation *animation = new QPropertyAnimation(mUiWidget->pageLayer(), "x");
-        animation->setEndValue(pageLayerXPos(targetPageIndex));
-        animation->setDuration(duration);
-        mPageChangeAnimation->addAnimation(animation);
-
-        animation = new QPropertyAnimation(mUiWidget->sceneLayer(), "x");
-        animation->setEndValue((parallaxFactor() * pageLayerXPos(targetPageIndex)) - HsConfiguration::bounceEffect() / 2);
-        animation->setDuration(duration);
-        mPageChangeAnimation->addAnimation(animation);
+        mPageChangeAnimation = new QPropertyAnimation(mUiWidget, "sceneX");        
     }
-    else {
-        if (QAbstractAnimation::Stopped != mPageChangeAnimation->state()) {
-            mPageChangeAnimation->stop();
-        }
-        QAbstractAnimation *animation = mPageChangeAnimation->animationAt(0);
-
-        qobject_cast<QPropertyAnimation*>(animation)->setEndValue(pageLayerXPos(targetPageIndex));
-        qobject_cast<QPropertyAnimation*>(animation)->setDuration(duration);
-
-        animation = mPageChangeAnimation->animationAt(1);
-        qobject_cast<QPropertyAnimation*>(animation)->setEndValue((parallaxFactor() * pageLayerXPos(targetPageIndex)) - HsConfiguration::bounceEffect() / 2);
-        qobject_cast<QPropertyAnimation*>(animation)->setDuration(duration);
-    }
+    else if (mPageChangeAnimation->state() != QAbstractAnimation::Stopped) {
+        mPageChangeAnimation->stop();
+    }        
+    
+    mPageChangeAnimation->setEndValue(pageLayerXPos(targetPageIndex));
+    mPageChangeAnimation->setDuration(duration);
+    connect(mPageChangeAnimation,
+            SIGNAL(finished()),
+            SLOT(pageChangeAnimationFinished()));
     mPageChangeAnimation->start();
-    HbInstantFeedback::play(HsConfiguration::pageChangeFeedbackType());
+    
+    HbInstantFeedback::play(HSCONFIGURATION_GET(pageChangeFeedbackEffect));
+    
     mUiWidget->showPageIndicator();
     mUiWidget->setActivePage(targetPageIndex);
 }
@@ -426,29 +415,26 @@ void HsIdleState::startPageChangeZoneAnimation(int duration)
     if (isInLeftPageChangeZone() && 0 < targetPageIndex) {
         --targetPageIndex;
     } else if (isInRightPageChangeZone() &&
-        targetPageIndex < scene->maximumPageCount()-1) {
+        targetPageIndex < HSCONFIGURATION_GET(maximumPageCount) - 1) {
         ++targetPageIndex;
     } else {
-        mAllowZoneAnimation = true;
         return;
     }
 
-    if (targetPageIndex == scene->pages().count()
-        && scene->pages().last()->widgets().isEmpty()) {
-        mAllowZoneAnimation = true;
+    if (targetPageIndex >= HSCONFIGURATION_GET(maximumPageCount)){
         return;
     }
 
     if (!mZoneAnimation) {
-        mZoneAnimation = new QPropertyAnimation(mUiWidget->sceneLayer(), "x");
+        mZoneAnimation = new QPropertyAnimation(mUiWidget, "sceneX");
     }
 
-    int bounceEffect = HsConfiguration::bounceEffect();
+    int bounceEffect = HSCONFIGURATION_GET(bounceEffect);
 
     if (isInLeftPageChangeZone()) {
-        mZoneAnimation->setEndValue(((parallaxFactor() * pageLayerXPos(scene->activePageIndex()))-bounceEffect/2)+bounceEffect/2);
+        mZoneAnimation->setEndValue(pageLayerXPos(scene->activePageIndex()) + bounceEffect);
     } else {
-        mZoneAnimation->setEndValue(((parallaxFactor() * pageLayerXPos(scene->activePageIndex()))-bounceEffect/2)-bounceEffect/2);
+        mZoneAnimation->setEndValue(pageLayerXPos(scene->activePageIndex()) - bounceEffect);
     }
     mZoneAnimation->setDuration(duration);
     mZoneAnimation->setDirection(QAbstractAnimation::Forward);
@@ -457,7 +443,6 @@ void HsIdleState::startPageChangeZoneAnimation(int duration)
             SIGNAL(finished()),
             SLOT(zoneAnimationFinished()));
     mZoneAnimation->start();
-    mPageChanged = true;
 }
 
 /*!
@@ -476,7 +461,7 @@ bool HsIdleState::isInPageChangeZone()
 */
 bool HsIdleState::isInLeftPageChangeZone()
 {
-    return mTouchScenePos.x() < HsConfiguration::pageChangeZoneWidth();
+    return mTouchScenePos.x() < HSCONFIGURATION_GET(pageChangeZoneWidth);
 }
 
 /*!
@@ -486,7 +471,7 @@ bool HsIdleState::isInLeftPageChangeZone()
 bool HsIdleState::isInRightPageChangeZone()
 {
     qreal pageWidth = HsScene::mainWindow()->layoutRect().width();
-    return mTouchScenePos.x() > pageWidth - HsConfiguration::pageChangeZoneWidth();;
+    return mTouchScenePos.x() > pageWidth - HSCONFIGURATION_GET(pageChangeZoneWidth);
 }
 
 /*!
@@ -503,53 +488,33 @@ void HsIdleState::addPageToScene(int pageIndex)
 }
 
 /*!
-    Computes the parallax factor based on the current scene and
-    page layer widths, and page count.
-*/
-qreal HsIdleState::parallaxFactor() const
-{
-    qreal clw = mUiWidget->controlLayer()->size().width();
-    qreal slw = mUiWidget->sceneLayer()->size().width() - HsConfiguration::bounceEffect();
-    int n = HsScene::instance()->pages().count();
-    if (n < 2) {
-        return 1;
-    } else {
-        return (slw - clw) / ((n - 1) * clw);
-    }
-}
-
-/*!
     Checks if page change zone animation needs to be started or stopped
 */
 void HsIdleState::updateZoneAnimation()
 {
     if (isInPageChangeZone() && mAllowZoneAnimation) {
-        if (!mZoneAnimation) {
-            /* We don't want to create another animation
-               before previous is finished */
-            mAllowZoneAnimation = false;
-            startPageChangeZoneAnimation(HsConfiguration::pageChangeZoneAnimationDuration());
+        if (!mZoneAnimation
+            && ( !mPageChangeAnimation
+                 || mPageChangeAnimation->state() == QAbstractAnimation::Stopped )) {
+            startPageChangeZoneAnimation(HSCONFIGURATION_GET(pageChangeZoneAnimationDuration));
         }
     }
     else if (mZoneAnimation && !isInPageChangeZone()) {
         if (mZoneAnimation->state() == QAbstractAnimation::Running) {
             if (mZoneAnimation->direction() == QAbstractAnimation::Forward) {
-                    mPageChanged = false;
-                    mZoneAnimation->setDuration(HsConfiguration::pageChangeZoneReverseAnimationDuration());
+                    mZoneAnimation->setDuration(HSCONFIGURATION_GET(pageChangeZoneReverseAnimationDuration));
                     mZoneAnimation->setDirection(QAbstractAnimation::Backward);
             }
         }
         else {
             // Out of the page change zone. Delete animation.
-            delete mZoneAnimation;
-            mZoneAnimation = NULL;
-            mAllowZoneAnimation = true;
+            deleteZoneAnimation();
         }
     }
     else if (!isInPageChangeZone()) {
-        /* Zone animation finished and deleted.
-           New animation can be launched. */
-        mAllowZoneAnimation = true;
+        if (mZoneAnimation) {
+            mZoneAnimation->stop();
+        }
     }
 }
 
@@ -560,7 +525,7 @@ void HsIdleState::showTrashBin()
 {
     if (mUiWidget->trashBin()->isUnderMouse()) {
         if (!mTrashBinFeedbackAlreadyPlayed) {
-            HbInstantFeedback::play(HsConfiguration::widgetOverTrashbinFeedbackType());
+            HbInstantFeedback::play(HSCONFIGURATION_GET(widgetOverTrashbinFeedbackEffect));
             mTrashBinFeedbackAlreadyPlayed = true;
         }
         mUiWidget->trashBin()->activate();
@@ -586,16 +551,29 @@ void HsIdleState::removeActivePage()
 
     mUiWidget->removePage(pageIndex);
     scene->removePage(page);
+    
+    if (page->wallpaper()) {
+        page->wallpaper()->remove();        
+    }
     delete page;
 
     pageIndex = pageIndex == 0 ? 0 : pageIndex - 1;
     scene->setActivePageIndex(pageIndex);
 
-    startPageChangeAnimation(pageIndex, HsConfiguration::pageRemovedAnimationDuration());
+    startPageChangeAnimation(pageIndex, HSCONFIGURATION_GET(pageRemovedAnimationDuration));
 
     mUiWidget->pageIndicator()->removeItem(pageIndex);
     mUiWidget->setActivePage(pageIndex);
     mUiWidget->showPageIndicator();
+}
+
+/*!
+    Deletes page change zone animation.
+*/
+void HsIdleState::deleteZoneAnimation()
+{
+    delete mZoneAnimation;
+    mZoneAnimation = NULL;
 }
 
 /*!
@@ -631,7 +609,7 @@ void HsIdleState::action_idle_setupView()
         mNavigationAction->setIcon(HbIcon(gApplicationLibraryIconName));
         connect(mNavigationAction, SIGNAL(triggered()), SIGNAL(event_applicationLibrary()));
         idleView->setNavigationAction(mNavigationAction);
-        
+
         HsGui::setIdleView(idleView);
 
         if (mPageChangeAnimation) {
@@ -709,10 +687,12 @@ void HsIdleState::action_idle_layoutNewWidgets()
     page is shown.
 */
 void HsIdleState::action_idle_showActivePage()
-{
-    qreal x = pageLayerXPos(HsScene::instance()->activePageIndex());
-    mUiWidget->pageLayer()->setX(x);
-    mUiWidget->sceneLayer()->setX((parallaxFactor() * x) - HsConfiguration::bounceEffect() / 2);
+{    
+    HsScene *scene = HsScene::instance();
+    QApplication::instance()->installEventFilter(scene);
+    scene->activePage()->showWidgets();
+    qreal x = pageLayerXPos(scene->activePageIndex());
+    mUiWidget->setSceneX(x);
 }
 
 /*!
@@ -758,6 +738,10 @@ void HsIdleState::action_waitInput_publishIdleKey()
 */
 void HsIdleState::action_idle_cleanupView()
 {
+    HsScene *scene = HsScene::instance();
+    QApplication::instance()->removeEventFilter(scene);
+    scene->activePage()->hideWidgets();
+
     if (mUiWidget) {
         mUiWidget->clearDelayedPress();
     }
@@ -808,14 +792,14 @@ void HsIdleState::action_waitInput_updateOptionsMenu()
         this, SLOT(onAddContentActionTriggered()));
 
     // Add page
-    if (scene->pages().count() < scene->maximumPageCount()) {
+    if (scene->pages().count() < HSCONFIGURATION_GET(maximumPageCount)) {
         menu->addAction(hbTrId(hsLocTextId_OptionsMenu_AddPage),
             this, SIGNAL(event_addPage()));
     }
 
     // Change wallpaper
     menu->addAction(hbTrId(hsLocTextId_ContextMenu_ChangeWallpaper),
-        this, SIGNAL(event_selectSceneWallpaper()));
+        this, SIGNAL(event_selectWallpaper()));
 
     // Remove page
     if (scene->activePage()->isRemovable()) {
@@ -852,6 +836,14 @@ void HsIdleState::action_waitInput_disconnectMouseEventHandlers()
 }
 
 /*!
+    Resets new widget layout.
+*/
+void HsIdleState::action_waitInput_resetNewWidgets()
+{
+    HsScene::instance()->activePage()->resetNewWidgets();
+}
+
+/*!
     Connects the widgetInteraction state's mouse event handlers.
 */
 void HsIdleState::action_widgetInteraction_connectMouseEventHandlers()
@@ -865,7 +857,7 @@ void HsIdleState::action_widgetInteraction_connectMouseEventHandlers()
 */
 void HsIdleState::action_widgetInteraction_connectGestureTimers()
 {
-    mTimer.setInterval(HsConfiguration::widgetTapAndHoldTimeout());
+    mTimer.setInterval(HSCONFIGURATION_GET(widgetTapAndHoldTimeout));
     connect(&mTimer, SIGNAL(timeout()),
         SLOT(widgetInteraction_onTapAndHoldTimeout()));
     mTimer.start();
@@ -903,7 +895,7 @@ void HsIdleState::action_sceneInteraction_connectMouseEventHandlers()
 */
 void HsIdleState::action_sceneInteraction_connectGestureTimers()
 {
-    mTimer.setInterval(HsConfiguration::sceneTapAndHoldTimeout());
+    mTimer.setInterval(HSCONFIGURATION_GET(sceneTapAndHoldTimeout));
     connect(&mTimer, SIGNAL(timeout()),
         SLOT(sceneInteraction_onTapAndHoldTimeout()));
     mTimer.start();
@@ -947,6 +939,7 @@ void HsIdleState::action_moveWidget_startWidgetDragEffect()
     HsWidgetHost *widget = HsScene::instance()->activeWidget();
     Q_ASSERT(widget);
     widget->startDragEffect();
+    mAllowZoneAnimation = true;
 }
 
 /*!
@@ -968,8 +961,7 @@ void HsIdleState::action_moveWidget_reparentToPage()
     if (mZoneAnimation
         && mZoneAnimation->state() == QAbstractAnimation::Running
         && mZoneAnimation->direction() == QAbstractAnimation::Forward) {
-        mPageChanged = false;
-        mZoneAnimation->setDuration(HsConfiguration::pageChangeZoneReverseAnimationDuration());
+        mZoneAnimation->setDuration(HSCONFIGURATION_GET(pageChangeZoneReverseAnimationDuration));
         mZoneAnimation->setDirection(QAbstractAnimation::Backward);
     }
 
@@ -978,7 +970,7 @@ void HsIdleState::action_moveWidget_reparentToPage()
     HsWidgetHost *widget = scene->activeWidget();
 
     if (mUiWidget->trashBin()->isUnderMouse()) {
-        HbInstantFeedback::play(HsConfiguration::widgetDropToTrashbinFeedbackType());
+        HbInstantFeedback::play(HSCONFIGURATION_GET(widgetDropToTrashbinFeedbackEffect));
         widget->page()->removeWidget(widget);
         widget->remove();
         scene->setActiveWidget(0);
@@ -1000,14 +992,13 @@ void HsIdleState::action_moveWidget_reparentToPage()
 
         // play feedback effect if user drops widget between pages and it needs to be repositioned back to original page
         if( widgetX != widgetRect.x() || widgetY != widgetRect.y()) {
-            HbInstantFeedback::play(HsConfiguration::widgetRepositionFeedbackType());
+            HbInstantFeedback::play(HSCONFIGURATION_GET(widgetRepositionFeedbackEffect));
         }
         widget->setPos(widgetX, widgetY);
 
         widget->savePresentation();
         page->updateZValues();
     }
-    mAllowZoneAnimation = true;
 
     widget->setParentItem(HsScene::instance()->activePage());
 
@@ -1035,6 +1026,14 @@ void HsIdleState::action_moveWidget_disconnectMouseEventHandlers()
 }
 
 /*!
+    Prevents page change zone animation.
+*/
+void HsIdleState::action_moveWidget_preventZoneAnimation()
+{
+    mAllowZoneAnimation = false;
+}
+
+/*!
     Connects the moveScene state's mouse event handlers.
 */
 void HsIdleState::action_moveScene_connectMouseEventHandlers()
@@ -1053,15 +1052,15 @@ void HsIdleState::action_moveScene_moveToNearestPage()
 
     int pageIndex = HsScene::instance()->activePageIndex();
 
-    if (mDeltaX < -HsConfiguration::pageChangePanDistanceInPixels()) {
+    if (mDeltaX < -HSCONFIGURATION_GET(pageChangePanDistanceInPixels)) {
         pageIndex = qMin(pageIndex + 1, pages.count() - 1);
-    } else if (HsConfiguration::pageChangePanDistanceInPixels() < mDeltaX) {
+    } else if (HSCONFIGURATION_GET(pageChangePanDistanceInPixels) < mDeltaX) {
         pageIndex = qMax(pageIndex - 1, 0);
     }
 
     HsScene::instance()->setActivePageIndex(pageIndex);
 
-    startPageChangeAnimation(pageIndex, HsConfiguration::pageChangeAnimationDuration());
+    startPageChangeAnimation(pageIndex, HSCONFIGURATION_GET(pageChangeAnimationDuration));
 }
 
 /*!
@@ -1090,11 +1089,11 @@ void HsIdleState::action_sceneMenu_showMenu()
     mSceneMenu->addAction(hbTrId(hsLocTextId_ContextMenu_AddContent), this, SLOT(onAddContentActionTriggered()));
 
     HsScene *scene = HsScene::instance();
-    if (scene->pages().count() < scene->maximumPageCount()) {
+    if (scene->pages().count() < HSCONFIGURATION_GET(maximumPageCount)) {
         mSceneMenu->addAction(hbTrId(hsLocTextId_OptionsMenu_AddPage), this, SIGNAL(event_addPage()));
     }
 
-    mSceneMenu->addAction(hbTrId(hsLocTextId_ContextMenu_ChangeWallpaper), this, SIGNAL(event_selectSceneWallpaper()));
+    mSceneMenu->addAction(hbTrId(hsLocTextId_ContextMenu_ChangeWallpaper), this, SIGNAL(event_selectWallpaper()));
     mSceneMenu->setPreferredPos(mTouchScenePos);
     mSceneMenu->open(this, SLOT(onSceneMenuTriggered(HbAction *)));
 }
@@ -1108,10 +1107,10 @@ void HsIdleState::action_sceneMenu_showMenu()
 void HsIdleState::action_addPage_addPage()
 {
     HsScene *scene = HsScene::instance();
-	  int pageIndex = scene->activePageIndex() + 1;
+	int pageIndex = scene->activePageIndex() + 1;
     addPageToScene(pageIndex);
     scene->setActivePageIndex(pageIndex);
-    startPageChangeAnimation(pageIndex, HsConfiguration::newPageAddedAnimationDuration());
+    startPageChangeAnimation(pageIndex, HSCONFIGURATION_GET(newPageAddedAnimationDuration));
     mUiWidget->pageIndicator()->addItem(pageIndex);
     mUiWidget->showPageIndicator();
 }
@@ -1132,7 +1131,7 @@ void HsIdleState::action_removePage_removePage()
         box->setHeadingWidget(new HbLabel
                                 (hbTrId(hsLocTextId_Title_RemovePage)));
         box->setText(hbTrId(hsLocTextId_Confirmation_RemovePage));
-        
+
         QAction *buttonOk = box->actions().at(0);
         //We are keen only from OK button. Cancel is not connected to any slot.
         connect(buttonOk, SIGNAL(triggered()), SLOT(onRemovePageConfirmationOk()));
@@ -1211,7 +1210,7 @@ void HsIdleState::widgetInteraction_onMouseMoved(
 
     QPointF point =
         event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
-    if (HsConfiguration::tapAndHoldDistance() < point.manhattanLength()) {
+    if (HSCONFIGURATION_GET(tapAndHoldDistance) < point.manhattanLength()) {
         // Threshold area for tap exceeded. This is pan or swipe
         mTimer.stop();
         if (HsScene::instance()->activeWidget()->isPannable(event)) {
@@ -1223,7 +1222,6 @@ void HsIdleState::widgetInteraction_onMouseMoved(
             emit event_moveScene();
         }
     }
-
 }
 
 /*!
@@ -1272,7 +1270,7 @@ void HsIdleState::sceneInteraction_onMouseMoved(
 
     QPointF point =
         event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
-    if (HsConfiguration::tapAndHoldDistance() < point.manhattanLength()) {
+    if (HSCONFIGURATION_GET(tapAndHoldDistance) < point.manhattanLength()) {
         mTimer.stop();
         mUiWidget->clearDelayedPress();
         emit event_moveScene();
@@ -1341,14 +1339,14 @@ void HsIdleState::moveWidget_onMouseMoved(
     */
     widget->setGeometry(widgetX, widgetY, widgetRect.width(), widgetRect.height());
 
-    int bounceFeedbackEffectDistance = HsConfiguration::bounceFeedbackEffectDistance();
+    int bounceFeedbackEffectDistance = HSCONFIGURATION_GET(bounceFeedbackEffectDistance);
     //Handle effects:
     //User is indicated by a tactile feedback if he/she is trying to move
     //widget over the first or the last page.
     if( (page == scene->pages().first() && mTouchScenePos.x() < bounceFeedbackEffectDistance ) ||
-        (page == scene->pages().last() && scene->pages().count() == scene->maximumPageCount()
+        (page == scene->pages().last() && scene->pages().count() == HSCONFIGURATION_GET(maximumPageCount)
          && mTouchScenePos.x() > pageRect.width() - bounceFeedbackEffectDistance)) {
-             HbInstantFeedback::play(HsConfiguration::widgetMoveBlockedFeedbackType());
+             HbInstantFeedback::play(HSCONFIGURATION_GET(widgetMoveBlockedFeedbackEffect));
             // TODO: use code below when Orbit has updated ContinuousFeedback API
             //if (!mContinuousFeedback->isPlaying()) {
             //    mContinuousFeedback->play();
@@ -1397,14 +1395,13 @@ void HsIdleState::moveScene_onMouseMoved(
     HsScene *scene = HsScene::instance();
     mDeltaX = event->scenePos().x() - event->buttonDownScenePos(Qt::LeftButton).x();
 
-    int bounceEffect = HsConfiguration::bounceEffect();
+    int bounceEffect = HSCONFIGURATION_GET(bounceEffect);
 
-    qreal x = qBound(pageLayerXPos(scene->pages().count() - 1) - bounceEffect / 2 / parallaxFactor(),
+    qreal x = qBound(pageLayerXPos(scene->pages().count() - 1) - bounceEffect / 2 / mUiWidget->parallaxFactor(),
                      pageLayerXPos(scene->activePageIndex()) + mDeltaX,
-                     pageLayerXPos(0) + (bounceEffect / 2 / parallaxFactor()) - qreal(0.5));
+                     pageLayerXPos(0) + (bounceEffect / 2 / mUiWidget->parallaxFactor()));
 
-    mUiWidget->pageLayer()->setX(x);
-    mUiWidget->sceneLayer()->setX((parallaxFactor() * x) - bounceEffect / 2);
+    mUiWidget->setSceneX(x);
 }
 
 /*!
@@ -1467,7 +1464,7 @@ void HsIdleState::zoneAnimationFinished()
     HsScene *scene = HsScene::instance();
     int pageIndex = scene->activePageIndex();
 
-    if (mPageChanged) {
+    if (mZoneAnimation->direction() == QAbstractAnimation::Forward) {
         if (isInLeftPageChangeZone() &&
             0 < pageIndex) {
             --pageIndex;
@@ -1476,43 +1473,30 @@ void HsIdleState::zoneAnimationFinished()
             pageIndex < scene->pages().count()) {
             ++pageIndex;
         }
-        else {
-            delete mZoneAnimation;
-            mZoneAnimation = NULL;
-            mAllowZoneAnimation = true;
-            return;
-        }
 
         if (pageIndex == scene->pages().count()) {
-            if (scene->pages().last()->widgets().isEmpty()) {
-                delete mZoneAnimation;
-                mZoneAnimation = NULL;
-                mAllowZoneAnimation = true;
-                return;
-            }
-            else if (scene->pages().count() < scene->maximumPageCount()) {
+            if (pageIndex < HSCONFIGURATION_GET(maximumPageCount)) {
                 addPageToScene(pageIndex);
                 mUiWidget->showPageIndicator();
                 mUiWidget->pageIndicator()->addItem(pageIndex);
             }
-            else {
-                delete mZoneAnimation;
-                mZoneAnimation = NULL;
-                mAllowZoneAnimation = true;
-                return;
-            }
         }
         scene->setActivePageIndex(pageIndex);
-        startPageChangeAnimation(pageIndex, HsConfiguration::pageChangeAnimationDuration());
+        startPageChangeAnimation(pageIndex, HSCONFIGURATION_GET(pageChangeAnimationDuration));
     }
     else {
         scene->setActivePageIndex(pageIndex);
         mUiWidget->setActivePage(pageIndex);
-        mAllowZoneAnimation = true;
     }
+    deleteZoneAnimation();
+}
 
-    delete mZoneAnimation;
-    mZoneAnimation = NULL;
+/*!
+    Page change animation has been finished.
+ */
+void HsIdleState::pageChangeAnimationFinished()
+{
+    updateZoneAnimation();
 }
 
 /*!

@@ -19,11 +19,12 @@
 #ifndef HSPREVIEWHSWIDGETSTATE_H
 #define HSPREVIEWHSWIDGETSTATE_H
 
-#include <hsmenubasestate.h>
+#include <QState>
 
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class CaEntry;
 class HbDialog;
 class HsWidgetHost;
 class CaNotifier;
@@ -31,7 +32,7 @@ class HbAction;
 class HbScrollArea;
 class HbMessageBox;
 
-class HsPreviewHSWidgetState : public HsMenuBaseState
+class HsPreviewHSWidgetState : public QState
 {
     Q_OBJECT
 
@@ -61,23 +62,20 @@ private:
     void showMessageWidgetCorrupted();
 
     void subscribeForMemoryCardRemove();
+    
+    HbDialog* buildPreviewDialog(const CaEntry& entry) const;
 
 private:
     
-    HbDialog *mPopupDialog;
+    HbDialog *mPreviewDialog;
 
     CaNotifier *mNotifier;
 
-    HbScrollArea *mScrollArea;
-
-    HsWidgetHost *mWidget;
-
-    QObjectList mObjectList;
+    QScopedPointer<HsWidgetHost> mWidget;
 
     int mEntryId;
 
     HbMessageBox *mCorruptedMessage;
-    
 };
 
 

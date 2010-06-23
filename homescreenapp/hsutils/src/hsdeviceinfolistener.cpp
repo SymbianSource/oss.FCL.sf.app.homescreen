@@ -22,6 +22,13 @@
 #include <e32property.h>
 #include <startupdomainpskeys.h>
 #endif
+
+/*!
+    \class HsDeviceInfoListener
+    \ingroup group_hsutils
+    \brief 
+*/
+
 /*!
 
 */

@@ -20,10 +20,16 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QVariantHash>
+#ifdef HOMESCREEN_TEST
+#include "xqrequestinfo_mock.h"
+#include "xqservicerequest_mock.h"
+#else
 #include <xqrequestinfo.h>
 #include <xqservicerequest.h>
+#endif
 
-const char INTERFACE_NAME[] = "com.nokia.services.hsapplication.IHomeScreenClient";
+const char INTERFACE_NAME[] = "com.nokia.symbian.IHomeScreenClient";
 
 /*!
     \class HsWidgetInstallerSender

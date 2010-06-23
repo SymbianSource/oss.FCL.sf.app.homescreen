@@ -25,7 +25,6 @@ HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbAction;
 class HbMessageBox;
-class HsShortcutService;
 class HsMenuService;
 
 class HsDeleteCollectionState: public QState
@@ -57,8 +56,6 @@ signals:
 private:
 
     void construct();
-
-    HsShortcutService *shortcutService() const;
 
 private:
     int mItemId;

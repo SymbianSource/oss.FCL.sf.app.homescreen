@@ -27,6 +27,8 @@ class HbAction;
 class HbMessageBox;
 class HsShortcutService;
 class HsMenuService;
+class HbDialog;
+class CaNotifier;
 
 class HsUninstallItemState: public QState
 {
@@ -35,6 +37,12 @@ class HsUninstallItemState: public QState
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 
 public:
+    enum UninstallDialogType {
+        UninstallDialogDefinition01 = 1,
+        UninstallDialogDefinition02,
+        UninstallDialogDefinition03,
+        UninstallDialogDefinition04
+    };
 
     HsUninstallItemState(QState *parent = 0);
 
@@ -57,14 +65,25 @@ signals:
 private:
 
     void construct();
-
-    HsShortcutService *shortcutService() const;
+    
+    bool getApplicationsNames(QString &componentName,
+        QStringList &applicationsNames,
+        QString &confirmationMessage);
+    
+    void createUninstallMessage();
+    void createUninstallJavaMessage();
+    void subscribeForMemoryCardRemove();
 
 private:
 
     int mItemId;
+    
+    CaNotifier *mNotifier;
 
     HbMessageBox *mUninstallMessage; // deletes itself automatically on close
+    HbDialog *mUninstallJavaMessage;
+    QObjectList mObjectList;
+    UninstallDialogType mDialogType;
 
     HbAction *mConfirmAction; // child for mConfirmMessage
 

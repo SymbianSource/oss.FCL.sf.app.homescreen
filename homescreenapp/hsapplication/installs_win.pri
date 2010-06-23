@@ -24,10 +24,21 @@ homescreendb.CONFIG += no_build
 homescreendb.path = $$DESTDIR/private/20022f35
 homescreendb.files = ./resource_win/homescreen.db
 
-wallpapers.CONFIG += no_build
-wallpapers.path = $$DESTDIR/private/20022f35/wallpapers
-wallpapers.files = ./resource_win/d_landscape.png \
-                   ./resource_win/d_portrait.png
+scenewallpapers.CONFIG += no_build
+scenewallpapers.path = $$DESTDIR/private/20022f35/wallpapers/scene
+scenewallpapers.files = ./resource_win/scene/default_landscape.png \
+                   ./resource_win/scene/default_portrait.png
 
-INSTALLS += kqtihswallpapers homescreendb wallpapers 
-PRE_TARGETDEPS += install_kqtihswallpapers install_homescreendb install_wallpapers
+pagewallpapers.CONFIG += no_build
+pagewallpapers.path = $$DESTDIR/private/20022f35/wallpapers/page
+pagewallpapers.files = ./resource_win/page/default_landscape.png \
+                       ./resource_win/page/default_portrait.png \
+                       ./resource_win/page/1_portrait.png \
+                       ./resource_win/page/1_landscape.png \
+                       ./resource_win/page/2_portrait.png \
+                       ./resource_win/page/2_landscape.png \
+                       ./resource_win/page/3_portrait.png \
+                       ./resource_win/page/3_landscape.png
+
+INSTALLS += kqtihswallpapers homescreendb scenewallpapers pagewallpapers
+PRE_TARGETDEPS += install_kqtihswallpapers install_homescreendb install_scenewallpapers install_pagewallpapers

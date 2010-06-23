@@ -59,6 +59,7 @@ protected:
 private:
     Q_DISABLE_COPY(HsDefaultRuntime)
 
+    void registerAnimations();
     void createStatePublisher();
     void createContentServiceParts();
     void createStates();

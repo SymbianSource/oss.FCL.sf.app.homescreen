@@ -50,7 +50,7 @@
 
 /*!
  Constructor
- \param parent owner
+ \param parent Parent state.
  \retval void
  */
 HsCollectionNameState::HsCollectionNameState(QState *parent) :
@@ -74,7 +74,11 @@ HsCollectionNameState::~HsCollectionNameState()
  */
 void HsCollectionNameState::construct()
 {
-    setObjectName(this->parent()->objectName() + "/collectionnamestate");
+    setObjectName("/collectionnamestate");
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
+    
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
@@ -82,9 +86,6 @@ void HsCollectionNameState::construct()
  Sets entry event.
  \param event entry event.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsCollectionNameState::onEntry(QEvent *event)
 {
     qDebug("CollectionState::onEntry()");
@@ -103,10 +104,6 @@ void HsCollectionNameState::onEntry(QEvent *event)
 
     HSMENUTEST_FUNC_EXIT("HsCollectionNameState::onEntry");
 }
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------

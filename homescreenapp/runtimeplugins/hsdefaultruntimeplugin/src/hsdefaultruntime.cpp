@@ -42,8 +42,8 @@
 #include "hsmenueventtransition.h"
 #include "hswidgetpositioningonorientationchange.h"
 #include "hswidgetpositioningonwidgetadd.h"
-#include "hstest_global.h"
 #include "hsconfiguration.h"
+#include "hstest_global.h"
 
 QTM_USE_NAMESPACE
 #define hbApp qobject_cast<HbApplication*>(qApp)
@@ -101,20 +101,26 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     db->open();
     HsDatabase::setInstance(db);
 
-    HsConfiguration::loadConfiguration();
-
+    HsConfiguration::setInstance(new HsConfiguration);
+    HsConfiguration::instance()->load();
+            
     HsWidgetPositioningOnOrientationChange::setInstance(
         new HsAdvancedWidgetPositioningOnOrientationChange);
 
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
 
+    registerAnimations();
+
     createStatePublisher();
     createContentServiceParts();
     createStates();
     assignServices();
     
-	QCoreApplication::instance()->installEventFilter(this);
+    // create the instance so that singleton is accessible from elsewhere
+    HsShortcutService::instance(this);
+	
+    QCoreApplication::instance()->installEventFilter(this);
 
     if (hbApp) { // Qt test framework uses QApplication.
 	    connect(hbApp->activityManager(), SIGNAL(activityRequested(QString)), 
@@ -173,6 +179,16 @@ bool HsDefaultRuntime::eventFilter(QObject *watched, QEvent *event)
         result = (ke->key() == applicationKey) || ke->key() == Qt::Key_Launch0;        
 	}
 	return result;
+}
+
+
+/*!
+    Registers framework animations.
+*/
+void HsDefaultRuntime::registerAnimations()
+{
+    HbIconAnimationManager *manager = HbIconAnimationManager::global();
+    manager->addDefinitionFile(QLatin1String("qtg_anim_loading.axml"));
 }
 
 /*!

@@ -26,12 +26,17 @@ QTM_USE_NAMESPACE
 
 //mandatory keys
 const QString hsItemName("item:name");
+// or for localized name
+const QString hsItemLocName("item:locname");
+
 const QString hsitemLaunchUri("item:launchuri");
 const QString hsitemPublisherId("item:publisherId");
 
 //not mandatory
 const QString hsItemWidgetUri("widget:uri");
 const QString hsItemDescription("item:description");
+// or for localized name
+const QString hsItemLocDescription("item:locdescription");
 
 //for icon - not mandatory
 const QString hsIconFileName("icon:filename");//to display specific icon from file

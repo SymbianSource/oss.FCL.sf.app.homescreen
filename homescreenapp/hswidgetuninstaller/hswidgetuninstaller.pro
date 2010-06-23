@@ -45,4 +45,5 @@ symbian: {
     RSS_RULES += hidden launch datatypelist 
     LIBS += -lxqservice
     LIBS += -lxqserviceutil
+    LIBS += -lapparc
 }

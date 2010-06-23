@@ -22,7 +22,7 @@
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 #ifdef Q_OS_SYMBIAN
 class HsBackupRestoreObserverPrivate;
@@ -37,14 +37,14 @@ public:
 	~HsBackupRestoreObserver();
 	
 	void backupRestoreStarted();
-    void backupRestoreComplited();
+    void backupRestoreCompleted();
     
     void readyForBUR();
     bool checkBUR();
 
 signals:	
     void event_backupRestoreStarted();
-    void event_backupRestoreComplited();	
+    void event_backupRestoreCompleted();	
 
 private:
 	HsBackupRestoreObserver(QObject *parent = 0);
@@ -67,7 +67,7 @@ private:
 #ifdef Q_OS_SYMBIAN
     friend class HsBackupRestoreObserverPrivate;
 #endif //Q_OS_SYMBIAN
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSBACKUPRESTOREOBSERVER_H

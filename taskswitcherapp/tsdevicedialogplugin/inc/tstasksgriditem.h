@@ -19,7 +19,9 @@
 
 #include <hbabstractviewitem.h>
 
-class HbLabel;
+class HbTextItem;
+class HbIconItem;
+class HbFrameItem;
 class HbPushButton;
 
 class TsTasksGridItem : public HbAbstractViewItem
@@ -29,7 +31,6 @@ class TsTasksGridItem : public HbAbstractViewItem
 public:
     TsTasksGridItem();
     TsTasksGridItem(const TsTasksGridItem &item);
-    ~TsTasksGridItem();
 
     HbAbstractViewItem *createItem();
     void updateChildItems();
@@ -41,10 +42,12 @@ signals:
     void deleteClicked(const QModelIndex &index);
 
 private:
-    HbLabel *mScreenshotLabel;
-    HbLabel *mApplicationNameLabel;
+    HbIconItem *mScreenshotLabel;
+    HbTextItem *mApplicationNameLabel;
     HbPushButton *mDeleteButton;
 
+    HbFrameItem *mActiveLabelFrame;
+    HbTextItem *mActiveLabel;
 };
 
 #endif //TSTASKSGRIDITEM_H

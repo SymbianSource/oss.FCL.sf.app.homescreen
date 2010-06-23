@@ -23,26 +23,40 @@
 #include "hswidgethost.h"
 
 
+/*!
+    \class HsContentService
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
+/*!
+
+*/
 HsContentService::HsContentService(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),mWidgetStartFaulted(false)
 {
    
 }
 
+/*!
+
+*/
 HsContentService::~HsContentService()
 {
 }
 
+/*!
 
+*/
 bool HsContentService::createWidget(const QVariantHash &params)
 {
-    HsWidgetHost *widget = createWidgetForPreview(params);
-    if (!widget) {
-        return false;
-    }     
-    return HsScene::instance()->activePage()->addNewWidget(widget);
+    return addWidget(params.value("uri").toString(),params.value("preferences").toHash());
 }
 
+// This method will be removed.
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
 HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &params)
 {
     HsWidgetData widgetData;
@@ -51,6 +65,9 @@ HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &param
     return HsWidgetHost::createInstance(
         widgetData, params.value("preferences").toHash());
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
 
@@ -70,9 +87,15 @@ bool HsContentService::addWidget(const QString &uri, const QVariantHash &prefere
         widget->remove();
         return false;
     }
-
-    widget->startWidget();
-    page->layoutNewWidgets();
+    connect(widget,SIGNAL(event_faulted()),SLOT(widgetStartFaulted()));
+    mWidgetStartFaulted = false; 
+    widget->startWidget(); // synchronous operation
+    if (mWidgetStartFaulted) {
+        // page will destroy widget instance
+        return false;
+    }
+    widget->disconnect(this);
+  
     return true;
 }
 
@@ -85,6 +108,14 @@ HsContentService *HsContentService::instance()
         mInstance = new HsContentService();
     }
     return mInstance;
+}
+
+/*!
+
+*/
+void HsContentService::widgetStartFaulted()
+{
+    mWidgetStartFaulted = true;
 }
 
 /*!

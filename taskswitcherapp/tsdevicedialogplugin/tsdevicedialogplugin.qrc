@@ -1,8 +1,7 @@
 <RCC>
-    <qresource prefix="/xml">
+    <qresource prefix="/">
         <file>resource/layout.docml</file>
-    </qresource>
-    <qresource prefix="/" >
-        <file>resource/delete.png</file>
+        <file>resource/tstasksgriditem.widgetml</file>
+        <file>resource/tstasksgriditem.css</file>        
     </qresource>
 </RCC>

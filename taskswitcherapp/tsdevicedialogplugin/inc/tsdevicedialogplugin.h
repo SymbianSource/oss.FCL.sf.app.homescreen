@@ -49,6 +49,8 @@ private:
     QAbstractListModel *mModel;
     TsTaskMonitor *mStorage;
 
+    bool mTriedToLoadTranslation;
+    
     Q_DISABLE_COPY(TsDeviceDialogPlugin)
 };
 

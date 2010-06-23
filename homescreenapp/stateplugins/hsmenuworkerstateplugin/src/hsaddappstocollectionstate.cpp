@@ -172,7 +172,7 @@
 /*!
  Constructor.
  \return \a true on success, \a false otherwise.
- \param parent Owner.
+ \param parent Parent state.
  */
 HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
     QState(parent), mCollectionName(), mCollectionId(0), mAppList(),
@@ -395,9 +395,6 @@ void HsAddAppsToCollectionState::stateExited()
 /*!
  Slot invoked when new collection state is entered..
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsAddAppsToCollectionState::newCollection()
 {
     qDebug("HsAddAppsToCollectionState::newCollection");
@@ -407,9 +404,6 @@ void HsAddAppsToCollectionState::newCollection()
 
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::newCollection");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 
 // ---------------------------------------------------------------------------
@@ -439,9 +433,6 @@ void HsAddAppsToCollectionState::editorDialogFinished(HbAction* finishedAction)
 /*!
  Slot invoked when select collection state is entered.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsAddAppsToCollectionState::selectCollection()
 {
     qDebug("HsAddAppsToCollectionState::selectCollection()");
@@ -451,11 +442,6 @@ void HsAddAppsToCollectionState::selectCollection()
     mListDialog->open(this, SLOT(listDialogFinished(HbAction*)));
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::selectCollection");
 }
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
-
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------

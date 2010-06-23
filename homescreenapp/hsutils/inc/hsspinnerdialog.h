@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,28 +11,34 @@
 *
 * Contributors:
 *
-* Description:  Homescreen wallpaper helper class.
+* Description: 
+*    Spinner dialog shown when setting new background image
 *
 */
 
-#ifndef HSWALLPAPERHELPER_H
-#define HSWALLPAPERHELPER_H
+#ifndef __SPINNERDIALOG_H
+#define __SPINNERDIALOG_H
 
+#include <HbDialog>
 #include "hsutils_global.h"
 #include "hstest_global.h"
-
+class HbIconItem;
 HOMESCREEN_TEST_CLASS(t_hsUtils)
 
-class HSUTILS_EXPORT HsWallpaperHelper
-{	
-public:
-    static QImage processImage(const QString &sourcePath, 
-    						   const QRect &targetRect,
-    						   const QRect &sourceRect,
-    						   bool centerTarget = true);
+class HSUTILS_EXPORT HsSpinnerDialog : public HbDialog
+{
+    Q_OBJECT
     
-private:  
+public: 
+    HsSpinnerDialog(QGraphicsItem *parent=0);
+    ~HsSpinnerDialog();
+    
+public slots:
+    void start();
+    void stop();
+    
+private:    
     HOMESCREEN_TEST_FRIEND_CLASS(t_hsUtils)
 };
 
-#endif // HSWALLPAPERHELPER_H
+#endif // __SPINNERDIALOG_H

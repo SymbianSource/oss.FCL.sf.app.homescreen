@@ -25,8 +25,9 @@
 
 class HsWidgetHost;
 class HsPageData;
+class HsWallpaper;
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HSDOMAINMODEL_EXPORT HsPage : public HbWidget
 {
@@ -42,12 +43,15 @@ public:
 
     bool load();
 
+    HsWallpaper *wallpaper() const;
+
     bool addExistingWidget(HsWidgetHost *widgetHost);
     bool removeWidget(HsWidgetHost *widgeHost);
 
     QList<HsWidgetHost *> newWidgets();
     bool addNewWidget(HsWidgetHost *widgetHost);
     void layoutNewWidgets();
+    void resetNewWidgets();
     bool deleteFromDatabase();
 
     QList<HsWidgetHost *> widgets() const;
@@ -55,6 +59,7 @@ public:
     bool isRemovable() const;
     void setRemovable(bool removable);
 
+    bool isDefaultPage() const;
     bool isActivePage() const;
     
     static HsPage *createInstance(const HsPageData &pageData);
@@ -84,12 +89,13 @@ private slots:
 
 private:
     int mDatabaseId;
+    HsWallpaper *mWallpaper;
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
     QList<HsWidgetHost*> mUnavailableWidgets;
 
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif

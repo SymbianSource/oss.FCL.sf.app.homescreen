@@ -58,7 +58,7 @@ private slots:
     bool openTaskSwitcher();
     void listItemActivated(const QModelIndex &index);
     void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
-    void addAppsAction();
+    void addAppsAction(bool addApps = true);
     void addCollectionShortcutToHomeScreenAction();
     void renameAction();
     void deleteAction();
