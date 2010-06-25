@@ -21,10 +21,11 @@
 #include <QStringList>
 #include <QDir>
 #include <QFileInfo>
-#include <apacmdln.h> 
+#include <apacmdln.h>
 
 #include "hswidgetcomponentparser.h"
 #include "hswidgetinstallersender.h"
+#include "hswidgetcomponentdescriptor.h"
 
 const char UNINSTALL_WIDGET_FUNCTION_NAME[] = "widgetUninstalled(QVariantHash)";
 
@@ -35,14 +36,14 @@ int main(int argc, char *argv[])
     TInt err = CApaCommandLine::GetCommandLineFromProcessEnvironment(commandLine);
     QString commandParam((QChar*)commandLine->DocumentName().Ptr(),commandLine->DocumentName().Length());
     qDebug() << "HSWIDGETUNINSTALLER commandParam:" << commandParam;
-    
+
     QCoreApplication app(argc, argv);
     QStringList args = QCoreApplication::arguments();
-    
+
     if (commandParam.isEmpty()) {
         return -1;
     }
-    
+
     HsWidgetComponentParser componentParser(commandParam);
     if ( !componentParser.error() ) {
         HsWidgetInstallerSender installerSender;
@@ -51,12 +52,12 @@ int main(int argc, char *argv[])
         componentDir.cdUp();
         QString componentPath = componentDir.path();
         if ( componentDir.exists(componentPath)) {
-            componentDescriptor.installationPath = componentPath;
+            componentDescriptor.setInstallationPath(componentPath);
         }
         installerSender.widgetChanged(UNINSTALL_WIDGET_FUNCTION_NAME, componentDescriptor);
     }
-    
+
     qDebug() << "HSWIDGETUNINSTALLER finished";
-    
+
     return 0; //app.exec();
 }

@@ -19,6 +19,7 @@
 #include <hbmessagebox.h>
 #include <hbaction.h>
 #include <hsmenuservice.h>
+#include <HbParameterLengthLimiter>
 #include <hsshortcutservice.h>
 #include <hsmenueventfactory.h>
 
@@ -34,7 +35,7 @@
 
 /*!
  Constructor.
- \param parent Owner.
+ \param parent Parent state.
  */
 HsDeleteCollectionState::HsDeleteCollectionState(QState *parent) :
     QState(parent),
@@ -58,9 +59,10 @@ HsDeleteCollectionState::~HsDeleteCollectionState()
  */
 void HsDeleteCollectionState::construct()
 {
-    setObjectName(this->parent()->objectName() + "/DeleteCollectionState");
-    setProperty(HS_SERVICES_REGISTRATION_KEY, QList<QVariant> ()
-                << SHORTCUT_SERVICE_KEY);
+    setObjectName("/DeleteCollectionState");
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
@@ -68,9 +70,6 @@ void HsDeleteCollectionState::construct()
  Sets entry event.
  \param event entry event.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsDeleteCollectionState::onEntry(QEvent *event)
 {
     HSMENUTEST_FUNC_ENTRY("HsDeleteCollectionState::onEntry");
@@ -82,12 +81,12 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
     mItemId = data.value(itemIdKey()).toInt();
 
     QString message;
-    if (shortcutService()->isItemShortcutWidget(mItemId)) {
-        message.append(hbTrId(
+    if (HsShortcutService::instance()->isItemShortcutWidget(mItemId)) {
+        message.append(HbParameterLengthLimiter(
                            "txt_applib_dialog_deletes_1_also_from_home_screen"). arg(
                            HsMenuService::getName(mItemId)));
     } else {
-        message.append(hbTrId("txt_applib_dialog_delete_1").arg(
+        message.append(HbParameterLengthLimiter("txt_applib_dialog_delete_1").arg(
                            HsMenuService::getName(mItemId)));
     }
 
@@ -107,19 +106,7 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
     mDeleteMessage->open(this, SLOT(deleteMessageFinished(HbAction*)));
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionState::onEntry");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
-/*!
- Convenience method returning the shortcut service.
- \since S60 ?S60_version.
- \return Shortcut Service.
- */
-HsShortcutService *HsDeleteCollectionState::shortcutService() const
-{
-    return property(SHORTCUT_SERVICE_KEY).value<HsShortcutService *> ();
-}
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------

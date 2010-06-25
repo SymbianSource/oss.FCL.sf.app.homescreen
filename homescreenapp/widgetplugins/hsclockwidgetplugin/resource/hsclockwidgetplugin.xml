@@ -8,7 +8,5 @@
         <version>1.0</version>
         <description>The clock widget displays current time.</description>
         <capabilities></capabilities>
-        <customproperty key="iconuri">tclock.png</customproperty>
-        <customproperty key="title">Clock</customproperty>
     </interface>
 </service>

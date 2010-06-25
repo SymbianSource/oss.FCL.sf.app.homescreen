@@ -4,5 +4,6 @@
         <file alias="hswidgetpreviewdialog.docml">resource/hswidgetpreviewdialog.docml</file>
         <file alias="hsarrangedialog.docml">resource/hsarrangedialog.docml</file>
         <file alias="hsdetailsdialog.docml">resource/hsdetailsdialog.docml</file>
+        <file alias="hsuninstalldialog.docml">resource/hsuninstalldialog.docml</file>
     </qresource>
 </RCC>

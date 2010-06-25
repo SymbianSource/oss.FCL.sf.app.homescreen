@@ -48,7 +48,7 @@ const int qMaxStrLength = 248;
 
 /*!
  Constructor
- \param parent owner
+ \param itemId Collection Id.
  \retval void
  */
 HsCollectionNameDialog::HsCollectionNameDialog(const int &itemId)

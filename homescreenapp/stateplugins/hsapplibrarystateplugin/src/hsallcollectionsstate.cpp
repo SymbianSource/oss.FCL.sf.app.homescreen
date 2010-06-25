@@ -77,7 +77,7 @@ HsAllCollectionsState::HsAllCollectionsState(
     HsMenuModeWrapper &menuMode,
     HsMainWindow &mainWindow,
     QState *parent):
-    QState(parent),
+    HsBaseViewState(parent),
     mSortAttribute(CustomHsSortAttribute),
     mMenuView(menuViewBuilder, HsAllCollectionsContext),
     mMenuMode(menuMode),
@@ -230,7 +230,9 @@ void HsAllCollectionsState::stateEntered()
 void HsAllCollectionsState::normalModeEntered()
 {
     setMenuOptions();
-
+    connect(&mMainWindow, SIGNAL(viewIsReady()),
+        &mMainWindow, SLOT(saveActivity()),
+        Qt::UniqueConnection);
     connect(&mMenuView,
             SIGNAL(activated(QModelIndex)),
             SLOT(listItemActivated(QModelIndex)));
@@ -266,7 +268,10 @@ void HsAllCollectionsState::addModeEntered()
 void HsAllCollectionsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::stateExited");
-
+    
+    disconnect(&mMainWindow, SIGNAL(viewIsReady()),
+               &mMainWindow, SLOT(saveActivity()));
+    
     mMenuView.setSearchPanelVisible(false);
 
     mMenuView.disconnect(this);
@@ -275,6 +280,8 @@ void HsAllCollectionsState::stateExited()
 
     if (mContextMenu)
         mContextMenu->close();
+    
+    HsBaseViewState::stateExited();
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::stateExited");
     qDebug("AllCollectionsState::stateExited()");
@@ -305,7 +312,7 @@ void HsAllCollectionsState::listItemActivated(const QModelIndex &index)
 
     mMenuView.setSearchPanelVisible(false);
 
-    machine()->postEvent(HsMenuEventFactory::createOpenCollectionEvent(id,
+    machine()->postEvent(HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(id,
                          collectionType));
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::listItemActivated");
 }
@@ -319,7 +326,7 @@ void HsAllCollectionsState::addActivated(const QModelIndex &index)
     const int itemId = index.data(CaItemModel::IdRole).toInt();
     machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(
-            itemId, mMenuMode.getHsMenuMode()));
+            itemId, mMenuMode.getHsMenuMode(), mMenuMode.getHsToken()));
 }
 
 /*!
@@ -335,7 +342,7 @@ void HsAllCollectionsState::addLongPressed(HbAbstractViewItem *item,
     const int itemId = item->modelIndex().data(CaItemModel::IdRole).toInt();
     machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(itemId,
-                mMenuMode.getHsMenuMode()));
+                mMenuMode.getHsMenuMode(), mMenuMode.getHsToken()));
 }
 
 /*!
@@ -391,7 +398,7 @@ void HsAllCollectionsState::contextMenuAction(HbAction *action)
         case AddToHomeScreenContextAction:
             machine()->postEvent(
                 HsMenuEventFactory::createAddToHomeScreenEvent(
-                    itemId, mMenuMode.getHsMenuMode()));
+                    itemId, mMenuMode.getHsMenuMode(), mMenuMode.getHsToken()));
             break;
         case RenameContextAction:
             machine()->postEvent(
@@ -475,3 +482,4 @@ void HsAllCollectionsState::descendingMenuAction()
     emit sortOrderChanged(mSortAttribute);
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::descendingMenuAction");
 }
+

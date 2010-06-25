@@ -19,7 +19,7 @@
 
 #include <HbInstance>
 #include <HbMainWindow>
-#include <HbDeviceProfile>
+#include <hbevent.h>
 
 #include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
@@ -28,6 +28,14 @@
 #include "hsdatabase.h"
 #include "hswallpaper.h"
 #include "hsconfiguration.h"
+
+
+/*!
+    \class HsScene
+    \ingroup group_hsdomainmodel
+    \brief Represents a scene in the framework.
+    HsScene can have a wallpaper.
+*/
 
 /*!
     Destructor.
@@ -58,23 +66,17 @@ bool HsScene::load()
         return false;
     }
 
-    mMaximumPageCount = HsConfiguration::maximumPageCount();
-
-    calculateWidgetSizeLimitations();
-
-    if (sceneData.portraitWallpaper.isEmpty()) {
-        mWallpaper->setImagesById();
-    } else {
-        mWallpaper->setImagesByPaths(
-            sceneData.landscapeWallpaper, 
-            sceneData.portraitWallpaper);
-    }
+    mDatabaseId = sceneData.id;
 
     QList<HsPageData> pageDatas;
     if (!db->pages(pageDatas) || pageDatas.empty()) {
         return false;
     }
     
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::SceneWallpaper) {
+        mWallpaper = new HsSceneWallpaper(this);
+    }
+
     foreach (HsPageData pageData, pageDatas) {
         HsPage *page = new HsPage;
         page->setDatabaseId(pageData.id);
@@ -84,35 +86,17 @@ bool HsScene::load()
             delete page;
             continue;
         }
-        if (pageData.id == HsConfiguration::defaultPageId()) {
+        if (pageData.id == HSCONFIGURATION_GET(defaultPageId)) {
             mActivePage = page;
             mActivePage->setRemovable(false);
         }
     }
-
-    QApplication::instance()->installEventFilter(this);
-
+    
 	return true;
 }
 
 /*!
-    Calculate maximum and minimum widget sizes 
-*/
-void HsScene::calculateWidgetSizeLimitations()
-{
-    // 1un = 6.7px = 2mm
-    mMaximumWidgetSizeInUnits = QSizeF(HsConfiguration::maximumWidgetWidth(),
-                                       HsConfiguration::maximumWidgetHeight());
-    mMinimumWidgetSizeInUnits = QSizeF(HsConfiguration::minimumWidgetWidth(),
-                                       HsConfiguration::minimumWidgetHeight());
-    HbDeviceProfile profile;
-    qreal unitToPixelFactor = profile.unitValue();
-    mMaximumWidgetSizeInPixels = unitToPixelFactor * mMaximumWidgetSizeInUnits;
-    mMinimumWidgetSizeInPixels = unitToPixelFactor * mMinimumWidgetSizeInUnits;
-}
-
-/*!
-    Return wallpaper. 
+    Return wallpaper.
 */
 HsWallpaper *HsScene::wallpaper() const
 {
@@ -126,7 +110,7 @@ QList<HsPage *> HsScene::pages() const
 {
     return mPages;
 }
-    
+
 /*!
     Add page \a page.
 */
@@ -135,13 +119,13 @@ bool HsScene::addPage(HsPage *page)
     if (!page) {
         return false;
     }
-   
+
     if (mPages.contains(page)) {
         return true;
     }
 
     HsDatabase *db = HsDatabase::instance();
-    
+
     HsPageData data;
     data.id = page->databaseId();
     if (!db->page(data)) {
@@ -160,13 +144,13 @@ bool HsScene::addPage(HsPage *page)
             return false;
         }
     }
-    
+
     db->commit();
-    
+
     mPages.insert(addPosition, page);
     return true;
 }
-    
+
 /*!
     Removes page \a page.
 */
@@ -205,7 +189,7 @@ bool HsScene::removePage(HsPage *page)
     mPages.removeOne(page);
     return true;
 }
- 
+
 /*!
     Set active page \a page.
 */
@@ -214,7 +198,7 @@ bool HsScene::setActivePage(HsPage *page)
     if (!page) {
         return false;
     }
-   
+
     if (!mPages.contains(page)) {
         return false;
     }
@@ -224,6 +208,7 @@ bool HsScene::setActivePage(HsPage *page)
     }
 
     mActivePage = page;
+    emit activePageChanged();
 
     foreach (HsPage *p, mPages) {
         if (p == mActivePage) {
@@ -264,53 +249,13 @@ int HsScene::activePageIndex() const
 }
 
 /*!
-    Return maximum number of pages.
-*/
-int HsScene::maximumPageCount() const
-{
-    return mMaximumPageCount;
-}
-
-/*!
-    Return maximum widget size in pixels.
-*/
-QSizeF HsScene::maximumWidgetSizeInPixels() const
-{
-    return mMaximumWidgetSizeInPixels;
-}
-
-/*!
-    Return minimum widget size in pixels.
-*/
-QSizeF HsScene::minimumWidgetSizeInPixels() const
-{
-    return mMinimumWidgetSizeInPixels;
-}
-
-/*!
-    Return maximum widget size in units.
-*/
-QSizeF HsScene::maximumWidgetSizeInUnits() const
-{
-    return mMaximumWidgetSizeInUnits;
-}
-
-/*!
-    Return minimum widget size in units.
-*/
-QSizeF HsScene::minimumWidgetSizeInUnits() const
-{
-    return mMinimumWidgetSizeInUnits;
-}
-
-/*!
     Set active widget \a widget.
 */
 void HsScene::setActiveWidget(HsWidgetHost *widget)
 {
     mActiveWidget = widget;
 }
- 
+
 /*!
    Return active widget.
 */
@@ -319,7 +264,7 @@ HsWidgetHost *HsScene::activeWidget() const
     return mActiveWidget;
 }
 /*!
-    Toggle application online state. Defaults 
+    Toggle application online state. Defaults
     to true.
 */
 void HsScene::setOnline(bool online)
@@ -339,15 +284,26 @@ bool HsScene::isOnline()const
 }
 
 /*!
-    Singleton. 
+    Singleton.
 */
 HsScene *HsScene::instance()
 {
-    if (!mInstance) {
-        mInstance = new HsScene;
-        mInstance->setParent(HsScene::mainWindow());
-    }
     return mInstance;
+}
+
+HsScene *HsScene::takeInstance()
+{
+    HsScene *instance = mInstance;
+    mInstance = 0;
+    return instance;
+}
+ 
+void HsScene::setInstance(HsScene *instance)
+{
+    if (mInstance != instance) {
+        delete mInstance;
+        mInstance = instance; 
+    }    
 }
 
 /*!
@@ -371,16 +327,28 @@ Qt::Orientation HsScene::orientation()
 */
 bool HsScene::eventFilter(QObject *watched, QEvent *event)
 {
-    switch (event->type()) {
-        case QEvent::ApplicationActivate:
+    if (event->type() == QEvent::ApplicationDeactivate && !mIsBackground) {
+        qDebug() << "QEvent::ApplicationDeactivate: calling hide for active page widgets";
+        mActivePage->hideWidgets(); 
+        mIsBackground = true;
+    } else if (event->type() == QEvent::ApplicationActivate && mIsBackground) {
+        if(!mIsSleeping) {
+            qDebug() << "QEvent::ApplicationActivate: not sleeping, calling show for active page widgets";
             mActivePage->showWidgets();
-            break;
-		case QEvent::ApplicationDeactivate:
-            mActivePage->hideWidgets();
-            break;
-        default:
-            break;
-	}
+        }
+        mIsBackground = false;
+    } else if (event->type() == HbEvent::SleepModeEnter && !mIsSleeping) {
+        qDebug() << "HbEvent::SleepModeEnter: calling hide for active page widgets";
+        mActivePage->hideWidgets();
+        mIsSleeping = true;
+    } else if (event->type() == HbEvent::SleepModeExit && mIsSleeping) {
+        if(!mIsBackground) {
+           qDebug() << "HbEvent::SleepModeExit: in foreground, calling show for active page widgets";
+           mActivePage->showWidgets();
+        }
+        mIsSleeping = false;
+    }    
+
     return QObject::eventFilter(watched, event);
 }
 
@@ -389,18 +357,14 @@ bool HsScene::eventFilter(QObject *watched, QEvent *event)
 */
 HsScene::HsScene(QObject *parent)
   : QObject(parent),
-    mDatabaseId(-1),    
-    mWallpaper(0),    
+    mDatabaseId(-1),
+    mWallpaper(0),
     mActivePage(0),
     mActiveWidget(0),
     mIsOnline(true),
-    mMaximumPageCount(1),
-    mMaximumWidgetSizeInPixels(321.6, 261.3),
-    mMinimumWidgetSizeInPixels(58.625, 58.625),
-    mMaximumWidgetSizeInUnits(48, 39),
-    mMinimumWidgetSizeInUnits(8.75, 8.75)
+    mIsBackground(false),
+    mIsSleeping(false)
 {
-    mWallpaper = new HsWallpaper;
 }
 
 /*!

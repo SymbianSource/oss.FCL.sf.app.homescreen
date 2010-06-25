@@ -289,4 +289,41 @@ inline const QString componentIdAttributeName()
     return key;
 }
 
+/*!
+    \return entry short name
+*/
+inline const QString entryShortName()
+{
+    static const QString key("short_name");
+    return key;
+}
+
+/*!
+    \return entry translation file name
+*/
+inline const QString translationFilename()
+{
+    static const QString key("widget:translation_file");
+    return key;
+}
+
+/*!
+    \return app lib activity name
+*/
+inline const QString appLibActivity()
+{
+    static const QString key("AppLibMainView");
+    return key;
+}
+
+/*!
+    \return homescreen activitity name to open idle iew
+*/
+inline const QString activityHsIdleView()
+{
+    static const QString key("HsIdleView");
+    return key;
+}
+
+
 #endif

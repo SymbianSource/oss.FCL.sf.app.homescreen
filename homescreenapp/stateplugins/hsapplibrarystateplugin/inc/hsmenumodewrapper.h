@@ -15,9 +15,10 @@
  *
  */
 
-#ifndef HSAPPLIBRARYMODE_H
-#define HSAPPLIBRARYMODE_H
+#ifndef HSMENUMODEWRAPPER_H
+#define HSMENUMODEWRAPPER_H
 
+#include <QVariant>
 #include "hsapp_defs.h"
 
 class HsMenuModeWrapper
@@ -26,11 +27,13 @@ public:
     HsMenuModeWrapper();
     
     HsMenuMode getHsMenuMode() const;
+    QVariant getHsToken() const;
 
-    void setHsMenuMode(HsMenuMode menuMode);
+    void setHsMenuMode(HsMenuMode menuMode, QVariant token = NULL);
 
 private:
     HsMenuMode mMode;
+    QVariant mToken;
 };
 
 #endif

@@ -24,7 +24,7 @@
 #include "hsdomainmodel_global.h"
 
 #include "hstest_global.h"
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HSDOMAINMODEL_EXPORT HsWidgetComponent : public QObject
 {
@@ -49,7 +49,7 @@ private:
     Q_DISABLE_COPY(HsWidgetComponent)
 	HsWidgetComponent(const QString &uri, QObject *parent = 0);
 
-	void resolveRootPath();
+	void resolveRootPathAndTranslationFilename();
     void installTranslator();
 	void uninstallTranslator();
 	
@@ -65,9 +65,10 @@ private:
 	QString mRootPath;
 	QString mDrive;
 	State mState;
+	QString mTranslationFilename;
 	friend class HsWidgetComponentRegistry;
 
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSWIDGETCOMPONENT_H

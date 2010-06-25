@@ -35,7 +35,7 @@
 
 const char SHORTCUT_WIDGET_URI[] = "hsshortcutwidgetplugin";
 const char SHORTCUT_ID[] = "caEntryId";
-const char ADD_TO_HOMESCREEN_STATE[] = "AddToHomeScreenState";
+
 
 
 /*!
@@ -50,17 +50,21 @@ const char ADD_TO_HOMESCREEN_STATE[] = "AddToHomeScreenState";
 
 /*!
  Constructor
- \param parent: parent state
+ \param parent Parent state.
  \retval void
  */
 HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
-    HsMenuBaseState(ADD_TO_HOMESCREEN_STATE, parent), 
+    QState(parent), 
     mCorruptedMessage(NULL), mConfirmAction(NULL),
     mMenuMode(NormalHsMenuMode),
     mNotifier(0)
 {
-    requestServices(QList<QVariant> () << SHORTCUT_SERVICE_KEY
-                    << CONTENT_SERVICE_KEY);
+    setObjectName("/AddToHomeScreenState");
+    
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
+    
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
@@ -86,7 +90,7 @@ HsAddToHomeScreenState::~HsAddToHomeScreenState()
 void HsAddToHomeScreenState::onEntry(QEvent *event)
 {
     HSMENUTEST_FUNC_ENTRY("HsAddToHomeScreenState::onEntry");
-    HsMenuBaseState::onEntry(event);
+    QState::onEntry(event);
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
@@ -95,14 +99,15 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
     const QString entryTypeName = entry->entryTypeName();
     
     mMenuMode = static_cast<HsMenuMode>(data.value(menuModeType()).toInt());
+    mToken = data.value(HOMESCREENDATA);
 
     bool success = false;
     if (entryTypeName == widgetTypeName()) {
         const QString uri = entry->attribute(widgetUriAttributeName());
-        success = addWidget(*contentService(), uri);
+        success = addWidget(*HsContentService::instance(), uri);
         HsMenuService::touch(mEntryId);        
     } else {
-        success = addApplication(*contentService(), *entry);
+        success = addApplication(*HsContentService::instance(), *entry);
     }
     
     if (success && (mMenuMode == NormalHsMenuMode)) {
@@ -132,6 +137,7 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
     HSMENUTEST_FUNC_ENTRY("HsAddToHomeScreenState::addWidget");
     QVariantHash params;
     params[URI] = uri;
+    params[HOMESCREENDATA] = mToken;
     bool success = contentService.createWidget(params);
     if (!success) {
         subscribeForMemoryCardRemove();
@@ -153,9 +159,6 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
  \param itemId entryId of widget (needed to delete it)
  \retval void
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
@@ -179,9 +182,6 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot launched on dismissing the corrupted widget error note
@@ -221,6 +221,7 @@ void HsAddToHomeScreenState::cleanUp()
 
     delete mNotifier;
     mNotifier = NULL;
+    mToken = NULL;
 }
 
 
@@ -239,6 +240,7 @@ bool HsAddToHomeScreenState::addShortcut(HsContentService &contentService)
     QVariantHash preferences;
     preferences[SHORTCUT_ID] = QString::number(mEntryId);
     params[PREFERENCES] = preferences;
+    params[HOMESCREENDATA] = mToken;
     const bool result = contentService.createWidget(params);
     logActionResult("Adding shortcut", mEntryId, result);
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::addShortcut");
@@ -273,6 +275,7 @@ bool HsAddToHomeScreenState::addApplication(HsContentService &contentService,
             }
         }
         params[PREFERENCES] = preferences;
+        params[HOMESCREENDATA] = mToken;
 
         success = contentService.createWidget(params);
         if (!success) {

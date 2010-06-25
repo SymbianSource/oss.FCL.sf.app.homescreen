@@ -18,15 +18,33 @@
 #ifndef HS_MAIN_WINDOW_H
 #define HS_MAIN_WINDOW_H
 
-class HsMenuView;
-class HsMainWindow
-{
+#include <QObject>
+#include <QPixmap>
 
+class HsMenuView;
+class HsMainWindow: public QObject
+{
+    Q_OBJECT
+    
 public:
     HsMainWindow();
     virtual ~HsMainWindow();
 
     virtual void setCurrentView(const HsMenuView &menuView);
+    virtual QPixmap grabScreenshot();
+       
+    public slots:
+    virtual void saveActivity();
+    
+    signals:
+    void viewIsReady();
+    
+    private:
+    /*
+     * not owned
+     * 
+     */
+    QObject* mActivityClient;
 };
 
 #endif // HS_MAIN_WINDOW_H

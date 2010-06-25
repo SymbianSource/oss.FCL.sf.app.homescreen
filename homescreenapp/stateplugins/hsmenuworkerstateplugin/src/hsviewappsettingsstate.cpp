@@ -57,7 +57,7 @@
 
 /*!
  Constructor
- \param parent: parent state
+ \param parent Parent state.
  \retval void
  */
 HsViewAppSettingsState::HsViewAppSettingsState(QState *parent) :
@@ -68,7 +68,7 @@ HsViewAppSettingsState::HsViewAppSettingsState(QState *parent) :
         mNotifier(0)
         
 {
-        construct();
+    construct();
 }
 
 /*!
@@ -76,8 +76,10 @@ HsViewAppSettingsState::HsViewAppSettingsState(QState *parent) :
  */
 void HsViewAppSettingsState::construct()
 {
-    setObjectName(this->parent()->objectName()
-                  + "/ViewAppSettingsState");
+    setObjectName("/ViewAppSettingsState");
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
 }
 
 /*!
@@ -106,7 +108,8 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
     const int entryId = data.value(itemIdKey()).toInt();   
     QSharedPointer<const CaEntry> entry = CaService::instance()->getEntry(entryId);    
     
-    QString pluginPath(entry->attribute(appSettingsPlugin()));
+    QString pluginPath;
+    pluginPath = pluginPath.append("/resource/qt/plugins/appsettings/").append(entry->attribute(appSettingsPlugin())).append(".qtplugin");
     QPluginLoader loader(pluginPath);
     mView = qobject_cast<HbView *>(loader.instance()); 
     
@@ -138,7 +141,7 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
+#endif //COVERAGE_MEASUREMENT (only returns HbMainWindow)
 /*!
  Returns pointer to tha main window.
  \return Pointer to the main window.
@@ -152,9 +155,6 @@ HbMainWindow *HsViewAppSettingsState::mainWindow() const
 #endif //COVERAGE_MEASUREMENT
 
 
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 /*!
  Invoked when plugin view exits
  */
@@ -162,9 +162,6 @@ void HsViewAppSettingsState::settingsDone()
 {
     emit exit();
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Subscribe for memory card remove.

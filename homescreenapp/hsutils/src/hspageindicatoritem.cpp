@@ -29,6 +29,13 @@ namespace
     const char gHighlightIconName[] = "qtg_graf_hspage_highlight";
 }
 
+
+/*!
+    \class HsPageIndicatorItem
+    \ingroup group_hsutils
+    \brief 
+*/
+
 /*!
 
 */

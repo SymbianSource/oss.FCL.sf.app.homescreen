@@ -32,15 +32,18 @@
 #include <qserviceinterfacedescriptor.h>
 
 #include <HbInstantFeedback>
+#include <HbTouchArea>
 
 #include "hsdatabase.h"
 #include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
 #include "hspage.h"
 #include "hswidgethost.h"
+#include "hswidgettoucharea.h"
 #include "hswidgetcomponentregistry.h"
 #include "hswidgetcomponent.h"
 #include "hsconfiguration.h"
+#include "hscontentservice.h"
 
 // Helper macros for connecting state entry and exit actions.
 #define ENTRY_ACTION(state, action) \
@@ -50,6 +53,17 @@
 
 QTM_USE_NAMESPACE
 
+
+/*!
+    \class HsWidgetHost
+    \ingroup group_hsdomainmodel
+    \brief Each widget is controlled by the home screen framework through a widget host.
+*/
+
+/*!
+    Constructs a new widget host with given \a databaseId and
+    \a parent item.
+*/
 HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
   : HbWidget(parent),
     mDatabaseId(databaseId),
@@ -68,15 +82,24 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
     grabGesture(Qt::CustomGesture);
-
+    
+    setupTouchArea();
     setupEffects();
     setupStates();
 }
 
+/*!
+    Destructor.
+*/
 HsWidgetHost::~HsWidgetHost()
 {
 }
 
+/*!
+    Creates a new widget host instance based on the give
+    \a widgetData and \a preferences. Returns the created
+    instance. Return 0 in failure cases.
+*/
 HsWidgetHost *HsWidgetHost::createInstance(HsWidgetData &widgetData, 
                                            const QVariantHash &preferences)
 {
@@ -90,11 +113,18 @@ HsWidgetHost *HsWidgetHost::createInstance(HsWidgetData &widgetData,
     }
 }
 
+/*!
+    Returns the databaseId.
+*/
 int HsWidgetHost::databaseId() const
 {
     return mDatabaseId;
 }
 
+/*!
+    Sets the containing \a page for this widget host.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::setPage(HsPage *page)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -118,23 +148,28 @@ bool HsWidgetHost::setPage(HsPage *page)
     return true;
 }
  
+/*!
+    Returns the containing page for this widget. Returns 0 
+    if this widget has no containg page.
+*/
 HsPage *HsWidgetHost::page() const
 {
     return mPage;
 }
 
-bool HsWidgetHost::isPannable(QGraphicsSceneMouseEvent *event)
-{
-    bool result = false;
-    mIsPannableMethod.invoke(mWidget, Q_RETURN_ARG(bool, result), Q_ARG(QGraphicsSceneMouseEvent *,event));
-    return result;
-}
-
+/*!
+    Loads presentation based on the current orientation.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::loadPresentation()
 {
     return loadPresentation(HsScene::orientation());
 }
 
+/*!
+    Loads presentation based on the given \a orientation.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::loadPresentation(Qt::Orientation orientation)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -150,11 +185,19 @@ bool HsWidgetHost::loadPresentation(Qt::Orientation orientation)
     return true;
 }
 
+/*!
+    Saves the current presentation.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::savePresentation()
 {
     return savePresentation(HsScene::orientation());
 }
 
+/*!
+    Saves the current presentation for the given \a orientation.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::savePresentation(Qt::Orientation orientation)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -167,6 +210,10 @@ bool HsWidgetHost::savePresentation(Qt::Orientation orientation)
     return db->setWidgetPresentation(data);
 }
 
+/*!
+    Saves the given presentation.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::savePresentation(HsWidgetPresentationData &presentation)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -175,6 +222,11 @@ bool HsWidgetHost::savePresentation(HsWidgetPresentationData &presentation)
     return db->setWidgetPresentation(presentation);
 }
 
+/*!
+    Fills the \a presentation based on the orientation field in 
+    the given \a presentation. Returns true on success, otherwise 
+    returns false.
+*/
 bool HsWidgetHost::getPresentation(HsWidgetPresentationData &presentation)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -183,12 +235,121 @@ bool HsWidgetHost::getPresentation(HsWidgetPresentationData &presentation)
     return db->widgetPresentation(presentation);
 }
 
+/*!
+    Removes the presentation for the given \a orientation.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::removePresentation(Qt::Orientation orientation)
 {
     HsDatabase *db = HsDatabase::instance();
     return db->deleteWidgetPresentation(mDatabaseId, orientation);
 }
 
+/*!
+    Reimplemented from QGraphicsItem. Returns the shape of the
+    this widget host. The shape is computed based on the contained
+    widget.
+*/
+QPainterPath HsWidgetHost::shape() const
+{
+    QPainterPath path;
+
+    if (mWidget) {
+        QRectF currRect = rect();
+        path = mWidget->shape();
+
+        QRectF pathRect(path.boundingRect());
+
+        if (pathRect.width() > currRect.width()
+            || pathRect.height() > currRect.height()) {
+            QPainterPath newPath(currRect.topLeft());
+            newPath.addRect(currRect);
+            path = path.intersected(newPath);
+        }
+    }
+    return path;
+}
+
+/*!
+    \fn HsWidgetHost::event_startAndShow()
+    Initiates a transition to show state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_startAndHide()
+    Initiates a transition to hide state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_unload()
+    Initiates a transition to unloaded state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_show()
+    Initiates a transition to show state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_hide()
+    Initiates a transition to hide state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_remove()
+    Initiates a transition to remove state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_close()
+    Initiates a transition to final state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_finished()
+    Initiates a transition to finished state.
+*/
+
+/*!
+    \fn HsWidgetHost::event_faulted()
+    Initiates a transition to faulted state.
+*/
+
+/*!
+    \fn HsWidgetHost::finished()
+    Notifies the home screen framework that this widget
+    host has moved to finished state.
+*/
+
+/*!
+    \fn HsWidgetHost::faulted()
+    Notifies the home screen framework that this widget
+    host has moved to faulted state.
+*/
+
+/*!
+    \fn HsWidgetHost::resized()
+    Notifies the home screen framework that this widget
+    host has resized itself.
+*/
+
+/*!
+    \fn HsWidgetHost::available()
+    Notifies the home screen framework that this widget
+    is now available.
+*/
+
+/*!
+    \fn HsWidgetHost::unavailable()
+    Notifies the home screen framework that this widget
+    is temporarily unavailable.
+*/
+
+
+/*!
+    Starts the widget. The \a show parameter defines the
+    visibility of the widget.
+*/
 void HsWidgetHost::startWidget(bool show)
 {
     if (!mStateMachine->isRunning()) {
@@ -206,21 +367,35 @@ void HsWidgetHost::startWidget(bool show)
     }
 }
  
+/*!
+    Puts the contained widget into show state.
+*/
 void HsWidgetHost::showWidget()
 {
     emit event_show();
 }
-    
+  
+/*!
+    Puts the contained widget into hidden state.
+*/
 void HsWidgetHost::hideWidget()
 {
     emit event_hide();
 }
 
+/*!
+    Notifies the conained widget about \a online
+    status changes.
+*/
 void HsWidgetHost::setOnline(bool online)
 {
     mIsOnlineProperty.write(mWidget, online);
 }
 
+/*!
+    Deletes this widget instance, including the 
+    database entries.
+*/
 void HsWidgetHost::remove()
 {
     if (mStateMachine->isRunning()) {
@@ -231,6 +406,10 @@ void HsWidgetHost::remove()
     }
 }
  
+/*!
+    Deletes this widget instance, leaving the 
+    database entries untouched.
+*/
 void HsWidgetHost::close()
 {
     if (mStateMachine->isRunning()) {
@@ -240,6 +419,9 @@ void HsWidgetHost::close()
     }
 }
 
+/*!
+    Starts the drag effect.
+*/
 void HsWidgetHost::startDragEffect()
 {
     /* TODO: Uncomment after the Qt bug has been fixed.
@@ -253,7 +435,7 @@ void HsWidgetHost::startDragEffect()
     QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup();
 
     QPropertyAnimation *animation = new QPropertyAnimation(this, "scale");
-    animation->setDuration(HsConfiguration::widgetDragEffectDuration());
+    animation->setDuration(HSCONFIGURATION_GET(widgetDragEffectDuration));
     animation->setEndValue(1.1);
     animationGroup->addAnimation(animation);
 
@@ -267,6 +449,9 @@ void HsWidgetHost::startDragEffect()
     animationGroup->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
+/*!
+    Starts the drop effect.
+*/
 void HsWidgetHost::startDropEffect()
 {
     /* TODO: Uncomment after the Qt bug has been fixed.
@@ -278,7 +463,7 @@ void HsWidgetHost::startDropEffect()
     QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup;
 
     QPropertyAnimation *animation = new QPropertyAnimation(this, "scale");
-    animation->setDuration(HsConfiguration::widgetDropEffectDuration());
+    animation->setDuration(HSCONFIGURATION_GET(widgetDropEffectDuration));
     animation->setEndValue(1);
     animationGroup->addAnimation(animation);
 
@@ -292,6 +477,10 @@ void HsWidgetHost::startDropEffect()
     animationGroup->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
+/*!
+    Reimplemented from QObject for monitoring changes in 
+    contained widget's size.
+*/
 bool HsWidgetHost::eventFilter(QObject *watched, QEvent *event)
 {
     if (event->type() == QEvent::GraphicsSceneResize ) {
@@ -303,6 +492,50 @@ bool HsWidgetHost::eventFilter(QObject *watched, QEvent *event)
     return HbWidget::eventFilter(watched, event);
 }
 
+/*!
+    Reimplemented from HbWidget for pan gesture handling.
+*/
+void HsWidgetHost::gestureEvent(QGestureEvent *event)
+{
+    HsScene *scene = HsScene::instance();    
+    QGesture *gesture = event->gesture(Qt::PanGesture);
+    if (gesture) {
+        switch (gesture->state()) {
+            case Qt::GestureStarted:
+                grabMouse();
+                emit scene->pagePanStarted(event);
+                break;
+            case Qt::GestureUpdated:
+                emit scene->pagePanUpdated(event);
+                break;
+            case Qt::GestureFinished:
+            case Qt::GestureCanceled:
+                ungrabMouse();
+                emit scene->pagePanFinished(event);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+/*!
+    \fn HsWidgetHost::mousePressEvent(QGraphicsSceneMouseEvent *)
+    Reimplemented from QGraphicsItem for eating all mouse presses.
+*/
+
+/*!
+    Configures the touch are for this widget host.
+*/
+void HsWidgetHost::setupTouchArea()
+{
+    mTouchArea = new HsWidgetTouchArea(this);
+    mTouchArea->setZValue(1);
+}
+
+/*!
+    Configures the effects for this widget host.
+*/
 void HsWidgetHost::setupEffects()
 {
     /* TODO: Uncomment after the Qt bug has been fixed.
@@ -315,6 +548,9 @@ void HsWidgetHost::setupEffects()
     */
 }
 
+/*!
+    Configures the state machine for this widget host.
+*/
 void HsWidgetHost::setupStates()
 {
     // State machine
@@ -399,6 +635,7 @@ void HsWidgetHost::setupStates()
 
     ENTRY_ACTION(state_faulted, action_faulted)
 
+    ENTRY_ACTION(state_remove, action_notifyRemove)
     ENTRY_ACTION(state_remove, action_remove)
 
     // Delete on finish.
@@ -407,6 +644,10 @@ void HsWidgetHost::setupStates()
             Qt::QueuedConnection);
 }
 
+/*!
+    Assigns the meta \a property based on the given property \a name.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::setProperty(const char *name, QMetaProperty &property)
 {
     const QMetaObject *object = mWidget->metaObject();
@@ -415,6 +656,10 @@ bool HsWidgetHost::setProperty(const char *name, QMetaProperty &property)
     return index >= 0;
 }
 
+/*!
+    Assigns the meta \a method based on the given method \a signature.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::setMethod(const char *signature, QMetaMethod &method)
 {
     const QMetaObject *object = mWidget->metaObject();
@@ -424,6 +669,10 @@ bool HsWidgetHost::setMethod(const char *signature, QMetaMethod &method)
     return index >= 0;
 }
 
+/*!
+    Checks if the contained widget has implemented the
+    signal with the given \a signature.
+*/
 bool HsWidgetHost::hasSignal(const char *signature)
 {
     const QMetaObject *object = mWidget->metaObject();
@@ -432,12 +681,20 @@ bool HsWidgetHost::hasSignal(const char *signature)
     return index >= 0;
 }
 
+/*!
+    Resizes this widget host to the given \a size.
+*/
 void HsWidgetHost::setNewSize(const QSizeF &size)
 {
+    mTouchArea->resize(size);
     resize(size);
     setPreferredSize(size);
 }
 
+/*!
+    Assigns preferences for the contained widget.
+    Returns true on success, otherwise returns false.
+*/
 bool HsWidgetHost::setPreferencesToWidget()
 {
     HsDatabase *db = HsDatabase::instance();
@@ -456,6 +713,10 @@ bool HsWidgetHost::setPreferencesToWidget()
     return true;
 }
 
+/*!
+    Connects this widget host for monitoring changes
+    in its widget component.
+*/
 void HsWidgetHost::action_connectComponent()
 {
     HsDatabase *db = HsDatabase::instance();
@@ -477,11 +738,18 @@ void HsWidgetHost::action_connectComponent()
     connect(mComponent, SIGNAL(updated()), SIGNAL(available()));
 }
 
+/*!
+    Disconnects this widget host from its widget component.
+*/
 void HsWidgetHost::action_disconnectComponent()
 {
     mComponent->disconnect(this);
 }
 
+/*!
+    Loads the contained widget from a widget plugin and 
+    connects to it's meta interface.
+*/
 void HsWidgetHost::action_load()
 {
     QServiceManager manager;
@@ -507,51 +775,63 @@ void HsWidgetHost::action_load()
 
     setMethod("onInitialize()", mOnInitializeMethod);
     setMethod("onUninitialize()", mOnUninitializeMethod);
-    setMethod("isPannable(QGraphicsSceneMouseEvent*)", mIsPannableMethod);
-
+    
     setProperty("isOnline", mIsOnlineProperty);
 	setProperty("rootPath", mRootPathProperty);
     
     if (hasSignal("setPreferences(const QStringList&)")) {
         connect(mWidget, SIGNAL(setPreferences(QStringList)),
-                SLOT(onSetPreferences(QStringList)));
+            SLOT(onSetPreferences(QStringList)), Qt::QueuedConnection);
     }
     if (hasSignal("finished()")) {
         connect(mWidget, SIGNAL(finished()),
-                SLOT(onFinished()));
+            SLOT(onFinished()), Qt::QueuedConnection);
     }
     if (hasSignal("error()")) {
         connect(mWidget, SIGNAL(error()),
-                SLOT(onError()));
+            SLOT(onError()), Qt::QueuedConnection);
     }
 
     mWidget->installEventFilter(this);
 
-    HsScene *scene = HsScene::instance();
-    setMaximumSize(scene->maximumWidgetSizeInPixels());
-    setMinimumSize(scene->minimumWidgetSizeInPixels());
-
+    setMinimumSize(HSCONFIGURATION_GET(minimumWidgetSizeInPixels));
+    setMaximumSize(HSCONFIGURATION_GET(maximumWidgetSizeInPixels));
+    
     loadPresentation();
 
     mWidget->setParentItem(this);
 
     setNewSize(mWidget->size());
+
+    QString objName(mComponent->uri());
+    objName.append(":");
+    objName.append(QString::number(mDatabaseId));
+    setObjectName(objName);
 }
 
+/*!
+    Unloads the contained widget. 
+*/
 void HsWidgetHost::action_unload()
 {
     delete mWidget;
     mWidget = 0;
-
+		// This is needed because QServicePluginCleanup is 
+    // deleted asynchronously via the eventloop (deleteLater). 
+    // Here we want the plugin to unload synchronously.
+    QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+    	
     mOnInitializeMethod = QMetaMethod();
     mOnShowMethod = QMetaMethod();
     mOnHideMethod = QMetaMethod();
-    mOnUninitializeMethod = QMetaMethod();
-    mIsPannableMethod = QMetaMethod();
+    mOnUninitializeMethod = QMetaMethod();    
     mIsOnlineProperty = QMetaProperty();
 	mRootPathProperty = QMetaProperty();    
 }
 
+/*!
+    Initializes the contained widget.
+*/
 void HsWidgetHost::action_initialize()
 {    
     mRootPathProperty.write(mWidget, mComponent->rootPath());
@@ -560,11 +840,17 @@ void HsWidgetHost::action_initialize()
     mOnInitializeMethod.invoke(mWidget);
 }
 
+/*!
+    Uninitializes the contained widget.
+*/
 void HsWidgetHost::action_uninitialize()
 {
     mOnUninitializeMethod.invoke(mWidget);
 }
 
+/*!
+    Puts the contained widget into show state.
+*/
 void HsWidgetHost::action_show()
 {
     if (!mIsFinishing) {
@@ -572,6 +858,9 @@ void HsWidgetHost::action_show()
     }
 }
 
+/*!
+    Puts the contained widget into hidden state.
+*/
 void HsWidgetHost::action_hide()
 {
     if (!mIsFinishing) {
@@ -579,16 +868,28 @@ void HsWidgetHost::action_hide()
     }
 }
 
+/*!
+    Notifies the home screen framework that this widget
+    host has moved to finished state.
+*/
 void HsWidgetHost::action_finished()
 {
     emit finished();
 }
 
+/*!
+    Notifies the home screen framework that this widget
+    host has moved to faulted state.
+*/
 void HsWidgetHost::action_faulted()
 {
     emit faulted();
 }
 
+/*!
+    Removes the contained widget from the home screen
+    database.
+*/
 void HsWidgetHost::action_remove()
 {
     HsDatabase *db = HsDatabase::instance();
@@ -597,18 +898,42 @@ void HsWidgetHost::action_remove()
     mDatabaseId = -1;
 }
 
+/*!
+    Notifies the widget removal through the content service.
+*/
+void HsWidgetHost::action_notifyRemove()
+{
+    HsDatabase *db = HsDatabase::instance();
+    QVariantHash preferences;
+    db->widgetPreferences(mDatabaseId, preferences);
+    HsContentService::instance()->emitWidgetRemoved(mComponent->uri(), preferences);
+}
+
+/*!
+    Handles contained widget's finished event.
+    Moves this widget host to finished state.
+*/
 void HsWidgetHost::onFinished()
 {
     mIsFinishing = true;
     emit event_finished();
 }
  
+/*!
+    Handles contained widget's error event.
+    Moves this widget host to faulted state.
+*/
 void HsWidgetHost::onError()
 {
     mIsFinishing = true;
     emit event_faulted();
 }
 
+/*!
+    Handles contained widget's setPreferences event.
+    Stores the preferences for the given \a names to
+    the home screen database.
+*/
 void HsWidgetHost::onSetPreferences(const QStringList &names)
 {
     if (names.isEmpty()) {

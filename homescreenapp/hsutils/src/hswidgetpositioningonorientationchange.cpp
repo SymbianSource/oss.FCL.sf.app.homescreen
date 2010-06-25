@@ -18,8 +18,11 @@
 #include <QtGlobal>
 #include "hswidgetpositioningonorientationchange.h"
 
+
+
 /*!
     \class HsWidgetPositioningOnOrientationChange
+    \ingroup group_hsutils
     \brief Defines widget positioning on orientation change.
 
     Widget positioning on orientation change sets positions for

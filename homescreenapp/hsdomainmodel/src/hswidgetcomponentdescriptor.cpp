@@ -33,10 +33,10 @@
 bool HsWidgetComponentDescriptor::isValid()
 {
     bool ret(false);
-    if (version == "1.0") {
-        ret = !(uri.isEmpty() || serviceXml.isEmpty() || title.isEmpty()); 
-    } else if (version.isEmpty()) {
-        ret = !(uri.isEmpty() || title.isEmpty()); 
+    if (mVersion == "1.0") {
+        ret = !(mUri.isEmpty() || mServiceXml.isEmpty() || mTitle.isEmpty()); 
+    } else if (mVersion.isEmpty()) {
+        ret = !(mUri.isEmpty() || mTitle.isEmpty()); 
     }
     return ret;
 }

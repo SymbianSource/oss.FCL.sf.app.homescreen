@@ -38,7 +38,8 @@ symbian: {
     widgetResources.path = $${DESTDIR}
     widgetResources.sources += resource/$${TARGET}.xml    
     widgetResources.sources += resource/$${TARGET}.manifest
-    widgetResources.sources += resource/$${TARGET}.png
+    widgetResources.sources += resource/$${TARGET}preview.png
+    widgetResources.sources += resource/$${TARGET}.svg
         
     DEPLOYMENT += plugins \
                   widgetResources
@@ -57,7 +58,7 @@ win32: {
     DESTDIR = $$PWD/../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
 
     manifest.path = $${DESTDIR}
-    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png
+    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png ./resource/*.svg
     
     INSTALLS += manifest    
     

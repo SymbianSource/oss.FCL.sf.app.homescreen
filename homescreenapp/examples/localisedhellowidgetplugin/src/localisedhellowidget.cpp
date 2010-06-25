@@ -24,7 +24,7 @@
 #include "localisedhellowidget.h"
 
 /*!
-    \ingroup group_helloworld_widget
+    \ingroup group_localised_helloworld_widget
     \class LocalisedHelloWidget
     \brief Example implementation for home screen widget.
 

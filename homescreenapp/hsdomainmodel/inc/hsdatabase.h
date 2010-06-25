@@ -19,20 +19,17 @@
 #define HSDATABASE_H
 
 #include <QObject>
-#include <QScopedPointer>
 #include <QVariantHash>
 
 #include "hsdomainmodel_global.h"
+#include "hstest_global.h"
 
-#include <HbFeedback>
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HsSceneData;
 class HsPageData;
 class HsWidgetData;
 class HsWidgetPresentationData;
-class HsGeneralConfiguration;
-class HsFeedbackConfiguration;
-class HsSnapConfiguration;
 
 class HSDOMAINMODEL_EXPORT HsDatabase : public QObject
 {
@@ -57,8 +54,7 @@ public:
     bool commit();
 
     bool scene(HsSceneData &data);
-    bool updateScene(const HsSceneData &data);
-
+    
     bool pages(QList<HsPageData> &data);
     bool page(HsPageData &data);
     bool insertPage(HsPageData &data);
@@ -67,6 +63,7 @@ public:
     
     bool widgets(int pageId, QList<HsWidgetData> &data);
     bool widgets(const QString &uri, QList<HsWidgetData> &data);
+    bool widgets(const QString &uri, const QVariantHash &preferences, int &count);
     bool widget(HsWidgetData &data);
     bool insertWidget(HsWidgetData &data);
     bool updateWidget(const HsWidgetData &data);
@@ -81,10 +78,8 @@ public:
     bool widgetPreference(int widgetId, const QString &key, QVariant &value);
     bool setWidgetPreferences(int widgetId, const QVariantHash &data);
 
-    bool generalConfiguration(HsGeneralConfiguration &data);
-    bool feedbackConfiguration(HsFeedbackConfiguration &data);
-    bool snapConfiguration(HsSnapConfiguration &data);
-    
+    bool configuration(QVariantHash &configuration);
+
 public:
     static void setInstance(HsDatabase *instance);
     static HsDatabase *instance();
@@ -93,12 +88,14 @@ public:
 private:    
     Q_DISABLE_COPY(HsDatabase)
     bool checkConnection() const;
+    bool matchWidgetPreferences(const QVariantHash &preferences, const QMultiMap<QString, QString>& storedPreferences);
 
 private:
     QString mConnectionName;
     QString mDatabaseName;
 
     static HsDatabase *mInstance;
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSDATABASE_H

@@ -25,8 +25,10 @@
 
 class HsWidgetHost;
 class HsPageData;
+class HsWallpaper;
+class HsPageTouchArea;
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HSDOMAINMODEL_EXPORT HsPage : public HbWidget
 {
@@ -40,14 +42,19 @@ public:
     int databaseId() const;
     void setDatabaseId(int id);
 
+    void setGeometry(const QRectF &rect);
+
     bool load();
+
+    HsWallpaper *wallpaper() const;
 
     bool addExistingWidget(HsWidgetHost *widgetHost);
     bool removeWidget(HsWidgetHost *widgeHost);
 
     QList<HsWidgetHost *> newWidgets();
-    bool addNewWidget(HsWidgetHost *widgetHost);
+    bool addNewWidget(HsWidgetHost *widgetHost, const QPointF &position = QPointF());
     void layoutNewWidgets();
+    void resetNewWidgets();
     bool deleteFromDatabase();
 
     QList<HsWidgetHost *> widgets() const;
@@ -55,9 +62,12 @@ public:
     bool isRemovable() const;
     void setRemovable(bool removable);
 
+    bool isDefaultPage() const;
     bool isActivePage() const;
     
     static HsPage *createInstance(const HsPageData &pageData);
+
+    QPointF mTouchPoint;
 
 public slots:
     void showWidgets();
@@ -70,6 +80,7 @@ public slots:
 
 private:
     Q_DISABLE_COPY(HsPage)
+    void setupTouchArea();
     void connectWidget(HsWidgetHost *widget);
     void disconnectWidget(HsWidgetHost *widget);
 
@@ -84,12 +95,14 @@ private slots:
 
 private:
     int mDatabaseId;
+    HsWallpaper *mWallpaper;
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
     QList<HsWidgetHost*> mUnavailableWidgets;
-
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HsPageTouchArea *mTouchArea;
+    
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif

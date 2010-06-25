@@ -33,6 +33,8 @@
 [0x102752AE],0,0,0,{"S60ProductID"}
 [0x1028315F],0,0,0,{"S60ProductID"}
  
-"/epoc32/release/armv5/urel/contentpublishclient.exe"                         - "c:/sys/bin/contentpublishclient.exe"
-"/epoc32/data/z/private/10003a3f/import/apps/contentpublishclient_reg.rsc"    - "c:/private/10003a3f/import/apps/contentpublishclient_reg.rsc"
-"/epoc32/data/z/resource/apps/contentpublishclient.rsc"                       - "c:/resource/apps/contentpublishclient.rsc"
+"/epoc32/release/armv5/urel/contentpublishclient.exe"                       - "c:/sys/bin/contentpublishclient.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/contentpublishclient_reg.rsc"  - "c:/private/10003a3f/import/apps/contentpublishclient_reg.rsc"
+"/epoc32/data/z/resource/apps/contentpublishclient.rsc"                     - "c:/resource/apps/contentpublishclient.rsc"
+"/epoc32/data/z/data/images/testwallpaper.jpg"                              - "c:/data/images/testwallpaper.jpg"
+"/epoc32/data/z/data/images/testwallpaper2.jpg"                             - "c:/data/images/testwallpaper2.jpg"

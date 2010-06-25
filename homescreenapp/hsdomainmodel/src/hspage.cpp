@@ -15,26 +15,26 @@
 *
 */
 
-#include <QPainter>
-#include <QRectF>
-#include <QGraphicsLinearLayout>
 #include <HbInstance>
 
 #include "hsdomainmodeldatastructures.h"
 #include "hspage.h"
+#include "hspagetoucharea.h"
+#include "hspagenewwidgetlayout.h"
 #include "hsscene.h"
 #include "hsdatabase.h"
 #include "hswidgethost.h"
 #include "hswallpaper.h"
 #include "hswidgetpositioningonwidgetadd.h"
 #include "hswidgetpositioningonorientationchange.h"
+#include "hsconfiguration.h"
 
 
 /*!
     \class HsPage
-    \ingroup group_hsutils
+    \ingroup group_hsdomainmodel
     \brief Represents a page in the framework.
-    HsPage is a parent for a group of widgets. HsPage can have a wallpaper.
+    HsPage contains group of widgets. HsPage can have a wallpaper.
 */
 
 /*!
@@ -46,11 +46,15 @@
 HsPage::HsPage(QGraphicsItem* parent)
     : HbWidget(parent),
       mDatabaseId(-1),
-      mRemovable(true)
+      mWallpaper(0),
+      mRemovable(true),
+      mTouchArea(0)
 {
     setFlag(QGraphicsItem::ItemHasNoContents);
     setSizePolicy(QSizePolicy(QSizePolicy::Ignored,
                               QSizePolicy::Ignored));
+
+    setupTouchArea();
 }
 
 /*!
@@ -58,6 +62,7 @@ HsPage::HsPage(QGraphicsItem* parent)
 */
 HsPage::~HsPage()
 {
+    delete mWallpaper;
 }
 
 /*!
@@ -76,6 +81,15 @@ void HsPage::setDatabaseId(int id)
     mDatabaseId = id;
 }
 
+void HsPage::setGeometry(const QRectF &rect)
+{
+    if (mTouchArea) {
+        mTouchArea->resize(rect.size());
+    }
+
+    HbWidget::setGeometry(rect);
+}
+
 /*!
     Loads widgets.
 */
@@ -92,13 +106,17 @@ bool HsPage::load()
         return false;
     }
 
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        mWallpaper = new HsPageWallpaper(this);
+    }
+
     foreach (HsWidgetData data, datas) {
         HsWidgetHost *widget = new HsWidgetHost(data.id);
         mWidgets.append(widget);
         connectWidget(widget);
         widget->setPage(this);
         widget->setParentItem(this);
-        widget->startWidget();
+        widget->startWidget(isDefaultPage());
     }
 
     connect(HsScene::mainWindow(),
@@ -108,6 +126,16 @@ bool HsPage::load()
     return true;
 }
 
+/*!
+    Return wallpaper. 
+*/
+HsWallpaper *HsPage::wallpaper() const
+{
+    return mWallpaper;
+}
+/*!
+    Add given existing \a widgetHost to a page. Returns true if successful
+*/
 bool HsPage::addExistingWidget(HsWidgetHost *widgetHost)
 {
     if (!widgetHost) {
@@ -128,7 +156,10 @@ bool HsPage::addExistingWidget(HsWidgetHost *widgetHost)
 
     return true;
  }
-
+/*!
+    Remove given \a widgetHost from a page. Widget is not deleted. 
+    Returns true if successful
+*/
 bool HsPage::removeWidget(HsWidgetHost *widgetHost)
 {
     if (!widgetHost || !widgetHost->setPage(0)) {
@@ -141,7 +172,10 @@ bool HsPage::removeWidget(HsWidgetHost *widgetHost)
 
     return true;
 }
-
+/*!
+    Returns list of new widgets belonging to a page. Widgets which are
+    not yet layouted are considered as new widgets. 
+*/
 QList<HsWidgetHost *> HsPage::newWidgets()
 {
     return mNewWidgets;
@@ -150,8 +184,10 @@ QList<HsWidgetHost *> HsPage::newWidgets()
 /*!
     Adds new widget into a page. Returns true if successfull.
 */
-bool HsPage::addNewWidget(HsWidgetHost* widgetHost)
+bool HsPage::addNewWidget(HsWidgetHost* widgetHost, const QPointF &touchPoint)
 {
+    mTouchPoint = touchPoint;
+
     if (!widgetHost || mWidgets.contains(widgetHost)) {
         return false;
     }
@@ -164,7 +200,7 @@ bool HsPage::addNewWidget(HsWidgetHost* widgetHost)
     presentation.orientation = HsScene::orientation();
     if (!widgetHost->getPresentation(presentation)) {
         presentation.orientation = HsScene::orientation();
-        presentation.setPos(QPointF());
+        presentation.setPos(mTouchPoint);
         presentation.zValue = 0;
         widgetHost->savePresentation(presentation);
     }
@@ -188,28 +224,16 @@ void HsPage::layoutNewWidgets()
         return;
     }
 
-    QString key = HsScene::orientation() == Qt::Horizontal ?
-        "landscape" : "portrait";
-
-    QList<QRectF> rects;
-
-    foreach (HsWidgetHost *newWidget, mNewWidgets) {
-        rects << newWidget->rect();
-    }
-
-    HsWidgetPositioningOnWidgetAdd *algorithm =
-        HsWidgetPositioningOnWidgetAdd::instance();
-
-    QList<QRectF> calculatedRects =
-        algorithm->convert(HsScene::mainWindow()->layoutRect(), rects, QPointF());
-
+    HsPageNewWidgetLayout *newWidgetLayout = static_cast<HsPageNewWidgetLayout *>(layout());
+    if (!newWidgetLayout) {
+        newWidgetLayout = new HsPageNewWidgetLayout(mTouchPoint);
+        setLayout(newWidgetLayout);
+    }    
     updateZValues();
-
     HsWidgetHost *widget = 0;
     for (int i = 0; i < mNewWidgets.count(); ++i) {
         widget = mNewWidgets.at(i);
-        widget->setGeometry(calculatedRects.at(i));
-        widget->savePresentation();
+        newWidgetLayout->addItem(widget);
         widget->setPage(this);
         widget->setParentItem(this);
         widget->showWidget();
@@ -219,14 +243,16 @@ void HsPage::layoutNewWidgets()
     mNewWidgets.clear();
 }
 
-
+/*!
+    Remove page and all it's contained widgets from database 
+*/
 bool HsPage::deleteFromDatabase()
 {
     foreach (HsWidgetHost *widget, mWidgets) {
         widget->remove();
     }
     mWidgets.clear();
-    
+
     foreach (HsWidgetHost *widget, mNewWidgets) {
         widget->remove();
     }
@@ -239,7 +265,9 @@ bool HsPage::deleteFromDatabase()
 
     return HsDatabase::instance()->deletePage(mDatabaseId);
 }
-
+/*!
+    Return list of widgets belonging to a page 
+*/
 QList<HsWidgetHost *> HsPage::widgets() const
 {
     return mWidgets;
@@ -261,12 +289,23 @@ void HsPage::setRemovable(bool removable)
 {
     mRemovable = removable;
 }
-
+/*!
+    Return true if page is default page.
+*/
+bool HsPage::isDefaultPage() const
+{
+    return mDatabaseId == HSCONFIGURATION_GET(defaultPageId);
+}
+/*!
+    Return true if page is active page.
+*/
 bool HsPage::isActivePage() const
 {
     return this == HsScene::instance()->activePage();
 }
-
+/*!
+    Create page into database and return instance of a new page.
+*/
 HsPage *HsPage::createInstance(const HsPageData &pageData)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -318,7 +357,10 @@ void HsPage::setOnline(bool online)
         widget->setOnline(online);
     }
 }
-
+/*!
+    Update widgets z-values and persist those. Active widget has top most 
+    z-value.
+*/
 void HsPage::updateZValues()
 {
     int z = 0;
@@ -350,12 +392,24 @@ void HsPage::updateZValues()
         }
     }
 }
-
+/*!
+    Return this page's index.
+*/
 int HsPage::pageIndex()
 {
     return HsScene::instance()->pages().indexOf(this);
 }
-
+/*!
+    Create touch area for page.
+*/
+void HsPage::setupTouchArea()
+{
+    mTouchArea = new HsPageTouchArea(this);
+    mTouchArea->setZValue(-1);
+}
+/*!
+    Utility to connect widget signals to page.
+*/
 void HsPage::connectWidget(HsWidgetHost *widget)
 {
     connect(widget, SIGNAL(finished()), SLOT(onWidgetFinished()));
@@ -364,12 +418,16 @@ void HsPage::connectWidget(HsWidgetHost *widget)
     connect(widget, SIGNAL(available()), SLOT(onWidgetAvailable()));
     connect(widget, SIGNAL(unavailable()), SLOT(onWidgetUnavailable()));
 }
-
+/*!
+    Disconnect widget signals from page
+*/
 void HsPage::disconnectWidget(HsWidgetHost *widget)
 {
     widget->disconnect(this);
 }
-
+/*!
+    Disconnect and remove widget
+*/
 void HsPage::onWidgetFinished()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
@@ -383,38 +441,38 @@ void HsPage::onWidgetFinished()
     disconnectWidget(widget);
     widget->remove();
 }
-
+/*!
+    Remove widget if it faulted
+*/
 void HsPage::onWidgetFaulted()
 {
     onWidgetFinished();
 }
 
 /*!
-    Calculates new widget position on page when widget size changes
+    Calculates new widget position on page when widget size changes. If page has layout then there are new widgets
+    and we use layout to calculate new widget positions.
 */
 void HsPage::onWidgetResized()
 {
-    HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
-
-    QRectF widgetRect = widget->geometry();
-
-    QRectF pageRect = HsScene::mainWindow()->layoutRect();
-
-    qreal lowerBoundX = 0;
-
-    qreal upperBoundX = pageRect.width() - widgetRect.width() / 2 - 10;
-    upperBoundX = pageRect.width() - widgetRect.width();
-
-    qreal widgetX = qBound(lowerBoundX, widgetRect.x(), upperBoundX);
-    qreal widgetY = qBound(qreal(64), widgetRect.y(), pageRect.height() - widgetRect.height());
-
-    widget->setPos(widgetX, widgetY);
+    if ( !layout() ) {
+        HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+        QRectF widgetRect = widget->geometry();
+        QRectF pageRect = HsScene::mainWindow()->layoutRect();
+        qreal widgetX = qBound(qreal(0), widgetRect.x(), pageRect.width() - widgetRect.width());
+        qreal widgetY = qBound(qreal(64), widgetRect.y(), pageRect.height() - widgetRect.height());
+        widget->setPos(widgetX, widgetY);
+    } else {
+        layout()->invalidate();
+    }
 }
-
+/*!
+    Show widget if it came available
+*/
 void HsPage::onWidgetAvailable()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
-    
+
     mUnavailableWidgets.removeOne(widget);
     mWidgets.append(widget);
 
@@ -422,7 +480,9 @@ void HsPage::onWidgetAvailable()
     widget->startWidget(isActivePage());
     widget->show();
 }
- 
+/*!
+    Update internal bookkeeping and hide widget
+*/
 void HsPage::onWidgetUnavailable()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
@@ -440,11 +500,14 @@ void HsPage::onWidgetUnavailable()
     widget->hide();
     widget->setParentItem(0);
 }
-
+/*!
+    Run positioning algorithm for widgets which don't have position on 
+    target orientation. Otherwise set orientation positions for widgets.
+*/
 void HsPage::onOrientationChanged(Qt::Orientation orientation)
 {
-    QRectF rect = HsScene::mainWindow()->layoutRect();    
-    
+    QRectF rect = HsScene::mainWindow()->layoutRect();
+
     HsWidgetPositioningOnOrientationChange *converter =
         HsWidgetPositioningOnOrientationChange::instance();
 
@@ -465,5 +528,15 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
             widget->setPos(presentation.pos());
             widget->setZValue(presentation.zValue);
         }
-    }   
+    }
 }
+
+/*!
+    Clears new widgets list and resets layout.
+*/
+void HsPage::resetNewWidgets()
+{
+    mNewWidgets.clear();
+    setLayout(0);
+}
+

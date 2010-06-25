@@ -42,8 +42,9 @@
 #include "hsmenueventtransition.h"
 #include "hswidgetpositioningonorientationchange.h"
 #include "hswidgetpositioningonwidgetadd.h"
-#include "hstest_global.h"
 #include "hsconfiguration.h"
+#include "hstest_global.h"
+#include "hswidgetpositioningonwidgetmove.h"
 
 QTM_USE_NAMESPACE
 #define hbApp qobject_cast<HbApplication*>(qApp)
@@ -82,9 +83,9 @@ namespace
 HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     : QStateMachine(parent),
       mContentService(0),	  
-	  mHomeScreenActive(false),
-	  mIdleStateActive(false),
-	  mPublisher(NULL)
+      mHomeScreenActive(false),
+      mIdleStateActive(false),
+      mPublisher(NULL)
 #ifdef Q_OS_SYMBIAN
 	  ,keyCapture()
 #endif
@@ -101,26 +102,35 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
     db->open();
     HsDatabase::setInstance(db);
 
-    HsConfiguration::loadConfiguration();
-
+    HsConfiguration::setInstance(new HsConfiguration);
+    HsConfiguration::instance()->load();
+            
     HsWidgetPositioningOnOrientationChange::setInstance(
         new HsAdvancedWidgetPositioningOnOrientationChange);
 
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
 
+    HsWidgetPositioningOnWidgetMove::setInstance(
+        new HsSnapToLines);
+
+    registerAnimations();
+
     createStatePublisher();
     createContentServiceParts();
     createStates();
     assignServices();
-    
-	QCoreApplication::instance()->installEventFilter(this);
+
+    // create the instance so that singleton is accessible from elsewhere
+    HsShortcutService::instance(this);
+
+    QCoreApplication::instance()->installEventFilter(this);
 
     if (hbApp) { // Qt test framework uses QApplication.
-	    connect(hbApp->activityManager(), SIGNAL(activityRequested(QString)), 
-	            this, SLOT(activityRequested(QString)));
+        connect(hbApp->activityManager(), SIGNAL(activityRequested(QString)), 
+                this, SLOT(activityRequested(QString)));
     }
-	HSTEST_FUNC_EXIT("HS::HsDefaultRuntime::HsDefaultRuntime");
+    HSTEST_FUNC_EXIT("HS::HsDefaultRuntime::HsDefaultRuntime");
 }
 
 /*!
@@ -129,7 +139,7 @@ HsDefaultRuntime::HsDefaultRuntime(QObject *parent)
 HsDefaultRuntime::~HsDefaultRuntime()
 {
     HsWidgetPositioningOnOrientationChange::setInstance(0);
-	delete mPublisher;
+    delete mPublisher;
 }
 
 /*!
@@ -145,34 +155,44 @@ bool HsDefaultRuntime::eventFilter(QObject *watched, QEvent *event)
     Q_UNUSED(watched);
 
     switch (event->type()) {
-		case QEvent::ApplicationActivate:
+        case QEvent::ApplicationActivate:
             qDebug() << "HsDefaultRuntime::eventFilter: QEvent::ApplicationActivate";
 #ifdef Q_OS_SYMBIAN
-			keyCapture.captureKey(applicationKey);
+            keyCapture.captureKey(applicationKey);
 #endif
             mHomeScreenActive = true;
             updatePSKeys();
             break;
-		case QEvent::ApplicationDeactivate:
+        case QEvent::ApplicationDeactivate:
             qDebug() << "HsDefaultRuntime::eventFilter: QEvent::ApplicationDeactivate";
 #ifdef Q_OS_SYMBIAN
-			keyCapture.cancelCaptureKey(applicationKey);
+            keyCapture.cancelCaptureKey(applicationKey);
 #endif
-			mHomeScreenActive = false;
+            mHomeScreenActive = false;
             updatePSKeys();
             break;
         default:
             break;
-	}
+    }
    
     bool result =  QStateMachine::eventFilter(watched, event);
     // temporary hack as we should not register twice for events
-	if (event->type() == QEvent::KeyPress ) {
+    if (event->type() == QEvent::KeyPress ) {
         QKeyEvent* ke = static_cast<QKeyEvent *>(event);         
         // Key_Launch0 should be removed when QT starts to send Key_Menu
         result = (ke->key() == applicationKey) || ke->key() == Qt::Key_Launch0;        
-	}
-	return result;
+    }
+    return result;
+}
+
+
+/*!
+    Registers framework animations.
+*/
+void HsDefaultRuntime::registerAnimations()
+{
+    HbIconAnimationManager *manager = HbIconAnimationManager::global();
+    manager->addDefinitionFile(QLatin1String("qtg_anim_loading.axml"));
 }
 
 /*!
@@ -259,8 +279,14 @@ void HsDefaultRuntime::createStates()
     QState *menuWorkerState = qobject_cast<QState *>(menuWorkerStateObj);
     menuWorkerState->setParent(menuParallelState);
     menuWorkerState->setObjectName(KHsMenuWorkerStateInterface);
+
     connect(appLibraryState, SIGNAL(collectionEntered()), 
             menuWorkerState, SIGNAL(reset()));
+    connect(appLibraryState, SIGNAL(allAppsStateEntered ()), 
+            menuWorkerState, SIGNAL(reset()));
+    connect(appLibraryState, SIGNAL(allCollectionsStateEntered ()), 
+            menuWorkerState, SIGNAL(reset()));
+
     //Backup/Restore state
     QObject *backupRestoreStateObj = manager.loadInterface(KHsBacupRestoreStateInterface);
     QState *backupRestoreState = qobject_cast<QState *>(backupRestoreStateObj);   
@@ -313,7 +339,9 @@ void HsDefaultRuntime::createStates()
                 window, QEvent::KeyPress, Qt::Key_Launch0);
     menuToIdleTransition2->setTargetState(idleState);
     menuRootState->addTransition(menuToIdleTransition2);
-
+    // add transition to switch to idle
+    menuRootState->addTransition( this, SIGNAL(event_toIdle()), idleState);    
+    
     // transitions to child states
     // opening shortcut to a colleciton
     QList<QState *> collectionStates =
@@ -405,8 +433,15 @@ void HsDefaultRuntime::onIdleStateExited()
 */
 void HsDefaultRuntime::activityRequested(const QString &name) 
 {
-    if (name == groupAppLibRecentView()){
-        this->postEvent(HsMenuEventFactory::createOpenCollectionEvent(0, 
-                collectionDownloadedTypeName()));
+    if (name == appLibActivity()) {
+        this->postEvent(
+            HsMenuEventFactory::createOpenAppLibraryEvent(NormalHsMenuMode));
+    }
+    else if (name == groupAppLibRecentView()) {
+        this->postEvent(
+            HsMenuEventFactory::createOpenCollectionEvent(0,
+            collectionDownloadedTypeName()));
+    } else if (name == activityHsIdleView()) {
+        emit event_toIdle();
     }
 }

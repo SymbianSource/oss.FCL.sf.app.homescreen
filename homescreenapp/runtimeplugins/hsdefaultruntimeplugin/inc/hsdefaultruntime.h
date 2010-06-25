@@ -52,13 +52,14 @@ public:
 
 signals:
     void event_exit();
-
+    void event_toIdle();
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
     Q_DISABLE_COPY(HsDefaultRuntime)
 
+    void registerAnimations();
     void createStatePublisher();
     void createContentServiceParts();
     void createStates();

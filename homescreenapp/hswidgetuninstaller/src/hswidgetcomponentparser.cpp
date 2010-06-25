@@ -31,6 +31,7 @@ const char ICON[] = "icon";
 const char DESCRIPTION[] = "description";
 const char HIDDEN[] = "hidden";
 const char SERVICEXML[] = "servicexml";
+const char TRANSLATIONFILE[] = "translationfile";
 const char VERSION[] = "version";
 const char VERSION_1_0[] = "1.0";
 
@@ -110,7 +111,7 @@ void HsWidgetComponentParser::parseWidgetManifestTag()
     /* Detect version */
     if (mParser.attributes().hasAttribute(VERSION)) {
         QStringRef version = mParser.attributes().value(VERSION);
-        mComponentDescriptor.version = version.toString();
+        mComponentDescriptor.setVersion(version.toString());
         if (version == VERSION_1_0) { 
             parseVersion1_0();
         } else {
@@ -120,7 +121,7 @@ void HsWidgetComponentParser::parseWidgetManifestTag()
     } else {
         // newest is default
         parseVersion1_0();
-        mComponentDescriptor.version = VERSION_1_0;
+        mComponentDescriptor.setVersion(VERSION_1_0);
     }
 }
 
@@ -140,15 +141,15 @@ void HsWidgetComponentParser::parseWidgetProviderTag()
     foreach (QXmlStreamAttribute attr, attrs) {
         QStringRef name = attr.name();
         if (name == URI) {
-            mComponentDescriptor.uri = attr.value().toString();
+            mComponentDescriptor.setUri(attr.value().toString());
         } else if (name == ICONURI) {
-            mComponentDescriptor.iconUri = attr.value().toString();   
+            mComponentDescriptor.setIconUri(attr.value().toString());   
         } else if (name == TITLE) {
-            mComponentDescriptor.title = attr.value().toString();    
+            mComponentDescriptor.setTitle(attr.value().toString());    
         } else if (name == DESCRIPTION) {
-            mComponentDescriptor.description = attr.value().toString();
+            mComponentDescriptor.setDescription(attr.value().toString());
         } else if (name == HIDDEN) {
-            mComponentDescriptor.hidden = attr.value().toString();
+            mComponentDescriptor.setHidden(attr.value().toString());
         } 
     }
 
@@ -181,7 +182,9 @@ void HsWidgetComponentParser::parseVersion1_0()
             parseHidden();
         } else if (tag == SERVICEXML) {
             parseServiceXml();
-        } 
+        } else if (tag == TRANSLATIONFILE) {
+            parseTranslationFilename();
+        }        
 	}
 }
 
@@ -195,7 +198,7 @@ void HsWidgetComponentParser::parseUri()
     if(mParser.tokenType() != QXmlStreamReader::Characters) {
 		return;
 	}
-    mComponentDescriptor.uri = mParser.text().toString();
+    mComponentDescriptor.setUri(mParser.text().toString());
 }
 
 /*!
@@ -207,7 +210,7 @@ void HsWidgetComponentParser::parseIcon()
     if(mParser.tokenType() != QXmlStreamReader::Characters) {
 		return;
 	}
-    mComponentDescriptor.iconUri = mParser.text().toString();
+    mComponentDescriptor.setIconUri(mParser.text().toString());
 }
 
 /*!
@@ -219,7 +222,7 @@ void HsWidgetComponentParser::parseTitle()
     if(mParser.tokenType() != QXmlStreamReader::Characters) {
 		return;
 	}
-    mComponentDescriptor.title = mParser.text().toString();
+    mComponentDescriptor.setTitle(mParser.text().toString());
 }
 
 /*!
@@ -231,7 +234,7 @@ void HsWidgetComponentParser::parseDescription()
     if(mParser.tokenType() != QXmlStreamReader::Characters) {
 		return;
 	}
-    mComponentDescriptor.description = mParser.text().toString();
+    mComponentDescriptor.setDescription(mParser.text().toString());
 }
 
 /*!
@@ -243,7 +246,7 @@ void HsWidgetComponentParser::parseHidden()
     if(mParser.tokenType() != QXmlStreamReader::Characters) {
 		return;
 	}
-    mComponentDescriptor.hidden = mParser.text().toString();
+    mComponentDescriptor.setHidden(mParser.text().toString());
 }
 
 /*!
@@ -255,6 +258,16 @@ void HsWidgetComponentParser::parseServiceXml()
     if(mParser.tokenType() != QXmlStreamReader::Characters) {
 		return;
 	}
-    mComponentDescriptor.serviceXml = mParser.text().toString();
+    mComponentDescriptor.setServiceXml(mParser.text().toString());
 }
-
+/*!
+    Parse service translation file name.
+*/
+void HsWidgetComponentParser::parseTranslationFilename()
+{
+    mParser.readNext();
+    if(mParser.tokenType() != QXmlStreamReader::Characters) {
+		return;
+	}
+    mComponentDescriptor.setTranslationFilename(mParser.text().toString());
+}

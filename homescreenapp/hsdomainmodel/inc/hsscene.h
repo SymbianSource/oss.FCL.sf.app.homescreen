@@ -21,14 +21,18 @@
 #include <QObject>
 #include <QScopedPointer>
 #include <QSizeF>
+#include <QPointF>
 
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
+class QGestureEvent;
+
 class HbMainWindow;
+
 class HsWallpaper;
 class HsPage;
 class HsWidgetHost;
@@ -39,6 +43,7 @@ class HSDOMAINMODEL_EXPORT HsScene : public QObject
     Q_OBJECT
 
 public:
+    HsScene(QObject *parent = 0);
     ~HsScene();
 
     int databaseId() const;
@@ -56,11 +61,7 @@ public:
     bool setActivePageIndex(int index);
     HsPage *activePage() const;
     int activePageIndex() const;
-    int maximumPageCount() const;
-    QSizeF maximumWidgetSizeInPixels() const;
-    QSizeF minimumWidgetSizeInPixels() const;
-    QSizeF maximumWidgetSizeInUnits() const;
-    QSizeF minimumWidgetSizeInUnits() const;
+
     void setActiveWidget(HsWidgetHost *widget);
     HsWidgetHost *activeWidget() const;
 
@@ -68,33 +69,47 @@ public:
     bool isOnline() const;
 
     static HsScene *instance();
+    static HsScene *takeInstance();
+    static void setInstance(HsScene *instance);
     static HbMainWindow *mainWindow();
     static Qt::Orientation orientation();
+
+signals:
+    void pageTapAndHoldFinished(QGestureEvent *event);
+    void pagePanStarted(QGestureEvent *event);
+    void pagePanUpdated(QGestureEvent *event);
+    void pagePanFinished(QGestureEvent *event);    
+    void widgetTapStarted(HsWidgetHost *widget);
+    void widgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost *widget);
+    void widgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *widget);
+    void widgetMoveFinished(const QPointF &scenePos, HsWidgetHost *widget);
+    void activePageChanged();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
-    HsScene(QObject *parent = 0);
-    void calculateWidgetSizeLimitations();
     Q_DISABLE_COPY(HsScene)
 
 private:
-    int mDatabaseId;    
+    int mDatabaseId;
     HsWallpaper *mWallpaper;
     QList<HsPage *> mPages;
     HsPage *mActivePage;
     HsWidgetHost *mActiveWidget;
     bool mIsOnline;
-    int mMaximumPageCount;
-    QSizeF mMaximumWidgetSizeInPixels;
-    QSizeF mMinimumWidgetSizeInPixels;
-    QSizeF mMaximumWidgetSizeInUnits;
-    QSizeF mMinimumWidgetSizeInUnits;
-    
+    bool mIsBackground;
+    bool mIsSleeping;
+
     static HsScene *mInstance;
 
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    friend class HsPage;
+    friend class HsPageTouchArea;
+    friend class HsWidgetHost;
+    friend class HsWidgetTouchArea;
+    friend class HsWidgetMoveTouchArea;
+
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };
 

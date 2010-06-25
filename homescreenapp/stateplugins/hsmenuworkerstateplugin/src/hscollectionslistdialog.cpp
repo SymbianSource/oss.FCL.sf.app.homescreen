@@ -15,12 +15,12 @@
  *
  */
 
-#include <hbaction.h>
-#include <hblabel.h>
-#include <hsmenuservice.h>
+#include <HbAction>
+#include <HbLabel>
 #include <QDebug>
 #include <QStandardItemModel>
 
+#include <hsmenuservice.h>
 #include <hsmenuitemmodel.h>
 #include "hscollectionslistdialog.h"
 

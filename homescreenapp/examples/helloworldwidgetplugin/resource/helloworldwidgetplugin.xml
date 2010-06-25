@@ -7,8 +7,5 @@
         <name>com.nokia.symbian.IHomeScreenWidget</name>
         <version>1.0</version>
         <description>Example of home screen widget</description>
-        <capabilities></capabilities>
-        <customproperty key="iconuri">helloworldwidgetplugin.png</customproperty>
-        <customproperty key="title">HelloWorld</customproperty>
     </interface>
 </service>

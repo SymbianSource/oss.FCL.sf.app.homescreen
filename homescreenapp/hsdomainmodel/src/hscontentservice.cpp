@@ -21,41 +21,66 @@
 #include "hspage.h"
 #include "hsdomainmodeldatastructures.h"
 #include "hswidgethost.h"
+#include "hsapp_defs.h"
 
 
+/*!
+    \class HsContentService
+    \ingroup group_hsdomainmodel
+    \brief Service for creating widget to Home Screen and make query for widget instances. 
+    
+*/
+
+/*!
+    Constructor.
+    
+    \a parent Owner.
+*/
 HsContentService::HsContentService(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), mWidgetStartFaulted(false)
 {
    
 }
 
+/*!
+    Destructor.
+*/
 HsContentService::~HsContentService()
 {
 }
 
-
+/*!
+    Creates widget. \a params must include 'uri' for the desired widget type.
+    'preferences' is optional.
+*/
 bool HsContentService::createWidget(const QVariantHash &params)
 {
-    HsWidgetHost *widget = createWidgetForPreview(params);
-    if (!widget) {
-        return false;
-    }     
-    return HsScene::instance()->activePage()->addNewWidget(widget);
+    return addWidget(params.value(URI).toString(),
+                     params.value(PREFERENCES).toHash(),
+                     params.value(HOMESCREENDATA));
 }
 
+// This method will be removed.
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
 HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &params)
 {
     HsWidgetData widgetData;
-    widgetData.uri = params.value("uri").toString();
+    widgetData.uri = params.value(URI).toString();
 
     return HsWidgetHost::createInstance(
-        widgetData, params.value("preferences").toHash());
+        widgetData, params.value(PREFERENCES).toHash());
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
 
 */
-bool HsContentService::addWidget(const QString &uri, const QVariantHash &preferences)
+bool HsContentService::addWidget(const QString &uri, const QVariantHash &preferences,
+                                 const QVariant &homescreenData)
 {
     HsWidgetData data;
     data.uri = uri;
@@ -66,18 +91,34 @@ bool HsContentService::addWidget(const QString &uri, const QVariantHash &prefere
     }
 
     HsPage *page = HsScene::instance()->activePage();
-    if (!page->addNewWidget(widget)) {
+    QPointF touchPoint = homescreenData.toPointF();
+    if (!page->addNewWidget(widget, touchPoint)) {
         widget->remove();
         return false;
     }
-
-    widget->startWidget();
-    page->layoutNewWidgets();
+    connect(widget,SIGNAL(event_faulted()),SLOT(widgetStartFaulted()));
+    mWidgetStartFaulted = false; 
+    widget->startWidget(); // synchronous operation
+    if (mWidgetStartFaulted) {
+        // page will destroy widget instance
+        return false;
+    }
+    widget->disconnect(this);
+    emit widgetAdded(uri, preferences);
     return true;
 }
 
 /*!
+    Returns false if database query fails. If returns true then 
+    number of widget instances of the given \a uri and \a preferences is stored to \a count.
+    If \a preferences is empty then returns number of widget instances with given uri.
+*/
+bool HsContentService::widgets(const QString &uri, const QVariantHash &preferences, int &count)
+{
+    return HsDatabase::instance()->widgets(uri, preferences, count);
+}
 
+/*!
 */
 HsContentService *HsContentService::instance()
 {
@@ -88,6 +129,36 @@ HsContentService *HsContentService::instance()
 }
 
 /*!
+
+*/
+void HsContentService::emitWidgetRemoved(const QString &uri, const QVariantHash &preferences)
+{
+    emit widgetRemoved(uri, preferences);
+}
+
+/*!
+
+*/
+void HsContentService::widgetStartFaulted()
+{
+    mWidgetStartFaulted = true;
+}
+
+/*!
     Points to the content service instance.
 */
 HsContentService *HsContentService::mInstance(0);
+
+/*!
+    \fn HsContentService::widgetAdded(const QString &uri, const QVariantHash &preferences);
+    
+    Emited when widget is added.
+
+*/
+/*!
+    \fn HsContentService::widgetRemoved(const QString &uri, const QVariantHash &preferences);
+    
+    Emited when widget is removed.
+
+*/
+

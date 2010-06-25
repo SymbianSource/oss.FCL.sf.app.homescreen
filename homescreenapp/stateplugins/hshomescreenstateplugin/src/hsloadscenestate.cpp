@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -39,14 +39,14 @@ HsLoadSceneState::HsLoadSceneState(QState *parent)
 #ifdef Q_OS_SYMBIAN
       ,mStartupKey(KPSUidStartup.iUid, KPSStartupUiPhase),
       mSettingsMgr(0)
-#endif        
+#endif
 {
     connect(this, SIGNAL(entered()), SLOT(action_loadScene()));
-#ifdef Q_OS_SYMBIAN     
+#ifdef Q_OS_SYMBIAN
 
     mSettingsMgr = new XQSettingsManager(this);
-    
-#endif //Q_OS_SYMBIAN    
+
+#endif //Q_OS_SYMBIAN
 }
 
 /*!
@@ -59,7 +59,7 @@ HsLoadSceneState::~HsLoadSceneState()
 /*!
     \fn HsLoadSceneState::event_idle()
 
-    Initiates a transition to idle state.
+    Loads scene information and initiates a transition to idle state if ready.
 */
 
 /*!
@@ -67,32 +67,31 @@ HsLoadSceneState::~HsLoadSceneState()
 */
 void HsLoadSceneState::action_loadScene()
 {
+    HsScene::setInstance(new HsScene);
     HsScene::instance()->load();
 
-#ifdef Q_OS_SYMBIAN    
- 
+#ifdef Q_OS_SYMBIAN
+
     int startupPhase = mSettingsMgr->readItemValue(mStartupKey).toInt();
     qDebug() << "HsLoadSceneState::action_loadScene boot phase " << startupPhase;
-    
+
     if (EStartupUiPhaseAllDone != startupPhase) {
         qDebug() << "HsLoadSceneState::HsLoadSceneState, starting to listen key";
-        
+
         connect(mSettingsMgr,SIGNAL(valueChanged(XQSettingsKey, const QVariant &)), this,
 			          SLOT(handleKeyChange(XQSettingsKey, const QVariant &)));
-        
+
         mSettingsMgr->startMonitoring(mStartupKey);
     } else {
         // We're already at the phase in boot where we can draw ourself to the foreground.
         showUi();
-        delete mSettingsMgr;
-        mSettingsMgr = 0;
 		}
 
 #else
 
     showUi();
 
-#endif		
+#endif
 }
 #ifdef Q_OS_SYMBIAN
 /*!
@@ -105,22 +104,20 @@ void HsLoadSceneState::handleKeyChange(XQSettingsKey key, const QVariant &value)
 {
 		qDebug() << "HsLoadSceneState::handleKeyChange key " << key.key()
 		         << "value " << value.toInt();
-		
+
 		if (key.key() == KPSStartupUiPhase && value.toInt() == EStartupUiPhaseAllDone) {
-			showUi();			 	
+			showUi();
     		mSettingsMgr->stopMonitoring(mStartupKey);
-    		mSettingsMgr->deleteLater();
-    		mSettingsMgr = 0;
 		}
 }
 #endif
 /*!
     \fn HsLoadSceneState::showUi()
 
-    Makes the main window visible, signals transition to idle state and 
+    Makes the main window visible, signals transition to idle state and
     brings the hs app to the foreground.
 */
-	
+
 void HsLoadSceneState::showUi()
 {
     qDebug() << "HsLoadSceneState::showUi";

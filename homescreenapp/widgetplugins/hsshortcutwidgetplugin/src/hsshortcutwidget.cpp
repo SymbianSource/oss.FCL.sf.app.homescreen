@@ -136,6 +136,9 @@ bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
         case QEvent::GraphicsSceneMouseRelease:
             handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
             return true;
+        case QEvent::UngrabMouse:
+            setBackgroundToNormal();
+            return true;
         default:
             break;
     }
@@ -232,7 +235,7 @@ void HsShortcutWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    HbInstantFeedback::play(HsConfiguration::shortcutWidgetTapFeedbackType());
+    HbInstantFeedback::play(HSCONFIGURATION_GET(shortcutWidgetTapFeedbackEffect));
     
     if (mCaEntryRole == ItemEntryRole) {
         CaService::instance()->executeCommand(mCaEntryId);
@@ -261,7 +264,7 @@ void HsShortcutWidget::createPrimitives()
     }
 
     // Text
-    if ( HsConfiguration::shortcutLabelsVisible() && !mText ) {
+    if (HSCONFIGURATION_GET(isShortcutLabelVisible) && !mText ) {
         mText = new HbTextItem(this);
         HbStyle::setItemName(mText, QLatin1String("text"));
         }
@@ -283,8 +286,12 @@ void HsShortcutWidget::updateContent(const CaEntry &caEntry)
     mCaEntryTypeName = caEntry.entryTypeName();
     mIcon->setIcon(caEntry.makeIcon());
     if (mText) {
-        mText->setText(caEntry.text());
-        }
+        if(caEntry.attribute(entryShortName()).length()) {
+            mText->setText(caEntry.attribute(entryShortName()));
+        } else {
+            mText->setText(caEntry.text());
+        }        
+    }
 }
 
 /*!
@@ -343,5 +350,6 @@ void HsShortcutWidget::onEntryChanged(const CaEntry &caEntry, ChangeType changeT
         emit finished();
     }
 }
+
 
 

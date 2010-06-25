@@ -26,7 +26,7 @@
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class QStateMachine;
 class HsShortcutServicePrivate;
@@ -50,7 +50,7 @@ private:
 	QScopedPointer<HsShortcutServicePrivate> mD; 	
     static HsShortcutService *mInstance;    
     
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 Q_DECLARE_METATYPE(HsShortcutService*)

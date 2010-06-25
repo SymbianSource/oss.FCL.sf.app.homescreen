@@ -20,6 +20,13 @@
 #include "hspageindicator.h"
 #include "hspageindicatoritem.h"
 
+
+/*!
+    \class HsPageIndicator
+    \ingroup group_hsutils
+    \brief 
+*/
+
 /*!
 
 */

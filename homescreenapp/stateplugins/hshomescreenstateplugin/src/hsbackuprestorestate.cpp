@@ -61,7 +61,7 @@ void HsBackupRestoreState::action_startListenBURStatus()
         HsBackupRestoreObserver::instance();
     
     connect(backupRestoreObserver, 
-            SIGNAL(event_backupRestoreComplited()),
+            SIGNAL(event_backupRestoreCompleted()),
             SIGNAL(event_loadScene()));
     
     // Close database
@@ -71,9 +71,8 @@ void HsBackupRestoreState::action_startListenBURStatus()
     deleteIdleView();        
 
     // Delete scene
-    HsScene *scene = HsScene::instance();    
-    delete scene;
-
+    HsScene::setInstance(0);
+    
     backupRestoreObserver->readyForBUR();
 }
 
@@ -99,7 +98,9 @@ void HsBackupRestoreState::deleteIdleView()
     QScopedPointer<HbView> idleView(HsGui::takeIdleView());
 
     if (idleView){
+        HbAction *navigationAction(idleView->navigationAction());
         idleView->setNavigationAction(0);
+        delete navigationAction;
         HsScene::mainWindow()->removeView(idleView.data());
     }
 }

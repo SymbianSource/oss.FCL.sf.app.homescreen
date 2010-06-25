@@ -35,6 +35,7 @@
 #include "hscollectionstate.h"
 #include "hsmenuitemmodel.h"
 #include "hsmenuview.h"
+#include "hslistviewitem.h"
 
 /*!
     \class HsMenuView
@@ -73,6 +74,7 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext):
 
     mView = mBuilder.currentView();
     mListView = mBuilder.currentListView();
+
     mViewLabel= mBuilder.currentViewLabel();
 
     mCollectionButton = mBuilder.collectionButton();
@@ -119,7 +121,7 @@ void HsMenuView::setModel(HsMenuItemModel *model)
                    SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
     }
     mListView->setModel(model);
-
+    mListView->setItemPrototype(new HsListViewItem());
     if (mListView->model()) {
         connect(mListView->model(),
                 SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
@@ -372,8 +374,8 @@ void HsMenuView::findItem(QString criteriaStr)
     if ("" != criteriaStr) {
         mProxyModel->invalidate();
         mProxyModel->setSourceModel(mListView->model());
-        mProxyModel->setFilterRegExp(QRegExp(criteriaStr,
-                                             Qt::CaseInsensitive, QRegExp::FixedString));
+        mProxyModel->setFilterRegExp(QRegExp(
+                QString("(^|\\b)%1").arg(criteriaStr), Qt::CaseInsensitive));
         mSearchListView->scrollTo(mProxyModel->index(0,0),
                                   HbAbstractItemView::PositionAtTop);
     } else {
@@ -410,6 +412,8 @@ void HsMenuView::searchBegins()
     mProxyModel->setFilterRegExp(QRegExp(QString(".*"), Qt::CaseInsensitive,
                                          QRegExp::RegExp));
     mSearchListView->setModel(mProxyModel);
+    mSearchListView->setItemPrototype(new HsListViewItem());
+    
     mSearchListView->scrollTo(
         mProxyModel->mapFromSource(mSearchViewInitialIndex),
         HbAbstractItemView::PositionAtTop);

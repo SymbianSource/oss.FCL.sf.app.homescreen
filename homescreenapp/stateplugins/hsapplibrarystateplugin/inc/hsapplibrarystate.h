@@ -65,7 +65,7 @@ public slots:
 
     void clearToolbarLatch();
 
-    bool oviStoreAction();
+    int oviStoreAction();
 
     void allAppsStateEntered();
 
@@ -113,6 +113,7 @@ private:
     HsMenuModeWrapper mMenuMode;
     
     HsMainWindow mMainWindow;
+    
 };
 
 #endif //HSAPPLIBRARYSTATE_H

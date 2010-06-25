@@ -5,4 +5,8 @@
     <qresource prefix="/css">
         <file alias="hsapplibrarystateplugin.css">resource/hsapplibrarystateplugin.css</file>
     </qresource>
+    <qresource prefix="/layout">
+        <file alias="hslistviewitem.css">resource/hslistviewitem.css</file>
+        <file alias="hslistviewitem.widgetml">resource/hslistviewitem.widgetml</file>
+    </qresource>
 </RCC>

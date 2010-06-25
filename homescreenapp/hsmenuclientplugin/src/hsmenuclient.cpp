@@ -106,9 +106,23 @@ bool HsMenuClientPrivate::add(const QVariantMap &entryPreference)
         {
             QSharedPointer<CaEntry> update_entry = CaService::instance()->getEntry(pref.take(hsItemId).toInt());
             
-            update_entry->setText(pref.take(hsItemName).toString());
+            if(pref.contains(hsItemLocName))
+                {
+                update_entry->setText(pref.take(hsItemLocName).toString(),true);
+                }
+            else
+                {
+                update_entry->setText(pref.take(hsItemName).toString());   
+                }
             
-            update_entry->setDescription(pref.take(hsItemDescription).toString());
+            if(pref.contains(hsItemLocDescription))
+                {
+                update_entry->setDescription(pref.take(hsItemLocDescription).toString(), true);
+                }
+            else
+                {
+                update_entry->setDescription(pref.take(hsItemDescription).toString());
+                }                                             
             
             iconDesc.setFilename(pref.take(hsIconFileName).toString());
             iconDesc.setSkinId(pref.take(hsIconName).toString());
@@ -122,19 +136,33 @@ bool HsMenuClientPrivate::add(const QVariantMap &entryPreference)
             
             result = CaService::instance()->updateEntry(*update_entry);
         }
-    else if (pref.contains(hsItemName) && pref.contains(hsitemLaunchUri) && pref.contains(hsitemPublisherId))
+    else if ((pref.contains(hsItemName) || pref.contains(hsItemLocName)) && pref.contains(hsitemLaunchUri) && pref.contains(hsitemPublisherId))
         {
             CaEntry add_entry(ItemEntryRole);
             add_entry.setEntryTypeName(templatedApplicationTypeName());
             // mandatory values
-            add_entry.setText(pref.take(hsItemName).toString());
+            if(pref.contains(hsItemLocName))
+                {
+                add_entry.setText(pref.take(hsItemLocName).toString(),true);
+                }
+            else
+                {
+                add_entry.setText(pref.take(hsItemName).toString());
+                }
             
             iconDesc.setFilename(pref.take(hsIconFileName).toString());
             iconDesc.setSkinId(pref.take(hsIconName).toString());
             iconDesc.setApplicationId(pref.take(hsIconApplicationId).toString());            
             add_entry.setIconDescription(iconDesc);  
             
-            add_entry.setDescription(pref.take(hsItemDescription).toString());
+            if(pref.contains(hsItemLocDescription))
+                {
+                add_entry.setDescription(pref.take(hsItemLocDescription).toString(), true);
+                }
+            else
+                {
+                add_entry.setDescription(pref.take(hsItemDescription).toString());
+                }  
             QMapIterator<QString, QVariant> k(pref);
             while (k.hasNext()) {
                 k.next();

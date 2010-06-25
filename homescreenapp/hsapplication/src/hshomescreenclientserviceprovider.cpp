@@ -15,31 +15,38 @@
 *
 */
 
-#include <QDir>
-#include <QFileInfo>
-
 #include "hshomescreenclientserviceprovider.h"
 #include "hswidgetcomponentdescriptor.h"
 #include "hscontentservice.h"
-
 #include "hsscene.h"
-#include "hsdomainmodeldatastructures.h"
+#include "hspage.h"
 #include "hswallpaper.h"
-#include "hsdatabase.h"
-#include "hswallpaperhelper.h"
 #include "hswidgetcomponentregistry.h"
 #include "hsconfiguration.h"
+#include "hsspinnerdialog.h"
 
 namespace
 {
-    const char gInterfaceName[] = "com.nokia.services.hsapplication.IHomeScreenClient";
+    const char gInterfaceName[] = "com.nokia.symbian.IHomeScreenClient";
 }
+
+
+/*!
+    \class HsHomeScreenClientServiceProvider
+    \ingroup group_hsapplication
+    \brief TODO
+*/
 
 /*!
     Constructor.
 */
 HsHomeScreenClientServiceProvider::HsHomeScreenClientServiceProvider(QObject *parent)
-  : XQServiceProvider(gInterfaceName, parent)
+  : XQServiceProvider(gInterfaceName, parent),
+    mWaitDialog(0),
+    mShowAnimation(false),
+    mAsyncRequestIndex(0),
+    mReturnValue(false),
+    mWallpaper(0)
 {
     publishAll();
 }
@@ -56,7 +63,7 @@ HsHomeScreenClientServiceProvider::~HsHomeScreenClientServiceProvider()
 #endif //COVERAGE_MEASUREMENT
 
 /*!
-    Adds new widget, with the give \a uri and \a preferences, 
+    Adds new widget, with the give \a uri and \a preferences,
     to the active home screen page.
 */
 bool HsHomeScreenClientServiceProvider::addWidget(const QString &uri, const QVariantHash &preferences)
@@ -67,69 +74,67 @@ bool HsHomeScreenClientServiceProvider::addWidget(const QString &uri, const QVar
 /*!
     Changes \a fileName image to the active home screen page's wallpaper.
 */
-bool HsHomeScreenClientServiceProvider::setWallpaper(const QString &fileName)
+void HsHomeScreenClientServiceProvider::setWallpaper(const QString &fileName)
 {
-    HsScene *scene = HsScene::instance();
-        
-    HsDatabase *db = HsDatabase::instance();
-    Q_ASSERT(db);
-    
-    HsSceneData sceneData;
-    if (!db->scene(sceneData)) {
-        return false;
-    }
-
-    QFileInfo fileInfo(fileName);
-    QString fileExtension("");
-    if (!fileInfo.suffix().isEmpty()) {
-        fileExtension = fileInfo.suffix();
-    }
-    
-    QFile::remove(sceneData.portraitWallpaper);
-    QFile::remove(sceneData.landscapeWallpaper); 
-    
-    QString wallpaperDir = HsWallpaper::wallpaperDirectory();            
-    QDir dir(wallpaperDir);
-    if (!dir.exists()) {
-        dir.mkpath(wallpaperDir);
-    }
-    
-    QString portraitPath = HsWallpaper::wallpaperPath(
-        Qt::Vertical, QString(), fileExtension);
-    QString landscapePath = HsWallpaper::wallpaperPath(
-        Qt::Horizontal, QString(), fileExtension);
-    
-    int bounceEffect = HsConfiguration::bounceEffect();
-
-    QRect portraitRect = QRect(0, 0, (2 * 360) + bounceEffect, 640);
-    QRect landscapeRect = QRect(0, 0, (2 * 640) + bounceEffect, 360);
-    QRect sourceRect; // left empty to signal we want to use full size image as source
-    
-    QImage portraitImage = HsWallpaperHelper::processImage(fileName,
-            portraitRect, sourceRect);
-
-    QImage landscapeImage = HsWallpaperHelper::processImage(fileName,
-            landscapeRect, sourceRect);
-
-    if (!portraitImage.isNull() && !landscapeImage.isNull()) {
-        portraitImage.save(portraitPath);
-        sceneData.portraitWallpaper = portraitPath;
-        
-        landscapeImage.save(landscapePath);
-        sceneData.landscapeWallpaper = landscapePath;
-        
-        if (db->updateScene(sceneData)) {
-            scene->wallpaper()->setImagesById(QString(), fileInfo.suffix());
+#ifndef HOMESCREEN_TEST //We can't use QtHighway at unit tests due to missing service client connection
+    mAsyncRequestIndex = setCurrentRequestAsync();
+#endif
+    if ( !mWaitDialog ) {
+        mWaitDialog = new HsSpinnerDialog();
         }
+    mWaitDialog->start();
+    mShowAnimation = true;
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        mWallpaper = HsScene::instance()->activePage()->wallpaper();
+    } else {
+        mWallpaper = HsScene::instance()->wallpaper();
     }
-    else {
-        // display some error note here
-    }
-    return true;
+    connect(mWallpaper, SIGNAL(imageSet()), SLOT(onImageSet()));
+    connect(mWallpaper, SIGNAL(imageSetFailed()),
+            SLOT(onImageSetFailed()));
+    mWallpaper->setImage(fileName);
 }
 
+/*!
+    \internal
+    Called when wallpaper image has been set successfully
+*/
+void HsHomeScreenClientServiceProvider::onImageSet()
+{
+    mWallpaper->disconnect(this);
+    stopAnimation();
+#ifndef HOMESCREEN_TEST //We can't use QtHighway at unit tests due to missing service client connection
+    completeRequest(mAsyncRequestIndex, QVariant(true));
+#endif
+}
 
+/*!
+    \internal
+    Called when error has happened in wallpaper image setting
+*/
+void HsHomeScreenClientServiceProvider::onImageSetFailed()
+{
+    mWallpaper->disconnect(this);
+    stopAnimation();
+#ifndef HOMESCREEN_TEST //We can't use QtHighway at unit tests due to missing service client connection
+    completeRequest(mAsyncRequestIndex, QVariant(false));
+#endif
+}
 
+/*!
+    Stops progress animation
+*/
+void HsHomeScreenClientServiceProvider::stopAnimation()
+{
+    if (mShowAnimation) {
+        mWaitDialog->stop();
+        mWaitDialog=0;
+    }
+}
+
+/*!
+
+*/
 bool HsHomeScreenClientServiceProvider::widgetUninstalled(const QVariantHash &widgetDescriptor)
 {
     HsWidgetComponentDescriptor widgetComponent = widgetComponentDescriptor(widgetDescriptor);
@@ -143,16 +148,19 @@ bool HsHomeScreenClientServiceProvider::widgetUninstalled(const QVariantHash &wi
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
 
+/*!
+
+*/
 HsWidgetComponentDescriptor HsHomeScreenClientServiceProvider::widgetComponentDescriptor(const QVariantHash& widgetDescriptor)
 {
     HsWidgetComponentDescriptor widget;
-    widget.installationPath = widgetDescriptor["installationPath"].toString(); 
-    widget.uri = widgetDescriptor["uri"].toString(); 
-    widget.title = widgetDescriptor["title"].toString(); 
-    widget.description = widgetDescriptor["description"].toString(); 
-    widget.iconUri = widgetDescriptor["iconUri"].toString(); 
-    widget.hidden = widgetDescriptor["hidden"].toString(); 
-    widget.serviceXml = widgetDescriptor["serviceXml"].toString(); 
-    widget.version = widgetDescriptor["version"].toString(); 
+    widget.setInstallationPath(widgetDescriptor["installationPath"].toString());
+    widget.setUri(widgetDescriptor["uri"].toString());
+    widget.setTitle(widgetDescriptor["title"].toString());
+    widget.setDescription(widgetDescriptor["description"].toString());
+    widget.setIconUri(widgetDescriptor["iconUri"].toString());
+    widget.setHidden(widgetDescriptor["hidden"].toString());
+    widget.setServiceXml(widgetDescriptor["serviceXml"].toString());
+    widget.setVersion(widgetDescriptor["version"].toString());
     return widget;
 }

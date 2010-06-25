@@ -324,8 +324,7 @@ HbLineEdit *HsMenuViewBuilder::searchPanelLineEdit() const
 
     foreach(QGraphicsItem *obj, currentSearchPanel()->childItems()) {
 
-        QGraphicsWidget *const widget =
-            static_cast<QGraphicsWidget *>(obj);
+        QGraphicsWidget *const widget = static_cast<QGraphicsWidget *>(obj);
 
         if (widget != NULL) {
 

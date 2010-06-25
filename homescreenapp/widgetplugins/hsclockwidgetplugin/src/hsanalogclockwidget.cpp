@@ -77,6 +77,27 @@ bool HsAnalogClockWidget::eventFilter(QObject *watched, QEvent *event)
 }
 
 /*!
+    Return bounding rect
+*/
+QRectF HsAnalogClockWidget::boundingRect() const
+{   
+    QRectF currRect = rect();
+    currRect.setHeight(mBackground->iconItemSize().height());
+    currRect.setWidth(mBackground->iconItemSize().width());
+    return currRect;
+}
+
+/*!
+    Return shape
+*/
+QPainterPath HsAnalogClockWidget::shape() const
+{   
+    QPainterPath path;
+    path.addEllipse(boundingRect());
+    return path;
+}
+
+/*!
     Updates clock visualization according to current time
  */
 void HsAnalogClockWidget::tick()
@@ -149,7 +170,7 @@ void HsAnalogClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *even
         return;
     }
 
-    HbInstantFeedback::play(HsConfiguration::clockWidgetTapFeedbackType());
+    HbInstantFeedback::play(HSCONFIGURATION_GET(clockWidgetTapFeedbackEffect));
 
     emit clockTapped();
 }

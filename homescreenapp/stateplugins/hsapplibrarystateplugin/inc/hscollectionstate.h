@@ -22,9 +22,7 @@
 #include <qabstractitemmodel.h>
 #include <QPointer>
 
-#include "hsmenustates_global.h"
-#include "hsmenuservice.h"
-#include "hsmenuview.h"
+#include "hsbaseviewstate.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -38,7 +36,7 @@ class HsMenuModeWrapper;
 class HsMenuViewBuilder;
 class HsMainWindow;
 
-class HsCollectionState: public QState
+class HsCollectionState: public HsBaseViewState
 {
     Q_OBJECT
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
@@ -58,7 +56,7 @@ private slots:
     bool openTaskSwitcher();
     void listItemActivated(const QModelIndex &index);
     void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
-    void addAppsAction();
+    void addAppsAction(bool addApps = true);
     void addCollectionShortcutToHomeScreenAction();
     void renameAction();
     void deleteAction();

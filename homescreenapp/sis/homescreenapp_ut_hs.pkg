@@ -51,8 +51,10 @@
 
 
 "../hsdomainmodel/tsrc/t_hsdomainmodel/hsdomainmodeltest.db"    - "c:/private/20022F59/hsdomainmodeltest.db"
-"../hsdomainmodel/tsrc/t_hsdomainmodel/d_landscape.png"         - "c:/private/20022F59/d_landscape.png"
-"../hsdomainmodel/tsrc/t_hsdomainmodel/d_portrait.png"           - "c:/private/20022F59/d_portrait.png"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/resource/default_portrait.png"       - "c:/private/20022F59/wallpapers/scene/default_landscape.png"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/resource/default_landscape.png"  - "c:/private/20022F59/wallpapers/scene/default_portrait.png"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/resource/default_portrait.png"       - "c:/private/20022F59/wallpapers/page/default_landscape.png"
+"../hsdomainmodel/tsrc/t_hsdomainmodel/resource/default_landscape.png"  - "c:/private/20022F59/wallpapers/page/default_portrait.png"
 
 "/epoc32/release/armv5/urel/mockwidgetplugin.dll"                                               - "c:/sys/bin/mockwidgetplugin.dll"
 "/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin"   - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugin.qtplugin"
