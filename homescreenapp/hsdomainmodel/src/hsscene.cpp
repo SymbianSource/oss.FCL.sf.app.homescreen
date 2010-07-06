@@ -19,6 +19,7 @@
 
 #include <HbInstance>
 #include <HbMainWindow>
+#include <hbevent.h>
 
 #include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
@@ -207,6 +208,7 @@ bool HsScene::setActivePage(HsPage *page)
     }
 
     mActivePage = page;
+    emit activePageChanged();
 
     foreach (HsPage *p, mPages) {
         if (p == mActivePage) {
@@ -325,16 +327,28 @@ Qt::Orientation HsScene::orientation()
 */
 bool HsScene::eventFilter(QObject *watched, QEvent *event)
 {
-    switch (event->type()) {
-        case QEvent::ApplicationActivate:
+    if (event->type() == QEvent::ApplicationDeactivate && !mIsBackground) {
+        qDebug() << "QEvent::ApplicationDeactivate: calling hide for active page widgets";
+        mActivePage->hideWidgets(); 
+        mIsBackground = true;
+    } else if (event->type() == QEvent::ApplicationActivate && mIsBackground) {
+        if(!mIsSleeping) {
+            qDebug() << "QEvent::ApplicationActivate: not sleeping, calling show for active page widgets";
             mActivePage->showWidgets();
-            break;
-		case QEvent::ApplicationDeactivate:
-            mActivePage->hideWidgets();
-            break;
-        default:
-            break;
-	}
+        }
+        mIsBackground = false;
+    } else if (event->type() == HbEvent::SleepModeEnter && !mIsSleeping) {
+        qDebug() << "HbEvent::SleepModeEnter: calling hide for active page widgets";
+        mActivePage->hideWidgets();
+        mIsSleeping = true;
+    } else if (event->type() == HbEvent::SleepModeExit && mIsSleeping) {
+        if(!mIsBackground) {
+           qDebug() << "HbEvent::SleepModeExit: in foreground, calling show for active page widgets";
+           mActivePage->showWidgets();
+        }
+        mIsSleeping = false;
+    }    
+
     return QObject::eventFilter(watched, event);
 }
 
@@ -347,7 +361,9 @@ HsScene::HsScene(QObject *parent)
     mWallpaper(0),
     mActivePage(0),
     mActiveWidget(0),
-    mIsOnline(true)
+    mIsOnline(true),
+    mIsBackground(false),
+    mIsSleeping(false)
 {
 }
 

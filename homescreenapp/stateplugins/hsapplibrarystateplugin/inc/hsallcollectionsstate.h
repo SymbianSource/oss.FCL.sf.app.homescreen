@@ -23,10 +23,8 @@
 #include <QPointF>
 #include <QPointer>
 
-#include "hsmenustates_global.h"
+#include "hsbaseviewstate.h"
 #include "hsmenumodewrapper.h"
-#include "hsmenuservice.h"
-#include "hsmenuview.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -39,7 +37,7 @@ class HsMenuItemModel;
 class HsMenuView;
 class HsMainWindow;
 
-class HsAllCollectionsState: public QState
+class HsAllCollectionsState: public HsBaseViewState
 {
     Q_OBJECT
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)

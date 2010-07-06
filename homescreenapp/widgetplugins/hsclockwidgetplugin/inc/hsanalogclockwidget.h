@@ -36,6 +36,8 @@ public:
     ~HsAnalogClockWidget();
 
     bool eventFilter(QObject *watched, QEvent *event);
+    QRectF boundingRect() const;
+    QPainterPath shape() const;
 
 signals:
     void clockTapped();

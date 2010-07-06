@@ -32,13 +32,15 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hswidgetcomponent.h \
            ./inc/hswidgetcomponentdescriptor.h \
            ./inc/hsbackuprestoreobserver.h \
-           ./inc/hsconfiguration.h
+           ./inc/hsconfiguration.h \
+           ./inc/hswidgettoucharea.h \
+           ./inc/hspagetoucharea.h
 
-SOURCES += ./src/hscontentservice.cpp   \
-           ./src/hsdatabase.cpp  \
-           ./src/hspage.cpp  \
-           ./src/hspagenewwidgetlayout.cpp  \
-           ./src/hsgui.cpp  \
+SOURCES += ./src/hscontentservice.cpp \
+           ./src/hsdatabase.cpp \
+           ./src/hspage.cpp \
+           ./src/hspagenewwidgetlayout.cpp \
+           ./src/hsgui.cpp \
            ./src/hsscene.cpp \
            ./src/hsshortcutservice.cpp \
            ./src/hswallpaper.cpp \
@@ -49,13 +51,12 @@ SOURCES += ./src/hscontentservice.cpp   \
            ./src/hswidgetcomponent.cpp \
            ./src/hswidgetcomponentdescriptor.cpp \
            ./src/hsbackuprestoreobserver.cpp \
-           ./src/hsconfiguration.cpp
+           ./src/hsconfiguration.cpp \
+           ./src/hswidgettoucharea.cpp \
+           ./src/hspagetoucharea.cpp
 
 symbian: {
 HEADERS += ./inc/hsbackuprestoreobserver_p.h \
            ./inc/hsbackuprestoreactivecallback.h
 SOURCES += ./src/hsbackuprestoreactivecallback.cpp
 }
-
-
-

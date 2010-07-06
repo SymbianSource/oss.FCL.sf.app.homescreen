@@ -43,7 +43,8 @@
 // ---------------------------------------------------------------------------
 //
 XQAIWGetImageClient::XQAIWGetImageClient():
-    mImageGrid(0)
+    mImageGrid(0),
+    mCurrentView(0)
 {
     mImageGrid = new HsImageGridWidget(QStringList(), 0);
     mBackAction = new HbAction(Hb::BackNaviAction, this);
@@ -114,6 +115,7 @@ void XQAIWGetImageClient::fetch()
 
     connect(mImageGrid, SIGNAL(imageSelected(QString)), SLOT(imageSelected(QString)));
 
+    mCurrentView = window->currentView();
     window->addView(mImageGrid);
     window->setCurrentView(mImageGrid, false);
 
@@ -150,7 +152,8 @@ void XQAIWGetImageClient::imageSelectionCancelled()
 
     HbMainWindow *window = HbInstance::instance()->allMainWindows().first();
     window->removeView(mImageGrid);
-    
+    window->setCurrentView(mCurrentView, false);
+    mCurrentView = 0;
     emit fetchFailed(-1, QString("")); //KErrNotFound
 
     QStringList images;

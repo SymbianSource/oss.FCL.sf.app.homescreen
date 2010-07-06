@@ -20,7 +20,9 @@
 
 #include <HbWidget>
 
+// Start of snippet 1
 class HelloWorldWidget : public HbWidget
+// End of snippet 1
 {
     Q_OBJECT
 
@@ -28,9 +30,11 @@ public:
     HelloWorldWidget(QGraphicsItem *parent = 0, Qt::WindowFlags flags = 0);
     ~HelloWorldWidget();
 
+// Start of snippet 2
 public slots:
     void onShow();
     void onHide();
+// End of snippet 2
 
 private:
     Q_DISABLE_COPY(HelloWorldWidget)

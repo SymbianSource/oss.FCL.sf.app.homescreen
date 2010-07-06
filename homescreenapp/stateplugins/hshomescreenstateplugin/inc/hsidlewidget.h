@@ -27,6 +27,7 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 class HsPage;
 class HsTrashBinWidget;
 class HsPageIndicator;
+class HsSnapLine;
 
 class HsIdleWidget : public HbWidget
 {
@@ -42,10 +43,6 @@ public:
 
     void setGeometry(const QRectF &rect);
 
-    void captureDelayedPress(QGraphicsSceneMouseEvent *event);
-    void sendDelayedPress();
-    void clearDelayedPress();
-
     void setActivePage(int index);
     void insertPage(int index, HsPage *page);
     void removePage(int index);
@@ -60,18 +57,17 @@ public:
 
     qreal parallaxFactor() const;
 
-signals:    
-    void mousePressed(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void mouseMoved(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void mouseReleased(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
 
 public slots:
     void showTrashBin();
     void showPageIndicator();
 
+    void showVerticalSnapLine(const QLineF &snapLine);	
+    void hideVerticalSnapLine();
+    void showHorizontalSnapLine(const QLineF &snapLine);
+    void hideHorizontalSnapLine();
+
 protected:
-    bool eventFilter(QObject *object, QEvent *event);
-    bool sceneEventFilter(QGraphicsItem *watched, QEvent *event);
     void polishEvent();
 
 private:
@@ -84,10 +80,11 @@ private:
     HbWidget *mPageWallpaperLayer;
     HbWidget *mSceneLayer;
 
-    QMouseEvent *mDelayedPressEvent;
-
     HsTrashBinWidget *mTrashBin;
     HsPageIndicator *mPageIndicator;
+
+    HsSnapLine *mHorizontalSnapLine;
+    HsSnapLine *mVerticalSnapLine;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };

@@ -95,6 +95,7 @@ file=ABI_DIR\BUILD_DIR\hsclockwidgetplugin.dll                                  
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\tclock.png                       private\20022f35\import\widgetregistry\20022F6C\tclock.png
+data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\qtg_graf_hswidget_preview_clock.svg  private\20022f35\import\widgetregistry\20022F6C\qtg_graf_hswidget_preview_clock.svg
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml          private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml
 
 // ---- IMenuClient --------------------------------------------

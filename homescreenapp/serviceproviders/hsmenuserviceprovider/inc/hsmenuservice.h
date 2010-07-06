@@ -49,7 +49,7 @@ public:
             const QString &collectionType = collectionTypeName());
     static QStringList getCollectionNames();
     static QString getName(int entryId);
-    static bool executeAction(int entryId, const QString &actionName =
+    static int executeAction(int entryId, const QString &actionName =
                                   openActionIdentifier());
     static bool launchTaskSwitcher();
 
@@ -70,7 +70,7 @@ public:
 
     static bool touch(int entryId);
     
-    static bool launchSoftwareUpdate();
+    static int launchSoftwareUpdate();
 
 private:
     // data

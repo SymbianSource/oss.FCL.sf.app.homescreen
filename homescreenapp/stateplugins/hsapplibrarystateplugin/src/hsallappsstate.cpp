@@ -25,6 +25,8 @@
 #include <hbinstance.h>
 #include <caentry.h>
 #include <hbsearchpanel.h>
+#include <HbScrollBar>
+#include <HbIndexFeedback>
 
 #include "hsmenuitemmodel.h"
 #include "cadefs.h"
@@ -78,7 +80,7 @@ HsAllAppsState::HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                                HsMenuModeWrapper &menuMode,
                                HsMainWindow &mainWindow,
                                QState *parent) :
-    QState(parent), mSortAttribute(AscendingNameHsSortAttribute),
+    HsBaseViewState(parent), mSortAttribute(AscendingNameHsSortAttribute),
     mCollectionsSortAttribute(LatestOnTopHsSortAttribute),
     mMenuView(menuViewBuilder, HsAllAppsContext),
     mMenuMode(menuMode),
@@ -127,6 +129,11 @@ void HsAllAppsState::construct()
 
     mAllAppsModel = HsMenuService::getAllApplicationsModel(mSortAttribute);
     mMenuView.setModel(mAllAppsModel);
+
+    mMenuView.listView()->verticalScrollBar()->setInteractive(true);
+    HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView.view());
+    indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
+    indexFeedback->setItemView(mMenuView.listView());
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::construct");
 }
@@ -210,7 +217,7 @@ void HsAllAppsState::stateEntered()
 {
     qDebug("AllAppsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateEntered");
-
+    
     mMainWindow.setCurrentView(mMenuView);
     mMenuView.activate();
 
@@ -221,9 +228,11 @@ void HsAllAppsState::stateEntered()
  Slot invoked when add mode entered.
  */
 void HsAllAppsState::normalModeEntered()
-{
+{    
     setMenuOptions();
-
+    connect(&mMainWindow, SIGNAL(viewIsReady()),
+        &mMainWindow, SLOT(saveActivity()),
+        Qt::UniqueConnection);
     connect(&mMenuView,
             SIGNAL(activated(QModelIndex)),
             SLOT(listItemActivated(QModelIndex)));
@@ -251,6 +260,10 @@ void HsAllAppsState::addModeEntered()
 void HsAllAppsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateExited");
+
+    disconnect(&mMainWindow, SIGNAL(viewIsReady()),
+               &mMainWindow, SLOT(saveActivity()));
+       
     mMenuView.setSearchPanelVisible(false);
 
     mMenuView.disconnect(this);
@@ -262,6 +275,8 @@ void HsAllAppsState::stateExited()
     if (mContextMenu)
         mContextMenu->close();
 
+    HsBaseViewState::stateExited();
+    
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::stateExited");
     qDebug("AllAppsState::stateExited()");
 }
@@ -277,11 +292,15 @@ bool HsAllAppsState::openTaskSwitcher()
 
 /*!
  Check software updates.
- \retval true if operation is successful.
+ \retval 0 if operation is successful.
  */
-bool HsAllAppsState::checkSoftwareUpdates()
+int HsAllAppsState::checkSoftwareUpdates()
 {
-    return HsMenuService::launchSoftwareUpdate();
+    int errCode = HsMenuService::launchSoftwareUpdate();
+    if (errCode != 0){
+        createApplicationLaunchFailMessage(errCode,0);
+    }
+    return errCode;
 }
 
 /*!
@@ -309,7 +328,10 @@ void HsAllAppsState::listItemActivated(const QModelIndex &index)
         }
     } else {
         QVariant data = mAllAppsModel->data(index, CaItemModel::IdRole);
-        HsMenuService::executeAction(data.toInt());
+        int errCode = HsMenuService::executeAction(data.toInt());
+        if (errCode != 0) {
+            createApplicationLaunchFailMessage(errCode,index.data(CaItemModel::IdRole).toInt());
+        }
     }
     
     mMenuView.setSearchPanelVisible(false);
@@ -482,7 +504,8 @@ void HsAllAppsState::addToHomeScreen(const QModelIndex &index)
     QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(index);
 
     machine()-> postEvent(HsMenuEventFactory::createAddToHomeScreenEvent(
-                              entry->id(), mMenuMode.getHsMenuMode()));
+                              entry->id(), mMenuMode.getHsMenuMode(), 
+                              mMenuMode.getHsToken()));
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::addToHomeScreen");
 }

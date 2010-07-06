@@ -21,12 +21,13 @@
 #include <QGraphicsLayout>
 #include "hstest_global.h"
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 class HsWidgetHost;
 class HsPageNewWidgetLayout : public QGraphicsLayout 
 {
 public: 
-    HsPageNewWidgetLayout(QGraphicsLayoutItem *parent = 0);
+    HsPageNewWidgetLayout(const QPointF &touchPoint = QPointF(),
+                          QGraphicsLayoutItem *parent = 0);
     ~HsPageNewWidgetLayout();
         
     int count() const;
@@ -40,7 +41,9 @@ public:
 private:
     QSizeF mSize;
     QList<HsWidgetHost*> mNewWidgets;
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    QPointF mTouchPoint;
+
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 

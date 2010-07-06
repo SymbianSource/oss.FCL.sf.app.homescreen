@@ -32,6 +32,8 @@
 #include "hspageindicator.h"
 #include "hsdocumentloader.h"
 #include "hsconfiguration.h"
+#include "hsapp_defs.h"
+#include "hssnapline.h"
 
 namespace
 {
@@ -57,8 +59,9 @@ namespace
 HsIdleWidget::HsIdleWidget(QGraphicsItem *parent)
   : HbWidget(parent),
     mControlLayer(0), mPageLayer(0), mPageWallpaperLayer(0),
-    mSceneLayer(0), mDelayedPressEvent(0),
-    mTrashBin(0), mPageIndicator(0)
+    mSceneLayer(0),
+    mTrashBin(0), mPageIndicator(0),
+    mHorizontalSnapLine(0), mVerticalSnapLine(0)
 {
     setFlag(ItemHasNoContents);
 
@@ -93,8 +96,6 @@ HsIdleWidget::HsIdleWidget(QGraphicsItem *parent)
 */
 HsIdleWidget::~HsIdleWidget()
 {
-    clearDelayedPress();
-
     QList<HsPage *> pages = HsScene::instance()->pages();
     foreach (HsPage *page, pages) {
         page->setParentItem(0);
@@ -137,57 +138,32 @@ void HsIdleWidget::setSceneX(qreal x)
 
 /*!
     Layouts the ui layers according to the given \a rect.
+    If given \a rect has different size than a fullscreen view, rect
+    is lifted up by statuspane height. Normally HsIdleWidget position is 0,0 
+    relative to it's parent container (HbView). This functionality tackles
+    problem caused by HbStackedLayout which sets top most rect for all items 
+    (views) in a stack (not considering fullscreen mode).
 */
 void HsIdleWidget::setGeometry(const QRectF &rect)
 {
+    
     int n = HsScene::instance()->pages().count();
-	QRectF layoutRect(HsScene::instance()->mainWindow()->layoutRect());
+    QRectF layoutRect(HsScene::instance()->mainWindow()->layoutRect());
     if (layoutRect == rect || (layoutRect.height() == rect.width() && layoutRect.width() == rect.height())) {
         mControlLayer->resize(rect.size());
-		mPageLayer->resize(n * rect.width(), rect.height());
+        mPageLayer->resize(n * rect.width(), rect.height());
         if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
             mPageWallpaperLayer->resize(n * rect.width(), rect.height());
         }
-		mSceneLayer->resize(2 * rect.width() + HSCONFIGURATION_GET(bounceEffect), rect.height());
-		HbWidget::setGeometry(rect);
-	} else {
-		QRectF sceneRect = mapToScene(rect).boundingRect();
-		sceneRect.setTop(-sceneRect.top());
-		HbWidget::setGeometry(sceneRect);
-	}
-}
-
-/*!
-    Stores the given mouse press \a event.
-*/
-void HsIdleWidget::captureDelayedPress(QGraphicsSceneMouseEvent *event)
-{
-    if (event) {
-        mDelayedPressEvent = new QMouseEvent(QEvent::MouseButtonPress,
-            event->scenePos().toPoint(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
-        mDelayedPressEvent->setAccepted(false);
-    }
-}
-
-/*!
-    Sends the stored mouse press event.
-*/
-void HsIdleWidget::sendDelayedPress()
-{
-    if (mDelayedPressEvent) {
-        QApplication::sendEvent(HsScene::mainWindow()->viewport(), mDelayedPressEvent);
-        clearDelayedPress();
-    }
-}
-
-/*!
-    Deletes the stored mouse press event.
-*/
-void HsIdleWidget::clearDelayedPress()
-{
-    if (mDelayedPressEvent) {
-        delete mDelayedPressEvent;
-        mDelayedPressEvent = 0;
+        mSceneLayer->resize(2 * rect.width() + HSCONFIGURATION_GET(bounceEffect), rect.height());
+        HbWidget::setGeometry(rect);
+    } else {
+        QRectF sceneRect = mapToScene(rect).boundingRect();
+        // HbView is a container item for widget, thus 0,0 is relative to view's position.
+        // Lift rect by offset. Fullscreen view is in 0,0 position in scene coordinates otherwise
+        // it's e.g 0,68 (statuspane being at 0,0 and view at 0,68)
+        sceneRect.setTop(-sceneRect.top());
+        HbWidget::setGeometry(sceneRect);
     }
 }
 
@@ -273,33 +249,6 @@ void HsIdleWidget::removePage(int index)
 */
 
 /*!
-    \fn HsIdleWidget::mousePressed(QGraphicsItem *, QGraphicsSceneMouseEvent *, bool &)
-
-    The idle state connects to this signal for handling mouse
-    press events. It filters events for the item \a watched.
-    \a event is the filtered event. Sets the \a filtered true
-    if the event was filtered by this handler.
-*/
-
-/*!
-    \fn HsIdleWidget::mouseMoved(QGraphicsItem *, QGraphicsSceneMouseEvent *, bool &)
-
-    The idle state connects to this signal for handling mouse
-    move events. It filters events for the item \a watched.
-    \a event is the filtered event. Sets the \a filtered true
-    if the event was filtered by this handler.
-*/
-
-/*!
-    \fn HsIdleWidget::mouseReleased(QGraphicsItem *, QGraphicsSceneMouseEvent *, bool &)
-
-    The idle state connects to this signal for handling mouse
-    release events. It filters events for the item \a watched.
-    \a event is the filtered event. Sets the \a filtered true
-    if the event was filtered by this handler.
-*/
-
-/*!
     Sets the trashbin visible and hides the page indicator.
 */
 void HsIdleWidget::showTrashBin()
@@ -320,58 +269,45 @@ void HsIdleWidget::showPageIndicator()
 }
 
 /*!
-    Filters the main window's graphics scene (\a object) \a event.
+    Shows the Vertical snapping lines showing the guidance
 */
-bool HsIdleWidget::eventFilter(QObject *object, QEvent *event)
+void HsIdleWidget::showVerticalSnapLine(const QLineF &snapLine)
 {
-    Q_UNUSED(object)
-    
-    bool filtered = false;
+    QVariantHash snapConfiguration;
+    snapConfiguration[SNAPLINEFADEINDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeInDuration));
+    snapConfiguration[SNAPLINEFADEOUTDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeOutDuration));
 
-    switch (event->type()) {
-    case QEvent::GraphicsSceneMousePress:
-        if (HbVkbHost::activeVkbHost()) {
-            setFiltersChildEvents(false);
-            break;
-        }
-        if (mDelayedPressEvent &&
-            scene()->mouseGrabberItem()) {
-            scene()->mouseGrabberItem()->ungrabMouse();
-        }
-        setFiltersChildEvents(!mDelayedPressEvent);
-        break;
-    case QEvent::GraphicsSceneMouseMove:        
-        emit mouseMoved(0, static_cast<QGraphicsSceneMouseEvent *>(event), filtered);
-        break;
-    case QEvent::GraphicsSceneMouseRelease:
-        emit mouseReleased(0, static_cast<QGraphicsSceneMouseEvent *>(event), filtered);
-        if (filtered && scene()->mouseGrabberItem()) {
-            scene()->mouseGrabberItem()->ungrabMouse();
-        }
-        break;
-    default:
-        break;
-    }
-
-    return filtered;
+    mVerticalSnapLine->setConfiguration(snapConfiguration);
+    mVerticalSnapLine->showLine(snapLine);
 }
 
 /*!
-    Filters events for the item \a watched. \a event is the filtered event.
+    Shows the Horizontal snapping lines showing the guidance
 */
-bool HsIdleWidget::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
+void HsIdleWidget::showHorizontalSnapLine(const QLineF &snapLine)
 {
-    bool filtered = false;
+    QVariantHash snapConfiguration;
+    snapConfiguration[SNAPLINEFADEINDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeInDuration));
+    snapConfiguration[SNAPLINEFADEOUTDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeOutDuration));
 
-    switch (event->type()) {
-    case QEvent::GraphicsSceneMousePress:
-        emit mousePressed(watched, static_cast<QGraphicsSceneMouseEvent *>(event), filtered);
-        break;
-    default:
-        break;
-    }
+    mHorizontalSnapLine->setConfiguration(snapConfiguration);
+    mHorizontalSnapLine->showLine(snapLine);
+}
 
-    return filtered;
+/*!
+    Hides the Vertical snapping line showing the guidance
+*/
+void HsIdleWidget::hideVerticalSnapLine()
+{
+    mVerticalSnapLine->hideLine();
+}
+
+/*!
+    Hides the Horizontal snapping line showing the guidance
+*/
+void HsIdleWidget::hideHorizontalSnapLine()
+{
+    mHorizontalSnapLine->hideLine();
 }
 
 /*!
@@ -444,6 +380,13 @@ void HsIdleWidget::loadControlLayer()
 
         mPageIndicator = qobject_cast<HsPageIndicator *>(loader.findWidget(gPageIndicatorName));
         mPageIndicator->setZValue(1e6);
+
+
+        mHorizontalSnapLine = new HsSnapLine(mControlLayer);
+        mHorizontalSnapLine->setZValue(10);
+
+        mVerticalSnapLine = new HsSnapLine(mControlLayer);
+        mVerticalSnapLine->setZValue(10);
     } else {
         // TODO: Handle error.
     }

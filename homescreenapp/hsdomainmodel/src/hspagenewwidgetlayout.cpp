@@ -15,12 +15,7 @@
 *
 */
 
-#include <QPainter>
-#include <QRectF>
-#include <QGraphicsLinearLayout>
 #include <HbInstance>
-#include <QGraphicsSceneResizeEvent>
-#include <QGraphicsAnchorLayout>
 
 #include "hsdomainmodeldatastructures.h"
 #include "hspagenewwidgetlayout.h"
@@ -45,8 +40,10 @@
 
     \a parent Owner.
 */
-HsPageNewWidgetLayout::HsPageNewWidgetLayout(QGraphicsLayoutItem *parent) :
-    QGraphicsLayout(parent)
+HsPageNewWidgetLayout::HsPageNewWidgetLayout(const QPointF &touchPoint,
+                                             QGraphicsLayoutItem *parent)
+    : QGraphicsLayout(parent),    
+    mTouchPoint(touchPoint)
 {
     mSize = HsScene::mainWindow()->layoutRect().size();
 }
@@ -110,15 +107,37 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
     foreach (HsWidgetHost *newWidget, mNewWidgets) {
         rects << QRectF(QPointF(), newWidget->preferredSize());
     }
-   HsWidgetPositioningOnWidgetAdd *algorithm =
-        HsWidgetPositioningOnWidgetAdd::instance();
-    QRectF pageRect = HsScene::mainWindow()->layoutRect();
-    pageRect.adjust( (qreal)0,(qreal)64,(qreal)0,(qreal)0);
-    QList<QRectF> calculatedRects =
-        algorithm->convert(pageRect, rects, QPointF());
 
-    for ( int i=0; i<mNewWidgets.count(); i++) {
-        mNewWidgets.at(i)->setGeometry(calculatedRects.at(i));
+    /* if there is touch point defined (widget added from context menu)
+       then there is only one widget in the list
+       -> set widget center point to this touch point
+    */
+    if (mTouchPoint != QPointF() && mNewWidgets.count() == 1) {
+        QRectF pageRect = HsScene::mainWindow()->layoutRect();
+        qreal widgetX = qBound(qreal(0), mTouchPoint.x() - rects.at(0).width() / 2, pageRect.width() - rects.at(0).width());
+        qreal widgetY = qBound(qreal(64), mTouchPoint.y() - rects.at(0).height() / 2, pageRect.height() - rects.at(0).height());
+        mNewWidgets.at(0)->setGeometry(widgetX,
+                                       widgetY,
+                                       rects.at(0).width(), 
+                                       rects.at(0).height());
+        /* we have to save widget presentation data here after drawing
+           to get correct position for later use
+        */
+        mNewWidgets.at(0)->savePresentation();
+    }
+    // otherwise calculate position with algorithm
+    else {
+        HsWidgetPositioningOnWidgetAdd *algorithm =
+            HsWidgetPositioningOnWidgetAdd::instance();
+        QRectF pageRect = HsScene::mainWindow()->layoutRect();
+        pageRect.adjust( (qreal)0,(qreal)64,(qreal)0,(qreal)0);
+        QList<QRectF> calculatedRects =
+            algorithm->convert(pageRect, rects, QPointF());
+
+        for ( int i=0; i<mNewWidgets.count(); i++) {
+            mNewWidgets.at(i)->setGeometry(calculatedRects.at(i));
+            mNewWidgets.at(i)->savePresentation();
+        }
     }
 }
 

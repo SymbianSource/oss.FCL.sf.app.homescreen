@@ -49,7 +49,7 @@ private:
     Q_DISABLE_COPY(HsWidgetComponent)
 	HsWidgetComponent(const QString &uri, QObject *parent = 0);
 
-	void resolveRootPath();
+	void resolveRootPathAndTranslationFilename();
     void installTranslator();
 	void uninstallTranslator();
 	
@@ -65,6 +65,7 @@ private:
 	QString mRootPath;
 	QString mDrive;
 	State mState;
+	QString mTranslationFilename;
 	friend class HsWidgetComponentRegistry;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)

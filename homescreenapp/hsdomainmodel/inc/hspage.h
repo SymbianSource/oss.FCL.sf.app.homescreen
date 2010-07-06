@@ -26,6 +26,7 @@
 class HsWidgetHost;
 class HsPageData;
 class HsWallpaper;
+class HsPageTouchArea;
 
 HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
@@ -41,6 +42,8 @@ public:
     int databaseId() const;
     void setDatabaseId(int id);
 
+    void setGeometry(const QRectF &rect);
+
     bool load();
 
     HsWallpaper *wallpaper() const;
@@ -49,7 +52,7 @@ public:
     bool removeWidget(HsWidgetHost *widgeHost);
 
     QList<HsWidgetHost *> newWidgets();
-    bool addNewWidget(HsWidgetHost *widgetHost);
+    bool addNewWidget(HsWidgetHost *widgetHost, const QPointF &position = QPointF());
     void layoutNewWidgets();
     void resetNewWidgets();
     bool deleteFromDatabase();
@@ -64,6 +67,8 @@ public:
     
     static HsPage *createInstance(const HsPageData &pageData);
 
+    QPointF mTouchPoint;
+
 public slots:
     void showWidgets();
     void hideWidgets();
@@ -75,6 +80,7 @@ public slots:
 
 private:
     Q_DISABLE_COPY(HsPage)
+    void setupTouchArea();
     void connectWidget(HsWidgetHost *widget);
     void disconnectWidget(HsWidgetHost *widget);
 
@@ -94,7 +100,8 @@ private:
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
     QList<HsWidgetHost*> mUnavailableWidgets;
-
+    HsPageTouchArea *mTouchArea;
+    
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 

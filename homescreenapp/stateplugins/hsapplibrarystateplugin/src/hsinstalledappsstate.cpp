@@ -78,7 +78,7 @@
 HsInstalledAppsState::HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
         HsMainWindow &mainWindow,
         QState *parent):
-    QState(parent),
+    HsBaseViewState(parent),
     mMenuView(menuViewBuilder, HsInstalledAppsContext),
     mInstalledAppsModel(0),
     mSecondarySoftkeyAction(new HbAction(Hb::BackNaviAction, this)),
@@ -175,9 +175,6 @@ void HsInstalledAppsState::stateEntered()
     connect(mInstalledAppsModel, SIGNAL(empty(bool)),this,
             SLOT(setEmptyLabelVisibility(bool)));
 
-    mMenuView.viewLabel()->setHeading(
-        hbTrId("txt_applib_subtitle_installed"));
-
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateEntered");
 }
 
@@ -192,10 +189,20 @@ void HsInstalledAppsState::stateExited()
                SLOT(setEmptyLabelVisibility(bool)));
 
     mMenuView.setSearchPanelVisible(false);
+
+    disconnect(&mMenuView,
+            SIGNAL(activated(QModelIndex)), this,
+            SLOT(listItemActivated(QModelIndex)));
+    disconnect(&mMenuView,
+            SIGNAL(longPressed(HbAbstractViewItem *, QPointF)), this,
+            SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
+
     mMenuView.inactivate();
 
     if (mContextMenu)
         mContextMenu->close();
+    
+    HsBaseViewState::stateExited();
     
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateExited");
     qDebug("AllAppsState::stateExited()");

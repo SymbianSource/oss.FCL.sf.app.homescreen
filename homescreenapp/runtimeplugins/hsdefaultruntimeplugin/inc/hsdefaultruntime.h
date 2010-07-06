@@ -52,7 +52,7 @@ public:
 
 signals:
     void event_exit();
-
+    void event_toIdle();
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 

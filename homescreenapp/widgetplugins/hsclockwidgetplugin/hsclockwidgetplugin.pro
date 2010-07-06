@@ -45,3 +45,4 @@ RESOURCES = hsclockwidgetplugin.qrc
 
 exportResources(./resource/*.manifest, $$PLUGIN_SUBDIR)
 exportResources(./resource/*.png, $$PLUGIN_SUBDIR)
+exportResources(./resource/*.svg, $$PLUGIN_SUBDIR)

@@ -5,13 +5,14 @@
         <string locid="txt_common_button_ok" name="text" value="Ok"/>
     </object>
     <widget name="details_dialog" type="HbDialog">
+        <enums name="dismissPolicy" value="HbPopup::NoDismiss"/>
+    	
         <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
         <widget name="qtl_dialog_pri_heading" role="HbDialog:headingWidget" type="HbLabel">
             <enums name="alignment" value="AlignLeft|AlignLeading"/>
             <contentsmargins bottom="var(hb-param-margin-gene-popup)" left="var(hb-param-margin-gene-popup)" right="var(hb-param-margin-gene-popup)" top="var(hb-param-margin-gene-popup)"/>
             <string locid="txt_applib_title_details" name="plainText" value="Details"/>
             <fontspec name="fontSpec" role="Primary" textheight="var(hb-param-text-height-primary)"/>
-            <string name="dismissPolicy" value="HbPopup::NoDismiss"/>
         </widget>
         <widget name="scrollArea" role="HbDialog:contentWidget" type="HbScrollArea">
             <widget name="scrollAreaContents" role="HbScrollArea:contents" type="HbWidget">

@@ -22,6 +22,9 @@
 #include <QVariantHash>
 
 #include "hsdomainmodel_global.h"
+#include "hstest_global.h"
+
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HsSceneData;
 class HsPageData;
@@ -60,6 +63,7 @@ public:
     
     bool widgets(int pageId, QList<HsWidgetData> &data);
     bool widgets(const QString &uri, QList<HsWidgetData> &data);
+    bool widgets(const QString &uri, const QVariantHash &preferences, int &count);
     bool widget(HsWidgetData &data);
     bool insertWidget(HsWidgetData &data);
     bool updateWidget(const HsWidgetData &data);
@@ -84,12 +88,14 @@ public:
 private:    
     Q_DISABLE_COPY(HsDatabase)
     bool checkConnection() const;
+    bool matchWidgetPreferences(const QVariantHash &preferences, const QMultiMap<QString, QString>& storedPreferences);
 
 private:
     QString mConnectionName;
     QString mDatabaseName;
 
     static HsDatabase *mInstance;
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSDATABASE_H

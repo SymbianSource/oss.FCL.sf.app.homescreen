@@ -35,6 +35,7 @@ public:
     enum OperationType {
         AddToHomeScreen,
         OpenCollection,
+        OpenCollectionFromAppLibrary,
         RenameCollection,
         DeleteCollection,
         CollectionDeleted,

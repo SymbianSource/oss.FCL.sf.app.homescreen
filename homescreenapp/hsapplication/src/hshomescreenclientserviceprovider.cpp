@@ -44,7 +44,7 @@ HsHomeScreenClientServiceProvider::HsHomeScreenClientServiceProvider(QObject *pa
   : XQServiceProvider(gInterfaceName, parent),
     mWaitDialog(0),
     mShowAnimation(false),
-    mAsyncRequestIndex(0),    
+    mAsyncRequestIndex(0),
     mReturnValue(false),
     mWallpaper(0)
 {
@@ -97,7 +97,7 @@ void HsHomeScreenClientServiceProvider::setWallpaper(const QString &fileName)
 
 /*!
     \internal
-    Called when wallpaper image has been set successfully  
+    Called when wallpaper image has been set successfully
 */
 void HsHomeScreenClientServiceProvider::onImageSet()
 {
@@ -154,13 +154,13 @@ bool HsHomeScreenClientServiceProvider::widgetUninstalled(const QVariantHash &wi
 HsWidgetComponentDescriptor HsHomeScreenClientServiceProvider::widgetComponentDescriptor(const QVariantHash& widgetDescriptor)
 {
     HsWidgetComponentDescriptor widget;
-    widget.installationPath = widgetDescriptor["installationPath"].toString();
-    widget.uri = widgetDescriptor["uri"].toString();
-    widget.title = widgetDescriptor["title"].toString();
-    widget.description = widgetDescriptor["description"].toString();
-    widget.iconUri = widgetDescriptor["iconUri"].toString();
-    widget.hidden = widgetDescriptor["hidden"].toString();
-    widget.serviceXml = widgetDescriptor["serviceXml"].toString();
-    widget.version = widgetDescriptor["version"].toString();
+    widget.setInstallationPath(widgetDescriptor["installationPath"].toString());
+    widget.setUri(widgetDescriptor["uri"].toString());
+    widget.setTitle(widgetDescriptor["title"].toString());
+    widget.setDescription(widgetDescriptor["description"].toString());
+    widget.setIconUri(widgetDescriptor["iconUri"].toString());
+    widget.setHidden(widgetDescriptor["hidden"].toString());
+    widget.setServiceXml(widgetDescriptor["serviceXml"].toString());
+    widget.setVersion(widgetDescriptor["version"].toString());
     return widget;
 }

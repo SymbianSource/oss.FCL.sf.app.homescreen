@@ -5,6 +5,5 @@
     <interface>
         <name>com.nokia.symbian.IHomeScreenWidget</name>
         <version>1.0</version>
-        <capabilities></capabilities>
     </interface>
 </service>

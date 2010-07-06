@@ -75,6 +75,14 @@ HsClockWidget::~HsClockWidget()
 }
 
 /*!
+    Return shape
+*/
+QPainterPath HsClockWidget::shape() const
+{
+    return mWidget->shape();
+}
+
+/*!
     Initializes this widget.
 */
 void HsClockWidget::onInitialize()

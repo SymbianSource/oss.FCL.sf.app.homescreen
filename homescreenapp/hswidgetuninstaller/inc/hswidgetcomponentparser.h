@@ -44,6 +44,7 @@ private:
     void parseDescription();
     void parseHidden();
     void parseServiceXml();
+    void parseTranslationFilename();
     
 private:
     QXmlStreamReader mParser;

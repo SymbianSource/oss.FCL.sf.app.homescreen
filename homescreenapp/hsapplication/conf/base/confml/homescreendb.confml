@@ -30,8 +30,8 @@
     </confml:setting>
     <confml:setting ref="Configuration" name="Configuration" type="sequence">
       <confml:setting ref="key" name="Key" type="string"/>
-      <confml:setting ref="value" name="Value" type="string"/>      
-    </confml:setting>    
+      <confml:setting ref="value" name="Value" type="string"/>
+    </confml:setting>
   </confml:feature>
   <confml:data>
     <confml:HomeScreenDbSettings>
@@ -112,7 +112,7 @@
       <confml:Configuration><confml:key>clockWidgetTapFeedbackEffect</confml:key><confml:value>BasicItem</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>widgetSnappingFeedbackEffect</confml:key><confml:value>ItemMoveOver</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>isSnapEnabled</confml:key><confml:value>true</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>snapTimeout</confml:key><confml:value>1000</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>snapTimeout</confml:key><confml:value>100</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>snapForce</confml:key><confml:value>30</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>snapGap</confml:key><confml:value>6</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>snapBorderGap</confml:key><confml:value>0</confml:value></confml:Configuration>

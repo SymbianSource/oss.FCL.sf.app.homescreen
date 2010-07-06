@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<hswidgetmanifest>
-    <uri>pannablewidgetplugin</uri>
-    <title>Pannable widget</title>
-    <description>Home screen example widget</description>
-    <icon>pannablewidgetplugin.png</icon>
-    <hidden>false</hidden>
-    <servicexml>pannablewidgetplugin.xml</servicexml>
-</hswidgetmanifest>

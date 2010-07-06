@@ -45,32 +45,6 @@
     <meshitem src="frame" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />
   </layout>
 
-
-  <!--layout name="applib_progress" type="mesh">
-
-    <meshitem src="icon-1" srcEdge="LEFT" dst="" dstEdge="LEFT"  spacing="-6px" />
-    <meshitem src="icon-1" srcEdge="TOP" dst="" dstEdge="TOP" spacing="-5px"/>
-    <meshitem src="icon-1" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM"  spacing="6px" />
-    <meshitem src="icon-1" srcEdge="RIGHT" dst="text-1" dstEdge="LEFT" spacing="15px"/>
-
-    <meshitem src="text-1" srcEdge="BOTTOM" dst="icon-1" dstEdge="CENTERV" />
-    <meshitem src="text-1" srcEdge="RIGHT" dst="" dstEdge="RIGHT" spacing="var(hb-param-margin-gene-middle-horizontal)" />
-
-    <meshitem src="progress" srcEdge="LEFT" dst="text-1" dstEdge="LEFT" />
-    <meshitem src="progress" srcEdge="RIGHT" dst="" dstEdge="RIGHT" spacing="15px" />
-    <meshitem src="progress" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" spacing="8px" />    
-
-    <meshitem src="background" srcEdge="LEFT" dst="" dstEdge="LEFT" />
-    <meshitem src="background" srcEdge="TOP" dst="" dstEdge="TOP" />
-    <meshitem src="background" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
-    <meshitem src="background" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />
-
-    <meshitem src="frame" srcEdge="LEFT" dst="" dstEdge="LEFT" />
-    <meshitem src="frame" srcEdge="TOP" dst="" dstEdge="TOP" />
-    <meshitem src="frame" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
-    <meshitem src="frame" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />
-  </layout-->
-
   <layout name="applib_progress" type="mesh">
 
     <meshitem src="icon-1" srcEdge="LEFT" dst="" dstEdge="LEFT"  spacing="-var(hb-param-margin-gene-left)" />

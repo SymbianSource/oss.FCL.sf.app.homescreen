@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QScopedPointer>
 #include <QSizeF>
+#include <QPointF>
 
 #include "hsdomainmodel_global.h"
 #include "hstest_global.h"
@@ -28,7 +29,10 @@
 HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
+class QGestureEvent;
+
 class HbMainWindow;
+
 class HsWallpaper;
 class HsPage;
 class HsWidgetHost;
@@ -70,6 +74,17 @@ public:
     static HbMainWindow *mainWindow();
     static Qt::Orientation orientation();
 
+signals:
+    void pageTapAndHoldFinished(QGestureEvent *event);
+    void pagePanStarted(QGestureEvent *event);
+    void pagePanUpdated(QGestureEvent *event);
+    void pagePanFinished(QGestureEvent *event);    
+    void widgetTapStarted(HsWidgetHost *widget);
+    void widgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost *widget);
+    void widgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *widget);
+    void widgetMoveFinished(const QPointF &scenePos, HsWidgetHost *widget);
+    void activePageChanged();
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -83,8 +98,16 @@ private:
     HsPage *mActivePage;
     HsWidgetHost *mActiveWidget;
     bool mIsOnline;
+    bool mIsBackground;
+    bool mIsSleeping;
 
     static HsScene *mInstance;
+
+    friend class HsPage;
+    friend class HsPageTouchArea;
+    friend class HsWidgetHost;
+    friend class HsWidgetTouchArea;
+    friend class HsWidgetMoveTouchArea;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)

@@ -38,8 +38,8 @@
     \ingroup group_hsdomainmodel
     \brief Homescreen widget component registry.
 
-    Homescreen widget component registry keeps track of packages from which is(are) 
-    created widget(s) to homescreen page(s). Registry updates its content
+    Widget component registry contains HsWidgetComponent instances. All widget instances from same type 
+    are refering to one HsWidgetComponent. Registry updates its content
     when the installation package is uninstalled/updated or installation location is( or is not)
 	available (media attached/detached). Registry takes care of package registration/unregistration
 	to Qt service framework.
@@ -92,7 +92,7 @@ HsWidgetComponent *HsWidgetComponentRegistry::component(const QString &uri)
 */
 void HsWidgetComponentRegistry::uninstallComponent(const HsWidgetComponentDescriptor &componentDescriptor)
 {
-    HsWidgetComponent *component = mRegistry.value(componentDescriptor.uri);
+    HsWidgetComponent *component = mRegistry.value(componentDescriptor.uri());
     if (component) {
         component->emitAboutToUninstall();
     }

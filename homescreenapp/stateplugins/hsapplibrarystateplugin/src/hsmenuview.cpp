@@ -374,8 +374,8 @@ void HsMenuView::findItem(QString criteriaStr)
     if ("" != criteriaStr) {
         mProxyModel->invalidate();
         mProxyModel->setSourceModel(mListView->model());
-        mProxyModel->setFilterRegExp(QRegExp(criteriaStr,
-                                             Qt::CaseInsensitive, QRegExp::FixedString));
+        mProxyModel->setFilterRegExp(QRegExp(
+                QString("(^|\\b)%1").arg(criteriaStr), Qt::CaseInsensitive));
         mSearchListView->scrollTo(mProxyModel->index(0,0),
                                   HbAbstractItemView::PositionAtTop);
     } else {

@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>resource/layout.docml</file>
-        <file>resource/tstasksgriditem.widgetml</file>
-        <file>resource/tstasksgriditem.css</file>        
-    </qresource>
-</RCC>

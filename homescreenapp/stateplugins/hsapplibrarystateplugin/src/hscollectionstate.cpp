@@ -121,7 +121,7 @@ HsCollectionState::HsCollectionState(HsMenuViewBuilder &menuViewBuilder,
                                      HsMenuModeWrapper &menuMode,
                                      HsMainWindow &mainWindow,
                                      QState *parent) :
-    QState(parent),
+    HsBaseViewState(parent),
     mSortAttribute(LatestOnTopHsSortAttribute),
     mCollectionsSortAttribute(CustomHsSortAttribute),
     mCollectionId(-1),
@@ -309,12 +309,16 @@ void HsCollectionState::stateExited()
                    this, SLOT(updateLabel()));
     delete mCollectionModel;
     mCollectionModel = NULL;
+    mOptions->close();
     delete mOptions;
     mOptions = NULL;
     if (mContextMenu)
         mContextMenu->close();
-    HSMENUTEST_FUNC_EXIT("HsCollectionState::stateExited");
     this->mSortAttribute = NoHsSortAttribute;
+    
+    HsBaseViewState::stateExited();
+    
+    HSMENUTEST_FUNC_EXIT("HsCollectionState::stateExited");
     qDebug("CollectionState::stateExited()");
 }
 
@@ -389,7 +393,10 @@ void HsCollectionState::listItemActivated(const QModelIndex &index)
         }
     } else {
         QVariant data = mCollectionModel->data(index, CaItemModel::IdRole);
-        HsMenuService::executeAction(data.toInt());
+        int errCode = HsMenuService::executeAction(data.toInt());
+        if (errCode != 0) {
+            createApplicationLaunchFailMessage(errCode,index.data(CaItemModel::IdRole).toInt());
+        }
     }
 
     mMenuView.setSearchPanelVisible(false);
@@ -560,7 +567,8 @@ void HsCollectionState::addAppsAction(bool addApps)
 void HsCollectionState::addCollectionShortcutToHomeScreenAction()
 {
     machine()->postEvent(HsMenuEventFactory::createAddToHomeScreenEvent(
-                             mCollectionId, mMenuMode.getHsMenuMode()));
+                             mCollectionId, mMenuMode.getHsMenuMode(), 
+                             mMenuMode.getHsToken()));
 }
 
 /*!
@@ -615,7 +623,7 @@ void HsCollectionState::addElementToHomeScreen(const QModelIndex &index)
 
     machine()->postEvent(
         HsMenuEventFactory::createAddToHomeScreenEvent(
-            entry->id(), mMenuMode.getHsMenuMode()));
+            entry->id(), mMenuMode.getHsMenuMode(), mMenuMode.getHsToken()));
 }
 
 /*!

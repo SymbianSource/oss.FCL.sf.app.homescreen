@@ -20,6 +20,7 @@
 #define HSADDSHORTCUTSTATE_H
 
 #include <QState>
+#include <QVariant>
 
 #include "hsmenustates_global.h"
 #include "hsapp_defs.h"
@@ -86,6 +87,8 @@ private:
     HsMenuMode mMenuMode;
     
     CaNotifier *mNotifier;
+    
+    QVariant mToken;
 
 };
 

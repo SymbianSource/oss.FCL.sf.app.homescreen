@@ -44,12 +44,16 @@
     \param attributes Widget params.
     \return Event for adding the widget to homescreen.
 */
-QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode)
+QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(
+    int entryId,
+	HsMenuMode menuMode,
+    QVariant homescreenData)
 {
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
     params.insert(itemIdKey(), entryId);
     params.insert(menuModeType(), menuMode);
+    params.insert(HOMESCREENDATA, homescreenData);
     return new HsMenuEvent(HsMenuEvent::AddToHomeScreen, params);
 }
 
@@ -67,6 +71,22 @@ QEvent *HsMenuEventFactory::createOpenCollectionEvent(int itemId,
     params.insert(itemIdKey(), itemId);
     params.insert(entryTypeNameKey(), collectionType);
     return new HsMenuEvent(HsMenuEvent::OpenCollection, params);
+}
+
+/*!
+    Creates an HsMenuEvent::createOpenCollectionFromAppLibraryEvent event.
+
+    \param itemId Item id of the collection to be opened.
+    \param collectionType type of the collection to be opened.
+    \return Open collection event.
+ */
+QEvent *HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(int itemId,
+        const QString &collectionType)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), itemId);
+    params.insert(entryTypeNameKey(), collectionType);
+    return new HsMenuEvent(HsMenuEvent::OpenCollectionFromAppLibrary, params);
 }
 
 /*!
@@ -113,10 +133,13 @@ QEvent *HsMenuEventFactory::createDeleteCollectionEvent(int aItemId)
 
     \return Open Applications Library event.
  */
-QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(HsMenuMode menuMode)
+QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(
+    HsMenuMode menuMode,
+	QVariant homescreenData)
 {
     QVariantMap params;
     params.insert(menuModeType(), menuMode);
+    params.insert(HOMESCREENDATA, homescreenData);
     return new HsMenuEvent(HsMenuEvent::OpenApplicationLibrary, params);
 }
 

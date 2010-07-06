@@ -151,7 +151,9 @@ bool HsUninstallItemState::getApplicationsNames(QString &componentName,
             query.setAttribute(applicationUidEntryKey(), uid);
             QList< QSharedPointer<CaEntry> > entries =
                 service->getEntries(query);
-            applicationsNames << entries[0]->text();
+            if (entries.length() > 0) {
+                applicationsNames << entries[0]->text();
+            }
         }
         if (applicationsNames.length()==1
             && applicationsNames[0]==componentName) {
@@ -207,8 +209,13 @@ void HsUninstallItemState::cleanUp()
  */
 void HsUninstallItemState::createUninstallMessage()
 {
+    CaQuery parentsQuery;
+    parentsQuery.setChildId(mItemId);
+    parentsQuery.setEntryTypeNames(QStringList(collectionTypeName()));
+    QList<int> parentsIds = CaService::instance()->getEntryIds(
+            parentsQuery);
     QString message;
-    if (HsShortcutService::instance()->isItemShortcutWidget(mItemId)) {
+    if (HsShortcutService::instance()->isItemShortcutWidget(mItemId) || (parentsIds.count() > 0)) {
         message.append(
             HbParameterLengthLimiter("txt_applib_dialog_uninstalls_1_and_deletes_all_sh").arg(
                 HsMenuService::getName(mItemId)));

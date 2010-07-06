@@ -70,7 +70,7 @@ HsConfiguration::HsConfiguration(QObject *parent)
     mClockWidgetTapFeedbackEffect(HbFeedback::BasicItem),
     mWidgetSnappingFeedbackEffect(HbFeedback::ItemMoveOver),
     mIsSnapEnabled(true),
-    mSnapTimeout(500),
+    mSnapTimeout(100),
     mSnapForce(30),
     mSnapGap(6),
     mSnapBorderGap(0),

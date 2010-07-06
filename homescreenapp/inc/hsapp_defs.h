@@ -47,7 +47,7 @@ inline const QString appSettingsPlugin();
 inline const QString groupNameAttributeName();
 inline const QString componentIdAttributeName();
 inline const QString entryShortName();
-
+inline const QString appLibActivity();
 // Sort attribute
 enum HsSortAttribute {
     NoHsSortAttribute,
@@ -81,8 +81,17 @@ const char TS_DEVICE_DIALOG_URI[] =
 const char LIBRARY[] = "library";
 const char URI[] = "uri";
 const char PREFERENCES[] = "preferences";
+const char HOMESCREENDATA[] = "homescreenData";
+
+const char SNAPENABLED[] = "snapenabled";
+const char SNAPFORCE[] = "snapforce";
+const char SNAPGAP[] = "snapgap";
+const char SNAPBORDERGAP[] = "snapbordergap";
+const char SNAPLINEFADEINDURATION[] = "snaplinefadeinduration";
+const char SNAPLINEFADEOUTDURATION[] = "snaplinefadeoutduration";
 
 const int softwareUpdateApplicationUid  = 0x2001FE2F;
+const int oviLauncherApplicationUid  = 0x2002D07F;
 
 #include "hsapp_defs.inl"
 

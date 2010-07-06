@@ -30,9 +30,6 @@ public:
     {}
     
     int     id;
-    QString portraitWallpaper;
-    QString landscapeWallpaper;
-
 };
 
 class HSDOMAINMODEL_EXPORT HsPageData

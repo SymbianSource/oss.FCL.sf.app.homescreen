@@ -407,6 +407,56 @@ bool HsDatabase::widgets(const QString &uri, QList<HsWidgetData> &data)
 /*!
 
 */
+bool HsDatabase::widgets(const QString &uri, const QVariantHash &preferences, int &count)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+    if ( preferences.size() == 0 ) {
+        // return widget count of the given uri
+        QString statement =
+            "SELECT COUNT(id) "
+            "FROM Widgets "
+            "WHERE uri = ?";
+
+        if (query.prepare(statement)) {
+            query.addBindValue(uri);
+            if (query.exec() && query.next()) {
+                count = query.value(0).toInt();
+                return true;
+            }
+        }
+    } else {
+
+        QString statement =
+            "SELECT key, value, widgetId "
+            "FROM widgetPreferences "
+            "WHERE widgetId IN"
+            "(SELECT id FROM widgets WHERE uri = ?)";
+            
+        if (query.prepare(statement)) {
+            query.addBindValue(uri);
+            if (query.exec()) {
+                count = 0;
+                QMultiMap<QString, QString> foundPreferences;
+                while (query.next()) {
+                    foundPreferences.insert(query.value(0).toString(), query.value(1).toString());
+                }
+                if ( matchWidgetPreferences(preferences, foundPreferences) ) {
+                    ++count;
+                }
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
 bool HsDatabase::widget(HsWidgetData &data)
 {
     if (!checkConnection()) {
@@ -803,6 +853,21 @@ HsDatabase *HsDatabase::takeInstance()
 bool HsDatabase::checkConnection() const
 {
     return QSqlDatabase::database(mConnectionName).isValid();
+}
+
+/*!
+    Returns true if \a preferences are found from \a storedPreferences multimap. 
+    If preferences is empty, returns true.
+    
+*/
+bool HsDatabase::matchWidgetPreferences(const QVariantHash &preferences, const QMultiMap<QString, QString>& storedPreferences)
+{
+    bool contains = true;
+    QList<QString> preferenceKeys = preferences.keys();
+    for (int i=0; i<preferenceKeys.count() && contains; ++i) {
+        contains = storedPreferences.contains(preferenceKeys[i], preferences[preferenceKeys[i]].toString());
+    }
+    return contains;
 }
 
 /*!

@@ -30,6 +30,7 @@ HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class QStateMachine;
 
+class HsWidgetTouchArea;
 class HsWidgetComponent;
 class HsPage;
 
@@ -49,8 +50,6 @@ public:
 
     bool setPage(HsPage *page);
     HsPage *page() const; 
-
-    bool isPannable(QGraphicsSceneMouseEvent *event);
     
     bool loadPresentation();
     bool loadPresentation(Qt::Orientation orientation);
@@ -59,6 +58,7 @@ public:
     bool savePresentation(HsWidgetPresentationData &presentation);
     bool getPresentation(HsWidgetPresentationData &presentation);
     bool removePresentation(Qt::Orientation orientation);
+    QPainterPath shape() const;
 
 signals:
     void event_startAndShow();
@@ -90,11 +90,13 @@ public slots:
     void startDropEffect();
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event);    
+    bool eventFilter(QObject *watched, QEvent *event);
+    void gestureEvent(QGestureEvent *event);
     void mousePressEvent(QGraphicsSceneMouseEvent *) {}
 
 private:
-    Q_DISABLE_COPY(HsWidgetHost)    
+    Q_DISABLE_COPY(HsWidgetHost)
+    void setupTouchArea();
     void setupEffects();
     void setupStates();
 
@@ -118,6 +120,7 @@ private slots:
     void action_finished();
     void action_faulted();
     void action_remove();
+    void action_notifyRemove();
     
     void onFinished();
     void onError();
@@ -128,12 +131,12 @@ private:
     QStateMachine *mStateMachine;
     QGraphicsWidget *mWidget;
     HsPage *mPage;    
-    HsWidgetComponent *mComponent;    
+    HsWidgetComponent *mComponent;
+    HsWidgetTouchArea *mTouchArea;
     QMetaMethod mOnInitializeMethod;
     QMetaMethod mOnShowMethod;
     QMetaMethod mOnHideMethod;
-    QMetaMethod mOnUninitializeMethod;
-    QMetaMethod mIsPannableMethod;
+    QMetaMethod mOnUninitializeMethod;    
     QMetaProperty mIsOnlineProperty;
 	QMetaProperty mRootPathProperty;        
     bool mIsFinishing;

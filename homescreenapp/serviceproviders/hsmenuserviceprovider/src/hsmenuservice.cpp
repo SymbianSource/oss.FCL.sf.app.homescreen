@@ -185,17 +185,17 @@ QString HsMenuService::getName(int entryId)
  Executes action on an item
  \param entryId of this item
  \param actionName string with action name
- \retval boolean error code
+ \retval int error code, 0 if no error
  */
-bool HsMenuService::executeAction(int entryId, const QString &actionName)
+int HsMenuService::executeAction(int entryId, const QString &actionName)
 {
     qDebug() << "HsMenuService::executeAction entryId:" << entryId
              << "actionName:" << actionName;
-    bool ret = CaService::instance()->executeCommand(entryId, actionName);
+    int ret = CaService::instance()->executeCommand(entryId, actionName);
 
-    // if its remove action we need to mark all items 
+/*    // if its remove action we need to mark all items 
     // that are being uninstalled
-    if (actionName ==  caCmdRemove && ret) {
+    if (actionName == caCmdRemove && ret == 0) {
         QSharedPointer<CaEntry> entry(
                 CaService::instance()->getEntry(entryId));
         if (!entry.isNull()) {
@@ -213,7 +213,7 @@ bool HsMenuService::executeAction(int entryId, const QString &actionName)
                 CaService::instance()->updateEntry(*entries[i]);
             }
         }
-    }
+    }*/
     return ret;
 }
 
@@ -411,9 +411,9 @@ bool HsMenuService::touch(int entryId)
 
 /*!
  Launch SoftwareUpdateApplication
- \retval boolean launching status
+ \retval int launching status, 0 if no errors
  */
-bool HsMenuService::launchSoftwareUpdate()
+int HsMenuService::launchSoftwareUpdate()
 {
     qDebug() << "HsMenuService::launchSoftwareUpdate";
     QScopedPointer<CaEntry> tsEntry(new CaEntry);

@@ -38,10 +38,13 @@ private:
 
 public:
 
-    static QEvent *createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode);
+    static QEvent *createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode, QVariant homescreenData = NULL);
 
     static QEvent *createOpenCollectionEvent(int itemId,
             const QString &collectionType);
+    
+    static QEvent *createOpenCollectionFromAppLibraryEvent(int itemId,
+            const QString &collectionType);    
 
     static QEvent *createRenameCollectionEvent(int aItemId);
 
@@ -50,7 +53,7 @@ public:
     static QEvent *createDeleteCollectionEvent(int aItemId);
 
     static QEvent *createOpenAppLibraryEvent(
-        HsMenuMode menuMode = NormalHsMenuMode);
+        HsMenuMode menuMode = NormalHsMenuMode, QVariant homescreenData = NULL);
 
     static QEvent *createOpenInstalledViewEvent();
     

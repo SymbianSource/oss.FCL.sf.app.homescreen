@@ -136,6 +136,9 @@ bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
         case QEvent::GraphicsSceneMouseRelease:
             handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
             return true;
+        case QEvent::UngrabMouse:
+            setBackgroundToNormal();
+            return true;
         default:
             break;
     }

@@ -3,7 +3,8 @@
     <uri>helloworldwidgetplugin</uri>
     <title>Hello world</title>
     <description>Home screen example widget</description>
-    <icon>helloworldwidgetplugin.png</icon>
+    <icon>helloworldwidgetplugin.svg</icon>
+    <previewimage>helloworldwidgetpluginpreview.png</previewimage>
     <hidden>false</hidden>
     <servicexml>helloworldwidgetplugin.xml</servicexml>
 </hswidgetmanifest>

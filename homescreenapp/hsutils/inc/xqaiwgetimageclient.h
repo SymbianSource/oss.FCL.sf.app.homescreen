@@ -32,6 +32,7 @@
 
 class HbAction;
 class HsImageGridWidget;
+class HbView;
 
 class HSUTILS_EXPORT XQAIWGetImageClient : public QObject
 {
@@ -57,6 +58,7 @@ private:
 private:
     QPointer<HsImageGridWidget> mImageGrid;//added
     HbAction *mBackAction;//added
+    HbView * mCurrentView;
 
 };
 

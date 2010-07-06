@@ -1,7 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<widgetprovider>
-    <widget library="hsshortcutwidgetplugin"
-            uri="hsshortcutwidgetplugin"
-            title="Shortcut"
-            iconuri="shortcut.png"            hidden="true"/>
-</widgetprovider>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<hswidgetmanifest>
+    <uri>hsshortcutwidgetplugin</uri>
+    <title>Shortcut</title>
+    <description>Themable shortcut widget.</description>
+    <icon>shortcut.png</icon>    <hidden>true</hidden>
+    <servicexml>hsshortcutwidgetplugin.xml</servicexml>
+</hswidgetmanifest>
