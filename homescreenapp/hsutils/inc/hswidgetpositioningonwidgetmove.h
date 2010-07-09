@@ -156,7 +156,6 @@ private: //data
     bool mSnapEnabled;
     qreal mSnapForce;
     qreal mSnapGap;
-    qreal mSnapBorderGap;
 
     bool mRectVerticalEdgeLiesInLineWithVerticalLine;
     bool mRectLieAboveVerticalLine;

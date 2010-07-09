@@ -21,11 +21,11 @@
 #include "hsmainwindow.h"
 #include "hsmenuview.h"
 
-#include <qservicemanager.h>
+
 /*!
  Constructor
  */
-QTM_USE_NAMESPACE
+
 
 
 /*
@@ -36,7 +36,7 @@ QTM_USE_NAMESPACE
  */
 
 
-HsMainWindow::HsMainWindow() : mActivityClient(NULL)
+HsMainWindow::HsMainWindow() 
 {
 }
 
@@ -55,9 +55,6 @@ void HsMainWindow::setCurrentView(const HsMenuView &menuView)
 {
     HbMainWindow *const hbW(
         HbInstance::instance()->allMainWindows().value(0));
-    
-    connect( hbW, SIGNAL(viewReady()), SIGNAL(viewIsReady()),
-        Qt::UniqueConnection );
 
     HbView *const view = menuView.view();
     
@@ -66,53 +63,3 @@ void HsMainWindow::setCurrentView(const HsMenuView &menuView)
     }
     hbW->setCurrentView(view);
 }
-
-
-/*!
- Grabs screenshot from actual main window
- \retval QPixmap& containing screenshot
-*/
-QPixmap HsMainWindow::grabScreenshot()
-	{
-	HbMainWindow *const hbW(
-	    HbInstance::instance()->allMainWindows().value(0));
-	return QPixmap::grabWidget(hbW, hbW->rect()); 
-	}
-
-/*!
- Saves applib activity with current view screenshot
-*/
-void HsMainWindow::saveActivity()
-{
-#ifdef Q_OS_SYMBIAN
-
-    if (!mActivityClient) {
-        QServiceManager serviceManager;
-        mActivityClient = serviceManager.loadInterface("com.nokia.qt.activities.ActivityClient");
-        if (!mActivityClient) {
-            qWarning("Cannot initialize critical com.nokia.qt.activities.ActivityClient service.");
-        }
-    }
-
-    if (mActivityClient) {
-        bool retok;
-        bool ok = QMetaObject::invokeMethod(mActivityClient, "removeActivity",
-            Q_RETURN_ARG(bool, retok), Q_ARG(QString, appLibActivity()));
-        if (!ok) {
-            qWarning("remove appLibActivity failed");
-        }
-
-        QVariant variant;
-        QVariantHash metadata;
-        metadata.insert("screenshot", grabScreenshot());
-
-        ok = QMetaObject::invokeMethod(mActivityClient, "addActivity", Q_RETURN_ARG(bool, retok),
-            Q_ARG(QString, appLibActivity() ), Q_ARG(QVariant, QVariant(variant)),
-            Q_ARG(QVariantHash, metadata));
-        if (!ok) {
-            qWarning("add appLibActivity failed");
-        }
-    }
-#endif//Q_OS_SYMBIAN   
-}
-

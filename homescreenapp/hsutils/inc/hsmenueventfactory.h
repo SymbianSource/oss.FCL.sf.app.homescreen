@@ -63,19 +63,20 @@ public:
 
     static QEvent *createAddAppsFromApplicationsViewEvent(
         HsSortAttribute aApplicationsSortOder,
-        HsSortAttribute aCollectionsSortOder,
         int aItemId = 0);
 
-    static QEvent *createAddAppsFromCallectionViewEvent(
+    static QEvent *createAddAppsFromCollectionViewEvent(
         int aCollectionId,
-        int aApplicationId = 0,
-        HsSortAttribute aCollectionsSortOder = NoHsSortAttribute);
+        int aApplicationId = 0);
 
     static QEvent *createRemoveAppFromCollectionEvent(int aItemId, int aCollectionId);
 
     static QEvent *createUninstallApplicationEvent(int aItemId);
 
-    static QEvent *createArrangeCollectionEvent(int aTopItemId);
+    static QEvent *createArrangeCollectionEvent(int aTopItemId,
+        int aCollectionId);
+
+    static QEvent *createArrangeAllCollectionsEvent(int aTopItemId);
 
     static QEvent *createPreviewHSWidgetEvent(
         int entryId,
@@ -87,6 +88,8 @@ public:
     static QEvent *createAppSettingsViewEvent(int entryId);
     
     static QEvent *createAppDetailsViewEvent(int entryId);
+    
+    static QEvent *createInstallationLogEvent();
 
     static QEvent *createUnknownEvent();
 

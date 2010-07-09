@@ -179,8 +179,7 @@ HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
     mShowConfirmation(0), mInitialState(0), mSelectCollectionState(0),
     mNewCollectionState(0), mAppsCheckListState(0), mActionType(
         NoActionType), mApplicationsSortAttribute(NoHsSortAttribute),
-    mCollectionsSortAttribute(NoHsSortAttribute), mAppsCheckList(0),
-    mEditorDialog(0), mListDialog(0)
+    mAppsCheckList(0), mEditorDialog(0), mListDialog(0)
 {
     construct();
 }
@@ -330,27 +329,19 @@ void HsAddAppsToCollectionState::onEntry(QEvent *event)
 
     mApplicationsSortAttribute = static_cast<HsSortAttribute>(data.value(
                                      appSortOrderKey()).toInt());
-    mCollectionsSortAttribute = static_cast<HsSortAttribute>(data.value(
-                                    collectionSortOrderKey()).toInt());
 
     const int itemId = data.value(itemIdKey()).toInt();
     mCollectionId = data.value(collectionIdKey()).toInt();
 
-    if (itemId && (mCollectionsSortAttribute != NoHsSortAttribute
-                   || mCollectionId)) {
-        //add selected app item form allAppView or collectionView
+    if (itemId) {
+        //add selected app item from allAppView or collectionView
         mAppList.append(itemId);
-
         mInitialState->addTransition(mSelectCollectionState);
-
         mShowConfirmation = true;
-    } else if (mApplicationsSortAttribute != NoHsSortAttribute
-               && mCollectionsSortAttribute != NoHsSortAttribute) {
+    } else if (mApplicationsSortAttribute != NoHsSortAttribute) {
         //add apps from allAppView options menu
         mActionType = ViaAllViewOptionMenuType;
-
         mInitialState->addTransition(mSelectCollectionState);
-
         mShowConfirmation = true;
     } else if (mCollectionId) {
         //add apps from collectionView options menu
@@ -437,8 +428,7 @@ void HsAddAppsToCollectionState::selectCollection()
 {
     qDebug("HsAddAppsToCollectionState::selectCollection()");
     HSMENUTEST_FUNC_ENTRY("HsAddAppsToCollectionState::selectCollection");
-    mListDialog = new HsCollectionsListDialog(mCollectionsSortAttribute,
-                                                       mCollectionId);
+    mListDialog = new HsCollectionsListDialog(mCollectionId);
     mListDialog->open(this, SLOT(listDialogFinished(HbAction*)));
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::selectCollection");
 }

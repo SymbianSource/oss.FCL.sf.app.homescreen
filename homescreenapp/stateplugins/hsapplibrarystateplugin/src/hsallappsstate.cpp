@@ -15,29 +15,26 @@
  *
  */
 
-#include <qstatemachine.h>
-#include <hbview.h>
-#include <hblistview.h>
-#include <hbaction.h>
-#include <hbmenu.h>
-#include <hbabstractviewitem.h>
-#include <hsmenueventfactory.h>
-#include <hbinstance.h>
-#include <caentry.h>
-#include <hbsearchpanel.h>
-#include <HbScrollBar>
+#include <QStateMachine>
+#include <HbMenu>
+#include <HbAction>
+#include <HbAbstractViewItem>
 #include <HbIndexFeedback>
+#include <HbListView>
+#include <HbScrollBar>
+#include <HbView>
 
-#include "hsmenuitemmodel.h"
-#include "cadefs.h"
-#include "hsallappsstate.h"
-#include "hsaddappstocollectionstate.h"
+#include <cadefs.h>
+#include <caentry.h>
+#include <caitemmodel.h>
+#include <caservice.h>
+
 #include "hsapp_defs.h"
+#include "hsmenueventfactory.h"
+#include "hsmenuitemmodel.h"
+#include "hsallappsstate.h"
 #include "hsmenumodewrapper.h"
 #include "hsmenuviewbuilder.h"
-#include "hsmenumodetransition.h"
-#include "caentry.h"
-#include "caservice.h"
 #include "hsmainwindow.h"
 
 /*!
@@ -55,39 +52,20 @@
  */
 
 /*!
- \var HsAllAppsState::mCollectionsSortAttribute
- Collections sort order
- */
-
-/*!
- \var HsAllAppsState::mMenuView
- Wrapper for All Applications View.
- */
-
-/*!
- \var HsAllAppsState::mMenuMode
- Menu view mode wrapper.
- Not Own.
- */
-
-/*!
  Constructor.
  \param menuViewBuilder Menu view builder.
- \param menuMode reference to object representing menu mode (add mode on/add mode off).
+ \param menuMode Menu mode object(add mode on/add mode off).
+ \param mainWindow Main window wrapper.
  \param parent Owner.
  */
 HsAllAppsState::HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                                HsMenuModeWrapper &menuMode,
                                HsMainWindow &mainWindow,
                                QState *parent) :
-    HsBaseViewState(parent), mSortAttribute(AscendingNameHsSortAttribute),
-    mCollectionsSortAttribute(LatestOnTopHsSortAttribute),
-    mMenuView(menuViewBuilder, HsAllAppsContext),
-    mMenuMode(menuMode),
-    mAllAppsModel(0),
-    mMainWindow(mainWindow),
-    mContextModelIndex(), mContextMenu(0)
+    HsBaseViewState(mainWindow, menuMode, parent),
+    mSortAttribute(AscendingNameHsSortAttribute)
 {
+    initialize(menuViewBuilder, HsAllAppsContext);
     construct();
 }
 
@@ -98,45 +76,25 @@ void HsAllAppsState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::construct");
 
-    QState *initialState = new QState(this);
-    setInitialState(initialState);
-
-    QState *addModeState = new QState(this);
-    connect(addModeState, SIGNAL(entered()),SLOT(addModeEntered()));
-
-    QState *normalModeState = new QState(this);
-    connect(normalModeState, SIGNAL(entered()),SLOT(normalModeEntered()));
-
-    initialState->addTransition(new HsMenuModeTransition(
-                                    mMenuMode, NormalHsMenuMode, normalModeState));
-    initialState->addTransition(new HsMenuModeTransition(
-                                    mMenuMode, AddHsMenuMode, addModeState));
+    defineTransitions();
 
     const QString parentName =
         parent() != 0 ? parent()->objectName() : QString("");
     setObjectName(parentName + "/allappsstate");
 
-    connect(this, SIGNAL(entered()),SLOT(stateEntered()));
-    connect(this, SIGNAL(exited()),SLOT(stateExited()));
+    connect(mBackKeyAction, SIGNAL(triggered()), SIGNAL(toAppLibraryState()));
 
-    mSecondarySoftkeyAction = new HbAction(Hb::BackNaviAction, this);
+    mModel = HsMenuService::getAllApplicationsModel(mSortAttribute);
+    mMenuView->setModel(mModel);
 
-    mMenuView.view()->setNavigationAction(
-        mSecondarySoftkeyAction);
-
-    connect(mSecondarySoftkeyAction, SIGNAL(triggered()),
-            SIGNAL(toAppLibraryState()));
-
-    mAllAppsModel = HsMenuService::getAllApplicationsModel(mSortAttribute);
-    mMenuView.setModel(mAllAppsModel);
-
-    mMenuView.listView()->verticalScrollBar()->setInteractive(true);
-    HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView.view());
+    mMenuView->listView()->verticalScrollBar()->setInteractive(true);
+    HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView->view());
     indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
-    indexFeedback->setItemView(mMenuView.listView());
+    indexFeedback->setItemView(mMenuView->listView());
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::construct");
 }
+
 
 /*!
  Creates and installs menu options for the view
@@ -146,11 +104,11 @@ void HsAllAppsState::setMenuOptions()
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::setMenuOptions");
     QScopedPointer<HbMenu> viewOptions(new HbMenu);
     viewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
-                           this, SLOT(openTaskSwitcher()));
+                           static_cast<HsBaseViewState*>(this), SLOT(openTaskSwitcher()));
     viewOptions->addAction(hbTrId("txt_applib_opt_add_to_collection"),
                            this, SLOT(addToCollection()));
     viewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
-                           this, SLOT(checkSoftwareUpdates()));
+                           static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
 
     HbMenu *const sortMenu = viewOptions->addMenu(hbTrId(
                                  "txt_applib_opt_sort_by"));
@@ -184,7 +142,7 @@ void HsAllAppsState::setMenuOptions()
     if (currentSortingPosition >= 0) {
         sortGroup->actions().at(currentSortingPosition)->setChecked(true);
     }
-    mMenuView.view()->setMenu(viewOptions.take());
+    mMenuView->view()->setMenu(viewOptions.take());
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::setMenuOptions");
 }
@@ -195,63 +153,18 @@ void HsAllAppsState::setMenuOptions()
 
 HsAllAppsState::~HsAllAppsState()
 {
-    mMenuView.setModel(NULL);
-    delete mAllAppsModel;
 }
 
-/*!
- Scrolls view to first item at top
- */
-void HsAllAppsState::scrollToBeginning()
-{
-    mMenuView.listView()->scrollTo(
-        mAllAppsModel->index(0), HbAbstractItemView::PositionAtTop);
-}
-
-/*!
- Slot invoked when a state is entered.
- */
-
-
-void HsAllAppsState::stateEntered()
-{
-    qDebug("AllAppsState::stateEntered()");
-    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateEntered");
-    
-    mMainWindow.setCurrentView(mMenuView);
-    mMenuView.activate();
-
-    HSMENUTEST_FUNC_EXIT("HsAllAppsState::stateEntered");
-}
 
 /*!
  Slot invoked when add mode entered.
  */
 void HsAllAppsState::normalModeEntered()
-{    
-    setMenuOptions();
-    connect(&mMainWindow, SIGNAL(viewIsReady()),
-        &mMainWindow, SLOT(saveActivity()),
-        Qt::UniqueConnection);
-    connect(&mMenuView,
-            SIGNAL(activated(QModelIndex)),
-            SLOT(listItemActivated(QModelIndex)));
-    connect(&mMenuView,
-            SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
-            SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
-}
-
-/*!
- Add mode entered.
- */
-void HsAllAppsState::addModeEntered()
 {
-    connect(&mMenuView,
+    HsBaseViewState::normalModeEntered();
+    connect(mMenuView.data(),
             SIGNAL(activated(QModelIndex)),
-            SLOT(addActivated(QModelIndex)));
-    connect(&mMenuView,
-            SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
-            SLOT(addLongPressed(HbAbstractViewItem *, QPointF)));
+            static_cast<HsBaseViewState*>(this), SLOT(launchItem(QModelIndex)));
 }
 
 /*!
@@ -261,82 +174,10 @@ void HsAllAppsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateExited");
 
-    disconnect(&mMainWindow, SIGNAL(viewIsReady()),
-               &mMainWindow, SLOT(saveActivity()));
-       
-    mMenuView.setSearchPanelVisible(false);
-
-    mMenuView.disconnect(this);
-
-    mMenuView.view()->setMenu(NULL);
-
-    mMenuView.inactivate();
-
-    if (mContextMenu)
-        mContextMenu->close();
-
     HsBaseViewState::stateExited();
     
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::stateExited");
     qDebug("AllAppsState::stateExited()");
-}
-
-/*!
- Open task switcher.
- \retval true if operation is successful.
- */
-bool HsAllAppsState::openTaskSwitcher()
-{
-    return HsMenuService::launchTaskSwitcher();
-}
-
-/*!
- Check software updates.
- \retval 0 if operation is successful.
- */
-int HsAllAppsState::checkSoftwareUpdates()
-{
-    int errCode = HsMenuService::launchSoftwareUpdate();
-    if (errCode != 0){
-        createApplicationLaunchFailMessage(errCode,0);
-    }
-    return errCode;
-}
-
-/*!
- Slot connected to List widget in normal mode.
- \param index Model index of the activated item.
- */
-void HsAllAppsState::listItemActivated(const QModelIndex &index)
-{
-    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::listItemActivated");
-
-    QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(index);
-    
-    if (entry->entryTypeName() == widgetTypeName()) {
-        EntryFlags flags = index.data(CaItemModel::FlagsRole).value<
-                               EntryFlags> ();
-        if (!(flags & UninstallEntryFlag)) {
-            machine()->postEvent(
-                HsMenuEventFactory::createPreviewHSWidgetEvent(
-                    entry->id(), entry->entryTypeName(), entry->attribute(
-                        widgetUriAttributeName()), entry->attribute(
-                        widgetLibraryAttributeName())));
-
-            const int itemId = index.data(CaItemModel::IdRole).toInt();
-            HsMenuService::touch(itemId);
-        }
-    } else {
-        QVariant data = mAllAppsModel->data(index, CaItemModel::IdRole);
-        int errCode = HsMenuService::executeAction(data.toInt());
-        if (errCode != 0) {
-            createApplicationLaunchFailMessage(errCode,index.data(CaItemModel::IdRole).toInt());
-        }
-    }
-    
-    mMenuView.setSearchPanelVisible(false);
-
-    HSMENUTEST_FUNC_EXIT("HsAllAppsState::listItemActivated");
 }
 
 /*!
@@ -345,70 +186,12 @@ void HsAllAppsState::listItemActivated(const QModelIndex &index)
  */
 void HsAllAppsState::addActivated(const QModelIndex &index)
 {
+    mMenuView->disconnect(this);
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addActivated");
     addToHomeScreen(index);
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::addActivated");
 }
 
-/*!
- Handles long-item-pressed event in all apps view by showing context menu
- \param item View item
- \param coords Press point coordinates
- */
-void HsAllAppsState::listItemLongPressed(HbAbstractViewItem *item,
-        const QPointF &coords)
-{
-    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::listItemLongPressed");
-
-    EntryFlags flags = item->modelIndex().data(
-                           CaItemModel::FlagsRole).value<EntryFlags> ();
-
-    if (!(flags & UninstallEntryFlag)) {
-        // create context menu
-        mContextMenu = new HbMenu;
-
-        HbAction *addToHomeScreenAction = mContextMenu->addAction(
-            hbTrId("txt_applib_menu_add_to_home_screen"));
-        addToHomeScreenAction->setData(AddToHomeScreenContextAction);
-
-        HbAction *addToCollectionAction = mContextMenu->addAction(
-            hbTrId("txt_applib_menu_add_to_collection"));
-        addToCollectionAction->setData(AddToCollectionContextAction);
-
-        HbAction *uninstallAction = mContextMenu->addAction(
-            hbTrId("txt_common_menu_delete"));
-        uninstallAction->setData(UninstallContextAction);
-        HbAction *appSettingsAction(NULL);
-        HbAction *appDetailsAction(NULL);
-
-        // check conditions and hide irrelevant menu items
-        QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(item->modelIndex());
-
-        if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
-            appSettingsAction = mContextMenu->addAction(
-                hbTrId("txt_common_menu_settings"));
-            appSettingsAction->setData(AppSettingContextAction);
-        }
-        if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
-                (flags & RemovableEntryFlag) ) {
-            appDetailsAction = mContextMenu->addAction(
-                hbTrId("txt_common_menu_details"));
-            appDetailsAction->setData(AppDetailsContextAction);
-        }
-
-        if (!(flags & RemovableEntryFlag)) {
-            uninstallAction->setVisible(false);
-        }
-
-        mContextModelIndex = item->modelIndex();
-        mContextMenu->setPreferredPos(coords);
-        mContextMenu->setAttribute(Qt::WA_DeleteOnClose);
-        mContextMenu->open(this, SLOT(contextMenuAction(HbAction*)));
-    }
-
-
-    HSMENUTEST_FUNC_EXIT("HsAllAppsState::listItemLongPressed");
-}
 
 /*!
  Handles context menu actions
@@ -429,7 +212,7 @@ void HsAllAppsState::contextMenuAction(HbAction *action)
             // an existing collection via item specific menu.
             machine()->postEvent(
                 HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
-                    mSortAttribute, mCollectionsSortAttribute, itemId));
+                    mSortAttribute, itemId));
             break;
         case UninstallContextAction:
             machine()->postEvent(
@@ -446,8 +229,7 @@ void HsAllAppsState::contextMenuAction(HbAction *action)
         default:
             break;
     }
-                                    
-    mMenuView.setSearchPanelVisible(false);
+    mMenuView->setSearchPanelVisible(false);
 }
 
 /*!
@@ -460,6 +242,7 @@ void HsAllAppsState::addLongPressed(HbAbstractViewItem *item,
                                     const QPointF &coords)
 {
     Q_UNUSED(coords);
+    mMenuView->disconnect(this);
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addLongPressed");
     addToHomeScreen(item->modelIndex());
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::addLongPressed");
@@ -475,7 +258,7 @@ void HsAllAppsState::addToCollection()
     // a new/an existing collection via the All view
     machine()->postEvent(
         HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
-            mSortAttribute, mCollectionsSortAttribute));
+            mSortAttribute));
 }
 
 /*!
@@ -495,19 +278,58 @@ void HsAllAppsState::openInstalledView()
 
 /*!
  Triggers event so that a state adding to Home Screen is reached
- \param index of an item to be added to homescreen
+ \param index of an item to be added to homescreen.
  \retval void
  */
 void HsAllAppsState::addToHomeScreen(const QModelIndex &index)
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addToHomeScreen");
-    QSharedPointer<const CaEntry> entry = mAllAppsModel->entry(index);
+    QSharedPointer<const CaEntry> entry = mModel->entry(index);
 
     machine()-> postEvent(HsMenuEventFactory::createAddToHomeScreenEvent(
-                              entry->id(), mMenuMode.getHsMenuMode(), 
-                              mMenuMode.getHsToken()));
+                              entry->id(), mMenuMode->getHsMenuMode(),
+                              mMenuMode->getHsToken()));
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::addToHomeScreen");
+}
+
+/*!
+ Method seting context menu options.
+ */
+void HsAllAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
+{
+    HbAction *addToHomeScreenAction = mContextMenu->addAction(
+        hbTrId("txt_applib_menu_add_to_home_screen"));
+    addToHomeScreenAction->setData(AddToHomeScreenContextAction);
+
+    HbAction *addToCollectionAction = mContextMenu->addAction(
+        hbTrId("txt_applib_menu_add_to_collection"));
+    addToCollectionAction->setData(AddToCollectionContextAction);
+
+    HbAction *uninstallAction = mContextMenu->addAction(
+        hbTrId("txt_common_menu_delete"));
+    uninstallAction->setData(UninstallContextAction);
+    HbAction *appSettingsAction(NULL);
+    HbAction *appDetailsAction(NULL);
+
+    // check conditions and hide irrelevant menu items
+    QSharedPointer<const CaEntry> entry = mModel->entry(item->modelIndex());
+
+    if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
+        appSettingsAction = mContextMenu->addAction(
+            hbTrId("txt_common_menu_settings"));
+        appSettingsAction->setData(AppSettingContextAction);
+    }
+    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
+            (flags & RemovableEntryFlag) ) {
+        appDetailsAction = mContextMenu->addAction(
+            hbTrId("txt_common_menu_details"));
+        appDetailsAction->setData(AppDetailsContextAction);
+    }
+
+    if (!(flags & RemovableEntryFlag)) {
+        uninstallAction->setVisible(false);
+    }
 }
 
 /*!
@@ -517,18 +339,8 @@ void HsAllAppsState::ascendingMenuAction()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::ascendingMenuAction");
     mSortAttribute = AscendingNameHsSortAttribute;
-    mAllAppsModel->setSort(mSortAttribute);
+    mModel->setSort(mSortAttribute);
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::ascendingMenuAction");
-}
-
-/*!
- Sets collections sort order
- /param sortOrder sort order.
- */
-void HsAllAppsState::collectionsSortOrder(
-    HsSortAttribute sortOrder)
-{
-    mCollectionsSortAttribute = sortOrder;
 }
 
 /*!
@@ -538,7 +350,7 @@ void HsAllAppsState::descendingMenuAction()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::descendingMenuAction");
     mSortAttribute = DescendingNameHsSortAttribute;
-    mAllAppsModel->setSort(mSortAttribute);
+    mModel->setSort(mSortAttribute);
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::descendingMenuAction");
 
 }

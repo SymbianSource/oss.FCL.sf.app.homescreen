@@ -16,9 +16,9 @@
 
 kqtihswallpapers.CONFIG += no_build
 kqtihswallpapers.path = $$DESTDIR/resource/kqtihswallpapers
-kqtihswallpapers.files = ./resource/bg_1.png \
-                         ./resource/bg_2.png \
-                         ./resource/bg_3.png
+kqtihswallpapers.files = ./resource/wallpapers/page/originals/car.png \
+                         ./resource/wallpapers/page/originals/shapes.png \
+                         ./resource/wallpapers/page/originals/shoes.png
 
 homescreendb.CONFIG += no_build
 homescreendb.path = $$DESTDIR/private/20022f35
@@ -26,19 +26,19 @@ homescreendb.files = ./resource/resource_win/homescreen.db
 
 scenewallpapers.CONFIG += no_build
 scenewallpapers.path = $$DESTDIR/private/20022f35/wallpapers/scene
-scenewallpapers.files = ./resource/scene/default_landscape.png \
-                   ./resource/scene/default_portrait.png
+scenewallpapers.files = ./resource/wallpapers/scene/default_landscape.png \
+                        ./resource/wallpapers/scene/default_portrait.png
 
 pagewallpapers.CONFIG += no_build
 pagewallpapers.path = $$DESTDIR/private/20022f35/wallpapers/page
-pagewallpapers.files = ./resource/page/default_landscape.png \
-                       ./resource/page/default_portrait.png \
-                       ./resource/page/1_portrait.png \
-                       ./resource/page/1_landscape.png \
-                       ./resource/page/2_portrait.png \
-                       ./resource/page/2_landscape.png \
-                       ./resource/page/3_portrait.png \
-                       ./resource/page/3_landscape.png
+pagewallpapers.files = ./resource/wallpapers/page/default_landscape.png \
+                       ./resource/wallpapers/page/default_portrait.png \
+                       ./resource/wallpapers/page/1_portrait.png \
+                       ./resource/wallpapers/page/1_landscape.png \
+                       ./resource/wallpapers/page/2_portrait.png \
+                       ./resource/wallpapers/page/2_landscape.png \
+                       ./resource/wallpapers/page/3_portrait.png \
+                       ./resource/wallpapers/page/3_landscape.png
 
 INSTALLS += kqtihswallpapers homescreendb scenewallpapers pagewallpapers
 PRE_TARGETDEPS += install_kqtihswallpapers install_homescreendb install_scenewallpapers install_pagewallpapers

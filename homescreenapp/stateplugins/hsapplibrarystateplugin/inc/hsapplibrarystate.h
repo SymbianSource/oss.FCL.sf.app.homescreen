@@ -84,28 +84,13 @@ private:
 private:
 
     HsMenuViewBuilder mMenuViewBuilder;
-    /**
-     * All Applications state.
-     * Own.
-     */
+
     HsAllAppsState *mAllAppsState;
 
-    /**
-     * Transition to remember last visited child state in Application Library.
-     * Own.
-     */
     HsMenuModeTransition *mHistoryTransaction;
 
-    /**
-     * All Collections state.
-     * Own.
-     */
     HsAllCollectionsState *mAllCollectionsState;
 
-    /**
-     * Collection state.
-     * Own.
-     */
     HsCollectionState *mCollectionState;
 
     HsInstalledAppsState *mInstalledAppsState;

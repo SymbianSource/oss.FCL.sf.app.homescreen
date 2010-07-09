@@ -16,6 +16,7 @@
 
 # configuration file exports
 BLD_INF_RULES.prj_exports += \
+    "conf/base/confml/CI_homescreendb.confml                APP_LAYER_CONFML(CI_homescreendb.confml)" \
     "conf/base/confml/homescreendb.confml                   APP_LAYER_CONFML(homescreendb.confml)" \
     "conf/base/implml/homescreendb.implml                   APP_LAYER_CRML(homescreendb.implml)" \
     "conf/base/implml/homescreendb_templates/create.sql     APP_LAYER_CRML(homescreendb_templates/create.sql)" \

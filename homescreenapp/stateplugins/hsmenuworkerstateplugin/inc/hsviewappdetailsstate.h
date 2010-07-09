@@ -22,12 +22,15 @@
 #include <QVariant>
 
 #include "hsmenustates_global.h"
+#include "casoftwareregistry.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbListWidget;
 class HsMenuItemModel;
 class HbDialog;
 class CaNotifier;
+class HbDocumentLoader;
+
 
 class HsViewAppDetailsState: public QState
 {
@@ -57,12 +60,13 @@ private:
 
     void construct();
     void subscribeForMemoryCardRemove(int entryId);
+    void setFieldPresentation(QString key,
+            CaSoftwareRegistry::DetailMap &detailMap,
+            HbDocumentLoader &loader);
 
 private:
 
     HbDialog *mDialog;
-    
-    QObjectList mObjectList;
     
     CaNotifier *mNotifier;
 };

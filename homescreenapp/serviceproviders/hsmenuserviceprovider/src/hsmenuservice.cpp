@@ -63,22 +63,16 @@ HsMenuItemModel *HsMenuService::getAllApplicationsModel(
 
 /*!
  Returns all collections model
- \param sortAttribute ::  SortAttribute
- \param details : switch to return details or not
  \retval HsMenuItemModel: all collections model
  */
-HsMenuItemModel *HsMenuService::getAllCollectionsModel(
-    HsSortAttribute sortAttribute)
+HsMenuItemModel *HsMenuService::getAllCollectionsModel()
 {
-    qDebug() << "HsMenuService::getAllCollectionsModel" << "sortAttribute:"
-             << sortAttribute;
+    qDebug() << "HsMenuService::getAllCollectionsModel";
     HSMENUTEST_FUNC_ENTRY("HsMenuService::getAllCollectionsModel");
     CaQuery query;
     query.setParentId(allCollectionsId());
     query.setFlagsOn(VisibleEntryFlag);
     query.setFlagsOff(MissingEntryFlag);
-    query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
-                  HsMenuServiceUtils::sortOrder(sortAttribute));
     HsMenuItemModel *model = new HsMenuCollectionsItemModel(query);
     HSMENUTEST_FUNC_EXIT("HsMenuService::getAllCollectionsModel");
     return model;

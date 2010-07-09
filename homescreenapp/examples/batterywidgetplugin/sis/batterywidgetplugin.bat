@@ -19,7 +19,7 @@
 if exist batterywidgetplugin.sisx del batterywidgetplugin.sisx
 
 makesis batterywidgetplugin.pkg
-signsis batterywidgetplugin.sis batterywidgetplugin.sisx ../../../../sis/rd.cer ../../../../sis/rd-key.pem
+signsis batterywidgetplugin.sis batterywidgetplugin.sisx ../../../sis/rd.cer ../../../sis/rd-key.pem
 
 if exist batterywidgetplugin.sisx (
 echo batterywidgetplugin.sisx creation SUCCEEDED

@@ -16,7 +16,7 @@
  */
 
 #include <QStateMachine>
-#include <hbmessagebox.h>
+#include <HbMessageBox>
 #include <hbaction.h>
 #include <hsmenuservice.h>
 #include <HbParameterLengthLimiter>
@@ -24,6 +24,7 @@
 #include <hsmenueventfactory.h>
 
 #include "hsdeletecollectionstate.h"
+#include "hsmenudialogfactory.h"
 #include "hsmenuevent.h"
 
 /*!
@@ -91,19 +92,10 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
     }
 
     // create and show message box
-    mDeleteMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-    mDeleteMessage->setAttribute(Qt::WA_DeleteOnClose);
-
-    mDeleteMessage->setText(message);
-
-    mDeleteMessage->clearActions();
-    mConfirmAction = new HbAction(hbTrId("txt_common_button_ok"), mDeleteMessage);
-    mDeleteMessage->addAction(mConfirmAction);
-
-    HbAction *secondaryAction = new HbAction(hbTrId("txt_common_button_cancel"), mDeleteMessage);
-    mDeleteMessage->addAction(secondaryAction);
-
+    mDeleteMessage = HsMenuDialogFactory().create(message);
+    mConfirmAction = mDeleteMessage->actions().value(0);
     mDeleteMessage->open(this, SLOT(deleteMessageFinished(HbAction*)));
+
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionState::onEntry");
 }
 
@@ -113,12 +105,13 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
 //
 void HsDeleteCollectionState::deleteMessageFinished(HbAction* finishedAction)
 {
-    if (finishedAction == mConfirmAction) {
+    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
         HsMenuService::removeCollection(mItemId);
         machine()->postEvent(
         HsMenuEventFactory::createCollectionDeletedEvent());
     }
     emit exit();
+    mConfirmAction = NULL;
 }
 
 /*!
@@ -129,7 +122,6 @@ void HsDeleteCollectionState::cleanUp()
 {
     // Close messagebox if App key was pressed
     if (mDeleteMessage) {
-        disconnect(mDeleteMessage, SIGNAL(finished(HbAction*)), this, SLOT(deleteMessageFinished(HbAction*)));
         mDeleteMessage->close();
         mDeleteMessage = NULL;
     }

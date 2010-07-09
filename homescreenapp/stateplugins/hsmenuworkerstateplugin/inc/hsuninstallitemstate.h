@@ -23,6 +23,7 @@
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class QAction;
 class HbAction;
 class HbMessageBox;
 class HsShortcutService;
@@ -82,10 +83,9 @@ private:
 
     HbMessageBox *mUninstallMessage; // deletes itself automatically on close
     HbDialog *mUninstallJavaMessage;
-    QObjectList mObjectList;
     UninstallDialogType mDialogType;
 
-    HbAction *mConfirmAction; // child for mConfirmMessage
+    QAction *mConfirmAction; // child for mConfirmMessage
 
 };
 

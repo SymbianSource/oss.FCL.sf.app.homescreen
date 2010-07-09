@@ -15,12 +15,13 @@
  *
  */
 
-#include <hbmessagebox.h>
+#include <HbMessageBox>
 #include <hbaction.h>
 #include <HbParameterLengthLimiter>
 #include <hsmenuservice.h>
 #include <hsmenueventfactory.h>
 
+#include "hsmenudialogfactory.h"
 #include "hsdeletecollectionitemstate.h"
 #include "hsmenuevent.h"
 
@@ -86,18 +87,8 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
             HsMenuService::getName(mItemId)));
 
     // create and show message box
-    mDeleteMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-    mDeleteMessage->setAttribute(Qt::WA_DeleteOnClose);
-
-    mDeleteMessage->setText(message);
-
-    mDeleteMessage->clearActions();
-    mConfirmAction = new HbAction(hbTrId("txt_common_button_ok"), mDeleteMessage);
-    mDeleteMessage->addAction(mConfirmAction);
-
-    HbAction *secondaryAction = new HbAction(hbTrId("txt_common_button_cancel"), mDeleteMessage);
-    mDeleteMessage->addAction(secondaryAction);
-
+    mDeleteMessage = HsMenuDialogFactory().create(message);
+    mConfirmAction = mDeleteMessage->actions().value(0);
     mDeleteMessage->open(this, SLOT(deleteMessageFinished(HbAction*)));
 
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionItemState::onEntry");
@@ -110,10 +101,11 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
  */
 void HsDeleteCollectionItemState::deleteMessageFinished(HbAction* finishedAction)
 {
-    if (finishedAction == mConfirmAction) {
+    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
         HsMenuService::removeApplicationFromCollection(mItemId, mCollectionId);
     }
     emit exit();
+    mConfirmAction = NULL;
 }
 
 /*!

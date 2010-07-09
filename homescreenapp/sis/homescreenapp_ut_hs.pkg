@@ -33,16 +33,14 @@
 "/epoc32/release/armv5/urel/t_hsapplicationexe.exe"                         - "c:/sys/bin/t_hsapplicationexe.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/t_hsapplicationexe_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsapplicationexe_reg.rsc"
 "/epoc32/data/z/resource/apps/t_hsapplicationexe.rsc"                       - "c:/resource/apps/t_hsapplicationexe.rsc"
-"/epoc32/release/armv5/urel/mockruntimeplugin.dll"                                                  - "c:/sys/bin/mockruntimeplugin.dll"
-"/epoc32/data/z/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.qtplugin"     - "c:/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.qtplugin"
-"/epoc32/data/z/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.xml"          - "c:/private/20022f5f/hsresources/plugins/runtimeplugins/mockruntimeplugin.xml"
+"/epoc32/release/armv5/urel/mockstateplugins.dll"                                                  - "c:/sys/bin/mockstateplugins.dll"
+"/epoc32/data/z/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"     - "c:/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"
+"/epoc32/data/z/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.xml"          - "c:/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.xml"
 
 ;--------------- hsutils ---------------
 "/epoc32/release/armv5/urel/t_hsutils.exe"                         - "c:/sys/bin/t_hsutils.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/t_hsutils_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsutils_reg.rsc"
 "/epoc32/data/z/resource/apps/t_hsutils.rsc"                       - "c:/resource/apps/t_hsutils.rsc"
-"../hsutils/tsrc/t_hsutils/nokia.png"                              - "c:/hsresources/testresources/nokia.png"
-"../hsutils/tsrc/t_hsutils/large.jpg"                              - "c:/hsresources/testresources/large.jpg"
 
 ;--------------- hsdomainmodel ---------------
 "/epoc32/release/armv5/urel/t_hsdomainmodel.exe"                         - "c:/sys/bin/t_hsdomainmodel.exe"
@@ -69,15 +67,10 @@
 "/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.qtplugin"
 "/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.xml"      - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugintoobig.xml"
 
+"/epoc32/release/armv5/urel/mockwidgetplugincheater.dll"                                             - "c:/sys/bin/mockwidgetplugincheater.dll"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugincheater.qtplugin" - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugincheater.qtplugin"
+"/epoc32/data/z/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugincheater.xml"      - "c:/private/20022F59/hsresources/plugins/widgetplugins/mockwidgetplugincheater.xml"
 
-;--------------- runtimeplugins ---------------
-;hsdefaultruntimeplugin
-"/epoc32/release/armv5/urel/t_hsdefaultruntimeplugin.exe"                                       - "c:/sys/bin/t_hsdefaultruntimeplugin.exe"
-"/epoc32/data/z/private/10003a3f/import/apps/t_hsdefaultruntimeplugin_reg.rsc"                  - "c:/private/10003a3f/import/apps/t_hsdefaultruntimeplugin_reg.rsc"
-"/epoc32/data/z/resource/apps/t_hsdefaultruntimeplugin.rsc"                                     - "c:/resource/apps/t_hsdefaultruntimeplugin.rsc"
-"/epoc32/release/armv5/urel/mockstateplugins.dll"                                               - "c:/sys/bin/mockstateplugins.dll"
-"/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"    - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"
-"/epoc32/data/z/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.xml"         - "c:/private/20022f63/hsresources/plugins/stateplugins/mockstateplugins.xml"
 
 ;--------------- serviceproviders ---------------
 
@@ -102,9 +95,9 @@
 
 ;--------------- hshomescreenclientplugin -----------------------
 ;hshomescreenclientplugin
-;"/epoc32/release/armv5/urel/t_hshomescreenclientplugin.exe"                       - "c:/sys/bin/t_hshomescreenclientplugin.exe"
-;"/epoc32/data/z/private/10003a3f/import/apps/t_hshomescreenclientplugin_reg.rsc"  - "c:/private/10003a3f/import/apps/t_hshomescreenclientplugin_reg.rsc"
-;"/epoc32/data/z/resource/apps/t_hshomescreenclientplugin.rsc"                     - "c:/resource/apps/t_hshomescreenclientplugin.rsc"
+"/epoc32/release/armv5/urel/t_hshomescreenclientplugin.exe"                       - "c:/sys/bin/t_hshomescreenclientplugin.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hshomescreenclientplugin_reg.rsc"  - "c:/private/10003a3f/import/apps/t_hshomescreenclientplugin_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hshomescreenclientplugin.rsc"                     - "c:/resource/apps/t_hshomescreenclientplugin.rsc"
 
 ;--------------- hswidgetuninstaller -----------------------
 ;hswidgetuninstaller

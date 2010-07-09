@@ -57,7 +57,7 @@
     Opening application library from shortcut.
 */
 /*! \var HsMenuEvent::OperationType HsMenuEvent::ArrangeCollection
-    Swith to arrange mode.
+    Switch to arrange mode.
 */
 /*! \var HsMenuEvent::OperationType HsMenuEvent::Unknown
     Unknown menu event.

@@ -35,6 +35,7 @@
 #include "hswidgethost.h"
 #include "hspreviewhswidgetstate.h"
 #include "hsmenuevent.h"
+#include "hsmenudialogfactory.h"
 #include "hsapp_defs.h"
 #include "hsscene.h"
 #include "hspage.h"
@@ -64,9 +65,10 @@ HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
     QState(parent),
     mPreviewDialog(0),
     mNotifier(0),
-    mWidget(0),
     mEntryId(0),
-    mCorruptedMessage(0)
+    mCorruptedMessage(0),
+    mToken(),
+    mUri()
 {
     setObjectName("/HsPreviewHSWidgetState");
     if (this->parent()) {
@@ -100,32 +102,21 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_ENTRY("HsPreviewHSWidgetState::onEntry");
     QState::onEntry(event);
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
+   
     QVariantMap data = menuEvent->data();
-
     mEntryId = data.value(itemIdKey()).toInt();
-
-    QVariantHash widgetData;
-    widgetData.insert(LIBRARY, data.value(widgetLibraryAttributeName()).toString());
-    widgetData.insert(URI, data.value(widgetUriAttributeName()).toString());
-
-    mWidget.reset(
-        HsContentService::instance()->createWidgetForPreview(widgetData));
-
-    if (!mWidget.isNull()) {
+    mToken = data.value(HOMESCREENDATA);
+    
         
-        QSharedPointer<CaEntry> entry = 
-            CaService::instance()->getEntry(mEntryId);
-        
-        mPreviewDialog = buildPreviewDialog(*entry);
-        
-        if (mPreviewDialog != NULL) {
-            subscribeForMemoryCardRemove();
-            // Launch popup asyncronously
-            mPreviewDialog->open(this, SLOT(previewDialogFinished(HbAction*)));    
-        }
-    } else {
+    QSharedPointer<CaEntry> entry =
+        CaService::instance()->getEntry(mEntryId);
+    mUri = entry->attribute(widgetUriAttributeName());
+    mPreviewDialog = buildPreviewDialog(*entry);
+
+    if (mPreviewDialog != NULL) {
         subscribeForMemoryCardRemove();
-        showMessageWidgetCorrupted();
+        // Launch popup asyncronously
+        mPreviewDialog->open(this, SLOT(previewDialogFinished(HbAction*)));
     }
 
     HSMENUTEST_FUNC_EXIT("HsPreviewHSWidgetState::onEntry");
@@ -152,7 +143,7 @@ void HsPreviewHSWidgetState::cleanUp()
         mCorruptedMessage = NULL;
     }
 
-    mWidget.reset();
+    mToken = NULL;
 
     disconnect(mNotifier,
                SIGNAL(entryChanged(CaEntry,ChangeType)),
@@ -168,21 +159,28 @@ void HsPreviewHSWidgetState::cleanUp()
  */
 void HsPreviewHSWidgetState::previewDialogFinished(HbAction* finishedAction)
 {
-    if (finishedAction == mPreviewDialog->actions().value(0)) {
+    if (static_cast<QAction*>(finishedAction) == mPreviewDialog->actions().value(0)) {
 
-        HsScene::instance()->activePage()->addNewWidget(
-            mWidget.take()); // ownership transferred
-        HbNotificationDialog *notificationDialog = new HbNotificationDialog();
-        notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
-        notificationDialog->setTitle(hbTrId(
-                                     "txt_applib_dpophead_added_to_homescreen") );
-        notificationDialog->show();
+        QVariantHash widgetData;
+        widgetData[URI] = mUri;
+        widgetData[HOMESCREENDATA] = mToken;
+        
+        bool success = HsContentService::instance()->createWidget(widgetData);
+        
+        if (success) {
+            HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+            notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
+            notificationDialog->setTitle(hbTrId("txt_applib_dpophead_added_to_homescreen"));
+            notificationDialog->show();
+            emit exit();
+        }
+        else {
+            mPreviewDialog = NULL;
+            showMessageWidgetCorrupted();            
+        }
     } else {
-            mWidget->remove();
-            mWidget.take();   
-            mWidget.reset();
+        emit exit();
     }
-    emit exit();
 }
 
 /*!
@@ -210,20 +208,11 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
 
-    mCorruptedMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-    mCorruptedMessage->setAttribute(Qt::WA_DeleteOnClose);
-
-    QString message(hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
-    mCorruptedMessage->setText(message);
-
-    mCorruptedMessage->clearActions();
-    HbAction *primaryAction = new HbAction(hbTrId("txt_common_button_ok"), mCorruptedMessage);
-    mCorruptedMessage->addAction(primaryAction);
-
-    HbAction *secondaryAction = new HbAction(hbTrId("txt_common_button_cancel"), mCorruptedMessage);
-    mCorruptedMessage->addAction(secondaryAction);
+    mCorruptedMessage = HsMenuDialogFactory().create(
+            hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
 
     mCorruptedMessage->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
+
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
 }
 
@@ -233,7 +222,7 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
  */
 void HsPreviewHSWidgetState::messageWidgetCorruptedFinished(HbAction* finishedAction)
 {
-    if (finishedAction == mCorruptedMessage->actions().value(0)) {
+    if (static_cast<QAction*>(finishedAction) == mCorruptedMessage->actions().value(0)) {
         HsMenuService::executeAction(mEntryId, removeActionIdentifier());
     }
     emit exit();
@@ -283,6 +272,8 @@ HbDialog* HsPreviewHSWidgetState::buildPreviewDialog(const CaEntry& entry) const
         if (!previewImageName.isEmpty()) {
             const HbIcon previewImage(previewImageName);
             if (previewImage.size().isValid()) {
+                iconBox->setMinimumHeight(previewImage.height());
+                iconBox->setMaximumHeight(previewImage.height());
                 iconBox->setIcon(previewImage);
             }
         }

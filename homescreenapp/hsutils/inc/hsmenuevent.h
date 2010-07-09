@@ -46,10 +46,12 @@ public:
         OpenInstalledView,
         OpenHomeScreen,
         ArrangeCollection,
+        ArrangeAllCollections,
         CreateCollection,
         PreviewHSWidget,
         ShowAppSettings,
         ShowAppDetails,
+        ShowInstallationLog,
         Unknown
     };
 

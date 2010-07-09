@@ -63,7 +63,7 @@ HsSnapToLines::HsSnapToLines() :
     mRectLieLeft(false), mTopInRange(false), mBottomInRange(false),
     mMinHorizontalEdgesDistance(0.0), mHorizontalDistance(0.0),
     mHorizontalDistanceFromSelectedRect(0.0), mContainerHorizontalEdgeDistance(0.0),
-    mSnapEnabled(false), mSnapForce(0.0), mSnapGap(0.0), mSnapBorderGap(0.0),
+    mSnapEnabled(false), mSnapForce(0.0), mSnapGap(0.0),
     mRectVerticalEdgeLiesInLineWithVerticalLine(false), mRectLieAboveVerticalLine(false), mRectLieBelowVerticalLine(false),
     mRectHorizontalEdgeLiesInLineWithHorizontalLine(false), mRectLieLeftOfHorizontalLine(false), mRectLiesRightOfHorizontalLine(false)
 {
@@ -80,7 +80,6 @@ void HsSnapToLines::setConfiguration(const QVariantHash &configuration)
     //The following values should be in qreal, so the status received in canConvert is ignored
     mSnapForce = configuration[SNAPFORCE].toDouble(&canConvert);
     mSnapGap = configuration[SNAPGAP].toDouble(&canConvert);
-    mSnapBorderGap = configuration[SNAPBORDERGAP].toDouble(&canConvert);
 }
 
 /*!
@@ -91,11 +90,7 @@ void HsSnapToLines::setPagePresentation(const QRectF &containerRect,
                                         const QList<QRectF> &inactiveRects,
                                         const QRectF &activeRect)
 {
-    mContainerRect.setLeft(containerRect.left() + mSnapBorderGap);
-    mContainerRect.setTop(containerRect.top() + mSnapBorderGap);
-    mContainerRect.setRight(containerRect.right() - mSnapBorderGap);
-    mContainerRect.setBottom(containerRect.bottom() - mSnapBorderGap);
-
+    mContainerRect = containerRect;
     mActiveRectWidth = activeRect.width();
     mActiveRectHeight = activeRect.height();
 

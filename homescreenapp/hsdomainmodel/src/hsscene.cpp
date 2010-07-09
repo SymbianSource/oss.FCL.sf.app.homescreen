@@ -164,29 +164,41 @@ bool HsScene::removePage(HsPage *page)
         return true;
     }
 
-    int index = mPages.indexOf(page) + 1;
+    int nextIndex = mPages.indexOf(page) + 1;
 
     HsDatabase *db = HsDatabase::instance();
     db->transaction();
-
+    // update page indexes
     HsPageData data;
-    for (int i = index; i < mPages.count(); ++i) {
-        data.id = mPages.at(i)->databaseId();
-        data.indexPosition = i - 1;
+    int pageCount(mPages.count());
+    for (;nextIndex < pageCount; ++nextIndex) {
+        data.id = mPages.at(nextIndex)->databaseId();
+        data.indexPosition = nextIndex - 1;
         if (!db->updatePage(data)) {
             db->rollback();
             return false;
         }
     }
-
+    // page will remove itself from database
     if (!page->deleteFromDatabase()) {
         db->rollback();
         return false;
     }
 
     db->commit();
-
+    // update internal list
+    int index = mPages.indexOf(page);
+    bool lastPage(mPages.last() == page);
     mPages.removeOne(page);
+    if (mPages.isEmpty()) {
+        mActivePage = NULL;
+    }else if (mActivePage == page) {
+        if (lastPage) {
+            index--;
+        }
+        setActivePageIndex(index);
+    }
+    
     return true;
 }
 

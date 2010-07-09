@@ -20,6 +20,7 @@
 
 // ---- hsapplication --------------------------------------------
 
+file=ABI_DIR\BUILD_DIR\hsapplicationlauncher.exe                PROGRAMS_DIR\hsapplicationlauncher.exe
 file=ABI_DIR\BUILD_DIR\hsapplication.exe                        PROGRAMS_DIR\hsapplication.exe
 data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc        private\10003a3f\import\apps\hsapplication_reg.rsc
 data=\epoc32\data\z\resource\apps\hsapplication.mif             resource\apps\hsapplication.mif
@@ -34,6 +35,9 @@ data=ZPRIVATE\20022f35\wallpapers\page\2_portrait.png           private\20022f35
 data=ZPRIVATE\20022f35\wallpapers\page\2_landscape.png          private\20022f35\wallpapers\page\2_landscape.png
 data=ZPRIVATE\20022f35\wallpapers\page\3_portrait.png           private\20022f35\wallpapers\page\3_portrait.png
 data=ZPRIVATE\20022f35\wallpapers\page\3_landscape.png          private\20022f35\wallpapers\page\3_landscape.png
+data=ZPRIVATE\20022f35\wallpapers\originals\car.png             private\20022f35\wallpapers\originals\car.png
+data=ZPRIVATE\20022f35\wallpapers\originals\shapes.png          private\20022f35\wallpapers\originals\shapes.png
+data=ZPRIVATE\20022f35\wallpapers\originals\shoes.png           private\20022f35\wallpapers\originals\shoes.png
 
 // ---- hswidgetuninstaller --------------------------------------------
 file=ABI_DIR\BUILD_DIR\hswidgetuninstaller.exe            PROGRAMS_DIR\hswidgetuninstaller.exe
@@ -53,12 +57,10 @@ file=ABI_DIR\BUILD_DIR\hshomescreenclientplugin.dll                        SHARE
 data=\epoc32\data\z\resource\qt\plugins\hshomescreenclientplugin.qtplugin  resource\qt\plugins\hshomescreenclientplugin.qtplugin
 data=ZPRIVATE\20022f35\hshomescreenclientplugin.xml                        private\20022f35\hshomescreenclientplugin.xml
 
-// ---- runtimeplugins --------------------------------------------
 
-// -------- hsdefaultruntimeplugin
-file=ABI_DIR\BUILD_DIR\hsdefaultruntimeplugin.dll                              SHARED_LIB_DIR\hsdefaultruntimeplugin.dll
-data=ZPRIVATE\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.qtplugin  private\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.qtplugin
-data=ZPRIVATE\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.xml       private\20022f35\plugins\runtimeplugins\hsdefaultruntimeplugin.xml
+
+
+
 
 // ---- serviceproviders --------------------------------------------
 

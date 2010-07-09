@@ -73,7 +73,7 @@ HsConfiguration::HsConfiguration(QObject *parent)
     mSnapTimeout(100),
     mSnapForce(30),
     mSnapGap(6),
-    mSnapBorderGap(0),
+    mPageMargin(0),
     mSnapLineFadeInDuration(200),
     mSnapLineFadeOutDuration(100),
     mIsSnapEffectsEnabled(true),    

@@ -79,7 +79,7 @@ int HsPageIndicator::itemCount() const
 */
 void HsPageIndicator::setActiveItemIndex(int activeItemIndex)
 {
-    if (activeItemIndex < 0 || itemCount() <= activeItemIndex) {
+    if (activeItemIndex < 0 || itemCount()-1 < activeItemIndex) {
         return;
     }
 
@@ -116,13 +116,18 @@ void HsPageIndicator::addItem(int activeItemIndex)
 */
 void HsPageIndicator::removeItem(int activeItemIndex)
 {
-    if (activeItemIndex < 0 || itemCount() - 1 <= activeItemIndex) {
+    if (activeItemIndex < 0 || itemCount() <= activeItemIndex) {
         return;
+    }
+
+    if (activeItemIndex == itemCount()-1) {
+        activeItemIndex--;
     }
 
     delete mItems.last();
     mItems.removeLast();
     layoutItems();
+    
     setActiveItemIndex(activeItemIndex);
 }
 

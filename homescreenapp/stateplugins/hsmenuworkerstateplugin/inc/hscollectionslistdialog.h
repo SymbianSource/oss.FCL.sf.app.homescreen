@@ -33,8 +33,7 @@ class HsCollectionsListDialog: public HbSelectionDialog
 
 public:
 
-    HsCollectionsListDialog(HsSortAttribute sortOrder,
-                            int collectionId = 0);
+    HsCollectionsListDialog(int collectionId = 0);
 
     virtual ~HsCollectionsListDialog();
 
@@ -51,8 +50,7 @@ private:
 
     void makeDisconnect();
 
-    QStandardItemModel *standartItemModel(HsSortAttribute sortOrder,
-                                          int collectionId);
+    QStandardItemModel *standardItemModel(int collectionId);
 
     void insertNewCollectionItem(QStandardItemModel *model);
 

@@ -111,9 +111,12 @@ void HsPageIndicatorItem::startAnimation()
     setTransformOriginPoint(rect().center());
     QPropertyAnimation *animation = 
         new QPropertyAnimation(graphicsEffect(), "strength");
+    
     animation->setDuration(800);
     animation->setKeyValueAt(0.2, 1);
     animation->setEndValue(0);
+    
+    connect(this,SIGNAL(destroyed()),animation,SLOT(stop()));
     connect(animation, SIGNAL(finished()), SLOT(animationFinished()));
     animation->start(QAbstractAnimation::DeleteWhenStopped);
 }

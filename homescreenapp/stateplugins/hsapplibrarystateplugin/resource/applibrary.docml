@@ -18,8 +18,6 @@
     <widget name="view" type="HbView">
         <widget name="container" role="HbView:widget" type="HbWidget">
             <widget name="collectionLabel" type="HbGroupBox">
-
-                <sizehint height="6un" type="MAXIMUM" width="100un"/>
                 <bool name="visible" value="FALSE"/>
                 <string name="heading" value="."/>
                 <bool name="marqueeHeading" value="TRUE"/>
@@ -52,7 +50,7 @@
                 <widget name="allAppsSearchListView" type="HbListView">
                     <bool name="visible" value="FALSE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="allAppsListView"/>
                 </layout>
@@ -79,7 +77,7 @@
                     <bool name="frictionEnabled" value="TRUE"/>
                     <bool name="visible" value="TRUE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="allAppsSearchListView"/>
                     <linearitem itemname="searchPanel"/>
@@ -99,7 +97,7 @@
                     <bool name="frictionEnabled" value="TRUE"/>
                     <bool name="visible" value="TRUE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="allCollectionsListView"/>
                 </layout>
@@ -134,7 +132,7 @@
                     <bool name="frictionEnabled" value="TRUE"/>
                     <bool name="visible" value="TRUE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="allCollectionsSearchListView"/>
                     <linearitem itemname="searchPanel"/>
@@ -150,7 +148,6 @@
                 <widget name="installedAppsLabel" type="HbGroupBox">
                     <string locid="txt_applib_subtitle_installed" name="heading"/>
                     <bool name="marqueeHeading" value="TRUE"/>
-                    <sizehint height="6un" type="MAXIMUM" width="-1"/>
                     <fontspec name="fontSpec" role="Title" textheight="0"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -174,7 +171,7 @@
                     <sizehint height="0un" type="MAXIMUM" width="0un"/>
                     <bool name="visible" value="FALSE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="installedAppsLabel"/>
                     <linearitem itemname="installedAppsListView"/>
@@ -190,7 +187,6 @@
                 <widget name="installedAppsLabel" type="HbGroupBox">
                     <string locid="txt_applib_subtitle_installed" name="heading"/>
                     <bool name="marqueeHeading" value="TRUE"/>
-                    <sizehint height="6un" type="MAXIMUM" width="-1"/>
                     <fontspec name="fontSpec" role="Title" textheight="0"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -214,7 +210,7 @@
                     <sizehint height="0un" type="MAXIMUM" width="0un"/>
                     <bool name="visible" value="FALSE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="installedAppsLabel"/>
                     <linearitem itemname="installedAppsSearchListView"/>
@@ -231,7 +227,6 @@
                 <widget name="installedAppsLabel" type="HbGroupBox">
                     <string locid="txt_applib_subtitle_installed" name="heading"/>
                     <bool name="marqueeHeading" value="TRUE"/>
-                    <sizehint height="6un" type="MAXIMUM" width="-1"/>
                     <fontspec name="fontSpec" role="Title" textheight="0"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -259,13 +254,13 @@
                         <fontspec name="fontSpec" role="Title" textheight="4un"/>
                     </widget>
                     <sizehint height="11.9403un" type="PREFERRED" width="23.8806un"/>
-                    <layout orientation="Horizontal" type="linear">
+                    <layout orientation="Horizontal" spacing="0.0un" type="linear">
                         <stretchitem stretchfactor="1"/>
                         <linearitem itemname="installedAppsEmptyLabel"/>
                         <stretchitem stretchfactor="1"/>
                     </layout>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="installedAppsLabel"/>
                     <stretchitem stretchfactor="1"/>
@@ -281,7 +276,6 @@
         <widget name="collectionView" type="HbView">
             <widget name="collectionContainer" role="HbView:widget" type="HbWidget">
                 <widget name="collectionLabel" type="HbGroupBox">
-                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
                     <bool name="visible" value="TRUE"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -310,7 +304,7 @@
                     <sizehint height="0un" type="MAXIMUM" width="0un"/>
                     <bool name="visible" value="FALSE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="collectionLabel"/>
                     <linearitem itemname="collectionListView"/>
@@ -324,7 +318,6 @@
         <widget name="collectionView" type="HbView">
             <widget name="collectionContainer" role="HbView:widget" type="HbWidget">
                 <widget name="collectionLabel" type="HbGroupBox">
-                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
                     <bool name="visible" value="TRUE"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -352,7 +345,7 @@
                     <sizehint height="0un" type="MAXIMUM" width="0un"/>
                     <bool name="visible" value="FALSE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="collectionLabel"/>
                     <linearitem itemname="collectionSearchListView"/>
@@ -368,7 +361,6 @@
             <widget name="collectionContainer" role="HbView:widget" type="HbWidget">
                 <widget name="collectionLabel" type="HbGroupBox">
                     <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
                     <bool name="visible" value="TRUE"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -393,7 +385,7 @@
                         <bool name="visible" value="TRUE"/>
                     </widget>
                     <sizehint height="11.9403un" type="PREFERRED" width="23.8806un"/>
-                    <layout orientation="Horizontal" type="linear">
+                    <layout orientation="Horizontal" spacing="0.0un"  type="linear">
                         <stretchitem stretchfactor="1"/>
                         <linearitem itemname="collectionButton"/>
                         <stretchitem stretchfactor="1"/>
@@ -404,7 +396,7 @@
                     <sizehint height="0un" type="MAXIMUM" width="0un"/>
                     <bool name="visible" value="FALSE"/>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un"  type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="collectionLabel"/>
                     <stretchitem stretchfactor="1"/>
@@ -420,7 +412,6 @@
         <widget name="collectionView" type="HbView">
             <widget name="collectionContainer" role="HbView:widget" type="HbWidget">
                 <widget name="collectionLabel" type="HbGroupBox">
-                    <sizehint height="6un" type="MAXIMUM" width="100un"/>
                     <bool name="visible" value="TRUE"/>
                     <integer name="groupBoxType" value="1"/>
                 </widget>
@@ -452,13 +443,13 @@
                         <fontspec name="fontSpec" role="Title" textheight="4un"/>
                     </widget>
                     <sizehint height="11.9403un" type="PREFERRED" width="23.8806un"/>
-                    <layout orientation="Horizontal" type="linear">
+                    <layout orientation="Horizontal" spacing="0.0un"  type="linear">
                         <stretchitem stretchfactor="1"/>
                         <linearitem itemname="collectionAppsEmptyLabel"/>
                         <stretchitem stretchfactor="1"/>
                     </layout>
                 </widget>
-                <layout orientation="Vertical" type="linear">
+                <layout orientation="Vertical" spacing="0.0un"  type="linear">
                     <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                     <linearitem itemname="collectionLabel"/>
                     <stretchitem stretchfactor="1"/>

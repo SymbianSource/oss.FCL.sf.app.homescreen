@@ -77,9 +77,9 @@ QVariant HsMenuItemModel::data(const QModelIndex &index,
     } else if (role == Hb::IndexFeedbackRole){
         QVariant display = CaItemModel::data(index, Qt::DisplayRole);
         if (display.type() == QVariant::String){
-            variant = display;
+            variant = QVariant(display.toString().at(0).toUpper());;
         } else {
-            variant = QVariant(display.toList().at(0));
+            variant = QVariant(display.toList().at(0).toString().at(0).toUpper());
         }
     } else {
         variant = CaItemModel::data(index, role);

@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef ARRANGE_H
-#define ARRANGE_H
+#ifndef HSARRANGESTATE_H
+#define HSARRANGESTATE_H
 
 #include <QState>
 #include <QVariant>
@@ -76,15 +76,17 @@ private:
     HsMenuItemModel *mItemModel;
 
     int mTopItemId;
+    
+    int mCollectionId;
 
     QModelIndex mTopModelIndex;
 
-    QList<int> mCollIdList;
+    QList<int> mCollItemIdList;
 
-    QList<int> mArrangedCollIdList;
+    QList<int> mArrangedCollItemIdList;
     
     QObjectList mObjectList;
 
 };
 
-#endif /* ARRANGE_H_ */
+#endif /* HSARRANGESTATE_H */

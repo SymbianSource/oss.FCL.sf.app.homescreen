@@ -15,26 +15,23 @@
  *
  */
 
-#include <qstatemachine.h>
+#include <QStateMachine>
+#include <HbView>
 #include <HbGroupBox>
-#include <hbview.h>
-#include <hblistview.h>
-#include <hbaction.h>
-#include <hbmenu.h>
-#include <hbabstractviewitem.h>
-#include <hsmenueventfactory.h>
-#include <hbinstance.h>
-#include <caentry.h>
-#include <hbsearchpanel.h>
+#include <HbListView>
+#include <HbAction>
+#include <HbMenu>
+#include <HbAbstractViewItem>
 
+#include <cadefs.h>
+#include <caentry.h>
+
+#include "hsapp_defs.h"
+#include "hsmenueventfactory.h"
 #include "hsmenuitemmodel.h"
-#include "hsmenuviewbuilder.h"
-#include "cadefs.h"
 #include "hsinstalledappsstate.h"
 #include "hsaddappstocollectionstate.h"
-#include "hsapp_defs.h"
 #include "hsmenumodetransition.h"
-#include "hsmainwindow.h"
 
 /*!
  \class HsInstalledAppsState
@@ -46,45 +43,17 @@
  */
 
 /*!
- \var HsInstalledAppsState::mMenuView
- The View widget.
- Own.
- */
-
-/*!
- \var HsInstalledAppsState::mInstalledAppsModel
- Item Model for the List.
- Own.
- */
-
-/*!
- \var HsInstalledAppsState::mSecondarySoftkeyAction
- Secondary Softkey action.
- Backstepping functionality.
- Own.
- */
-
-/*!
- \var HsInstalledAppsState::mOldNavigationAction
- Old navigation icon.
- Not own.
- */
-
-/*!
  Constructor.
  \param menuViewBuilder Menu view builder.
+ \param mainWindow main window wrapper.
  \param parent Owner.
  */
 HsInstalledAppsState::HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
         HsMainWindow &mainWindow,
         QState *parent):
-    HsBaseViewState(parent),
-    mMenuView(menuViewBuilder, HsInstalledAppsContext),
-    mInstalledAppsModel(0),
-    mSecondarySoftkeyAction(new HbAction(Hb::BackNaviAction, this)),
-    mMainWindow(mainWindow),
-    mContextModelIndex(),mContextMenu(0)
+    HsBaseViewState(mainWindow, parent)
 {
+    initialize(menuViewBuilder, HsInstalledAppsContext);
     construct();
 }
 
@@ -98,16 +67,8 @@ void HsInstalledAppsState::construct()
     const QString parentName =
         parent() != 0 ? parent()->objectName() : QString("");
     setObjectName(parentName + "/installedappsstate");
-    connect(this, SIGNAL(entered()),SLOT(stateEntered()));
-    connect(this, SIGNAL(exited()),SLOT(stateExited()));
 
-    connect(mSecondarySoftkeyAction, SIGNAL(triggered()),
-            SLOT(backAction()));
-    mMenuView.view()->
-    setNavigationAction(mSecondarySoftkeyAction);
-
-
-    setMenuOptions();
+    connect(mBackKeyAction, SIGNAL(triggered()), SLOT(openAppLibrary()));
 
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::construct");
 }
@@ -123,21 +84,43 @@ void HsInstalledAppsState::setMenuOptions()
 
     mOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                         this, SLOT(openTaskSwitcher()));
+    mOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
+                        this, SLOT(openInstallationLog()));
 
-    mMenuView.view()->setMenu(mOptions);
+    mMenuView->view()->setMenu(mOptions);
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::setMenuOptions");
 }
+
+/*!
+ Method seting context menu options.
+ \param item the context menu is built for.
+ \param flags of the \item.
+ */
+void HsInstalledAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
+{
+    HbAction *uninstallAction = mContextMenu->addAction(
+                                hbTrId("txt_common_menu_delete"));
+    HbAction *appDetailsAction(NULL);
+    uninstallAction->setData(UninstallContextAction);
+
+    QSharedPointer<const CaEntry> entry = mModel->entry(item->modelIndex());
+
+    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
+            (flags & RemovableEntryFlag) ) {
+        appDetailsAction = mContextMenu->addAction(hbTrId(
+                                                "txt_common_menu_details"));
+        appDetailsAction->setData(AppDetailsContextAction);
+    }
+}
+
 
 /*!
  Destructor.
  */
 HsInstalledAppsState::~HsInstalledAppsState()
 {
-    mMenuView.inactivate();
-    mMenuView.setModel(NULL);
-    mMenuView.view()->setNavigationAction(NULL);
-
-    delete mInstalledAppsModel;
+    mMenuView->inactivate();
+    mMenuView->view()->setNavigationAction(NULL);
 }
 
 /*!
@@ -149,30 +132,26 @@ void HsInstalledAppsState::stateEntered()
     qDebug("AllAppsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::stateEntered");
 
-    mMainWindow.setCurrentView(mMenuView);
-    mMenuView.activate();
-
-    if (!mInstalledAppsModel) {
-        mInstalledAppsModel
+    HsBaseViewState::stateEntered();
+    setMenuOptions();
+    if (!mModel) {
+        mModel
         = HsMenuService::getInstalledModel(AscendingNameHsSortAttribute);
-        mMenuView.setModel(mInstalledAppsModel);
+        mMenuView->setModel(mModel);
     }
 
-    if (mInstalledAppsModel->rowCount() == 0){
-        mMenuView.setContext(HsInstalledAppsContext,HsEmptyLabelContext);
+    if (mModel->rowCount() == 0){
+        mMenuView->setContext(HsInstalledAppsContext,HsEmptyLabelContext);
         }
 
-    mMenuView.listView()->scrollTo(
-        mInstalledAppsModel->index(0));
+    mMenuView->listView()->scrollTo(
+        mModel->index(0));
 
-    connect(&mMenuView,
-            SIGNAL(activated(QModelIndex)),
-            SLOT(listItemActivated(QModelIndex)));
-    connect(&mMenuView,
+    connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
-            SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
+            SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
 
-    connect(mInstalledAppsModel, SIGNAL(empty(bool)),this,
+    connect(mModel, SIGNAL(empty(bool)),this,
             SLOT(setEmptyLabelVisibility(bool)));
 
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateEntered");
@@ -185,23 +164,13 @@ void HsInstalledAppsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::stateExited");
 
-    disconnect(mInstalledAppsModel, SIGNAL(empty(bool)),this,
+    disconnect(mModel, SIGNAL(empty(bool)),this,
                SLOT(setEmptyLabelVisibility(bool)));
 
-    mMenuView.setSearchPanelVisible(false);
-
-    disconnect(&mMenuView,
-            SIGNAL(activated(QModelIndex)), this,
-            SLOT(listItemActivated(QModelIndex)));
-    disconnect(&mMenuView,
+    disconnect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)), this,
-            SLOT(listItemLongPressed(HbAbstractViewItem *, QPointF)));
+            SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
 
-    mMenuView.inactivate();
-
-    if (mContextMenu)
-        mContextMenu->close();
-    
     HsBaseViewState::stateExited();
     
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateExited");
@@ -209,89 +178,30 @@ void HsInstalledAppsState::stateExited()
 }
 
 /*!
- Handles button visibility
+ Handles button visibility.
+ \param visibility indicates whether show or not to show 'empty' label.
  */
 void HsInstalledAppsState::setEmptyLabelVisibility(bool visibility)
 {
     if(visibility){
-        mMenuView.setContext(HsInstalledAppsContext,HsEmptyLabelContext);
+        mMenuView->setContext(HsInstalledAppsContext,HsEmptyLabelContext);
     } else {
-        mMenuView.setContext(HsInstalledAppsContext,HsItemViewContext);
+        mMenuView->setContext(HsInstalledAppsContext,HsItemViewContext);
     }
 }
 
 /*!
- Open task switcher.
- \retval true if operation is successful.
+ Open installation log.
  */
-bool HsInstalledAppsState::openTaskSwitcher()
+void HsInstalledAppsState::openInstallationLog()
 {
-    return HsMenuService::launchTaskSwitcher();
+    machine()->postEvent(
+        HsMenuEventFactory::createInstallationLogEvent());
 }
 
 /*!
- Method invoked when a list item is activated.
- \param index indec of activated item.
- */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
-void HsInstalledAppsState::listItemActivated(const QModelIndex &/*index*/)
-{
-    //no implementation yet
-}
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
-
-/*!
- Handles long-item-pressed event in all apps view by showing context menu
- \param item the event pertains to
- \param coords press point coordinates.
- */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
-void HsInstalledAppsState::listItemLongPressed(HbAbstractViewItem *item,
-        const QPointF &coords)
-{
-    HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::listItemLongPressed");
-
-    EntryFlags flags = item->modelIndex().data(
-                           CaItemModel::FlagsRole).value<EntryFlags> ();
-    if (!(flags & UninstallEntryFlag)) {
-        // create context menu
-        mContextMenu = new HbMenu();
-
-        HbAction *uninstallAction = mContextMenu->addAction(
-                                    hbTrId("txt_common_menu_delete"));
-        HbAction *appDetailsAction(NULL);
-        uninstallAction->setData(UninstallContextAction);
-    
-        QSharedPointer<const CaEntry> entry = mInstalledAppsModel->entry(item->modelIndex());
-    
-        if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
-                (flags & RemovableEntryFlag) ) {
-            appDetailsAction = mContextMenu->addAction(hbTrId(
-                                                    "txt_common_menu_details"));
-            appDetailsAction->setData(AppDetailsContextAction);
-        }
-
-        mContextModelIndex = item->modelIndex();
-        mContextMenu->setPreferredPos(coords);
-        mContextMenu->setAttribute(Qt::WA_DeleteOnClose);
-        mContextMenu->open(this, SLOT(contextMenuAction(HbAction*)));
-    }
-    
-    
-    HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::listItemLongPressed");
-}
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
-
-/*!
- Handles context menu actions
+ Handles context menu actions.
+ \param action to handle.
  */
 void HsInstalledAppsState::contextMenuAction(HbAction *action)
 {    
@@ -313,19 +223,5 @@ void HsInstalledAppsState::contextMenuAction(HbAction *action)
         default:
             break;            
     }
-    mMenuView.setSearchPanelVisible(false);
+    mMenuView->setSearchPanelVisible(false);
 }
-
-/*!
- Slot invoked when a back action is triggered.
- */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
-void HsInstalledAppsState::backAction()
-{
-    machine()->postEvent(HsMenuEventFactory::createOpenAppLibraryEvent());
-}
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT

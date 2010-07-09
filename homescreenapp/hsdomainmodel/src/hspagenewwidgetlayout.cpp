@@ -20,6 +20,7 @@
 #include "hsdomainmodeldatastructures.h"
 #include "hspagenewwidgetlayout.h"
 #include "hsscene.h"
+#include "hspage.h"
 #include "hsdatabase.h"
 #include "hswidgethost.h"
 #include "hswallpaper.h"
@@ -113,13 +114,10 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
        -> set widget center point to this touch point
     */
     if (mTouchPoint != QPointF() && mNewWidgets.count() == 1) {
-        QRectF pageRect = HsScene::mainWindow()->layoutRect();
-        qreal widgetX = qBound(qreal(0), mTouchPoint.x() - rects.at(0).width() / 2, pageRect.width() - rects.at(0).width());
-        qreal widgetY = qBound(qreal(64), mTouchPoint.y() - rects.at(0).height() / 2, pageRect.height() - rects.at(0).height());
-        mNewWidgets.at(0)->setGeometry(widgetX,
-                                       widgetY,
-                                       rects.at(0).width(), 
-                                       rects.at(0).height());
+        QRectF widgetRect = rects.at(0);
+        widgetRect.moveCenter(mTouchPoint);
+        widgetRect.moveTopLeft(HsScene::instance()->activePage()->adjustedWidgetPosition(widgetRect));
+        mNewWidgets.at(0)->setGeometry(widgetRect);
         /* we have to save widget presentation data here after drawing
            to get correct position for later use
         */
@@ -129,8 +127,7 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
     else {
         HsWidgetPositioningOnWidgetAdd *algorithm =
             HsWidgetPositioningOnWidgetAdd::instance();
-        QRectF pageRect = HsScene::mainWindow()->layoutRect();
-        pageRect.adjust( (qreal)0,(qreal)64,(qreal)0,(qreal)0);
+        QRectF pageRect = HsScene::instance()->activePage()->contentGeometry();
         QList<QRectF> calculatedRects =
             algorithm->convert(pageRect, rects, QPointF());
 

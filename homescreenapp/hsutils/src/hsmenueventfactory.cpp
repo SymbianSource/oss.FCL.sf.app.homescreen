@@ -177,18 +177,15 @@ QEvent *HsMenuEventFactory::createCollectionDeletedEvent()
     Creates an HsMenuEvent::AddAppsToCollection event.
 
     \param aApplicationsSortOder applications sort order.
-    \param aCollectionsSortOder collections sort order.
     \param aItemId item id.
     \return Add applications to collection event.
  */
 QEvent *HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
     HsSortAttribute aApplicationsSortOder,
-    HsSortAttribute aCollectionsSortOder,
     int aItemId)
 {
     QVariantMap params;
     params.insert(appSortOrderKey(), aApplicationsSortOder);
-    params.insert(collectionSortOrderKey(), aCollectionsSortOder);
     params.insert(itemIdKey(), aItemId);
     return  new HsMenuEvent(HsMenuEvent::AddAppsToCollection, params);
 }
@@ -198,18 +195,15 @@ QEvent *HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
 
     \param aCollectionId collection id.
     \param aApplicationId application id.
-    \param aCollectionsSortOder collections sort order.
     \return Add applications to collection event.
  */
-QEvent *HsMenuEventFactory::createAddAppsFromCallectionViewEvent(
+QEvent *HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
     int aCollectionId,
-    int aApplicationId,
-    HsSortAttribute aCollectionsSortOder)
+    int aApplicationId)
 {
     QVariantMap params;
     params.insert(itemIdKey(), aApplicationId);
     params.insert(collectionIdKey(), aCollectionId);
-    params.insert(collectionSortOrderKey(), aCollectionsSortOder);
     return new HsMenuEvent(HsMenuEvent::AddAppsToCollection, params);
 }
 
@@ -247,13 +241,30 @@ QEvent *HsMenuEventFactory::createUninstallApplicationEvent(int aItemId)
     Creates an HsMenuEvent::ArrangeCollection event.
 
     \param aTopItemId Item id to be scrolled.
-    \return ArrangeCollection event.
+    \param aCollectionId Collection id.
+    \retval ArrangeCollection event.
  */
-QEvent *HsMenuEventFactory::createArrangeCollectionEvent(int aTopItemId)
+QEvent *HsMenuEventFactory::createArrangeCollectionEvent(
+    int aTopItemId,
+    int aCollectionId)
 {
     QVariantMap params;
     params.insert(itemIdKey(), aTopItemId);
+    params.insert(collectionIdKey(), aCollectionId);
     return new HsMenuEvent(HsMenuEvent::ArrangeCollection, params);
+}
+
+/*!
+    Creates an HsMenuEvent::ArrangeAllCollections event.
+
+    \param aTopItemId Item id to be scrolled.
+    \retval ArrangeAllCollections event.
+ */
+QEvent *HsMenuEventFactory::createArrangeAllCollectionsEvent(int aTopItemId)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), aTopItemId);
+    return new HsMenuEvent(HsMenuEvent::ArrangeAllCollections, params);
 }
 
 /*!
@@ -312,6 +323,16 @@ QEvent *HsMenuEventFactory::createAppDetailsViewEvent(int entryId)
     params.insert(itemIdKey(), entryId);
 
     return new HsMenuEvent(HsMenuEvent::ShowAppDetails, params);
+}
+
+/*!
+    Creates an HsMenuEvent::ShowInstallationLog event.
+
+    \return Event for installation log.
+*/
+QEvent *HsMenuEventFactory::createInstallationLogEvent()
+{
+    return new HsMenuEvent(HsMenuEvent::ShowInstallationLog);
 }
 
 /*!

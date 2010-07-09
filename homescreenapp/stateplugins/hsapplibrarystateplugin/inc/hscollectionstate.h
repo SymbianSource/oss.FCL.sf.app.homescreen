@@ -18,9 +18,8 @@
 #ifndef HSCOLLECTIONSTATE_H
 #define HSCOLLECTIONSTATE_H
 
-#include <qstate.h>
-#include <qabstractitemmodel.h>
-#include <QPointer>
+#include <QState>
+#include <QAbstractItemModel>
 
 #include "hsbaseviewstate.h"
 
@@ -30,7 +29,6 @@ class HbView;
 class HbAction;
 class HbMenu;
 class HbAbstractViewItem;
-class QModelIndex;
 class HsMenuItemModel;
 class HsMenuModeWrapper;
 class HsMenuViewBuilder;
@@ -46,29 +44,25 @@ public:
                       HsMainWindow &mainWindow,
                       QState *parent = 0);
     ~HsCollectionState();
-public slots:
-    void collectionsSortOrder(HsSortAttribute sortAttribute);
 protected:
     void onEntry(QEvent *event);
 signals:
     void sortOrderChanged(HsSortAttribute sortAttribute);
 private slots:
-    bool openTaskSwitcher();
-    void listItemActivated(const QModelIndex &index);
-    void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addAppsAction(bool addApps = true);
     void addCollectionShortcutToHomeScreenAction();
     void renameAction();
     void deleteAction();
-    void backSteppingAction();
     void updateLabel();
     void stateEntered();
+
     void stateExited();
     void latestOnTopMenuAction();
     void oldestOnTopMenuAction();
     void contextMenuAction(HbAction *action);
     void handleEmptyChange(bool empty);
     void lockSearchButton(bool lock);
+    void createArrangeCollection();
 
 private:
     void construct();
@@ -76,20 +70,13 @@ private:
     void makeConnect();
     void makeDisconnect();
     void addElementToHomeScreen(const QModelIndex &index);
+    void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
+    void setMenuOptions();
 
 private:
     HsSortAttribute mSortAttribute;
-    HsSortAttribute mCollectionsSortAttribute;
     int mCollectionId;
     QString mCollectionType;
-    HsMenuView mMenuView;
-    HsMenuModeWrapper &mMenuMode;
-    HbAction *const mSecondarySoftkeyAction;
-    HsMenuItemModel *mCollectionModel;
-    HbMenu *mOptions;
-    QModelIndex mContextModelIndex;
-    QPointer<HbMenu> mContextMenu;
-    HsMainWindow &mMainWindow;
 };
 
 #endif // HSCOLLECTIONSTATE_H

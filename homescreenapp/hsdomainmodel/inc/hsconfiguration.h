@@ -47,7 +47,7 @@ class HSDOMAINMODEL_EXPORT HsConfiguration : public QObject
     Q_PROPERTY(int widgetDragEffectDuration READ widgetDragEffectDuration WRITE setWidgetDragEffectDuration)
     Q_PROPERTY(int widgetDropEffectDuration READ widgetDropEffectDuration WRITE setWidgetDropEffectDuration)
     Q_PROPERTY(int defaultPageId READ defaultPageId WRITE setDefaultPageId)
-    Q_PROPERTY(int maximumPageCount READ maximumPageCount WRITE setMaximumPageCount)    
+    Q_PROPERTY(int maximumPageCount READ maximumPageCount WRITE setMaximumPageCount)
     Q_PROPERTY(bool isShortcutLabelVisible READ isShortcutLabelVisible WRITE setShortcutLabelVisible)
     Q_PROPERTY(qreal bounceFeedbackEffectDistance READ bounceFeedbackEffectDistance WRITE setBounceFeedbackEffectDistance)
     Q_PROPERTY(qreal pageChangePanDistanceInPixels READ pageChangePanDistanceInPixels WRITE setPageChangePanDistanceInPixels)
@@ -73,7 +73,7 @@ class HSDOMAINMODEL_EXPORT HsConfiguration : public QObject
     Q_PROPERTY(int snapTimeout READ snapTimeout WRITE setSnapTimeout)
     Q_PROPERTY(qreal snapForce READ snapForce WRITE setSnapForce)
     Q_PROPERTY(qreal snapGap READ snapGap WRITE setSnapGap)
-    Q_PROPERTY(qreal snapBorderGap READ snapBorderGap WRITE setSnapBorderGap)
+    Q_PROPERTY(qreal pageMargin READ pageMargin WRITE setPageMargin)
     Q_PROPERTY(int snapLineFadeInDuration READ snapLineFadeInDuration WRITE setSnapLineFadeInDuration)
     Q_PROPERTY(int snapLineFadeOutDuration READ snapLineFadeOutDuration WRITE setSnapLineFadeOutDuration)
     Q_PROPERTY(bool isSnapEffectsEnabled READ isSnapEffectsEnabled WRITE setSnapEffectsEnabled)
@@ -91,107 +91,117 @@ public:
         SceneWallpaper
     };
 
+#define SETVALUE(member, name) \
+    if (member != value) { \
+        member = value; \
+        emit propertyChanged(name); \
+    }
+
     int bounceEffect() const { return mBounceEffect; }
-    void setBounceEffect(int effect) { mBounceEffect = effect; }
+    void setBounceEffect(int value) { SETVALUE(mBounceEffect, "bounceEffect") }
     int widgetTapAndHoldTimeout() const { return mWidgetTapAndHoldTimeout; }
-    void setWidgetTapAndHoldTimeout(int timeout) { mWidgetTapAndHoldTimeout = timeout; }
+    void setWidgetTapAndHoldTimeout(int value) { SETVALUE(mWidgetTapAndHoldTimeout, "widgetTapAndHoldTimeout") }
     int sceneTapAndHoldTimeout() const { return mSceneTapAndHoldTimeout; }
-    void setSceneTapAndHoldTimeout(int timeout) { mSceneTapAndHoldTimeout = timeout; }
+    void setSceneTapAndHoldTimeout(int value) { SETVALUE(mSceneTapAndHoldTimeout, "sceneTapAndHoldTimeout") }
     int pageChangeAnimationDuration() const { return mPageChangeAnimationDuration; }
-    void setPageChangeAnimationDuration(int duration) { mPageChangeAnimationDuration = duration; }    
+    void setPageChangeAnimationDuration(int value) { SETVALUE(mPageChangeAnimationDuration, "pageChangeAnimationDuration") }
     int pageChangeZoneAnimationDuration() const { return mPageChangeZoneAnimationDuration; }
-    void setPageChangeZoneAnimationDuration(int duration) { mPageChangeZoneAnimationDuration = duration; }    
+    void setPageChangeZoneAnimationDuration(int value) { SETVALUE(mPageChangeZoneAnimationDuration, "pageChangeZoneAnimationDuration") }
     int pageChangeZoneReverseAnimationDuration() const { return mPageChangeZoneReverseAnimationDuration; }
-    void setPageChangeZoneReverseAnimationDuration(int duration) { mPageChangeZoneReverseAnimationDuration = duration; }
+    void setPageChangeZoneReverseAnimationDuration(int value) { SETVALUE(mPageChangeZoneReverseAnimationDuration, "pageChangeZoneReverseAnimationDuration") }
     int pageRemovedAnimationDuration() const { return mPageRemovedAnimationDuration; }
-    void setPageRemovedAnimationDuration(int duration) { mPageRemovedAnimationDuration = duration; }    
+    void setPageRemovedAnimationDuration(int value) { SETVALUE(mPageRemovedAnimationDuration, "pageRemovedAnimationDuration") }
     int newPageAddedAnimationDuration() const { return mNewPageAddedAnimationDuration; }
-    void setNewPageAddedAnimationDuration(int duration) { mNewPageAddedAnimationDuration = duration; }  
+    void setNewPageAddedAnimationDuration(int value) { SETVALUE(mNewPageAddedAnimationDuration, "newPageAddedAnimationDuration") }
     int widgetDragEffectDuration() const { return mWidgetDragEffectDuration; }
-    void setWidgetDragEffectDuration(int duration) { mWidgetDragEffectDuration = duration; }  
+    void setWidgetDragEffectDuration(int value) { SETVALUE(mWidgetDragEffectDuration, "widgetDragEffectDuration") }
     int widgetDropEffectDuration() const { return mWidgetDropEffectDuration; }
-    void setWidgetDropEffectDuration(int duration) { mWidgetDropEffectDuration = duration; }  
+    void setWidgetDropEffectDuration(int value) { SETVALUE(mWidgetDropEffectDuration, "widgetDropEffectDuration") }
     int defaultPageId() const { return mDefaultPageId; }
-    void setDefaultPageId(int id) { mDefaultPageId = id; }
+    void setDefaultPageId(int value) { SETVALUE(mDefaultPageId, "defaultPageId") }
     int maximumPageCount() const { return mMaximumPageCount; }
-    void setMaximumPageCount(int count) { mMaximumPageCount = count; }  
+    void setMaximumPageCount(int value) { SETVALUE(mMaximumPageCount, "maximumPageCount") }
     bool isShortcutLabelVisible() const { return mIsShortcutLabelVisible; }
-    void setShortcutLabelVisible(bool visible) { mIsShortcutLabelVisible = visible; }  
+    void setShortcutLabelVisible(bool value) { SETVALUE(mIsShortcutLabelVisible, "isShortcutLabelVisible") }
     qreal bounceFeedbackEffectDistance() const { return mBounceFeedbackEffectDistance; }
-    void setBounceFeedbackEffectDistance(qreal distance) { mBounceFeedbackEffectDistance = distance; }  
+    void setBounceFeedbackEffectDistance(qreal value) { SETVALUE(mBounceFeedbackEffectDistance, "bounceFeedbackEffectDistance") }
     qreal pageChangePanDistanceInPixels() const { return mPageChangePanDistanceInPixels; }
-    void setPageChangePanDistanceInPixels(qreal distance) { mPageChangePanDistanceInPixels = distance; }  
+    void setPageChangePanDistanceInPixels(qreal value) { SETVALUE(mPageChangePanDistanceInPixels, "pageChangePanDistanceInPixels") }
     qreal tapAndHoldDistance() const { return mTapAndHoldDistance; }
-    void setTapAndHoldDistance(qreal distance) { mTapAndHoldDistance = distance; }  
+    void setTapAndHoldDistance(qreal value) { SETVALUE(mTapAndHoldDistance, "tapAndHoldDistance") }
     qreal pageChangeZoneWidth() const { return mPageChangeZoneWidth; }
-    void setPageChangeZoneWidth(qreal width) { mPageChangeZoneWidth = width; }  
+    void setPageChangeZoneWidth(qreal value) { SETVALUE(mPageChangeZoneWidth, "pageChangeZoneWidth") }
     qreal pageIndicatorSpacing() const { return mPageIndicatorSpacing; }
-    void setPageIndicatorSpacing(qreal spacing) { mPageIndicatorSpacing = spacing; }
+    void setPageIndicatorSpacing(qreal value) { SETVALUE(mPageIndicatorSpacing, "pageIndicatorSpacing") }
     qreal maximumWidgetHeight() const { return mMaximumWidgetHeight; }
-    void setMaximumWidgetHeight(qreal height) { mMaximumWidgetHeight = height; }  
+    void setMaximumWidgetHeight(qreal value) { SETVALUE(mMaximumWidgetHeight, "maximumWidgetHeight") }
     qreal maximumWidgetWidth() const { return mMaximumWidgetWidth; }
-    void setMaximumWidgetWidth(qreal width) { mMaximumWidgetWidth = width; }  
+    void setMaximumWidgetWidth(qreal value) { SETVALUE(mMaximumWidgetWidth, "maximumWidgetWidth") }
     qreal minimumWidgetHeight() const { return mMinimumWidgetHeight; }
-    void setMinimumWidgetHeight(qreal height) { mMinimumWidgetHeight = height; }
+    void setMinimumWidgetHeight(qreal value) { SETVALUE(mMinimumWidgetHeight, "minimumWidgetHeight") }
     qreal minimumWidgetWidth() const { return mMinimumWidgetWidth; }
-    void setMinimumWidgetWidth(qreal width) { mMinimumWidgetWidth = width; }  
+    void setMinimumWidgetWidth(qreal value) { SETVALUE(mMinimumWidgetWidth, "minimumWidgetWidth") }
     qreal pageChangePanDistance() const { return mPageChangePanDistance; }
-    void setPageChangePanDistance(qreal distance) { mPageChangePanDistance = distance; }  
+    void setPageChangePanDistance(qreal value) { SETVALUE(mPageChangePanDistance, "pageChangePanDistance") }
     HbFeedback::InstantEffect pageChangeFeedbackEffect() const { return mPageChangeFeedbackEffect; }
-    void setPageChangeFeedbackEffect(HbFeedback::InstantEffect effect) { mPageChangeFeedbackEffect = effect; }   
+    void setPageChangeFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mPageChangeFeedbackEffect, "pageChangeFeedbackEffect") }
     HbFeedback::InstantEffect widgetPickFeedbackEffect() const { return mWidgetPickFeedbackEffect; }
-    void setWidgetPickFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetPickFeedbackEffect = effect; }  
+    void setWidgetPickFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetPickFeedbackEffect, "widgetPickFeedbackEffect") }
     HbFeedback::InstantEffect widgetDropFeedbackEffect() const { return mWidgetDropFeedbackEffect; }
-    void setWidgetDropFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetDropFeedbackEffect = effect; }  
+    void setWidgetDropFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetDropFeedbackEffect, "widgetDropFeedbackEffect") }
     HbFeedback::InstantEffect widgetRepositionFeedbackEffect() const { return mWidgetRepositionFeedbackEffect; }
-    void setWidgetRepositionFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetRepositionFeedbackEffect = effect; } 
+    void setWidgetRepositionFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetRepositionFeedbackEffect, "widgetRepositionFeedbackEffect") }
     HbFeedback::InstantEffect widgetOverTrashbinFeedbackEffect() const { return mWidgetOverTrashbinFeedbackEffect; }
-    void setWidgetOverTrashbinFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetOverTrashbinFeedbackEffect = effect; } 
+    void setWidgetOverTrashbinFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetOverTrashbinFeedbackEffect, "widgetOverTrashbinFeedbackEffect") }
     HbFeedback::InstantEffect widgetDropToTrashbinFeedbackEffect() const { return mWidgetDropToTrashbinFeedbackEffect; }
-    void setWidgetDropToTrashbinFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetDropToTrashbinFeedbackEffect = effect; } 
+    void setWidgetDropToTrashbinFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetDropToTrashbinFeedbackEffect, "widgetDropToTrashbinFeedbackEffect") }
     HbFeedback::InstantEffect shortcutWidgetTapFeedbackEffect() const { return mShortcutWidgetTapFeedbackEffect; }
-    void setShortcutWidgetTapFeedbackEffect(HbFeedback::InstantEffect effect) { mShortcutWidgetTapFeedbackEffect = effect; } 
+    void setShortcutWidgetTapFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mShortcutWidgetTapFeedbackEffect, "shortcutWidgetTapFeedbackEffect") }
     HbFeedback::InstantEffect widgetMoveBlockedFeedbackEffect() const { return mWidgetMoveBlockedFeedbackEffect; }
-    void setWidgetMoveBlockedFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetMoveBlockedFeedbackEffect = effect; } 
+    void setWidgetMoveBlockedFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetMoveBlockedFeedbackEffect, "widgetMoveBlockedFeedbackEffect") }
     HbFeedback::InstantEffect clockWidgetTapFeedbackEffect() const { return mClockWidgetTapFeedbackEffect; }
-    void setClockWidgetTapFeedbackEffect(HbFeedback::InstantEffect effect) { mClockWidgetTapFeedbackEffect = effect; } 
+    void setClockWidgetTapFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mClockWidgetTapFeedbackEffect, "clockWidgetTapFeedbackEffect") }
     HbFeedback::InstantEffect widgetSnappingFeedbackEffect() const { return mWidgetSnappingFeedbackEffect; }
-    void setWidgetSnappingFeedbackEffect(HbFeedback::InstantEffect effect) { mWidgetSnappingFeedbackEffect = effect; }
+    void setWidgetSnappingFeedbackEffect(HbFeedback::InstantEffect value) { SETVALUE(mWidgetSnappingFeedbackEffect, "widgetSnappingFeedbackEffect") }
     bool isSnapEnabled() const { return mIsSnapEnabled; }
-    void setSnapEnabled(bool enabled) { mIsSnapEnabled = enabled; }
+    void setSnapEnabled(bool value) { SETVALUE(mIsSnapEnabled, "isSnapEnabled") }
     int snapTimeout() const { return mSnapTimeout; }
-    void setSnapTimeout(int timeout) { mSnapTimeout = timeout; }
+    void setSnapTimeout(int value) { SETVALUE(mSnapTimeout, "snapTimeout") }
     qreal snapForce() const { return mSnapForce; }
-    void setSnapForce(qreal force) { mSnapForce = force; }  
+    void setSnapForce(qreal value) { SETVALUE(mSnapForce, "snapForce") }
     qreal snapGap() const { return mSnapGap; }
-    void setSnapGap(qreal gap) { mSnapGap = gap; }  
-    qreal snapBorderGap() const { return mSnapBorderGap; }
-    void setSnapBorderGap(qreal gap) { mSnapBorderGap = gap; }
+    void setSnapGap(qreal value) { SETVALUE(mSnapGap, "snapGap") }
+    qreal pageMargin() const { return mPageMargin; }
+    void setPageMargin(qreal value) { SETVALUE(mPageMargin, "pageMargin") }
     int snapLineFadeInDuration() const { return mSnapLineFadeInDuration; }
-    void setSnapLineFadeInDuration(int duration) { mSnapLineFadeInDuration = duration; }
+    void setSnapLineFadeInDuration(int value) { SETVALUE(mSnapLineFadeInDuration, "snapLineFadeInDuration") }
     int snapLineFadeOutDuration() const { return mSnapLineFadeOutDuration; }
-    void setSnapLineFadeOutDuration(int duration) { mSnapLineFadeOutDuration = duration; }
+    void setSnapLineFadeOutDuration(int value) { SETVALUE(mSnapLineFadeOutDuration, "snapLineFadeOutDuration") }
     bool isSnapEffectsEnabled() const { return mIsSnapEffectsEnabled; }
-    void setSnapEffectsEnabled(bool enabled) { mIsSnapEffectsEnabled = enabled; }
+    void setSnapEffectsEnabled(bool value) { SETVALUE(mIsSnapEffectsEnabled, "isSnapEffectsEnabled") }
     SceneType sceneType() const { return mSceneType; }
-    void setSceneType(SceneType type) { mSceneType = type; }
-     
+    void setSceneType(SceneType value) { SETVALUE(mSceneType, "sceneType") }
+#undef SETVALUE
+
     QSizeF minimumWidgetSizeInUnits() const;
     QSizeF maximumWidgetSizeInUnits() const;
     QSizeF minimumWidgetSizeInPixels() const;
     QSizeF maximumWidgetSizeInPixels() const;
-    
+
     bool load();
     bool importFromFile(const QString &path);
     bool exportToFile(const QString &path);
-        
+
     static HsConfiguration *instance();
     static HsConfiguration *takeInstance();
     static void setInstance(HsConfiguration *instance);
 
+signals:
+    void propertyChanged(const QString &name);
+
 private:
     Q_DISABLE_COPY(HsConfiguration)
-    
+
 private:
     int mBounceEffect;
     int mWidgetTapAndHoldTimeout;
@@ -230,7 +240,7 @@ private:
     int mSnapTimeout;
     qreal mSnapForce;
     qreal mSnapGap;
-    qreal mSnapBorderGap;
+    qreal mPageMargin;
     int mSnapLineFadeInDuration;
     int mSnapLineFadeOutDuration;
     bool mIsSnapEffectsEnabled;

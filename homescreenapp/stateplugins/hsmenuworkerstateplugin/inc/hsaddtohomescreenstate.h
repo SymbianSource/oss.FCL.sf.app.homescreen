@@ -27,6 +27,7 @@
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class QAction;
 class HbAction;
 class HbMessageBox;
 class CaEntry;
@@ -82,7 +83,7 @@ private:
 
     HbMessageBox *mCorruptedMessage;
 
-    HbAction *mConfirmAction;
+    QAction *mConfirmAction;
     
     HsMenuMode mMenuMode;
     

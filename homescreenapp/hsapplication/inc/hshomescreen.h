@@ -53,7 +53,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
-    void registerServicePlugins(QServiceManager &serviceManager);
+    void registerServicePlugins();
     void registerServicePlugins(const QString &root, QServiceManager &serviceManager);
 
 private slots:

@@ -59,13 +59,6 @@
 
 "/epoc32/release/armv5/urel/hsdomainmodel.dll" - "c:/sys/bin/hsdomainmodel.dll"
 
-; ---- runtimeplugins --------------------------------------------
-
-; -------- hsdefaultruntimeplugin
-"/epoc32/release/armv5/urel/hsdefaultruntimeplugin.dll"     - "c:/sys/bin/hsdefaultruntimeplugin.dll"
-"/epoc32/data/z/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.qtplugin" - "c:/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.qtplugin"
-"/epoc32/data/z/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.manifest"  - "c:/hsresources/plugins/runtimeplugins/hsdefaultruntimeplugin.manifest"
-
 ; ---- serviceproviders --------------------------------------------
 
 ; -------- hsmenuserviceprovider

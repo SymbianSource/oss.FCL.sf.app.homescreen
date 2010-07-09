@@ -14,10 +14,14 @@
 # Description:
 #
 
-HEADERS += ./inc/hshomescreen.h
+HEADERS += ./inc/hshomescreen.h \
+           ./inc/hsstatemachine.h
 SOURCES += ./src/hshomescreen.cpp \
+           ./src/hsstatemachine.cpp \        
            ./src/main.cpp
 symbian:{
-    HEADERS += ./inc/hshomescreenclientserviceprovider.h
-    SOURCES += ./src/hshomescreenclientserviceprovider.cpp 
+    HEADERS += ./inc/hshomescreenclientserviceprovider.h \
+               ./inc/hsrecoverymanager.h
+    SOURCES += ./src/hshomescreenclientserviceprovider.cpp \
+               ./src/hsrecoverymanager.cpp
 }

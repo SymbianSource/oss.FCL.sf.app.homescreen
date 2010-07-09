@@ -26,6 +26,7 @@
 
 #include "hshomescreen.h"
 #include "hstest_global.h"
+#include "hsstatemachine.h"
 #ifdef Q_OS_SYMBIAN
 #include "hshomescreenclientserviceprovider.h"
 #endif
@@ -35,8 +36,7 @@ QTM_USE_NAMESPACE
     \class HsHomeScreen
     \ingroup group_hsapplication
     \brief Homescreen application main class.
-    Loads a runtime from a runtime provider plugin. Manages
-    the state machine execution.
+    Manages the state machine execution.
 */
 
 /*!
@@ -52,34 +52,17 @@ HsHomeScreen::HsHomeScreen(QObject *parent)
 {
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::HsHomeScreen");
 
-    QServiceManager serviceManager;
-
-    registerServicePlugins(serviceManager);
+    registerServicePlugins();
     
-    QServiceFilter filter("com.nokia.symbian.IHomeScreenRuntime");
-    QList<QServiceInterfaceDescriptor> interfaces = serviceManager.findInterfaces(filter);
+    mRuntime = new HsStateMachine(this);
 
-    if (interfaces.isEmpty()) {
-        emit exit();
-        return;
-    }
-
-    QObject *object = serviceManager.loadInterface(interfaces.first().interfaceName());
-    mRuntime = qobject_cast<QStateMachine *>(object);
-
-    if (mRuntime) {
-        mRuntime->setParent(this);
-        connect(mRuntime, SIGNAL(started()), SLOT(onRuntimeStarted()));
-        connect(mRuntime, SIGNAL(stopped()), SLOT(onRuntimeStopped()));
-        hbInstance->allMainWindows().first()->installEventFilter(this);
+    connect(mRuntime, SIGNAL(started()), SLOT(onRuntimeStarted()));
+    connect(mRuntime, SIGNAL(stopped()), SLOT(onRuntimeStopped()));
+    hbInstance->allMainWindows().first()->installEventFilter(this);
 #ifdef Q_OS_SYMBIAN
-        mHomeScreenClientServiceProvider = new HsHomeScreenClientServiceProvider;
-        mHomeScreenClientServiceProvider->setParent(this);
+    mHomeScreenClientServiceProvider = new HsHomeScreenClientServiceProvider;
+    mHomeScreenClientServiceProvider->setParent(this);
 #endif
-    } else {
-        delete object;
-        emit exit();
-    }
 
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::HsHomeScreen");
 }
@@ -97,26 +80,21 @@ HsHomeScreen::~HsHomeScreen()
 */
 
 /*!
-    Starts the runtime.
+    Starts the state machine.
 */
 void HsHomeScreen::start()
 {
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::start");
-    if (mRuntime) {
-        mRuntime->start();
-    } else {
-        HSTEST_FUNC_EXIT("HS::HsHomeScreen::start, mRuntime not created, exit application");
-        emit exit();
-    }
+    mRuntime->start();
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::start");
 }
 
 /*!
-    Stops the runtime.
+    Stops the state machine.
 */
 void HsHomeScreen::stop()
 {
-	if (mRuntime && mRuntime->isRunning()) {
+	if (mRuntime->isRunning()) {
         QEventLoop eventLoop;
         connect(mRuntime, SIGNAL(finished()), &eventLoop, SLOT(quit()));
         QMetaObject::invokeMethod(mRuntime, "event_exit", Qt::QueuedConnection);
@@ -137,14 +115,14 @@ bool HsHomeScreen::eventFilter(QObject *watched, QEvent *event)
 }
 
 /*!
-    Called after the runtime has started.
+    Called after the state machine has started.
 */
 void HsHomeScreen::onRuntimeStarted()
 {
 }
 
 /*!
-    Called after the runtime has stopped.
+    Called after the state machine has stopped.
 */
 void HsHomeScreen::onRuntimeStopped()
 {
@@ -154,9 +132,12 @@ void HsHomeScreen::onRuntimeStopped()
 /*!
     Registers service plugins pre-installed on the device.
 */
-void HsHomeScreen::registerServicePlugins(QServiceManager &serviceManager)
-{
+void HsHomeScreen::registerServicePlugins()
+{    
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::registerServicePlugins()");
+    
+    QServiceManager serviceManager;
+    
     QStringList pluginPaths;
     
     pluginPaths << "private/20022F35";    

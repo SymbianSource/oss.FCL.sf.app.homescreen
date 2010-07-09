@@ -17,14 +17,13 @@
 
 #include <qstatemachine.h>
 #include <hblabel.h>
-#include <hsiwidgetprovider.h>
 #include <hsshortcutservice.h>
 #include <hscontentservice.h>
 #include <hbmessagebox.h>
 #include <hbaction.h>
 #include <hbnotificationdialog.h>
 #include <hsmenueventfactory.h>
-
+#include "hsmenudialogfactory.h"
 #include "hsaddtohomescreenstate.h"
 #include "hsmenuevent.h"
 #include "canotifier.h"
@@ -163,21 +162,9 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
 
-    mCorruptedMessage = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-    mCorruptedMessage->setAttribute(Qt::WA_DeleteOnClose);
-
-    QString message(hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
-    mCorruptedMessage->setText(message);
-
-    mCorruptedMessage->clearActions();
-    mConfirmAction = new HbAction(hbTrId("txt_common_button_ok"), 
-                                  mCorruptedMessage);
-    mCorruptedMessage->addAction(mConfirmAction);
-
-    HbAction *secondaryAction = new HbAction(
-            hbTrId("txt_common_button_cancel"), mCorruptedMessage);
-    mCorruptedMessage->addAction(secondaryAction);
-
+    mCorruptedMessage = HsMenuDialogFactory().create(
+            hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
+    mConfirmAction = mCorruptedMessage->actions().value(0);
     mCorruptedMessage->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
 
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
@@ -190,7 +177,7 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 void HsAddToHomeScreenState::messageWidgetCorruptedFinished
         (HbAction* finishedAction)
 {
-    if (finishedAction == mConfirmAction) {
+    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
         HsMenuService::executeAction(mEntryId, removeActionIdentifier());
     }
     emit exit();
@@ -198,6 +185,7 @@ void HsAddToHomeScreenState::messageWidgetCorruptedFinished
         machine()->postEvent(
             HsMenuEventFactory::createOpenHomeScreenEvent());
     }
+    mConfirmAction = NULL;
 }
 
 

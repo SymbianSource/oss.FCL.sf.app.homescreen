@@ -78,7 +78,7 @@
  */
 HsArrangeState::HsArrangeState(QState *parent) :
     QState(parent), mDialog(0), mEntriesList(0), 
-    mItemModel(0)
+    mItemModel(0),mCollectionId(0)
 {
     construct();
 }
@@ -119,9 +119,10 @@ void HsArrangeState::save(const HbListWidget& listWidget)
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::save");
 
     getArrangedEntriesIds(listWidget);
-    if (mArrangedCollIdList != mCollIdList) {
+    if (mArrangedCollItemIdList != mCollItemIdList) {
         HsMenuService::organizeCollection(
-            HsMenuService::allCollectionsId(), mArrangedCollIdList);
+            mCollectionId,
+            mArrangedCollItemIdList);
     }
 
     HSMENUTEST_FUNC_EXIT("HsArrangeState::save");
@@ -156,9 +157,22 @@ void HsArrangeState::onEntry(QEvent *event)
     mDialog = qobject_cast<HbDialog*>(
             loader.findWidget(HS_ARRANGE_DIALOG_NAME));
 
-    if (mEntriesList != NULL && mDialog != NULL) {
+    if (mEntriesList && mDialog) {
+        switch (menuEvent->operation()) {
+        case HsMenuEvent::ArrangeCollection:
+            mCollectionId = data.value(collectionIdKey()).toInt();
+            mItemModel = HsMenuService::getCollectionModel(
+                mCollectionId,
+                NoHsSortAttribute);
+            break;
+        case HsMenuEvent::ArrangeAllCollections:
+            mCollectionId = HsMenuService::allCollectionsId();
+            mItemModel = HsMenuService::getAllCollectionsModel();
+            break;
+        default:
+            break;
+        }
 
-        mItemModel = HsMenuService::getAllCollectionsModel();
         // as we copy the model contents to the list widget
         // we do not need the model to auto update
         mItemModel->setAutoUpdate(false);
@@ -171,7 +185,7 @@ void HsArrangeState::onEntry(QEvent *event)
         mEntriesList->setArrangeMode(true);
     
         mDialog->setTimeout(HbPopup::NoTimeout);
-        mDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+        mDialog->setAttribute(Qt::WA_DeleteOnClose);
 
         mDialog->setPreferredSize(
             HbInstance::instance()->allMainWindows().at(0)->size());
@@ -201,7 +215,8 @@ void HsArrangeState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::stateExited");
     if (mDialog) {
-        disconnect(mDialog, SIGNAL(finished(HbAction*)), this, SLOT(arrangeDialogFinished(HbAction*)));
+        disconnect(mDialog, SIGNAL(finished(HbAction*)),
+        this, SLOT(arrangeDialogFinished(HbAction*)));
         mDialog->close();
         mDialog = NULL;
     }
@@ -212,8 +227,8 @@ void HsArrangeState::stateExited()
     delete mItemModel;
     mItemModel = NULL;
 
-    mArrangedCollIdList.clear();
-    mCollIdList.clear();
+    mArrangedCollItemIdList.clear();
+    mCollItemIdList.clear();
 
     HSMENUTEST_FUNC_EXIT("HsArrangeState::stateExited");
     qDebug("HsArrangeState::stateExited()");
@@ -235,7 +250,7 @@ void HsArrangeState::fulfillEntriesList(HbListWidget& listWidget)
         int itemId = mItemModel->data(idx, CaItemModel::IdRole).toInt();
         widgetItem->setData(mItemModel->data(idx, CaItemModel::IdRole),
                             CaItemModel::IdRole);
-        mCollIdList.append(itemId);
+        mCollItemIdList.append(itemId);
         widgetItem->setData(mItemModel->data(idx, Qt::DisplayRole),
                             Qt::DisplayRole);
         widgetItem->setData(mItemModel->data(idx, Qt::DecorationRole),
@@ -259,6 +274,6 @@ void HsArrangeState::getArrangedEntriesIds(const HbListWidget& listWidget)
     for (int i(0); i < listWidget.count(); ++i) {
         HbListWidgetItem *widgetItem = listWidget.item(i);
         QVariant entryId = widgetItem->data(CaItemModel::IdRole);
-        mArrangedCollIdList.append(entryId.toInt());
+        mArrangedCollItemIdList.append(entryId.toInt());
     }
 }

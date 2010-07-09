@@ -58,19 +58,19 @@
  to remove from list.
  \retval void
  */
-HsCollectionsListDialog::HsCollectionsListDialog(HsSortAttribute sortOrder,
-        int collectionId) :
+HsCollectionsListDialog::HsCollectionsListDialog(int collectionId) :
     HbSelectionDialog(), mItemId(0)
 {
     clearActions();
-    HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"), this);
+    HbAction *cancelAction = new HbAction(
+        hbTrId("txt_common_button_cancel"), this);
     addAction(cancelAction);
 
     setHeadingWidget(new HbLabel(hbTrId("txt_applib_title_add_to")));
     // it must be single selection, although it shows checkboxes -
     // it is Orbit defect and will be fixed in next release
     setSelectionMode(HbAbstractItemView::SingleSelection);
-    mModel = standartItemModel(sortOrder, collectionId);
+    mModel = standardItemModel(collectionId);
     setModel(mModel);
 }
 
@@ -96,7 +96,7 @@ void HsCollectionsListDialog::open(QObject* receiver, const char* member)
     \reimp
     Disconnects signals and calls base class impl. which emits finished(HbAction*)
  */
-void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
+void HsCollectionsListDialog::closeEvent (QCloseEvent * event)
 {
     qDebug("HsCollectionsListDialog::closeEvent");
     HbAction *closingAction = qobject_cast<HbAction *>(sender());
@@ -118,12 +118,12 @@ void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
  \param collectionId id of collection to remove from model.
  \return QStandardItemModel - caller takes ownership.
  */
-QStandardItemModel *HsCollectionsListDialog::standartItemModel(
-    HsSortAttribute sortOrder, int collectionId)
+QStandardItemModel *HsCollectionsListDialog::standardItemModel(
+    int collectionId)
 {
     HSMENUTEST_FUNC_ENTRY("HsListDialog::standartItemModel");
     QScopedPointer<HsMenuItemModel> caModel(
-        HsMenuService::getAllCollectionsModel(sortOrder));
+        HsMenuService::getAllCollectionsModel());
     caModel->setSecondLineVisibility(false);
     QStandardItemModel *model = new QStandardItemModel(this);
     QList<QStandardItem *> items;

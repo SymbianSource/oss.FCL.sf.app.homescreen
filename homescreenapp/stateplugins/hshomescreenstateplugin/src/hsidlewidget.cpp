@@ -216,6 +216,7 @@ void HsIdleWidget::removePage(int index)
         mPageWallpaperLayer->resize(
             layout->count() * size().width(), size().height());
     }
+    mPageIndicator->removeItem(index);
 }
 
 /*!

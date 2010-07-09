@@ -20,17 +20,20 @@
 #define HSPREVIEWHSWIDGETSTATE_H
 
 #include <QState>
+#include <QVariant>
 
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class QAction;
+class HbAction;
 class CaEntry;
 class HbDialog;
 class HsWidgetHost;
 class CaNotifier;
-class HbAction;
 class HbScrollArea;
 class HbMessageBox;
+
 
 class HsPreviewHSWidgetState : public QState
 {
@@ -71,11 +74,15 @@ private:
 
     CaNotifier *mNotifier;
 
-    QScopedPointer<HsWidgetHost> mWidget;
-
     int mEntryId;
 
     HbMessageBox *mCorruptedMessage;
+
+    QAction *mConfirmAction;
+
+    QVariant mToken;
+    
+    QString mUri;
 };
 
 

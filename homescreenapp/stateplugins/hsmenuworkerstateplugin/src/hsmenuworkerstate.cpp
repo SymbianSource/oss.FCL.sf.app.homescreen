@@ -28,6 +28,7 @@
 #include "hspreviewhswidgetstate.h"
 #include "hsviewappsettingsstate.h"
 #include "hsviewappdetailsstate.h"
+#include "hsinstallationlogstate.h"
 
 /*!
  \class HsMenuWorkerState
@@ -79,7 +80,9 @@ void HsMenuWorkerState::construct()
     createChildState<HsUninstallItemState> (
         HsMenuEvent::UninstallApplication);
     createChildState<HsArrangeState> (HsMenuEvent::ArrangeCollection);
+    createChildState<HsArrangeState> (HsMenuEvent::ArrangeAllCollections);
 
+    
     // create a new child state based on the template
     HsCollectionNameState *newChildState = new HsCollectionNameState(this);
     // create a transition to the new child state which will be triggered by
@@ -95,7 +98,8 @@ void HsMenuWorkerState::construct()
     mInitialState->addTransition(createCollectionTransition);
     // set a transition to the initial state after child processing finished
     newChildState->addTransition(newChildState, SIGNAL(exit()), mInitialState);
-
+    connect(this, SIGNAL(reset()), newChildState, SIGNAL(exit()));
+    
     HsAddAppsToCollectionState *addAppsToCollectionState =
         new HsAddAppsToCollectionState(this);
     // create a transition to the new child state which will be triggered by
@@ -108,9 +112,12 @@ void HsMenuWorkerState::construct()
     addAppsToCollectionState->addTransition(addAppsToCollectionState,
                                             SIGNAL(finished()), mInitialState);
     connect(this, SIGNAL(reset()), addAppsToCollectionState, SIGNAL(finished()));
+    
+    
     createChildState<HsPreviewHSWidgetState> (HsMenuEvent::PreviewHSWidget);
     createChildState<HsViewAppSettingsState> (HsMenuEvent::ShowAppSettings);
     createChildState<HsViewAppDetailsState> (HsMenuEvent::ShowAppDetails);
+    createChildState<HsInstallationLogState> (HsMenuEvent::ShowInstallationLog);
 
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::construct");
 }

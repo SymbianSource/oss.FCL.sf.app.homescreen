@@ -308,15 +308,6 @@ inline const QString translationFilename()
 }
 
 /*!
-    \return app lib activity name
-*/
-inline const QString appLibActivity()
-{
-    static const QString key("AppLibMainView");
-    return key;
-}
-
-/*!
     \return homescreen activitity name to open idle iew
 */
 inline const QString activityHsIdleView()

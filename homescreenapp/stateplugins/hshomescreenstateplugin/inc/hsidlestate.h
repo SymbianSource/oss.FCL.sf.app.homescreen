@@ -44,6 +44,9 @@ class XQSettingsManager;
 #endif
 
 class HsWidgetHost;
+class HsPage;
+class HsMessageBoxWrapper;
+class HsPropertyAnimationWrapper;
 
 class HsIdleState : public QState
 {
@@ -60,6 +63,7 @@ signals:
     void event_moveScene();
     void event_selectWallpaper();
     void event_addPage();
+    void event_preRemovePage();
     void event_removePage();
     void event_toggleConnection();
 
@@ -78,8 +82,6 @@ private:
     void addPageToScene(int pageIndex);    
     void updateZoneAnimation();
     void showTrashBin();
-    void removeActivePage();
-    void deleteZoneAnimation();
     QList<QRectF> createInactiveWidgetRects();
     void updatePagePresentationToWidgetSnap();
     void resetSnapPosition();
@@ -117,6 +119,8 @@ private slots:
     void action_moveScene_moveToNearestPage();
     void action_moveScene_disconnectGestureHandlers();    
     void action_addPage_addPage();
+    void action_preRemovePage_showQuery();
+    void action_removePage_startRemovePageAnimation();
     void action_removePage_removePage();
     void action_toggleConnection_toggleConnection();
     void action_idle_setupTitle();
@@ -136,18 +140,17 @@ private slots:
     bool openTaskSwitcher();
     void zoneAnimationFinished();
     void pageChangeAnimationFinished();
-    void onRemovePageConfirmationOk();
     void onVerticalSnapLineTimerTimeout();
     void onHorizontalSnapLineTimerTimeout();
     void onActivePageChanged();
-
+   
 private:
     HbAction *mNavigationAction;
     HsIdleWidget *mUiWidget;  
     HsTitleResolver *mTitleResolver;
     QPropertyAnimation *mZoneAnimation;
     bool mAllowZoneAnimation;
-    QPropertyAnimation *mPageChangeAnimation;
+    HsPropertyAnimationWrapper *mPageChangeAnimation;
     HbContinuousFeedback *mContinuousFeedback;
     bool mTrashBinFeedbackAlreadyPlayed;    
     QPointF mPageHotSpot;
@@ -157,12 +160,13 @@ private:
     QPointer<HbMenu> mSceneMenu;
     HsWidgetPositioningOnWidgetMove::Result mSnapResult;
     HsWidgetPositioningOnWidgetMove::Result mPreviousSnapResult;
-    qreal mSnapBorderGap;
     QTimer mVerticalSnapLineTimer;
-    QTimer mHorizontalSnapLineTimer;
+    QTimer mHorizontalSnapLineTimer; 
 #ifdef Q_OS_SYMBIAN    
     XQSettingsManager *mSettingsMgr;
 #endif    
+    HsMessageBoxWrapper *mMessageBoxWrapper;
+
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };
 

@@ -47,7 +47,7 @@ inline const QString appSettingsPlugin();
 inline const QString groupNameAttributeName();
 inline const QString componentIdAttributeName();
 inline const QString entryShortName();
-inline const QString appLibActivity();
+
 // Sort attribute
 enum HsSortAttribute {
     NoHsSortAttribute,

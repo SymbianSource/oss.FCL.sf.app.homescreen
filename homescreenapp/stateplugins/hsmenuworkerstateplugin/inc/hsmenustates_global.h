@@ -60,6 +60,10 @@ static const char *const HS_UNINSTALL_DIALOG_LIST_VIEW_LABEL ="list_view_label";
 static const char *const HS_UNINSTALL_DIALOG_CONFIRMATION_ACTION ="qtl_dialog_softkey_2_left";
 static const char *const HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_ICON ="icon";
 
+static const char *const HS_INSTALLATION_LOG_DIALOG_LAYOUT =":/xml/hsinstallationlogdialog.docml";
+static const char *const HS_INSTALLATION_LOG_DIALOG_NAME="installation_log_dialog";
+static const char *const HS_INSTALLATION_LOG_DIALOG_LOG_LABEL="log_label";
+
 
 /*!
  To enable logging of function entry and exit use the following flag for qmake:

@@ -18,7 +18,6 @@ TEMPLATE = subdirs
 
 SUBDIRS  += hsutils \
             hsdomainmodel \
-            runtimeplugins \
             serviceproviders \
             stateplugins \
             widgetplugins \
@@ -27,7 +26,8 @@ SUBDIRS  += hsutils \
 
 symbian: {
 SUBDIRS  += hshomescreenclientplugin \
-            hswidgetuninstaller
+            hswidgetuninstaller \
+            hsapplicationlauncher
 }
 
 SUBDIRS  += ./../tsrc

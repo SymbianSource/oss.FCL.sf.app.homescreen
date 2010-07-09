@@ -11,21 +11,20 @@
         <widget name="label" role="HbDialog:headingWidget" type="HbLabel"/>
         <widget name="container" role="HbDialog:contentWidget" type="HbWidget">
             <widget name="icon_box" type="HbLabel">
-                <enums name="alignment" value="AlignHCenter|AlignTop"/>
+                <enums name="alignment" value="AlignAbsolute|AlignVCenter|AlignHCenter"/>
                 <enums name="aspectRatioMode" value="KeepAspectRatio"/>
-                <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Minimum" verticalStretch="0"/>
-                <sizehint height="32un" type="PREFERRED"/>
-                <sizehint height="var(hb-param-text-height-secondary)" type="MINIMUM" width="32un"/>
-                <contentsmargins bottom="0un" left="0un" right="0un" top="expr(var(hb-param-margin-gene-popup) )"/>
-                <sizehint type="MAXIMUM" width="32un"/>
+                <sizehint height="var(hb-param-text-height-secondary)" type="MINIMUM"/>
+                <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                 <string locid="txt_applib_info_no_preview_available" name="plainText"/>
                 <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
             </widget>
+            
             <real name="z" value="0"/>
-            <layout orientation="Horizontal" type="linear">
-                <stretchitem stretchfactor="1"/>
-                <linearitem itemname="icon_box"/>
-                <stretchitem stretchfactor="1"/>
+           <layout type="anchor">
+                <anchoritem dst="icon_box" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
+                <anchoritem dst="icon_box" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="TOP"/>
+                <anchoritem dst="icon_box" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="icon_box" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
         <ref object="add_to_homescreen" role="HbWidget:addAction"/>

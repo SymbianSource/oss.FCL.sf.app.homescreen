@@ -63,6 +63,8 @@ void HsMenuViewBuilder::searchPanelVisibilityChange(bool visible)
 
         lineEdit->setText("");
         lineEdit->setFocus();
+        lineEdit->setInputMethodHints(Qt::ImhNoPredictiveText | 
+            Qt::ImhNoAutoUppercase);
     } 
 
 }

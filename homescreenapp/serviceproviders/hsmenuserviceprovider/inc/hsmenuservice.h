@@ -40,8 +40,7 @@ public:
     // Function declarations
     static HsMenuItemModel *getAllApplicationsModel(
         HsSortAttribute sortAttribute = DescendingNameHsSortAttribute);
-    static HsMenuItemModel *getAllCollectionsModel(
-        HsSortAttribute sortAttribute = LatestOnTopHsSortAttribute);
+    static HsMenuItemModel *getAllCollectionsModel();
     static HsMenuItemModel *getInstalledModel(
         HsSortAttribute sortAttribute = DescendingNameHsSortAttribute);
     static HsMenuItemModel *getCollectionModel(int collectionId,

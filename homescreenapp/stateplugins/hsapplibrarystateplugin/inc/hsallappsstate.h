@@ -18,10 +18,7 @@
 #ifndef HSALLAPPSSTATE_H
 #define HSALLAPPSSTATE_H
 
-#include <qstate.h>
-#include <QModelIndex>
-#include <QPointer>
-
+#include <QState>
 #include "hsbaseviewstate.h"
 #include "hsmenumodewrapper.h"
 
@@ -29,8 +26,6 @@
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbView;
-class HbAction;
-class HbMenu;
 class HbAbstractViewItem;
 class QPointF;
 class HsMenuViewBuilder;
@@ -52,22 +47,13 @@ public:
 signals:
     void toAppLibraryState();
 
-public slots:
-    void scrollToBeginning();
-    void collectionsSortOrder(HsSortAttribute sortAttribute);
 private slots:
-    bool openTaskSwitcher();
-    int checkSoftwareUpdates();
-    void listItemActivated(const QModelIndex &index);
     void addActivated(const QModelIndex &index);
-    void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addToCollection();
     void openInstalledView();
     void ascendingMenuAction();
     void descendingMenuAction();
-    void stateEntered();
-    void addModeEntered();
     void normalModeEntered();
     void stateExited();
     void contextMenuAction(HbAction *action);
@@ -75,17 +61,10 @@ private:
     void construct();
     void setMenuOptions();
     void addToHomeScreen(const QModelIndex &index);
-private:
-    HbAction *mSecondarySoftkeyAction;
-    HsSortAttribute mSortAttribute;
-    HsSortAttribute mCollectionsSortAttribute;
-    HsMenuView mMenuView;
-    HsMenuModeWrapper &mMenuMode;
-    HsMenuItemModel *mAllAppsModel;
-    HsMainWindow &mMainWindow;
-    QModelIndex mContextModelIndex;
-    QPointer<HbMenu> mContextMenu;
+    void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
 
+private:
+    HsSortAttribute mSortAttribute;
 };
 
 #endif // HSALLAPPSSTATE_H

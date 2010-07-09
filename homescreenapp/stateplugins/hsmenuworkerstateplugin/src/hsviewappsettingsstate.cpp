@@ -116,8 +116,7 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
     mActionConfirm = new HbAction(Hb::ConfirmNaviAction, mView);
     connect(mActionConfirm, SIGNAL(triggered()),SLOT(settingsDone()));
     
-    if(mView)
-        {    
+    if (mView) {    
         subscribeForMemoryCardRemove(entryId);
         QObject::connect(this, SIGNAL(initialize(QString)), mView, SLOT(initialize(QString)));        
         mView->setParent(this);
@@ -132,7 +131,7 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
         mPreviousView = hbMainWindow->currentView();
         hbMainWindow->setCurrentView(mView);
         hbMainWindow->show();
-        }
+    }
 
     
     HSMENUTEST_FUNC_EXIT("HsViewAppSettingsState::onEntry");

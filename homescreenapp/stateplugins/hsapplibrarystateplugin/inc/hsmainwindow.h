@@ -20,31 +20,20 @@
 
 #include <QObject>
 #include <QPixmap>
+#include "hsmenustates_global.h"
+
+HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HsMenuView;
-class HsMainWindow: public QObject
+class HsMainWindow
 {
-    Q_OBJECT
-    
+
 public:
     HsMainWindow();
     virtual ~HsMainWindow();
 
-    virtual void setCurrentView(const HsMenuView &menuView);
-    virtual QPixmap grabScreenshot();
-       
-    public slots:
-    virtual void saveActivity();
-    
-    signals:
-    void viewIsReady();
-    
-    private:
-    /*
-     * not owned
-     * 
-     */
-    QObject* mActivityClient;
+    virtual void setCurrentView(const HsMenuView &menuView);     
+
 };
 
 #endif // HS_MAIN_WINDOW_H

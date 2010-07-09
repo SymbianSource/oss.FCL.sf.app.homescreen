@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QModelIndex>
 #include <QAbstractItemView>
+#include <QScopedPointer>
 #include <QSortFilterProxyModel>
 #include <HbAbstractItemView>
 #include "hsmenustates_global.h"
@@ -36,7 +37,7 @@ class HbAbstractItemView;
 class HbListView;
 class HbGroupBox;
 class HbWidget;
-class HbStaticVkbHost;
+class HbShrinkingVkbHost;
 class HsMenuItemModel;
 
 
@@ -89,9 +90,6 @@ private slots:
                          QAbstractItemView::PositionAtTop);
     void findItem(QString criteriaStr);
 
-    void vkbOpened();
-    void vkbClosed();
-
 private:
 
     QModelIndex firstVisibleItemIndex(const HbListView *view) const;
@@ -123,7 +121,7 @@ private:
 
     HbListView *mSearchListView;
     HbSearchPanel *mSearchPanel;
-    HbStaticVkbHost* mVkbHost;
+    QScopedPointer<HbShrinkingVkbHost> mVkbHost;
 
     HbPushButton *mCollectionButton;
 

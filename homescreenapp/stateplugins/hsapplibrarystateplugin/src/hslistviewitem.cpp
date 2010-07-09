@@ -62,17 +62,23 @@ void HsListViewItem::updateChildItems()
         if (!progress) {
             progress = new HbProgressBar(this);
             progress->setRange(0, 100);
+            HbEffect::disable(progress);
             repolish();
         }
         int progresVal = modelIndex().data(
                 CaItemModel::UninstalRole).toInt();
         progress->setProgressValue(progresVal);
         HbStyle::setItemName(progress, "progress");         
+        if (!progress->isVisible()) {
+            progress->setVisible(!progress->isVisible());
+            repolish();
+        }    
     } else if (progress) {       
         HbStyle::setItemName(progress, "");
-        delete progress;
-        progress = 0;
-        repolish();
+        if (progress->isVisible()) {
+            progress->setVisible(!progress->isVisible());
+            repolish();
+        } 
     }
     // hide text-2 if we have to 
     foreach (QGraphicsItem * item, this->childItems()) {

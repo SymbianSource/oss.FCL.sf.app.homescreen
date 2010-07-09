@@ -23,6 +23,7 @@
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class QAction;
 class HbAction;
 class HbMessageBox;
 class HsShortcutService;
@@ -66,7 +67,7 @@ private:
 
     HbMessageBox *mDeleteMessage; // deletes itself automatically on close
 
-    HbAction *mConfirmAction; // child for mDeleteMessage
+    QAction *mConfirmAction; // child for mDeleteMessage
 
 };
 

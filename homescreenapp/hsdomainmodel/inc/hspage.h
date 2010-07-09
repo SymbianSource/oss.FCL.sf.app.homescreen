@@ -18,6 +18,7 @@
 #ifndef HSPAGE_H
 #define HSPAGE_H
 
+#include <QPointF>
 #include <HbWidget>
 #include <HbIconItem>
 #include "hsdomainmodel_global.h"
@@ -38,44 +39,35 @@ class HSDOMAINMODEL_EXPORT HsPage : public HbWidget
 public:
     HsPage(QGraphicsItem *parent = 0);
     ~HsPage();
-
     int databaseId() const;
     void setDatabaseId(int id);
-
     void setGeometry(const QRectF &rect);
-
     bool load();
-
     HsWallpaper *wallpaper() const;
-
     bool addExistingWidget(HsWidgetHost *widgetHost);
     bool removeWidget(HsWidgetHost *widgeHost);
-
     QList<HsWidgetHost *> newWidgets();
     bool addNewWidget(HsWidgetHost *widgetHost, const QPointF &position = QPointF());
     void layoutNewWidgets();
     void resetNewWidgets();
     bool deleteFromDatabase();
-
     QList<HsWidgetHost *> widgets() const;
-
     bool isRemovable() const;
     void setRemovable(bool removable);
-
     bool isDefaultPage() const;
     bool isActivePage() const;
-    
     static HsPage *createInstance(const HsPageData &pageData);
-
-    QPointF mTouchPoint;
+    QPointF adjustedWidgetPosition(const QRectF &origWidgetRect);
+    QRectF contentGeometry();
+    QRectF contentGeometry(Qt::Orientation orientation);
+    QRectF contentRect();
+    QRectF contentRect(Qt::Orientation orientation);
 
 public slots:
     void showWidgets();
     void hideWidgets();
     void setOnline(bool online = true);
-
     void updateZValues();
-
     int pageIndex();
 
 private:
@@ -90,8 +82,8 @@ private slots:
     void onWidgetResized();
     void onWidgetAvailable();
     void onWidgetUnavailable();
-
     void onOrientationChanged(Qt::Orientation orientation);
+    void onPageMarginChanged(const QString &value);
 
 private:
     int mDatabaseId;
@@ -101,7 +93,8 @@ private:
     QList<HsWidgetHost*> mNewWidgets;
     QList<HsWidgetHost*> mUnavailableWidgets;
     HsPageTouchArea *mTouchArea;
-    
+    QPointF mTouchPoint;    
+    qreal mPageMargin;
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 

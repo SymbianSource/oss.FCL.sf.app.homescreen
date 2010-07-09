@@ -28,7 +28,7 @@
 #include <HbToolBar>
 #include <HbView>
 #include <HbToolBarExtension>
-#include <HbStaticVkbHost>
+#include <HbShrinkingVkbHost>
 
 #include "hsallappsstate.h"
 #include "hsallcollectionsstate.h"
@@ -65,7 +65,7 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext):
     mListView(NULL),
     mViewLabel(NULL),
     mSearchListView(NULL),
-    mSearchPanel(NULL), 
+    mSearchPanel(NULL),
     mVkbHost(NULL)
 {
     mBuilder.setOperationalContext(HsItemViewContext);
@@ -83,9 +83,7 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext):
     mProxyModel->setFilterKeyColumn(1);
     mProxyModel->setSortRole(CaItemModel::TextRole);
 
-    mVkbHost = new HbStaticVkbHost(mView);
-    connect(mVkbHost, SIGNAL(keypadOpened()), this, SLOT(vkbOpened()));
-    connect(mVkbHost, SIGNAL(keypadClosed()), this, SLOT(vkbClosed()));
+    mVkbHost.reset(new HbShrinkingVkbHost(mView));
 
     connect(mListView,
             SIGNAL(activated(QModelIndex)),
@@ -367,27 +365,17 @@ void HsMenuView::disconnectSearchPanelSignals()
  */
 void HsMenuView::findItem(QString criteriaStr)
 {
-    qDebug
-    () << QString("hsmenuview::findItem: %1").arg(criteriaStr);
+   qDebug() << QString("hsmenuview::findItem: %1").arg(criteriaStr);
     HSMENUTEST_FUNC_ENTRY("hsmenuview::findItem");
 
-    if ("" != criteriaStr) {
-        mProxyModel->invalidate();
-        mProxyModel->setSourceModel(mListView->model());
-        mProxyModel->setFilterRegExp(QRegExp(
-                QString("(^|\\b)%1").arg(criteriaStr), Qt::CaseInsensitive));
-        mSearchListView->scrollTo(mProxyModel->index(0,0),
-                                  HbAbstractItemView::PositionAtTop);
-    } else {
-        mProxyModel->setFilterRegExp(QRegExp(QString(".*"),
-                                             Qt::CaseInsensitive, QRegExp::RegExp));
+    mProxyModel->invalidate();
+    mProxyModel->setSourceModel(mListView->model());
+    mProxyModel->setFilterRegExp(QRegExp(
+            QString("(^|\\b)%1").arg(criteriaStr), Qt::CaseInsensitive));
 
-        // scroll to first item in model
-        mSearchListView->scrollTo(
-            mProxyModel->index(0, 0),
-
-            HbAbstractItemView::PositionAtTop);
-    }
+    mSearchListView->scrollTo(mProxyModel->index(0,0),
+                              HbAbstractItemView::PositionAtTop);
+    
     HSMENUTEST_FUNC_EXIT("hsmenuview::findItem");
 }
 
@@ -440,7 +428,6 @@ void HsMenuView::searchFinished()
 
     mSearchListView = NULL;
     mSearchPanel = NULL;
-    vkbClosed();
     HSMENUTEST_FUNC_EXIT("hsmenuview::searchFinished");
 }
 
@@ -493,21 +480,3 @@ void HsMenuView::inactivate()
     disconnect(mBuilder.searchAction(), SIGNAL(triggered()),
                this, SLOT(showSearchPanel()));
 }
-
-
-/*!
- change size of view when VKB is opened
- */
-void HsMenuView::vkbOpened()
-{
-    mView->setMaximumHeight(mVkbHost->applicationArea().height());   
-}
-
-/*!
- change size of view when VKB is closed
- */
-void HsMenuView::vkbClosed()
-{
-     mView->setMaximumHeight(-1);   
-}
-

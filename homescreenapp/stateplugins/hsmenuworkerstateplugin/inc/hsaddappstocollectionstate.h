@@ -128,8 +128,6 @@ private:
 
     HsSortAttribute mApplicationsSortAttribute;
 
-    HsSortAttribute mCollectionsSortAttribute;
-
     HsAppsCheckList *mAppsCheckList;
 
     HsCollectionNameDialog *mEditorDialog;

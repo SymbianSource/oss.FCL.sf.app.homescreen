@@ -18,14 +18,21 @@
 #ifndef HSBASEVIEWSTATE_H
 #define HSBASEVIEWSTATE_H
 
-#include <qstate.h>
+#include <QState>
+#include <QPointer>
+#include <QModelIndex>
 
 #include "hsmenustates_global.h"
 #include "hsmenuservice.h"
 #include "hsmenuview.h"
 
+class HbMenu;
+class HbAction;
 class HbMessageBox;
+class HbAbstractViewItem;
 class CaNotifier;
+class HsMenuModeWrapper;
+class HsMainWindow;
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -37,35 +44,59 @@ class HsBaseViewState: public QState
     
 public:
     
-    HsBaseViewState(QState *parent);    
+    HsBaseViewState(HsMainWindow &mainWindow, QState *parent);
+    HsBaseViewState(HsMainWindow &mainWindow, 
+        HsMenuModeWrapper& menuMode, QState *parent);
     ~HsBaseViewState();
-    
+    void scrollToBeginning();
+
 private slots:
 
-    void applicationLaunchFailMessageFinished(HbAction*);
-    
+    virtual void applicationLaunchFailMessageFinished(HbAction*);
+    virtual void openAppLibrary();
+
 protected slots:
     
-    void stateExited();
-    
+    virtual void stateEntered();
+    virtual void stateExited();
+    virtual void addModeEntered();
+    virtual void normalModeEntered();
+    virtual void normalModeExited();
+    virtual void launchItem(const QModelIndex &index);
+    virtual void openCollection(const QModelIndex &index);
+    virtual void showContextMenu(HbAbstractViewItem *item, const QPointF &coords);
+    virtual int checkSoftwareUpdates();
+    virtual bool openTaskSwitcher();
 protected:
     
+    void initialize(HsMenuViewBuilder &menuViewBuilder, HsViewContext viewContext);
     void createApplicationLaunchFailMessage(int errorCode,int itemId);
     void subscribeForMemoryCardRemove();
-    
+
+    void defineTransitions();
+
 private:
     
-    void construct();
     void cleanUpApplicationLaunchFailMessage();
-    
+
+    virtual void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags) = 0;
+    virtual void setMenuOptions() = 0;
+
+
 private:
     
     CaNotifier *mNotifier;
-    
     int mMessageRelatedItemId;
-    
     HbMessageBox *mApplicationLaunchFailMessage;
 
+protected:
+    HsMenuItemModel *mModel;
+    QPointer<HbMenu> mContextMenu;
+    QModelIndex mContextModelIndex;
+    HbAction *mBackKeyAction;
+    QScopedPointer<HsMenuView> mMenuView;
+    HsMenuModeWrapper *mMenuMode;
+    HsMainWindow &mMainWindow;
 };
 
 

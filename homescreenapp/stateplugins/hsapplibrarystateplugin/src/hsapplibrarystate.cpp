@@ -14,18 +14,11 @@
  * Description: Menu Application Library state.
  *
  */
-#include <hbmainwindow.h>
-#include <hbview.h>
-#include <hbaction.h>
+
+#include <HbAction>
 #include <HbToolBar>
-#include <HbIcon>
-#include <hbinstance.h>
-#include <hblistview.h>
-#include <hbsearchpanel.h>
 #include <HbToolBarExtension>
 #include <HbStyleLoader>
-#include <hsmenueventtransition.h>
-
 
 #include "hstest_global.h"
 #include "hsapplibrarystate.h"
@@ -34,7 +27,7 @@
 #include "hscollectionstate.h"
 #include "hsinstalledappsstate.h"
 #include "hsoperatorhandler.h"
-#include "hsmenuview.h"
+#include "hsmenueventtransition.h"
 #include "hsmenumodetransition.h"
 
 
@@ -179,11 +172,6 @@ void HsAppLibraryState::construct()
     mAllAppsState->addTransition(allViewToInstalledTransition);
 
     constructToolbar();
-
-    connect(mAllCollectionsState, SIGNAL(sortOrderChanged(HsSortAttribute)),
-            mAllAppsState, SLOT(collectionsSortOrder(HsSortAttribute)));
-    connect(mAllCollectionsState, SIGNAL(sortOrderChanged(HsSortAttribute)),
-            mCollectionState, SLOT(collectionsSortOrder(HsSortAttribute)));
 
     connect(mAllAppsState, SIGNAL(entered()),
             this, SLOT(allAppsStateEntered()));

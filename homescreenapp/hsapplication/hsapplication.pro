@@ -18,13 +18,12 @@ TEMPLATE = app
 
 include(../common.pri)
 
-LIBS += -lhsutils -lhsdomainmodel
 CONFIG += console
 
-QT += xml
+#QT += xml
 
 CONFIG += hb mobility
-MOBILITY = serviceframework
+MOBILITY = serviceframework publishsubscribe
 
 fute:DEFINES += FUTE
 
@@ -56,7 +55,7 @@ symbian: {
     include(hsapplication_exports_to_rom.pri)    
 
     CONFIG += service
-    LIBS +=  -lxqservice -lxqserviceutil 
+    LIBS +=  -lxqservice -lxqserviceutil -lXQKeyCapture
            
     SERVICE.FILE = ipc_service_conf.xml
 }

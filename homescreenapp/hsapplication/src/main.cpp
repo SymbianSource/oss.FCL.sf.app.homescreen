@@ -36,6 +36,7 @@ namespace
 #include <e32debug.h>
 #include <apgwgnam.h>
 
+#include "hsrecoverymanager.h"
 
 void loadTranslationFilesOnSymbian(QTranslator &commonTranslator, 
                                     QTranslator &hsTranslator, 
@@ -43,6 +44,7 @@ void loadTranslationFilesOnSymbian(QTranslator &commonTranslator,
 void copyWallpapersFromRom();
 void copyHsDatabaseFileFromRom();
 void createPrivateFolder();
+void copyWallpaperOriginalsFromRomToPhotos();
 
 /*!
     \fn setHomescreenAsSystemAppL(CEikonEnv* eikonEnv)
@@ -133,6 +135,8 @@ int main(int argc, char *argv[])
     
 #ifdef Q_OS_SYMBIAN
     copyHsDatabaseFileFromRom();
+    HsRecoveryManager recoveryManager;
+    recoveryManager.execute();
     copyWallpapersFromRom();
 #endif
     
@@ -203,7 +207,7 @@ void copyHsDatabaseFileFromRom()
         HSTEST("HS::main() - homescreen.db not in c:");
         file.setFileName("z:/private/20022f35/homescreen.db");
         if(!file.exists()) {
-            HSTEST("HS::main() - homescreen.db not in ROM!");
+            qWarning() << "HS::main() - homescreen.db not in ROM!";
         } else {
             HSTEST("HS::main() - homescreen.db found from z:");
             createPrivateFolder();
@@ -214,10 +218,12 @@ void copyHsDatabaseFileFromRom()
             HSTEST("HS::main() - homescreen.db copied from ROM to c:!");
             file.setFileName("c:/private/20022f35/homescreen.db");
             if(!file.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
-                HSTEST("HS::main() - homescreen.db ReadWrite permission settings on c: failed!");
+                qWarning() << "HS::main() - homescreen.db ReadWrite permission settings on c: failed!";
             }
             HSTEST("HS::main() - homescreen.db permission set to ReadWrite!");
         }
+        // Copy wallpaper originals to C drive user data to be visible in Photos
+        copyWallpaperOriginalsFromRomToPhotos();
     }
 #ifdef __WINS__
     else if(!file.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
@@ -274,6 +280,36 @@ void copyWallpapersFromRom()
                 if(!createdFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
                     qDebug() << "read write permission set failed for file" << targetFile;
                 }
+            }
+        }
+    }
+}
+
+/*!
+    \fn copyWallpaperOriginalFromRomToPhotos()
+    \ingroup group_hsapplication
+    \internal    
+    \brief Wallpaper original copier
+    Copies homescreen wallpaper originals from rom to C for Photos
+    does not exist on c: drive
+*/
+void copyWallpaperOriginalsFromRomToPhotos()
+{
+    QString targetPath("e:/data/images/wallpapers");
+    QDir dir(targetPath);
+    if(!dir.exists()) {
+        dir.mkpath(targetPath);    
+        QDir dir2("z:/private/20022f35/wallpapers/originals");
+        dir2.setFilter(QDir::Files);
+        QStringList files = dir2.entryList();
+        foreach(QString file, files) {
+            QString targetFile(targetPath + "/" + file);
+            if ( QFile::copy(dir2.absoluteFilePath(file), targetFile) ) {
+                qDebug() << "Wallpaper original copied from " << dir2.absoluteFilePath(file) << "to " << targetFile;
+            } 
+            QFile createdFile(targetFile);
+            if(!createdFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
+                qDebug() << "Read write permission set failed for wallpaper original" << targetFile;
             }
         }
     }

@@ -31,10 +31,12 @@
 #include "hsmenuevent.h"
 #include "hsmenuitemmodel.h"
 
+static const char *const HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME=
+        "detailsDialogForJavaApplication";
 
 /*!
  Constructor.
- @param parent Parent state.
+ /param parent Parent state.
  */
 HsViewAppDetailsState::HsViewAppDetailsState(QState *parent) :
     QState(parent), mDialog(0), mNotifier(0)
@@ -58,7 +60,7 @@ HsViewAppDetailsState::~HsViewAppDetailsState()
 void HsViewAppDetailsState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsViewAppDetailsState::construct");
-        
+
     setObjectName("/ViewAppDetailsState");
     if (this->parent()) {
         setObjectName(this->parent()->objectName() + objectName());
@@ -75,61 +77,95 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     QState::onEntry(event);
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
-    
+
     const int entryId = data.value(itemIdKey()).toInt();
-    QSharedPointer<const CaEntry> entry 
+    QSharedPointer<const CaEntry> entry
         = CaService::instance()->getEntry(entryId);
     const int componentId = entry->attribute(
         componentIdAttributeName()).toInt();
     
     QSharedPointer<CaSoftwareRegistry> scr = CaSoftwareRegistry::create();
     CaSoftwareRegistry::DetailMap detailMap = scr->entryDetails(componentId);
+
+    QString appType = entry->attribute(swTypeKey());
+
+    
+    //TODO: Should we display something In that case?
+    if (detailMap.size() < 1){
+        return;
+    }
     
     HbDocumentLoader loader;
     bool loadStatusOk = false;
-    mObjectList = loader.load(HS_DETAILS_DIALOG_LAYOUT, &loadStatusOk);
+    loader.load(HS_DETAILS_DIALOG_LAYOUT, &loadStatusOk);
     Q_ASSERT_X(loadStatusOk, HS_DETAILS_DIALOG_LAYOUT,
            "Error while loading docml file.");
 
+    if (!appType.compare(javaSwType())) {
+        QString section = QString(HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME);
+        loader.load(HS_DETAILS_DIALOG_LAYOUT,
+                                  section, &loadStatusOk);
+    }
+
     mDialog = qobject_cast<HbDialog*>(
         loader.findWidget(HS_DETAILS_DIALOG_NAME));
-    mDialog->actions()[0]->setParent(mDialog);
-    
-    subscribeForMemoryCardRemove(entryId);
-    
-    HbLabel* nameLabel = qobject_cast<HbLabel*>(
-        loader.findWidget(CaSoftwareRegistry::componentNameKey()));
-    HbLabel* versionLabel = qobject_cast<HbLabel*>(
-        loader.findWidget(CaSoftwareRegistry::componentVersionKey()));
-    HbLabel* supplierLabel = qobject_cast<HbLabel*>(
-        loader.findWidget(CaSoftwareRegistry::componentVendorKey()));
-    HbLabel* memoryLabel = qobject_cast<HbLabel*>(
-        loader.findWidget(CaSoftwareRegistry::componentDriveInfoKey()));
-    HbLabel* sizeLabel = qobject_cast<HbLabel*>(
-        loader.findWidget(CaSoftwareRegistry::componentSizeKey()));
-    HbLabel* typeLabel = qobject_cast<HbLabel*>(
-        loader.findWidget(CaSoftwareRegistry::componentTypeKey()));    
-    
-    nameLabel->setPlainText(
-        detailMap[CaSoftwareRegistry::componentNameKey()]);
-    versionLabel->setPlainText(
-        detailMap[CaSoftwareRegistry::componentVersionKey()]);
-    supplierLabel->setPlainText(
-        detailMap[CaSoftwareRegistry::componentVendorKey()]);
-    memoryLabel->setPlainText(
-            detailMap[CaSoftwareRegistry::componentDriveInfoKey()]);
-    sizeLabel->setPlainText(
-        detailMap[CaSoftwareRegistry::componentSizeKey()]);
 
-    typeLabel->setPlainText(
-        detailMap[CaSoftwareRegistry::componentTypeKey()]);
-    
     if (mDialog != NULL) {
         mDialog->setTimeout(HbPopup::NoTimeout);
         mDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+        mDialog->actions()[0]->setParent(mDialog);
+
+        subscribeForMemoryCardRemove(entryId);
+      
+        setFieldPresentation(CaSoftwareRegistry::componentNameKey(),
+            detailMap, loader);
+        setFieldPresentation(CaSoftwareRegistry::componentVersionKey(),
+            detailMap, loader);
+        setFieldPresentation(CaSoftwareRegistry::componentVendorKey(),
+            detailMap, loader);
+        setFieldPresentation(CaSoftwareRegistry::componentDriveInfoKey(),
+            detailMap, loader);
+        setFieldPresentation(CaSoftwareRegistry::componentSizeKey(),
+            detailMap, loader);
+        setFieldPresentation(CaSoftwareRegistry::componentTypeKey(),
+            detailMap, loader);
+
+        if (!appType.compare(javaSwType())) {
+            setFieldPresentation(CaSoftwareRegistry::componentDescriptionKey(),
+                detailMap, loader);
+            setFieldPresentation(CaSoftwareRegistry::componentProtectionDomainKey(),
+                detailMap, loader);
+        }
         mDialog->open(this, SLOT(stateExited())); 
     }
-    HSMENUTEST_FUNC_EXIT("HsViewAppDetailsState::onEntry");    
+    HSMENUTEST_FUNC_EXIT("HsViewAppDetailsState::onEntry");
+}
+
+/*!
+ Extracting label from loader and set content of data field.
+ Hide label if the is no data to display.
+ \param key detail key.
+ \param detailMap detail map.
+ \param loader session to document loader
+ \retval void
+ */
+void HsViewAppDetailsState::setFieldPresentation(QString key,
+        CaSoftwareRegistry::DetailMap &detailMap,
+        HbDocumentLoader &loader)
+{
+    HbLabel* dataLabel = qobject_cast<HbLabel*>(
+                loader.findWidget(key));
+    QString data = detailMap[key];
+    if (data.isEmpty()) {
+        dataLabel->setVisible(false);
+        dataLabel->setMaximumHeight(0);
+        HbLabel* titleLabel = qobject_cast<HbLabel*>(
+            loader.findWidget(QString("_") + key));
+        titleLabel->setVisible(false);
+        titleLabel->setMaximumHeight(0);
+    } else {
+        dataLabel->setPlainText(data);
+    }
 }
 
 /*!

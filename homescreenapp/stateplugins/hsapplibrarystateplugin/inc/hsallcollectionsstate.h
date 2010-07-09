@@ -18,17 +18,14 @@
 #ifndef HSALLCOLLECTIONSSTATE_H
 #define HSALLCOLLECTIONSSTATE_H
 
-#include <qstate.h>
-#include <QModelIndex>
+#include <QState>
 #include <QPointF>
-#include <QPointer>
 
 #include "hsbaseviewstate.h"
 #include "hsmenumodewrapper.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
-class HbMenu;
 class HsMenuViewBuilder;
 class HbAbstractViewItem;
 class HbAction;
@@ -49,24 +46,13 @@ public:
     ~HsAllCollectionsState();
 protected:
 signals:
-    void sortOrderChanged(HsSortAttribute sortAttribute);
     void toAppLibraryState();
 
-public slots:
-    void scrollToBeginning();
 private slots:
-    bool openTaskSwitcher();
-    void listItemActivated(const QModelIndex &index);
     void addActivated(const QModelIndex &index);
-    void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void createNewCollection();
     void createArrangeCollection();
-    void customMenuAction();
-    void ascendingMenuAction();
-    void descendingMenuAction();
-    void stateEntered();
-    void addModeEntered();
     void normalModeEntered();
     void normalModeExited();
     void stateExited();
@@ -74,15 +60,7 @@ private slots:
 private:
     void construct();
     void setMenuOptions();
-private:
-    HbAction *mSecondarySoftkeyAction;
-    HsSortAttribute mSortAttribute;
-    HsMenuView mMenuView;
-    HsMenuModeWrapper &mMenuMode;
-    HsMenuItemModel *mAllCollectionsModel;
-    HsMainWindow &mMainWindow;
-    QModelIndex mContextModelIndex;
-    QPointer<HbMenu> mContextMenu;
+    void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
 };
 
 #endif // HSALLCOLLECTIONSSTATE_H

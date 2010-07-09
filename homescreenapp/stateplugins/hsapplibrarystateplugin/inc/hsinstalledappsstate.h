@@ -18,9 +18,7 @@
 #ifndef HSINSTALLEDAPPSSTATE_H
 #define HSINSTALLEDAPPSSTATE_H
 
-#include <qstate.h>
-#include <QModelIndex>
-#include <QPointer>
+#include <QState>
 
 #include "hsbaseviewstate.h"
 
@@ -51,15 +49,7 @@ public:
 
 private slots:
 
-    bool openTaskSwitcher();
-
-    void listItemActivated(const QModelIndex &index);
-
-    void listItemLongPressed(HbAbstractViewItem *item,
-                             const QPointF &coords);
-
-    void backAction();
-
+    void openInstallationLog();
     void stateEntered();
 
     void stateExited();
@@ -71,33 +61,8 @@ private slots:
 private:
 
     void construct();
-
     void setMenuOptions();
-
-private:
-    /**
-     * The View widget.
-     * Own.
-     */
-    HsMenuView mMenuView;
-
-    /**
-     * Item Model for the List.
-     * Own.
-     */
-    HsMenuItemModel *mInstalledAppsModel;
-
-    /**
-     * Secondary Softkey action.
-     * Backstepping functionality.
-     * Own.
-     */
-    HbAction *const mSecondarySoftkeyAction;
-    
-    HsMainWindow &mMainWindow;
-
-    QModelIndex mContextModelIndex;
-    QPointer<HbMenu> mContextMenu;
+    void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H
