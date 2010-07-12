@@ -73,8 +73,10 @@ void CXnEffectManager::ConstructL()
     CTimer::ConstructL();
     
     OrientationChanged();
-    
+
+#ifndef NO_ALF_OBSERVER    
     iObserver = CAlfEffectObserver::NewL();
+#endif
     }
 
 // -----------------------------------------------------------------------------
@@ -277,8 +279,13 @@ TBool CXnEffectManager::DoBeginFullscreenEffect( TXnEffect& aEffect )
 //
 TBool CXnEffectManager::WaitActiveEffect( TInt aInterval )     
     {
+    if (iObserver == NULL)
+        {
+        return ETrue;
+        }
+
     TBool retval( EFalse );
-    
+    	
     TInt loop( aInterval / KWaitInterval );
     
     while ( loop >= 0 )
