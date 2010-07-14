@@ -17,6 +17,8 @@
 deploy.path = z:
 
 exports1.path = /private/20022F35
+# this database is only for winscw emulator, for HW it is generated during image creation from confml
+exports1.sources += resource/resource_emulator/homescreen.db
 exports1.sources += data/backup_registration.xml
 for(export1, exports1.sources):BLD_INF_RULES.prj_exports += "./$$export1 $$deploy.path$$exports1.path/$$basename(export1)"
 
