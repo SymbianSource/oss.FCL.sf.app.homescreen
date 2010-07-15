@@ -149,6 +149,12 @@ CXnBackgroundManager::CXnBackgroundManager( CXnViewManager& aViewManager, CHspsW
 //
 void CXnBackgroundManager::ConstructL()
     {    
+    // Connect to skin server.
+    User::LeaveIfError( iSkinSrv.Connect( this ) );
+          
+    // Start listening for drive events.
+    User::LeaveIfError( iFsSession.Connect() );
+
     CreateWindowL();
 
     iRect = TRect();
@@ -165,11 +171,6 @@ void CXnBackgroundManager::ConstructL()
     ActivateL();
     iIntUpdate = 0;
     
-    User::LeaveIfError( iSkinSrv.Connect( this ) );
-          
-    // Start listening for drive events.
-    User::LeaveIfError( iFsSession.Connect() );
-    
     // Start listening file server notifications.
     iDiskNotifier = CDiskNotifyHandler::NewL( *this, iFsSession );
     User::LeaveIfError( iDiskNotifier->NotifyDisk() );
@@ -177,7 +178,7 @@ void CXnBackgroundManager::ConstructL()
     // Reads from cenrep wheteher page specific wallpaper is enabled or not
     CheckFeatureTypeL();   
     
-    GfxTransEffect::Register( this, KGfxContextBgAppear );       
+    GfxTransEffect::Register( this, KGfxContextBgAppear );
     }
 
 // -----------------------------------------------------------------------------
@@ -201,7 +202,10 @@ CXnBackgroundManager* CXnBackgroundManager::NewL( CXnViewManager& aViewManager,
 //
 CXnBackgroundManager::~CXnBackgroundManager()
     {
-    GfxTransEffect::Deregister( this );
+    if ( GfxTransEffect::IsRegistered( this) )
+        {
+        GfxTransEffect::Deregister( this );
+        }
         
     iSkinSrv.RemoveAllWallpapers();
     iSkinSrv.Close();
@@ -1112,7 +1116,8 @@ void CXnBackgroundManager::StoreWallpaperL()
 
         CXnViewData& activeView = iViewManager.ActiveViewData();
         const TDesC& path( activeView.WallpaperImagePath() );
-        if( path != KNullDesC && activeView.WallpaperImage() )
+        RFs& fs( CEikonEnv::Static()->FsSession() );
+        if ( path != KNullDesC && BaflUtils::FileExists( fs, path ) )
             {
             iIntUpdate++;
             TInt err( AknsWallpaperUtils::SetIdleWallpaper( path, NULL ) ); 

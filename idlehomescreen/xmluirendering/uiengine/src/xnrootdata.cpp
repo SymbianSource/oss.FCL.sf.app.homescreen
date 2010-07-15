@@ -19,7 +19,6 @@
 
 
 // User includes
-#include <xnuiengine.rsg>
 #include "xnviewmanager.h"
 #include "xnviewdata.h"
 
@@ -160,7 +159,7 @@ TInt CXnRootData::Load()
     if ( !iODT )
         {
         // Can't recover
-        Panic( EXnInvalidConfiguration );                       
+        return EXnInvalidConfiguration;                       
         }
        
     if ( !err )
@@ -169,7 +168,7 @@ TInt CXnRootData::Load()
         }
     
     if ( !err )
-        {                
+        {             
         for ( TInt i = 0; i < iPluginsData.Count(); i++ )
             {
             CXnViewData* plugin( 
@@ -178,54 +177,55 @@ TInt CXnRootData::Load()
             if ( plugin->Initial() )
                 {
                 err = plugin->Load();
-                                    
+                                                    
                 if ( plugin->Occupied() )
                     {
-                    // Initial view is succesfully composed. Some plugins
-                    // may have failed but it doesn't matter as those are removed                                        
-                    return KErrNone;
+                    // Initial view is succesfully composed. Some widget plugins
+                    // may have failed but it doesn't matter as those are removed.
+                    // Rest of the views will be loaded asynchronously by the RunLoadL()
+                    return err;
                     }     
-                
-                // Initial view failed, remove it
-                iPluginsData.Remove( i );
+                                
+                // Initial view failed                
+                iManager.RemoveFaultyView( plugin );
                 
                 delete plugin;
-                plugin = NULL;                                                
-                break;                             
+                plugin = NULL;                
+                break;
                 }
             }
-                                    
+                                                    
         // Initial view loading failed, fallback to load any of the views
         while( iPluginsData.Count() )
             {
             CXnViewData* plugin( 
                 static_cast< CXnViewData* >( iPluginsData[ 0 ] ) ); 
 
+            plugin->SetInitial();            
+            
             // Ignore error
             plugin->Load();
                             
             if ( plugin->Occupied() )
                 {
-                // Return error because of fallback condition                                
-                return KXnErrPluginFailure;
+                // Return error because of fallback condition
+                return KXnErrViewPluginFailure;
                 }
 
-            // View failed, remove it
-            iPluginsData.Remove( 0 );
+            // View failed, remove it    
+            iManager.RemoveFaultyView( plugin );     
             
             delete plugin;
-            plugin = NULL;
+            plugin = NULL;                       
             }        
         }
     else if ( err == KErrNoMemory )
         {
-        TRAP_IGNORE( iManager.ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
-        }
-
-    // Configuration loading failed totally
-    Panic( EXnInvalidConfiguration );
+        return err;
+        }    
     
-    return err;
+    // Configuration loading failed totally
+    return EXnInvalidConfiguration;
     }
 
 // -----------------------------------------------------------------------------
@@ -257,6 +257,7 @@ void CXnRootData::LoadRemainingViews()
         if ( !AllViewsLoaded() )
             {
             iLoadForward = ETrue;
+            iLoadError = KErrNone;
             
             iLoadTimer->Cancel();
             
@@ -488,76 +489,92 @@ TBool CXnRootData::AllViewsDestroyed() const
     if ( self->iFlags.IsSet( EIsDispose ) )
         {
         self->iLoadTimer->Cancel();
+        return KErrNone;
+        }
+
+    CXnPluginData& active( self->ActiveViewData() );
+    
+    CXnPluginData* toLoad( NULL );
+                   
+    TInt index( self->iPluginsData.Find( &active ) );
+    TInt count( self->iPluginsData.Count() );
+            
+    if ( self->iLoadForward )
+        {
+        self->iLoadForward = EFalse;
+        
+        // Start from the next one
+        index = index + 1;
+        
+        if ( index == count )
+            {
+            index = 0;
+            }
+                     
+        for ( TInt i = index; i < self->iPluginsData.Count(); i++ )
+            {
+            if ( !self->iPluginsData[i]->Occupied() )
+                {
+                toLoad = self->iPluginsData[i];
+                break;
+                }
+            }                              
         }
     else
-        {               
-        CXnPluginData& active( self->ActiveViewData() );
+        {
+        self->iLoadForward = ETrue;
         
-        CXnPluginData* toLoad( NULL );
-                       
-        TInt index( self->iPluginsData.Find( &active ) );
-        TInt count( self->iPluginsData.Count() );
-                
-        if ( self->iLoadForward )
+        if ( index == 0 )
             {
-            self->iLoadForward = EFalse;
-            
-            // Start from the next one
-            index = index + 1;
-            
-            if ( index == count )
-                {
-                index = 0;
-                }
-                         
-            for ( TInt i = index; i < self->iPluginsData.Count(); i++ )
-                {
-                if ( !self->iPluginsData[i]->Occupied() )
-                    {
-                    toLoad = self->iPluginsData[i];
-                    break;
-                    }
-                }                              
+            index = count - 1;
             }
         else
             {
-            self->iLoadForward = ETrue;
-            
-            if ( index == 0 )
-                {
-                index = count - 1;
-                }
-            else
-                {
-                index = index - 1;
-                }
-            
-            for ( TInt i = index; i >= 0; i-- )
-                {
-                if ( !self->iPluginsData[i]->Occupied() )
-                    {
-                    toLoad = self->iPluginsData[i];
-                    break;
-                    }
-                }
+            index = index - 1;
             }
         
-        if ( !self->AllViewsLoaded() && toLoad )
-            {                       
-            if ( toLoad->Load() == KErrNoMemory )
+        for ( TInt i = index; i >= 0; i-- )
+            {
+            if ( !self->iPluginsData[i]->Occupied() )
                 {
-                TRAP_IGNORE( 
-                    self->iManager.ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );                
+                toLoad = self->iPluginsData[i];
+                break;
                 }
             }
+        }
+    
+    TInt err( KErrNone );
+    
+    if ( !self->AllViewsLoaded() && toLoad )
+        {                       
+        err = toLoad->Load();
         
-        if ( self->AllViewsLoaded() )
+        if ( err )
             {            
-            self->iLoadTimer->Cancel();
-            self->iManager.NotifyAllViewsLoadedL();
-            }                    
+            self->iLoadError = err;            
+            }
         }
         
+    if ( err == KXnErrViewPluginFailure )
+        {                
+        // Remove the view        
+        self->iManager.RemoveFaultyView( static_cast< CXnViewData* >( toLoad ) );
+        
+        delete toLoad;
+        toLoad = NULL;        
+        }
+    
+    if ( self->AllViewsLoaded() || err == KErrNoMemory )
+        {            
+        self->iLoadTimer->Cancel();
+        
+        // Show the error note only once
+        self->iManager.HandleErrorNotes( self->iLoadError );  
+        
+        self->iLoadError = KErrNone;        
+		self->iManager.NotifyAllViewsLoadedL();
+        }
+    
     __PRINTS( "*** CXnRootData::RunLoadL - done" );
     
     return KErrNone;

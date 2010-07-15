@@ -69,6 +69,7 @@ _LIT8( KRequestNotification, "RequestNotification" );
 _LIT8( KHSPSCommandRestoreConfigurations, "RestoreConfigurations" );
 _LIT8( KRestore, "restore" );
 _LIT8( KRestoreDefault, "default" );
+_LIT8( KRestoreAll, "all" );
 _LIT8( KRestoreRom, "rom" );
 _LIT8( KRestoreViews, "views" );
 _LIT8( K0, "0" );
@@ -830,6 +831,42 @@ EXPORT_C TInt CHspsWrapper::RestoreRomConfL()
     // Compose Liw message
     TLiwGenericParam restoreTypeParam;
     restoreTypeParam.SetNameAndValueL( KRestore, TLiwVariant( KRestoreRom ) );
+    restoreTypeParam.PushL();
+    inParamList.AppendL( restoreTypeParam );
+    CleanupStack::Pop( &restoreTypeParam );
+    restoreTypeParam.Reset();
+      
+    iHspsInterface->ExecuteCmdL( KHSPSCommandRestoreConfigurations, 
+                                 inParamList, 
+                                 outParamList ); 
+      
+    inParamList.Reset();
+      
+    // check success
+    const TLiwGenericParam* outParam = NULL;
+    TInt pos(0);
+    outParam = outParamList.FindFirst( pos, KOutKeyStatus );
+    TInt status(KErrGeneral);
+    
+    if ( outParam )
+        {
+        status = outParam->Value().AsTInt32();
+        }
+    outParamList.Reset();
+    return status;
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TInt CHspsWrapper::RestoreAllConfL()
+    {
+    CLiwGenericParamList& inParamList = iServiceHandler->InParamListL();
+    CLiwGenericParamList& outParamList = iServiceHandler->OutParamListL();
+         
+    // Compose Liw message
+    TLiwGenericParam restoreTypeParam;
+    restoreTypeParam.SetNameAndValueL( KRestore, TLiwVariant( KRestoreAll ) );
     restoreTypeParam.PushL();
     inParamList.AppendL( restoreTypeParam );
     CleanupStack::Pop( &restoreTypeParam );

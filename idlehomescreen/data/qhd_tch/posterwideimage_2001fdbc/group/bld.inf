@@ -29,12 +29,19 @@ PRJ_EXPORTS
 ../xuikon/00/posterwideimage.dat /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/posterwideimage_2001fdbc.dat
 ../xuikon/00/posterwideimage.css /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/posterwideimage.css
 ../xuikon/00/posterwideimage.xml /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/posterwideimage.xml
-
+../xuikon/00/wideimage.dtd /epoc32/data/Z/resource/homescreen/posterwideimage_2001fdbc/xuikon/wideimage.dtd
 
 // Support for S60 builds
 //***********************
-../rom/posterwideimage_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc_variant.iby)
 ../rom/posterwideimage.iby CORE_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc.iby)
+../rom/posterwideimage_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc_resources.iby)
+../rom/posterwideimage_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc_customer.iby)
+../rom/posterwideimage_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(posterwideimage_2001fdbc_variant.iby)
+
+// Support for S60 localization
+//*****************************
+// export localizable loc files (engineering versions)
+../loc/wideimage.loc                      APP_LAYER_LOC_EXPORT_PATH(wideimage.loc)
 
 // Dtd-localization
 //*****************

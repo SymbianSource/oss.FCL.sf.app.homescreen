@@ -237,11 +237,18 @@ public:
     IMPORT_C TInt SetActivePluginL(const TDesC8& aPluginId);     
               
      /**
-       * Restores plug-in configurations from eMMC, UDA and ROM drives.       
+       * Activates another application configuration.       
        *
        * @return Operation status. KErrNone (success), KErrNotFound
        */
     IMPORT_C TInt RestoreDefaultConfL();      
+    
+    /**
+      * Restores plug-in configurations from eMMC, UDA and ROM drives.       
+      *
+      * @return Operation status. KErrNone (success), KErrNotFound
+      */
+    IMPORT_C TInt RestoreAllConfL();
             
     /**
       * Restores plug-in configurations from ROM only. To be used if content

@@ -152,8 +152,8 @@ void CTsFsHiddenAppList::ConstructL()
 
     // must not call RunL directly from here as things are not fully initialized yet
     TRequestStatus* status = &iStatus;
-    User::RequestComplete( status, KErrNone );
     SetActive();
+    User::RequestComplete( status, KErrNone );
     }
 
 // -----------------------------------------------------------------------------

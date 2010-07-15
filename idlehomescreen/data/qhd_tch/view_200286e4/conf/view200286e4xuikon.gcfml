@@ -3,8 +3,6 @@
 	<tag name="target" value="core"/>
 	<tag name="target" value="rofs2"/>
 	<tag name="target" value="rofs3"/>
-<!--	<tag name="target" value="uda"/>
-	<tag name="target" value="emmc"/> -->
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="empty.foo" target="\private\200159c0\install\view_200286e4\xuikon\">
 	<setting ref="Homescreen2XuikonFolder/FolderCFG"/>
 		<xsl:stylesheet version="1.0" 

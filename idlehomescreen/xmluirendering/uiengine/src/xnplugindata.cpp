@@ -141,7 +141,7 @@ TInt CXnPluginData::Load()
         // Succesfully composed, try schedule publishers' loading
         LoadPublishers( EAiFwPluginStartup );                  
         }    
-    else if ( err == KXnErrPluginFailure )
+    else if ( err == KXnErrWidgetPluginFailure )
         {
         // Widget's configuration is broken, remove it
         TRAP_IGNORE( iManager.UnloadWidgetFromPluginL( *this, ETrue ) );                        

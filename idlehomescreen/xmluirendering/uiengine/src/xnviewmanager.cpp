@@ -27,6 +27,7 @@
 #include <aifwdefs.h>
 #include <gfxtranseffect/gfxtranseffect.h>
 #include <akntransitionutils.h>
+#include <xnuiengine.rsg>
 
 // User includes
 #include "xnapplication.h"
@@ -65,9 +66,10 @@ const TInt KPSCategoryUid( 0x200286E3 );
 const TInt KPSCrashCountKey( 1 );     
 const TInt KStabilityInterval( 60000000 ); // 1 minute
 const TInt KActivationCompleteInterval( 2000000 ); // 2s
-const TInt KCrashRestoreDefaultThreshold( 3 );
-const TInt KCrashRestoreRomTreshold( 4 );
-const TInt KCrashRestoreViewsTreshold( 5 );
+const TInt KCrashRestoreDefaultTreshold( 3 );
+const TInt KCrashRestoreAllTreshold( 4 );
+const TInt KCrashRestoreRomTreshold( 5 );
+const TInt KCrashRestoreViewsTreshold( 6 );
 
 // ============================ LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
@@ -348,8 +350,21 @@ void CXnViewManager::LoadUiL()
     iRootData = CXnRootData::NewL( *this, iApplicationUid );
            
     // Load root configuration and initial view.
-    iRootData->Load();
-           
+    TInt err = iRootData->Load();
+    
+    if( err == EXnInvalidConfiguration )
+        {
+        // Configuration loading failed totally
+        Panic( EXnInvalidConfiguration );
+        }
+    
+    // Show the error note only once, if there are more views
+    // the note should be shown from CXnRootData::RunLoadL()
+    if( iRootData->PluginData().Count() == 1 )
+        {        
+        HandleErrorNotes( err );
+        }
+               
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC();
     
     // Load initial view publishers    
@@ -482,14 +497,9 @@ TInt CXnViewManager::LoadWidgetToPluginL( const CHsContentInfo& aContentInfo,
             // Report widget amount in the view
             ReportWidgetAmountL( viewData );           
             }  
-        else if ( retval == KErrNoMemory )
-            {
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
-            }
-        else if ( retval == KXnErrPluginFailure )
-            {            
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-            }
+        
+        // Handle the errors
+        HandleErrorNotes( retval );        
         
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC
         }
@@ -630,15 +640,10 @@ TInt CXnViewManager::ReplaceWidgetToPluginL( const CHsContentInfo& aContentInfo,
                     }
                 }            
             }
-        else if ( retval == KErrNoMemory )
-            {
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );            
-            }
-        else if ( retval == KXnErrPluginFailure )
-            {            
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );        
-            }
-                        
+        
+        // Handle the errors
+        HandleErrorNotes( retval );
+        
         CleanupStack::PopAndDestroy(); // DisableRenderUiLC
         }
     
@@ -897,15 +902,7 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
         
         if ( err )
             {
-            if ( err == KErrNoMemory )
-                {
-                TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
-                }
-            else if ( err == KXnErrPluginFailure )
-                {            
-                TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-                }
-            
+            HandleErrorNotes( err );            
             return;            
             }
         }
@@ -933,15 +930,7 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
         
         if ( err )
             {
-            if ( err == KErrNoMemory )
-                {
-                TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
-                }
-            else if ( err == KXnErrPluginFailure )
-                {            
-                TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-                }
-            
+            HandleErrorNotes( err );            
             return;            
             }    
         }
@@ -989,14 +978,7 @@ TInt CXnViewManager::AddViewL( const CHsContentInfo& aInfo )
         
         retval = newView->Load();
                 
-        if ( retval == KErrNoMemory )
-            {
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );            
-            }
-        else if ( retval == KXnErrPluginFailure )
-            {            
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-            }
+        HandleErrorNotes( retval );
                 
         if ( newView->Occupied() )
             {
@@ -1072,14 +1054,7 @@ void CXnViewManager::AddViewL( TInt aEffectId )
         
         status = newView->Load();
         
-        if ( status == KErrNoMemory )
-            {
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
-            }        
-        else if ( status == KXnErrPluginFailure )
-            {            
-            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-            }
+        HandleErrorNotes( status );        
                 
         if ( newView->Occupied() )
             {
@@ -1117,6 +1092,41 @@ void CXnViewManager::AddViewL( TInt aEffectId )
         }
 
     CleanupStack::PopAndDestroy( result );       
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::RemoveFaultyView()
+// Removes a view which has failed to load
+// -----------------------------------------------------------------------------
+//
+TInt CXnViewManager::RemoveFaultyView( CXnViewData* aViewData )
+    {
+    TInt retval( KErrGeneral );
+    
+    if( aViewData )
+        {
+        RPointerArray< CXnPluginData >& views( iRootData->PluginData() );
+        
+        TInt index( views.Find( aViewData ) );
+        
+        if ( index != KErrNotFound )
+            {
+            // Remove instance from the views array
+            views.Remove( index );
+
+            // Remove the faulty view configuration from the root configuration in HSPS
+            TRAP_IGNORE( iHspsWrapper->RemovePluginL( aViewData->PluginId() ) ); 
+                                                   
+            // Update MSK from the remaining views
+            TRAP_IGNORE( UpdatePageManagementInformationL() );
+            
+            TRAP_IGNORE( iUiEngine->RenderUIL() );
+            
+            retval = KErrNone;
+            }
+        }
+    
+    return retval;
     }
 
 // -----------------------------------------------------------------------------
@@ -1404,14 +1414,7 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
         iRootData->LoadRemainingViews();
         }
     
-    if ( err == KErrNoMemory )
-        {
-        TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
-        }
-    else if ( err == KXnErrPluginFailure )
-        {
-        TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
-        }       
+    HandleErrorNotes( err );         
                
     NotifyViewActivatedL( aViewToActivate );           
     }
@@ -1457,7 +1460,7 @@ void CXnViewManager::PublishersReadyL( CXnViewData& aViewData, TInt aResult )
         {
         ShowErrorL( R_QTN_HS_HS_MEMORY_FULL );
         }
-    else if ( aResult == KXnErrPluginFailure )
+    else if ( aResult == KXnErrWidgetPluginFailure )
         {
         ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED );
         }       
@@ -1709,6 +1712,29 @@ void CXnViewManager::ShowErrorL( TInt aResource ) const
     }
 
 // -----------------------------------------------------------------------------
+// CXnViewManager::HandleErrorNotes
+//
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::HandleErrorNotes( const TInt aError ) const
+    {
+    switch( aError )
+        {
+        case KErrNoMemory:            
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_HS_MEMORY_FULL ) );
+            break;
+            
+        case KXnErrViewPluginFailure:
+        case KXnErrWidgetPluginFailure:            
+            TRAP_IGNORE( ShowErrorL( R_QTN_HS_ERROR_WIDGETS_REMOVED ) );
+            break;
+            
+        default:
+            break;
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // CXnViewManager::OOMSysHandler
 //
 // -----------------------------------------------------------------------------
@@ -1818,9 +1844,9 @@ void CXnViewManager::DoRobustnessCheckL()
     RProperty::Get( TUid::Uid( KPSCategoryUid ),
                     KPSCrashCountKey,
                     crashCount );    
-    
-    if( crashCount == KCrashRestoreDefaultThreshold )
-        {    
+    if( crashCount == KCrashRestoreDefaultTreshold )
+        {
+        // Try to activate another root configuration with a licensee default status
         iHspsWrapper->RestoreDefaultConfL();
         
         CAknQueryDialog* query = CAknQueryDialog::NewL();
@@ -1830,14 +1856,21 @@ void CXnViewManager::DoRobustnessCheckL()
         query->SetPromptL( queryText->Des() );    
         CleanupStack::PopAndDestroy( queryText );
 
-        query->RunLD();           
+        query->RunLD();
+        }
+    else if( crashCount == KCrashRestoreAllTreshold )
+        {                 
+        // Reinstall all plugins from the ROM, UDA and eMMC drives
+        iHspsWrapper->RestoreAllConfL();                           
         }
     else if( crashCount == KCrashRestoreRomTreshold )
         {
+        // Reinstall from the ROM drive only
         iHspsWrapper->RestoreRomConfL();                         
         }
     else if( crashCount >= KCrashRestoreViewsTreshold )
         {
+        // Remove all the Homescreen pages and widgets        
         iHspsWrapper->RestoreViewsL();
                  
         ResetCrashCount();

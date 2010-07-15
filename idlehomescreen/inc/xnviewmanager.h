@@ -181,6 +181,8 @@ public:
     
     void AddViewL( TInt aEffectId = 0 );
     
+    TInt RemoveFaultyView( CXnViewData* aViewData );
+    
     TInt RemoveViewL( const CHsContentInfo& aInfo );
 
     void RemoveViewL( TInt aEffectId = 0 );
@@ -207,6 +209,8 @@ public:
     void UpdatePageManagementInformationL();
                   
     void ShowErrorL( TInt aResource ) const;
+    
+    void HandleErrorNotes( const TInt aError ) const;
     
     void PublishersReadyL( CXnViewData& aViewData, TInt aResult );
         

@@ -51,12 +51,12 @@ public:
      */
     TBool IsCWRTWidget( TUid aUid );
 
+
 private:
     /** Constructor */
     CTsFsWidgetList();
+    void ConstructL();
     void ResetArrayOfWidgetInfo( RWidgetInfoArray& aWidgetInfoArr );
-
-    static void CleanupConnect( TAny* aThis );
 
     TBool IsValBetween( TInt aMinor, TInt aMajor, TInt aBetween );
 

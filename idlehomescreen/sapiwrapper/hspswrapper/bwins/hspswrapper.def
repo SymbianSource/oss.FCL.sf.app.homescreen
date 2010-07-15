@@ -71,33 +71,34 @@ EXPORTS
 	?PluginId@CAddPluginResult@hspswrapper@@QBEABVTDesC8@@XZ @ 70 NONAME ; class TDesC8 const & hspswrapper::CAddPluginResult::PluginId(void) const
 	??1CAddPluginResult@hspswrapper@@UAE@XZ @ 71 NONAME ; hspswrapper::CAddPluginResult::~CAddPluginResult(void)
 	?NewLC@CPluginMap@hspswrapper@@SAPAV12@XZ @ 72 NONAME ; class hspswrapper::CPluginMap * hspswrapper::CPluginMap::NewLC(void)
-	?ReplacePluginL@CHspsWrapper@hspswrapper@@QAEHABVTDesC8@@0@Z @ 73 NONAME ; int hspswrapper::CHspsWrapper::ReplacePluginL(class TDesC8 const &, class TDesC8 const &)
-	?Resources@CHspsConfiguration@hspswrapper@@QAEAAV?$RPointerArray@VCObjectMap@hspswrapper@@@@XZ @ 74 NONAME ; class RPointerArray<class hspswrapper::CObjectMap> & hspswrapper::CHspsConfiguration::Resources(void)
-	?MaxChild@CPluginInfo@hspswrapper@@QBEABJXZ @ 75 NONAME ; long const & hspswrapper::CPluginInfo::MaxChild(void) const
-	?SetLockingStatusL@CPluginMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 76 NONAME ; class hspswrapper::CPluginMap & hspswrapper::CPluginMap::SetLockingStatusL(class TDesC8 const &)
-	?ServiceHandler@CHspsWrapper@hspswrapper@@QBEPAVCLiwServiceHandler@@XZ @ 77 NONAME ; class CLiwServiceHandler * hspswrapper::CHspsWrapper::ServiceHandler(void) const
-	?SetActivePluginL@CHspsWrapper@hspswrapper@@QAEHABVTDesC8@@@Z @ 78 NONAME ; int hspswrapper::CHspsWrapper::SetActivePluginL(class TDesC8 const &)
-	?Interface@CPluginInfo@hspswrapper@@QBEABVTDesC8@@XZ @ 79 NONAME ; class TDesC8 const & hspswrapper::CPluginInfo::Interface(void) const
-	?SetDescriptionL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 80 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetDescriptionL(class TDesC8 const &)
-	?AddPluginL@CHspsWrapper@hspswrapper@@QAEPAVCAddPluginResult@2@ABVTDesC8@@0H@Z @ 81 NONAME ; class hspswrapper::CAddPluginResult * hspswrapper::CHspsWrapper::AddPluginL(class TDesC8 const &, class TDesC8 const &, int)
-	?SetPluginIdL@CAddPluginResult@hspswrapper@@QAEXABVTDesC8@@@Z @ 82 NONAME ; void hspswrapper::CAddPluginResult::SetPluginIdL(class TDesC8 const &)
-	?SetUidL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 83 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetUidL(class TDesC8 const &)
-	?SetTagL@CObjectMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 84 NONAME ; class hspswrapper::CObjectMap & hspswrapper::CObjectMap::SetTagL(class TDesC8 const &)
-	?NewLC@CPluginInfo@hspswrapper@@SAPAV12@XZ @ 85 NONAME ; class hspswrapper::CPluginInfo * hspswrapper::CPluginInfo::NewLC(void)
-	?SetNameL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 86 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetNameL(class TDesC8 const &)
-	?RestoreViewsL@CHspsWrapper@hspswrapper@@QAEHXZ @ 87 NONAME ; int hspswrapper::CHspsWrapper::RestoreViewsL(void)
-	?SetMediaTypeL@CObjectMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 88 NONAME ; class hspswrapper::CObjectMap & hspswrapper::CObjectMap::SetMediaTypeL(class TDesC8 const &)
-	?Tag@CObjectMap@hspswrapper@@QBEABVTDesC8@@XZ @ 89 NONAME ; class TDesC8 const & hspswrapper::CObjectMap::Tag(void) const
-	?SetItemIdL@CItemMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 90 NONAME ; class hspswrapper::CItemMap & hspswrapper::CItemMap::SetItemIdL(class TDesC8 const &)
-	?NewLC@CItemMap@hspswrapper@@SAPAV12@XZ @ 91 NONAME ; class hspswrapper::CItemMap * hspswrapper::CItemMap::NewLC(void)
-	?SetLogoIconL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC16@@@Z @ 92 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetLogoIconL(class TDesC16 const &)
-	?SetInterfaceL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 93 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetInterfaceL(class TDesC8 const &)
-	?AddPluginMapL@CHspsConfiguration@hspswrapper@@QAEAAV12@PAVCPluginMap@2@@Z @ 94 NONAME ; class hspswrapper::CHspsConfiguration & hspswrapper::CHspsConfiguration::AddPluginMapL(class hspswrapper::CPluginMap *)
-	?RemovePluginL@CHspsWrapper@hspswrapper@@QAEHABVTDesC8@@@Z @ 95 NONAME ; int hspswrapper::CHspsWrapper::RemovePluginL(class TDesC8 const &)
-	?SetActivationStateL@CPluginMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 96 NONAME ; class hspswrapper::CPluginMap & hspswrapper::CPluginMap::SetActivationStateL(class TDesC8 const &)
-	?LockingStatus@CPluginMap@hspswrapper@@QBEABVTDesC8@@XZ @ 97 NONAME ; class TDesC8 const & hspswrapper::CPluginMap::LockingStatus(void) const
-	?Type@CPluginInfo@hspswrapper@@QBEABVTDesC8@@XZ @ 98 NONAME ; class TDesC8 const & hspswrapper::CPluginInfo::Type(void) const
-	?SetConfIdL@CHspsConfiguration@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 99 NONAME ; class hspswrapper::CHspsConfiguration & hspswrapper::CHspsConfiguration::SetConfIdL(class TDesC8 const &)
-	?NewLC@CPropertyMap@hspswrapper@@SAPAV12@XZ @ 100 NONAME ; class hspswrapper::CPropertyMap * hspswrapper::CPropertyMap::NewLC(void)
-	??0CAddPluginResult@hspswrapper@@AAE@XZ @ 101 NONAME ; hspswrapper::CAddPluginResult::CAddPluginResult(void)
+	?RestoreAllConfL@CHspsWrapper@hspswrapper@@QAEHXZ @ 73 NONAME ; int hspswrapper::CHspsWrapper::RestoreAllConfL(void)
+	?ReplacePluginL@CHspsWrapper@hspswrapper@@QAEHABVTDesC8@@0@Z @ 74 NONAME ; int hspswrapper::CHspsWrapper::ReplacePluginL(class TDesC8 const &, class TDesC8 const &)
+	?Resources@CHspsConfiguration@hspswrapper@@QAEAAV?$RPointerArray@VCObjectMap@hspswrapper@@@@XZ @ 75 NONAME ; class RPointerArray<class hspswrapper::CObjectMap> & hspswrapper::CHspsConfiguration::Resources(void)
+	?MaxChild@CPluginInfo@hspswrapper@@QBEABJXZ @ 76 NONAME ; long const & hspswrapper::CPluginInfo::MaxChild(void) const
+	?SetLockingStatusL@CPluginMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 77 NONAME ; class hspswrapper::CPluginMap & hspswrapper::CPluginMap::SetLockingStatusL(class TDesC8 const &)
+	?ServiceHandler@CHspsWrapper@hspswrapper@@QBEPAVCLiwServiceHandler@@XZ @ 78 NONAME ; class CLiwServiceHandler * hspswrapper::CHspsWrapper::ServiceHandler(void) const
+	?SetActivePluginL@CHspsWrapper@hspswrapper@@QAEHABVTDesC8@@@Z @ 79 NONAME ; int hspswrapper::CHspsWrapper::SetActivePluginL(class TDesC8 const &)
+	?Interface@CPluginInfo@hspswrapper@@QBEABVTDesC8@@XZ @ 80 NONAME ; class TDesC8 const & hspswrapper::CPluginInfo::Interface(void) const
+	?SetDescriptionL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 81 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetDescriptionL(class TDesC8 const &)
+	?AddPluginL@CHspsWrapper@hspswrapper@@QAEPAVCAddPluginResult@2@ABVTDesC8@@0H@Z @ 82 NONAME ; class hspswrapper::CAddPluginResult * hspswrapper::CHspsWrapper::AddPluginL(class TDesC8 const &, class TDesC8 const &, int)
+	?SetPluginIdL@CAddPluginResult@hspswrapper@@QAEXABVTDesC8@@@Z @ 83 NONAME ; void hspswrapper::CAddPluginResult::SetPluginIdL(class TDesC8 const &)
+	?SetUidL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 84 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetUidL(class TDesC8 const &)
+	?SetTagL@CObjectMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 85 NONAME ; class hspswrapper::CObjectMap & hspswrapper::CObjectMap::SetTagL(class TDesC8 const &)
+	?NewLC@CPluginInfo@hspswrapper@@SAPAV12@XZ @ 86 NONAME ; class hspswrapper::CPluginInfo * hspswrapper::CPluginInfo::NewLC(void)
+	?SetNameL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 87 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetNameL(class TDesC8 const &)
+	?RestoreViewsL@CHspsWrapper@hspswrapper@@QAEHXZ @ 88 NONAME ; int hspswrapper::CHspsWrapper::RestoreViewsL(void)
+	?SetMediaTypeL@CObjectMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 89 NONAME ; class hspswrapper::CObjectMap & hspswrapper::CObjectMap::SetMediaTypeL(class TDesC8 const &)
+	?Tag@CObjectMap@hspswrapper@@QBEABVTDesC8@@XZ @ 90 NONAME ; class TDesC8 const & hspswrapper::CObjectMap::Tag(void) const
+	?SetItemIdL@CItemMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 91 NONAME ; class hspswrapper::CItemMap & hspswrapper::CItemMap::SetItemIdL(class TDesC8 const &)
+	?NewLC@CItemMap@hspswrapper@@SAPAV12@XZ @ 92 NONAME ; class hspswrapper::CItemMap * hspswrapper::CItemMap::NewLC(void)
+	?SetLogoIconL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC16@@@Z @ 93 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetLogoIconL(class TDesC16 const &)
+	?SetInterfaceL@CPluginInfo@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 94 NONAME ; class hspswrapper::CPluginInfo & hspswrapper::CPluginInfo::SetInterfaceL(class TDesC8 const &)
+	?AddPluginMapL@CHspsConfiguration@hspswrapper@@QAEAAV12@PAVCPluginMap@2@@Z @ 95 NONAME ; class hspswrapper::CHspsConfiguration & hspswrapper::CHspsConfiguration::AddPluginMapL(class hspswrapper::CPluginMap *)
+	?RemovePluginL@CHspsWrapper@hspswrapper@@QAEHABVTDesC8@@@Z @ 96 NONAME ; int hspswrapper::CHspsWrapper::RemovePluginL(class TDesC8 const &)
+	?SetActivationStateL@CPluginMap@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 97 NONAME ; class hspswrapper::CPluginMap & hspswrapper::CPluginMap::SetActivationStateL(class TDesC8 const &)
+	?LockingStatus@CPluginMap@hspswrapper@@QBEABVTDesC8@@XZ @ 98 NONAME ; class TDesC8 const & hspswrapper::CPluginMap::LockingStatus(void) const
+	?Type@CPluginInfo@hspswrapper@@QBEABVTDesC8@@XZ @ 99 NONAME ; class TDesC8 const & hspswrapper::CPluginInfo::Type(void) const
+	?SetConfIdL@CHspsConfiguration@hspswrapper@@QAEAAV12@ABVTDesC8@@@Z @ 100 NONAME ; class hspswrapper::CHspsConfiguration & hspswrapper::CHspsConfiguration::SetConfIdL(class TDesC8 const &)
+	?NewLC@CPropertyMap@hspswrapper@@SAPAV12@XZ @ 101 NONAME ; class hspswrapper::CPropertyMap * hspswrapper::CPropertyMap::NewLC(void)
+	??0CAddPluginResult@hspswrapper@@AAE@XZ @ 102 NONAME ; hspswrapper::CAddPluginResult::CAddPluginResult(void)
 

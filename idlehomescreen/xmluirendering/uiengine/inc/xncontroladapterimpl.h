@@ -36,6 +36,7 @@ class CXnNode;
 class CXnProperty;
 class CGulIcon;
 class CXnUiEngine;
+class CAknPointerEventSuppressor;
 
 //Constants
 _LIT( KMif, "mif(" );
@@ -551,6 +552,8 @@ private:
     TBool iBackgrondInitialized;
     /** Tells is border images are allready created*/
     TBool iBorderInitialized;
+    /** Suppress drag events, owned */
+    CAknPointerEventSuppressor* iSuppressor;
     };
 
 #endif //__XNCONTROLADAPTERIMPL_H__

@@ -580,7 +580,7 @@ CXnODT* CXnComposer::ComposeRootL( CXnRootData& aRootData )
 //
 TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
     {    
-    TInt retval( KXnErrPluginFailure );
+    TInt retval( KXnErrViewPluginFailure );
     
     if ( aViewData.PluginId() == KNullDesC8 )
         {
@@ -726,7 +726,7 @@ TInt CXnComposer::ComposeViewL( CXnViewData& aViewData )
 //
 TInt CXnComposer::ComposeWidgetL( CXnPluginData& aPluginData )     
     {    
-    TInt retval( KXnErrPluginFailure );
+    TInt retval( KXnErrWidgetPluginFailure );
     
     if ( aPluginData.PluginId() == KNullDesC8 )
         {

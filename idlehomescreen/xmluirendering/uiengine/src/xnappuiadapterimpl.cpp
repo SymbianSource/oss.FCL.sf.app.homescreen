@@ -141,6 +141,12 @@ void CXnAppUiAdapterImpl::ConstructL()
 //
 void CXnAppUiAdapterImpl::ReloadUiL()
     {
+    // If the UI hasn't been loaded yet, ignore the event
+    if( !iViewAdapter || !iViewManager )
+        {
+        return;
+        }
+    
     __PRINTS( "*** CXnAppUiAdapterImpl::ReloadUiL" );
     __TIME_MARK( time );
 

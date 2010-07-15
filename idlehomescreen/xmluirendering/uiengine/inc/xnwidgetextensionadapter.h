@@ -151,10 +151,10 @@ private:
     
     /** UiEngine, not owned */
     CXnUiEngine* iUiEngine; 	    
-    /** Node, not owned */ 
-    CXnNodePluginIf& iNode;    
     /** Position hint */
-    TPositionHint iPositionHint;    
+    TPositionHint iPositionHint;
+    /** Node, not owned */
+    CXnNodePluginIf& iNode;    
     /** AppUi, not owned */
     CXnAppUiAdapter* iAppUiAdapter;
     /** Flag to indicate whether <popup> is permanent */

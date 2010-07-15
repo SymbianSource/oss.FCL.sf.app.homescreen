@@ -33,6 +33,7 @@
 #include "ainativeuiplugins.h"
 #include "xnpanic.h"
 
+
 #include "debug.h"
 
 // Constants
@@ -162,21 +163,19 @@ TInt CXnViewData::SetActive( TBool aActive )
 // -----------------------------------------------------------------------------
 //
 TInt CXnViewData::Load()
-    {   
-    iLoadError = KErrNone;
-    
+    {
+    TInt err( KErrNone );
+            
     if ( Occupied() )
         {
-        iLoadError = KErrInUse;
+        err = KErrInUse;
         }      
     else if ( !CXnOomSysHandler::HeapAvailable( VIEW_MIN_MEM ) )
         {                                
-        iLoadError = KErrNoMemory;
+        err = KErrNoMemory;
         }
     else
-        {
-        TInt err( KErrNone );
-        
+        {                
         TRAP( err, err = iManager.Composer().ComposeViewL( *this ) );
     
         if ( err == KErrNone )
@@ -193,7 +192,7 @@ TInt CXnViewData::Load()
                     {                    
                     TInt err2( iPluginsData[i]->Load() );
                     
-                    if ( err2 == KXnErrPluginFailure )
+                    if ( err2 == KXnErrWidgetPluginFailure )
                         {
                         err = err2;                                        
                         }          
@@ -207,11 +206,11 @@ TInt CXnViewData::Load()
                            
             // Succesfully enough composed, publishers 
             // will be loaded when view is activated
-            }    
-        
-        iLoadError = err;
+            }                   
         }
-                       
+    
+    iLoadError = err;
+                
     return iLoadError;
     }
 
@@ -577,7 +576,7 @@ void CXnViewData::NotifyPublisherReadyL()
                     {
                     iManager.UnloadWidgetFromPluginL( *plugin, ETrue );
                     
-                    result = KXnErrPluginFailure;
+                    result = KXnErrWidgetPluginFailure;
                     }                              
                 }
             }

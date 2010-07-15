@@ -74,7 +74,8 @@ const TInt KXnErrAppendingMapItemFailed_1 = -32251;
 const TInt KXnErrAppendingMapItemFailed_2 = -32252;
 const TInt KXnErrBlockProgressionPropertyNULL = -32253; 
 const TInt KXnErrBlockProgressionPropertyNULL_2 = -32254;
-const TInt KXnErrPluginFailure = -32255;
+const TInt KXnErrWidgetPluginFailure = -32255;
+const TInt KXnErrViewPluginFailure = -32256;
 
 // FUNCTION PROTOTYPES
 GLREF_C void Panic(TXnPanic aPanic);

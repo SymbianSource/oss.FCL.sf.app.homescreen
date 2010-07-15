@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <container xmlns="http://www.symbianfoundation.org/xml/implml/1">
-	<tag name="target" value="core"/>
-	<tag name="target" value="rofs2"/>
-	<tag name="target" value="rofs3"/>
 	<tag name="target" value="uda"/>
 	<tag name="target" value="emmc"/>
+	<phase name='post'/> <!-- post phase for making sure that all required data is available -->
+	
 <file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_200286ed\hsps\00\">
 		<setting ref="BlankoHomescreenPlugins/Plugins"/>
 	<xsl:stylesheet version="1.0" 

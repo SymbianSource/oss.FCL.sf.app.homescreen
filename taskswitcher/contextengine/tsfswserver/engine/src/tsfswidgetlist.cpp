@@ -26,7 +26,20 @@
 //
 CTsFsWidgetList* CTsFsWidgetList::NewL()
     {
-    return new (ELeave) CTsFsWidgetList;
+	CTsFsWidgetList* self = new (ELeave) CTsFsWidgetList();
+	CleanupStack::PushL (self );
+    self->ConstructL ( );
+    CleanupStack::Pop ( self );
+    return self;
+    }
+
+// --------------------------------------------------------------------------
+// CTsFsWidgetList::CTsFsWidgetList
+// --------------------------------------------------------------------------
+//   
+void CTsFsWidgetList::ConstructL()
+    {
+	User::LeaveIfError( iWidgetRegistryClientSession.Connect() );
     }
 
 // --------------------------------------------------------------------------
@@ -36,7 +49,7 @@ CTsFsWidgetList* CTsFsWidgetList::NewL()
 CTsFsWidgetList::CTsFsWidgetList()
     {
     }
-
+	
 // --------------------------------------------------------------------------
 // CTsFsWidgetList::~CTsFsWidgetList
 // --------------------------------------------------------------------------
@@ -45,16 +58,7 @@ CTsFsWidgetList::~CTsFsWidgetList()
     {
     ResetArrayOfWidgetInfo( iRunningWidgets );        
     iRunningWidgets.Reset();
-    }
-
-// --------------------------------------------------------------------------
-// CTsFsWidgetList::CleanupConnect
-// --------------------------------------------------------------------------
-//
-void CTsFsWidgetList::CleanupConnect( TAny* aThis )
-    {
-    CTsFsWidgetList* self = static_cast<CTsFsWidgetList*>( aThis );
-    self->iWidgetRegistryClientSession.Disconnect();
+	iWidgetRegistryClientSession.Disconnect();
     }
 
 // --------------------------------------------------------------------------
@@ -65,17 +69,13 @@ void CTsFsWidgetList::InitializeWidgetListL()
     {
     ResetArrayOfWidgetInfo( iRunningWidgets );
     iRunningWidgets.Reset();
-    User::LeaveIfError( iWidgetRegistryClientSession.Connect() );
-    CleanupStack::PushL( TCleanupItem( CleanupConnect, this) );
-    iWidgetRegistryClientSession.RunningWidgetsL(iRunningWidgets);
+   iWidgetRegistryClientSession.RunningWidgetsL(iRunningWidgets);
     //modify useless file size information with mode flag
     for ( TInt i(iRunningWidgets.Count() - 1); 0 <= i; --i )
         {
         iRunningWidgets[i]->iFileSize = 
              iWidgetRegistryClientSession.IsWidgetInFullView(iRunningWidgets[i]->iUid);
         }
-    CleanupStack::Pop(); // clean WidgetRegistryClientSession item
-    iWidgetRegistryClientSession.Disconnect();
     }
 
 // --------------------------------------------------------------------------

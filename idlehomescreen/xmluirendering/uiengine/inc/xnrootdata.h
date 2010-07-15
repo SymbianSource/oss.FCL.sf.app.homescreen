@@ -206,6 +206,8 @@ private:
     TBool iLoadForward;
     /** Maximum of views allowed */
     TInt32 iMaxPages;
+    /** Load error code */
+    TInt iLoadError;
     };
 
 #endif // _XNROOTDATA_H

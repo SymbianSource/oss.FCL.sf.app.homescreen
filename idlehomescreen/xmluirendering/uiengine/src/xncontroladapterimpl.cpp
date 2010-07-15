@@ -28,6 +28,7 @@
 #include <AknUtils.h>
 #include <AknsListBoxBackgroundControlContext.h>
 #include <gulicon.h>
+#include <aknpointereventsuppressor.h>
 #ifdef RD_TACTILE_FEEDBACK
 #include <touchfeedback.h>
 #endif // RD_TACTILE_FEEDBACK
@@ -62,6 +63,7 @@
 #include "xneditmode.h"
 
 _LIT8(KScrollableBoxNodeName, "scrollablebox");
+_LIT8( KView, "view" );
 
 // Constants
 const TInt KSkinGfxInnerRectShrink = 5;
@@ -72,7 +74,8 @@ const TInt KLongTapStartLongDelay( 500000 ); // 0.5s
 const TInt KLongTapTimeShortDelay( 600000 ); // 0.6s for SK
 const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s
 
-const TInt KDragThreshold = 20; // pixels
+const TInt KDragThreshold = 100; // pixels
+const TInt KMaxTapMove = 100; //100x100 pixels
 
 const TReal KEps( 3e-16 ); // proximite EPS value for double FP numbers
 
@@ -3589,6 +3592,7 @@ CXnControlAdapterImpl::~CXnControlAdapterImpl()
         }
     
     delete iGestureFw;
+    delete iSuppressor;
     }
 
 // -----------------------------------------------------------------------------
@@ -3883,7 +3887,7 @@ TBool CXnControlAdapterImpl::IsDragThresholdExceeded( const TPoint& aPoint )
 //
 TBool CXnControlAdapterImpl::HandlePointerEventL(
     const TPointerEvent& aPointerEvent )
-    {
+    {    
     const TPointerEvent& event( aPointerEvent );
     
     CXnNode* node( &iNode.Node() );
@@ -3911,6 +3915,12 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
             // No softkey node found, consume event
             return ETrue;
             }
+        }
+    else if ( iSuppressor &&
+              iSuppressor->SuppressPointerEvent( aPointerEvent ) )
+        {
+        // if view does not handle swipe we have to pass event to children
+        return ( iGestureDestination == node );
         }
     
     CAknLongTapDetector* detector( iAdapter->LongTapDetector() );
@@ -3987,8 +3997,7 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
         {        
         if ( node->IsStateSet( XnPropertyNames::style::common::KFocus ) )
             {
-            if ( IsDragThresholdExceeded( event.iPosition ) ||
-                 !node->MarginRect().Contains( event.iPosition ) )
+            if ( IsDragThresholdExceeded( event.iPosition ) )
                 {
                 // Remove focus
                 node->UnsetStateL(
@@ -4003,9 +4012,8 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
             if ( menuBar ) 
                 {
                 node->SetStateL( XnPropertyNames::style::common::KActive );
-                }          
-            else if ( ( node->MarginRect().Contains( event.iPosition ) &&
-               node->IsStateSet( XnPropertyNames::style::common::KFocus ) ) )
+                }
+            else if ( node->IsStateSet( XnPropertyNames::style::common::KFocus ) )
                 {
 #ifdef RD_TACTILE_FEEDBACK            
                 MTouchFeedback* feedback( MTouchFeedback::Instance() );
@@ -5304,6 +5312,13 @@ void CXnControlAdapterImpl::ConstructL(
         {
         iGestureFw = CAknTouchGestureFw::NewL( *this, aAdapter );
         iGestureFw->SetGestureInterestL( EAknTouchGestureFwGroupFlick );
+        }
+    
+    if ( aNode.Type()->Type() == KView )
+        {
+        iSuppressor = CAknPointerEventSuppressor::NewL();
+        iSuppressor->SetMaxTapMove( TSize( KMaxTapMove, KMaxTapMove) );
+        iSuppressor->SetMaxTapDuration( KLongTapTimeLongDelay );
         }
     }
 

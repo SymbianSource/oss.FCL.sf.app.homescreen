@@ -22,7 +22,7 @@
 #if defined(__LAYOUT_360_640_TOUCH) || defined(__LAYOUT_640_360_TOUCH)          
 
 // Enabled by DTD-localization tools
-data=ZPRIVATE\200159c0\install\posterwideimage_2001fdbc\xuikon\00\posterwideimage.o0000 \private\200159c0\install\posterwideimage_2001fdbc\xuikon\00\posterwideimage.o0000
+
 data=ZPRIVATE\200159c0\install\posterwideimage_2001fdbc\hsps\00\manifest.dat \private\200159c0\install\posterwideimage_2001fdbc\hsps\00\manifest.dat
 
 #endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--!DOCTYPE xmluiml SYSTEM "wideimage.dtd"-->
+<!DOCTYPE xmluiml SYSTEM "wideimage.dtd">
 <xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
 
     <widget id="posterwideimage_template" focusable="true" _s60-initial-focus="1">
@@ -32,7 +32,7 @@
             <property class="policy/emptyContent" name="wide_text" value="display: block;"/>
             <property class="policy/Content" name="wide_text" value="display: none;"/>
           </image>
-          <text id="wide_text">#Loading Content</text>
+          <text id="wide_text">&qtn_ai_loading_content;</text>
         </box>
         <menuextension>
             <!-- dynmenuitems are mapped to HS view.xml menu based on target attribute.

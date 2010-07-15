@@ -112,7 +112,8 @@ void CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL()
 // -----------------------------------------------------------------------------
 //
 CXnWidgetExtensionAdapter::CXnWidgetExtensionAdapter( CXnNodePluginIf& aNode )
-    : iNode( aNode ), iPositionHint( EAboveLeft )
+    : iPositionHint( AknLayoutUtils::LayoutMirrored() ? EAboveRight : EAboveLeft ),
+      iNode( aNode )
     {
     }
 
@@ -412,14 +413,13 @@ void CXnWidgetExtensionAdapter::ChangePopupPosition()
                      iPositionHint = EAboveLeft; 
                      }
                  }
-        
-            if ( iPositionHint != ENone )
-                {    
-                // the popup is going visible and position-hind is available
-                // calculate its position
-                CalculatePosition();
-                }
-            }        
+            }
+        if ( iPositionHint != ENone )
+            {
+            // the popup is going visible and position-hind is available
+            // calculate its position
+            CalculatePosition();
+            }
         }
     }
 

@@ -313,8 +313,8 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
     iHspsWrapper = CHspsWrapper::NewL( aUid, this );
     iRepository= CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
     iOomSysHandler = CXnOomSysHandler::NewL();
-    iNotifyWidgetListChanged = CPeriodic::New( CActive::EPriorityIdle );
-    iNotifyViewListChanged = CPeriodic::New( CActive::EPriorityIdle );
+    iNotifyWidgetListChanged = CPeriodic::NewL( CActive::EPriorityIdle );
+    iNotifyViewListChanged = CPeriodic::NewL( CActive::EPriorityIdle );
     }
 
 // ---------------------------------------------------------------------------
@@ -323,13 +323,15 @@ void CXnEditor::ConstructL( const TDesC8& aUid )
 // 
 CXnEditor::~CXnEditor()
     {
-    if ( iNotifyWidgetListChanged->IsActive() )
+    if ( iNotifyWidgetListChanged && 
+       iNotifyWidgetListChanged->IsActive() )
         {
         iNotifyWidgetListChanged->Cancel();
         }
     delete iNotifyWidgetListChanged;
 
-    if ( iNotifyViewListChanged->IsActive() )
+    if ( iNotifyViewListChanged && 
+       iNotifyViewListChanged->IsActive() )
         {
         iNotifyViewListChanged->Cancel();
         }
@@ -2160,9 +2162,11 @@ CHsContentInfo* CXnEditor::CreateContentInfoLC( CXnPluginData& aPlugin,
         for ( TInt i = 0; i < aInfos.Count() && !contentInfo; i++ )
             {
             CHsContentInfo* info = aInfos[i];
-            if ( aPlugin.PluginUid().CompareF( info->Uid() ) == 0 && 
-                 ( ( aPlugin.PublisherName().Length() == 0 ) || 
-                   ( aPlugin.PublisherName().CompareF( info->PublisherId() ) == 0 ) ) )
+            if ( ( !aPlugin.PublisherName().Length() && 
+                   aPlugin.PluginUid().CompareF( info->Uid() ) == 0 ) ||
+                 ( aPlugin.PublisherName().Length() &&
+                   aPlugin.PublisherName().CompareF( info->PublisherId() ) == 0 )
+                )
                 {
                 contentInfo = info->CloneL();
                 CleanupStack::PushL( contentInfo );

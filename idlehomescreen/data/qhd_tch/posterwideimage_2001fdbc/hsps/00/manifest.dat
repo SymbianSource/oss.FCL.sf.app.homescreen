@@ -46,16 +46,10 @@
 
 
 
-  <!-- Locale independent/common resources -->
-
-  <fileresource>posterwideimage.o0000</fileresource>
-
-
-
   <!-- Locale specific resources -->
-
-	<localization/>
-
+<localization>
+  <fileresource>posterwideimage.o0000</fileresource>
+</localization>
 
 
 </package>
