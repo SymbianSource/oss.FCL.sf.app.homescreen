@@ -38,10 +38,13 @@ private:
 
 public:
 
-    static QEvent *createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode);
+    static QEvent *createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode, QVariant homescreenData = NULL);
 
     static QEvent *createOpenCollectionEvent(int itemId,
             const QString &collectionType);
+    
+    static QEvent *createOpenCollectionFromAppLibraryEvent(int itemId,
+            const QString &collectionType);    
 
     static QEvent *createRenameCollectionEvent(int aItemId);
 
@@ -50,7 +53,7 @@ public:
     static QEvent *createDeleteCollectionEvent(int aItemId);
 
     static QEvent *createOpenAppLibraryEvent(
-        HsMenuMode menuMode = NormalHsMenuMode);
+        HsMenuMode menuMode = NormalHsMenuMode, QVariant homescreenData = NULL);
 
     static QEvent *createOpenInstalledViewEvent();
     
@@ -70,6 +73,8 @@ public:
 
     static QEvent *createRemoveAppFromCollectionEvent(int aItemId, int aCollectionId);
 
+    static QEvent *createUninstallApplicationEvent(int aItemId);
+
     static QEvent *createArrangeCollectionEvent(int aTopItemId);
 
     static QEvent *createPreviewHSWidgetEvent(
@@ -79,7 +84,9 @@ public:
         const QString &library = QString()
     );
     
-    static QEvent *createAppSettingsViewEvent(int entryId);    
+    static QEvent *createAppSettingsViewEvent(int entryId);
+    
+    static QEvent *createAppDetailsViewEvent(int entryId);
 
     static QEvent *createUnknownEvent();
 

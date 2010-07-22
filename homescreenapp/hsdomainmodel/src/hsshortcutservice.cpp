@@ -28,17 +28,33 @@ namespace
     const char gShortcutWidgetUri[] = "hsshortcutwidgetplugin";
 }
 
+
+/*!
+    \class HsShortcutService
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
+/*!
+
+*/
 HsShortcutServicePrivate::HsShortcutServicePrivate(QStateMachine *stateMachine, QObject *parent)
     : QObject(parent),
 	  mStateMachine(stateMachine)
 {
 }
 
+/*!
+
+*/
 HsShortcutServicePrivate::~HsShortcutServicePrivate()
 {
 
 }
 
+/*!
+
+*/
 void HsShortcutServicePrivate::executeCollectionAction(
         int shortcutId, const QString& collectionType)
 {
@@ -47,6 +63,9 @@ void HsShortcutServicePrivate::executeCollectionAction(
 	mStateMachine->postEvent(menuEvent);
 }
 
+/*!
+
+*/
 bool HsShortcutServicePrivate::isItemShortcutWidget(int itemId)
 {
     HsDatabase *db = HsDatabase::instance();
@@ -65,33 +84,49 @@ bool HsShortcutServicePrivate::isItemShortcutWidget(int itemId)
 	return false;
 }
 
+/*!
+
+*/
 HsShortcutService *HsShortcutService::instance(QStateMachine *stateMachine)
 {
     if (!mInstance && stateMachine) {
-        mInstance.reset(new HsShortcutService(stateMachine));
+        mInstance = new HsShortcutService(stateMachine);
     }
-    return mInstance.data();
+    return mInstance;
 }
 
+/*!
+
+*/
 HsShortcutService::~HsShortcutService()
 {
+    
 }
 
+/*!
+
+*/
 void HsShortcutService::executeCollectionAction(
         int shortcutId, const QString& collectionType)
 {
     mD->executeCollectionAction(shortcutId, collectionType);
 }
 
+/*!
+
+*/
 bool HsShortcutService::isItemShortcutWidget(int itemId)
 {
     return mD->isItemShortcutWidget(itemId);
 }
 
+/*!
+
+*/
 HsShortcutService::HsShortcutService(QStateMachine *stateMachine, QObject *parent)
     : QObject(parent)
 {
     mD.reset(new HsShortcutServicePrivate(stateMachine));
 }
 
-QScopedPointer<HsShortcutService> HsShortcutService::mInstance(0);
+HsShortcutService *HsShortcutService::mInstance(0);

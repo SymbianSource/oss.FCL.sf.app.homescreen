@@ -84,9 +84,6 @@ private:
     QList<int> mArrangedCollIdList;
     
     QObjectList mObjectList;
-    
-    bool mFinishedEntered;
-
 
 };
 

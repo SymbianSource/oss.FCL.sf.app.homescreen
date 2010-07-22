@@ -23,17 +23,19 @@
 #include <QVariant>
 #ifdef Q_OS_SYMBIAN
 #include <xqaiwinterfacedescriptor.h>
+#include <xqaiwdecl.h>
 #endif // Q_OS_SYMBIAN
-
-namespace
-{
-    const char gFetcherInterface[] = "image";
-    const char gFetcherOperation[] = "fetch(QVariantMap,QVariant)";
-}
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
+
+
+/*!
+    \class HsImageFetcherClient
+    \ingroup group_hsutils
+    \brief 
+*/
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -74,9 +76,8 @@ void HsImageFetcherClient::fetch()
         mReq = 0;
     }
 
-    mReq = mAppMgr.create(gFetcherInterface, gFetcherOperation, false);
-    if (mReq) {
-        // Connect signals once
+    mReq = mAppMgr.create(XQI_IMAGE_FETCH, XQOP_IMAGE_FETCH, false);
+    if (mReq) {        
         connect(mReq, SIGNAL(requestOk(const QVariant&)), this, SLOT(handleOk(const QVariant&)));
         connect(mReq, SIGNAL(requestError(int,const QString&)), this, SLOT(handleError(int,const QString&)));
     } else {

@@ -1,12 +1,4 @@
-{%- set portraitWallpaper = feat_tree.HomeScreenDbSettings.portraitWallpaper._value or '' -%}
-{%- set landscapeWallpaper = feat_tree.HomeScreenDbSettings.landscapeWallpaper._value or '' -%}
-{%- set defaultPageId = feat_tree.HomeScreenDbSettings.defaultPageId._value -%}
-{%- set maximumPageCount = feat_tree.HomeScreenDbSettings.maximumPageCount._value -%}
-{%- set maximumWidgetHeight = feat_tree.HomeScreenDbSettings.maximumWidgetHeight._value -%}
-{%- set maximumWidgetWidth = feat_tree.HomeScreenDbSettings.maximumWidgetWidth._value -%}
-{%- set minimumWidgetHeight = feat_tree.HomeScreenDbSettings.minimumWidgetHeight._value -%}
-{%- set minimumWidgetWidth = feat_tree.HomeScreenDbSettings.minimumWidgetWidth._value -%}
-INSERT INTO Scene (portraitWallpaper, landscapeWallpaper, defaultPageId, maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, minimumWidgetHeight, minimumWidgetWidth) VALUES ('{{portraitWallpaper}}', '{{landscapeWallpaper}}', {{defaultPageId}}, {{maximumPageCount}}, {{maximumWidgetHeight}}, {{maximumWidgetWidth}}, {{minimumWidgetHeight}}, {{minimumWidgetWidth}});
+INSERT INTO Scene (id) VALUES (1);
 
 {% for index in range(feat_tree.HomeScreenDbSettings.Pages._value|length) -%}
     {%- set id = feat_tree.HomeScreenDbSettings.Pages.id._value[index] -%}
@@ -38,4 +30,11 @@ INSERT INTO Scene (portraitWallpaper, landscapeWallpaper, defaultPageId, maximum
     {%- set widgetId = feat_tree.HomeScreenDbSettings.WidgetPreferences.widgetId._value[index] -%}
     
     INSERT INTO WidgetPreferences (key, value, widgetId) VALUES ('{{key}}', '{{value}}', {{widgetId}});
+{% endfor %}
+
+{% for index in range(feat_tree.HomeScreenDbSettings.Configuration._value|length) -%}
+    {%- set key = feat_tree.HomeScreenDbSettings.Configuration.key._value[index] or '' -%}
+    {%- set value = feat_tree.HomeScreenDbSettings.Configuration.value._value[index] -%}
+    
+    INSERT INTO Configuration (key, value) VALUES ('{{key}}', '{{value}}');
 {% endfor %}

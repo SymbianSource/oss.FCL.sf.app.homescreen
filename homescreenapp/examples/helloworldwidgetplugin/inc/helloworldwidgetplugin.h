@@ -22,6 +22,7 @@
 #include <qserviceplugininterface.h>
 
 QTM_USE_NAMESPACE
+// Start of snippet 1
 class HelloWorldWidgetPlugin : public QObject, public QServicePluginInterface
 {
     Q_OBJECT
@@ -32,5 +33,6 @@ public:
                             QServiceContext *context,
                             QAbstractSecuritySession *session);
 };
+// End of snippet 1
 
 #endif // HELLOWORLDWIDGETPLUGIN_H

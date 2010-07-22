@@ -22,9 +22,7 @@
 #include <qabstractitemmodel.h>
 #include <QPointer>
 
-#include "hsmenustates_global.h"
-#include "hsmenuservice.h"
-#include "hsmenuview.h"
+#include "hsbaseviewstate.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -36,14 +34,16 @@ class QModelIndex;
 class HsMenuItemModel;
 class HsMenuModeWrapper;
 class HsMenuViewBuilder;
+class HsMainWindow;
 
-class HsCollectionState: public QState
+class HsCollectionState: public HsBaseViewState
 {
     Q_OBJECT
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 public:
     HsCollectionState(HsMenuViewBuilder &menuView,
                       HsMenuModeWrapper &menuMode,
+                      HsMainWindow &mainWindow,
                       QState *parent = 0);
     ~HsCollectionState();
 public slots:
@@ -56,7 +56,7 @@ private slots:
     bool openTaskSwitcher();
     void listItemActivated(const QModelIndex &index);
     void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
-    void addAppsAction();
+    void addAppsAction(bool addApps = true);
     void addCollectionShortcutToHomeScreenAction();
     void renameAction();
     void deleteAction();
@@ -66,7 +66,10 @@ private slots:
     void stateExited();
     void latestOnTopMenuAction();
     void oldestOnTopMenuAction();
-	void contextMenuAction(HbAction *action);
+    void contextMenuAction(HbAction *action);
+    void handleEmptyChange(bool empty);
+    void lockSearchButton(bool lock);
+
 private:
     void construct();
     void constructMenu(bool isDynamic);
@@ -84,9 +87,9 @@ private:
     HbAction *const mSecondarySoftkeyAction;
     HsMenuItemModel *mCollectionModel;
     HbMenu *mOptions;
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
-
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
+    HsMainWindow &mMainWindow;
 };
 
 #endif // HSCOLLECTIONSTATE_H

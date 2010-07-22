@@ -20,10 +20,16 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QVariantHash>
+#ifdef HOMESCREEN_TEST
+#include "xqrequestinfo_mock.h"
+#include "xqservicerequest_mock.h"
+#else
 #include <xqrequestinfo.h>
 #include <xqservicerequest.h>
+#endif
 
-const char INTERFACE_NAME[] = "com.nokia.services.hsapplication.IHomeScreenClient";
+const char INTERFACE_NAME[] = "com.nokia.symbian.IHomeScreenClient";
 
 /*!
     \class HsWidgetInstallerSender
@@ -53,14 +59,15 @@ HsWidgetInstallerSender::~HsWidgetInstallerSender()
 void HsWidgetInstallerSender::widgetChanged(QString functionSignature, HsWidgetComponentDescriptor &widgetDescriptor)
 {
     QVariantHash widgetDescriptorHash;
-    widgetDescriptorHash["uri"] = widgetDescriptor.uri; 
-    widgetDescriptorHash["title"] = widgetDescriptor.title; 
-    widgetDescriptorHash["description"] = widgetDescriptor.description; 
-    widgetDescriptorHash["iconUri"] = widgetDescriptor.iconUri; 
-    widgetDescriptorHash["hidden"] = widgetDescriptor.hidden; 
-    widgetDescriptorHash["serviceXml"] = widgetDescriptor.serviceXml; 
-    widgetDescriptorHash["version"] = widgetDescriptor.version; 
-    widgetDescriptorHash["installationPath"] = widgetDescriptor.installationPath; 
+    widgetDescriptorHash["uri"] = widgetDescriptor.uri(); 
+    widgetDescriptorHash["title"] = widgetDescriptor.title(); 
+    widgetDescriptorHash["description"] = widgetDescriptor.description(); 
+    widgetDescriptorHash["iconUri"] = widgetDescriptor.iconUri(); 
+    widgetDescriptorHash["hidden"] = widgetDescriptor.hidden(); 
+    widgetDescriptorHash["serviceXml"] = widgetDescriptor.serviceXml(); 
+    widgetDescriptorHash["version"] = widgetDescriptor.version();
+    widgetDescriptorHash["installationPath"] = widgetDescriptor.installationPath(); 
+    widgetDescriptorHash["translationFilename"] = widgetDescriptor.translationFilename();
     
     XQServiceRequest snd(INTERFACE_NAME, functionSignature, true);
     XQRequestInfo requestInfo = snd.info();

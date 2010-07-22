@@ -29,7 +29,7 @@
 #include "cadefs.h"
 
 #include "hstest_global.h"
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HsWidgetComponent;
 class CaEntry;
@@ -67,7 +67,7 @@ private:
 	QServiceManager mServiceManager;
 	static HsWidgetComponentRegistry *mInstance;
     
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSWIDGETCOMPONENTREGISTRY_H

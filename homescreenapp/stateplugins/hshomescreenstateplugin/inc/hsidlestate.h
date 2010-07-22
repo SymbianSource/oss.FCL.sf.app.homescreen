@@ -21,6 +21,10 @@
 #include <QState>
 #include <QTimer>
 #include <QPointF>
+#include <QPointer>
+#include <QRectF>
+
+#include "hswidgetpositioningonwidgetmove.h"
 
 #include "hstest_global.h"
 HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
@@ -28,7 +32,7 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 class QGraphicsItem;
 class QGraphicsSceneMouseEvent;
 class QPropertyAnimation;
-class HbView;
+class QGestureEvent;
 class HbAction;
 class HbContinuousFeedback;
 class HsIdleWidget;
@@ -38,6 +42,8 @@ class HbMenu;
 #ifdef Q_OS_SYMBIAN
 class XQSettingsManager;
 #endif
+
+class HsWidgetHost;
 
 class HsIdleState : public QState
 {
@@ -50,12 +56,9 @@ public:
 signals:
     void event_applicationLibrary();
     void event_waitInput();
-    void event_widgetInteraction();
-    void event_sceneInteraction();
     void event_moveWidget();
     void event_moveScene();
-    void event_sceneMenu();
-    void event_selectSceneWallpaper();
+    void event_selectWallpaper();
     void event_addPage();
     void event_removePage();
     void event_toggleConnection();
@@ -72,101 +75,91 @@ private:
     bool isInPageChangeZone();
     bool isInLeftPageChangeZone();
     bool isInRightPageChangeZone();
-    void addPageToScene(int pageIndex);
-    qreal parallaxFactor() const;
+    void addPageToScene(int pageIndex);    
     void updateZoneAnimation();
+    void showTrashBin();
     void removeActivePage();
+    void deleteZoneAnimation();
+    QList<QRectF> createInactiveWidgetRects();
+    void updatePagePresentationToWidgetSnap();
+    void resetSnapPosition();
+    void showVerticalLine();
+    void showHorizontalLine();
+    void hideVerticalLine();
+    void hideHorizontalLine();
 
-private slots:
-    void action_disableUserInteraction();
-    void action_enableUserInteraction();
+private slots:    
     void action_idle_setupView();
     void action_idle_layoutNewWidgets();
     void action_idle_showActivePage();
     void action_idle_connectOrientationChangeEventHandler();
+    void action_idle_orientationChanged();
     void action_idle_installEventFilter();
     void action_idle_cleanupView();
     void action_idle_disconnectOrientationChangeEventHandler();
     void action_idle_uninstallEventFilter();
     void action_waitInput_updateOptionsMenu();
-    void action_waitInput_connectMouseEventHandlers();
+    void action_waitInput_connectGestureHandlers();
     void action_waitInput_publishIdleKey();
-    void action_waitInput_disconnectMouseEventHandlers();
-    void action_widgetInteraction_connectMouseEventHandlers();
-    void action_widgetInteraction_connectGestureTimers();
-    void action_widgetInteraction_disconnectMouseEventHandlers();
-    void action_widgetInteraction_disconnectGestureTimers();
-    void action_sceneInteraction_connectMouseEventHandlers();
-    void action_sceneInteraction_connectGestureTimers();
-    void action_sceneInteraction_disconnectMouseEventHandlers();
-    void action_sceneInteraction_disconnectGestureTimers();
+    void action_waitInput_disconnectGestureHandlers();
+    void action_waitInput_resetNewWidgets();
     void action_moveWidget_reparentToControlLayer();
     void action_moveWidget_startWidgetDragEffect();
-    void action_moveWidget_connectMouseEventHandlers();
+    void action_moveWidget_connectGestureHandlers();
+    void action_moveWidget_setWidgetSnap();
+
     void action_moveWidget_reparentToPage();
     void action_moveWidget_startWidgetDropEffect();
-    void action_moveWidget_disconnectMouseEventHandlers();
-    void action_moveScene_connectMouseEventHandlers();
+    void action_moveWidget_disconnectGestureHandlers();
+    void action_moveWidget_preventZoneAnimation();
+    void action_moveWidget_deleteWidgetSnap();
+    void action_moveScene_connectGestureHandlers();
     void action_moveScene_moveToNearestPage();
-    void action_moveScene_disconnectMouseEventHandlers();
-    void action_sceneMenu_showMenu();
+    void action_moveScene_disconnectGestureHandlers();    
     void action_addPage_addPage();
     void action_removePage_removePage();
     void action_toggleConnection_toggleConnection();
     void action_idle_setupTitle();
     void action_idle_cleanupTitle();
-
-    void waitInput_onMousePressed(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void widgetInteraction_onMouseMoved(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void widgetInteraction_onMouseReleased(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void sceneInteraction_onMouseMoved(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void sceneInteraction_onMouseReleased(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void moveWidget_onMouseMoved(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void moveWidget_onMouseReleased(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void moveScene_onMouseMoved(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void moveScene_onMouseReleased(
-        QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-
-    void onOrientationChanged(Qt::Orientation orientation);
-
-    void widgetInteraction_onTapAndHoldTimeout();
-    void sceneInteraction_onTapAndHoldTimeout();
-
+    
+    void onPageTapAndHoldFinished(QGestureEvent *event);
+    void onPagePanStarted(QGestureEvent *event);
+    void onPagePanUpdated(QGestureEvent *event);
+    void onPagePanFinished(QGestureEvent *event);
+    void onWidgetTapStarted(HsWidgetHost *widget);
+    void onWidgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost *widget);
+    void onWidgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *widget);
+    void onWidgetMoveFinished(const QPointF &scenePos, HsWidgetHost *widget);
     void onTitleChanged(QString title);
-
-    void onAddContentActionTriggered();
-
+    void onAddContentFromContextMenuActionTriggered();
+    void onAddContentFromOptionsMenuActionTriggered();
     bool openTaskSwitcher();
     void zoneAnimationFinished();
-    void onSceneMenuAboutToClose();
-    void onRemovePageMessageBoxClosed(HbAction *action);
+    void pageChangeAnimationFinished();
+    void onRemovePageConfirmationOk();
+    void onVerticalSnapLineTimerTimeout();
+    void onHorizontalSnapLineTimerTimeout();
+    void onActivePageChanged();
 
 private:
-    HbView *mView;
     HbAction *mNavigationAction;
-    HsIdleWidget *mUiWidget;
-    QTimer mTimer;
-    qreal mTapAndHoldDistance;
-    qreal mPageChangeZoneWidth;
-
-    QPointF mSceneMenuPos;
+    HsIdleWidget *mUiWidget;  
     HsTitleResolver *mTitleResolver;
     QPropertyAnimation *mZoneAnimation;
-    bool mPageChanged;
     bool mAllowZoneAnimation;
-    QParallelAnimationGroup *mPageChangeAnimation;
+    QPropertyAnimation *mPageChangeAnimation;
     HbContinuousFeedback *mContinuousFeedback;
-    bool mTrashBinFeedbackAlreadyPlayed;
-
+    bool mTrashBinFeedbackAlreadyPlayed;    
+    QPointF mPageHotSpot;
+    QPointF mWidgetHotSpot;
+    QPointF mWidgetHotSpotOffset;
     qreal mDeltaX;
+    QPointer<HbMenu> mSceneMenu;
+    HsWidgetPositioningOnWidgetMove::Result mSnapResult;
+    HsWidgetPositioningOnWidgetMove::Result mPreviousSnapResult;
+    qreal mSnapBorderGap;
+    QTimer mVerticalSnapLineTimer;
+    QTimer mHorizontalSnapLineTimer;
 #ifdef Q_OS_SYMBIAN    
     XQSettingsManager *mSettingsMgr;
 #endif    

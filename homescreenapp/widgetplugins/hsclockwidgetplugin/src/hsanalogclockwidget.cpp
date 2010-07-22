@@ -21,7 +21,9 @@
 #include <HbStyleLoader>
 #include <HbIconItem>
 #include <HbTouchArea>
+#include <HbInstantFeedback>
 
+#include "hsconfiguration.h"
 #include "hsanalogclockwidget.h"
 
 /*!
@@ -72,6 +74,27 @@ bool HsAnalogClockWidget::eventFilter(QObject *watched, QEvent *event)
     }
 
     return false;
+}
+
+/*!
+    Return bounding rect
+*/
+QRectF HsAnalogClockWidget::boundingRect() const
+{   
+    QRectF currRect = rect();
+    currRect.setHeight(mBackground->iconItemSize().height());
+    currRect.setWidth(mBackground->iconItemSize().width());
+    return currRect;
+}
+
+/*!
+    Return shape
+*/
+QPainterPath HsAnalogClockWidget::shape() const
+{   
+    QPainterPath path;
+    path.addEllipse(boundingRect());
+    return path;
 }
 
 /*!
@@ -146,6 +169,8 @@ void HsAnalogClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *even
     if (!contains(event->pos())) {
         return;
     }
+
+    HbInstantFeedback::play(HSCONFIGURATION_GET(clockWidgetTapFeedbackEffect));
 
     emit clockTapped();
 }

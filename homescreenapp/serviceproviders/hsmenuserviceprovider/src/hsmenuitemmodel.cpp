@@ -15,6 +15,8 @@
  *
  */
 
+#include <hbnamespace.h>
+
 #include "hsmenuitemmodel.h"
 #include "hsmenuserviceutils.h"
 
@@ -72,6 +74,13 @@ QVariant HsMenuItemModel::data(const QModelIndex &index,
         icons << HbIcon(newIconId());
 
         variant = QVariant(icons);
+    } else if (role == Hb::IndexFeedbackRole){
+        QVariant display = CaItemModel::data(index, Qt::DisplayRole);
+        if (display.type() == QVariant::String){
+            variant = display;
+        } else {
+            variant = QVariant(display.toList().at(0));
+        }
     } else {
         variant = CaItemModel::data(index, role);
     }

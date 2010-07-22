@@ -19,7 +19,8 @@
 #ifndef HSADDSHORTCUTSTATE_H
 #define HSADDSHORTCUTSTATE_H
 
-#include <hsmenubasestate.h>
+#include <QState>
+#include <QVariant>
 
 #include "hsmenustates_global.h"
 #include "hsapp_defs.h"
@@ -27,11 +28,12 @@
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbAction;
-class CaEntry;
 class HbMessageBox;
+class CaEntry;
+class CaNotifier;
+class HsContentService;
 
-
-class HsAddToHomeScreenState: public  HsMenuBaseState
+class HsAddToHomeScreenState: public  QState
 {
     Q_OBJECT
 
@@ -50,6 +52,8 @@ private slots:
     void cleanUp();
 
     void messageWidgetCorruptedFinished(HbAction* finishedAction);
+    
+    void memoryCardRemoved();
 
 signals:
 
@@ -67,6 +71,7 @@ private:
 
     void logActionResult(QString operationName, int entryId,
                          bool operationSucceded);
+    void subscribeForMemoryCardRemove();
 
 private:
 
@@ -78,7 +83,12 @@ private:
     HbMessageBox *mCorruptedMessage;
 
     HbAction *mConfirmAction;
+    
     HsMenuMode mMenuMode;
+    
+    CaNotifier *mNotifier;
+    
+    QVariant mToken;
 
 };
 

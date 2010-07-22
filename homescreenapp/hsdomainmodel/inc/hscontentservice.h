@@ -37,14 +37,28 @@ public:
     bool createWidget(const QVariantHash &params);
     HsWidgetHost *createWidgetForPreview(const QVariantHash &params);
 
-    bool addWidget(const QString &uri, const QVariantHash &preferences);
+    bool addWidget(const QString &uri, const QVariantHash &preferences,
+                   const QVariant &homescreenData = QVariant());
+    
+    bool widgets(const QString &uri, const QVariantHash &preferences, int &count);
 
     static HsContentService *instance();
+    
+    void emitWidgetRemoved(const QString &uri, const QVariantHash &preferences);
+    
+signals:    
+    void widgetAdded(const QString &uri, const QVariantHash &preferences);
+    void widgetRemoved(const QString &uri, const QVariantHash &preferences);
+    
+private slots:
+    void widgetStartFaulted();
+private:
+    Q_DISABLE_COPY(HsContentService)
 
 private:
-    static QScopedPointer<HsContentService> mInstance;
-
-    Q_DISABLE_COPY(HsContentService)
+    static HsContentService *mInstance;
+    bool mWidgetStartFaulted;
+    
 };
 
 Q_DECLARE_METATYPE(HsContentService*)

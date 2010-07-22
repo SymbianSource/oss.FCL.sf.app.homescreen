@@ -38,9 +38,7 @@ public:
     HsClockWidget(QGraphicsItem *parent = 0, Qt::WindowFlags flags = 0);
     ~HsClockWidget();
 
-signals:
-    void setPreferences(const QStringList &names);
-
+    QPainterPath shape() const;
 public slots:
     void onInitialize();
     void onShow();

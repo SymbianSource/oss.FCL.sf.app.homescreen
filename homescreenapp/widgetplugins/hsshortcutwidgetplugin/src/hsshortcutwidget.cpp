@@ -31,6 +31,7 @@
 #include "caservice.h"
 #include "canotifier.h"
 #include "caquery.h"
+#include "hsconfiguration.h"
 
 /*!
     \class HsShortcutWidget
@@ -97,6 +98,28 @@ QString HsShortcutWidget::uid() const
 }
 
 /*!
+    Returns the text property. This property is needed by css selector.
+*/
+QString HsShortcutWidget::text() const
+{
+    if ( mText ) {
+        return mText->text();
+    } else {
+        return QString();
+        }
+}
+
+/*!
+    Sets the text property. This property is needed by css selector.
+*/
+void HsShortcutWidget::setText(const QString& textItem)
+{
+    if ( mText ) {
+        mText->setText(textItem);
+    }
+}
+
+/*!
     Filters touch area events.
 */
 bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
@@ -112,6 +135,9 @@ bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
             return true;
         case QEvent::GraphicsSceneMouseRelease:
             handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
+            return true;
+        case QEvent::UngrabMouse:
+            setBackgroundToNormal();
             return true;
         default:
             break;
@@ -209,7 +235,7 @@ void HsShortcutWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    HbInstantFeedback::play(HbFeedback::BasicItem);
+    HbInstantFeedback::play(HSCONFIGURATION_GET(shortcutWidgetTapFeedbackEffect));
     
     if (mCaEntryRole == ItemEntryRole) {
         CaService::instance()->executeCommand(mCaEntryId);
@@ -238,11 +264,10 @@ void HsShortcutWidget::createPrimitives()
     }
 
     // Text
-    if (!mText) {
+    if (HSCONFIGURATION_GET(isShortcutLabelVisible) && !mText ) {
         mText = new HbTextItem(this);
         HbStyle::setItemName(mText, QLatin1String("text"));
-    }
-
+        }
     // Touch Area
     if (!mTouchArea) {
         mTouchArea = new HbTouchArea(this);
@@ -260,7 +285,13 @@ void HsShortcutWidget::updateContent(const CaEntry &caEntry)
     mCaEntryFlags = caEntry.flags();
     mCaEntryTypeName = caEntry.entryTypeName();
     mIcon->setIcon(caEntry.makeIcon());
-    mText->setText(caEntry.text());
+    if (mText) {
+        if(caEntry.attribute(entryShortName()).length()) {
+            mText->setText(caEntry.attribute(entryShortName()));
+        } else {
+            mText->setText(caEntry.text());
+        }        
+    }
 }
 
 /*!
@@ -319,3 +350,6 @@ void HsShortcutWidget::onEntryChanged(const CaEntry &caEntry, ChangeType changeT
         emit finished();
     }
 }
+
+
+

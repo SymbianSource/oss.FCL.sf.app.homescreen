@@ -27,20 +27,21 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 class HsPage;
 class HsTrashBinWidget;
 class HsPageIndicator;
+class HsSnapLine;
 
 class HsIdleWidget : public HbWidget
 {
     Q_OBJECT
+    Q_PROPERTY(qreal sceneX READ sceneX WRITE setSceneX)
 
 public:
     HsIdleWidget(QGraphicsItem *parent = 0);
 	~HsIdleWidget();
 
-    void setGeometry(const QRectF &rect);
+    qreal sceneX() const;
+    void setSceneX(qreal x);
 
-    void captureDelayedPress(QGraphicsSceneMouseEvent *event);
-    void sendDelayedPress();
-    void clearDelayedPress();
+    void setGeometry(const QRectF &rect);
 
     void setActivePage(int index);
     void insertPage(int index, HsPage *page);
@@ -48,42 +49,42 @@ public:
 
     HbWidget *controlLayer() const { return mControlLayer; }
     HbWidget *pageLayer() const { return mPageLayer; }
+    HbWidget *pageWallpaperLayer() const { return mPageWallpaperLayer; }
     HbWidget *sceneLayer() const { return mSceneLayer; }
 
     HsTrashBinWidget *trashBin() const { return mTrashBin; }
     HsPageIndicator *pageIndicator() const { return mPageIndicator; }
 
-signals:    
-    void mousePressed(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void mouseMoved(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
-    void mouseReleased(QGraphicsItem *watched, QGraphicsSceneMouseEvent *event, bool &filtered);
+    qreal parallaxFactor() const;
+
 
 public slots:
     void showTrashBin();
     void showPageIndicator();
 
+    void showVerticalSnapLine(const QLineF &snapLine);	
+    void hideVerticalSnapLine();
+    void showHorizontalSnapLine(const QLineF &snapLine);
+    void hideHorizontalSnapLine();
+
 protected:
-    bool eventFilter(QObject *object, QEvent *event);
-    bool sceneEventFilter(QGraphicsItem *watched, QEvent *event);
     void polishEvent();
 
 private:
     Q_DISABLE_COPY(HsIdleWidget)
     void loadControlLayer();
-    void setItemsUnfocusable(QGraphicsSceneMouseEvent *event);
-    void setItemsFocusable();
-
+        
 private:
     HbWidget *mControlLayer;
     HbWidget *mPageLayer;
+    HbWidget *mPageWallpaperLayer;
     HbWidget *mSceneLayer;
-
-    QMouseEvent *mDelayedPressEvent;
 
     HsTrashBinWidget *mTrashBin;
     HsPageIndicator *mPageIndicator;
 
-    QList<QGraphicsItem *> mFocusableItems;
+    HsSnapLine *mHorizontalSnapLine;
+    HsSnapLine *mVerticalSnapLine;
 
     HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
 };

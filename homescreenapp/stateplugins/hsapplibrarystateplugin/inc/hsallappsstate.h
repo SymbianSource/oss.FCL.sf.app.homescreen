@@ -22,10 +22,8 @@
 #include <QModelIndex>
 #include <QPointer>
 
-#include "hsmenustates_global.h"
+#include "hsbaseviewstate.h"
 #include "hsmenumodewrapper.h"
-#include "hsmenuservice.h"
-#include "hsmenuview.h"
 
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
@@ -38,16 +36,19 @@ class QPointF;
 class HsMenuViewBuilder;
 class HsMenuItemModel;
 class HsMenuModeWrapper;
+class HsMainWindow;
 
-class HsAllAppsState: public QState
+class HsAllAppsState: public HsBaseViewState
 {
     Q_OBJECT
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 public:
     HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                    HsMenuModeWrapper &menuMode,
+                   HsMainWindow &mainWindow,
                    QState *parent = 0);
     ~HsAllAppsState();
+    
 signals:
     void toAppLibraryState();
 
@@ -56,7 +57,7 @@ public slots:
     void collectionsSortOrder(HsSortAttribute sortAttribute);
 private slots:
     bool openTaskSwitcher();
-    bool checkSoftwareUpdates();
+    int checkSoftwareUpdates();
     void listItemActivated(const QModelIndex &index);
     void addActivated(const QModelIndex &index);
     void listItemLongPressed(HbAbstractViewItem *item, const QPointF &coords);
@@ -68,8 +69,8 @@ private slots:
     void stateEntered();
     void addModeEntered();
     void normalModeEntered();
-    void stateExited();	
-	void contextMenuAction(HbAction *action);
+    void stateExited();
+    void contextMenuAction(HbAction *action);
 private:
     void construct();
     void setMenuOptions();
@@ -81,8 +82,10 @@ private:
     HsMenuView mMenuView;
     HsMenuModeWrapper &mMenuMode;
     HsMenuItemModel *mAllAppsModel;
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
+    HsMainWindow &mMainWindow;
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
+
 };
 
 #endif // HSALLAPPSSTATE_H

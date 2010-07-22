@@ -22,6 +22,13 @@
 
 const qreal offset = 40; //TODO: Implement this as configurable parameter
 
+
+/*!
+    \class HsWidgetPositioningOnWidgetAdd
+    \ingroup group_hsutils
+    \brief 
+*/
+
 /*!
     \class HsWidgetPositioningOnWidgetAdd
     \brief Defines widget positioning on widget add.

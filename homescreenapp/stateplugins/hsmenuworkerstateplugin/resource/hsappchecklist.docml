@@ -2,6 +2,9 @@
 <hbdocument version="0.9">
     <widget name="view" type="HbView">
         <widget name="listView" role="HbView:widget" type="HbListView">
+            <widget name="listViewItemPrototype" role="HbAbstractView:prototype" type="HbListViewItem">
+                <enums name="graphicsSize" value="LargeIcon"/>
+            </widget>
             <enums name="selectionMode" value="MultiSelection"/>
             <bool name="visible" value="TRUE"/>
             <string name="orientation" value="Horizontal"/>

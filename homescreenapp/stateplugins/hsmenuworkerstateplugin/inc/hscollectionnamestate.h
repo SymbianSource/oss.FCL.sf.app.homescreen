@@ -71,7 +71,6 @@ private:
 
     HsCollectionNameDialog *mCollectionNameDialog;
 
-    bool mFinishedEntered;
 };
 
 #endif /* COLLECTIONANAMESTATE_H */

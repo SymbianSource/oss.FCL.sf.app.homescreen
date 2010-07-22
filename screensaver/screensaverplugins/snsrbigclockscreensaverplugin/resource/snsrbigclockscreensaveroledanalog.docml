@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+    <widget name="view" type="HbView">
+        <widget name="mainContainer" role="HbView:widget" type="HbWidget">
+            <widget name="clockContainer" type="HbWidget">
+                <sizehint height="49.5un" type="PREFERRED" width="45un"/>
+                <widget name="oledAnalogClockWidget" type="SnsrOledClockWidget">
+                    <real name="z" value="1"/>
+                    <sizehint height="32.8un" type="PREFERRED" width="32.8un"/>
+                </widget>
+                <widget name="indicatorWidget" type="SnsrIndicatorWidget">
+                    <sizehint height="2.5un" type="PREFERRED"/>
+                    <sizehint width="0" type="MINIMUM"/>
+                    <sizepolicy horizontalPolicy="Expanding" verticalPolicy="Preferred"/>
+                    <real name="z" value="2"/>
+                </widget>
+                <widget name="dateLabel" type="SnsrLabel">
+                    <real name="z" value="3"/>
+                    <sizepolicy horizontalPolicy="Expanding" verticalPolicy="Preferred"/>
+                    <sizehint height="var(hb-param-text-height-tiny)" type="PREFERRED"/>
+                    <sizehint width="0un" type="MINIMUM"/>
+                    <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                </widget>
+                <layout type="anchor">
+                    <anchoritem dst="oledAnalogClockWidget" dstEdge="CENTERH" spacing="0" src="" srcEdge="CENTERH"/>
+                    <anchoritem dst="oledAnalogClockWidget" dstEdge="TOP" spacing="0" src="" srcEdge="TOP"/>
+                    <anchoritem dst="indicatorWidget" dstEdge="CENTERH" spacing="0" src="oledAnalogClockWidget" srcEdge="CENTERH"/>
+                    <anchoritem dst="indicatorWidget" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="oledAnalogClockWidget" srcEdge="BOTTOM"/>
+                    <anchoritem dst="dateLabel" dstEdge="CENTERH" spacing="0" src="oledAnalogClockWidget" srcEdge="CENTERH"/>
+                    <anchoritem dst="dateLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="indicatorWidget" srcEdge="BOTTOM"/>
+                </layout>
+            </widget>
+            <layout type="anchor">
+                <anchoritem dst="clockContainer" dstEdge="CENTERH" spacing="0" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="clockContainer" dstEdge="CENTERV" spacing="0" src="" srcEdge="CENTERV"/>
+            </layout>
+        </widget>
+        <string name="title" value="View"/>
+    </widget>
+    <section name="landscape">
+    </section>
+    <metadata activeUIState="landscape" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+        <uistate name="landscape" sections="#common landscape"/>
+    </metadata>
+</hbdocument>

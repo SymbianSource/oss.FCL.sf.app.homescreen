@@ -42,6 +42,7 @@ INCLUDEPATH += . \
 
 symbian: {
     TARGET.UID3 = 0x20022F38
+    LIBS += -lxqsettingsmanager -labclient
 }
 win32:{
     QT += network 

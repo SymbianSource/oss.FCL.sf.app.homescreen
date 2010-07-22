@@ -40,5 +40,6 @@
 "/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"    - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.qtplugin"
 "../resource/helloworldwidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.manifest"
 "../resource/helloworldwidgetplugin.xml"                                                            - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.xml"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"         - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.png"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.svg"         - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetplugin.svg"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetpluginpreview.png"  - "!:/private/20022F35/import/widgetregistry/20022F7E/helloworldwidgetpluginpreview.png"
 

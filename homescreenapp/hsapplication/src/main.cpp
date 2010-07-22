@@ -44,6 +44,12 @@ void copyWallpapersFromRom();
 void copyHsDatabaseFileFromRom();
 void createPrivateFolder();
 
+/*!
+    \fn setHomescreenAsSystemAppL(CEikonEnv* eikonEnv)
+    \ingroup group_hsapplication
+    \internal
+    \brief TODO
+*/
 void setHomescreenAsSystemAppL(CEikonEnv* eikonEnv)
 {
     CApaWindowGroupName* wgName = CApaWindowGroupName::NewLC(eikonEnv->WsSession());
@@ -54,6 +60,12 @@ void setHomescreenAsSystemAppL(CEikonEnv* eikonEnv)
     CleanupStack::PopAndDestroy();
 }
 
+/*!
+    \fn myMessageOutput(QtMsgType type, const char *msg)
+    \ingroup group_hsapplication
+    \internal    
+    \brief TODO
+*/
 void myMessageOutput(QtMsgType type, const char *msg)
 {
     switch (type) {
@@ -79,7 +91,10 @@ void myMessageOutput(QtMsgType type, const char *msg)
 #endif //Q_OS_SYMBIAN
 
 /*!
-
+    \fn main(int argc, char *argv[])
+    \ingroup group_hsapplication
+    \internal    
+    \brief TODO
 */
 int main(int argc, char *argv[])
 {
@@ -89,7 +104,7 @@ int main(int argc, char *argv[])
 
     HSTEST_FUNC_ENTRY("HS::main()");
 
-    HbApplication app(argc, argv);
+    HbApplication app(argc, argv, Hb::NoSplash);
 
 #ifdef Q_OS_SYMBIAN
     QString currentPath = QString(argv[0]).left(2);
@@ -147,8 +162,12 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_SYMBIAN
 
 /*!
- * Creates private folder to c: drive if not exists yet.
- */
+    \fn createPrivateFolder()
+    \ingroup group_hsapplication
+    \internal    
+    \brief Private folder creator
+    Creates private folder to c: drive if not exists yet.
+*/
 void createPrivateFolder()
 {
     QDir dir("c:/private/20022f35/");
@@ -168,9 +187,14 @@ void createPrivateFolder()
     HSTEST("HS::main() - c:/private/20022f35/ exists.");
 }
 
+
 /*!
- * Copies homescreen database from rom if database does not exist on c: drive
- */
+    \fn copyHsDatabaseFileFromRom()
+    \ingroup group_hsapplication
+    \internal    
+    \brief Database copier
+    Copies homescreen database from rom if database does not exist on c: drive
+*/
 void copyHsDatabaseFileFromRom()
 {
     QFile file("c:/private/20022f35/homescreen.db");
@@ -204,33 +228,66 @@ void copyHsDatabaseFileFromRom()
 }
 
 /*!
- * Copies homescreen wallpapers from rom if wallpaper directory does not exist on c: drive
- */
+    \fn copyWallpapersFromRom()
+    \ingroup group_hsapplication
+    \internal    
+    \brief Wallpaper copier
+    Copies homescreen wallpapers from rom if wallpaper directory
+    does not exist on c: drive
+*/
 void copyWallpapersFromRom()
 {
-    QDir dir("c:/private/20022f35/wallpapers");
-    if(!dir.exists()) {
-        dir.mkpath("c:/private/20022f35/wallpapers/");
-        QDir dir2("z:/private/20022f35/wallpapers");
-        dir2.setFilter(QDir::Files);
-        QStringList files = dir2.entryList();
-        foreach(QString file, files)
-        {
-            QString targetFile("c:/private/20022f35/wallpapers/" + file);
-            if ( QFile::copy(dir2.absoluteFilePath(file), targetFile) ) {
-                qDebug() << "image copied" << dir2.absoluteFilePath(file);
-            } 
-            QFile createdFile(targetFile);
-            if(!createdFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
-                qDebug() << "read write permission set failed for file" << targetFile;
+    {
+        QDir dir("c:/private/20022f35/wallpapers/scene");
+        if(!dir.exists()) {
+            dir.mkpath("c:/private/20022f35/wallpapers/scene");
+            QDir dir2("z:/private/20022f35/wallpapers/scene");
+            dir2.setFilter(QDir::Files);
+            QStringList files = dir2.entryList();
+            foreach(QString file, files)
+            {
+                QString targetFile("c:/private/20022f35/wallpapers/scene/" + file);
+                if ( QFile::copy(dir2.absoluteFilePath(file), targetFile) ) {
+                    qDebug() << "image copied" << dir2.absoluteFilePath(file);
+                } 
+                QFile createdFile(targetFile);
+                if(!createdFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
+                    qDebug() << "read write permission set failed for file" << targetFile;
+                }
+            }
+        }
+    }
+    {
+        QDir dir("c:/private/20022f35/wallpapers/page");
+        if(!dir.exists()) {
+            dir.mkpath("c:/private/20022f35/wallpapers/page");
+            QDir dir2("z:/private/20022f35/wallpapers/page");
+            dir2.setFilter(QDir::Files);
+            QStringList files = dir2.entryList();
+            foreach(QString file, files)
+            {
+                QString targetFile("c:/private/20022f35/wallpapers/page/" + file);
+                if ( QFile::copy(dir2.absoluteFilePath(file), targetFile) ) {
+                    qDebug() << "image copied" << dir2.absoluteFilePath(file);
+                } 
+                QFile createdFile(targetFile);
+                if(!createdFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
+                    qDebug() << "read write permission set failed for file" << targetFile;
+                }
             }
         }
     }
 }
 
 /*!
- * Load translation files.
- */
+    \fn loadTranslationFilesOnSymbian(QTranslator &commonTranslator, 
+                                      QTranslator &hsTranslator, 
+                                      QTranslator &alTranslator)
+    \ingroup group_hsapplication
+    \internal    
+    \brief translation loader
+    Load translation files.
+*/
 void loadTranslationFilesOnSymbian(QTranslator &commonTranslator, 
                                    QTranslator &hsTranslator, 
                                    QTranslator &alTranslator)

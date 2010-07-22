@@ -35,11 +35,13 @@ public:
     enum OperationType {
         AddToHomeScreen,
         OpenCollection,
+        OpenCollectionFromAppLibrary,
         RenameCollection,
         DeleteCollection,
         CollectionDeleted,
         AddAppsToCollection,
         RemoveAppFromCollection,
+        UninstallApplication,
         OpenApplicationLibrary,
         OpenInstalledView,
         OpenHomeScreen,
@@ -47,6 +49,7 @@ public:
         CreateCollection,
         PreviewHSWidget,
         ShowAppSettings,
+        ShowAppDetails,
         Unknown
     };
 

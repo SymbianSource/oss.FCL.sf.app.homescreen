@@ -8,8 +8,5 @@
         <version>1.0</version>
         <description></description>
         <capabilities></capabilities>
-        <customproperty key="iconuri">shortcut.png</customproperty>
-        <customproperty key="hidden">true</customproperty>
-        <customproperty key="title">Shortcut</customproperty>
     </interface>
 </service>

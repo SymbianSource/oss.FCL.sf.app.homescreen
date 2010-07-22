@@ -21,11 +21,13 @@
 #include "hsaddappstocollectionstate.h"
 #include "hsdeletecollectionstate.h"
 #include "hsdeletecollectionitemstate.h"
+#include "hsuninstallitemstate.h"
 #include "hsmenuworkerstate.h"
 #include "hscollectionnamestate.h"
 #include "hsarrangestate.h"
 #include "hspreviewhswidgetstate.h"
 #include "hsviewappsettingsstate.h"
+#include "hsviewappdetailsstate.h"
 
 /*!
  \class HsMenuWorkerState
@@ -41,7 +43,7 @@
 
 /*!
  Constructor.
- \param parent Owner.
+ \param parent Parent state. 
  */
 HsMenuWorkerState::HsMenuWorkerState(QState *parent) :
     QState(parent), mInitialState(0)
@@ -74,6 +76,8 @@ void HsMenuWorkerState::construct()
         HsMenuEvent::DeleteCollection);
     createChildState<HsDeleteCollectionItemState> (
         HsMenuEvent::RemoveAppFromCollection);
+    createChildState<HsUninstallItemState> (
+        HsMenuEvent::UninstallApplication);
     createChildState<HsArrangeState> (HsMenuEvent::ArrangeCollection);
 
     // create a new child state based on the template
@@ -103,9 +107,10 @@ void HsMenuWorkerState::construct()
     // set a transition to the initial state after child processing finished
     addAppsToCollectionState->addTransition(addAppsToCollectionState,
                                             SIGNAL(finished()), mInitialState);
-
+    connect(this, SIGNAL(reset()), addAppsToCollectionState, SIGNAL(finished()));
     createChildState<HsPreviewHSWidgetState> (HsMenuEvent::PreviewHSWidget);
     createChildState<HsViewAppSettingsState> (HsMenuEvent::ShowAppSettings);
+    createChildState<HsViewAppDetailsState> (HsMenuEvent::ShowAppDetails);
 
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::construct");
 }
@@ -130,6 +135,7 @@ T *HsMenuWorkerState::createChildState(
     mInitialState->addTransition(newChildStateTransition);
     // set a transition to the initial state after child processing finished
     newChildState->addTransition(newChildState, SIGNAL(exit()), mInitialState);
+    connect(this, SIGNAL(reset()), newChildState, SIGNAL(exit()));
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::createChildState");
 
     return newChildState;

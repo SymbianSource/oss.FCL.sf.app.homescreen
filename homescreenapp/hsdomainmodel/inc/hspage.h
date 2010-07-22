@@ -25,36 +25,49 @@
 
 class HsWidgetHost;
 class HsPageData;
+class HsWallpaper;
+class HsPageTouchArea;
 
-HOMESCREEN_TEST_CLASS(TestRuntimeServices)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HSDOMAINMODEL_EXPORT HsPage : public HbWidget
 {
-	Q_OBJECT
+    Q_OBJECT
+    Q_PROPERTY(int pageIndex READ pageIndex)
 
 public:
     HsPage(QGraphicsItem *parent = 0);
-	~HsPage();
+    ~HsPage();
 
     int databaseId() const;
     void setDatabaseId(int id);
-    
+
+    void setGeometry(const QRectF &rect);
+
     bool load();
+
+    HsWallpaper *wallpaper() const;
 
     bool addExistingWidget(HsWidgetHost *widgetHost);
     bool removeWidget(HsWidgetHost *widgeHost);
 
     QList<HsWidgetHost *> newWidgets();
-    bool addNewWidget(HsWidgetHost *widgetHost);
+    bool addNewWidget(HsWidgetHost *widgetHost, const QPointF &position = QPointF());
     void layoutNewWidgets();
+    void resetNewWidgets();
     bool deleteFromDatabase();
 
     QList<HsWidgetHost *> widgets() const;
-        
+
     bool isRemovable() const;
     void setRemovable(bool removable);
+
+    bool isDefaultPage() const;
+    bool isActivePage() const;
     
     static HsPage *createInstance(const HsPageData &pageData);
+
+    QPointF mTouchPoint;
 
 public slots:
     void showWidgets();
@@ -63,21 +76,33 @@ public slots:
 
     void updateZValues();
 
+    int pageIndex();
+
 private:
+    Q_DISABLE_COPY(HsPage)
+    void setupTouchArea();
     void connectWidget(HsWidgetHost *widget);
     void disconnectWidget(HsWidgetHost *widget);
 
 private slots:
-    void onWidgetFinished(HsWidgetHost *widget);
-    void onWidgetResized(HsWidgetHost *widget);
+    void onWidgetFinished();
+    void onWidgetFaulted();
+    void onWidgetResized();
+    void onWidgetAvailable();
+    void onWidgetUnavailable();
+
+    void onOrientationChanged(Qt::Orientation orientation);
 
 private:
-    int mDatabaseId;    
+    int mDatabaseId;
+    HsWallpaper *mWallpaper;
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
+    QList<HsWidgetHost*> mUnavailableWidgets;
+    HsPageTouchArea *mTouchArea;
     
-    HOMESCREEN_TEST_FRIEND_CLASS(TestRuntimeServices)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
- 
+
 #endif

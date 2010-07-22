@@ -37,7 +37,7 @@ symbian: {
     TARGET.EPOCHEAPSIZE = 0x20000 0x1000000 // 128kB - 16MB
     LIBS += -lefsrv
     
-    testwallpaperimages.path = /data/images/kqtihswallpapers
+    testwallpaperimages.path = /data/images
     testwallpaperimages.sources += ./resource/*.jpg
     
     DEPLOYMENT += testwallpaperimages

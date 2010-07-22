@@ -24,6 +24,7 @@
 #include <QString>
 #include <qnamespace.h>
 #include <HbDocumentLoader>
+#include "hsmenustates_global.h"
 
 class QActionGroup;
 class HbAction;
@@ -35,6 +36,7 @@ class HbToolBar;
 class HbView;
 class HbWidget;
 class HbToolBarExtension;
+class HbPushButton;
 
 enum HsViewContext {
     HsAllAppsContext,
@@ -45,9 +47,12 @@ enum HsViewContext {
 
 enum HsOperationalContext {
     HsItemViewContext,
-    HsSearchContext
+    HsSearchContext,
+    HsButtonContext,
+    HsEmptyLabelContext
 };
 
+HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HsMenuViewBuilder
 {
@@ -73,6 +78,7 @@ public:
     // optional widgets accessors
     HbGroupBox *currentViewLabel() const;
     HbSearchPanel *currentSearchPanel() const;
+    HbPushButton *collectionButton() const;
 
 
     void setViewContext(HsViewContext viewContext);
@@ -99,13 +105,13 @@ private:
     QSet<QObject *> mLoadedObjects;
 
     const QString DOCUMENT_FILE_NAME;
-    const QString COMMON_SECTION_NAME;
     const QString ALL_APPS_ACTION_NAME;
     const QString ALL_COLLECTIONS_ACTION_NAME;
     const QString SEARCH_ACTION_NAME;
     const QString OVI_STORE_ACTION_NAME;
     const QString OPERATOR_ACTION_NAME;
     const QString SEARCH_PANEL_NAME;
+    const QString BUTTON_NAME;
     const QString TOOL_BAR_NAME;
 
     QActionGroup *mToolBarActionGroup;
@@ -115,6 +121,8 @@ private:
 
     HsViewContext mViewContext;
     HsOperationalContext mOperationalContext;
+
+    HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };
 
 #endif // HSMENUVIEWBUILDER_H

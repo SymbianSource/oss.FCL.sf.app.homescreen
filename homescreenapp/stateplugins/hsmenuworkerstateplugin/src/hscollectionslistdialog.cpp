@@ -15,12 +15,12 @@
  *
  */
 
-#include <hbaction.h>
-#include <hblabel.h>
-#include <hsmenuservice.h>
+#include <HbAction>
+#include <HbLabel>
 #include <QDebug>
 #include <QStandardItemModel>
 
+#include <hsmenuservice.h>
 #include <hsmenuitemmodel.h>
 #include "hscollectionslistdialog.h"
 
@@ -62,7 +62,10 @@ HsCollectionsListDialog::HsCollectionsListDialog(HsSortAttribute sortOrder,
         int collectionId) :
     HbSelectionDialog(), mItemId(0)
 {
-    setPrimaryAction(NULL);
+    clearActions();
+    HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"), this);
+    addAction(cancelAction);
+
     setHeadingWidget(new HbLabel(hbTrId("txt_applib_title_add_to")));
     // it must be single selection, although it shows checkboxes -
     // it is Orbit defect and will be fixed in next release
@@ -79,10 +82,6 @@ HsCollectionsListDialog::~HsCollectionsListDialog()
     delete mModel;
 }
 
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP // Reason: Modal inputdialog open
-#endif //COVERAGE_MEASUREMENT
 /*!
  Executes dialog.
  \retval Selected action.
@@ -92,11 +91,6 @@ void HsCollectionsListDialog::open(QObject* receiver, const char* member)
     this->setAttribute(Qt::WA_DeleteOnClose);
     HbSelectionDialog::open(receiver, member);
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP // Reason: Modal inputdialog exec
-#endif //COVERAGE_MEASUREMENT
-
-
 
 /*!
     \reimp
@@ -107,7 +101,7 @@ void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
     qDebug("HsCollectionsListDialog::closeEvent");
     HbAction *closingAction = qobject_cast<HbAction *>(sender());
 
-	if (closingAction != actions().value(1)) {
+    if (closingAction != actions().value(0)) {
         QModelIndexList modlist = selectedModelIndexes();
         if (modlist.count()) {
             mItemId
@@ -117,8 +111,6 @@ void HsCollectionsListDialog::closeEvent ( QCloseEvent * event )
 
     HbDialog::closeEvent(event); // emits finished(HbAction*)
 }
-
-
 
 /*!
  Creates standard item model.

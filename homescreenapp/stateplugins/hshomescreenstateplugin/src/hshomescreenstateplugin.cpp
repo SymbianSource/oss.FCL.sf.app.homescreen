@@ -22,6 +22,8 @@
 #include "hshomescreenstateplugin.h"
 #include "hsloadscenestate.h"
 #include "hsidlestate.h"
+#include "hsrootstate.h"
+#include "hsbackuprestorestate.h"
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
@@ -40,9 +42,16 @@ QObject *HsHomeScreenStatePlugin::createInstance(const QServiceInterfaceDescript
 
     if (descriptor.interfaceName() == QLatin1String("com.nokia.homescreen.state.HsLoadSceneState")) {
         return new HsLoadSceneState();
-    } else if(descriptor.interfaceName() == QLatin1String("com.nokia.homescreen.state.HsIdleState")) {
+    }
+    else if(descriptor.interfaceName() == QLatin1String("com.nokia.homescreen.state.HsIdleState")) {
         return new HsIdleState();
-    } else {
+    } 
+    else if(descriptor.interfaceName() == QLatin1String("com.nokia.homescreen.state.HsRootState")) {
+        return new HsRootState();
+    }
+    else if(descriptor.interfaceName() == QLatin1String("com.nokia.homescreen.state.HsBackupRestoreState")) {
+        return new HsBackupRestoreState();
+    }else {
         return 0;
     }
 }

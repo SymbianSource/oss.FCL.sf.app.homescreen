@@ -37,6 +37,15 @@
     \class HsWidgetComponentRegistry
     \ingroup group_hsdomainmodel
     \brief Homescreen widget component registry.
+
+    Widget component registry contains HsWidgetComponent instances. All widget instances from same type 
+    are refering to one HsWidgetComponent. Registry updates its content
+    when the installation package is uninstalled/updated or installation location is( or is not)
+	available (media attached/detached). Registry takes care of package registration/unregistration
+	to Qt service framework.
+    
+    Events for all above cases are get from Content Storage. Component registry listens
+    changes of Content Storages' entries (CaEntry) via its service class (CaService).
 */
 
 HsWidgetComponentRegistry *HsWidgetComponentRegistry::mInstance = 0;
@@ -64,6 +73,7 @@ HsWidgetComponentRegistry::~HsWidgetComponentRegistry()
 
 /*!
     Returns component object of the given \a uri.
+    Uri is defined in widget manifest file. \see page_widgetsispackage
 */
 HsWidgetComponent *HsWidgetComponentRegistry::component(const QString &uri)
 {
@@ -77,15 +87,15 @@ HsWidgetComponent *HsWidgetComponentRegistry::component(const QString &uri)
 }
 
 /*!
-    Requests widget component to emit 'aboutToInstall' signal to free widget resources when uninstalling the widget.
+    Requests widget component to emit 'aboutToUninstall' signal to free widget resources when
+    uninstalling the widget's installation package.
 */
 void HsWidgetComponentRegistry::uninstallComponent(const HsWidgetComponentDescriptor &componentDescriptor)
 {
-    HsWidgetComponent *component = mRegistry.value(componentDescriptor.uri);
+    HsWidgetComponent *component = mRegistry.value(componentDescriptor.uri());
     if (component) {
         component->emitAboutToUninstall();
-        }
-        
+    }
 }
 
 /*!
@@ -119,7 +129,6 @@ void HsWidgetComponentRegistry::handleEntryAdded(const CaEntry &entry, const QSt
     if (component) {
         component->emitAvailable();
     }
-
 }
 
 /*!
@@ -139,7 +148,7 @@ void HsWidgetComponentRegistry::handleEntryRemoved(const CaEntry &entry, const Q
         mServiceManager.removeService(uri);
         QCoreApplication::removeLibraryPath(rootPath);
         if (component) {
-            // for now support versions without uinstaller
+            // for now support versions without uninstaller
             component->emitAboutToUninstall();
             component->emitUninstalled();
             mRegistry.take(uri)->deleteLater();
@@ -203,4 +212,3 @@ void HsWidgetComponentRegistry::onEntryChanged(const CaEntry &entry, ChangeType 
         default: break;     
     }
 }
-

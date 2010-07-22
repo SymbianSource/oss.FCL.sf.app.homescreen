@@ -138,7 +138,7 @@ win32 {
 }
 }
 
-!exists($${EPOCROOT}epoc32/include/mw/XQSettingsManager) {
+!exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager) {
 	DEFINES += NO_QT_EXTENSIONS
 }
 

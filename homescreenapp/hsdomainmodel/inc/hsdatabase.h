@@ -19,10 +19,12 @@
 #define HSDATABASE_H
 
 #include <QObject>
-#include <QScopedPointer>
 #include <QVariantHash>
 
 #include "hsdomainmodel_global.h"
+#include "hstest_global.h"
+
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HsSceneData;
 class HsPageData;
@@ -52,8 +54,7 @@ public:
     bool commit();
 
     bool scene(HsSceneData &data);
-    bool updateScene(const HsSceneData &data);
-
+    
     bool pages(QList<HsPageData> &data);
     bool page(HsPageData &data);
     bool insertPage(HsPageData &data);
@@ -62,6 +63,7 @@ public:
     
     bool widgets(int pageId, QList<HsWidgetData> &data);
     bool widgets(const QString &uri, QList<HsWidgetData> &data);
+    bool widgets(const QString &uri, const QVariantHash &preferences, int &count);
     bool widget(HsWidgetData &data);
     bool insertWidget(HsWidgetData &data);
     bool updateWidget(const HsWidgetData &data);
@@ -70,14 +72,14 @@ public:
 
     bool widgetPresentation(HsWidgetPresentationData &data);
     bool setWidgetPresentation(const HsWidgetPresentationData &data);
-    bool deleteWidgetPresentation(int widgetId, const QString &key);
+    bool deleteWidgetPresentation(int widgetId, Qt::Orientation orientation);
 
     bool widgetPreferences(int widgetId, QVariantHash &data);
     bool widgetPreference(int widgetId, const QString &key, QVariant &value);
     bool setWidgetPreferences(int widgetId, const QVariantHash &data);
-    
-    void setDataBaseBlocked(bool blocked);
-    bool getDataBaseBlocked();
+
+    bool configuration(QVariantHash &configuration);
+
 public:
     static void setInstance(HsDatabase *instance);
     static HsDatabase *instance();
@@ -86,13 +88,14 @@ public:
 private:    
     Q_DISABLE_COPY(HsDatabase)
     bool checkConnection() const;
+    bool matchWidgetPreferences(const QVariantHash &preferences, const QMultiMap<QString, QString>& storedPreferences);
 
 private:
     QString mConnectionName;
     QString mDatabaseName;
 
-    static QScopedPointer<HsDatabase> mInstance;
-    bool mBlocked;
+    static HsDatabase *mInstance;
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSDATABASE_H

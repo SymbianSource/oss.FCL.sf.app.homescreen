@@ -17,6 +17,7 @@
 
 #include <hbmessagebox.h>
 #include <hbaction.h>
+#include <HbParameterLengthLimiter>
 #include <hsmenuservice.h>
 #include <hsmenueventfactory.h>
 
@@ -32,7 +33,7 @@
 
 /*!
  Constructor.
- \param parent Owner.
+ \param parent Parent state. 
  */
 HsDeleteCollectionItemState::HsDeleteCollectionItemState(QState *parent) :
     QState(parent),
@@ -57,8 +58,10 @@ HsDeleteCollectionItemState::~HsDeleteCollectionItemState()
  */
 void HsDeleteCollectionItemState::construct()
 {
-    setObjectName(this->parent()->objectName()
-                  + "/DeleteCollectionItemState");
+    setObjectName("/DeleteCollectionItemState");
+    if (this->parent()) {
+        setObjectName(this->parent()->objectName() + objectName());
+    }
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
@@ -66,9 +69,6 @@ void HsDeleteCollectionItemState::construct()
  Sets entry event.
  \param event entry event.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsDeleteCollectionItemState::onEntry(QEvent *event)
 {
     HSMENUTEST_FUNC_ENTRY("HsDeleteCollectionItemState::onEntry");
@@ -82,7 +82,7 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
 
     QString message;
     message.append(
-        hbTrId("txt_applib_dialog_remove_1_from_collection").arg(
+        HbParameterLengthLimiter("txt_applib_dialog_remove_1_from_collection").arg(
             HsMenuService::getName(mItemId)));
 
     // create and show message box
@@ -102,26 +102,18 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
 
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionItemState::onEntry");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
+/*!
+ Action after closed confirmation dialog.
+ \param finishedAction chosen action.
+ \retval void
+ */
 void HsDeleteCollectionItemState::deleteMessageFinished(HbAction* finishedAction)
 {
-    if (mItemId !=0 ) { // (work-around for crash if more then one action is selected in HbDialog)
-
-        if (finishedAction == mConfirmAction) {
-            HsMenuService::removeApplicationFromCollection(mItemId, mCollectionId);
-        }
-        mItemId = 0;
-        emit exit();
-    } else {
-        // (work-around for crash if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+    if (finishedAction == mConfirmAction) {
+        HsMenuService::removeApplicationFromCollection(mItemId, mCollectionId);
     }
+    emit exit();
 }
 
 /*!
@@ -132,11 +124,12 @@ void HsDeleteCollectionItemState::cleanUp()
 {
     // Close messagebox if App key was pressed
     if (mDeleteMessage) {
+		disconnect(mDeleteMessage, SIGNAL(finished(HbAction*)), this, SLOT(deleteMessageFinished(HbAction*)));
         mDeleteMessage->close();
+		mDeleteMessage = NULL;
     }
-
-    mDeleteMessage = NULL;
-    mConfirmAction= NULL;
+	
+    mConfirmAction = NULL;
     mItemId = 0;
     mCollectionId = 0;
 }

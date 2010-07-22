@@ -212,7 +212,7 @@ inline const QString defaultCollectionIconId()
 */
 inline const QString newIconId()
 {
-    static const QString name("qtg_large_super_new");
+    static const QString name("qtg_small_new_event");
     return name;
 }
 
@@ -268,6 +268,60 @@ inline const QString appSettingsPlugin()
 inline const QString groupNameAttributeName()
 {
     static const QString key("appgroup_name");
+    return key;
+}
+
+/*!
+    \return applibrary activate name to open downloaded
+*/
+inline const QString groupAppLibRecentView()
+{
+    static const QString key("AppLibRecentView");
+    return key;
+}
+
+/*!
+    \return application componentID atribute name
+*/
+inline const QString componentIdAttributeName()
+{
+    static const QString key("component_id");
+    return key;
+}
+
+/*!
+    \return entry short name
+*/
+inline const QString entryShortName()
+{
+    static const QString key("short_name");
+    return key;
+}
+
+/*!
+    \return entry translation file name
+*/
+inline const QString translationFilename()
+{
+    static const QString key("widget:translation_file");
+    return key;
+}
+
+/*!
+    \return app lib activity name
+*/
+inline const QString appLibActivity()
+{
+    static const QString key("AppLibMainView");
+    return key;
+}
+
+/*!
+    \return homescreen activitity name to open idle iew
+*/
+inline const QString activityHsIdleView()
+{
+    static const QString key("HsIdleView");
     return key;
 }
 

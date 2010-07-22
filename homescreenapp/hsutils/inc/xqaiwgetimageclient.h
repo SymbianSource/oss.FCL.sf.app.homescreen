@@ -29,11 +29,10 @@
 #include <QPointer>
 #include <QStringList>
 #include "hsutils_global.h"
-#include "xqaiwcommon.h"
-
 
 class HbAction;
 class HsImageGridWidget;
+class HbView;
 
 class HSUTILS_EXPORT XQAIWGetImageClient : public QObject
 {
@@ -43,7 +42,7 @@ public:
     ~XQAIWGetImageClient();
     
 public slots:
-    void fetch( QVariantMap filter, XQAIWMultimediaFlags flag);
+    void fetch();
     
 private slots: 
     void imageSelected(const QString&);
@@ -51,14 +50,15 @@ private slots:
     void imageSelectionCancelled();
 
 signals:
-    void fetchComplete( QStringList filesList);
-    void fetchFailed( int errorCode );
+    void fetchCompleted(const QString&);
+    void fetchFailed(int, const QString&);
 
 private:
     void findImages(const QString &aDir, const QStringList &aFilters, QStringList &aFoundImages);
 private:
     QPointer<HsImageGridWidget> mImageGrid;//added
     HbAction *mBackAction;//added
+    HbView * mCurrentView;
 
 };
 

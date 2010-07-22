@@ -20,12 +20,20 @@
 #include "hspageindicator.h"
 #include "hspageindicatoritem.h"
 
+
+/*!
+    \class HsPageIndicator
+    \ingroup group_hsutils
+    \brief 
+*/
+
 /*!
 
 */
-HsPageIndicator::HsPageIndicator(QGraphicsItem *parent)
+HsPageIndicator::HsPageIndicator(qreal spacing, QGraphicsItem *parent)
   : HbWidget(parent),
-    mActiveItemIndex(-1)
+    mActiveItemIndex(-1),
+    mSpacing(spacing)
 {
 }
 
@@ -46,18 +54,18 @@ void HsPageIndicator::initialize(int itemCount, int activeItemIndex)
     mItems.clear();
     mActiveItemIndex = -1;
 
-    if (itemCount < 1 || activeItemIndex < 0 || 
+    if (itemCount < 1 || activeItemIndex < 0 ||
         itemCount <= activeItemIndex) {
         return;
     }
 
     for (int i = 0; i < itemCount; ++i) {
         mItems << new HsPageIndicatorItem(i == activeItemIndex);
-    }    
+    }
     mActiveItemIndex = activeItemIndex;
     layoutItems();
 }
- 
+
 /*!
 
 */
@@ -80,7 +88,7 @@ void HsPageIndicator::setActiveItemIndex(int activeItemIndex)
         mItems[i]->setActive(i == activeItemIndex);
     }
 }
- 
+
 /*!
 
 */
@@ -107,7 +115,7 @@ void HsPageIndicator::addItem(int activeItemIndex)
 
 */
 void HsPageIndicator::removeItem(int activeItemIndex)
-{   
+{
     if (activeItemIndex < 0 || itemCount() - 1 <= activeItemIndex) {
         return;
     }
@@ -133,12 +141,23 @@ void HsPageIndicator::layoutItems()
 {
     QGraphicsLinearLayout *layout = new QGraphicsLinearLayout;
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(mSpacing);
     layout->addStretch();
     foreach (HsPageIndicatorItem *item, mItems) {
         item->setPreferredSize(preferredHeight(), preferredHeight());
         layout->addItem(item);
-    }    
+    }
     layout->addStretch();
     setLayout(layout);
+}
+
+/*!
+
+*/
+void HsPageIndicator::setSpacing(qreal spacing)
+{
+    QGraphicsLinearLayout *linearLayout = static_cast<QGraphicsLinearLayout*>(layout());
+    if (linearLayout) {
+        linearLayout->setSpacing(spacing);
+    }
 }

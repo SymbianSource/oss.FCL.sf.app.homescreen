@@ -15,8 +15,6 @@
  *
  */
 
-#ifndef HS_MENU_MODE_WRAPPER_H
-#define HS_MENU_MODE_WRAPPER_H
 
 #include "hsmenumodewrapper.h"
 /*!
@@ -47,10 +45,19 @@ HsMenuMode HsMenuModeWrapper::getHsMenuMode() const
 }
 
 /*!
-    \return sets in the object homescreen mode (add mode on / add mode off)
+    \return homescreen token
  */
-void HsMenuModeWrapper::setHsMenuMode(HsMenuMode menuMode) {
-    mMode = menuMode;
+QVariant HsMenuModeWrapper::getHsToken() const
+{
+    return mToken;
 }
 
-#endif
+/*!
+    \return sets in the object homescreen mode (add mode on / add mode off)
+ */
+void HsMenuModeWrapper::setHsMenuMode(HsMenuMode menuMode, QVariant token) 
+{
+    mMode = menuMode;
+    mToken = token;
+}
+

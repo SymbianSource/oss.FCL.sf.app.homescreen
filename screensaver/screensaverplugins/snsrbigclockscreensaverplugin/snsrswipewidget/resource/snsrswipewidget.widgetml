@@ -1,0 +1,6 @@
+<hbwidget version="0.1">
+    <layout name="layout-portrait" type="mesh">
+        <meshitem src="slideLabel" srcEdge="TOP" dst="" dstEdge="TOP" spacing="0.0un"/>
+        <meshitem src="slideIcon" srcEdge="TOP" dst="slideLabel" dstEdge="BOTTOM" spacing="2un"/>
+    </layout>
+</hbwidget>

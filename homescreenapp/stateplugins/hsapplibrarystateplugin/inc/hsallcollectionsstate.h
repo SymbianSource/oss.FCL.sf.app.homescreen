@@ -23,10 +23,8 @@
 #include <QPointF>
 #include <QPointer>
 
-#include "hsmenustates_global.h"
+#include "hsbaseviewstate.h"
 #include "hsmenumodewrapper.h"
-#include "hsmenuservice.h"
-#include "hsmenuview.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -37,14 +35,16 @@ class HbAction;
 class HbMainWindow;
 class HsMenuItemModel;
 class HsMenuView;
+class HsMainWindow;
 
-class HsAllCollectionsState: public QState
+class HsAllCollectionsState: public HsBaseViewState
 {
     Q_OBJECT
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 public:
     HsAllCollectionsState(HsMenuViewBuilder &menuViewBuilder,
                           HsMenuModeWrapper &menuMode,
+                          HsMainWindow &mainWindow,
                           QState *parent = 0);
     ~HsAllCollectionsState();
 protected:
@@ -70,7 +70,7 @@ private slots:
     void normalModeEntered();
     void normalModeExited();
     void stateExited();
-	void contextMenuAction(HbAction *action);
+    void contextMenuAction(HbAction *action);
 private:
     void construct();
     void setMenuOptions();
@@ -80,8 +80,9 @@ private:
     HsMenuView mMenuView;
     HsMenuModeWrapper &mMenuMode;
     HsMenuItemModel *mAllCollectionsModel;
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
+    HsMainWindow &mMainWindow;
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
 };
 
 #endif // HSALLCOLLECTIONSSTATE_H

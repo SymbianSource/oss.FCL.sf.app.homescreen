@@ -22,9 +22,7 @@
 #include <QModelIndex>
 #include <QPointer>
 
-#include "hsmenustates_global.h"
-#include "hsmenuservice.h"
-#include "hsmenuview.h"
+#include "hsbaseviewstate.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -35,8 +33,9 @@ class HbAbstractViewItem;
 class QPointF;
 class HsMenuViewBuilder;
 class HsMenuItemModel;
+class HsMainWindow;
 
-class HsInstalledAppsState: public QState
+class HsInstalledAppsState: public HsBaseViewState
 {
     Q_OBJECT
 
@@ -45,6 +44,7 @@ class HsInstalledAppsState: public QState
 public:
 
     HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
+                         HsMainWindow &mainWindow,
                          QState *parent = 0);
 
     ~HsInstalledAppsState();
@@ -64,7 +64,9 @@ private slots:
 
     void stateExited();
 
-	void contextMenuAction(HbAction *action);
+    void setEmptyLabelVisibility(bool visibility);
+
+    void contextMenuAction(HbAction *action);
 
 private:
 
@@ -91,9 +93,11 @@ private:
      * Own.
      */
     HbAction *const mSecondarySoftkeyAction;
+    
+    HsMainWindow &mMainWindow;
 
-	QModelIndex mContextModelIndex;
-	QPointer<HbMenu> mContextMenu;
+    QModelIndex mContextModelIndex;
+    QPointer<HbMenu> mContextMenu;
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H

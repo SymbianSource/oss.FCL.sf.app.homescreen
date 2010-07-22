@@ -23,6 +23,7 @@
 
 #include "hsdatabase.h"
 #include "hsdomainmodeldatastructures.h"
+#include "hsbackuprestoreobserver.h"
 
 namespace
 {
@@ -48,12 +49,18 @@ namespace
     }
 }
 
+
+/*!
+    \class HsDatabase
+    \ingroup group_hsdomainmodel
+    \brief 
+*/
+
 /*!
     Constructs a new database with the given \a parent object.
 */
 HsDatabase::HsDatabase(QObject *parent)
-  : QObject(parent),
-  	mBlocked(false)
+  : QObject(parent)
 {
 }
 
@@ -103,7 +110,8 @@ QString HsDatabase::databaseName() const
 */  
 bool HsDatabase::open()
 {
-	if (mBlocked) {
+	HsBackupRestoreObserver *brObserver = HsBackupRestoreObserver::instance();
+	if (brObserver->checkBUR()) {	
 		return false;
 	}
 
@@ -184,51 +192,15 @@ bool HsDatabase::scene(HsSceneData &data)
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
-        "SELECT id, portraitWallpaper, landscapeWallpaper, defaultPageId, "
-        "maximumPageCount, maximumWidgetHeight, maximumWidgetWidth, "
-        "minimumWidgetHeight, minimumWidgetWidth "
+        "SELECT id "
         "FROM Scene";
     
     if (query.prepare(statement) && query.exec() && query.next()) {        
-        data.id                  = query.value(0).toInt();
-        data.portraitWallpaper   = query.value(1).toString();
-        data.landscapeWallpaper  = query.value(2).toString();
-        data.defaultPageId       = query.value(3).toInt();
-        data.maximumPageCount    = query.value(4).toInt();
-        data.maximumWidgetHeight = query.value(5).toReal();
-        data.maximumWidgetWidth  = query.value(6).toReal();
-        data.minimumWidgetHeight = query.value(7).toReal();
-        data.minimumWidgetWidth  = query.value(8).toReal();
+        data.id = query.value(0).toInt();        
         return true;
     }
     
-    return false;
-}
-
-/*!
-
-*/
-bool HsDatabase::updateScene(const HsSceneData &data)
-{
-    if (!checkConnection()) {
-        return false;
-    }
-
-    QSqlQuery query(QSqlDatabase::database(mConnectionName));
-
-    QString statement =
-        "UPDATE Scene "
-        "SET portraitWallpaper = ?, landscapeWallpaper = ? "
-        "WHERE id = ?";
-
-    if (query.prepare(statement)) {
-        query.addBindValue(data.portraitWallpaper);
-        query.addBindValue(data.landscapeWallpaper);    
-        query.addBindValue(data.id);
-        return  query.exec();
-    }
-    
-    return false;
+    return false;    
 }
 
 /*!
@@ -435,6 +407,56 @@ bool HsDatabase::widgets(const QString &uri, QList<HsWidgetData> &data)
 /*!
 
 */
+bool HsDatabase::widgets(const QString &uri, const QVariantHash &preferences, int &count)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+    if ( preferences.size() == 0 ) {
+        // return widget count of the given uri
+        QString statement =
+            "SELECT COUNT(id) "
+            "FROM Widgets "
+            "WHERE uri = ?";
+
+        if (query.prepare(statement)) {
+            query.addBindValue(uri);
+            if (query.exec() && query.next()) {
+                count = query.value(0).toInt();
+                return true;
+            }
+        }
+    } else {
+
+        QString statement =
+            "SELECT key, value, widgetId "
+            "FROM widgetPreferences "
+            "WHERE widgetId IN"
+            "(SELECT id FROM widgets WHERE uri = ?)";
+            
+        if (query.prepare(statement)) {
+            query.addBindValue(uri);
+            if (query.exec()) {
+                count = 0;
+                QMultiMap<QString, QString> foundPreferences;
+                while (query.next()) {
+                    foundPreferences.insert(query.value(0).toString(), query.value(1).toString());
+                }
+                if ( matchWidgetPreferences(preferences, foundPreferences) ) {
+                    ++count;
+                }
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/*!
+
+*/
 bool HsDatabase::widget(HsWidgetData &data)
 {
     if (!checkConnection()) {
@@ -572,6 +594,9 @@ bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
         return false;
     }
 
+    QString key = data.orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
+
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
@@ -580,7 +605,7 @@ bool HsDatabase::widgetPresentation(HsWidgetPresentationData &data)
         "WHERE key = ? AND widgetId = ?";
 
     if (query.prepare(statement)) {
-        query.addBindValue(data.key);
+        query.addBindValue(key);
         query.addBindValue(data.widgetId);
         if (query.exec() && query.next()) {
             data.x      = query.value(0).toReal();
@@ -602,6 +627,9 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
         return false;
     }
 
+    QString key = data.orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
+
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
     QString statement =
@@ -610,7 +638,7 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
         "VALUES (?, ?, ?, ?, ?)";
 
     if (query.prepare(statement)) {
-        query.addBindValue(data.key);
+        query.addBindValue(key);
         query.addBindValue(data.x);
         query.addBindValue(data.y);
         query.addBindValue(data.zValue);
@@ -624,11 +652,14 @@ bool HsDatabase::setWidgetPresentation(const HsWidgetPresentationData &data)
 /*!
 
 */
-bool HsDatabase::deleteWidgetPresentation(int widgetId, const QString &key)
+bool HsDatabase::deleteWidgetPresentation(int widgetId, Qt::Orientation orientation)
 {
     if (!checkConnection()) {
         return false;
     }
+
+    QString key = orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
 
     QSqlQuery query(QSqlDatabase::database(mConnectionName));
 
@@ -758,21 +789,28 @@ bool HsDatabase::setWidgetPreferences(int widgetId, const QVariantHash &data)
     return true;
 }
 
-/*!
-    Sets the database blocked or unblocked.
-*/
-void HsDatabase::setDataBaseBlocked(bool blocked)
+bool HsDatabase::configuration(QVariantHash &configuration)
 {
-	mBlocked = blocked;
-}
+    if (!checkConnection()) {
+        return false;
+    }
 
-/*!
-    Returns is the database blocked.
-    Return value true if blocked.
-*/
-bool HsDatabase::getDataBaseBlocked()
-{
-	return mBlocked;
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+
+    QString statement =
+        "SELECT key, value "
+        "FROM Configuration";
+
+    if (query.prepare(statement) && query.exec()) {
+        configuration.clear();
+        while (query.next()) {
+            configuration.insert(query.value(0).toString(), 
+                                 query.value(1));
+        }
+        return true;
+    }
+
+    return false;
 }
 
 /*!
@@ -781,7 +819,11 @@ bool HsDatabase::getDataBaseBlocked()
 */
 void HsDatabase::setInstance(HsDatabase *instance)
 {
-    mInstance.reset(instance);
+    if (mInstance != instance) {
+        HsDatabase *oldInstance = mInstance;
+        mInstance = instance;
+        delete oldInstance;
+    }
 }
 
 /*!
@@ -789,7 +831,7 @@ void HsDatabase::setInstance(HsDatabase *instance)
 */
 HsDatabase *HsDatabase::instance()
 {
-    return mInstance.data();
+    return mInstance;
 }
 
 /*!
@@ -799,7 +841,9 @@ HsDatabase *HsDatabase::instance()
 */
 HsDatabase *HsDatabase::takeInstance()
 {
-    return mInstance.take();
+    HsDatabase *instance = mInstance;
+    mInstance = 0;
+    return instance;
 }
   
 /*!
@@ -812,6 +856,21 @@ bool HsDatabase::checkConnection() const
 }
 
 /*!
+    Returns true if \a preferences are found from \a storedPreferences multimap. 
+    If preferences is empty, returns true.
+    
+*/
+bool HsDatabase::matchWidgetPreferences(const QVariantHash &preferences, const QMultiMap<QString, QString>& storedPreferences)
+{
+    bool contains = true;
+    QList<QString> preferenceKeys = preferences.keys();
+    for (int i=0; i<preferenceKeys.count() && contains; ++i) {
+        contains = storedPreferences.contains(preferenceKeys[i], preferences[preferenceKeys[i]].toString());
+    }
+    return contains;
+}
+
+/*!
     Points to the database instance.
 */
-QScopedPointer<HsDatabase> HsDatabase::mInstance(0);
+HsDatabase *HsDatabase::mInstance(0);

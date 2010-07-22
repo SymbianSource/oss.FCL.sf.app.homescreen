@@ -22,6 +22,7 @@
 #include <hbdocumentloader.h>
 #include "hsmenustates_global.h"
 #include "hsmenuview.h"
+#include "hsmainwindow.h"
 #include "hsmenumodewrapper.h"
 #include "hsapp_defs.h"
 
@@ -54,6 +55,8 @@ public:
 
 signals:
 
+    void collectionEntered();
+
     void toHomescreenState();
 
     void initialize();
@@ -62,7 +65,7 @@ public slots:
 
     void clearToolbarLatch();
 
-    bool oviStoreAction();
+    int oviStoreAction();
 
     void allAppsStateEntered();
 
@@ -108,6 +111,9 @@ private:
     HsInstalledAppsState *mInstalledAppsState;
 
     HsMenuModeWrapper mMenuMode;
+    
+    HsMainWindow mMainWindow;
+    
 };
 
 #endif //HSAPPLIBRARYSTATE_H

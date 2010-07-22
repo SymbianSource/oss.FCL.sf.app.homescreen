@@ -23,6 +23,7 @@
 #include <HbFrameItem>
 #include <HbFrameDrawer>
 #include <HbTouchArea>
+#include <HbInstantFeedback>
 
 #include "hsdigitalclockwidget.h"
 
@@ -56,16 +57,16 @@ HsDigitalClockWidget::HsDigitalClockWidget(bool useAmPm, QGraphicsItem *parent)
     mDigitMap.insert(QChar('8'), QString("clock_widget_eight"));
     mDigitMap.insert(QChar('9'), QString("clock_widget_nine"));
 */
-    mDigitMap.insert(QChar('0'), QString(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"));
-    mDigitMap.insert(QChar('1'), QString(":/themes/icons/hbdefault/scalable/clock_widget_one.svg"));
-    mDigitMap.insert(QChar('2'), QString(":/themes/icons/hbdefault/scalable/clock_widget_two.svg"));
-    mDigitMap.insert(QChar('3'), QString(":/themes/icons/hbdefault/scalable/clock_widget_three.svg"));
-    mDigitMap.insert(QChar('4'), QString(":/themes/icons/hbdefault/scalable/clock_widget_four.svg"));
-    mDigitMap.insert(QChar('5'), QString(":/themes/icons/hbdefault/scalable/clock_widget_five.svg"));
-    mDigitMap.insert(QChar('6'), QString(":/themes/icons/hbdefault/scalable/clock_widget_six.svg"));
-    mDigitMap.insert(QChar('7'), QString(":/themes/icons/hbdefault/scalable/clock_widget_seven.svg"));
-    mDigitMap.insert(QChar('8'), QString(":/themes/icons/hbdefault/scalable/clock_widget_eight.svg"));
-    mDigitMap.insert(QChar('9'), QString(":/themes/icons/hbdefault/scalable/clock_widget_nine.svg"));
+    mDigitMap.insert(QChar('0'), QString(":/clock_widget_zero.svg"));
+    mDigitMap.insert(QChar('1'), QString(":/clock_widget_one.svg"));
+    mDigitMap.insert(QChar('2'), QString(":/clock_widget_two.svg"));
+    mDigitMap.insert(QChar('3'), QString(":/clock_widget_three.svg"));
+    mDigitMap.insert(QChar('4'), QString(":/clock_widget_four.svg"));
+    mDigitMap.insert(QChar('5'), QString(":/clock_widget_five.svg"));
+    mDigitMap.insert(QChar('6'), QString(":/clock_widget_six.svg"));
+    mDigitMap.insert(QChar('7'), QString(":/clock_widget_seven.svg"));
+    mDigitMap.insert(QChar('8'), QString(":/clock_widget_eight.svg"));
+    mDigitMap.insert(QChar('9'), QString(":/clock_widget_nine.svg"));
 
     createPrimitives();
 }
@@ -98,6 +99,16 @@ bool HsDigitalClockWidget::eventFilter(QObject *watched, QEvent *event)
     }
 
     return false;
+}
+
+/*!
+    Return shape
+*/
+QPainterPath HsDigitalClockWidget::shape() const
+{   
+    QPainterPath path;
+    path.addRect(mBackground->rect());
+    return path;
 }
 
 /*!
@@ -165,30 +176,30 @@ void HsDigitalClockWidget::createPrimitives()
     }
 */
     HbFrameDrawer *drawer = new HbFrameDrawer(
-        QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget.svg"), HbFrameDrawer::NinePieces);
+        QLatin1String(":/clock_widget.svg"), HbFrameDrawer::NinePieces);
     mBackground = new HbFrameItem(drawer, this);
     HbStyle::setItemName(mBackground, QLatin1String("background"));
 
-    mDigit1 = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"), this);
+    mDigit1 = new HbIconItem(QLatin1String(":/clock_widget_zero.svg"), this);
     HbStyle::setItemName(mDigit1, QLatin1String("digit1"));
 
-    mDigit2 = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"), this);
+    mDigit2 = new HbIconItem(QLatin1String(":/clock_widget_zero.svg"), this);
     HbStyle::setItemName(mDigit2, QLatin1String("digit2"));
 
-    mDigit3 = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"), this);
+    mDigit3 = new HbIconItem(QLatin1String(":/clock_widget_zero.svg"), this);
     HbStyle::setItemName(mDigit3, QLatin1String("digit3"));
 
-    mDigit4 = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"), this);
+    mDigit4 = new HbIconItem(QLatin1String(":/clock_widget_zero.svg"), this);
     HbStyle::setItemName(mDigit4, QLatin1String("digit4"));
 
-    mDigit5 = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"), this);
+    mDigit5 = new HbIconItem(QLatin1String(":/clock_widget_zero.svg"), this);
     HbStyle::setItemName(mDigit5, QLatin1String("digit5"));
 
-    mDigit6 = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_zero.svg"), this);
+    mDigit6 = new HbIconItem(QLatin1String(":/clock_widget_zero.svg"), this);
     HbStyle::setItemName(mDigit6, QLatin1String("digit6"));
 
     if (mUseAmPm) {
-        mAmPm = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_am.svg"), this);
+        mAmPm = new HbIconItem(QLatin1String(":/clock_widget_am.svg"), this);
         HbStyle::setItemName(mAmPm, QLatin1String("ampm"));
     }
 
@@ -208,7 +219,7 @@ void HsDigitalClockWidget::updatePrimitives()
     if (mUseAmPm) {
         if (!mAmPm) {
             //mAmPm = new HbIconItem(QLatin1String("clock_widget_am"), this);
-            mAmPm = new HbIconItem(QLatin1String(":/themes/icons/hbdefault/scalable/clock_widget_am.svg"), this);
+            mAmPm = new HbIconItem(QLatin1String(":/clock_widget_am.svg"), this);
             HbStyle::setItemName(mAmPm, QLatin1String("ampm"));
         }
         timeString = time.toString("hh:mm:ss ap");
@@ -230,10 +241,10 @@ void HsDigitalClockWidget::updatePrimitives()
     if (mUseAmPm) {
         if (timeString[9] == QChar('a')) {
             //mAmPm->setIconName("clock_widget_am");
-            mAmPm->setIconName(":/themes/icons/hbdefault/scalable/clock_widget_am.svg");
+            mAmPm->setIconName(":/clock_widget_am.svg");
         } else {
             //mAmPm->setIconName("clock_widget_pm");
-            mAmPm->setIconName(":/themes/icons/hbdefault/scalable/clock_widget_pm.svg");
+            mAmPm->setIconName(":/clock_widget_pm.svg");
         }
     }
 }
@@ -246,6 +257,8 @@ void HsDigitalClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *eve
     if (!contains(event->pos())) {
         return;
     }
+
+    HbInstantFeedback::play(HbFeedback::BasicItem);
 
     emit clockTapped();
 }

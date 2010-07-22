@@ -34,9 +34,6 @@
 #endif
 
 class HsContentService;
-#ifdef Q_OS_SYMBIAN
-class CHsBackupRestoreObserver;
-#endif
 QTM_BEGIN_NAMESPACE
 class QValueSpacePublisher;
 QTM_END_NAMESPACE
@@ -55,7 +52,7 @@ public:
 
 signals:
     void event_exit();
-
+    void event_toIdle();
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -63,7 +60,6 @@ private:
     Q_DISABLE_COPY(HsDefaultRuntime)
 
     void registerAnimations();
-
     void createStatePublisher();
     void createContentServiceParts();
     void createStates();
@@ -73,6 +69,8 @@ private:
 private slots:
 	void onIdleStateEntered();
 	void onIdleStateExited();
+	void activityRequested(const QString &name);
+	
 
 private:
     HsContentService *mContentService;	
@@ -84,7 +82,6 @@ private:
 	
 #ifdef Q_OS_SYMBIAN
     XqKeyCapture keyCapture;
-    CHsBackupRestoreObserver* mBRObserver;
 #endif
     
     TEST_FRIEND

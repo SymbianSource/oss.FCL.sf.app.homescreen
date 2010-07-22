@@ -18,27 +18,18 @@
 #ifndef HSDOMAINMODELDATASTRUCTURES_H
 #define HSDOMAINMODELDATASTRUCTURES_H
 
-#include <QRectF>
+#include <QPointF>
+
 #include "hsdomainmodel_global.h"
 
 class HSDOMAINMODEL_EXPORT HsSceneData
 {
 public:
     HsSceneData() 
-      : id(-1), defaultPageId(-1), maximumPageCount(-1),
-        maximumWidgetHeight(-1.0), maximumWidgetWidth(-1.0),
-        minimumWidgetHeight(-1.0), minimumWidgetWidth(-1.0)
+      : id(-1)
     {}
     
     int     id;
-    QString portraitWallpaper;
-    QString landscapeWallpaper;
-    int     defaultPageId;
-    int     maximumPageCount;
-    qreal   maximumWidgetHeight;
-    qreal   maximumWidgetWidth;
-    qreal   minimumWidgetHeight;
-    qreal   minimumWidgetWidth;
 };
 
 class HSDOMAINMODEL_EXPORT HsPageData
@@ -69,7 +60,7 @@ class HSDOMAINMODEL_EXPORT HsWidgetPresentationData
 {
 public:
     HsWidgetPresentationData()
-        : x(0), y(0), zValue(0), 
+        : orientation(Qt::Vertical), x(0), y(0), zValue(0), 
           widgetId(-1)
     {}
 
@@ -79,7 +70,12 @@ public:
         y = pos.y();
     }
 
-    QString key;
+    QPointF pos() const
+    {
+        return QPointF(x, y);
+    }
+
+    Qt::Orientation orientation;
     qreal   x;
     qreal   y;
     qreal   zValue;

@@ -19,7 +19,7 @@
 #include <xqrequestinfo.h>
 #include <QEventLoop>
 
-const char INTERFACE_NAME[] = "com.nokia.services.hsapplication.IHomeScreenClient";
+const char INTERFACE_NAME[] = "com.nokia.symbian.IHomeScreenClient";
 
 
 /*!

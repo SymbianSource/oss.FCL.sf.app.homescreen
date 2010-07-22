@@ -73,12 +73,12 @@
 
 /*!
  Constructor
- \param parent owner
+ \param parent Parent state.
  \retval void
  */
 HsArrangeState::HsArrangeState(QState *parent) :
     QState(parent), mDialog(0), mEntriesList(0), 
-    mItemModel(0), mFinishedEntered(false)
+    mItemModel(0)
 {
     construct();
 }
@@ -132,9 +132,6 @@ void HsArrangeState::save(const HbListWidget& listWidget)
  Method invoked when a state is entered.
  \param event an event causing the entrance the state.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsArrangeState::onEntry(QEvent *event)
 {
     qDebug("HsArrangeState::onEntry()");
@@ -184,29 +181,18 @@ void HsArrangeState::onEntry(QEvent *event)
     }
     HSMENUTEST_FUNC_EXIT("HsArrangeState::onEntry");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot invoked on closing the dialog.
  */
 void HsArrangeState::arrangeDialogFinished(HbAction* finishedAction)
 {
-    if (!mFinishedEntered) {
-        mFinishedEntered = true;
-
-        mEntriesList->setArrangeMode(false);
-        if (finishedAction == mDialog->actions().value(0)) {
-            save(*mEntriesList);
-        }
-        emit exit();
-    } else {
-        // (work-around for crash if more then one action is selected in HbDialog)
-        qWarning("Another signal finished was emited.");
+    mEntriesList->setArrangeMode(false);
+    if (finishedAction == mDialog->actions().value(0)) {
+        save(*mEntriesList);
     }
+    emit exit();
 }
-
 
 /*!
  Slot invoked when a state is exited.
@@ -215,9 +201,10 @@ void HsArrangeState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsArrangeState::stateExited");
     if (mDialog) {
+        disconnect(mDialog, SIGNAL(finished(HbAction*)), this, SLOT(arrangeDialogFinished(HbAction*)));
         mDialog->close();
+        mDialog = NULL;
     }
-    mDialog = NULL;
 
     mObjectList.clear(); // mDialog as parent for all confml items
     
@@ -227,8 +214,6 @@ void HsArrangeState::stateExited()
 
     mArrangedCollIdList.clear();
     mCollIdList.clear();
-
-    mFinishedEntered = false;
 
     HSMENUTEST_FUNC_EXIT("HsArrangeState::stateExited");
     qDebug("HsArrangeState::stateExited()");

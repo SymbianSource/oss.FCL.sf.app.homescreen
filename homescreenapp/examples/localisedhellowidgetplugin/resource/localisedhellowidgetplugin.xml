@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <name>localisedhellowidgetplugin</name>
+    <filepath>localisedhellowidgetplugin</filepath>
+    <interface>
+        <name>com.nokia.symbian.IHomeScreenWidget</name>
+        <version>1.0</version>
+    </interface>
+</service>

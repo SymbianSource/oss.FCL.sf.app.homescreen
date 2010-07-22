@@ -44,12 +44,16 @@
     \param attributes Widget params.
     \return Event for adding the widget to homescreen.
 */
-QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(int entryId, HsMenuMode menuMode)
+QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(
+    int entryId,
+	HsMenuMode menuMode,
+    QVariant homescreenData)
 {
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
     params.insert(itemIdKey(), entryId);
     params.insert(menuModeType(), menuMode);
+    params.insert(HOMESCREENDATA, homescreenData);
     return new HsMenuEvent(HsMenuEvent::AddToHomeScreen, params);
 }
 
@@ -67,6 +71,22 @@ QEvent *HsMenuEventFactory::createOpenCollectionEvent(int itemId,
     params.insert(itemIdKey(), itemId);
     params.insert(entryTypeNameKey(), collectionType);
     return new HsMenuEvent(HsMenuEvent::OpenCollection, params);
+}
+
+/*!
+    Creates an HsMenuEvent::createOpenCollectionFromAppLibraryEvent event.
+
+    \param itemId Item id of the collection to be opened.
+    \param collectionType type of the collection to be opened.
+    \return Open collection event.
+ */
+QEvent *HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(int itemId,
+        const QString &collectionType)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), itemId);
+    params.insert(entryTypeNameKey(), collectionType);
+    return new HsMenuEvent(HsMenuEvent::OpenCollectionFromAppLibrary, params);
 }
 
 /*!
@@ -113,10 +133,13 @@ QEvent *HsMenuEventFactory::createDeleteCollectionEvent(int aItemId)
 
     \return Open Applications Library event.
  */
-QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(HsMenuMode menuMode)
+QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(
+    HsMenuMode menuMode,
+	QVariant homescreenData)
 {
     QVariantMap params;
     params.insert(menuModeType(), menuMode);
+    params.insert(HOMESCREENDATA, homescreenData);
     return new HsMenuEvent(HsMenuEvent::OpenApplicationLibrary, params);
 }
 
@@ -207,6 +230,20 @@ QEvent *HsMenuEventFactory::createRemoveAppFromCollectionEvent(int aItemId,
 }
 
 /*!
+    Creates an HsMenuEvent::UninstallApplication event.
+
+    \param aItemId Item id of the application to be removed from a collection.
+    \param aCollectionId Item id of the collection the application is to be removed from.
+    \return UninstallApplication event.
+ */
+QEvent *HsMenuEventFactory::createUninstallApplicationEvent(int aItemId)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), aItemId);
+    return new HsMenuEvent(HsMenuEvent::UninstallApplication, params);
+}
+
+/*!
     Creates an HsMenuEvent::ArrangeCollection event.
 
     \param aTopItemId Item id to be scrolled.
@@ -262,6 +299,19 @@ QEvent *HsMenuEventFactory::createAppSettingsViewEvent(int entryId)
     params.insert(itemIdKey(), entryId);
 
     return new HsMenuEvent(HsMenuEvent::ShowAppSettings, params);
+}
+
+/*!
+    Creates an HsMenuEvent::ShowAppDetails event.
+    \param entryId Id of an item.
+    \return Event for view the Application Settings.
+*/
+QEvent *HsMenuEventFactory::createAppDetailsViewEvent(int entryId)
+{
+    QVariantMap params;
+    params.insert(itemIdKey(), entryId);
+
+    return new HsMenuEvent(HsMenuEvent::ShowAppDetails, params);
 }
 
 /*!

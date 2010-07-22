@@ -92,7 +92,7 @@ HsMenuItemModel *HsMenuService::getAllCollectionsModel(
 HsMenuItemModel *HsMenuService::getInstalledModel(
     HsSortAttribute sortAttribute)
 {
-    //TODO get proper items 
+    //TODO get proper items
     qDebug() << "HsMenuService::getInstalledModel" << "sortAttribute:"
              << sortAttribute;
     HSMENUTEST_FUNC_ENTRY("HsMenuService::getInstalledModel");
@@ -125,6 +125,9 @@ HsMenuItemModel *HsMenuService::getCollectionModel(int collectionId,
         query.setFlagsOn(RemovableEntryFlag | VisibleEntryFlag);
     } else {
         query.setFlagsOn(VisibleEntryFlag);
+    }
+    if(!collectionId) {
+        collectionId = collectionIdByType(collectionType);
     }
     query.setParentId(collectionId);
     query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
@@ -182,14 +185,36 @@ QString HsMenuService::getName(int entryId)
  Executes action on an item
  \param entryId of this item
  \param actionName string with action name
- \retval boolean error code
+ \retval int error code, 0 if no error
  */
-bool HsMenuService::executeAction(int entryId, const QString &actionName)
+int HsMenuService::executeAction(int entryId, const QString &actionName)
 {
     qDebug() << "HsMenuService::executeAction entryId:" << entryId
              << "actionName:" << actionName;
+    int ret = CaService::instance()->executeCommand(entryId, actionName);
 
-    return CaService::instance()->executeCommand(entryId, actionName);
+/*    // if its remove action we need to mark all items 
+    // that are being uninstalled
+    if (actionName == caCmdRemove && ret == 0) {
+        QSharedPointer<CaEntry> entry(
+                CaService::instance()->getEntry(entryId));
+        if (!entry.isNull()) {
+            QString componentId = entry->attribute(
+                    componentIdAttributeName());
+            
+            CaQuery query;
+            query.setAttribute(componentIdAttributeName(), componentId);
+            QList< QSharedPointer<CaEntry> > entries 
+                    = CaService::instance()->getEntries(query);
+            
+            for (int i = 0; i < entries.count(); i++) {
+                entries[i]->setFlags(
+                        entries.first()->flags()| UninstallEntryFlag);
+                CaService::instance()->updateEntry(*entries[i]);
+            }
+        }
+    }*/
+    return ret;
 }
 
 /*!
@@ -347,6 +372,33 @@ int HsMenuService::allCollectionsId()
 }
 
 /*!
+ Retrives the first found collection entry id
+ \param collectionType collection type.
+ \retval collectionType id
+ */
+int HsMenuService::collectionIdByType(const QString& collectionType)
+{
+    HSMENUTEST_FUNC_ENTRY("HsMenuService::collectionsIdByType");
+    int collectionId;
+    CaQuery collectionsQuery;
+    collectionsQuery.setEntryRoles(GroupEntryRole);
+    //sorting is set to (default, ascending) to assure that
+    //proper entry is fetched, somebody can add item with
+    //"menucollections" typename to the storage, but even if he or she
+    //do this we fetch entry that we wanted
+    collectionsQuery.setSort(DefaultSortAttribute, Qt::AscendingOrder);
+    collectionsQuery.addEntryTypeName(collectionType);
+    QList<int> ids = CaService::instance()->getEntryIds(
+                         collectionsQuery);
+    Q_ASSERT(ids.count() > 0);
+    collectionId = ids.at(0);
+    qDebug() << "HsMenuService::HsMenuService collectionsIdByType"
+             << collectionId;
+    HSMENUTEST_FUNC_EXIT("HsMenuService::collectionsIdByType");
+    return collectionId;
+}
+
+/*!
  Touch action on an entry.
  \param entryId of this entry.
  \retval boolean error code.
@@ -359,16 +411,16 @@ bool HsMenuService::touch(int entryId)
 
 /*!
  Launch SoftwareUpdateApplication
- \retval boolean launching status
+ \retval int launching status, 0 if no errors
  */
-bool HsMenuService::launchSoftwareUpdate()
+int HsMenuService::launchSoftwareUpdate()
 {
     qDebug() << "HsMenuService::launchSoftwareUpdate";
     QScopedPointer<CaEntry> tsEntry(new CaEntry);
     tsEntry->setEntryTypeName(applicationTypeName());
     tsEntry->setAttribute(
-            applicationUidEntryKey(), QString::number(softwareUpdateApplicationUid)); 
-    int retval = CaService::instance()->executeCommand(*tsEntry, 
+            applicationUidEntryKey(), QString::number(softwareUpdateApplicationUid));
+    int retval = CaService::instance()->executeCommand(*tsEntry,
             openActionIdentifier());
     return retval;
 }

@@ -140,7 +140,7 @@ bool ContentPublishClient::addWidget(QString widgetUri)
 */
 void ContentPublishClient::setWallpaper1()
 {
-    QString wallpaper = "c:/data/images/kqtihswallpapers/testwallpaper.jpg";
+    QString wallpaper = "c:/data/images/testwallpaper.jpg";
     setWallpaper(wallpaper);
 }
 
@@ -149,7 +149,7 @@ void ContentPublishClient::setWallpaper1()
 */
 void ContentPublishClient::setWallpaper2()
 {
-    QString wallpaper = "c:/data/images/kqtihswallpapers/testwallpaper2.jpg";
+    QString wallpaper = "c:/data/images/testwallpaper2.jpg";
     setWallpaper(wallpaper);
 }
 

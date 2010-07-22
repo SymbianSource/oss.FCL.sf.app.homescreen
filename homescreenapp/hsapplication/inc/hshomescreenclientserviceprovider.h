@@ -22,6 +22,12 @@
 
 #include <xqserviceprovider.h>
 #include "hswidgetcomponentdescriptor.h"
+#include "hstest_global.h"
+
+HOMESCREEN_TEST_CLASS(t_hsapplication)
+
+class HsSpinnerDialog;
+class HsWallpaper;
 
 class HsHomeScreenClientServiceProvider : public XQServiceProvider
 {
@@ -30,14 +36,29 @@ class HsHomeScreenClientServiceProvider : public XQServiceProvider
 public:
     HsHomeScreenClientServiceProvider(QObject *parent = 0);
     ~HsHomeScreenClientServiceProvider();
+private:
+    void startAnimation();
+    void stopAnimation();
+
+signals:
+    void requestFinished();
     
 public slots:
     bool addWidget(const QString &uri,const QVariantHash &preferences);
-    bool setWallpaper(const QString &fileName);
+    void setWallpaper(const QString &fileName);
     bool widgetUninstalled(const QVariantHash &widgetDescriptor);
+    void onImageSet();
+    void onImageSetFailed();    
     
 private:
     HsWidgetComponentDescriptor widgetComponentDescriptor(const QVariantHash& widgetDescriptor);
+    HsSpinnerDialog *mWaitDialog;
+    bool mShowAnimation;
+    int mAsyncRequestIndex;
+    QVariant mReturnValue;
+    HsWallpaper *mWallpaper;
+
+    HOMESCREEN_TEST_FRIEND_CLASS(t_hsapplication)
 };
 
 #endif // HSHOMESCREENCLIENTSERVICEPROVIDER_H

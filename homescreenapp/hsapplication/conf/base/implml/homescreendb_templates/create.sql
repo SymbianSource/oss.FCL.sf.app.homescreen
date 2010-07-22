@@ -1,14 +1,6 @@
 DROP TABLE IF EXISTS Scene;
 CREATE TABLE Scene (
-  id INTEGER PRIMARY KEY,
-  portraitWallpaper TEXT,
-  landscapeWallpaper TEXT,
-  defaultPageId INTEGER,
-  maximumPageCount INTEGER,
-  maximumWidgetHeight REAL,
-  maximumWidgetWidth REAL,
-  minimumWidgetHeight REAL,
-  minimumWidgetWidth REAL);
+  id INTEGER PRIMARY KEY);
 
 DROP TABLE IF EXISTS Pages;
 CREATE TABLE Pages (
@@ -38,3 +30,10 @@ CREATE TABLE WidgetPreferences (
   widgetId INTEGER,
   UNIQUE(widgetId, key) ON CONFLICT REPLACE,
   FOREIGN KEY(widgetId) REFERENCES Widgets(id) ON DELETE CASCADE);
+
+DROP TABLE IF EXISTS Configuration;
+CREATE TABLE Configuration (
+	key TEXT,
+	value TEXT,
+	UNIQUE(key) ON CONFLICT REPLACE);
+	

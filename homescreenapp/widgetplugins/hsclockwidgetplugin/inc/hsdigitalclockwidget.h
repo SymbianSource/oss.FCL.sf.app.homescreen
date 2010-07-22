@@ -37,7 +37,7 @@ public:
     ~HsDigitalClockWidget();
 
     bool eventFilter(QObject *watched, QEvent *event);
-
+    QPainterPath shape() const;
 signals:
     void clockTapped();
 

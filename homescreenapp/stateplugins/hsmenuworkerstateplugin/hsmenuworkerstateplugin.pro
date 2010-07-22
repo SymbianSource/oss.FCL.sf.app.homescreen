@@ -25,7 +25,8 @@ include(../../common.pri)
 LIBS += -lhsdomainmodel \
         -lhsmenuserviceprovider \
         -lhsutils \
-        -lcaclient
+        -lcaclient \
+        -lcasoftwareregistry
 
 DEPENDPATH += ./inc \
     ./src

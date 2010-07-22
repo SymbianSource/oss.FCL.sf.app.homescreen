@@ -17,6 +17,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS  =  homescreenapp
-symbian:SUBDIRS += taskswitcherapp
+symbian:SUBDIRS += screensaver
 
 CONFIG += ordered
