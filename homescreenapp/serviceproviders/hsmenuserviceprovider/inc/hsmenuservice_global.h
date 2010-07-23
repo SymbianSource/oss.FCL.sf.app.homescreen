@@ -19,7 +19,7 @@
 #define HSMENUSERVICE_GLOBAL_H
 
 // System includes
-#include <Qt/qglobal.h>
+#include <qglobal.h>
 
 #ifdef MENUSERVICE_LIB
 #define MENUSERVICE_EXPORT Q_DECL_EXPORT

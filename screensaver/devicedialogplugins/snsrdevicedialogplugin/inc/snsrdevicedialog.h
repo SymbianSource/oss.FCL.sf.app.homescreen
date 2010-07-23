@@ -23,17 +23,16 @@
 
 
 
-
+#include "screensaver.h"
 #include "snsrtest_global.h"
 
 class Screensaver;
 class SnsrUserActivityServiceInterface;
 class QGraphicsLinearLayout;
 class XQSettingsManager;
+class HbIndicatorInterface;
 
 SCREENSAVER_TEST_CLASS(T_SnsrDeviceDialogPlugin)
-
-class HbIndicatorInterface;
 
 
 class SnsrDeviceDialog: public HbPopup, public HbDeviceDialogInterface
@@ -55,6 +54,8 @@ public: // constants
     };
     
     static const char *dataKeyUnlock;
+    static const char *dataKeySwitchLights;
+    static const char *dataKeySwitchLowPower;
 
 public: // methods
 
@@ -77,6 +78,7 @@ private slots:
     void screensaverFaulted();
     void changeLayout(Qt::Orientation);
     void requestUnlock();
+    void requestScreenMode(Screensaver::ScreenPowerMode mode);
     // slots for signals emitted by HbIndicatorPluginManager
     void indicatorsActivated(const QList<HbIndicatorInterface*> &activatedIndicators);
     void indicatorActivated(HbIndicatorInterface *activatedIndicator);

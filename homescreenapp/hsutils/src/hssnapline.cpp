@@ -17,9 +17,10 @@
 
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
+#include <hbcolorscheme.h>
 
 #include "hsapp_defs.h"
-#include "HsSnapLine.h"
+#include "hssnapline.h"
 
 /*!
     Constructor.
@@ -44,11 +45,6 @@ HsSnapLine::HsSnapLine(QGraphicsItem *parent)
 
     mFadeOutAnimation = new QPropertyAnimation(graphicsEffect(), "opacity", this);
     connect(mFadeOutAnimation, SIGNAL(finished()), SLOT(fadeOutAnimationFinished()));
-
-    QPen pen;
-    pen.setWidth(3);
-    pen.setColor(Qt::darkCyan); //TODO: Change the color to the Theme element
-    setPen(pen);
 }
  
 /*!
@@ -110,6 +106,23 @@ void HsSnapLine::showLine(const QLineF &snapLine)
         }
         displayLine.translate(-1.0, 0.0);
     }
+
+    QLinearGradient gradient(displayLine.p1(), displayLine.p2());
+    gradient.setColorAt(0.0, Qt::white);
+    QColor snapLineColor = HbColorScheme::color("qtc_hs_snapguide");
+    if (!snapLineColor.isValid()) {
+        //if valid color is not loaded from the theme, the darkCyan color is used as a backup.color
+        snapLineColor = Qt::darkCyan;
+    }
+    gradient.setColorAt(0.4, snapLineColor);
+    gradient.setColorAt(0.6, snapLineColor);
+    gradient.setColorAt(1.0, Qt::white);
+    QBrush brush(gradient);
+    QPen pen;
+    pen.setWidth(3);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setBrush(brush);
+    setPen(pen);
 
     setLine(displayLine);
     show();

@@ -24,6 +24,8 @@
 #include <hbnotificationdialog.h>
 #include <hsmenueventfactory.h>
 #include "hsmenudialogfactory.h"
+#include "hsmenuentryremovedhandler.h"
+
 #include "hsaddtohomescreenstate.h"
 #include "hsmenuevent.h"
 #include "canotifier.h"
@@ -55,8 +57,7 @@ const char SHORTCUT_ID[] = "caEntryId";
 HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
     QState(parent), 
     mCorruptedMessage(NULL), mConfirmAction(NULL),
-    mMenuMode(NormalHsMenuMode),
-    mNotifier(0)
+    mMenuMode(NormalHsMenuMode)
 {
     setObjectName("/AddToHomeScreenState");
     
@@ -139,7 +140,6 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
     params[HOMESCREENDATA] = mToken;
     bool success = contentService.createWidget(params);
     if (!success) {
-        subscribeForMemoryCardRemove();
         showMessageWidgetCorrupted();
     } else {
         emit exit();
@@ -165,6 +165,13 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted()
     mCorruptedMessage = HsMenuDialogFactory().create(
             hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
     mConfirmAction = mCorruptedMessage->actions().value(0);
+    
+    QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
+        new HsMenuEntryRemovedHandler(mEntryId, 
+            mCorruptedMessage, SLOT(close())));
+    
+    entryObserver.take()->setParent(mCorruptedMessage); 
+    
     mCorruptedMessage->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
 
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
@@ -196,19 +203,11 @@ void HsAddToHomeScreenState::messageWidgetCorruptedFinished
 void HsAddToHomeScreenState::cleanUp()
 {
     // Close popups if App key was pressed
-    if (mCorruptedMessage) {
-        disconnect(mCorruptedMessage, SIGNAL(finished(HbAction*)),
-                   this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
+    if (mCorruptedMessage != NULL) {
         mCorruptedMessage->close();
         mCorruptedMessage = NULL;
     }
     
-    disconnect(mNotifier,
-               SIGNAL(entryChanged(CaEntry,ChangeType)),
-               this, SLOT(memoryCardRemoved()));
-
-    delete mNotifier;
-    mNotifier = NULL;
     mToken = NULL;
 }
 
@@ -305,32 +304,6 @@ void HsAddToHomeScreenState::logActionResult(QString operationName,
     }
 }
 
-/*!
- Subscribe for memory card remove.
- \retval void
- */
-void HsAddToHomeScreenState::subscribeForMemoryCardRemove()
-{
-    CaNotifierFilter filter;
-    QList<int> entryIds;
-    entryIds.append(mEntryId);
-    filter.setIds(entryIds);
-    mNotifier = CaService::instance()->createNotifier(filter);
-    mNotifier->setParent(this);
-    connect(mNotifier,
-            SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SLOT(memoryCardRemoved()));
-}
 
-/*!
- Memory card with instaled widget was removed.
- \retval void
- */
-void HsAddToHomeScreenState::memoryCardRemoved()
-{
-    if (mCorruptedMessage) {
-        mCorruptedMessage->close();
-        mCorruptedMessage = NULL;
-    }
-    // exit not needed, it is called after dialog closed
-}
+
+

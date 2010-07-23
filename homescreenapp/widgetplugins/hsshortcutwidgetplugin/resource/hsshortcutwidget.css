@@ -54,7 +54,3 @@ HsShortcutWidget::text{
 	color: var(qtc_hs_list_item_title_normal);
 	zvalue: 2;
 }
-
-HsShortcutWidget::toucharea {  
-  zvalue: 3;
-}

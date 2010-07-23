@@ -28,7 +28,7 @@ HOMESCREEN_TEST_CLASS(TestShortcutWidget)
 class HbFrameItem;    
 class HbIconItem;
 class HbTextItem;
-class HbTouchArea;
+class QGestureEvent;
 class CaEntry;
 
 class HsShortcutWidget : public HbWidget
@@ -51,8 +51,6 @@ public:
     QString text() const;
     void setText(const QString& textItem);
 
-    bool eventFilter(QObject *watched, QEvent *event);
-
 signals:
     void finished();
     void setPreferences(const QStringList &names);
@@ -62,12 +60,13 @@ public slots:
     void onShow();
     void onHide();
 
+protected:
+    void gestureEvent(QGestureEvent *event);
+
 private:
     Q_DISABLE_COPY(HsShortcutWidget)
-
-    void handleMousePressEvent(QGraphicsSceneMouseEvent *event);
-    void handleMouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    
+    void launch();
             
     void createPrimitives();
     void updateContent(const CaEntry &caEntry);
@@ -85,8 +84,7 @@ private:
     HbFrameItem *mBackground;
     HbIconItem *mIcon;
     HbTextItem *mText;
-    HbTouchArea *mTouchArea;
-    
+        
     int mCaEntryId;
     QString mUid;
     EntryRole mCaEntryRole;

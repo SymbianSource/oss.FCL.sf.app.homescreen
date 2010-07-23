@@ -67,13 +67,30 @@ bool HsPropertyAnimationWrapper::isRunning()
 {
     return (mImpl->mPropertyAnimation->state() == QAbstractAnimation::Running);
 }
+
 void HsPropertyAnimationWrapper::setEndValue(const QVariant &value)
 {
     mImpl->mPropertyAnimation->setEndValue(value);
 }
+
 void HsPropertyAnimationWrapper::setDuration(int msecs)
 {
     mImpl->mPropertyAnimation->setDuration(msecs);
+}
+
+void HsPropertyAnimationWrapper::setForward()
+{
+    mImpl->mPropertyAnimation->setDirection(QAbstractAnimation::Forward);
+}
+
+void HsPropertyAnimationWrapper::setBackward()
+{
+    mImpl->mPropertyAnimation->setDirection(QAbstractAnimation::Backward);
+}
+
+bool HsPropertyAnimationWrapper::isForward() const
+{
+    return (mImpl->mPropertyAnimation->direction() == QAbstractAnimation::Forward);
 }
 /*!
 
@@ -89,3 +106,4 @@ void HsPropertyAnimationWrapper::stop()
 {
     mImpl->mPropertyAnimation->stop();
 }
+

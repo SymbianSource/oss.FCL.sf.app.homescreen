@@ -73,14 +73,12 @@ private:
     
     void createUninstallMessage();
     void createUninstallJavaMessage();
-    void subscribeForMemoryCardRemove();
+    void createSimpleUninstallJavaMessage();
 
 private:
 
     int mItemId;
     
-    CaNotifier *mNotifier;
-
     HbMessageBox *mUninstallMessage; // deletes itself automatically on close
     HbDialog *mUninstallJavaMessage;
     UninstallDialogType mDialogType;

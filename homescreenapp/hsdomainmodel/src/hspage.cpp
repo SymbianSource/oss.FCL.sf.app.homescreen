@@ -19,15 +19,18 @@
 
 #include "hsdomainmodeldatastructures.h"
 #include "hspage.h"
+#include "hspagevisual.h"
 #include "hspagetoucharea.h"
 #include "hspagenewwidgetlayout.h"
 #include "hsscene.h"
 #include "hsdatabase.h"
 #include "hswidgethost.h"
+#include "hswidgethostvisual.h"
 #include "hswallpaper.h"
 #include "hswidgetpositioningonwidgetadd.h"
 #include "hswidgetpositioningonorientationchange.h"
 #include "hsconfiguration.h"
+#include "hsgui.h"
 
 
 /*!
@@ -43,20 +46,15 @@
     \a parent Owner.
     \a aFlags Window flags.
 */
-HsPage::HsPage(QGraphicsItem* parent)
-    : HbWidget(parent),
+HsPage::HsPage(QObject* parent)
+    : QObject(parent),
       mDatabaseId(-1),
+      mPageVisual(new HsPageVisual), 
       mWallpaper(0),
       mRemovable(true),
-      mTouchArea(0),
       mPageMargin(0.0)
 {
-    setFlag(QGraphicsItem::ItemHasNoContents);
-    setSizePolicy(QSizePolicy(QSizePolicy::Ignored,
-                              QSizePolicy::Ignored));
-
-    setupTouchArea();
-
+ 
     //Page margin
     mPageMargin = HSCONFIGURATION_GET(pageMargin);
     connect(HsConfiguration::instance(), SIGNAL(propertyChanged(QString)), SLOT(onPageMarginChanged(QString)));
@@ -67,6 +65,36 @@ HsPage::HsPage(QGraphicsItem* parent)
 */
 HsPage::~HsPage()
 {
+    // visuals are owned by widget host, detach those from page visual
+    HsWidgetHostVisual *visual(0);
+    foreach (HsWidgetHost *widget, mWidgets) {
+        visual = widget->visual();
+        visual->setParent(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
+    }
+   
+    foreach (HsWidgetHost *widget, mNewWidgets) {
+        visual = widget->visual();
+        visual->setParent(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
+    }
+   
+    foreach (HsWidgetHost *widget, mUnavailableWidgets) {
+        visual = widget->visual();
+        visual->setParent(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
+    }
+    qDeleteAll(mWidgets);
+    qDeleteAll(mNewWidgets);
+    qDeleteAll(mUnavailableWidgets);
+
+    delete mPageVisual;
     delete mWallpaper;
 }
 
@@ -85,7 +113,7 @@ void HsPage::setDatabaseId(int id)
 {
     mDatabaseId = id;
 }
-
+/*
 void HsPage::setGeometry(const QRectF &rect)
 {
     if (mTouchArea) {
@@ -94,7 +122,7 @@ void HsPage::setGeometry(const QRectF &rect)
 
     HbWidget::setGeometry(rect);
 }
-
+*/
 /*!
     Loads widgets.
 */
@@ -117,14 +145,23 @@ bool HsPage::load()
 
     foreach (HsWidgetData data, datas) {
         HsWidgetHost *widget = new HsWidgetHost(data.id);
-        mWidgets.append(widget);
-        connectWidget(widget);
-        widget->setPage(this);
-        widget->setParentItem(this);
-        widget->startWidget(isDefaultPage());
+        if (!widget->loadPresentation(Qt::Horizontal) &&
+            !widget->loadPresentation(Qt::Vertical)) {
+            widget->setPage(this);
+            widget->visual()->hide();
+            connectWidget(widget);
+            mNewWidgets << widget;            
+        }
+        else {
+            mWidgets.append(widget);
+            connectWidget(widget);
+            widget->setPage(this);
+            widget->visual()->setParentItem(this->visual());
+            widget->startWidget(isDefaultPage());
+        }
     }
 
-    connect(HsScene::mainWindow(),
+    connect(HsGui::instance(),
         SIGNAL(orientationChanged(Qt::Orientation)),
         SLOT(onOrientationChanged(Qt::Orientation)));
 
@@ -157,7 +194,7 @@ bool HsPage::addExistingWidget(HsWidgetHost *widgetHost)
 
     connectWidget(widgetHost);
     mWidgets << widgetHost;
-    widgetHost->setParentItem(this);
+    widgetHost->visual()->setParentItem(visual());
 
     return true;
  }
@@ -174,7 +211,7 @@ bool HsPage::removeWidget(HsWidgetHost *widgetHost)
 
     disconnectWidget(widgetHost);
     mWidgets.removeOne(widgetHost);
-    widgetHost->setParentItem(0);
+    widgetHost->visual()->setParentItem(0);
 
     return true;
 }
@@ -202,20 +239,10 @@ bool HsPage::addNewWidget(HsWidgetHost* widgetHost, const QPointF &touchPoint)
     if (mNewWidgets.contains(widgetHost)) {
         return true;
     }
+    
+    widgetHost->setPage(this);    
 
-    HsWidgetPresentationData presentation;
-    QPointF adjustedWidgetPos = adjustedWidgetPosition(widgetHost->geometry());
-    presentation.orientation = HsScene::orientation();
-    if (!widgetHost->getPresentation(presentation)) {
-        presentation.orientation = HsScene::orientation();
-        presentation.setPos(adjustedWidgetPos);
-        presentation.zValue = 0;
-        widgetHost->savePresentation(presentation);
-    }
-
-    widgetHost->hide();
-    widgetHost->setPos(adjustedWidgetPos);
-    widgetHost->setZValue(presentation.zValue);
+    widgetHost->visual()->hide();
 
     connectWidget(widgetHost);
     mNewWidgets << widgetHost;
@@ -232,10 +259,10 @@ void HsPage::layoutNewWidgets()
         return;
     }
 
-    HsPageNewWidgetLayout *newWidgetLayout = static_cast<HsPageNewWidgetLayout *>(layout());
+    HsPageNewWidgetLayout *newWidgetLayout = static_cast<HsPageNewWidgetLayout *>(visual()->layout());
     if (!newWidgetLayout) {
         newWidgetLayout = new HsPageNewWidgetLayout(mTouchPoint);
-        setLayout(newWidgetLayout);
+        visual()->setLayout(newWidgetLayout);
     }    
     updateZValues();
     HsWidgetHost *widget = 0;
@@ -243,9 +270,9 @@ void HsPage::layoutNewWidgets()
         widget = mNewWidgets.at(i);
         newWidgetLayout->addItem(widget);
         widget->setPage(this);
-        widget->setParentItem(this);
+        widget->visual()->setParentItem(visual());
         widget->showWidget();
-        widget->show();
+        widget->visual()->show();
     }
     mWidgets << mNewWidgets;
     mNewWidgets.clear();
@@ -257,7 +284,7 @@ void HsPage::layoutNewWidgets()
 void HsPage::resetNewWidgets()
 {
     mNewWidgets.clear();
-    setLayout(0);
+    visual()->setLayout(0);
 }
 
 /*!
@@ -265,17 +292,35 @@ void HsPage::resetNewWidgets()
 */
 bool HsPage::deleteFromDatabase()
 {
+    
+    HsWidgetHostVisual *visual(0);
     foreach (HsWidgetHost *widget, mWidgets) {
+        visual = widget->visual();
+        visual->setParent(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
         widget->remove();
     }
     mWidgets.clear();
+    
 
     foreach (HsWidgetHost *widget, mNewWidgets) {
+        visual = widget->visual();
+        visual->setParent(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
         widget->remove();
     }
     mNewWidgets.clear();
 
     foreach (HsWidgetHost *widget, mUnavailableWidgets) {
+        visual = widget->visual();
+        visual->setParent(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
         widget->remove();
     }
     mUnavailableWidgets.clear();
@@ -362,7 +407,7 @@ QPointF HsPage::adjustedWidgetPosition(const QRectF &origWidgetRect)
 */
 QRectF HsPage::contentGeometry()
 {
-    return contentGeometry(HsScene::mainWindow()->orientation());
+    return contentGeometry(HsGui::instance()->orientation());
 }
 
 /*!
@@ -370,9 +415,9 @@ QRectF HsPage::contentGeometry()
 */
 QRectF HsPage::contentGeometry(Qt::Orientation orientation)
 {
-    QRectF pageRect = HsScene::mainWindow()->layoutRect();
+    QRectF pageRect = HsGui::instance()->layoutRect();
 
-    if (orientation != HsScene::orientation()) {
+    if (orientation != HsGui::instance()->orientation()) {
         qreal width = pageRect.width();
         qreal height = pageRect.height();
         pageRect.setWidth(height);
@@ -391,7 +436,7 @@ QRectF HsPage::contentGeometry(Qt::Orientation orientation)
 */
 QRectF HsPage::contentRect()
 {
-    return contentRect(HsScene::mainWindow()->orientation());
+    return contentRect(HsGui::instance()->orientation());
 }
 
 /*!
@@ -404,13 +449,17 @@ QRectF HsPage::contentRect(Qt::Orientation orientation)
     return rect;
 }
 
+HsPageVisual *HsPage::visual() const
+{
+    return mPageVisual;
+}
 /*!
     Calls onShow() for contained widgets.
 */
 void HsPage::showWidgets()
 {
     foreach (HsWidgetHost *widget, mWidgets) {
-        if (widget->parentItem() == this) {
+        if (widget->visual()->parentItem() == visual()) {
             widget->showWidget();
         }
     }
@@ -422,7 +471,7 @@ void HsPage::showWidgets()
 void HsPage::hideWidgets()
 {
     foreach (HsWidgetHost *widget, mWidgets) {
-        if (widget->parentItem() == this) {
+        if (widget->visual()->parentItem() == visual()) {
             widget->hideWidget();
         }
     }
@@ -452,7 +501,7 @@ void HsPage::updateZValues()
     if (!mWidgets.isEmpty()) {
         QMultiMap<qreal, HsWidgetHost *> map;
         foreach (HsWidgetHost *widget, mWidgets) {
-            map.insert(widget->zValue(), widget);
+            map.insert(widget->visual()->zValue(), widget);
         }
 
         QList<HsWidgetHost *> sortedWidgets = map.values();
@@ -464,14 +513,14 @@ void HsPage::updateZValues()
         }
 
         foreach (HsWidgetHost *widget, sortedWidgets) {
-            widget->setZValue(z++);
+            widget->visual()->setZValue(z++);
             widget->savePresentation();
         }
     }
 
     if (!mNewWidgets.isEmpty()) {
         foreach (HsWidgetHost *widget, mNewWidgets) {
-            widget->setZValue(z++);
+            widget->visual()->setZValue(z++);
             widget->savePresentation();
         }
     }
@@ -486,11 +535,11 @@ int HsPage::pageIndex()
 /*!
     Create touch area for page.
 */
-void HsPage::setupTouchArea()
+/*void HsPage::setupTouchArea()
 {
     mTouchArea = new HsPageTouchArea(this);
     mTouchArea->setZValue(-1);
-}
+}*/
 /*!
     Utility to connect widget signals to page.
 */
@@ -498,7 +547,7 @@ void HsPage::connectWidget(HsWidgetHost *widget)
 {
     connect(widget, SIGNAL(finished()), SLOT(onWidgetFinished()));
     connect(widget, SIGNAL(faulted()), SLOT(onWidgetFaulted()));
-    connect(widget, SIGNAL(resized()), SLOT(onWidgetResized()));
+    connect(widget->visual(), SIGNAL(resized()), SLOT(onWidgetResized()));
     connect(widget, SIGNAL(available()), SLOT(onWidgetAvailable()));
     connect(widget, SIGNAL(unavailable()), SLOT(onWidgetUnavailable()));
 }
@@ -507,6 +556,7 @@ void HsPage::connectWidget(HsWidgetHost *widget)
 */
 void HsPage::disconnectWidget(HsWidgetHost *widget)
 {
+    widget->visual()->disconnect(this);
     widget->disconnect(this);
 }
 /*!
@@ -521,6 +571,14 @@ void HsPage::onWidgetFinished()
     if (!mNewWidgets.removeOne(widget)) {
         mWidgets.removeOne(widget);
     }
+    if (widget){     
+        HsWidgetHostVisual *visual = widget->visual();
+        visual->setParentItem(0);
+        if (visual->scene()) {
+            visual->scene()->removeItem(visual);
+        }
+    }
+    
 
     disconnectWidget(widget);
     widget->remove();
@@ -539,11 +597,11 @@ void HsPage::onWidgetFaulted()
 */
 void HsPage::onWidgetResized()
 {
-    if ( !layout() ) {
-        HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
-        widget->setPos(adjustedWidgetPosition(widget->geometry()));
+    if (!visual()->layout()) {
+        HsWidgetHostVisual *widgetVisual = qobject_cast<HsWidgetHostVisual *>(sender());
+        widgetVisual->setPos(adjustedWidgetPosition(widgetVisual->geometry()));
     } else {
-        layout()->invalidate();
+        visual()->layout()->invalidate();
     }
 }
 /*!
@@ -552,13 +610,14 @@ void HsPage::onWidgetResized()
 void HsPage::onWidgetAvailable()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+    HsWidgetHostVisual *widgetVisual(widget->visual());
 
     mUnavailableWidgets.removeOne(widget);
     mWidgets.append(widget);
 
-    widget->setParentItem(this);
+    widgetVisual->setParentItem(visual());
     widget->startWidget(isActivePage());
-    widget->show();
+    widgetVisual->show();
 }
 /*!
     Update internal bookkeeping and hide widget
@@ -566,6 +625,7 @@ void HsPage::onWidgetAvailable()
 void HsPage::onWidgetUnavailable()
 {
     HsWidgetHost *widget = qobject_cast<HsWidgetHost *>(sender());
+    HsWidgetHostVisual *widgetVisual(widget->visual());
 
     if (mWidgets.contains(widget)) {
         mWidgets.removeOne(widget);
@@ -577,8 +637,8 @@ void HsPage::onWidgetUnavailable()
 
     mUnavailableWidgets.append(widget);
 
-    widget->hide();
-    widget->setParentItem(0);
+    widgetVisual->hide();
+    widgetVisual->setParentItem(0);
 }
 
 /*!
@@ -596,41 +656,135 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
 
     HsWidgetPresentationData presentation;
     presentation.orientation = orientation;
-
+    
+    HsWidgetHostVisual *visual(0);
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+    QList<HsWidgetHost*> newWidgets;
+#endif //HSWIDGETORGANIZER_ALGORITHM    
     foreach (HsWidgetHost *widget, mWidgets) {
+        visual = widget->visual();
         if (!widget->getPresentation(presentation)) {
+#ifndef HSWIDGETORGANIZER_ALGORITHM
             QList<QRectF> geometries = converter->convert(
-                from, QList<QRectF>() << widget->geometry(), to);
-            widget->setGeometry(geometries.first());
+                from, QList<QRectF>() << visual->geometry(), to);
+            visual->setGeometry(geometries.first());
             widget->savePresentation();
+#else //HSWIDGETORGANIZER_ALGORITHM
+            newWidgets << widget;
+#endif //HSWIDGETORGANIZER_ALGORITHM
         } else {
             QRectF adjustWidgetPosition;
-            adjustWidgetPosition = widget->geometry();
+            adjustWidgetPosition = visual->geometry();
             adjustWidgetPosition.moveTopLeft(presentation.pos());
-            widget->setPos(adjustedWidgetPosition(adjustWidgetPosition));
-            widget->setZValue(presentation.zValue);
+            visual->setPos(adjustedWidgetPosition(adjustWidgetPosition));
+            visual->setZValue(presentation.zValue);
             widget->savePresentation(); //Needed to follow pageMargin dynamic change
         }
     }
+    
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+    // sort new widgets in order
+    if (newWidgets.count()) {
+        // TODO: read from configuration? or just use height for portrait and width for landscape (currently only height is used)
+        sortOrder order(height);
+        if(orientation == Qt::Horizontal) {
+            order = width;
+        } 
+        sortWidgets(order, newWidgets);
+        // get rects for new widgets
+        QList<QRectF> newRects;
+        foreach (HsWidgetHost *newWidget, newWidgets) {
+            newRects << QRectF(QPointF(), newWidget->visual()->preferredSize());
+        }
+        
+        // get page rect
+        QRectF pageRect = contentGeometry();
+
+        // scan existing widgets rects
+        QList<QRectF> existingRects;
+        foreach (HsWidgetHost *widget, mWidgets) {
+            if (!newWidgets.contains(widget)) {
+                existingRects << QRectF(widget->visual()->pos(), widget->visual()->preferredSize());
+            }
+        }
+         
+        // calculate new widget positions with "stuck 'em all"-algorithm
+        HsWidgetPositioningOnWidgetAdd *algorithm =
+            HsWidgetPositioningOnWidgetAdd::instance();
+        QList<QRectF> calculatedRects =
+            algorithm->convert(pageRect, existingRects, newRects, QPointF());
+
+        for ( int i=0; i<newWidgets.count(); i++) {            
+            int j = mWidgets.indexOf(newWidgets.at(i));
+            mWidgets.at(j)->visual()->setGeometry(calculatedRects.at(i));
+            mWidgets.at(j)->savePresentation();            
+        }               
+    }    
+#endif //HSWIDGETORGANIZER_ALGORITHM
+    
 }
 
 void HsPage::onPageMarginChanged(const QString &value)
 {
     if (value == "pageMargin") {
         mPageMargin = HSCONFIGURATION_GET(pageMargin);
-
+        HsWidgetHostVisual *visual(0);
         if (!mWidgets.isEmpty()) {
             foreach (HsWidgetHost *widget, mWidgets) {
-                widget->setPos(adjustedWidgetPosition(widget->geometry()));
+                visual = widget->visual();
+                visual->setPos(adjustedWidgetPosition(visual->geometry()));
                 widget->savePresentation();
             }
         }
 
         if (!mNewWidgets.isEmpty()) {
             foreach (HsWidgetHost *widget, mNewWidgets) {
-                widget->setPos(adjustedWidgetPosition(widget->geometry()));
+                visual = widget->visual();
+                visual->setPos(adjustedWidgetPosition(visual->geometry()));
                 widget->savePresentation();
             }
         }
     }
 }
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+// TODO: sorting should be done in algorithm class, make widget<->rect mapping here and move sortWidgets function to algorithm side
+/*!
+    Sorts widgets in height/width order
+*/
+void HsPage::sortWidgets(sortOrder order, QList<HsWidgetHost*> &widgets)
+{
+    QList<HsWidgetHost*> tmpWidgets;
+
+    for ( int i = 0; i < widgets.count(); i++) {
+        int index = 0;
+        // add first widget to sorted list
+        if (i == 0) {
+            tmpWidgets << widgets.at(i);
+        } else {
+            // go through existing widgets in the sorted list
+            for ( int j = 0; j < tmpWidgets.count(); j++) {
+                // sort widgets in height order
+                if (order == height) {
+                    /* if widgets heigth is smaller on already
+                       existing ones in the list -> increment index
+                    */
+                    if (widgets.at(i)->visual()->preferredHeight() <= tmpWidgets.at(j)->visual()->preferredHeight()) {
+                        index++;
+                    }
+                // sort widgets in width order
+                } else {
+                    /* if widgets width is smaller on already
+                       existing ones in the sorted list -> increment index
+                    */
+                    if (widgets.at(i)->visual()->preferredWidth() <= tmpWidgets.at(j)->visual()->preferredWidth()) {
+                        index++;
+                    }
+                }
+            }
+            // add widget to its correct index in sorted list
+            tmpWidgets.insert(index, widgets.at(i));
+        }
+    }
+    widgets = tmpWidgets;    
+}
+#endif //HSWIDGETORGANIZER_ALGORITHM

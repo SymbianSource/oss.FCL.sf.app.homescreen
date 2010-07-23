@@ -19,6 +19,7 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hsdatabase.h  \
            ./inc/hsdomainmodel_global.h  \
            ./inc/hspage.h \
+           ./inc/hspagevisual.h \
            ./inc/hspagenewwidgetlayout.h \
            ./inc/hsgui.h  \
            ./inc/hsscene.h \
@@ -27,18 +28,24 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hswallpaper.h \
            ./inc/hswallpaperloader.h \
            ./inc/hswallpaperloaderthread.h \
+           ./inc/hshostedwidgetfactory.h \
            ./inc/hswidgethost.h \
+           ./inc/hswidgethostvisual.h \
            ./inc/hswidgetcomponentregistry.h \
            ./inc/hswidgetcomponent.h \
            ./inc/hswidgetcomponentdescriptor.h \
            ./inc/hsbackuprestoreobserver.h \
            ./inc/hsconfiguration.h \
            ./inc/hswidgettoucharea.h \
-           ./inc/hspagetoucharea.h
+           ./inc/hspagetoucharea.h \
+           ./inc/hsidlewidget.h \
+           ./inc/hsdocumentloader.h
+        
 
 SOURCES += ./src/hscontentservice.cpp \
            ./src/hsdatabase.cpp \
            ./src/hspage.cpp \
+           ./src/hspagevisual.cpp \
            ./src/hspagenewwidgetlayout.cpp \
            ./src/hsgui.cpp \
            ./src/hsscene.cpp \
@@ -46,14 +53,18 @@ SOURCES += ./src/hscontentservice.cpp \
            ./src/hswallpaper.cpp \
            ./src/hswallpaperloader.cpp \
            ./src/hswallpaperloaderthread.cpp \
+           ./src/hshostedwidgetfactory.cpp \
            ./src/hswidgethost.cpp \
+           ./src/hswidgethostvisual.cpp \
            ./src/hswidgetcomponentregistry.cpp \
            ./src/hswidgetcomponent.cpp \
            ./src/hswidgetcomponentdescriptor.cpp \
            ./src/hsbackuprestoreobserver.cpp \
            ./src/hsconfiguration.cpp \
            ./src/hswidgettoucharea.cpp \
-           ./src/hspagetoucharea.cpp
+           ./src/hspagetoucharea.cpp \
+           ./src/hsidlewidget.cpp \
+           ./src/hsdocumentloader.cpp
 
 symbian: {
 HEADERS += ./inc/hsbackuprestoreobserver_p.h \

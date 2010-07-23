@@ -40,11 +40,16 @@ INCLUDEPATH += . \
                ../hsutils/inc \
                ../hsapplication/inc
 
+RESOURCES += hsdomainmodel.qrc
+
 symbian: {
     TARGET.UID3 = 0x20022F38
     LIBS += -lxqsettingsmanager -labclient
 }
-win32:{
+!symbian:{
     QT += network 
 }
+
+new_short:DEFINES += HSWIDGETORGANIZER_ALGORITHM
+
 include(hsdomainmodel.pri)

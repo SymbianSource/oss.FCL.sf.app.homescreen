@@ -29,10 +29,10 @@
     \brief Model for handling indicator data.
  */
 
-// TODO: what is the type string of silent indicator? couldn't
+// TODO: what is the final type string of silent indicator? couldn't
 // find it in wk22 -> workaround solution: assume that it contains
-// substring "silent"
-const char *gSilentIndicatorTypeString = "silent";
+// substring "silence" like in their demo app.
+const char *gSilentIndicatorTypeString = "silence";
 const char *gOfflineIndicatorTypeString = "offline";
 
 
@@ -80,6 +80,7 @@ void SnsrIndicatorModel::handleActiveIndicators(
         if (activatedIndicator 
             && showIndicatorInScreensaver(*activatedIndicator,indicatorInfo)) {
             addIndicator(indicatorInfo);
+            connectToIndicatorsUpdateSignal(*activatedIndicator);
             addedAny = true;
         }
     }
@@ -89,12 +90,6 @@ void SnsrIndicatorModel::handleActiveIndicators(
     if (addedAny) {
         emitChangeSignal();
     }
-    
-    // TODO: no we need to listen to update signals?
-    // used for changing icon?
-    /* //connect indicator's update signal
-     QObject::connect(activatedIndicator, SIGNAL(dataChanged()),
-                      this, SLOT(indicatorUpdated()));*/
 }
 
 /*!
@@ -107,8 +102,10 @@ void SnsrIndicatorModel::handleActivatedIndicator(
     SnsrIndicatorInfo indicatorInfo;
     if (activatedIndicator
         && showIndicatorInScreensaver(*activatedIndicator,indicatorInfo)) {
-        addIndicator(indicatorInfo);
-        emitChangeSignal();
+        if (addIndicator(indicatorInfo)) {
+            connectToIndicatorsUpdateSignal(*activatedIndicator);
+            emitChangeSignal();
+        }
     }
 }
 
@@ -129,6 +126,35 @@ void SnsrIndicatorModel::handleDeactivatedIndicator(
             emitChangeSignal();
         }
     }
+}
+
+/*!
+    Called when some universal indicator updates its data by
+    emitting dataChanged signal. 
+    We listen to this signal because at least the silent indicator plugin demo 
+    uses this method to inform the clients when it gets deactivated/activated 
+    once it has been activated once by setting its icon path to empty/valid string.
+    Don't know if this is going to be the final solution as it's unconventional (?) 
+    but let's be prepared also to this kind of approach. 
+ */
+void SnsrIndicatorModel::handleUpdatedIndicator()
+{
+    HbIndicatorInterface* indicator =
+        qobject_cast<HbIndicatorInterface*>(sender());
+    if (!indicator) {
+        return;
+    }
+    
+    // If indicator's icon path was set to empty string, then treat it
+    // like it were deactivated. And if not empty, then it's active again.
+    if (indicator->indicatorData(
+            HbIndicatorInterface::MonoDecorationNameRole).toString().isEmpty()) {
+        handleDeactivatedIndicator(indicator);
+    }
+    else {
+        handleActivatedIndicator(indicator);
+    }
+    
 }
 
 /*!
@@ -175,24 +201,50 @@ void SnsrIndicatorModel::offlineValueChanged( const XQSettingsKey &key, const QV
     Add the indicator into this model. Handle here the order in which
     indicators are shown in screensaver: notification indicators should be
     shown in the same order as shown in statusbar, that is in reversed
-    chronological order. Silent indicator should always be the right-most.
+    chronological order. Silent indicator should always be the right-most one.
+    /retval true if indicator was added (not found already in the listings)
  */
-void SnsrIndicatorModel::addIndicator(const SnsrIndicatorInfo &indicatorInfo)
+bool SnsrIndicatorModel::addIndicator(const SnsrIndicatorInfo &indicatorInfo)
 {
-    // info from pattern library - todo: remove
-    //Indicators are displayed inside of each group in reversed chronological order 
-    // according to the arrival time; the indicator that appeared most recently is placed on top of the group.
-
-    //Status bar indicators follow the same order; the most recent notification indicator (4) is on the left 
-    // and similarly the most recent settings indicator (5) is on the right.
-
-    // use prepend to keep the list in reversed chronological order
-    if (indicatorInfo.category == HbIndicatorInterface::NotificationCategory) {
+    // To be on the safe side, check that the indicator doesn't already
+    // exists in the active indicator listings.
+    bool added(false);
+    
+    // Use prepend to keep the list in reversed chronological order
+    if (indicatorInfo.category == HbIndicatorInterface::NotificationCategory
+        && !isIndicatorAlreadyAdded(indicatorInfo)) {
         mNotificationIndicators.prepend(indicatorInfo);
+        added = true;
     }
-    else {
+    else if (indicatorInfo.category == HbIndicatorInterface::SettingCategory
+             && !isIndicatorAlreadyAdded(indicatorInfo)) {
         mSettingIndicators.append(indicatorInfo);
+        added = true;
     }
+    
+    return added;
+}
+
+/*!
+    Check whether the indicator is already added in the active 
+    indicator listing.
+    /retval true if indicator is already added; false if not.
+ */
+bool SnsrIndicatorModel::isIndicatorAlreadyAdded(const SnsrIndicatorInfo &indicatorInfo) const
+{
+    bool alreadyExits(false);
+    
+    const QList<SnsrIndicatorInfo> &indicatorList = 
+        indicatorInfo.category == HbIndicatorInterface::NotificationCategory 
+        ? mNotificationIndicators : mSettingIndicators;
+    
+    for (int i = 0; i < indicatorList.size(); ++i) {
+        if (indicatorList.at(i).type == indicatorInfo.type) {
+            alreadyExits = true;
+            break;
+        }
+    }
+    return alreadyExits;
 }
 
 /*!
@@ -254,7 +306,7 @@ bool SnsrIndicatorModel::showIndicatorInScreensaver(
              && !iconPath.isEmpty()
              // TODO: what is the type string of silent indicator? couldn't
              // find it in wk22 -> workaround solution: assume that it contains
-             // substring "silent"
+             // substring "silence" like in their demo app.
              // && type == gSilentIndicatorTypeString ) { 
              && typeString.contains(gSilentIndicatorTypeString, Qt::CaseInsensitive)) {  
         show = true;
@@ -269,6 +321,27 @@ bool SnsrIndicatorModel::showIndicatorInScreensaver(
     indicatorInfo.category = category;
         
     return show;
+}
+
+/*!
+   Start listening to indicator's dataChanged signals.
+   /parameter indicator whose dataChanged signal we want to listen
+ */
+void SnsrIndicatorModel::connectToIndicatorsUpdateSignal(const HbIndicatorInterface &indicatorInterface)
+{
+    // Connect to silent indicator's dataChanged signal as it seems to 
+    // use unconventional method (demo at least) to inform when
+    // it's get deactivated/activated: dataChanged signal is emitted and
+    // icon path is set to empty string/valid string.
+    // It's assumed that we don't need to listen to other indicators
+    // as we are not interested e.g. when primary/secondary texts change etc.
+    
+    // NOTE: do NOT disconnect the indicator signal anywhere explicitly here
+    // or we won't get activation/deactivation messages.
+    if (indicatorInterface.indicatorType().contains(gSilentIndicatorTypeString, Qt::CaseInsensitive)) {
+        QObject::connect( &indicatorInterface, SIGNAL(dataChanged()),
+                          this, SLOT(handleUpdatedIndicator()));
+    }
 }
 
 /*!

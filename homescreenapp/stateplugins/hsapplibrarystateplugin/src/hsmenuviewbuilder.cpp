@@ -21,7 +21,6 @@
 #include <HbAction>
 #include <HbGroupBox>
 #include <HbListView>
-#include <HbLineEdit>
 #include <HbSearchPanel>
 #include <HbPushButton>
 #include <HbToolBar>
@@ -35,6 +34,27 @@
 #include "hsmenuviewbuilder.h"
 #include "hsmenustates_global.h"
 
+static const char* DOCUMENT_BASE_NAME_MAP
+        [InvalidStateContext][InvalidOperationalContext] =
+    /*HsItemViewContext,    HsSearchContext,    HsButtonContext,    HsEmptyLabelContext*/
+{
+/*HsAllAppsContext*/        {"listview", "searchlistview", "listview", "listview"},
+/*HsAllCollectionsContext*/ {"listview", "searchlistview", "listview", "listview"},
+/*HsInstalledAppsContext*/  {"labeledlistview", "labeledlistview",
+                                "labeledlistview", "emptylabeledview"},
+/*HsCollectionContext*/     {"labeledlistview", "searchlabeledlistview",
+                                "addcontentlabeledview", "emptylabeledview"}
+};
+
+static const QString DOCUMENT_NAME_PREFIX(QLatin1String(":/xml/"));
+static const QString DOCUMENT_NAME_EXT(QLatin1String(".docml"));
+static const QString COMMON_OBJECTS_DOCUMENT_BASE_NAME(
+        QLatin1String("common_objects"));
+static const QString VIEW_NAME(QLatin1String("view"));
+static const QString LIST_VIEW_NAME(QLatin1String("listView"));
+static const QString VIEW_LABEL_NAME(QLatin1String("label"));
+static const QString SEARCH_PANEL_NAME(QLatin1String("searchPanel"));
+static const QString ADD_CONTENT_BUTTON_NAME(QLatin1String("addContentButton"));
 
 /*!
     \class HsMenuViewBuilder
@@ -48,160 +68,144 @@
 */
 
 
-/*!
-  Cleanup search text on showing search panel. Ensures vkb host instance
-  is appears on show and disappears on hide search panel.
-  
-  \param visible When true search panel is to show up,
-  hide otherwise.
- */
-void HsMenuViewBuilder::searchPanelVisibilityChange(bool visible)
-{
-    if (visible) {
 
-        HbLineEdit *const lineEdit(searchPanelLineEdit());
-
-        lineEdit->setText("");
-        lineEdit->setFocus();
-        lineEdit->setInputMethodHints(Qt::ImhNoPredictiveText | 
-            Qt::ImhNoAutoUppercase);
-    } 
-
-}
 
 /*!
- \return pointer to the view resulting from last \a build call or NULL if 
+ \return Pointer to the view resulting from last \a build call or NULL if 
  the \a build has not yet been called.
  Memory ownership is not changed.
  */
-HbView *HsMenuViewBuilder::currentView() const
+HbView *HsMenuViewBuilder::currentView()
 {
-    const QString VIEW_NAME =
-        mViewContextToStringMap[mViewContext]
-        + "View";
-
     HbView *const view =
-        qobject_cast<HbView *>(mDocumentLoader.findWidget(VIEW_NAME));
+        qobject_cast<HbView *>(currentLoader()->findWidget(VIEW_NAME));
 
-    if (view != NULL && mViewContext != HsInstalledAppsContext) {
+    if (view != NULL && mStateContext != HsInstalledAppsContext) {
         view->setToolBar(mToolBar);
     }
     return view;
 }
 
 /*!
- \return pointer to list view resulting from last \a build call or NULL if 
+ \return Pointer to list view resulting from last \a build call or NULL if 
  the \a build has not yet been called.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbListView *HsMenuViewBuilder::currentListView() const
+HbListView *HsMenuViewBuilder::currentListView()
 {
-    QString LIST_VIEW_NAME = mViewContextToStringMap[mViewContext];
-    if (mOperationalContext == HsSearchContext) {
-        LIST_VIEW_NAME.append(mOperationalContextToStringMap[mOperationalContext]);
-    }
-    LIST_VIEW_NAME.append("ListView");
+    HbListView *const listView =
+        qobject_cast<HbListView *>(
+                currentLoader()->findWidget(LIST_VIEW_NAME));
 
-    return qobject_cast<HbListView *>(
-               mDocumentLoader.findWidget(LIST_VIEW_NAME));
+    return listView;
 }
 
 /*!
- \return pointer to the view label resulting from last \a build call. It is 
+ \return Pointer to the view label resulting from last \a build call. It is 
  guaranteed to be not NULL if the \a build was called for the context
  related to view including label.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbGroupBox *HsMenuViewBuilder::currentViewLabel() const
+HbGroupBox *HsMenuViewBuilder::currentViewLabel()
 {
-    const QString LABEL_NAME = mViewContextToStringMap[mViewContext]
-                               + "Label";
+    HbGroupBox *viewLabel =
+            qobject_cast<HbGroupBox *>(
+                    currentLoader()->findWidget(VIEW_LABEL_NAME));
 
-    return qobject_cast<HbGroupBox *>(
-               mDocumentLoader.findWidget(LABEL_NAME));
+    return viewLabel;
 }
 
 /*!
- \return pointer to search panel.
+ \return Pointer to the search panel resulting from last \a build call. It is
+ guaranteed to be not NULL if the \a build was called for the context
+ related to view including label.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbSearchPanel *HsMenuViewBuilder::currentSearchPanel() const
+HbSearchPanel *HsMenuViewBuilder::currentSearchPanel()
 {
-    return qobject_cast<HbSearchPanel *>(mDocumentLoader.findWidget(
-            SEARCH_PANEL_NAME));
+    HbSearchPanel *searchPanel =
+            qobject_cast<HbSearchPanel *>(currentLoader()->findWidget(
+                        SEARCH_PANEL_NAME));
+    return searchPanel;
+
 }
 
 /*!
- \return pointer to a button
+ \return Pointer to the 'Add content' button resulting from last
+ \a build call. It is
+ guaranteed to be not NULL if the \a build was called for the context
+ related to view including label.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbPushButton *HsMenuViewBuilder::collectionButton() const
+HbPushButton *HsMenuViewBuilder::currentAddContentButton()
 {
-    return qobject_cast<HbPushButton *>(mDocumentLoader.findWidget(
-            BUTTON_NAME));
+    HbPushButton *pushButton =
+            qobject_cast<HbPushButton *>(currentLoader()->findWidget(
+                        ADD_CONTENT_BUTTON_NAME));
+    return pushButton;
 }
 
 /*!
- \return pointer to All Applications Action. Guaranteed to be not NULL.
+ \return Pointer to All Applications Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
 HbAction *HsMenuViewBuilder::allAppsAction() const
 {
-    return qobject_cast<HbAction *>(mDocumentLoader.findObject(
+    return qobject_cast<HbAction *>(mCommonObjectsLoader->findObject(
                                         ALL_APPS_ACTION_NAME));
 }
 
 /*!
- \return pointer to All Collections Action. Guaranteed to be not NULL.
+ \return Pointer to All Collections Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
 HbAction *HsMenuViewBuilder::allCollectionsAction() const
 {
-    return qobject_cast<HbAction *>(mDocumentLoader.findObject(
+    return qobject_cast<HbAction *>(mCommonObjectsLoader->findObject(
                                         ALL_COLLECTIONS_ACTION_NAME));
 }
 
 /*!
- \return pointer to Search Action. Guaranteed to be not NULL.
+ \return Pointer to Search Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
 HbAction *HsMenuViewBuilder::searchAction() const
 {
-    return qobject_cast<HbAction *>(mDocumentLoader.findObject(
+    return qobject_cast<HbAction *>(mCommonObjectsLoader->findObject(
                                         SEARCH_ACTION_NAME));
 }
 
 /*!
- \return pointer to Ovi Store Action. Guaranteed to be not NULL.
+ \return Pointer to Ovi Store Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
 HbAction *HsMenuViewBuilder::oviStoreAction() const
 {
-    return qobject_cast<HbAction *>(mDocumentLoader.findObject(
+    return qobject_cast<HbAction *>(mCommonObjectsLoader->findObject(
                                         OVI_STORE_ACTION_NAME));
 }
 
 /*!
- \return pointer to Operator Action. Guaranteed to be not NULL.
+ \return Pointer to Operator Action. Guaranteed to be not NULL.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
 HbAction *HsMenuViewBuilder::operatorAction() const
 {
-    return qobject_cast<HbAction *>(mDocumentLoader.findObject(
+    return qobject_cast<HbAction *>(mCommonObjectsLoader->findObject(
                                         OPERATOR_ACTION_NAME));
 }
 
 /*!
- \return pointer to the main view toolbar.
+ \return Pointer to the main view toolbar.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
@@ -211,7 +215,7 @@ HbToolBar *HsMenuViewBuilder::toolBar() const
 }
 
 /*!
- \return pointer to the toolbar extension.
+ \return Pointer to the toolbar extension.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
@@ -221,7 +225,7 @@ HbToolBarExtension *HsMenuViewBuilder::toolBarExtension() const
 }
 
 /*!
- \return action group for \a allAppsState and \a allCollectionsState action.
+ \return Action group for \a allAppsState and \a allCollectionsState action.
  */
 QActionGroup *HsMenuViewBuilder::toolBarActionGroup() const
 {
@@ -230,18 +234,22 @@ QActionGroup *HsMenuViewBuilder::toolBarActionGroup() const
 
 /*!
  Reads docml configuration corresponding to current context.
+ \return Shared pointer to loader serving current context.
  */
-bool HsMenuViewBuilder::build()
+QSharedPointer<HbDocumentLoader> HsMenuViewBuilder::currentLoader()
 {
-    return readContextConfiguration(mViewContext, mOperationalContext);
+    if (!mLoaderMap.contains(context())) {
+        QSharedPointer<HbDocumentLoader> loader =
+                readContextConfiguration();
+        mLoaderMap.insert(context(), loader);
+    }
+
+    return mLoaderMap[context()];
 }
 
 
-
 /*!
- Constructor.
- Makes object be initialized with with hidden but existing
- search panel and view label.
+  Loads non-context sensitive objects.
  */
 HsMenuViewBuilder::HsMenuViewBuilder():
     DOCUMENT_FILE_NAME(":/xml/applibrary.docml"),
@@ -255,17 +263,10 @@ HsMenuViewBuilder::HsMenuViewBuilder():
     TOOL_BAR_NAME("toolBar"),
     mToolBar(new HbToolBar),
     mToolBarExtension(new HbToolBarExtension),
-    mViewContext(HsAllAppsContext),
+    mStateContext(HsAllAppsContext),
     mOperationalContext(HsItemViewContext)
 {
-    init();
-
-    // parse common section and the one specified by view options
-    const bool result = parseSection();
-
-    Q_ASSERT_X(result,
-               "HsMenuViewBuilder::HsMenuViewBuilder()",
-               "construction failed");
+    mCommonObjectsLoader = parseDocument(COMMON_OBJECTS_DOCUMENT_BASE_NAME);
 
     mToolBar->addAction(allAppsAction());
     mToolBar->addAction(allCollectionsAction());
@@ -278,8 +279,7 @@ HsMenuViewBuilder::HsMenuViewBuilder():
 }
 
 /*!
- Destructor.
- Deletes widgets owned by the Menu View Builder.
+ Deletes loaded objects.
  */
 HsMenuViewBuilder::~HsMenuViewBuilder()
 {
@@ -291,81 +291,43 @@ HsMenuViewBuilder::~HsMenuViewBuilder()
 /*!
  Parses requested docml file section and reflects its contents in the
  object state.
- \param sectionName Name of the section to parse.
- \retval \a true on success, \a false otherwise.
+ \param documentName Identifies document to parse.
+ \return Document loader instance containing parsed
+    objects for requested \documentName.
  */
-bool HsMenuViewBuilder::parseSection(const QString &sectionName)
+QSharedPointer<HbDocumentLoader> HsMenuViewBuilder::parseDocument(
+        const QString &documentBaseName)
 {
-    HSMENUTEST_FUNC_ENTRY("HsMenuViewBuilder::parseSection");
+    HSMENUTEST_FUNC_ENTRY("HsMenuViewBuilder::parseDocument");
 
     bool loadStatusOk = false;
+
+    QSharedPointer<HbDocumentLoader> loader(new HbDocumentLoader());
+
+    const QString documentFullName = DOCUMENT_NAME_PREFIX +
+                                     documentBaseName +
+                                     DOCUMENT_NAME_EXT;
     const QObjectList loadedObjects =
-        mDocumentLoader.load(DOCUMENT_FILE_NAME,
-                             sectionName,
-                             &loadStatusOk); 
+            loader->load(documentFullName, &loadStatusOk);
+
     mLoadedObjects |= loadedObjects.toSet();
 
     Q_ASSERT_X(loadStatusOk,
-               DOCUMENT_FILE_NAME.toLatin1().data(),
+               documentFullName.toLatin1().data(),
                "Error while loading docml file.");
 
-    HSMENUTEST_FUNC_EXIT("HsMenuViewBuilder::parseSection");
+    HSMENUTEST_FUNC_EXIT("HsMenuViewBuilder::parseDocument");
 
-    return loadStatusOk;
-}
-
-
-/*!
- \return Line edit of the searchPanel on success, NULL otherwise.
- */
-HbLineEdit *HsMenuViewBuilder::searchPanelLineEdit() const
-{
-    HSMENUTEST_FUNC_ENTRY("HsMenuViewBuilder::searchPanelLineEdit");
-
-    HbLineEdit *result(0);
-
-    foreach(QGraphicsItem *obj, currentSearchPanel()->childItems()) {
-
-        QGraphicsWidget *const widget = static_cast<QGraphicsWidget *>(obj);
-
-        if (widget != NULL) {
-
-            HbLineEdit *const lineEdit = qobject_cast<HbLineEdit *>(widget);
-
-            if (lineEdit != NULL) {
-                result = lineEdit;
-                break;
-            }
-        }
-    }
-    HSMENUTEST_FUNC_EXIT("HsMenuViewBuilder::searchPanelLineEdit");
-
-    return result;
-}
-
-/*!
-    Builds mapping between context and docml name buidling blocks.
- */
-void HsMenuViewBuilder::init()
-{
-    mViewContextToStringMap[HsAllAppsContext] = "allApps";
-    mViewContextToStringMap[HsAllCollectionsContext] = "allCollections";
-    mViewContextToStringMap[HsInstalledAppsContext] = "installedApps";
-    mViewContextToStringMap[HsCollectionContext] = "collection";
-    mOperationalContextToStringMap[HsItemViewContext] = "";
-    mOperationalContextToStringMap[HsSearchContext] = "Search";
-    mOperationalContextToStringMap[HsButtonContext] = "Button";
-    mOperationalContextToStringMap[HsEmptyLabelContext] = "EmptyLabel";
-
+    return loader;
 }
 
 /*!
  Sets view context. Not reflected in widgets returned by the builder
  until \a build is not run.
  */
-void HsMenuViewBuilder::setViewContext(HsViewContext viewContext)
+void HsMenuViewBuilder::setStateContext(HsStateContext stateContext)
 {
-    mViewContext = viewContext;
+    mStateContext = stateContext;
 }
 
 /*!
@@ -381,20 +343,23 @@ void HsMenuViewBuilder::setOperationalContext(
 /*!
  Reads configuration for requested context and ensures search panel and corresponding
  vkb host are managed properly.
+ \return Document loader with objects for current context.
  */
-bool HsMenuViewBuilder::readContextConfiguration(HsViewContext viewContext,
-        HsOperationalContext operationalContext)
+QSharedPointer<HbDocumentLoader> HsMenuViewBuilder::readContextConfiguration()
 {
-    const QString sectionName = mViewContextToStringMap[viewContext]
-        + mOperationalContextToStringMap[operationalContext] 
-        + "ViewDefinition";
+    const QLatin1String documentName(
+            DOCUMENT_BASE_NAME_MAP[mStateContext][mOperationalContext]);
 
-    const bool result = parseSection(sectionName);
+    QSharedPointer<HbDocumentLoader> loader =
+            parseDocument(QString(documentName));
 
-    if (currentSearchPanel()) {
-        searchPanelVisibilityChange(mOperationalContext == HsSearchContext);
-    }
-
-    return result;
+    return loader;
 }
 
+/*!
+ \return Current context.
+ */
+HsMenuViewBuilder::Context HsMenuViewBuilder::context() const
+{
+    return Context(mStateContext, mOperationalContext);
+}

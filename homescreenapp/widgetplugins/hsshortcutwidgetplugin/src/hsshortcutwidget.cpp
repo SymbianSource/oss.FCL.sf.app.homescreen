@@ -22,8 +22,8 @@
 #include <HbFrameDrawer>
 #include <HbIconItem>
 #include <HbTextItem>
-#include <HbTouchArea>
 #include <HbInstantFeedback>
+#include <HbTapGesture>
 
 #include "hsshortcutwidget.h"
 #include "hsshortcutservice.h"
@@ -47,9 +47,11 @@
 */
 HsShortcutWidget::HsShortcutWidget(QGraphicsItem *parent, Qt::WindowFlags flags)
   : HbWidget(parent, flags),
-    mBackground(0), mIcon(0), mText(0), mTouchArea(0),
+    mBackground(0), mIcon(0), mText(0),
     mCaEntryId(-1), mCaEntryRole(ItemEntryRole)
 {
+    grabGesture(Qt::TapGesture);
+
     HbStyleLoader::registerFilePath(":/hsshortcutwidget.widgetml");
     HbStyleLoader::registerFilePath(":/hsshortcutwidget.css");
 
@@ -120,33 +122,6 @@ void HsShortcutWidget::setText(const QString& textItem)
 }
 
 /*!
-    Filters touch area events.
-*/
-bool HsShortcutWidget::eventFilter(QObject *watched, QEvent *event)
-{
-    Q_UNUSED(watched)
-
-    switch (event->type()) {
-        case QEvent::GraphicsSceneMousePress:
-            handleMousePressEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            return true;
-        case QEvent::GraphicsSceneMouseMove:
-            handleMouseMoveEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            return true;
-        case QEvent::GraphicsSceneMouseRelease:
-            handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            return true;
-        case QEvent::UngrabMouse:
-            setBackgroundToNormal();
-            return true;
-        default:
-            break;
-    }
-
-    return false;
-}
-
-/*!
     Initializes this widget.
 */
 void HsShortcutWidget::onInitialize()
@@ -204,37 +179,42 @@ void HsShortcutWidget::onHide()
 }
 
 /*!
-    \internal
+    \internal  
 */
-void HsShortcutWidget::handleMousePressEvent(QGraphicsSceneMouseEvent *event)
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsShortcutWidget::gestureEvent(QGestureEvent *event)
 {
-    Q_UNUSED(event)
-    setBackgroundToPressed();
+    HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture));
+    if (gesture) {
+        switch (gesture->state()) {
+            case Qt::GestureStarted:
+                setBackgroundToPressed();
+                break;            
+            case Qt::GestureCanceled:
+                setBackgroundToNormal();
+                break;
+            case Qt::GestureFinished:
+                setBackgroundToNormal();
+                if (gesture->tapStyleHint() == HbTapGesture::Tap) {
+                    launch();
+                }
+                break;
+            default:
+                break;
+        }
+    }
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
     \internal
 */
-void HsShortcutWidget::handleMouseMoveEvent(QGraphicsSceneMouseEvent *event)
+void HsShortcutWidget::launch()
 {
-    if (contains(event->pos())) {
-        setBackgroundToPressed();
-    } else {
-        setBackgroundToNormal();
-    }
-}
-
-/*!
-    \internal
-*/
-void HsShortcutWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    setBackgroundToNormal();
-
-    if (!contains(event->pos())) {
-        return;
-    }
-
     HbInstantFeedback::play(HSCONFIGURATION_GET(shortcutWidgetTapFeedbackEffect));
     
     if (mCaEntryRole == ItemEntryRole) {
@@ -267,12 +247,6 @@ void HsShortcutWidget::createPrimitives()
     if (HSCONFIGURATION_GET(isShortcutLabelVisible) && !mText ) {
         mText = new HbTextItem(this);
         HbStyle::setItemName(mText, QLatin1String("text"));
-        }
-    // Touch Area
-    if (!mTouchArea) {
-        mTouchArea = new HbTouchArea(this);
-        mTouchArea->installEventFilter(this);
-        HbStyle::setItemName(mTouchArea, QLatin1String("toucharea"));
     }
 }
 
@@ -350,6 +324,3 @@ void HsShortcutWidget::onEntryChanged(const CaEntry &caEntry, ChangeType changeT
         emit finished();
     }
 }
-
-
-

@@ -14,6 +14,7 @@
  * Description: Menu All Collections state.
  *
  */
+#include <QPointF>
 #include <QScopedPointer>
 #include <QStateMachine>
 #include <HbView>
@@ -24,12 +25,12 @@
 
 #include <cadefs.h>
 
+#include "hsmenumodewrapper.h"
 #include "hsmenueventfactory.h"
 #include "hsmenumodewrapper.h"
 #include "hsmenuitemmodel.h"
 #include "hsallcollectionsstate.h"
 #include "hsaddappstocollectionstate.h"
-//#include "hsmenumodetransition.h"
 #include "hsmainwindow.h"
 
 /*!
@@ -107,6 +108,11 @@ void HsAllCollectionsState::setMenuOptions()
 void HsAllCollectionsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
 {
     Q_UNUSED(item)
+
+    HbAction *openAction = mContextMenu->addAction(hbTrId(
+        "txt_common_menu_open"));
+    openAction->setData(OpenContextAction);
+
     // create context menu
     HbAction *addShortcutAction = mContextMenu->addAction(hbTrId(
                                       "txt_applib_menu_add_to_home_screen"));
@@ -200,7 +206,7 @@ void HsAllCollectionsState::addLongPressed(HbAbstractViewItem *item,
  */
 void HsAllCollectionsState::contextMenuAction(HbAction *action)
 {
-    HsContextAction command = 
+    HsContextAction command =
         static_cast<HsContextAction>(action->data().toInt());
 
     const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
@@ -209,7 +215,9 @@ void HsAllCollectionsState::contextMenuAction(HbAction *action)
         case AddToHomeScreenContextAction:
             machine()->postEvent(
                 HsMenuEventFactory::createAddToHomeScreenEvent(
-                    itemId, mMenuMode->getHsMenuMode(), mMenuMode->getHsToken()));
+                    itemId,
+                    mMenuMode->getHsMenuMode(),
+                    mMenuMode->getHsToken()));
             break;
         case RenameContextAction:
             machine()->postEvent(
@@ -218,12 +226,15 @@ void HsAllCollectionsState::contextMenuAction(HbAction *action)
         case DeleteContextAction:
              machine()->postEvent(
                 HsMenuEventFactory::createDeleteCollectionEvent(itemId));
-            break;      
+            break;
+        case OpenContextAction:
+            openCollection(mContextModelIndex);
+            break;
         default:
             break;
     }
-                                    
-    mMenuView->setSearchPanelVisible(false);
+
+    mMenuView->hideSearchPanel();
 }
 
 /*!

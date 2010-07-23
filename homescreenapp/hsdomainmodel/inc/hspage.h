@@ -28,20 +28,21 @@ class HsWidgetHost;
 class HsPageData;
 class HsWallpaper;
 class HsPageTouchArea;
+class HsPageVisual;
 
 HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
-class HSDOMAINMODEL_EXPORT HsPage : public HbWidget
+class HSDOMAINMODEL_EXPORT HsPage : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int pageIndex READ pageIndex)
 
 public:
-    HsPage(QGraphicsItem *parent = 0);
+    HsPage(QObject *parent = 0);
     ~HsPage();
     int databaseId() const;
     void setDatabaseId(int id);
-    void setGeometry(const QRectF &rect);
+   // void setGeometry(const QRectF &rect);
     bool load();
     HsWallpaper *wallpaper() const;
     bool addExistingWidget(HsWidgetHost *widgetHost);
@@ -62,7 +63,10 @@ public:
     QRectF contentGeometry(Qt::Orientation orientation);
     QRectF contentRect();
     QRectF contentRect(Qt::Orientation orientation);
-
+    HsPageVisual *visual() const;
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+    enum sortOrder { height, width};
+#endif //HSWIDGETORGANIZER_ALGORITHM
 public slots:
     void showWidgets();
     void hideWidgets();
@@ -72,9 +76,12 @@ public slots:
 
 private:
     Q_DISABLE_COPY(HsPage)
-    void setupTouchArea();
+  //  void setupTouchArea();
     void connectWidget(HsWidgetHost *widget);
     void disconnectWidget(HsWidgetHost *widget);
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+    void sortWidgets(sortOrder order, QList<HsWidgetHost*> &widgets);
+#endif //HSWIDGETORGANIZER_ALGORITHM
 
 private slots:
     void onWidgetFinished();
@@ -87,12 +94,13 @@ private slots:
 
 private:
     int mDatabaseId;
+    HsPageVisual *mPageVisual;
     HsWallpaper *mWallpaper;
     bool mRemovable;
     QList<HsWidgetHost*> mWidgets;
     QList<HsWidgetHost*> mNewWidgets;
     QList<HsWidgetHost*> mUnavailableWidgets;
-    HsPageTouchArea *mTouchArea;
+    //HsPageTouchArea *mTouchArea;
     QPointF mTouchPoint;    
     qreal mPageMargin;
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)

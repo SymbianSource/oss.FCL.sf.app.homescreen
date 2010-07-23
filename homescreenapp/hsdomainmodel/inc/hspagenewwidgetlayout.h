@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -35,9 +35,13 @@ public:
     void removeAt(int index);
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF &constraint = QSizeF()) const;
     void setGeometry(const QRectF &rect);
-    
     void addItem(HsWidgetHost *item);
-    
+    enum sortOrder { height, width};
+
+private:
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+    QList<HsWidgetHost*> sortWidgets(sortOrder order);
+#endif    
 private:
     QSizeF mSize;
     QList<HsWidgetHost*> mNewWidgets;
@@ -45,6 +49,5 @@ private:
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
-
 
 #endif

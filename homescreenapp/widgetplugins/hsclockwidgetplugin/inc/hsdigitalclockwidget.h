@@ -26,7 +26,7 @@ HOMESCREEN_TEST_CLASS(TestClockWidget)
 
 class HbFrameItem;
 class HbIconItem;
-class HbTouchArea;
+class QGestureEvent;
 
 class HsDigitalClockWidget : public HbWidget
 {
@@ -36,7 +36,6 @@ public:
     explicit HsDigitalClockWidget(bool useAmPm = true, QGraphicsItem *parent = 0);
     ~HsDigitalClockWidget();
 
-    bool eventFilter(QObject *watched, QEvent *event);
     QPainterPath shape() const;
 signals:
     void clockTapped();
@@ -47,12 +46,12 @@ public slots:
 
 protected:
     void resizeEvent(QGraphicsSceneResizeEvent *event);
+    void gestureEvent(QGestureEvent *event);
 
 private:
     Q_DISABLE_COPY(HsDigitalClockWidget)
     void createPrimitives();
     void updatePrimitives();
-    void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
     HbFrameItem *mBackground;
@@ -63,7 +62,6 @@ private:
     HbIconItem *mDigit5;
     HbIconItem *mDigit6;
     HbIconItem *mAmPm;
-    HbTouchArea *mTouchArea;
     bool mUseAmPm;
     QMap<QChar, QString> mDigitMap;
     

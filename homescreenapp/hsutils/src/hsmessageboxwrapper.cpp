@@ -36,7 +36,9 @@ struct HsMessageBoxWrapperImpl{
 
 */
 HsMessageBoxWrapper::HsMessageBoxWrapper(QObject *parent)
-  : QObject(parent),mImpl(new HsMessageBoxWrapperImpl)
+  : QObject(parent),
+    mImpl(new HsMessageBoxWrapperImpl),
+    mBox(0)
 {
 }
 
@@ -71,14 +73,23 @@ void HsMessageBoxWrapper::setQueryText(const QString &queryText)
 
 void HsMessageBoxWrapper::show()
 {
-    HbMessageBox *box = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-    box->setAttribute(Qt::WA_DeleteOnClose);
-    box->setHeadingWidget(new HbLabel(mImpl->mHeader));
-    box->setText(mImpl->mQueryText);
-    box->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
+    mBox = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+    mBox->setAttribute(Qt::WA_DeleteOnClose);
+    mBox->setHeadingWidget(new HbLabel(mImpl->mHeader));
+    mBox->setText(mImpl->mQueryText);
+    mBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
 
-    box->open(this,SLOT(onDialogClosed(int)));
+    mBox->open(this,SLOT(onDialogClosed(int)));
 }
+
+void HsMessageBoxWrapper::close()
+{
+    if (mBox) {
+        mBox->close();
+        mBox = NULL;
+    }
+}
+
 /*!
 
 */

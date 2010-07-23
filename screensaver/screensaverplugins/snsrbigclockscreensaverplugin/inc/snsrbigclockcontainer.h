@@ -42,22 +42,26 @@ public:
 public slots:
 
     virtual void update() = 0;
-    virtual void changeLayout(Qt::Orientation orientation) = 0;
+    virtual void changeLayout(Qt::Orientation orientation);
     
 public:
     
+    void setIndicatorModel(SnsrIndicatorModel &model);
+    virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow);
+    virtual bool isOrientationLocked();
     virtual int updateIntervalInMilliseconds() = 0;
-    void initIndicators(SnsrIndicatorModel &model);
 
 protected:
 
+    virtual void loadWidgets() = 0;
     virtual void changeEvent(QEvent * event);
     QPointF randomPosition(const QRectF &rect);
     QPointF nextRandomPosition(const QPointF &curPos, QPointF &destPos, const QRectF &containerRect);
-
+    void initIndicatorWidget();
+    void resetIndicatorConnections();
+    
 private:
 
-    void resetIndicatorConnections();
     void setBackgroundColor(); 
     void paint(
             QPainter *painter,
@@ -68,6 +72,7 @@ private:
 signals:
 
     void unlockRequested();
+    void activeAreaMoved();
 
 protected:
 

@@ -31,7 +31,7 @@ LIBS += -lhsdomainmodel \
 DEPENDPATH += ./inc \
     ./src
 INCLUDEPATH += ./inc \
-    ../../serviceproviders\hsmenuserviceprovider\inc \
+    ../../serviceproviders/hsmenuserviceprovider/inc \
     ../../hsutils/inc \
     ../../hsdomainmodel/inc
 

@@ -30,7 +30,7 @@ SUBDIRS  += hshomescreenclientplugin \
             hsapplicationlauncher
 }
 
-SUBDIRS  += ./../tsrc
+exists(./../tsrc/tsrc.pro): SUBDIRS  += ./../tsrc
 
 CONFIG += ordered
 

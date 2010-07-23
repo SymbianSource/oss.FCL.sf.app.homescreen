@@ -140,6 +140,8 @@ void HsInstallationLogState::createInstallationLogDialog()
                         newLine + newLine;
             }
         }
+
+        applicationsList.chop(2 * newLine.size());
         logList->setPlainText(applicationsList);
     
         mInstalationLogDialog->open(this, SLOT(stateExited()));

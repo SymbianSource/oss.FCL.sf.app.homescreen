@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -131,9 +131,12 @@ void SnsrOledClockWidget::updatePrimitives()
     Q_ASSERT( mClockHourHand && mClockMinuteHand /*&& mClockDateLabel */);
     
     // Calculate angles for clock hands.
+    // Use granularity of one minute so that minute hand is always exactly
+    // on some minute and not between minutes. OLED clock is not updated more
+    // frequently than once per minute and using finer granularity would cause
+    // the minute hand to be always between even minutes.
     QTime time = QTime::currentTime();
-    qreal s = 6 * time.second();
-    qreal m = 6 * (time.minute() + s/360);
+    qreal m = 6 * time.minute();
     qreal h = 30 * ((time.hour() % 12) + m/360);
     
     int x = mClockHourHand->preferredSize().width()/2;

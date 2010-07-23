@@ -53,14 +53,15 @@ HsWidgetPositioningOnWidgetMove *HsWidgetPositioningOnWidgetMove::mInstance = 0;
     Constructor.
 */
 HsSnapToLines::HsSnapToLines() :
-    mActiveRectWidth(0.0), mActiveRectHeight(0.0),
+    mActiveRectWidth(0.0), mActiveRectHeight(0.0), mMinDistancePosition(0.0),
     mHorizontalSnapPosition(0.0), mVerticalSnapPosition(0.0),
-    mHorizontalSnapFound(false),
-    mVerticalSnapFound(false),
-    mRectLieAbove(false), mLeftInRange(false), mRightInRange(false),
+    mHorizontalSnapFound(false), mVerticalSnapFound(false),
+    mRectLieAbove(false), mLeftInRange(false), mRightInRange(false), mIsBetterFitHorizontalSnap(false),
+    mDistanceVerticalEdges(0.0), mVerticalEdgeToLeftOfInactiveRect(0.0), mVerticalEdgeToRightOfInactiveRect(0.0),
     mMinVerticalEdgesDistance(0.0), mVerticalDistance(0.0),
     mVerticalDistanceFromSelectedRect(0.0), mContainerVerticalEdgeDistance(0.0),
-    mRectLieLeft(false), mTopInRange(false), mBottomInRange(false),
+    mRectLieLeft(false), mTopInRange(false), mBottomInRange(false), mIsBetterFitVerticalSnap(false),
+    mDistanceHorizontalEdges(0.0), mHorizontalEdgeToTopOfInactiveRect(0.0), mHorizontalEdgeToBottomOfInactiveRect(0.0),
     mMinHorizontalEdgesDistance(0.0), mHorizontalDistance(0.0),
     mHorizontalDistanceFromSelectedRect(0.0), mContainerHorizontalEdgeDistance(0.0),
     mSnapEnabled(false), mSnapForce(0.0), mSnapGap(0.0),
@@ -173,16 +174,14 @@ HsWidgetPositioningOnWidgetMove::Result HsSnapToLines::run(const QRectF &movingR
         mContainerHorizontalEdgeDistance = 0.0;
         mVerticalSnapFound = false;
 
-        checkForCenterSnapping();
         for (int i = 0; i < mInactiveSnapRects.count(); ++i) {
             mInactiveSnapRectToCompare = mInactiveSnapRects[i];
             mInactiveRectToCompare = mInactiveSnapRectToCompare.rectangle;
             if (!movingRect.intersects(mInactiveRectToCompare)) { //Only compare if Inactive Rect and moving rect do not overlap.
-                //TODO: Move the above check to another function...
-                // X - Direction Snapping
+                // Horizontal - Direction Snapping
                 compareLeftSideOfMovingRectForSnapping();
                 compareRightSideOfMovingRectForSnapping();
-                // Y - Direction Snapping
+                // Vertical - Direction Snapping
                 compareTopOfMovingRectForSnapping();
                 compareBottomOfMovingRectForSnapping();
             }
@@ -204,29 +203,6 @@ HsWidgetPositioningOnWidgetMove::Result HsSnapToLines::run(const QRectF &movingR
     }
 
     return result;
-}
-
-/*!
-    Check if the center of moving rect is in the snap force in the middle of continer rect.
-*/
-void HsSnapToLines::checkForCenterSnapping()
-{
-    QPointF centerOfContainerRect = mContainerRect.center();
-
-    QRectF verticalSnapField = QRectF(QPointF(centerOfContainerRect.x() - (mSnapForce/2), mContainerRect.top()),
-         QPointF(centerOfContainerRect.x() + (mSnapForce/2), mContainerRect.bottom()));
-
-    //Check that the widget lies in the container rect, if the snapping position is proposed... is not required,
-    //unless some widget is bigger than the page width
-    QPointF centerOfMovingRect = mMovingRect.center();
-    if (verticalSnapField.contains(centerOfMovingRect)) {
-        mHorizontalSnapFound = true;
-        mHorizontalSnapPosition = centerOfContainerRect.x() - mActiveRectWidth/2;
-        mMinVerticalEdgesDistance = qAbs(centerOfContainerRect.x() - centerOfMovingRect.x());
-        //save the points for the Vertical line
-        mVerticalLine.setP1(QPointF(centerOfContainerRect.x(), mMovingRect.top()));
-        mVerticalLine.setP2(QPointF(centerOfContainerRect.x(), mMovingRect.bottom()));
-    }
 }
 
 /*!
@@ -259,6 +235,81 @@ void HsSnapToLines::checkInactiveRectLieAboveOrBelowOfMovingRect()
     }
 }
 
+/*!
+    Check if the Vertical edges (Left and Right Edges) of the inactive rect being compared
+    is in range of the snapping distance of the vertical edge of moving rect
+    \param movingRectVerticalEdgePosition Position of the Vertical edge(either left or right) of moving rect.
+*/
+void HsSnapToLines::checkInactiveRectVerticalEdgesInRange(qreal movingRectVerticalEdgePosition)
+{
+    mLeftInRange = false;
+    mRightInRange = false;
+
+    //calculate the distance of the moving rect's vertical edge to the inactive rect's left and right edges
+    mVerticalEdgeToLeftOfInactiveRect = qAbs(mInactiveRectToCompare.left() - movingRectVerticalEdgePosition);
+    mVerticalEdgeToRightOfInactiveRect = qAbs(mInactiveRectToCompare.right() - movingRectVerticalEdgePosition);
+
+    if (mVerticalEdgeToLeftOfInactiveRect <= mMinVerticalEdgesDistance 
+        && (mRectLieAbove && mInactiveSnapRectToCompare.isLeftSnapableForBelow
+        || !mRectLieAbove && mInactiveSnapRectToCompare.isLeftSnapableForAbove)) { 
+        mLeftInRange = true;
+    }
+    if (mVerticalEdgeToRightOfInactiveRect <= mMinVerticalEdgesDistance
+        && (mRectLieAbove && mInactiveSnapRectToCompare.isRightSnapableForBelow
+        || !mRectLieAbove && mInactiveSnapRectToCompare.isRightSnapableForAbove)) {
+        mRightInRange = true;
+    }
+}
+
+/*!
+    Check if this inactive rect is better fit for Horizontal snapping
+    \param containerVerticalEdgeToInactiveRectVerticalEdge
+           difference between the vertical edge of the container and same vertical edge of inactive rect
+    \param containerOtherVerticalEdgeToInactiveRectOtherVerticalEdge
+           difference between the opposite vertical edges of continer and the inactive rect
+*/
+void HsSnapToLines::checkInactiveRectBetterFitForHorizontalSnapping(qreal containerVerticalEdgeToInactiveRectVerticalEdge,
+                                                                    qreal containerOtherVerticalEdgeToInactiveRectOtherVerticalEdge)
+{
+    //Check if the inactive rect is better fit or if it is inline with already selected position and hence is also a better fit
+    mIsBetterFitHorizontalSnap = false;
+    if (mLeftInRange || mRightInRange) {
+        if (mDistanceVerticalEdges < mMinVerticalEdgesDistance) {
+            mIsBetterFitHorizontalSnap = true;
+        }
+        else if (mDistanceVerticalEdges == mMinVerticalEdgesDistance) { //the distance in the vertical edges is same as from the previously selected rect
+            //check the position of rect with respect to Vertical line
+            checkInactiveRectPositionToVerticalLine();
+            //if horizontal snap position was previously found and the rect's edge is in line with Vertical line
+            if (mHorizontalSnapFound && mRectVerticalEdgeLiesInLineWithVerticalLine) {
+                if (mRectLieAboveVerticalLine || mRectLieBelowVerticalLine) {
+                    extendVerticalLineToIncludeInactiveRect();
+                }
+            }
+            //here the case is that moving rect lies exactly in middle of two same sides of two different inactive widgets.
+            else {
+                //Prioritize first on the fact if the inactive rect is closer to the moving rect in Y - direction.
+                if (mVerticalDistance < mVerticalDistanceFromSelectedRect) {
+                    mIsBetterFitHorizontalSnap = true;
+                }
+                else if (mVerticalDistance == mVerticalDistanceFromSelectedRect) {
+                    //Prioritize next if this Inactive rect's vertical edge is closer to the same vertical edge of the container rect, then the previously selected rect
+                    if (containerVerticalEdgeToInactiveRectVerticalEdge < mContainerVerticalEdgeDistance) {
+                        mIsBetterFitHorizontalSnap = true;
+                    }
+                    //Prioritize next if the Inactive rect's vertical edge lies near to same vertical edge of the container rect than the other pair
+                    else if (containerVerticalEdgeToInactiveRectVerticalEdge < containerOtherVerticalEdgeToInactiveRectOtherVerticalEdge) {
+                        mIsBetterFitHorizontalSnap = true;
+                    }
+                    else {
+                        //This else will happen if this rectangle being compared is exactly the same as the selected rectangle for snapping, but in opposite Y direction.
+                        //In that case it does not matter which is the selected rectangle. Hece we leave the already selected rectangle as the better fit.
+                    }
+                }
+            }
+        }
+    }
+}
 
 /*!
     Check if the left edge of moving rect is snappable to the incative rect's left or right edge.
@@ -268,141 +319,80 @@ void HsSnapToLines::compareLeftSideOfMovingRectForSnapping()
 {
     checkInactiveRectLieAboveOrBelowOfMovingRect();
 
-    //calculate the distance of the moving rect's left edge to the inactive rect's left and right edges
-    qreal leftToLeftOfInactiveRect = qAbs(mInactiveRectToCompare.left() - mMovingRect.left());
-    qreal leftToRightOfInactiveRect = qAbs(mInactiveRectToCompare.right() - mMovingRect.left());
-    mLeftInRange = false;
-    mRightInRange = false;
-
-    if (leftToLeftOfInactiveRect <= mMinVerticalEdgesDistance) {
-        if (mRectLieAbove && mInactiveSnapRectToCompare.isLeftSnapableForBelow
-         || !mRectLieAbove && mInactiveSnapRectToCompare.isLeftSnapableForAbove) { 
-            mLeftInRange = true;
-        }
-    }
-    if (leftToRightOfInactiveRect <= mMinVerticalEdgesDistance) {
-        if (mRectLieAbove && mInactiveSnapRectToCompare.isRightSnapableForBelow
-         || !mRectLieAbove && mInactiveSnapRectToCompare.isRightSnapableForAbove) {
-            mRightInRange = true;
-        }
-    }
+    checkInactiveRectVerticalEdgesInRange(mMovingRect.left());
 
     //calculate the distance of inactive rect's left edge and container rect's left edge
     qreal differenceContainerLeftEdgeToInactiveRectLeftEdge = mInactiveRectToCompare.left() - mContainerRect.left();
     //calculate the distance of inactive rect's right edge and container rect's right edge
     qreal differenceContainerRightEdgeToInactiveRectRightEdge = mContainerRect.right() - mInactiveRectToCompare.right();
-
-    qreal minDistancePosition = 0.0;
-    qreal distanceVerticalEdges = 0.0;
     qreal xSnapGapAdjustment = 0.0;
+    mDistanceVerticalEdges = 0.0;
+    mMinDistancePosition = 0.0;
 
     //If only one edge of inactive rect is in snappable range, save that position
     if ((mLeftInRange && !mRightInRange)
         || !mLeftInRange && mRightInRange) {
         if (mLeftInRange) {
-            minDistancePosition = mInactiveRectToCompare.left();
-            distanceVerticalEdges = leftToLeftOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.left();
+            mDistanceVerticalEdges = mVerticalEdgeToLeftOfInactiveRect;
             xSnapGapAdjustment = 0.0;
         }
         else {
-            minDistancePosition = mInactiveRectToCompare.right();
-            distanceVerticalEdges = leftToRightOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.right();
+            mDistanceVerticalEdges = mVerticalEdgeToRightOfInactiveRect;
             xSnapGapAdjustment = mSnapGap;
         }
     }
     //else both edges of inactive rect are in range, check which is a better fit
     else if (mLeftInRange && mRightInRange) {
         //if left edge of moving rect to the left of the inactive rect is closer than the left edge of moving rect to the right of the inactive rect
-        if (leftToLeftOfInactiveRect < leftToRightOfInactiveRect) {
-            minDistancePosition = mInactiveRectToCompare.left();
-            distanceVerticalEdges = leftToLeftOfInactiveRect;
+        if (mVerticalEdgeToLeftOfInactiveRect < mVerticalEdgeToRightOfInactiveRect) {
+            mMinDistancePosition = mInactiveRectToCompare.left();
+            mDistanceVerticalEdges = mVerticalEdgeToLeftOfInactiveRect;
             xSnapGapAdjustment = 0.0;
             mRightInRange = false;
         }
         //if the left edge of inactive rect to left of moving rect is at the same distance as the right edge of inactive rect to the right of moving rect
-        else if (leftToLeftOfInactiveRect == leftToRightOfInactiveRect) {
+        else if (mVerticalEdgeToLeftOfInactiveRect == mVerticalEdgeToRightOfInactiveRect) {
             //if inactive rect lies towards the left or middle of container rect, then the left edge is priortized as the selected edge for outside snapping 
             if (differenceContainerLeftEdgeToInactiveRectLeftEdge <= differenceContainerRightEdgeToInactiveRectRightEdge) { 
-                minDistancePosition = mInactiveRectToCompare.left();
-                distanceVerticalEdges = leftToLeftOfInactiveRect;
+                mMinDistancePosition = mInactiveRectToCompare.left();
+                mDistanceVerticalEdges = mVerticalEdgeToLeftOfInactiveRect;
                 xSnapGapAdjustment = 0.0;
                 mRightInRange = false;
             }
             //else right of the inactive rect lies more close to the right of the container rect, and hence prioritize it for snapping.
             else {
-                minDistancePosition = mInactiveRectToCompare.right();
-                distanceVerticalEdges = leftToRightOfInactiveRect;
+                mMinDistancePosition = mInactiveRectToCompare.right();
+                mDistanceVerticalEdges = mVerticalEdgeToRightOfInactiveRect;
                 xSnapGapAdjustment = mSnapGap;
                 mLeftInRange = false;
             }
         }
         //else right edge of inactive rect to the left of the moving rect is closer than the left edge of inactive rect to the left of the moving rect
         else{
-            minDistancePosition = mInactiveRectToCompare.right();
-            distanceVerticalEdges = leftToRightOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.right();
+            mDistanceVerticalEdges = mVerticalEdgeToRightOfInactiveRect;
             xSnapGapAdjustment = mSnapGap;
             mLeftInRange = false;
         }
     }
 
-    //Check if this inactive rect is better fit than the previous selected rect for X - snapping
-    bool horizontalSnappingBetterFit = false;
-    if (mLeftInRange || mRightInRange) {
-        if (distanceVerticalEdges < mMinVerticalEdgesDistance) {
-            horizontalSnappingBetterFit = true;
-        }
-        else if (distanceVerticalEdges == mMinVerticalEdgesDistance) { //the distance in the vertical edges is same as from the selected rectangle
-            //check the position of rect with respect to Vertical line
-            checkInactiveRectPositionToVerticalLine();
-            //if horizontal snap position was previously found the rect's edges are in line with Vertical line
-            if (mHorizontalSnapFound && mRectVerticalEdgeLiesInLineWithVerticalLine) {
-                if (mRectLieAboveVerticalLine || mRectLieBelowVerticalLine) {
-                    extendVerticalLineToIncludeInactiveRect();
-                }
-            }
-            //here the case is that moving rect lies exactly in middle of two same sides of two inactive widgets.
-            else {
-                //Prioritize first on the fact if the inactive rect is closer to the moving rect in Y - direction.
-                if (mVerticalDistance < mVerticalDistanceFromSelectedRect) {
-                    horizontalSnappingBetterFit = true;
-                }
-                else if (mVerticalDistance == mVerticalDistanceFromSelectedRect) {
-                    //Prioritize next if this Inactive rect is closer to the left edge of the container rect, then the previously selected rect
-                    if (differenceContainerLeftEdgeToInactiveRectLeftEdge < mContainerVerticalEdgeDistance) {
-                        horizontalSnappingBetterFit = true;
-                    }
-                    //Prioritize next if the Inactive widget's left edge lies near to left edge of the container rect
-                    else if (differenceContainerLeftEdgeToInactiveRectLeftEdge < differenceContainerRightEdgeToInactiveRectRightEdge) {
-                        horizontalSnappingBetterFit = true;
-                    }
-                    else {
-                        //This else will happen if this rectangle being compared is exactly the same as the selected rectangle for snapping.
-                        //In that case it does not matter which is the selected rectangle. Hence we leave the already selected rectangle as the better fit.
-                    }
-                }
-            }
-        }
-    }
+    //Check if this inactive rect is better fit than the previous selected rect for Horizontal - snapping
+    checkInactiveRectBetterFitForHorizontalSnapping(differenceContainerLeftEdgeToInactiveRectLeftEdge,
+                                                    differenceContainerRightEdgeToInactiveRectRightEdge);
 
-    if (horizontalSnappingBetterFit) {
-        qreal proposedRightOfActiveRect = minDistancePosition + xSnapGapAdjustment + mActiveRectWidth;
+    if (mIsBetterFitHorizontalSnap) {
+        qreal proposedRightOfActiveRect = mMinDistancePosition + xSnapGapAdjustment + mActiveRectWidth;
         if (qBound(mContainerRect.left(), proposedRightOfActiveRect, mContainerRect.right())
             == proposedRightOfActiveRect) {
             mHorizontalSnapFound = true;
-            mHorizontalSnapPosition = minDistancePosition + xSnapGapAdjustment;
-            mMinVerticalEdgesDistance = distanceVerticalEdges;
+            mHorizontalSnapPosition = mMinDistancePosition + xSnapGapAdjustment;
+            mMinVerticalEdgesDistance = mDistanceVerticalEdges;
             mVerticalDistanceFromSelectedRect = mVerticalDistance;
             //Save the new distance of the Chosen Rectangle's left edge from Container's left edge
             mContainerVerticalEdgeDistance = differenceContainerLeftEdgeToInactiveRectLeftEdge;
-
-            if (mRectLieAbove) {
-                mVerticalLine.setP1(QPointF(minDistancePosition, mInactiveRectToCompare.top()));
-                mVerticalLine.setP2(QPointF(minDistancePosition, mMovingRect.bottom()));
-            }
-            else {
-                mVerticalLine.setP1(QPointF(minDistancePosition, mInactiveRectToCompare.bottom()));
-                mVerticalLine.setP2(QPointF(minDistancePosition, mMovingRect.top()));
-            }
+            createVerticalLine();
         }
     }
 }
@@ -415,143 +405,96 @@ void HsSnapToLines::compareRightSideOfMovingRectForSnapping()
 {
     checkInactiveRectLieAboveOrBelowOfMovingRect();
 
-    //calculate the distance of the moving rect's right edge to the inactive rect's left and right edges
-    qreal rightToLeftOfInactiveRect = qAbs(mInactiveRectToCompare.left() - mMovingRect.right());
-    qreal rightToRightOfInactiveRect = qAbs(mInactiveRectToCompare.right() - mMovingRect.right());
-    mLeftInRange = false;
-    mRightInRange = false;
-
-    if (rightToLeftOfInactiveRect <= mMinVerticalEdgesDistance) {
-        if (mRectLieAbove && mInactiveSnapRectToCompare.isLeftSnapableForBelow
-         || !mRectLieAbove && mInactiveSnapRectToCompare.isLeftSnapableForAbove) {
-            mLeftInRange = true;
-        }
-    }
-    if (rightToRightOfInactiveRect <= mMinVerticalEdgesDistance) {
-        if (mRectLieAbove && mInactiveSnapRectToCompare.isRightSnapableForBelow
-         || !mRectLieAbove && mInactiveSnapRectToCompare.isRightSnapableForAbove) {
-            mRightInRange = true;
-        }
-    }
+    checkInactiveRectVerticalEdgesInRange(mMovingRect.right());
 
     //calculate the distance of inactive rect's left edge and container rect's left edge
     qreal differenceContainerLeftEdgeToInactiveRectLeftEdge = mInactiveRectToCompare.left() - mContainerRect.left();
     //calculate the distance of inactive rect's right edge and container rect's right edge
     qreal differenceContainerRightEdgeToInactiveRectRightEdge = mContainerRect.right() - mInactiveRectToCompare.right();
-    qreal minDistancePosition = 0.0;
-    qreal distanceVerticalEdges = 0.0;
     qreal xSnapGapAdjustment = 0.0;
+    mDistanceVerticalEdges = 0.0;
+    mMinDistancePosition = 0.0;
 
     //If only one edge of inactive rect is in snappable range, save that position
     if ((mLeftInRange && !mRightInRange)
         || !mLeftInRange && mRightInRange) {
         if (mLeftInRange) {
-            minDistancePosition = mInactiveRectToCompare.left();
-            distanceVerticalEdges = rightToLeftOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.left();
+            mDistanceVerticalEdges = mVerticalEdgeToLeftOfInactiveRect;
             xSnapGapAdjustment = mSnapGap;
         }
         else {
-            minDistancePosition = mInactiveRectToCompare.right();
-            distanceVerticalEdges = rightToRightOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.right();
+            mDistanceVerticalEdges = mVerticalEdgeToRightOfInactiveRect;
             xSnapGapAdjustment = 0.0;
         }
     }
     //else both edges of inactive rect are in range, check which is a better fit
     else if (mLeftInRange && mRightInRange) {
         //if right edge of moving rect to the right of the inactive rect is closer than the right edge of moving rect to the left of inactive rect
-        if (rightToRightOfInactiveRect < rightToLeftOfInactiveRect) {
-            minDistancePosition = mInactiveRectToCompare.right();
-            distanceVerticalEdges = rightToRightOfInactiveRect;
+        if (mVerticalEdgeToRightOfInactiveRect < mVerticalEdgeToLeftOfInactiveRect) {
+            mMinDistancePosition = mInactiveRectToCompare.right();
+            mDistanceVerticalEdges = mVerticalEdgeToRightOfInactiveRect;
             xSnapGapAdjustment = 0.0;
             mLeftInRange = false;
         }
         //if the right edge of moving rect to right of inactive rect is at the same distance as the right edge of moving rect to the left of inactive rect
-        else if (rightToRightOfInactiveRect == rightToLeftOfInactiveRect) {
+        else if (mVerticalEdgeToRightOfInactiveRect == mVerticalEdgeToLeftOfInactiveRect) {
             //if inactive rect lies towards the right of container rect, then the right edge is priortized as the selected edge for outside snapping
             if (differenceContainerRightEdgeToInactiveRectRightEdge < differenceContainerLeftEdgeToInactiveRectLeftEdge ) { 
-                minDistancePosition = mInactiveRectToCompare.right();
-                distanceVerticalEdges = rightToRightOfInactiveRect;
+                mMinDistancePosition = mInactiveRectToCompare.right();
+                mDistanceVerticalEdges = mVerticalEdgeToRightOfInactiveRect;
                 xSnapGapAdjustment = 0.0;
                 mLeftInRange = false;
             }
             //else left of the inactive rect lies more close to the left or middle of the container rect, and hence prioritize it
             else {
-                minDistancePosition = mInactiveRectToCompare.left();
-                distanceVerticalEdges = rightToLeftOfInactiveRect;
+                mMinDistancePosition = mInactiveRectToCompare.left();
+                mDistanceVerticalEdges = mVerticalEdgeToLeftOfInactiveRect;
                 xSnapGapAdjustment = mSnapGap;
                 mRightInRange = false;
             }
         }
         //else right edge of moving rect to the left of the inactive rect is closer than the right edge of moving rect to the right of the incoming rect
         else{
-            minDistancePosition = mInactiveRectToCompare.left();
-            distanceVerticalEdges = rightToLeftOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.left();
+            mDistanceVerticalEdges = mVerticalEdgeToLeftOfInactiveRect;
             xSnapGapAdjustment = mSnapGap;
             mRightInRange = false;
         }
     }
 
     //Check if this inactive rect is better fit than the previous selected rect 
-    bool horizontalSnappingBetterFit = false;
-    if (mLeftInRange || mRightInRange) {
-        if (distanceVerticalEdges < mMinVerticalEdgesDistance) {
-            horizontalSnappingBetterFit = true;
-        }
-        else if (distanceVerticalEdges == mMinVerticalEdgesDistance) { //the distance in the vertical edge is same as from the selected rectangle
-            //check the position of rect with respect to Vertical line
-            checkInactiveRectPositionToVerticalLine();
-            //if horizontal snap position was previously found and the rect's edge is in line with Vertical line
-            if (mHorizontalSnapFound && mRectVerticalEdgeLiesInLineWithVerticalLine) {
-                if (mRectLieAboveVerticalLine || mRectLieBelowVerticalLine) {
-                    extendVerticalLineToIncludeInactiveRect();
-                }
-            }
-            //here the case is that moving rect lies exactly in middle of two same sides of two inactive widgets.
-            else {
-                //Prioritize first on the fact if the inactive rect is closer to the moving rect in Y - direction.
-                if (mVerticalDistance < mVerticalDistanceFromSelectedRect) {
-                    horizontalSnappingBetterFit = true;
-                }
-                else if (mVerticalDistance == mVerticalDistanceFromSelectedRect) {
-                    //Prioritize next if this Inactive rect is closer to the right edge of the container rect, then the previously selected rect
-                    if (differenceContainerRightEdgeToInactiveRectRightEdge < mContainerVerticalEdgeDistance) {
-                        horizontalSnappingBetterFit = true;
-                    }
-                    //Prioritize next if the Inactive rect's right edge lies near to right edge of the container rect
-                    else if (differenceContainerRightEdgeToInactiveRectRightEdge < differenceContainerLeftEdgeToInactiveRectLeftEdge) {
-                        horizontalSnappingBetterFit = true;
-                    }
-                    else {
-                        //This else will happen if this rectangle being compared is exactly the same as the selected rectangle for snapping, but in opposite Y direction.
-                        //In that case it does not matter which is the selected rectangle. Hece we leave the already selected rectangle as the better fit.
-                    }
-                }
-            }
-        }
-    }
+    checkInactiveRectBetterFitForHorizontalSnapping(differenceContainerRightEdgeToInactiveRectRightEdge,
+                                                    differenceContainerLeftEdgeToInactiveRectLeftEdge);
 
-    if (horizontalSnappingBetterFit) {
-        qreal proposedLeftOfActiveRect = minDistancePosition - mActiveRectWidth - xSnapGapAdjustment;
+    if (mIsBetterFitHorizontalSnap) {
+        qreal proposedLeftOfActiveRect = mMinDistancePosition - mActiveRectWidth - xSnapGapAdjustment;
         if (qBound(mContainerRect.left(), proposedLeftOfActiveRect, mContainerRect.right())
             == proposedLeftOfActiveRect) {
             mHorizontalSnapFound = true;
             mHorizontalSnapPosition = proposedLeftOfActiveRect;
-            mMinVerticalEdgesDistance = distanceVerticalEdges;
+            mMinVerticalEdgesDistance = mDistanceVerticalEdges;
             mVerticalDistanceFromSelectedRect = mVerticalDistance;
             //Save the new distance of the Chosen Rectangle's right edge from Container's right edge
             mContainerVerticalEdgeDistance = differenceContainerRightEdgeToInactiveRectRightEdge;
-
-            if (mRectLieAbove) {
-                //save the points for the Vertical line
-                mVerticalLine.setP1(QPointF(minDistancePosition, mInactiveRectToCompare.top()));
-                mVerticalLine.setP2(QPointF(minDistancePosition, mMovingRect.bottom()));
-            }
-            else {
-                //save the points for the Vertical line
-                mVerticalLine.setP1(QPointF(minDistancePosition, mInactiveRectToCompare.bottom()));
-                mVerticalLine.setP2(QPointF(minDistancePosition, mMovingRect.top()));
-            }
+            createVerticalLine();
         }
+    }
+}
+
+/*!
+    Create the vertical line for horizontal snap guidance
+*/
+void HsSnapToLines::createVerticalLine()
+{
+    if (mRectLieAbove) {
+        mVerticalLine.setP1(QPointF(mMinDistancePosition, mInactiveRectToCompare.top()));
+        mVerticalLine.setP2(QPointF(mMinDistancePosition, mMovingRect.bottom()));
+    }
+    else {
+        mVerticalLine.setP1(QPointF(mMinDistancePosition, mInactiveRectToCompare.bottom()));
+        mVerticalLine.setP2(QPointF(mMinDistancePosition, mMovingRect.top()));
     }
 }
 
@@ -585,97 +528,49 @@ void HsSnapToLines::checkInactiveRectLieLeftOrRightOfMovingRect()
 }
 
 /*!
-    Check if the top edge of moving rect is snappable to the incative rect's top or bottom edge.
-    The inactive rect's edge is only chosen if it is a better fit for vertical snapping.
+    Check if the Horizontal edges (Top and Bottom Edges) of the inactive rect being compared
+    is in range of the snapping distance of the horizontal edge of moving rect
+    \param movingRectHorizontalEdgePosition Position of the Horizontal edge(either top or bottom) of moving rect.
 */
-void HsSnapToLines::compareTopOfMovingRectForSnapping()
+void HsSnapToLines::checkInactiveRectHorizontalEdgesInRange(qreal movingRectHorizontalEdgePosition)
 {
-    //Check if the inactive rect lies to the left or right of the moving rect
-    checkInactiveRectLieLeftOrRightOfMovingRect();
-
-    //calculate the distance of the moving rect's top edge to the inactive rect's top and bottom edges
-    qreal topToTopOfInactiveRect = qAbs(mInactiveRectToCompare.top() - mMovingRect.top());
-    qreal topToBottomOfInactiveRect = qAbs(mInactiveRectToCompare.bottom() - mMovingRect.top());
     mTopInRange = false;
     mBottomInRange = false;
 
-    if (topToTopOfInactiveRect <= mMinHorizontalEdgesDistance) {
+    //calculate the distance of the moving rect's horizontal edge to the inactive rect's top and bottom edges
+    mHorizontalEdgeToTopOfInactiveRect = qAbs(mInactiveRectToCompare.top() - movingRectHorizontalEdgePosition);
+    mHorizontalEdgeToBottomOfInactiveRect = qAbs(mInactiveRectToCompare.bottom() - movingRectHorizontalEdgePosition);
+
+    if (mHorizontalEdgeToTopOfInactiveRect <= mMinHorizontalEdgesDistance) {
         if (mRectLieLeft && mInactiveSnapRectToCompare.isTopSnapableForRight
          || !mRectLieLeft && mInactiveSnapRectToCompare.isTopSnapableForLeft) {
             mTopInRange = true;
         }
     }
-    if (topToBottomOfInactiveRect <= mMinHorizontalEdgesDistance) {
+    if (mHorizontalEdgeToBottomOfInactiveRect <= mMinHorizontalEdgesDistance) {
         if (mRectLieLeft && mInactiveSnapRectToCompare.isBottomSnapableForRight
          || !mRectLieLeft && mInactiveSnapRectToCompare.isBottomSnapableForLeft) {
             mBottomInRange = true;
         }
     }
+}
 
-    //calculate the distance of inactive rect's top edge and container rect's top edge
-    qreal differenceContainerTopEdgeToInactiveRectTopEdge = mInactiveRectToCompare.top() - mContainerRect.top();
-    //calculate the distance of inactive rect's bottom edge and container rect's bottom edge
-    qreal differenceContainerBottomEdgeToInactiveRectBottomEdge = mContainerRect.bottom() - mInactiveRectToCompare.bottom();
-    qreal minDistancePosition = 0.0;
-    qreal distanceHorizontalEdges = 0.0;
-    qreal ySnapGapAdjustment = 0.0;
-
-    //If only one edge of inactive rect is in snappable range, save that position
-    if ((mTopInRange && !mBottomInRange)
-        || !mTopInRange && mBottomInRange) {
-        if (mTopInRange) {
-            minDistancePosition = mInactiveRectToCompare.top();
-            distanceHorizontalEdges = topToTopOfInactiveRect;
-            ySnapGapAdjustment = 0.0;
-        }
-        else {
-            minDistancePosition = mInactiveRectToCompare.bottom();
-            distanceHorizontalEdges = topToBottomOfInactiveRect;
-            ySnapGapAdjustment = mSnapGap;
-        }
-    }
-    //else both edges of inactive rect are in range, check which is a better fit
-    else if (mTopInRange && mBottomInRange) {
-        //if top edge of moving rect to the top of the inactive rect is closer than the bottom edge of moving rect to the bottom of the inactive rect
-        if (topToTopOfInactiveRect < topToBottomOfInactiveRect) {
-            minDistancePosition = mInactiveRectToCompare.top();
-            distanceHorizontalEdges = topToTopOfInactiveRect;
-            ySnapGapAdjustment = 0.0;
-            mBottomInRange = false;
-        }
-        //if the top edge of moving rect to top of inactive rect is at the same distance as the top edge of moving rect to the bottom of inactive rect
-        else if (topToTopOfInactiveRect == topToBottomOfInactiveRect) {
-            //if inactive rect lies towards the top or middle of container rect, then the top edge is priortized as the selected edge for outside snapping
-            if (differenceContainerTopEdgeToInactiveRectTopEdge <= differenceContainerBottomEdgeToInactiveRectBottomEdge) { 
-                minDistancePosition = mInactiveRectToCompare.top();
-                distanceHorizontalEdges = topToTopOfInactiveRect;
-                ySnapGapAdjustment = 0.0;
-                mBottomInRange = false;
-            }
-            //else bottom of the inactive rect lies more close to the bottom of the container rect, and hence prioritize it for snapping.
-            else {
-                minDistancePosition = mInactiveRectToCompare.bottom();
-                distanceHorizontalEdges = topToBottomOfInactiveRect;
-                ySnapGapAdjustment = mSnapGap;
-                mTopInRange = false;
-            }
-        }
-        //else top edge of moving rect to the bottom of the inactive rect is closer than the top edge of moving rect to the top of the inactive rect
-        else{
-            minDistancePosition = mInactiveRectToCompare.bottom();
-            distanceHorizontalEdges = topToBottomOfInactiveRect;
-            ySnapGapAdjustment = mSnapGap;
-            mTopInRange = false;
-        }
-    }
-
-    //Check if this inactive rect is better fit than the previous selected rect 
-    bool verticalSnappingBetterFit = false;
+/*!
+    Check if this inactive rect is better fit for Vertical snapping
+    \param containerHorizontalEdgeToInactiveRectHorizontalEdge
+           difference between the horizontal edge of the container and same horizontal edge of inactive rect
+    \param containerOtherHorizontalEdgeToInactiveRectOtherHorizontalEdge
+           difference between the opposite horizontal edges of continer and the inactive rect
+*/
+void HsSnapToLines::checkInactiveRectBetterFitForVerticalSnapping(qreal containerHorizontalEdgeToInactiveRectHorizontalEdge,
+                                                       qreal containerOtherHorizontalEdgeToInactiveRectOtherHorizontalEdge)
+{
+    mIsBetterFitVerticalSnap = false;
     if (mTopInRange || mBottomInRange) {
-        if (distanceHorizontalEdges < mMinHorizontalEdgesDistance) {
-            verticalSnappingBetterFit = true;
+        if (mDistanceHorizontalEdges < mMinHorizontalEdgesDistance) {
+            mIsBetterFitVerticalSnap = true;
         }
-        else if (distanceHorizontalEdges == mMinHorizontalEdgesDistance) { //the distance in the horizontal edge is same as from the selected rectangle
+        else if (mDistanceHorizontalEdges == mMinHorizontalEdgesDistance) { //the distance in the horizontal edge is same as from the selected rectangle
             //check the position of rect with respect to horizontal line
             checkInactiveRectPositionToHorizontalLine();
             //if vertical snap position was already found and this rect's horizontal edges lies in line with Horizontal snap line
@@ -687,16 +582,16 @@ void HsSnapToLines::compareTopOfMovingRectForSnapping()
             else {
                 //Prioritize first on the fact if the inactive rect is closer to the moving rect in X - direction.
                 if (mHorizontalDistance < mHorizontalDistanceFromSelectedRect) {
-                    verticalSnappingBetterFit = true;
+                    mIsBetterFitVerticalSnap = true;
                 }
                 else if (mHorizontalDistance == mHorizontalDistanceFromSelectedRect) {
                     //Prioritize next if this Inactive rect is closer to the top edge of the container rect, then the previously selected rect
-                    if (differenceContainerTopEdgeToInactiveRectTopEdge < mContainerHorizontalEdgeDistance) {
-                        verticalSnappingBetterFit = true;
+                    if (containerHorizontalEdgeToInactiveRectHorizontalEdge < mContainerHorizontalEdgeDistance) {
+                        mIsBetterFitVerticalSnap = true;
                     }
                     //Prioritize next if the Inactive widget's top edge lies near to top edge of the container rect
-                    else if (differenceContainerTopEdgeToInactiveRectTopEdge < differenceContainerBottomEdgeToInactiveRectBottomEdge) {
-                        verticalSnappingBetterFit = true;
+                    else if (containerHorizontalEdgeToInactiveRectHorizontalEdge < containerOtherHorizontalEdgeToInactiveRectOtherHorizontalEdge) {
+                        mIsBetterFitVerticalSnap = true;
                     }
                     else {
                         //This else will happen if this rectangle being compared is exactly the same as the selected rectangle for snapping, or in opposite X direction.
@@ -707,27 +602,91 @@ void HsSnapToLines::compareTopOfMovingRectForSnapping()
         }
     }
 
-    if (verticalSnappingBetterFit) {
-        qreal proposedBottomOfActiveRect = minDistancePosition + mActiveRectHeight + ySnapGapAdjustment;
+}
+
+/*!
+    Check if the top edge of moving rect is snappable to the incative rect's top or bottom edge.
+    The inactive rect's edge is only chosen if it is a better fit for vertical snapping.
+*/
+void HsSnapToLines::compareTopOfMovingRectForSnapping()
+{
+    //Check if the inactive rect lies to the left or right of the moving rect
+    checkInactiveRectLieLeftOrRightOfMovingRect();
+
+    checkInactiveRectHorizontalEdgesInRange(mMovingRect.top());
+
+    //calculate the distance of inactive rect's top edge and container rect's top edge
+    qreal differenceContainerTopEdgeToInactiveRectTopEdge = mInactiveRectToCompare.top() - mContainerRect.top();
+    //calculate the distance of inactive rect's bottom edge and container rect's bottom edge
+    qreal differenceContainerBottomEdgeToInactiveRectBottomEdge = mContainerRect.bottom() - mInactiveRectToCompare.bottom();
+    qreal ySnapGapAdjustment = 0.0;
+    mDistanceHorizontalEdges = 0.0;
+    mMinDistancePosition = 0.0;
+
+    //If only one edge of inactive rect is in snappable range, save that position
+    if ((mTopInRange && !mBottomInRange)
+        || !mTopInRange && mBottomInRange) {
+        if (mTopInRange) {
+            mMinDistancePosition = mInactiveRectToCompare.top();
+            mDistanceHorizontalEdges = mHorizontalEdgeToTopOfInactiveRect;
+            ySnapGapAdjustment = 0.0;
+        }
+        else {
+            mMinDistancePosition = mInactiveRectToCompare.bottom();
+            mDistanceHorizontalEdges = mHorizontalEdgeToBottomOfInactiveRect;
+            ySnapGapAdjustment = mSnapGap;
+        }
+    }
+    //else both edges of inactive rect are in range, check which is a better fit
+    else if (mTopInRange && mBottomInRange) {
+        //if top edge of moving rect to the top of the inactive rect is closer than the bottom edge of moving rect to the bottom of the inactive rect
+        if (mHorizontalEdgeToTopOfInactiveRect < mHorizontalEdgeToBottomOfInactiveRect) {
+            mMinDistancePosition = mInactiveRectToCompare.top();
+            mDistanceHorizontalEdges = mHorizontalEdgeToTopOfInactiveRect;
+            ySnapGapAdjustment = 0.0;
+            mBottomInRange = false;
+        }
+        //if the top edge of moving rect to top of inactive rect is at the same distance as the top edge of moving rect to the bottom of inactive rect
+        else if (mHorizontalEdgeToTopOfInactiveRect == mHorizontalEdgeToBottomOfInactiveRect) {
+            //if inactive rect lies towards the top or middle of container rect, then the top edge is priortized as the selected edge for outside snapping
+            if (differenceContainerTopEdgeToInactiveRectTopEdge <= differenceContainerBottomEdgeToInactiveRectBottomEdge) { 
+                mMinDistancePosition = mInactiveRectToCompare.top();
+                mDistanceHorizontalEdges = mHorizontalEdgeToTopOfInactiveRect;
+                ySnapGapAdjustment = 0.0;
+                mBottomInRange = false;
+            }
+            //else bottom of the inactive rect lies more close to the bottom of the container rect, and hence prioritize it for snapping.
+            else {
+                mMinDistancePosition = mInactiveRectToCompare.bottom();
+                mDistanceHorizontalEdges = mHorizontalEdgeToBottomOfInactiveRect;
+                ySnapGapAdjustment = mSnapGap;
+                mTopInRange = false;
+            }
+        }
+        //else top edge of moving rect to the bottom of the inactive rect is closer than the top edge of moving rect to the top of the inactive rect
+        else{
+            mMinDistancePosition = mInactiveRectToCompare.bottom();
+            mDistanceHorizontalEdges = mHorizontalEdgeToBottomOfInactiveRect;
+            ySnapGapAdjustment = mSnapGap;
+            mTopInRange = false;
+        }
+    }
+
+    //Check if this inactive rect is better fit than the previous selected rect 
+    checkInactiveRectBetterFitForVerticalSnapping(differenceContainerTopEdgeToInactiveRectTopEdge,
+                                                  differenceContainerBottomEdgeToInactiveRectBottomEdge);
+
+    if (mIsBetterFitVerticalSnap) {
+        qreal proposedBottomOfActiveRect = mMinDistancePosition + mActiveRectHeight + ySnapGapAdjustment;
         if (qBound(mContainerRect.top(), proposedBottomOfActiveRect, mContainerRect.bottom())
             == proposedBottomOfActiveRect) {
             mVerticalSnapFound = true;
-            mVerticalSnapPosition = minDistancePosition + ySnapGapAdjustment;
-            mMinHorizontalEdgesDistance = distanceHorizontalEdges;
+            mVerticalSnapPosition = mMinDistancePosition + ySnapGapAdjustment;
+            mMinHorizontalEdgesDistance = mDistanceHorizontalEdges;
             mHorizontalDistanceFromSelectedRect = mHorizontalDistance;
             //Save the new distance of the Chosen Rectangle's top edge from Container's top edge
             mContainerHorizontalEdgeDistance = differenceContainerTopEdgeToInactiveRectTopEdge;
-
-            if (mRectLieLeft) {
-                //save the points for the Horizontal line
-                mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.left(), minDistancePosition));
-                mHorizontalLine.setP2(QPointF(mMovingRect.right(), minDistancePosition));
-            }
-            else {
-                //save the points for the Horizontal line
-                mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.right(), minDistancePosition));
-                mHorizontalLine.setP2(QPointF(mMovingRect.left(), minDistancePosition));
-            }
+            createHorizontalLine();
         }
     }
 }
@@ -742,142 +701,99 @@ void HsSnapToLines::compareBottomOfMovingRectForSnapping()
     checkInactiveRectLieLeftOrRightOfMovingRect();
 
     //calculate the distance of the moving rect's bottom edge to the inactive rect's top and bottom edges
-    qreal bottomToTopOfInactiveRect = qAbs(mInactiveRectToCompare.top() - mMovingRect.bottom());
-    qreal bottomToBottomOfInactiveRect = qAbs(mInactiveRectToCompare.bottom() - mMovingRect.bottom());
-    mTopInRange = false;
-    mBottomInRange = false;
-
-    if (bottomToTopOfInactiveRect <= mMinHorizontalEdgesDistance) {
-        if (mRectLieLeft && mInactiveSnapRectToCompare.isTopSnapableForRight
-         || !mRectLieLeft && mInactiveSnapRectToCompare.isTopSnapableForLeft) {
-            mTopInRange = true;
-        }
-    }
-    if (bottomToBottomOfInactiveRect <= mMinHorizontalEdgesDistance) {
-        if (mRectLieLeft && mInactiveSnapRectToCompare.isBottomSnapableForRight
-         || !mRectLieLeft && mInactiveSnapRectToCompare.isBottomSnapableForLeft) {
-            mBottomInRange = true;
-        }
-    }
+    checkInactiveRectHorizontalEdgesInRange(mMovingRect.bottom());
 
     //calculate the distance of inactive rect's top edge and container rect's top edge
     qreal differenceContainerTopEdgeToInactiveRectTopEdge = mInactiveRectToCompare.top() - mContainerRect.top();
     //calculate the distance of inactive rect's bottom edge and container rect's bottom edge
     qreal differenceContainerBottomEdgeToInactiveRectBottomEdge = mContainerRect.bottom() - mInactiveRectToCompare.bottom();
-    qreal minDistancePosition = 0.0;
-    qreal distanceHorizontalEdges = 0.0;
     qreal ySnapGapAdjustment = 0.0;
+    mDistanceHorizontalEdges = 0.0;
+    mMinDistancePosition = 0.0;
 
     //If only one edge of inactive rect is in snappable range, save that position
     if ((mTopInRange && !mBottomInRange)
         || !mTopInRange && mBottomInRange) {
         if (mTopInRange) {
-            minDistancePosition = mInactiveRectToCompare.top();
-            distanceHorizontalEdges = bottomToTopOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.top();
+            mDistanceHorizontalEdges = mHorizontalEdgeToTopOfInactiveRect;
             ySnapGapAdjustment = mSnapGap;
         }
         else {
-            minDistancePosition = mInactiveRectToCompare.bottom();
-            distanceHorizontalEdges = bottomToBottomOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.bottom();
+            mDistanceHorizontalEdges = mHorizontalEdgeToBottomOfInactiveRect;
             ySnapGapAdjustment = 0.0;
         }
     }
     //else both edges of inactive rect are in range, check which is a better fit
     else if (mTopInRange && mBottomInRange) {
         //if bottom edge of moving rect to the bottom of inactive rect is closer than the bottom edge of moving rect to the top of the inactive rect
-        if (bottomToBottomOfInactiveRect < bottomToTopOfInactiveRect ) {
-            minDistancePosition = mInactiveRectToCompare.bottom();
-            distanceHorizontalEdges = bottomToBottomOfInactiveRect;
+        if (mHorizontalEdgeToBottomOfInactiveRect < mHorizontalEdgeToTopOfInactiveRect ) {
+            mMinDistancePosition = mInactiveRectToCompare.bottom();
+            mDistanceHorizontalEdges = mHorizontalEdgeToBottomOfInactiveRect;
             ySnapGapAdjustment = 0.0;
             mTopInRange = false;
         }
         //if bottom edge of moving rect to the bottom of inactive rect is at the same distance as the bottom edge of moving rect to the top of inactive rect
-        else if (bottomToBottomOfInactiveRect == bottomToTopOfInactiveRect) {
+        else if (mHorizontalEdgeToBottomOfInactiveRect == mHorizontalEdgeToTopOfInactiveRect) {
             //if inactive rect lies towards the bottom of container rect, then the bottom edge is priortized as the selected edge for snapping
             //This is done for outside snapping
             if (differenceContainerBottomEdgeToInactiveRectBottomEdge < differenceContainerTopEdgeToInactiveRectTopEdge) {
-                minDistancePosition = mInactiveRectToCompare.bottom();
-                distanceHorizontalEdges = bottomToBottomOfInactiveRect;
+                mMinDistancePosition = mInactiveRectToCompare.bottom();
+                mDistanceHorizontalEdges = mHorizontalEdgeToBottomOfInactiveRect;
                 ySnapGapAdjustment = 0.0;
                 mTopInRange = false;
             }
             //else top of the inactive rect lies more close to the top of the container rect or at the same distance, and hence prioritize it
             else {
-                minDistancePosition = mInactiveRectToCompare.top();
-                distanceHorizontalEdges = bottomToTopOfInactiveRect;
+                mMinDistancePosition = mInactiveRectToCompare.top();
+                mDistanceHorizontalEdges = mHorizontalEdgeToTopOfInactiveRect;
                 ySnapGapAdjustment = mSnapGap;
                 mBottomInRange = false;
             }
         }
         //else bottom edge of moving rect to the top of inactive rect is closer than the bottom edge of moving rect to the bottom of the inactive rect
         else{
-            minDistancePosition = mInactiveRectToCompare.top();
-            distanceHorizontalEdges = bottomToTopOfInactiveRect;
+            mMinDistancePosition = mInactiveRectToCompare.top();
+            mDistanceHorizontalEdges = mHorizontalEdgeToTopOfInactiveRect;
             ySnapGapAdjustment = mSnapGap;
             mBottomInRange = false;
         }
     }
 
     //Check if this inactive rect is better fit than the previous selected rect 
-    bool verticalSnappingBetterFit = false;
-    if (mTopInRange || mBottomInRange) {
-        if (distanceHorizontalEdges < mMinHorizontalEdgesDistance) {
-            verticalSnappingBetterFit = true;
-        }
-        else if (distanceHorizontalEdges == mMinHorizontalEdgesDistance) { //the distance in the horizontal edge is same as from the selected rectangle
-            //check the position of rect with respect to horizontal line
-            checkInactiveRectPositionToHorizontalLine();
-            //if vertical snap was already found and the horizontal line of rect is in line with horizontal snap line
-            if (mVerticalSnapFound && mRectHorizontalEdgeLiesInLineWithHorizontalLine) {
-                if (mRectLieLeftOfHorizontalLine || mRectLiesRightOfHorizontalLine) {
-                    extendHorizontalLineToIncludeInactiveRect();
-                }
-            }
-            else {
-                //Prioritize first on the fact if the inactive rect is closer to the moving rect in X - direction.
-                if (mHorizontalDistance < mHorizontalDistanceFromSelectedRect) {
-                    verticalSnappingBetterFit = true;
-                }
-                else if (mHorizontalDistance == mHorizontalDistanceFromSelectedRect) {
-                    //Prioritize next if this Inactive rect is closer to the bottom edge of the container rect, then the previously selected rect
-                    if (differenceContainerBottomEdgeToInactiveRectBottomEdge < mContainerHorizontalEdgeDistance) {
-                        verticalSnappingBetterFit = true;
-                    }
-                    //Prioritize next if the Inactive widget's bottom edge lies near to bottom edge of the container rect
-                    else if (differenceContainerBottomEdgeToInactiveRectBottomEdge < differenceContainerTopEdgeToInactiveRectTopEdge) {
-                        verticalSnappingBetterFit = true;
-                    }
-                    else {
-                        //This else will happen if this rectangle being compared is exactly the same as the selected rectangle for snapping, or in opposite X direction.
-                        //In that case it does not matter which is the selected rectangle. Hence we leave the already selected rectangle as the better fit.
-                    }
-                }
-            }
-        }
-    }
+    checkInactiveRectBetterFitForVerticalSnapping(differenceContainerBottomEdgeToInactiveRectBottomEdge,
+                                                  differenceContainerTopEdgeToInactiveRectTopEdge);
 
-    if (verticalSnappingBetterFit) {
-        qreal proposedTopOfActiveRect = minDistancePosition - mActiveRectHeight - ySnapGapAdjustment;
+    if (mIsBetterFitVerticalSnap) {
+        qreal proposedTopOfActiveRect = mMinDistancePosition - mActiveRectHeight - ySnapGapAdjustment;
         if (qBound(mContainerRect.top(), proposedTopOfActiveRect, mContainerRect.bottom())
             == proposedTopOfActiveRect) {
             mVerticalSnapFound = true;
             mVerticalSnapPosition = proposedTopOfActiveRect;
-            mMinHorizontalEdgesDistance = distanceHorizontalEdges;
+            mMinHorizontalEdgesDistance = mDistanceHorizontalEdges;
             mHorizontalDistanceFromSelectedRect = mHorizontalDistance;
             //Save the new distance of the Selected Rectangle's bottom edge from Container's bottom edge
             mContainerHorizontalEdgeDistance = differenceContainerBottomEdgeToInactiveRectBottomEdge;
-
-            if (mRectLieLeft) {
-                //save the points for the Horizontal line
-                mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.left(), minDistancePosition));
-                mHorizontalLine.setP2(QPointF(mMovingRect.right(), minDistancePosition));
-            }
-            else {
-                //save the points for the Horizontal line
-                mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.right(), minDistancePosition));
-                mHorizontalLine.setP2(QPointF(mMovingRect.left(), minDistancePosition));
-            }
+            createHorizontalLine();
         }
+    }
+}
+
+/*!
+    Create the horizontal line for vertical snap guidance
+*/
+void HsSnapToLines::createHorizontalLine()
+{
+    if (mRectLieLeft) {
+        //save the points for the Horizontal line
+        mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.left(), mMinDistancePosition));
+        mHorizontalLine.setP2(QPointF(mMovingRect.right(), mMinDistancePosition));
+    }
+    else {
+        //save the points for the Horizontal line
+        mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.right(), mMinDistancePosition));
+        mHorizontalLine.setP2(QPointF(mMovingRect.left(), mMinDistancePosition));
     }
 }
 

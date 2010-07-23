@@ -19,9 +19,10 @@
 #define HSPROPERTYANIMATIONWRAPPER_H
 
 #include <QScopedPointer>
-#include "hsutils_global.h"
 
+#include "hsutils_global.h"
 #include "hstest_global.h"
+
 HOMESCREEN_TEST_CLASS(t_hsUtils)
 
 struct HsPropertyAnimationWrapperImpl;
@@ -38,6 +39,10 @@ public:
     bool isRunning();
     void setEndValue(const QVariant &value);
     void setDuration(int msecs);
+    void setForward();
+    void setBackward();
+    bool isForward() const;
+
 signals:
     void finished();
 

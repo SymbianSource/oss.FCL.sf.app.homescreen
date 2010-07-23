@@ -28,6 +28,8 @@
 #include "hspage.h"
 #include "hswallpaperloader.h"
 #include "hsconfiguration.h"
+#include "hsgui.h"
+
 
 /*!
     \class HsWallpaper
@@ -58,7 +60,7 @@ HsWallpaper::HsWallpaper(QGraphicsItem *parent)
     layout->addItem(mIconItem);
     setLayout(layout);
 
-    connect(HsScene::mainWindow(),
+    connect(HsGui::instance(),
         SIGNAL(orientationChanged(Qt::Orientation)),
         SLOT(updateIconItem(Qt::Orientation)));
 }
@@ -110,7 +112,7 @@ void HsWallpaper::setDefaultImage()
     mLandscapeImagePath = infos.first().absoluteFilePath();
     mPortraitImagePath = infos.last().absoluteFilePath();
 
-    updateIconItem(HsScene::orientation());
+    updateIconItem(HsGui::instance()->orientation());
 }
 
 /*!
@@ -150,7 +152,7 @@ bool HsWallpaper::setExistingImage()
     mLandscapeImagePath = infos.first().absoluteFilePath();
     mPortraitImagePath = infos.last().absoluteFilePath();
 
-    updateIconItem(HsScene::orientation());
+    updateIconItem(HsGui::instance()->orientation());
     return true;
 }
 

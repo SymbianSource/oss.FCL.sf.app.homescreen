@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,6 +28,7 @@ SCREENSAVER_TEST_CLASS(T_SnsrBigClockScreensaverPlugin)
 class HbMainWindow;
 class SnsrBigClockContainer;
 class SnsrIndicatorModel;
+class XQSettingsManager;
 
 class SnsrBigClockScreensaver : public Screensaver
 {
@@ -60,7 +61,12 @@ private:
     virtual void onHandleActiveIndicators(const QList<HbIndicatorInterface*> &activeIndicators);
     virtual void onHandleActivatedIndicator(HbIndicatorInterface *activatedIndicator);
     virtual void onHandleDeactivatedIndicator(HbIndicatorInterface *deactivatedIndicator);
+    virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow);
+    virtual void updateLayout();
 
+private slots:
+
+    void updateActiveAreaForLowPower();
 
 private:
 
@@ -68,7 +74,8 @@ private:
     HbMainWindow *mMainWindow;
     SnsrBigClockContainer *mCurrentContainer;
     SnsrIndicatorModel *mIndicatorModel;
-    
+    XQSettingsManager *m_setManager;
+
     SCREENSAVER_TEST_FRIEND_CLASS(T_SnsrBigClockScreensaverPlugin)
 
 };

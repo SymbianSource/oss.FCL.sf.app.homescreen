@@ -19,31 +19,20 @@
 #include <QStateMachine>
 #include <QState>
 #include <QFinalState>
-#include <QGraphicsLinearLayout>
-#include <QParallelAnimationGroup>
-#include <QPropertyAnimation>
-#include <QGraphicsDropShadowEffect>
-#include <QGraphicsSceneResizeEvent>
-#include <QGesture>
-#include <QGraphicsScene>
-
-#include <qservicemanager.h>
-#include <qservicefilter.h>
-#include <qserviceinterfacedescriptor.h>
-
-#include <HbInstantFeedback>
-#include <HbTouchArea>
 
 #include "hsdatabase.h"
 #include "hsdomainmodeldatastructures.h"
 #include "hsscene.h"
 #include "hspage.h"
 #include "hswidgethost.h"
-#include "hswidgettoucharea.h"
+#include "hswidgethostvisual.h"
+#include "hshostedwidgetfactory.h"
+
 #include "hswidgetcomponentregistry.h"
 #include "hswidgetcomponent.h"
 #include "hsconfiguration.h"
 #include "hscontentservice.h"
+#include "hsgui.h"
 
 // Helper macros for connecting state entry and exit actions.
 #define ENTRY_ACTION(state, action) \
@@ -51,7 +40,7 @@
 #define EXIT_ACTION(state, action) \
     connect(state, SIGNAL(exited()), SLOT(action()));
 
-QTM_USE_NAMESPACE
+
 
 
 /*!
@@ -64,8 +53,9 @@ QTM_USE_NAMESPACE
     Constructs a new widget host with given \a databaseId and
     \a parent item.
 */
-HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
-  : HbWidget(parent),
+HsWidgetHost::HsWidgetHost(int databaseId, QObject *parent)
+  : QObject(parent),
+    mVisual(new HsWidgetHostVisual),
     mDatabaseId(databaseId),
     mStateMachine(0),
     mWidget(0),
@@ -73,19 +63,8 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
     mComponent(0),
     mIsFinishing(false)
 {
-    setFlag(QGraphicsItem::ItemClipsChildrenToShape);
-    setFlag(QGraphicsItem::ItemHasNoContents);
-
-    grabGesture(Qt::TapGesture);
-    grabGesture(Qt::TapAndHoldGesture);
-    grabGesture(Qt::PanGesture);
-    grabGesture(Qt::PinchGesture);
-    grabGesture(Qt::SwipeGesture);
-    grabGesture(Qt::CustomGesture);
-    
-    setupTouchArea();
-    setupEffects();
     setupStates();
+    mVisual->setVisualModel(this);
 }
 
 /*!
@@ -93,6 +72,7 @@ HsWidgetHost::HsWidgetHost(int databaseId, QGraphicsItem *parent)
 */
 HsWidgetHost::~HsWidgetHost()
 {
+    delete mVisual;
 }
 
 /*!
@@ -145,6 +125,7 @@ bool HsWidgetHost::setPage(HsPage *page)
     }
 
     mPage = page;
+    
     return true;
 }
  
@@ -163,7 +144,7 @@ HsPage *HsWidgetHost::page() const
 */
 bool HsWidgetHost::loadPresentation()
 {
-    return loadPresentation(HsScene::orientation());
+    return loadPresentation(HsGui::instance()->orientation());
 }
 
 /*!
@@ -180,8 +161,8 @@ bool HsWidgetHost::loadPresentation(Qt::Orientation orientation)
     if (!db->widgetPresentation(data)) {
         return false;
     }
-    setPos(data.x, data.y);
-    setZValue(data.zValue);
+    mVisual->setPos(data.x, data.y);
+    mVisual->setZValue(data.zValue);
     return true;
 }
 
@@ -191,7 +172,7 @@ bool HsWidgetHost::loadPresentation(Qt::Orientation orientation)
 */
 bool HsWidgetHost::savePresentation()
 {
-    return savePresentation(HsScene::orientation());
+    return savePresentation(HsGui::instance()->orientation());
 }
 
 /*!
@@ -204,8 +185,8 @@ bool HsWidgetHost::savePresentation(Qt::Orientation orientation)
         
     HsWidgetPresentationData data;
     data.orientation = orientation;
-    data.setPos(pos());
-    data.zValue = zValue();
+    data.setPos(mVisual->pos());
+    data.zValue = mVisual->zValue();
     data.widgetId = mDatabaseId;
     return db->setWidgetPresentation(data);
 }
@@ -245,29 +226,9 @@ bool HsWidgetHost::removePresentation(Qt::Orientation orientation)
     return db->deleteWidgetPresentation(mDatabaseId, orientation);
 }
 
-/*!
-    Reimplemented from QGraphicsItem. Returns the shape of the
-    this widget host. The shape is computed based on the contained
-    widget.
-*/
-QPainterPath HsWidgetHost::shape() const
+HsWidgetHostVisual *HsWidgetHost::visual() const
 {
-    QPainterPath path;
-
-    if (mWidget) {
-        QRectF currRect = rect();
-        path = mWidget->shape();
-
-        QRectF pathRect(path.boundingRect());
-
-        if (pathRect.width() > currRect.width()
-            || pathRect.height() > currRect.height()) {
-            QPainterPath newPath(currRect.topLeft());
-            newPath.addRect(currRect);
-            path = path.intersected(newPath);
-        }
-    }
-    return path;
+    return mVisual;
 }
 
 /*!
@@ -327,11 +288,7 @@ QPainterPath HsWidgetHost::shape() const
     host has moved to faulted state.
 */
 
-/*!
-    \fn HsWidgetHost::resized()
-    Notifies the home screen framework that this widget
-    host has resized itself.
-*/
+
 
 /*!
     \fn HsWidgetHost::available()
@@ -424,29 +381,7 @@ void HsWidgetHost::close()
 */
 void HsWidgetHost::startDragEffect()
 {
-    /* TODO: Uncomment after the Qt bug has been fixed.
-    QGraphicsDropShadowEffect *effect =
-        static_cast<QGraphicsDropShadowEffect *>(graphicsEffect());
-    */
-    HbInstantFeedback::play(HbFeedback::ItemPick);
-
-    setTransformOriginPoint(rect().center());
-
-    QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup();
-
-    QPropertyAnimation *animation = new QPropertyAnimation(this, "scale");
-    animation->setDuration(HSCONFIGURATION_GET(widgetDragEffectDuration));
-    animation->setEndValue(1.1);
-    animationGroup->addAnimation(animation);
-
-    /* TODO: Uncomment after the Qt bug has been fixed.
-    animation = new QPropertyAnimation(effect, "offset");
-    animation->setDuration(200);
-    animation->setEndValue(QPointF(8 ,8));
-    animationGroup->addAnimation(animation);
-    */
-
-    animationGroup->start(QAbstractAnimation::DeleteWhenStopped);
+   mVisual->startDragEffect();
 }
 
 /*!
@@ -454,98 +389,7 @@ void HsWidgetHost::startDragEffect()
 */
 void HsWidgetHost::startDropEffect()
 {
-    /* TODO: Uncomment after the Qt bug has been fixed.
-    QGraphicsDropShadowEffect *effect =
-        static_cast<QGraphicsDropShadowEffect *>(graphicsEffect());
-    */
-    HbInstantFeedback::play(HbFeedback::ItemDrop);
-
-    QParallelAnimationGroup *animationGroup = new QParallelAnimationGroup;
-
-    QPropertyAnimation *animation = new QPropertyAnimation(this, "scale");
-    animation->setDuration(HSCONFIGURATION_GET(widgetDropEffectDuration));
-    animation->setEndValue(1);
-    animationGroup->addAnimation(animation);
-
-    /* TODO: Uncomment after the Qt bug has been fixed.
-    animation = new QPropertyAnimation(effect, "offset");
-    animation->setDuration(200);
-    animation->setEndValue(QPointF(3, 3));
-    animationGroup->addAnimation(animation);
-    */
-
-    animationGroup->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-/*!
-    Reimplemented from QObject for monitoring changes in 
-    contained widget's size.
-*/
-bool HsWidgetHost::eventFilter(QObject *watched, QEvent *event)
-{
-    if (event->type() == QEvent::GraphicsSceneResize ) {
-        QGraphicsSceneResizeEvent *resizeEvent = 
-            static_cast<QGraphicsSceneResizeEvent *>(event);
-        setNewSize(resizeEvent->newSize());
-        emit resized();
-    }
-    return HbWidget::eventFilter(watched, event);
-}
-
-/*!
-    Reimplemented from HbWidget for pan gesture handling.
-*/
-void HsWidgetHost::gestureEvent(QGestureEvent *event)
-{
-    HsScene *scene = HsScene::instance();    
-    QGesture *gesture = event->gesture(Qt::PanGesture);
-    if (gesture) {
-        switch (gesture->state()) {
-            case Qt::GestureStarted:
-                grabMouse();
-                emit scene->pagePanStarted(event);
-                break;
-            case Qt::GestureUpdated:
-                emit scene->pagePanUpdated(event);
-                break;
-            case Qt::GestureFinished:
-            case Qt::GestureCanceled:
-                ungrabMouse();
-                emit scene->pagePanFinished(event);
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-/*!
-    \fn HsWidgetHost::mousePressEvent(QGraphicsSceneMouseEvent *)
-    Reimplemented from QGraphicsItem for eating all mouse presses.
-*/
-
-/*!
-    Configures the touch are for this widget host.
-*/
-void HsWidgetHost::setupTouchArea()
-{
-    mTouchArea = new HsWidgetTouchArea(this);
-    mTouchArea->setZValue(1);
-}
-
-/*!
-    Configures the effects for this widget host.
-*/
-void HsWidgetHost::setupEffects()
-{
-    /* TODO: Uncomment after the Qt bug has been fixed.
-    QGraphicsDropShadowEffect *effect =
-        new QGraphicsDropShadowEffect(this);
-    effect->setColor(QColor(0, 0, 0, 150));
-    effect->setBlurRadius(5);
-    effect->setOffset(3);
-    setGraphicsEffect(effect);
-    */
+    mVisual->startDropEffect();
 }
 
 /*!
@@ -681,15 +525,6 @@ bool HsWidgetHost::hasSignal(const char *signature)
     return index >= 0;
 }
 
-/*!
-    Resizes this widget host to the given \a size.
-*/
-void HsWidgetHost::setNewSize(const QSizeF &size)
-{
-    mTouchArea->resize(size);
-    resize(size);
-    setPreferredSize(size);
-}
 
 /*!
     Assigns preferences for the contained widget.
@@ -752,26 +587,21 @@ void HsWidgetHost::action_disconnectComponent()
 */
 void HsWidgetHost::action_load()
 {
-    QServiceManager manager;
-    QServiceFilter filter("com.nokia.symbian.IHomeScreenWidget");
-    filter.setServiceName(mComponent->uri());
-    QList<QServiceInterfaceDescriptor> interfaces = manager.findInterfaces(filter);
-    if (interfaces.isEmpty()) {
+    mWidget = HsHostedWidgetFactory::instance()->createWidget(mComponent->uri());
+    if (!mWidget) {
         emit event_faulted();
         return;
     }
-
-    QObject *widgetObject = manager.loadInterface(interfaces.first());
-    mWidget = qobject_cast<QGraphicsWidget *>(widgetObject);
-
-    if (!mWidget ||
-        !setMethod("onShow()", mOnShowMethod) ||
+    // must have fuctions
+    if (!setMethod("onShow()", mOnShowMethod) || 
         !setMethod("onHide()", mOnHideMethod)) {
+        delete mWidget;
         mWidget = 0;
-        delete widgetObject;
         emit event_faulted();
         return;
     }
+    
+    mVisual->setWidget(mWidget);
 
     setMethod("onInitialize()", mOnInitializeMethod);
     setMethod("onUninitialize()", mOnUninitializeMethod);
@@ -792,21 +622,12 @@ void HsWidgetHost::action_load()
             SLOT(onError()), Qt::QueuedConnection);
     }
 
-    mWidget->installEventFilter(this);
-
-    setMinimumSize(HSCONFIGURATION_GET(minimumWidgetSizeInPixels));
-    setMaximumSize(HSCONFIGURATION_GET(maximumWidgetSizeInPixels));
-    
     loadPresentation();
-
-    mWidget->setParentItem(this);
-
-    setNewSize(mWidget->size());
-
+   
     QString objName(mComponent->uri());
     objName.append(":");
     objName.append(QString::number(mDatabaseId));
-    setObjectName(objName);
+    mVisual->setObjectName(objName);
 }
 
 /*!
@@ -814,6 +635,7 @@ void HsWidgetHost::action_load()
 */
 void HsWidgetHost::action_unload()
 {
+    mVisual->setWidget(0);
     delete mWidget;
     mWidget = 0;
 		// This is needed because QServicePluginCleanup is 

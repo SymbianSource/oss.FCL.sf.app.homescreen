@@ -21,11 +21,12 @@
 #include <QTime>
 #include <QGraphicsLinearLayout>
 
-#include <hblabel.h>
-#include <hbextendedlocale.h>
+#include <HbExtendedLocale>
+#include <HbMainWindow>
 
 #include "snsrswipewidget.h"
 #include "snsrindicatorwidget.h"
+#include "snsrlabel.h"
 
 /*!
     \class SnsrDigitalClockContainer
@@ -66,41 +67,6 @@ SnsrDigitalClockContainer::SnsrDigitalClockContainer() :
     mSwipeWidget(0)*/
 {
     SCREENSAVER_TEST_FUNC_ENTRY("SnsrDigitalClockContainer::SnsrDigitalClockContainer")
-
-    bool ok(false);
-    // load digital clock
-    qDebug() << gDigitalLayoutDocml;
-    mDocumentObjects = mDocumentLoader.load(gDigitalLayoutDocml, &ok);
-    Q_ASSERT_X(ok, gDigitalLayoutDocml, "Invalid DocML file.");
-
-    if (ok) {
-        mMainView = mDocumentLoader.findWidget(gMainViewName);
-        mDateLabel = qobject_cast<HbLabel *>(
-                mDocumentLoader.findWidget(gDateLabelName));
-        mTimeLabel = qobject_cast<HbLabel *>(
-                mDocumentLoader.findWidget(gTimeLabelName));
-        mAmPmLabel = qobject_cast<HbLabel *>(
-                mDocumentLoader.findWidget(gAmPmLabelName));
-        mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
-                mDocumentLoader.findWidget(gIndicatorWidgetName));
-        // implement swipewidget later on
-        /*mSwipeWidget = qobject_cast<SnsrSwipeWidget *>(
-                mDocumentLoader.findWidget(gSwipeWidgetName));*/
-
-        Q_ASSERT_X(
-                mMainView && mDateLabel && mTimeLabel && mAmPmLabel &&
-                mIndicatorWidget /*&& mSwipeWidget*/,
-                gDigitalLayoutDocml, "Objects not found in DocML file."
-                );
-        
-        //connect( mSwipeWidget, SIGNAL(swipeDownDetected()), SIGNAL(unlockRequested()) );
-
-        mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
-        
-        mBackgroundContainerLayout->addItem(mMainView);
- //       mSwipeWidget->start();
-    }
-
     SCREENSAVER_TEST_FUNC_EXIT("SnsrDigitalClockContainer::SnsrDigitalClockContainer")
 }
 
@@ -109,6 +75,7 @@ SnsrDigitalClockContainer::SnsrDigitalClockContainer() :
  */
 SnsrDigitalClockContainer::~SnsrDigitalClockContainer()
 {
+    resetIndicatorConnections();
     //mTimeLabel, mAmPmLabel, mDateLabel - deleted by the parent
 }
 
@@ -130,7 +97,8 @@ void SnsrDigitalClockContainer::update()
     mTimeLabel->setPlainText(
         HbExtendedLocale().format(QTime::currentTime(), gTimeFormatStr)
         );
-    // if clock type is 24, this will return an empty string.
+    
+    // if clock type is 24h, this will return an empty string.
     mAmPmLabel->setPlainText(
         HbExtendedLocale().format(QTime::currentTime(), gAmPmFormatStr)
         );
@@ -151,44 +119,60 @@ void SnsrDigitalClockContainer::update()
     SCREENSAVER_TEST_FUNC_EXIT("SnsrDigitalClockContainer::update")
 }
 
-/*!
-    Changes screensaver layout basing on orientation changes.
-    \param orientation Current orientation.
- */
-void SnsrDigitalClockContainer::changeLayout(Qt::Orientation orientation)
-{
-    SCREENSAVER_TEST_FUNC_ENTRY("SnsrDigitalClockContainer::changeLayout")
-
-    bool ok(false);
-    if (mCurrentOrientation != orientation) {
-        mCurrentOrientation = orientation;
-
-        // hide controls to avoid screen flickering
-        mMainView->hide();
-
-        QString sectionToLoad("");
-        if (mCurrentOrientation == Qt::Horizontal) {
-            sectionToLoad = gLandscapeSectionName;
-        }
-        qDebug() << "loading: " << gDigitalLayoutDocml << ", section: "
-                << sectionToLoad;
-        mDocumentLoader.load(gDigitalLayoutDocml, sectionToLoad, &ok);
-        // view is rebuilt and ready to show
-        update();
-        mMainView->show();
-        Q_ASSERT_X(ok, gDigitalLayoutDocml, "Invalid section in DocML file.");
-    }
-    // update anyway - this is needed in situations when screensaver goes to
-    // foreground but layout change did not occur
-    if (!ok) {
-        update();
-    }
-
-    SCREENSAVER_TEST_FUNC_EXIT("SnsrDigitalClockContainer::changeLayout")
-}
-
 int SnsrDigitalClockContainer::updateIntervalInMilliseconds()
 {
     return 1000;
+}
+
+void SnsrDigitalClockContainer::loadWidgets()
+{
+    // reset widget pointers, any previous widgets are already deleted by now
+    mMainView = 0;
+    mDateLabel = 0;
+    mTimeLabel = 0;
+    mAmPmLabel = 0;
+    mIndicatorWidget = 0;
+    
+    // load widgets from docml
+    bool ok(false);
+    qDebug() << gDigitalLayoutDocml;
+    mDocumentObjects = mDocumentLoader.load(gDigitalLayoutDocml, &ok);
+    Q_ASSERT_X(ok, gDigitalLayoutDocml, "Invalid DocML file.");
+
+    if (ok) {
+        mMainView = mDocumentLoader.findWidget(gMainViewName);
+        mDateLabel = qobject_cast<SnsrLabel *>(
+                mDocumentLoader.findWidget(gDateLabelName));
+        mTimeLabel = qobject_cast<SnsrLabel *>(
+                mDocumentLoader.findWidget(gTimeLabelName));
+        mAmPmLabel = qobject_cast<SnsrLabel *>(
+                mDocumentLoader.findWidget(gAmPmLabelName));
+        mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
+                mDocumentLoader.findWidget(gIndicatorWidgetName));
+        // implement swipewidget later on
+        /*mSwipeWidget = qobject_cast<SnsrSwipeWidget *>(
+                mDocumentLoader.findWidget(gSwipeWidgetName));*/
+
+        Q_ASSERT_X(
+                mMainView && mDateLabel && mTimeLabel && mAmPmLabel &&
+                mIndicatorWidget /*&& mSwipeWidget*/,
+                gDigitalLayoutDocml, "Objects not found in DocML file."
+                );
+
+        // In case of landscape layout, read also the landscape delta section
+        if ( mCurrentOrientation == Qt::Horizontal ) {
+            qDebug() << "loading: " << gDigitalLayoutDocml << ", section: " << gLandscapeSectionName;
+            mDocumentLoader.load(gDigitalLayoutDocml, gLandscapeSectionName, &ok);
+            Q_ASSERT_X(ok, gDigitalLayoutDocml, "Invalid section in DocML file.");
+        }
+
+        mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        initIndicatorWidget();
+        
+        mBackgroundContainerLayout->addItem(mMainView);
+
+        //connect( mSwipeWidget, SIGNAL(swipeDownDetected()), SIGNAL(unlockRequested()) );
+        //mSwipeWidget->start();
+    }
 }
 

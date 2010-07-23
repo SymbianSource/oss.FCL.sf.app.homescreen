@@ -26,6 +26,7 @@
 #include "hsmenuservice.h"
 #include "hsmenuview.h"
 
+
 class HbMenu;
 class HbAction;
 class HbMessageBox;
@@ -52,7 +53,6 @@ public:
 
 private slots:
 
-    virtual void applicationLaunchFailMessageFinished(HbAction*);
     virtual void openAppLibrary();
 
 protected slots:
@@ -67,27 +67,21 @@ protected slots:
     virtual void showContextMenu(HbAbstractViewItem *item, const QPointF &coords);
     virtual int checkSoftwareUpdates();
     virtual bool openTaskSwitcher();
+    virtual void closeContextMenu();
 protected:
     
-    void initialize(HsMenuViewBuilder &menuViewBuilder, HsViewContext viewContext);
+    void initialize(HsMenuViewBuilder &menuViewBuilder, HsStateContext stateContext);
     void createApplicationLaunchFailMessage(int errorCode,int itemId);
-    void subscribeForMemoryCardRemove();
-
     void defineTransitions();
 
 private:
-    
-    void cleanUpApplicationLaunchFailMessage();
-
     virtual void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags) = 0;
     virtual void setMenuOptions() = 0;
 
 
 private:
     
-    CaNotifier *mNotifier;
-    int mMessageRelatedItemId;
-    HbMessageBox *mApplicationLaunchFailMessage;
+    QPointer<HbMessageBox> mApplicationLaunchFailMessage;
 
 protected:
     HsMenuItemModel *mModel;

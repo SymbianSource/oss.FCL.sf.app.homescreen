@@ -29,7 +29,7 @@ QT += xml sql
 HB += hbfeedback
 
 CONFIG += plugin hb mobility
-MOBILITY = serviceframework
+MOBILITY = serviceframework systeminfo
 
 PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
 
@@ -39,7 +39,6 @@ LIBS += -lhsutils \
         -lhsdomainmodel \
         -lhsmenuserviceprovider
 
-RESOURCES += hshomescreenstateplugin.qrc
 
 symbian: {
     TARGET.UID3 = 0x20022F41

@@ -34,6 +34,7 @@ class CaEntry;
 class CaNotifier;
 class HsContentService;
 
+
 class HsAddToHomeScreenState: public  QState
 {
     Q_OBJECT
@@ -53,8 +54,6 @@ private slots:
     void cleanUp();
 
     void messageWidgetCorruptedFinished(HbAction* finishedAction);
-    
-    void memoryCardRemoved();
 
 signals:
 
@@ -72,7 +71,6 @@ private:
 
     void logActionResult(QString operationName, int entryId,
                          bool operationSucceded);
-    void subscribeForMemoryCardRemove();
 
 private:
 
@@ -86,8 +84,6 @@ private:
     QAction *mConfirmAction;
     
     HsMenuMode mMenuMode;
-    
-    CaNotifier *mNotifier;
     
     QVariant mToken;
 

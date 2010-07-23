@@ -25,13 +25,12 @@
 #include "caentry.h" 
 #include "cadefs.h"
 #include "canotifier.h"
-#include "hsscene.h"
 
 #include <QSignalMapper>
 #include <QDir>
 #include <QCoreApplication>
 
-#include <HbMainWindow>
+//#include <HbMainWindow>
 
 /*!
     \class HsWidgetComponentRegistry
@@ -58,7 +57,7 @@ HsWidgetComponentRegistry* HsWidgetComponentRegistry::instance()
 {
     if (!mInstance) {
         mInstance = new HsWidgetComponentRegistry;
-        mInstance->setParent(HsScene::mainWindow());
+        mInstance->setParent(QCoreApplication::instance());
     }
     return mInstance;
 }

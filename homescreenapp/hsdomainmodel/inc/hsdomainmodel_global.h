@@ -19,7 +19,7 @@
 #ifndef HSDOMAINMODEL_GLOBAL_H
 #define HSDOMAINMODEL_GLOBAL_H
 
-#include <Qt/qglobal.h>
+#include <qglobal.h>
 
 // services uri; services key names used when the service is passed as property in state
 const char CONTENT_SERVICE_KEY[]  = "http://homescreen.nokia.com/runtimeservices/contentservice";

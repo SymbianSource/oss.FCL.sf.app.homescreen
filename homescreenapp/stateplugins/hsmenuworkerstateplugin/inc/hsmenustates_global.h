@@ -64,6 +64,12 @@ static const char *const HS_INSTALLATION_LOG_DIALOG_LAYOUT =":/xml/hsinstallatio
 static const char *const HS_INSTALLATION_LOG_DIALOG_NAME="installation_log_dialog";
 static const char *const HS_INSTALLATION_LOG_DIALOG_LOG_LABEL="log_label";
 
+static const char *const HS_COLLECTION_DIALOG_LAYOUT =":/xml/hscollectionslistdialog.docml";
+static const char *const HS_COLLECTION_DIALOG_NAME="collection_list_dialog";
+static const char *const HS_COLLECTION_DIALOG_LIST_VIEW="listView";
+static const char *const HS_COLLECTION_DIALOG_CREATE_NEW_ACTION="qtl_dialog_softkey_2_left";
+static const char *const HS_COLLECTION_DIALOG_CANCEL_ACTION="qtl_dialog_softkey_2_right";
+
 
 /*!
  To enable logging of function entry and exit use the following flag for qmake:

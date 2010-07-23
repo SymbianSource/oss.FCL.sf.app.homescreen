@@ -14,7 +14,7 @@
 * Description:  Menu Application Library state.
  *
 */
-
+#include <QScopedPointer>
 #include <hbmainwindow.h>
 #include <hbview.h>
 #include <hbinstance.h>
@@ -26,6 +26,7 @@
 #include "hsapp_defs.h"
 #include "hsmenuevent.h"
 #include "hsviewappsettingsstate.h"
+#include "hsmenuentryremovedhandler.h"
 #include "caentry.h"
 #include "canotifier.h"
 #include "canotifierfilter.h"
@@ -64,9 +65,7 @@ HsViewAppSettingsState::HsViewAppSettingsState(QState *parent) :
         QState(parent),
         mView(0), 
         mPreviousView(0), 
-        mActionConfirm(0),
-        mNotifier(0)
-        
+        mActionConfirm(0)
 {
     construct();
 }
@@ -87,9 +86,6 @@ void HsViewAppSettingsState::construct()
  */
 HsViewAppSettingsState::~HsViewAppSettingsState()
 {
-    if (mNotifier) {
-        delete mNotifier;
-    }    
 }
 
 /*!
@@ -109,15 +105,20 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
     QSharedPointer<const CaEntry> entry = CaService::instance()->getEntry(entryId);    
     
     QString pluginPath;
-    pluginPath = pluginPath.append("/resource/qt/plugins/appsettings/").append(entry->attribute(appSettingsPlugin())).append(".qtplugin");
+    pluginPath = pluginPath.append("/resource/qt/plugins/appsettings/")
+        .append(entry->attribute(appSettingsPlugin())).append(".qtplugin");
     QPluginLoader loader(pluginPath);
     mView = qobject_cast<HbView *>(loader.instance()); 
     
     mActionConfirm = new HbAction(Hb::ConfirmNaviAction, mView);
-    connect(mActionConfirm, SIGNAL(triggered()),SLOT(settingsDone()));
+    connect(mActionConfirm, SIGNAL(triggered()), SIGNAL(exit()));
     
     if (mView) {    
-        subscribeForMemoryCardRemove(entryId);
+        QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
+            new HsMenuEntryRemovedHandler(entryId, this, SIGNAL(exit())));
+        
+        entryObserver.take()->setParent(mView);
+        
         QObject::connect(this, SIGNAL(initialize(QString)), mView, SLOT(initialize(QString)));        
         mView->setParent(this);
         emit initialize(entry->attribute(applicationUidEntryKey()));        
@@ -154,32 +155,6 @@ HbMainWindow *HsViewAppSettingsState::mainWindow() const
 #endif //COVERAGE_MEASUREMENT
 
 
-/*!
- Invoked when plugin view exits
- */
-void HsViewAppSettingsState::settingsDone()
-{
-    emit exit();
-}
-
-/*!
- Subscribe for memory card remove.
- \param entryId: entry id.
- \retval void
- */
-void HsViewAppSettingsState::subscribeForMemoryCardRemove(int entryId)
-{
-    CaNotifierFilter filter;
-    QList<int> entryIds;
-    entryIds.append(entryId);
-    filter.setIds(entryIds);
-    mNotifier = CaService::instance()->createNotifier(filter);
-    mNotifier->setParent(this);
-    connect(mNotifier,
-            SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SLOT(settingsDone()));
-}
-
 void HsViewAppSettingsState::onExit(QEvent *event)
 {
     
@@ -188,12 +163,7 @@ void HsViewAppSettingsState::onExit(QEvent *event)
     HbMainWindow *hbMainWindow = mainWindow();
     hbMainWindow->setCurrentView(mPreviousView);
     hbMainWindow->removeView(mView);
-    disconnect(mNotifier,
-               SIGNAL(entryChanged(CaEntry,ChangeType)),
-               this,
-               SLOT(settingsDone()));
-    delete mNotifier;
-    mNotifier = NULL;
+
     
     delete mActionConfirm;
     mActionConfirm = NULL;

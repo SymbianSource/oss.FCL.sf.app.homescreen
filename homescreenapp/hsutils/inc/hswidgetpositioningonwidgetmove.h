@@ -103,13 +103,20 @@ public:
 private:
 
     void createSnappableRectangles(const QList<QRectF> &inactiveRects);
-    void checkForCenterSnapping();
     void checkInactiveRectLieAboveOrBelowOfMovingRect();
+    void checkInactiveRectVerticalEdgesInRange(qreal movingRectVerticalEdgePosition);
+    void checkInactiveRectBetterFitForHorizontalSnapping(qreal containerVerticalEdgeToInactiveRectVerticalEdge,
+                                                         qreal containerOtherVerticalEdgeToInactiveRectOtherVerticalEdge);
     void compareLeftSideOfMovingRectForSnapping();
     void compareRightSideOfMovingRectForSnapping();
     void checkInactiveRectLieLeftOrRightOfMovingRect();
+    void checkInactiveRectHorizontalEdgesInRange(qreal movingRectHorizontalEdgePosition);
+    void checkInactiveRectBetterFitForVerticalSnapping(qreal containerHorizontalEdgeToInactiveRectHorizontalEdge,
+                                                       qreal containerOtherHorizontalEdgeToInactiveRectOtherHorizontalEdge);
     void compareTopOfMovingRectForSnapping();
     void compareBottomOfMovingRectForSnapping();
+    void createVerticalLine();
+    void createHorizontalLine();
     void extendVerticalLine();
     void extendHorizontalLine();
     void checkInactiveRectPositionToVerticalLine();
@@ -128,6 +135,8 @@ private: //data
     QRectF mInactiveRectToCompare;
     HsSnapRectangle mInactiveSnapRectToCompare;
     QRectF mMovingRect;
+
+    qreal mMinDistancePosition;
     qreal mHorizontalSnapPosition;
     qreal mVerticalSnapPosition;
 
@@ -140,6 +149,10 @@ private: //data
     bool mRectLieAbove;
     bool mLeftInRange;
     bool mRightInRange;
+    bool mIsBetterFitHorizontalSnap;
+    qreal mDistanceVerticalEdges;
+    qreal mVerticalEdgeToLeftOfInactiveRect;
+    qreal mVerticalEdgeToRightOfInactiveRect;
     qreal mMinVerticalEdgesDistance;
     qreal mVerticalDistance;
     qreal mVerticalDistanceFromSelectedRect;
@@ -148,6 +161,10 @@ private: //data
     bool mRectLieLeft;
     bool mTopInRange;
     bool mBottomInRange;
+    bool mIsBetterFitVerticalSnap;
+    qreal mDistanceHorizontalEdges;
+    qreal mHorizontalEdgeToTopOfInactiveRect;
+    qreal mHorizontalEdgeToBottomOfInactiveRect;
     qreal mMinHorizontalEdgesDistance;
     qreal mHorizontalDistance;
     qreal mHorizontalDistanceFromSelectedRect;

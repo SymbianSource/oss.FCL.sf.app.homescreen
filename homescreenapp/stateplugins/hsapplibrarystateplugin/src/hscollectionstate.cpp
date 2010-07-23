@@ -26,6 +26,7 @@
 
 #include <cadefs.h>
 #include <caentry.h>
+#include <caitemmodel.h>
 
 #include "hsapp_defs.h"
 #include "hsmenuevent.h"
@@ -103,8 +104,6 @@ void HsCollectionState::construct()
         parent() != 0 ? parent()->objectName() : QString("");
     setObjectName(parentName + "/collectionstate");
 
-    mMenuView->collectionButton()->setCheckable(true);
-
     HSMENUTEST_FUNC_EXIT("HsCollectionState::construct");
 }
 
@@ -144,45 +143,20 @@ void HsCollectionState::onEntry(QEvent *event)
 void HsCollectionState::stateEntered()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::stateEntered");
-    HsBaseViewState::stateEntered();
-    makeConnect();
     if (!mModel) {
         mModel =
             HsMenuService::getCollectionModel(
                 mCollectionId, mSortAttribute, mCollectionType);
     }
 
-    EntryFlags flags =
-        mModel->root().data(CaItemModel::FlagsRole).value<
-        EntryFlags> ();
+    handleEmptyChange(mModel->rowCount() == 0);
 
-    if (mModel->rowCount() == 0){
-        if (flags & RemovableEntryFlag){
-            mMenuView->setContext(HsCollectionContext,HsButtonContext);
-        } else {
-            mMenuView->setContext(HsCollectionContext,HsEmptyLabelContext);
-        }
-        mMenuView->disableSearch(true);
-    } else {
-        mMenuView->setContext(HsCollectionContext,HsItemViewContext);
-        mMenuView->disableSearch(false);
-    }
-
-    connect(mModel, SIGNAL(modelReset()), SLOT(updateLabel()));
-    connect(mModel, SIGNAL(empty(bool)),this,
-            SLOT(handleEmptyChange(bool)));
-    connect(mModel, SIGNAL(empty(bool)),this,
-            SLOT(lockSearchButton(bool)));
-
-    mMenuView->setModel(mModel);
-
-    mMenuView->listView()->scrollTo(
-        mModel->index(0), HbAbstractItemView::PositionAtTop);
-
+    makeConnect();
+    
     mMenuView->viewLabel()->setHeading(
-        mModel->root().data(Qt::DisplayRole).toString());
-    setMenuOptions();
+        mModel->root().data(CaItemModel::CollectionTitleRole).toString());
 
+    HsBaseViewState::stateEntered();
     HSMENUTEST_FUNC_EXIT("HsCollectionState::stateEntered");
 }
 
@@ -257,16 +231,9 @@ void HsCollectionState::setMenuOptions()
 void HsCollectionState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::stateExited");
-    makeDisconnect();
     mMenuView->disableSearch(false);
-    disconnect(mModel, SIGNAL(empty(bool)),this,
-               SLOT(handleEmptyChange(bool)));
+    makeDisconnect();
 
-    disconnect(mModel, SIGNAL(empty(bool)),this,
-               SLOT(lockSearchButton(bool)));
-
-    disconnect(mModel, SIGNAL(modelReset()),
-                   this, SLOT(updateLabel()));
     delete mModel;
     mModel = NULL;
     this->mSortAttribute = NoHsSortAttribute;
@@ -296,8 +263,11 @@ void HsCollectionState::makeConnect()
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             static_cast<HsBaseViewState*>(this),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
-    connect(mMenuView->collectionButton(),
-            SIGNAL(toggled(bool)), this, SLOT(addAppsAction(bool)));
+    connect(mModel, SIGNAL(modelReset()), SLOT(updateLabel()));
+    connect(mModel, SIGNAL(empty(bool)),this,
+            SLOT(handleEmptyChange(bool)));
+    connect(mModel, SIGNAL(empty(bool)),this,
+            SLOT(lockSearchButton(bool)));
 }
 
 /*!
@@ -305,9 +275,6 @@ void HsCollectionState::makeConnect()
  */
 void HsCollectionState::makeDisconnect()
 {
-    disconnect(mMenuView->collectionButton(),
-            SIGNAL(toggled(bool)), this, SLOT(addAppsAction(bool)));
-
     disconnect(mBackKeyAction, SIGNAL(triggered()),
                static_cast<HsBaseViewState*>(this), SLOT(openAppLibrary()));
 
@@ -323,6 +290,14 @@ void HsCollectionState::makeDisconnect()
                SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
                static_cast<HsBaseViewState*>(this),
                SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
+    disconnect(mModel, SIGNAL(empty(bool)),this,
+               SLOT(handleEmptyChange(bool)));
+
+    disconnect(mModel, SIGNAL(empty(bool)),this,
+               SLOT(lockSearchButton(bool)));
+
+    disconnect(mModel, SIGNAL(modelReset()),
+                   this, SLOT(updateLabel()));
 }
 
 /*!
@@ -362,32 +337,48 @@ void HsCollectionState::contextMenuAction(HbAction *action)
             machine()->postEvent(
                 HsMenuEventFactory::createAppDetailsViewEvent(itemId));
             break;
+        case OpenContextAction:
+            launchItem(mContextModelIndex);
+            break;
         default:
             break;
     }
 
-    mMenuView->setSearchPanelVisible(false);
+    mMenuView->hideSearchPanel();
 }
 
 /*!
- Handles button visibility
-  \param empty if true set empty text label or button to add entries to collection.
+ Handler to be called when model becomes not empty or model becomes empty.
+  \param empty \a true when model becomes empty \a false otherwise.
  */
 void HsCollectionState::handleEmptyChange(bool empty)
 {
+
     EntryFlags flags =
         mModel->root().data(CaItemModel::FlagsRole).value<
         EntryFlags> ();
 
     if (empty){
         if (flags & RemovableEntryFlag){
-            mMenuView->setContext(HsCollectionContext,HsButtonContext);
+            mMenuView->reset(HsButtonContext);
+            connect(mMenuView->contentButton(),
+                    SIGNAL(toggled(bool)), this, SLOT(addAppsAction(bool)),
+                    Qt::UniqueConnection);
         } else {
-            mMenuView->setContext(HsCollectionContext,HsEmptyLabelContext);
+            mMenuView->reset(HsEmptyLabelContext);
         }
+
     } else {
-        mMenuView->setContext(HsCollectionContext,HsItemViewContext);
+        mMenuView->reset(HsItemViewContext);
+        mMenuView->setModel(mModel);
+        mMenuView->listView()->scrollTo(
+            mModel->index(0), HbAbstractItemView::PositionAtTop);
     }
+	
+    mMenuView->disableSearch(empty);
+    
+    mMenuView->activate();
+
     setMenuOptions();
 }
 
@@ -411,7 +402,11 @@ void HsCollectionState::addAppsAction(bool addApps)
 {
     // Add applications
     if (addApps) {
-        mMenuView->collectionButton()->setChecked(false);
+
+        if (mMenuView->contentButton()) {
+            mMenuView->contentButton()->setChecked(false);
+        }
+
         machine()->postEvent(
             HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
                 mCollectionId));
@@ -476,15 +471,18 @@ void HsCollectionState::addElementToHomeScreen(const QModelIndex &index)
 }
 
 /*!
- Method seting context menu options.
+ Method setting context menu options.
  */
 void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
 {
+    HbAction *openAction = mContextMenu->addAction(hbTrId(
+        "txt_common_menu_open"));
+    openAction->setData(OpenContextAction);
     HbAction *addShortcutAction = mContextMenu->addAction(hbTrId(
-                                      "txt_applib_menu_add_to_home_screen"));
+        "txt_applib_menu_add_to_home_screen"));
     addShortcutAction->setData(AddToHomeScreenContextAction);
     HbAction *addToCollection = mContextMenu->addAction(hbTrId(
-                                    "txt_applib_menu_add_to_collection"));
+        "txt_applib_menu_add_to_collection"));
     addToCollection->setData(AddToCollectionContextAction);
     HbAction *removeAction(NULL);
     HbAction *uninstallAction(NULL);
@@ -553,12 +551,14 @@ void HsCollectionState::createArrangeCollection()
     // Arrange collection via the Arrange view
     int topItemId(0);
 
-    const QList<HbAbstractViewItem *> array =
-        mMenuView->listView()->visibleItems();
+    if (mMenuView->listView() != NULL) {
+        const QList<HbAbstractViewItem *> array =
+            mMenuView->listView()->visibleItems();
 
-    if (array.count() >= 1) {
-        QModelIndex idx = array[0]->modelIndex();
-        topItemId = idx.data(CaItemModel::IdRole).toInt();
+        if (array.count() >= 1) {
+            QModelIndex idx = array[0]->modelIndex();
+            topItemId = idx.data(CaItemModel::IdRole).toInt();
+        }
     }
 
     machine()->postEvent(

@@ -24,14 +24,16 @@
 #include <QDebug>
 #include <QTime>
 #include <QTimer>
+#include <XQSettingsManager> 
+#include <HbInstance>
+#include <HbMainWindow>
 
-#include <hbinstance.h>
-#include <hbmainwindow.h>
-
+#include <screensaverdomaincrkeys.h>
 #include "snsranalogclockcontainer.h"
 #include "snsrdigitalclockcontainer.h"
 #include "snsroledanalogclockcontainer.h"
 #include "snsroleddigitalclockcontainer.h"
+#include "snsrblankcontainer.h"
 #include "snsrindicatormodel.h"
 
 /*!
@@ -40,15 +42,14 @@
     \brief Screensaver with big digital clock.
  */
 
-const int gTimeInterval(100);
-
 /*!
     Constructs a new SnsrBigClockScreensaver.
  */
 SnsrBigClockScreensaver::SnsrBigClockScreensaver() :
     mMainWindow(0),
     mCurrentContainer(0),
-    mIndicatorModel(0)
+    mIndicatorModel(0),
+    m_setManager(0)
 {
     mMainWindow = HbInstance::instance()->allMainWindows().at(0);
     // for nice looking clock hand transformations
@@ -64,6 +65,7 @@ SnsrBigClockScreensaver::SnsrBigClockScreensaver() :
  */
 SnsrBigClockScreensaver::~SnsrBigClockScreensaver()
 {
+    mMainWindow->unsetOrientation( /*animate*/false );
     // mCurrentContainer, mIndicatorModel - deleted by the parent
 }
 
@@ -86,6 +88,8 @@ bool SnsrBigClockScreensaver::onForeground()
 
     removeCurrentContainer();
 
+    emit screenPowerModeRequested( Screensaver::ScreenModeFullPower );
+    
     SnsrBigClockContainer* newContainer( 0 );
     if (clockFormat() == ClockFormatAnalog) {
         newContainer = new SnsrAnalogClockContainer();
@@ -95,7 +99,7 @@ bool SnsrBigClockScreensaver::onForeground()
     }
 
     setCurrentContainer( newContainer );
-
+    
     SCREENSAVER_TEST_FUNC_EXIT("SnsrBigClockScreensaver::onForeground")
     return true;
 }
@@ -111,13 +115,34 @@ bool SnsrBigClockScreensaver::onPartialForeground()
     removeCurrentContainer();
     
     SnsrBigClockContainer* newContainer( 0 );
-    if (clockFormat() == ClockFormatAnalog) {
-        newContainer = new SnsrOledAnalogClockContainer();
+        
+    // Check ScreensaverStatus from repository
+    XQSettingsManager::Error error;
+    int screensaverOn = 1; 
+    XQCentralRepositorySettingsKey settingsKey(
+            KCRUidScreensaverSettings.iUid, KScreensaverStatus ); // TUid as same repository used in control panel via Symbian APIs 
+    m_setManager = new XQSettingsManager(this);
+    if (m_setManager) {
+        screensaverOn = m_setManager->readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
+        error = m_setManager->error();
+        if (error != XQSettingsManager::NoError) {
+            qDebug("Error reading value from XQSettingsManager.. error = %d", error);
+        }
+        delete m_setManager;
+    }
+    
+    if (screensaverOn) {
+        if (clockFormat() == ClockFormatAnalog) {
+            newContainer = new SnsrOledAnalogClockContainer();
+        }
+        else {
+            newContainer = new SnsrOledDigitalClockContainer();
+        }
     }
     else {
-        newContainer = new SnsrOledDigitalClockContainer();
+        newContainer = new SnsrBlankContainer();
     }
-
+    
     setCurrentContainer( newContainer );
 
     SCREENSAVER_TEST_FUNC_EXIT("SnsrBigClockScreensaver::onPartialForeground")
@@ -196,6 +221,46 @@ void SnsrBigClockScreensaver::onHandleDeactivatedIndicator(
     mIndicatorModel->handleDeactivatedIndicator(deactivatedIndicator);
 }
 
+/*!
+    @copydoc Screensaver::getActiveScreenRows
+ */
+void SnsrBigClockScreensaver::getActiveScreenRows(int *firstActiveRow, int *lastActiveRow)
+{
+    if ( mCurrentContainer ) {
+        mCurrentContainer->getActiveScreenRows( firstActiveRow, lastActiveRow );
+    }
+    else {
+        qWarning() << "No current container when active rows queried.";
+    }
+}
+
+/*!
+    @copydoc Screensaver::updateLayout
+ */
+void SnsrBigClockScreensaver::updateLayout()
+{
+    if ( mCurrentContainer ) {
+        if ( mCurrentContainer->isOrientationLocked() ) {
+            mMainWindow->setOrientation( mMainWindow->orientation(), /*animate*/false );
+        }
+        else {
+            mMainWindow->unsetOrientation( /*animate*/false );
+        }
+        mCurrentContainer->changeLayout( mMainWindow->orientation() );
+    }
+    else {
+        qWarning() << "No current container when updateLayout called.";
+    }
+}
+
+/*!
+    Update the area visible in the power save screen mode. Power save mode gets
+    also activated on call if not already active.
+ */
+void SnsrBigClockScreensaver::updateActiveAreaForLowPower()
+{
+    emit screenPowerModeRequested( Screensaver::ScreenModeLowPower );
+}
 
 /*!
     Determines the curent clock format settings.
@@ -223,38 +288,41 @@ void SnsrBigClockScreensaver::removeCurrentContainer()
 {
     if ( mCurrentContainer ) {
         disconnect(
-            mMainWindow, SIGNAL(orientationChanged(Qt::Orientation)),
-            mCurrentContainer, SLOT(changeLayout(Qt::Orientation))
-            );
-        disconnect(
             &mTimer, SIGNAL(timeout()),
             mCurrentContainer, SLOT(update())
             );
         disconnect( 
             mCurrentContainer, SIGNAL(unlockRequested()), 
             this, SIGNAL(unlockRequested()) );
-        mTimer.stop();
+        if (mTimer.timerId()!= -1) {
+            mTimer.stop();
+        }
         emit viewChanged(0);
         
         delete mCurrentContainer;
         mCurrentContainer = 0;
     }
+    
+    mMainWindow->unsetOrientation( /*animate*/false );
 }
 
 void SnsrBigClockScreensaver::setCurrentContainer( SnsrBigClockContainer* newContainer )
 {
     mCurrentContainer = newContainer;
-    connect(
-            mMainWindow, SIGNAL(orientationChanged(Qt::Orientation)),
-            mCurrentContainer, SLOT(changeLayout(Qt::Orientation))
-        );
+    mCurrentContainer->setParent(this);
     connect( &mTimer, SIGNAL(timeout()), mCurrentContainer, SLOT(update()) );
     connect( mCurrentContainer, SIGNAL(unlockRequested()), SIGNAL(unlockRequested()) );
+    connect( mCurrentContainer, SIGNAL(activeAreaMoved()), SLOT(updateActiveAreaForLowPower()) );
 
-    mCurrentContainer->initIndicators(*mIndicatorModel);
+    mCurrentContainer->setIndicatorModel(*mIndicatorModel);
+
+    int updateInterval = mCurrentContainer->updateIntervalInMilliseconds(); 
+    // blankcontainer is empty one, don't start timer with -1 return value
+    if ( updateInterval != -1) {
+        mTimer.start(updateInterval);
+    }
     
-    mCurrentContainer->changeLayout(mMainWindow->orientation());
-    mTimer.start( mCurrentContainer->updateIntervalInMilliseconds() );
+    
     emit viewChanged(mCurrentContainer);
 }
 

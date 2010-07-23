@@ -42,6 +42,8 @@ public slots:
     void handleActivatedIndicator(HbIndicatorInterface *activatedIndicator);
     void handleDeactivatedIndicator(HbIndicatorInterface *deactivatedIndicator);
     
+    void handleUpdatedIndicator();
+    
     void initializeIndicatorWidget();
 
     /*
@@ -53,15 +55,18 @@ signals:
 
     void indicatorsUpdated(const QList<SnsrIndicatorInfo> &activeIndicators);
     void allIndicatorsDeactivated();
-   
+
 private:
 
-    void addIndicator(const SnsrIndicatorInfo &indicatorInfo);
-
-    bool findAndRemoveIndicator(const SnsrIndicatorInfo &indicatorInfo);
+    bool addIndicator(const SnsrIndicatorInfo &indicatorInfo);
+    bool isIndicatorAlreadyAdded(const SnsrIndicatorInfo &indicatorInfo) const;
     
+    bool findAndRemoveIndicator(const SnsrIndicatorInfo &indicatorInfo);
+   
     bool showIndicatorInScreensaver(const HbIndicatorInterface &indicatorInterface,
                                     SnsrIndicatorInfo &indicatorInfo);
+    
+    void connectToIndicatorsUpdateSignal(const HbIndicatorInterface &indicatorInterface);
 
     bool anyActiveIndicators() const;
     

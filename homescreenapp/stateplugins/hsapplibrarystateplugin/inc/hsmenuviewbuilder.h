@@ -20,7 +20,9 @@
 
 #include <QFlags>
 #include <QMap>
+#include <QPair>
 #include <QSet>
+#include <QSharedPointer>
 #include <QString>
 #include <qnamespace.h>
 #include <HbDocumentLoader>
@@ -38,18 +40,20 @@ class HbWidget;
 class HbToolBarExtension;
 class HbPushButton;
 
-enum HsViewContext {
-    HsAllAppsContext,
+enum HsStateContext {
+    HsAllAppsContext = 0,
     HsAllCollectionsContext,
     HsInstalledAppsContext,
     HsCollectionContext,
+    InvalidStateContext
 };
 
 enum HsOperationalContext {
-    HsItemViewContext,
+    HsItemViewContext = 0,
     HsSearchContext,
     HsButtonContext,
-    HsEmptyLabelContext
+    HsEmptyLabelContext,
+    InvalidOperationalContext
 };
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
@@ -71,37 +75,33 @@ public:
     HbToolBarExtension *toolBarExtension() const;
 
     // mandatory context dependent widgets accessors
-    HbView *currentView() const;
-    HbListView *currentListView() const;
+    HbView *currentView();
+    HbListView *currentListView();
 
 
     // optional widgets accessors
-    HbGroupBox *currentViewLabel() const;
-    HbSearchPanel *currentSearchPanel() const;
-    HbPushButton *collectionButton() const;
+    HbGroupBox *currentViewLabel();
+    HbSearchPanel *currentSearchPanel();
+    HbPushButton *currentAddContentButton();
 
 
-    void setViewContext(HsViewContext viewContext);
+    void setStateContext(HsStateContext stateContext);
     void setOperationalContext(HsOperationalContext operationalContext);
-    bool build();
 
 private:
-    void init();
+    typedef QPair<HsStateContext, HsOperationalContext> Context;
+    typedef QMap<Context, QSharedPointer<HbDocumentLoader> > LoaderMap;
 
-    bool parseSection(const QString &sectionName = QString());
+    QSharedPointer<HbDocumentLoader>
+            parseDocument(const QString &documentBaseName);
+
+    QSharedPointer<HbDocumentLoader> readContextConfiguration();
+
+    Context context() const;
+
+    QSharedPointer<HbDocumentLoader> currentLoader();
 
 
-    bool readContextConfiguration(HsViewContext, HsOperationalContext);
-
-
-    void searchPanelVisibilityChange(bool visible);
-
-    HbLineEdit *searchPanelLineEdit() const;
-
-    QMap<HsViewContext, QString > mViewContextToStringMap;
-    QMap<HsOperationalContext, QString > mOperationalContextToStringMap;
-
-    HbDocumentLoader mDocumentLoader;
     QSet<QObject *> mLoadedObjects;
 
     const QString DOCUMENT_FILE_NAME;
@@ -119,10 +119,13 @@ private:
     HbToolBarExtension *mToolBarExtension;
     HbAction *mToolBarExtensionAction;
 
-    HsViewContext mViewContext;
+    HsStateContext mStateContext;
     HsOperationalContext mOperationalContext;
 
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
+
+    LoaderMap mLoaderMap;
+    QSharedPointer<HbDocumentLoader> mCommonObjectsLoader;
 };
 
 #endif // HSMENUVIEWBUILDER_H

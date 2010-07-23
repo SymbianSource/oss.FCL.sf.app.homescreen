@@ -18,7 +18,7 @@
 #ifndef HSWIDGETHOST_H
 #define HSWIDGETHOST_H
 
-#include <HbWidget>
+#include <QObject>
 #include <QMetaMethod>
 #include <QMetaProperty>
 
@@ -33,13 +33,14 @@ class QStateMachine;
 class HsWidgetTouchArea;
 class HsWidgetComponent;
 class HsPage;
+class HsWidgetHostVisual;
 
-class HSDOMAINMODEL_EXPORT HsWidgetHost : public HbWidget
+class HSDOMAINMODEL_EXPORT HsWidgetHost : public QObject
 {
     Q_OBJECT
 
 public:
-    HsWidgetHost(int databaseId, QGraphicsItem *parent = 0);
+    HsWidgetHost(int databaseId, QObject *parent = 0);
     ~HsWidgetHost();
 
     static HsWidgetHost *createInstance(
@@ -58,8 +59,8 @@ public:
     bool savePresentation(HsWidgetPresentationData &presentation);
     bool getPresentation(HsWidgetPresentationData &presentation);
     bool removePresentation(Qt::Orientation orientation);
-    QPainterPath shape() const;
-
+    
+    HsWidgetHostVisual *visual() const;
 signals:
     void event_startAndShow();
     void event_startAndHide();
@@ -73,7 +74,6 @@ signals:
     
     void finished();
     void faulted();
-    void resized();
     void available();
     void unavailable();
 
@@ -90,22 +90,20 @@ public slots:
     void startDropEffect();
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event);
+/*    bool eventFilter(QObject *watched, QEvent *event);
     void gestureEvent(QGestureEvent *event);
     void mousePressEvent(QGraphicsSceneMouseEvent *) {}
-
+*/
 private:
     Q_DISABLE_COPY(HsWidgetHost)
-    void setupTouchArea();
-    void setupEffects();
+  
     void setupStates();
 
     bool setProperty(const char *name, QMetaProperty &property); 
     bool setMethod(const char *signature, QMetaMethod &method);    
     bool hasSignal(const char *signature);
 
-    void setNewSize(const QSizeF &size);
-
+  
     bool setPreferencesToWidget();
 
 private slots:
@@ -127,12 +125,13 @@ private slots:
     void onSetPreferences(const QStringList &names);
 
 private:
-    int mDatabaseId;        
+    int mDatabaseId;
+    HsWidgetHostVisual *mVisual;
     QStateMachine *mStateMachine;
-    QGraphicsWidget *mWidget;
+    QObject *mWidget;
     HsPage *mPage;    
     HsWidgetComponent *mComponent;
-    HsWidgetTouchArea *mTouchArea;
+
     QMetaMethod mOnInitializeMethod;
     QMetaMethod mOnShowMethod;
     QMetaMethod mOnHideMethod;

@@ -26,6 +26,7 @@
 #include "hsidlewidget.h"
 #include "hsscene.h"
 #include "hspage.h"
+#include "hspagevisual.h"
 #include "hswidgethost.h"
 #include "hswallpaper.h"
 #include "hstrashbinwidget.h"
@@ -34,6 +35,8 @@
 #include "hsconfiguration.h"
 #include "hsapp_defs.h"
 #include "hssnapline.h"
+#include "hsgui.h"
+
 
 namespace
 {
@@ -98,9 +101,9 @@ HsIdleWidget::~HsIdleWidget()
 {
     QList<HsPage *> pages = HsScene::instance()->pages();
     foreach (HsPage *page, pages) {
-        page->setParentItem(0);
-        if (page->scene()) {
-            page->scene()->removeItem(page);
+        page->visual()->setParentItem(0);
+        if (page->visual()->scene()) {
+            page->visual()->scene()->removeItem(page->visual());
         }
         HsWallpaper *pageWallpaper = page->wallpaper();
         if (pageWallpaper) {
@@ -148,7 +151,7 @@ void HsIdleWidget::setGeometry(const QRectF &rect)
 {
     
     int n = HsScene::instance()->pages().count();
-    QRectF layoutRect(HsScene::instance()->mainWindow()->layoutRect());
+    QRectF layoutRect(HsGui::instance()->layoutRect());
     if (layoutRect == rect || (layoutRect.height() == rect.width() && layoutRect.width() == rect.height())) {
         mControlLayer->resize(rect.size());
         mPageLayer->resize(n * rect.width(), rect.height());
@@ -184,7 +187,7 @@ void HsIdleWidget::insertPage(int index, HsPage *page)
 {
     QGraphicsLinearLayout *layout =
         static_cast<QGraphicsLinearLayout *>(mPageLayer->layout());
-    layout->insertItem(index, page);
+    layout->insertItem(index, page->visual());
     mPageLayer->resize(
         layout->count() * size().width(), size().height());
 
@@ -325,7 +328,7 @@ void HsIdleWidget::polishEvent()
     QList<HsPage *> pages = scene->pages();
 
     foreach (HsPage *page, pages) {
-        pageLayout->addItem(page);
+        pageLayout->addItem(page->visual());
         if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
             QGraphicsLinearLayout *pageWallpaperLayout = 
                 static_cast<QGraphicsLinearLayout *>(mPageWallpaperLayer->layout());
@@ -342,7 +345,7 @@ void HsIdleWidget::polishEvent()
     mPageIndicator->initialize(pages.count(), scene->activePageIndex());    
     showPageIndicator();
 
-    HsScene::mainWindow()->scene()->installEventFilter(this);
+   // HsGui::instance()->scene()->installEventFilter(this);
 }
 
 /*!

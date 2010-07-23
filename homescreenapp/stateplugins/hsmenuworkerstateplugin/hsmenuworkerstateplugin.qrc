@@ -6,5 +6,6 @@
         <file alias="hsdetailsdialog.docml">resource/hsdetailsdialog.docml</file>
         <file alias="hsuninstalldialog.docml">resource/hsuninstalldialog.docml</file>
         <file alias="hsinstallationlogdialog.docml">resource/hsinstallationlogdialog.docml</file>
+        <file alias="hscollectionslistdialog.docml">resource/hscollectionslistdialog.docml</file>
     </qresource>
 </RCC>

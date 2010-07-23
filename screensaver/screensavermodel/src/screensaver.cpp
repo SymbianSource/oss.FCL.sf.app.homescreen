@@ -108,6 +108,19 @@ Screensaver::~Screensaver()
  */
 
 /*!
+    \fn void Screensaver::unlockRequested()
+
+    This signal is emitted if screensaver wants the device to be unlocked.
+ */
+
+/*!
+    \fn void Screensaver::screenPowerModeRequested(ScreenPowerMode mode)
+
+    This signal is emitted when screensaver wants to switch the power
+    mode of the screen, or update the visible area in power save mode.
+ */
+
+/*!
     Returns the state that the Screensaver is currently in.
     \return The current state.
  */
@@ -115,6 +128,26 @@ ScreensaverState Screensaver::currentState()
 {
     return m_d->currentState();
 }
+
+/*!
+    \fn virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow) = 0
+
+    Inherited screensavers must implement this function to return the rows where 
+    the screensaver wants to draw graphics. This is called when screen is set to the
+    power save mode. The values returned do not matter in case the screensaver doesn't
+    ask for power save mode.
+    Note that the returned rows should reflect the rows in the natural orientation
+    of the screen device. That is, if default orientation of the screen is portrait,
+    then the return value in landscape mode must reflect the columns between which
+    the graphics are drawn.
+ */
+
+/*!
+    \fn virtual void updateLayout() = 0
+
+    Inherited screensavers must implement this function to reload the screen layout
+    for the current screen orientation.
+ */
 
 /*!
     Initializes the Screensaver

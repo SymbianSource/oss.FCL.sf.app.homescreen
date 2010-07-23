@@ -132,27 +132,32 @@ void HsInstalledAppsState::stateEntered()
     qDebug("AllAppsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::stateEntered");
 
-    HsBaseViewState::stateEntered();
-    setMenuOptions();
+    mMenuView->viewLabel()->setHeading(
+            hbTrId("txt_applib_subtitle_installed"));
+
     if (!mModel) {
         mModel
-        = HsMenuService::getInstalledModel(AscendingNameHsSortAttribute);
-        mMenuView->setModel(mModel);
+            = HsMenuService::getInstalledModel(AscendingNameHsSortAttribute);
     }
 
-    if (mModel->rowCount() == 0){
-        mMenuView->setContext(HsInstalledAppsContext,HsEmptyLabelContext);
-        }
-
-    mMenuView->listView()->scrollTo(
-        mModel->index(0));
-
+    if (mModel->rowCount() == 0) {
+        mMenuView->reset(HsEmptyLabelContext);
+    }
+    else {
+		mMenuView->reset(HsItemViewContext);
+        mMenuView->setModel(mModel);
+        mMenuView->listView()->scrollTo(
+            mModel->index(0));
+    }
+    setMenuOptions();
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
 
     connect(mModel, SIGNAL(empty(bool)),this,
             SLOT(setEmptyLabelVisibility(bool)));
+
+    HsBaseViewState::stateEntered();
 
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateEntered");
 }
@@ -172,7 +177,7 @@ void HsInstalledAppsState::stateExited()
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
 
     HsBaseViewState::stateExited();
-    
+
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateExited");
     qDebug("AllAppsState::stateExited()");
 }
@@ -184,10 +189,12 @@ void HsInstalledAppsState::stateExited()
 void HsInstalledAppsState::setEmptyLabelVisibility(bool visibility)
 {
     if(visibility){
-        mMenuView->setContext(HsInstalledAppsContext,HsEmptyLabelContext);
+        mMenuView->reset(HsEmptyLabelContext);
     } else {
-        mMenuView->setContext(HsInstalledAppsContext,HsItemViewContext);
+        mMenuView->reset(HsItemViewContext);
+        mMenuView->setModel(mModel);
     }
+    mMenuView->activate();
 }
 
 /*!
@@ -204,24 +211,24 @@ void HsInstalledAppsState::openInstallationLog()
  \param action to handle.
  */
 void HsInstalledAppsState::contextMenuAction(HbAction *action)
-{    
-    HsContextAction command = 
+{
+    HsContextAction command =
             static_cast<HsContextAction>(action->data().toInt());
-    
+
     const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
-    
+
     switch (command) {
         case UninstallContextAction:
             machine()->postEvent(
                 HsMenuEventFactory::createUninstallApplicationEvent(
                     itemId));
             break;
-        case AppDetailsContextAction: 
+        case AppDetailsContextAction:
             machine()->postEvent(
                 HsMenuEventFactory::createAppDetailsViewEvent(itemId));
-            break;            
+            break;
         default:
-            break;            
+            break;
     }
-    mMenuView->setSearchPanelVisible(false);
+    mMenuView->hideSearchPanel();
 }

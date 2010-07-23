@@ -15,13 +15,15 @@
 *
 */
 
-#include <HbMainWindow>
+#include "hsloadscenestate.h"
+#include "hsscene.h"
+#include "hsgui.h"
+
 #ifdef Q_OS_SYMBIAN
 #include <XQSettingsManager>
 #include <startupdomainpskeys.h>
 #endif
-#include "hsloadscenestate.h"
-#include "hsscene.h"
+
 
 /*!
     \class HsLoadSceneState
@@ -121,7 +123,7 @@ void HsLoadSceneState::handleKeyChange(XQSettingsKey key, const QVariant &value)
 void HsLoadSceneState::showUi()
 {
     qDebug() << "HsLoadSceneState::showUi";
-    HsScene::mainWindow()->raise();
-    HsScene::mainWindow()->show();
+  
+    HsGui::instance()->show();
     emit event_history();
 }

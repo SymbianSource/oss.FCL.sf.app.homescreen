@@ -20,7 +20,7 @@
 
 #include <HbStyleLoader>
 #include <HbIconItem>
-#include <HbTouchArea>
+#include <HbTapGesture>
 #include <HbInstantFeedback>
 
 #include "hsconfiguration.h"
@@ -38,12 +38,13 @@
 HsAnalogClockWidget::HsAnalogClockWidget(QGraphicsItem *parent)
     : HbWidget(parent),
       mBackground(0), mHourHand(0), mMinuteHand(0), 
-      mSecondHand(0), mTouchArea(0)
+      mSecondHand(0)
 {
     HbStyleLoader::registerFilePath(":/hsanalogclockwidget.widgetml");
     HbStyleLoader::registerFilePath(":/hsanalogclockwidget.css");
 
     createPrimitives();
+    grabGesture(Qt::TapGesture);
 }
 
 /*!
@@ -53,28 +54,27 @@ HsAnalogClockWidget::~HsAnalogClockWidget()
 {
     HbStyleLoader::unregisterFilePath(":/hsanalogclockwidget.widgetml");
     HbStyleLoader::unregisterFilePath(":/hsanalogclockwidget.css");
-    mTouchArea->removeEventFilter(this);
 }
 
-/*!
-    Filters touch area events.
-*/
-bool HsAnalogClockWidget::eventFilter(QObject *watched, QEvent *event)
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsAnalogClockWidget::gestureEvent(QGestureEvent *event)
 {
-    Q_UNUSED(watched)
-
-    switch (event->type()) {
-        case QEvent::GraphicsSceneMousePress:
-            return true;
-        case QEvent::GraphicsSceneMouseRelease:
-            handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            return true;
-        default:
-            break;
+    HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture));
+    if (gesture) {
+        if (gesture->state() == Qt::GestureFinished) {
+            if (gesture->tapStyleHint() == HbTapGesture::Tap) {
+                    HbInstantFeedback::play(HSCONFIGURATION_GET(clockWidgetTapFeedbackEffect));
+                    emit clockTapped();                
+            }
+        }
     }
-
-    return false;
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
 
 /*!
     Return bounding rect
@@ -130,10 +130,6 @@ void HsAnalogClockWidget::createPrimitives()
 
     mSecondHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_sec"), this);
     HbStyle::setItemName(mSecondHand, QLatin1String("second_hand"));
-
-    mTouchArea = new HbTouchArea(this);
-    mTouchArea->installEventFilter(this);    
-    HbStyle::setItemName(mTouchArea, QLatin1String("toucharea"));
 }
 
 /*!
@@ -159,18 +155,4 @@ void HsAnalogClockWidget::updatePrimitives()
 
     mSecondHand->setTransformOriginPoint(originPoint);
     mSecondHand->setRotation(s);
-}
-
-/*!
-    \internal
-*/
-void HsAnalogClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (!contains(event->pos())) {
-        return;
-    }
-
-    HbInstantFeedback::play(HSCONFIGURATION_GET(clockWidgetTapFeedbackEffect));
-
-    emit clockTapped();
 }

@@ -25,7 +25,3 @@ HsAnalogClockWidget::second_hand {
   fixed-height: 25.0un;
   zvalue: 1;
 }
-
-HsAnalogClockWidget::toucharea {  
-  zvalue: 4;
-}

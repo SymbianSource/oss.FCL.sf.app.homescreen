@@ -25,7 +25,7 @@
 HOMESCREEN_TEST_CLASS(TestClockWidget)
 
 class HbIconItem;
-class HbTouchArea;
+class QGestureEvent;
 
 class HsAnalogClockWidget : public HbWidget
 {
@@ -35,7 +35,6 @@ public:
     explicit HsAnalogClockWidget(QGraphicsItem *parent = 0);
     ~HsAnalogClockWidget();
 
-    bool eventFilter(QObject *watched, QEvent *event);
     QRectF boundingRect() const;
     QPainterPath shape() const;
 
@@ -47,19 +46,18 @@ public slots:
 
 protected:
     void resizeEvent(QGraphicsSceneResizeEvent *event);
+    void gestureEvent(QGestureEvent *event);
 
 private:
     Q_DISABLE_COPY(HsAnalogClockWidget)
     void createPrimitives();
     void updatePrimitives();
-    void handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
     HbIconItem *mBackground;
     HbIconItem *mHourHand;
     HbIconItem *mMinuteHand;
     HbIconItem *mSecondHand;
-    HbTouchArea *mTouchArea;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestClockWidget)
 };

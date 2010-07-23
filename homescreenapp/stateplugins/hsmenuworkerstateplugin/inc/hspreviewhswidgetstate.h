@@ -23,6 +23,8 @@
 #include <QVariant>
 
 #include "hsmenustates_global.h"
+#include "hsmenuentryremovedhandler.h"
+
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class QAction;
@@ -33,7 +35,6 @@ class HsWidgetHost;
 class CaNotifier;
 class HbScrollArea;
 class HbMessageBox;
-
 
 class HsPreviewHSWidgetState : public QState
 {
@@ -52,7 +53,7 @@ private slots:
     void previewDialogFinished(HbAction* finishedAction);
 
     void messageWidgetCorruptedFinished(HbAction* finishedAction);
-
+    
     void onEntry(QEvent *event);
 
     void cleanUp();
@@ -63,23 +64,20 @@ signals:
 private:
 
     void showMessageWidgetCorrupted();
-
-    void subscribeForMemoryCardRemove();
     
     HbDialog* buildPreviewDialog(const CaEntry& entry) const;
 
 private:
     
     HbDialog *mPreviewDialog;
-
-    CaNotifier *mNotifier;
-
+    QScopedPointer<HsMenuEntryRemovedHandler> mEntryObserver;
     int mEntryId;
 
     HbMessageBox *mCorruptedMessage;
 
-    QAction *mConfirmAction;
-
+    QAction *mConfirmRemovalAction;
+    QAction *mAddToHomescreenAction;
+    
     QVariant mToken;
     
     QString mUri;

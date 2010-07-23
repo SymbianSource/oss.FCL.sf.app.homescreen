@@ -16,6 +16,7 @@
 */
 
 #include <QDebug>
+#include <QScopedPointer>
 #include <HbDialog>
 #include <HbDocumentLoader>
 #include <HbLabel>
@@ -30,6 +31,7 @@
 #include "hsviewappdetailsstate.h"
 #include "hsmenuevent.h"
 #include "hsmenuitemmodel.h"
+#include "hsmenuentryremovedhandler.h"
 
 static const char *const HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME=
         "detailsDialogForJavaApplication";
@@ -39,7 +41,7 @@ static const char *const HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME=
  /param parent Parent state.
  */
 HsViewAppDetailsState::HsViewAppDetailsState(QState *parent) :
-    QState(parent), mDialog(0), mNotifier(0)
+    QState(parent), mDialog(0)
 {
     construct();
 }
@@ -49,9 +51,7 @@ HsViewAppDetailsState::HsViewAppDetailsState(QState *parent) :
  */
 HsViewAppDetailsState::~HsViewAppDetailsState()
 {
-    if (mDialog) {
-        delete mDialog;
-    }
+    delete mDialog;
 }
 
 /*!
@@ -92,6 +92,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     
     //TODO: Should we display something In that case?
     if (detailMap.size() < 1){
+        stateExited();
         return;
     }
     
@@ -114,9 +115,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
         mDialog->setTimeout(HbPopup::NoTimeout);
         mDialog->setAttribute(Qt::WA_DeleteOnClose, true);
         mDialog->actions()[0]->setParent(mDialog);
-
-        subscribeForMemoryCardRemove(entryId);
-      
+        
         setFieldPresentation(CaSoftwareRegistry::componentNameKey(),
             detailMap, loader);
         setFieldPresentation(CaSoftwareRegistry::componentVersionKey(),
@@ -136,7 +135,15 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
             setFieldPresentation(CaSoftwareRegistry::componentProtectionDomainKey(),
                 detailMap, loader);
         }
-        mDialog->open(this, SLOT(stateExited())); 
+        
+        QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
+            new HsMenuEntryRemovedHandler(entryId, this, SIGNAL(exit())));
+        
+        entryObserver.take()->setParent(mDialog);
+        
+        mDialog->open(this, SLOT(stateExited()));
+    } else {
+        stateExited();
     }
     HSMENUTEST_FUNC_EXIT("HsViewAppDetailsState::onEntry");
 }
@@ -174,7 +181,6 @@ void HsViewAppDetailsState::setFieldPresentation(QString key,
 void HsViewAppDetailsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsViewAppDetailsState::stateExited");
-    mDialog = NULL;
     emit exit();
     HSMENUTEST_FUNC_EXIT("HsViewAppDetailsState::stateExited");
     qDebug("HsViewAppDetailsState::stateExited()");
@@ -188,26 +194,9 @@ void HsViewAppDetailsState::onExit(QEvent *event)
     QState::onExit(event);
     // Close popups if App key was pressed or
     // memory card removed
-    if (mDialog) {
+    if (mDialog != NULL) {
         mDialog->close();
+        mDialog = NULL;
     }
-    mDialog = NULL;
 }
 
-/*!
- Subscribe for memory card remove.
- \param entryId: entry id.
- \retval void
- */
-void HsViewAppDetailsState::subscribeForMemoryCardRemove(int entryId)
-{
-    CaNotifierFilter filter;
-    QList<int> entryIds;
-    entryIds.append(entryId);
-    filter.setIds(entryIds);
-    mNotifier = CaService::instance()->createNotifier(filter);
-    mNotifier->setParent(this);
-    connect(mNotifier,
-            SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SIGNAL(exit()));
-}

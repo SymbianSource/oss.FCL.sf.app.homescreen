@@ -175,7 +175,7 @@ void HsAllAppsState::stateExited()
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateExited");
 
     HsBaseViewState::stateExited();
-    
+
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::stateExited");
     qDebug("AllAppsState::stateExited()");
 }
@@ -198,7 +198,7 @@ void HsAllAppsState::addActivated(const QModelIndex &index)
  */
 void HsAllAppsState::contextMenuAction(HbAction *action)
 {
-    HsContextAction command = 
+    HsContextAction command =
         static_cast<HsContextAction>(action->data().toInt());
 
     const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
@@ -218,18 +218,21 @@ void HsAllAppsState::contextMenuAction(HbAction *action)
             machine()->postEvent(
                 HsMenuEventFactory::createUninstallApplicationEvent(itemId));
             break;
-        case AppSettingContextAction: 
+        case AppSettingContextAction:
             machine()->postEvent(
                 HsMenuEventFactory::createAppSettingsViewEvent(itemId));
             break;
-        case AppDetailsContextAction: 
+        case AppDetailsContextAction:
             machine()->postEvent(
                 HsMenuEventFactory::createAppDetailsViewEvent(itemId));
-            break;            
+            break;
+        case OpenContextAction:
+            launchItem(mContextModelIndex);
+            break;
         default:
             break;
     }
-    mMenuView->setSearchPanelVisible(false);
+    mMenuView->hideSearchPanel();
 }
 
 /*!
@@ -298,6 +301,10 @@ void HsAllAppsState::addToHomeScreen(const QModelIndex &index)
  */
 void HsAllAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
 {
+    HbAction *openAction = mContextMenu->addAction(hbTrId(
+        "txt_common_menu_open"));
+    openAction->setData(OpenContextAction);
+
     HbAction *addToHomeScreenAction = mContextMenu->addAction(
         hbTrId("txt_applib_menu_add_to_home_screen"));
     addToHomeScreenAction->setData(AddToHomeScreenContextAction);

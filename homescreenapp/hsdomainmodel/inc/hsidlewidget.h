@@ -22,21 +22,23 @@
 #include <HbWidget>
 
 #include "hstest_global.h"
-HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
+#include "hsdomainmodel_global.h"
+
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HsPage;
 class HsTrashBinWidget;
 class HsPageIndicator;
 class HsSnapLine;
 
-class HsIdleWidget : public HbWidget
+class HSDOMAINMODEL_EXPORT HsIdleWidget : public HbWidget
 {
     Q_OBJECT
     Q_PROPERTY(qreal sceneX READ sceneX WRITE setSceneX)
 
 public:
     HsIdleWidget(QGraphicsItem *parent = 0);
-	~HsIdleWidget();
+		~HsIdleWidget();
 
     qreal sceneX() const;
     void setSceneX(qreal x);
@@ -86,7 +88,7 @@ private:
     HsSnapLine *mHorizontalSnapLine;
     HsSnapLine *mVerticalSnapLine;
 
-    HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif // HSIDLEWIDGET_H

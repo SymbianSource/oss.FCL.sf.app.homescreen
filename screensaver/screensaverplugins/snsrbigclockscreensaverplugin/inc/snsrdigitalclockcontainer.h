@@ -22,7 +22,7 @@
 
 SCREENSAVER_TEST_CLASS(T_SnsrBigClockScreensaverPlugin)
 
-class HbLabel;
+class SnsrLabel;
 class SnsrSwipeWidget;
 
 class SnsrDigitalClockContainer : public SnsrBigClockContainer
@@ -37,17 +37,20 @@ public:
 public slots:
 
     virtual void update();
-    virtual void changeLayout(Qt::Orientation orientation);
 
 public: // from base classes
 
     virtual int updateIntervalInMilliseconds();
 
+protected: // from base classes
+
+    virtual void loadWidgets();
+
 private: // data
 
-    HbLabel *mTimeLabel;
-    HbLabel *mAmPmLabel;
-    HbLabel *mDateLabel;
+    SnsrLabel *mTimeLabel;
+    SnsrLabel *mAmPmLabel;
+    SnsrLabel *mDateLabel;
     SnsrSwipeWidget *mSwipeWidget;
 
     SCREENSAVER_TEST_FRIEND_CLASS(T_SnsrBigClockScreensaverPlugin)

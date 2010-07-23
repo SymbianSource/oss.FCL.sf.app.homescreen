@@ -15,6 +15,7 @@
  *
  */
 
+#include <QScopedPointer>
 #include <QStateMachine>
 #include <HbMessageBox>
 #include <HbParameterLengthLimiter>
@@ -31,6 +32,7 @@
 #include "hsmenudialogfactory.h"
 #include "hsmenuitemmodel.h"
 #include "hsmenumodetransition.h"
+#include "hsmenuentryremovedhandler.h"
 #include "hsmainwindow.h"
 
 
@@ -41,8 +43,6 @@
  */
 HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow, QState *parent):
     QState(parent),
-    mNotifier(0),
-    mMessageRelatedItemId(0),
     mApplicationLaunchFailMessage(0),
     mModel(0),
     mContextMenu(0),
@@ -61,12 +61,10 @@ HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow, QState *parent):
  \param menuMode menu mode object.
  \param parent Owner.
  */
-HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow, 
-    HsMenuModeWrapper& menuMode, 
+HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow,
+    HsMenuModeWrapper& menuMode,
     QState *parent):
     QState(parent),
-    mNotifier(0),
-    mMessageRelatedItemId(0),
     mApplicationLaunchFailMessage(0),
     mModel(0),
     mContextMenu(0),
@@ -81,12 +79,13 @@ HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow,
 /*!
  Initialize contained objects.
  \param menuViewBuilder object providing widgets for menu view.
- \param viewContext state context of the view the builder is to provide widgets for.
+ \param stateContext state context of the view the builder
+     is to provide widgets for.
  */
-void HsBaseViewState::initialize(HsMenuViewBuilder &menuViewBuilder, 
-    HsViewContext viewContext)
+void HsBaseViewState::initialize(HsMenuViewBuilder &menuViewBuilder,
+    HsStateContext stateContext)
 {
-    mMenuView.reset(new HsMenuView(menuViewBuilder, viewContext));
+    mMenuView.reset(new HsMenuView(menuViewBuilder, stateContext, mMainWindow));
     mMenuView->view()->setNavigationAction(mBackKeyAction);
 
     connect(this, SIGNAL(entered()),SLOT(stateEntered()));
@@ -105,61 +104,18 @@ void HsBaseViewState::createApplicationLaunchFailMessage(int errorCode,
     message.append(
         HbParameterLengthLimiter("txt_applib_info_launching_the_application_failed").arg(
             errorCode));
-    
-    mMessageRelatedItemId = itemId;
 
     // create and show message box
-    mApplicationLaunchFailMessage = HsMenuDialogFactory().create(message, HsMenuDialogFactory::Close);
+    mApplicationLaunchFailMessage = HsMenuDialogFactory().create(
+            message, HsMenuDialogFactory::Close);
 
-    mApplicationLaunchFailMessage->open(this, SLOT(applicationLaunchFailMessageFinished(HbAction*)));
-    
-    subscribeForMemoryCardRemove();
+    QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
+        new HsMenuEntryRemovedHandler(itemId, mApplicationLaunchFailMessage.data(), SLOT(close())));
+
+    entryObserver.take()->setParent(mApplicationLaunchFailMessage.data());
+
+    mApplicationLaunchFailMessage->open();
 }
-
-/*!
- Subscribe for memory card remove.
- */
-void HsBaseViewState::subscribeForMemoryCardRemove()
-{
-    if (mMessageRelatedItemId !=0 ) {
-        CaNotifierFilter filter;
-        filter.setIds(QList<int>() << mMessageRelatedItemId);
-        mNotifier = CaService::instance()->createNotifier(filter);
-        mNotifier->setParent(this);
-        connect(mNotifier,
-            SIGNAL(entryChanged(CaEntry,ChangeType)),
-            SLOT(cleanUpApplicationLaunchFailMessage()));
-    }
-}
-
-/*!
- Clean up application launch fail message box.
- \retval void
- */
-void HsBaseViewState::cleanUpApplicationLaunchFailMessage()
-{
-    if (mApplicationLaunchFailMessage) {
-        mApplicationLaunchFailMessage->close();
-        mApplicationLaunchFailMessage = NULL;
-    }
-    if (mNotifier) {
-        delete mNotifier;
-        mNotifier = NULL;
-    }
-    mMessageRelatedItemId = 0;
-}
-
-/*!
- Action after closed application launch fail dialog.
- \param finishedAction chosen action.
- \retval void
- */
-void HsBaseViewState::applicationLaunchFailMessageFinished(HbAction*)
-{
-    mApplicationLaunchFailMessage = NULL;
-    cleanUpApplicationLaunchFailMessage();
-}
-
 
 /*!
  Slot invoked when a state is entered.
@@ -168,10 +124,9 @@ void HsBaseViewState::stateEntered()
 {
     qDebug("HsBaseViewState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::stateEntered");
-
-    mMainWindow.setCurrentView(*mMenuView);
     mMenuView->activate();
-
+    connect(mMenuView.data(), SIGNAL(listViewChange()),
+            this, SLOT(closeContextMenu()));
     HSMENUTEST_FUNC_EXIT("HsBaseViewState::stateEntered");
 }
 
@@ -181,14 +136,15 @@ void HsBaseViewState::stateEntered()
 void HsBaseViewState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::stateExited");
-    mMenuView->setSearchPanelVisible(false);
+
+    mMenuView->hideSearchPanel();
     mMenuView->disconnect(this);
     mMenuView->view()->setMenu(NULL);
     mMenuView->inactivate();
-    cleanUpApplicationLaunchFailMessage();
-    if (mContextMenu){
-        mContextMenu->close();
+    if (!mApplicationLaunchFailMessage.isNull()) {
+        mApplicationLaunchFailMessage->close();
     }
+    closeContextMenu();
     HSMENUTEST_FUNC_EXIT("HsBaseViewState::stateExited");
 }
 
@@ -225,7 +181,6 @@ void HsBaseViewState::normalModeEntered()
  */
 HsBaseViewState::~HsBaseViewState()
 {
-    mMenuView->setModel(NULL);
     delete mModel;
 }
 
@@ -238,28 +193,23 @@ void HsBaseViewState::launchItem(const QModelIndex &index)
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::launchItem");
 
     QSharedPointer<const CaEntry> entry = mModel->entry(index);
-
-    if (entry->entryTypeName() == widgetTypeName()) {
-        EntryFlags flags = index.data(CaItemModel::FlagsRole).value<
-                               EntryFlags> ();
-        if (!(flags & UninstallEntryFlag)) {
-            machine()->postEvent(
-                HsMenuEventFactory::createPreviewHSWidgetEvent(
-                    entry->id(), entry->entryTypeName(), entry->attribute(
-                        widgetUriAttributeName()), entry->attribute(
-                        widgetLibraryAttributeName())));
-
-            const int itemId = index.data(CaItemModel::IdRole).toInt();
-            HsMenuService::touch(itemId);
+    if (!entry.isNull()) {
+        if (entry->entryTypeName() == widgetTypeName()) {
+            EntryFlags flags = entry->flags();
+            if (!(flags & UninstallEntryFlag)) {
+                machine()->postEvent(HsMenuEventFactory::createPreviewHSWidgetEvent(entry->id(),
+                    entry->entryTypeName(), entry->attribute(widgetUriAttributeName()),
+                    entry->attribute(widgetLibraryAttributeName())));
+                HsMenuService::touch(entry->id());
+            }
         }
-    } else {
-        QVariant data = mModel->data(index, CaItemModel::IdRole);
-        int errCode = HsMenuService::executeAction(data.toInt());
-        if (errCode != 0) {
-            createApplicationLaunchFailMessage(errCode,index.data(CaItemModel::IdRole).toInt());
+        else {
+            int errCode = HsMenuService::executeAction(entry->id());
+            if (errCode != 0) {
+                createApplicationLaunchFailMessage(errCode, entry->id());
+            }
         }
     }
-
     HSMENUTEST_FUNC_EXIT("HsBaseViewState::launchItem");
 }
 
@@ -272,13 +222,13 @@ void HsBaseViewState::openCollection(const QModelIndex &index)
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::openCollection");
     QVariant data = mModel->data(index, CaItemModel::IdRole);
     int id = data.toInt();
-    QString collectionType =
-        mModel->data(index, CaItemModel::TypeRole).toString();
-    qDebug("HsBaseViewState::openCollection - MCS ID: %d",
-           data.toInt());
+    QString collectionType = mModel->data(
+            index, CaItemModel::TypeRole).toString();
+    qDebug("HsBaseViewState::openCollection - MCS ID: %d", data.toInt());
 
-    machine()->postEvent(HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(id,
-                         collectionType));
+    machine()->postEvent(
+            HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(
+                    id, collectionType));
     HSMENUTEST_FUNC_EXIT("HsBaseViewState::openCollection");
 }
 
@@ -288,11 +238,10 @@ void HsBaseViewState::openCollection(const QModelIndex &index)
  */
 void HsBaseViewState::showContextMenu(HbAbstractViewItem *item, const QPointF &coords)
 {
-
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::showContextMenu");
 
     EntryFlags flags = item->modelIndex().data(
-                           CaItemModel::FlagsRole).value<EntryFlags> ();
+            CaItemModel::FlagsRole).value<EntryFlags> ();
 
     if (!(flags & UninstallEntryFlag)) {
         mContextMenu = new HbMenu;
@@ -335,13 +284,23 @@ int HsBaseViewState::checkSoftwareUpdates()
     }
     return errCode;
 }
+
+/*!
+ close context menu
+ */
+void HsBaseViewState::closeContextMenu()
+{
+    if (mContextMenu) {
+        mContextMenu->close();
+    }    
+}
 /*!
  Scrolls view to first item at top
  */
 void HsBaseViewState::scrollToBeginning()
 {
     mMenuView->listView()->scrollTo(
-        mModel->index(0), HbAbstractItemView::PositionAtTop);
+            mModel->index(0), HbAbstractItemView::PositionAtTop);
 }
 
 /*!
@@ -367,7 +326,7 @@ void HsBaseViewState::defineTransitions()
     connect(normalModeState, SIGNAL(exited()),SLOT(normalModeExited()));
 
     initialState->addTransition(new HsMenuModeTransition(
-                                    *mMenuMode, NormalHsMenuMode, normalModeState));
+            *mMenuMode, NormalHsMenuMode, normalModeState));
     initialState->addTransition(new HsMenuModeTransition(
-                                    *mMenuMode, AddHsMenuMode, addModeState));
+            *mMenuMode, AddHsMenuMode, addModeState));
 }

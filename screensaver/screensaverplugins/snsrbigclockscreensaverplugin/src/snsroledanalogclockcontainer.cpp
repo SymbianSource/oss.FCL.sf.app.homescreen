@@ -21,11 +21,12 @@
 #include <QGraphicsLinearLayout>
 #include <QTimer>
 #include <QTime>
-#include <hblabel.h>
-#include <hbextendedlocale.h>
+#include <HbExtendedLocale>
+#include <HbMainWindow>
 
 #include "snsroledclockwidget.h"
 #include "snsrindicatorwidget.h"
+#include "snsrlabel.h"
 
 /*!
     \class SnsrOledAnalogClockContainer
@@ -57,34 +58,6 @@ SnsrOledAnalogClockContainer::SnsrOledAnalogClockContainer() :
     mDateLabel(0), mDestPosition(QPointF()), mInitialize(false)
 {
     SCREENSAVER_TEST_FUNC_ENTRY("SnsrOledAnalogClockContainer::SnsrOledAnalogClockContainer")
-
-    bool ok(false);
-    qDebug() << gOledAnalogLayoutDocml;
-
-    // load oled analog clock
-    mDocumentObjects = mDocumentLoader.load(gOledAnalogLayoutDocml, &ok);
-    Q_ASSERT_X(ok, gOledAnalogLayoutDocml, "Invalid DocML file.");
-    if (ok) {
-        mMainView = mDocumentLoader.findWidget(gMainViewName);
-        mMainContainer = mDocumentLoader.findWidget(gMainContainerName);
-        mClockContainer = mDocumentLoader.findWidget(gClockContainerName);
-        mOledClockWidget = qobject_cast<SnsrOledClockWidget *>(
-              mDocumentLoader.findWidget(gOledAnalogClockWidgetName));
-        mDateLabel = qobject_cast<HbLabel *>(
-              mDocumentLoader.findWidget(gDateLabelName));
-        mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
-              mDocumentLoader.findWidget(gIndicatorWidgetName));
-        Q_ASSERT_X(
-                mMainView && mMainContainer && mClockContainer
-                && mOledClockWidget && mDateLabel && mIndicatorWidget,
-                gOledAnalogLayoutDocml, "Objects not found in DocML file."
-                );
-        
-        mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
-        
-        mBackgroundContainerLayout->addItem(mMainView);
-    }
-
     SCREENSAVER_TEST_FUNC_EXIT("SnsrOledAnalogClockContainer::SnsrOledAnalogClockContainer")
 }
 
@@ -93,6 +66,7 @@ SnsrOledAnalogClockContainer::SnsrOledAnalogClockContainer() :
  */
 SnsrOledAnalogClockContainer::~SnsrOledAnalogClockContainer()
 {
+    resetIndicatorConnections();
     //mOledClockWidget etc - deleted by the parent
 }
 
@@ -106,9 +80,14 @@ void SnsrOledAnalogClockContainer::updatePosition()
     // Container must have a valid size to enable calculating the 
     // destination position for the clock.
     if ( containerSize.width() > 0 && containerSize.height() > 0 ) {
-        containerSize -= mClockContainer->boundingRect().size();
+        containerSize -= mClockContainer->size();
         QRectF containerRect( mMainContainer->pos(), containerSize );
         if ( mInitialize ) {
+            // disconnect container from parent layout,
+            // connected container resets its position to the one defined in docml
+            // after label text updates
+            mClockContainer->setParentLayoutItem(0);
+
             QPointF clockPos = nextRandomPosition( mClockContainer->pos(), mDestPosition, containerRect );
             mClockContainer->setPos( clockPos );
         }
@@ -116,6 +95,8 @@ void SnsrOledAnalogClockContainer::updatePosition()
             mDestPosition = randomPosition( containerRect );
             mInitialize = true;
         }
+        // the active area of power save mode needs to be updated when clock container is moved
+        emit activeAreaMoved();
     }
 }
 
@@ -143,57 +124,86 @@ void SnsrOledAnalogClockContainer::update()
     // position
     updatePosition();
     
-    // TODO: Currently, both time and position are updated 10 times per second.
-    // These should happen only once per minute in the power save mode.
-
     SCREENSAVER_TEST_FUNC_EXIT("SnsrOledAnalogClockContainer::update")
-}
-
-/*!
-    Changes screensaver layout basing on orientation changes.
-    \param orientation Current orientation.
- */
-void SnsrOledAnalogClockContainer::changeLayout(Qt::Orientation orientation)
-{
-    SCREENSAVER_TEST_FUNC_ENTRY("SnsrOledAnalogClockContainer::changeLayout")
-
-    bool ok(false);
-    if (mCurrentOrientation != orientation) {
-        mCurrentOrientation = orientation;
-        // hide controls to avoid screen flickering
-        mMainView->hide();
-
-        QString sectionToLoad("");
-        if (mCurrentOrientation == Qt::Horizontal) {
-            sectionToLoad = gLandscapeSectionName;
-        }
-        qDebug() << "loading: " << gOledAnalogLayoutDocml << ", section: " << sectionToLoad;
-        mDocumentLoader.load(gOledAnalogLayoutDocml, sectionToLoad, &ok);
-        Q_ASSERT_X(ok, gOledAnalogLayoutDocml, "Invalid section in DocML file.");
-
-        // disconnect container from parent layout,
-        // connected container resets its position to the one defined in docml
-        // after label text updates
-        mClockContainer->setParentLayoutItem(0);
-
-        update();
-
-        // view is rebuilt and ready to show
-        mMainView->show();
-    }
-
-    // update anyway - this is needed in situations when screensaver goes to
-    // foreground but layout change did not occur
-    if (!ok) {
-        update();
-    }
-
-    SCREENSAVER_TEST_FUNC_EXIT("SnsrOledAnalogClockContainer::changeLayout")
 }
 
 int SnsrOledAnalogClockContainer::updateIntervalInMilliseconds()
 {
     return 60*1000;
+}
+
+/*!
+    @copydoc SnsrBigClockContainer::getActiveScreenRows()
+ */
+void SnsrOledAnalogClockContainer::getActiveScreenRows(int *firstActiveRow, int *lastActiveRow)
+{
+    if ( mClockContainer ) {
+        QRect clockRect( mClockContainer->pos().toPoint(), 
+                         mClockContainer->size().toSize() );
+        if ( mCurrentOrientation == Qt::Vertical ) {
+            *firstActiveRow = clockRect.top();
+            *lastActiveRow = clockRect.bottom() + 1;
+        }
+        else {
+            *firstActiveRow = clockRect.left();
+            *lastActiveRow = clockRect.right() + 1;
+        }
+    }
+}
+
+/*!
+    Orientation is locked in power save mode as sensors are off anyway,
+    at least after some timeout.
+ */
+bool SnsrOledAnalogClockContainer::isOrientationLocked()
+{
+    return true;
+}
+
+void SnsrOledAnalogClockContainer::loadWidgets()
+{
+    bool ok(true);
+
+    // reset widget pointers, any previous widgets are already deleted by now
+    mMainView = 0;
+    mMainContainer = 0;
+    mClockContainer = 0;
+    mOledClockWidget = 0;
+    mDateLabel = 0;
+    mIndicatorWidget = 0;
+    
+    // load widgets from docml
+    qDebug() << gOledAnalogLayoutDocml;
+    mDocumentObjects = mDocumentLoader.load(gOledAnalogLayoutDocml, &ok);
+    Q_ASSERT_X(ok, gOledAnalogLayoutDocml, "Invalid DocML file.");
+    if (ok) {
+        mMainView = mDocumentLoader.findWidget(gMainViewName);
+        mMainContainer = mDocumentLoader.findWidget(gMainContainerName);
+        mClockContainer = mDocumentLoader.findWidget(gClockContainerName);
+        mOledClockWidget = qobject_cast<SnsrOledClockWidget *>(
+              mDocumentLoader.findWidget(gOledAnalogClockWidgetName));
+        mDateLabel = qobject_cast<SnsrLabel *>(
+              mDocumentLoader.findWidget(gDateLabelName));
+        mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
+              mDocumentLoader.findWidget(gIndicatorWidgetName));
+        Q_ASSERT_X(
+                mMainView && mMainContainer && mClockContainer
+                && mOledClockWidget && mDateLabel && mIndicatorWidget,
+                gOledAnalogLayoutDocml, "Objects not found in DocML file."
+                );
+        
+        // In case of landscape layout, read also the landscape delta section
+        if ( mCurrentOrientation == Qt::Horizontal ) {
+            qDebug() << "loading: " << gOledAnalogLayoutDocml << ", section: " << gLandscapeSectionName;
+            mDocumentLoader.load(gOledAnalogLayoutDocml, gLandscapeSectionName, &ok);
+            Q_ASSERT_X(ok, gOledAnalogLayoutDocml, "Invalid section in DocML file.");
+        }
+
+        mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        initIndicatorWidget();
+        
+        mBackgroundContainerLayout->addItem(mMainView);
+    }
 }
 
 // end of file

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -42,10 +42,20 @@ class SREENSAVERMODEL_EXPORT Screensaver : public QObject
 
 public:
 
+    Q_ENUMS(ScreenPowerMode)
+    
+    enum ScreenPowerMode {
+        ScreenModeOff = 0,
+        ScreenModeLowPower,
+        ScreenModeFullPower
+    };
+    
     Screensaver(QObject *parent = 0);
     virtual ~Screensaver();
 
     ScreensaverState currentState();
+    virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow) = 0;
+    virtual void updateLayout() = 0;
 
 public slots:
 
@@ -80,6 +90,7 @@ signals:
     void faulted();
     void viewChanged(QGraphicsWidget *widget);
     void unlockRequested();
+    void screenPowerModeRequested(Screensaver::ScreenPowerMode mode);
 
 private:
 

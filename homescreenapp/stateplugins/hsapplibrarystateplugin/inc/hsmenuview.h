@@ -26,6 +26,7 @@
 #include <HbAbstractItemView>
 #include "hsmenustates_global.h"
 #include "hsmenuviewbuilder.h"
+#include "hssearchview.h"
 #include "hsapp_defs.h"
 
 class QPointF;
@@ -33,32 +34,29 @@ class QActionGroup;
 class HbView;
 class HbMainWindow;
 class HbAction;
-class HbAbstractItemView;
 class HbListView;
 class HbGroupBox;
 class HbWidget;
 class HbShrinkingVkbHost;
+class HsMainWindow;
 class HsMenuItemModel;
 
-
 HS_STATES_TEST_CLASS(MenuStatesTest)
+
 
 class HsMenuView: public QObject
 {
     Q_OBJECT
 
 public:
-    HsMenuView(HsMenuViewBuilder &builder, HsViewContext viewContext);
+    HsMenuView(HsMenuViewBuilder &builder, HsStateContext stateContext,
+               HsMainWindow& mainWindow);
     ~HsMenuView();
-
-    void setSearchPanelVisible(bool visible);
-    void setContext(HsViewContext viewContext,
-                    HsOperationalContext context);
 
     HbView *view() const;
 
     HbListView *listView() const;
-    HbPushButton *collectionButton() const;
+    HbPushButton *contentButton() const;
 
     void activate();
     void inactivate();
@@ -67,63 +65,42 @@ public:
 
     void setModel(HsMenuItemModel *model);
 
-
+    void reset(HsOperationalContext operationalContext);
 signals:
     void activated(const QModelIndex &index);
     void longPressed(HbAbstractViewItem *item, const QPointF &coords);
-
+    void listViewChange();
 public slots:
-
-    void activatedProxySlot(const QModelIndex &index);
-    void longPressedProxySlot(HbAbstractViewItem *item,
-                              const QPointF &coords);
 
     void showSearchPanel();
     void hideSearchPanel();
 
     void disableSearch(bool disable);
 
-
 private slots:
     void scrollToRow(int row,
                      QAbstractItemView::ScrollHint hint =
                          QAbstractItemView::PositionAtTop);
-    void findItem(QString criteriaStr);
 
 private:
 
-    QModelIndex firstVisibleItemIndex(const HbListView *view) const;
-
-    void connectSearchPanelSignals();
-    void disconnectSearchPanelSignals();
-    void connectSearchItemViewsSignals();
-    void disconnectSearchItemViewsSignals();
-
-    void searchFinished();
-    void searchBegins();
     HbAbstractItemView::ScrollHint convertScrollHint(
         QAbstractItemView::ScrollHint hint);
 
+    void switchBuilderContext();
+    void synchronizeCache();
 private:
-
-    const HsViewContext mViewContext;
     HsMenuViewBuilder &mBuilder;
+    const HsStateContext mStateContext;
+    HsOperationalContext mOperationalContext;
+    HsMainWindow &mMainWindow;
 
-    QModelIndex mSearchViewInitialIndex;
-    QModelIndex mIndexToScrollAfterSearchDone;
-    QModelIndex mSearchViewLongPressedIndex;
+    HbView *mView; // once this is constructed it is not NULL
+    HbListView *mListView; // may be NULL in some contexts
+    HbGroupBox *mViewLabel; // may be NULL in some contexts
+    HbPushButton *mAddContentButton; // may be NULL in some contexts
 
-    QSortFilterProxyModel *mProxyModel; // owned
-
-    HbView *mView;
-    HbListView *mListView;
-    HbGroupBox *mViewLabel;
-
-    HbListView *mSearchListView;
-    HbSearchPanel *mSearchPanel;
-    QScopedPointer<HbShrinkingVkbHost> mVkbHost;
-
-    HbPushButton *mCollectionButton;
+    QScopedPointer<HsSearchView> mHsSearchView;
 
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };

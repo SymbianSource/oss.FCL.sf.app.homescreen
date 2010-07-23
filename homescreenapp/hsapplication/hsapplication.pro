@@ -27,6 +27,8 @@ MOBILITY = serviceframework publishsubscribe
 
 fute:DEFINES += FUTE
 
+new_short:DEFINES += HSWIDGETORGANIZER_ALGORITHM
+
 DEPENDPATH += . \
               ./inc \
               ./src
@@ -39,7 +41,8 @@ INCLUDEPATH += . \
 TRANSLATIONS = homescreen.ts
 
 LIBS += -lhsutils \
-        -lhsdomainmodel
+        -lhsdomainmodel \
+	-lcaclient
 
 
 symbian: {
@@ -60,7 +63,7 @@ symbian: {
     SERVICE.FILE = ipc_service_conf.xml
 }
 
-win32: {
+!symbian: {
     include(installs_win.pri)
 }
 

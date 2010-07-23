@@ -22,10 +22,11 @@
 #include <HbIconItem>
 #include <HbFrameItem>
 #include <HbFrameDrawer>
-#include <HbTouchArea>
+#include <HbTapGesture>
 #include <HbInstantFeedback>
 
 #include "hsdigitalclockwidget.h"
+#include "hsconfiguration.h"
 
 /*!
     \class HsDigitalClockWidget
@@ -41,7 +42,7 @@ HsDigitalClockWidget::HsDigitalClockWidget(bool useAmPm, QGraphicsItem *parent)
     mBackground(0),
     mDigit1(0), mDigit2(0), mDigit3(0),
     mDigit4(0), mDigit5(0), mDigit6(0),
-    mAmPm(0), mTouchArea(0), mUseAmPm(useAmPm)
+    mAmPm(0), mUseAmPm(useAmPm)
 {
     HbStyleLoader::registerFilePath(":/hsdigitalclockwidget.widgetml");
     HbStyleLoader::registerFilePath(":/hsdigitalclockwidget.css");
@@ -69,6 +70,7 @@ HsDigitalClockWidget::HsDigitalClockWidget(bool useAmPm, QGraphicsItem *parent)
     mDigitMap.insert(QChar('9'), QString(":/clock_widget_nine.svg"));
 
     createPrimitives();
+    grabGesture(Qt::TapGesture);
 }
 
 /*!
@@ -78,28 +80,26 @@ HsDigitalClockWidget::~HsDigitalClockWidget()
 {
     HbStyleLoader::unregisterFilePath(":/hsdigitalclockwidget.widgetml");
     HbStyleLoader::unregisterFilePath(":/hsdigitalclockwidget.css");
-    mTouchArea->removeEventFilter(this);
 }
 
-/*!
-    Filters touch area events.
-*/
-bool HsDigitalClockWidget::eventFilter(QObject *watched, QEvent *event)
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsDigitalClockWidget::gestureEvent(QGestureEvent *event)
 {
-    Q_UNUSED(watched)
-
-    switch (event->type()) {
-        case QEvent::GraphicsSceneMousePress:
-            return true;
-        case QEvent::GraphicsSceneMouseRelease:
-            handleMouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent *>(event));
-            return true;
-        default:
-            break;
+    HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture));
+    if (gesture) {
+        if (gesture->state() == Qt::GestureFinished) {
+            if (gesture->tapStyleHint() == HbTapGesture::Tap) {
+                    HbInstantFeedback::play(HSCONFIGURATION_GET(clockWidgetTapFeedbackEffect));
+                    emit clockTapped();                
+            }
+        }
     }
-
-    return false;
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
     Return shape
@@ -202,10 +202,6 @@ void HsDigitalClockWidget::createPrimitives()
         mAmPm = new HbIconItem(QLatin1String(":/clock_widget_am.svg"), this);
         HbStyle::setItemName(mAmPm, QLatin1String("ampm"));
     }
-
-    mTouchArea = new HbTouchArea(this);
-    mTouchArea->installEventFilter(this);
-    HbStyle::setItemName(mTouchArea, QLatin1String("toucharea"));
 }
 
 /*!
@@ -247,18 +243,4 @@ void HsDigitalClockWidget::updatePrimitives()
             mAmPm->setIconName(":/clock_widget_pm.svg");
         }
     }
-}
-
-/*!
-    \internal
-*/
-void HsDigitalClockWidget::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (!contains(event->pos())) {
-        return;
-    }
-
-    HbInstantFeedback::play(HbFeedback::BasicItem);
-
-    emit clockTapped();
 }

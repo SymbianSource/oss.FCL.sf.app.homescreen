@@ -53,4 +53,5 @@ EXPORTS
 	_ZN11Screensaver26handleDeactivatedIndicatorEP20HbIndicatorInterface @ 52 NONAME
 	_ZN11Screensaver26onHandleActivatedIndicatorEP20HbIndicatorInterface @ 53 NONAME
 	_ZN11Screensaver28onHandleDeactivatedIndicatorEP20HbIndicatorInterface @ 54 NONAME
+	_ZN11Screensaver24screenPowerModeRequestedENS_15ScreenPowerModeE @ 55 NONAME
 

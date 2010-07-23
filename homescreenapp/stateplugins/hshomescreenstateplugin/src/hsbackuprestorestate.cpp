@@ -27,6 +27,7 @@
 #include "hsscene.h"
 #include "hsgui.h"
 
+
 /*!
     \class HsBackupRestoreState
     \ingroup group_hshomescreenstateplugin
@@ -95,12 +96,5 @@ void HsBackupRestoreState::action_stopListenBURStatus()
 void HsBackupRestoreState::deleteIdleView()
 {
     // Delete idle view
-    QScopedPointer<HbView> idleView(HsGui::takeIdleView());
-
-    if (idleView){
-        HbAction *navigationAction(idleView->navigationAction());
-        idleView->setNavigationAction(0);
-        delete navigationAction;
-        HsScene::mainWindow()->removeView(idleView.data());
-    }
+    HsGui::instance()->cleanupIdleUi();
 }

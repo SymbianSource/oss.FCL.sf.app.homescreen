@@ -19,7 +19,7 @@
 #define HSDOMAINMODELDATASTRUCTURES_H
 
 #include <QPointF>
-
+#include <QString>
 #include "hsdomainmodel_global.h"
 
 class HSDOMAINMODEL_EXPORT HsSceneData

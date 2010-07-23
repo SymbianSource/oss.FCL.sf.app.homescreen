@@ -26,6 +26,7 @@
 HOMESCREEN_TEST_CLASS(t_hsUtils)
 
 class HbAction;
+class HbMessageBox;
 struct HsMessageBoxWrapperImpl;
 
 class HSUTILS_EXPORT HsMessageBoxWrapper : public QObject
@@ -38,6 +39,7 @@ public:
 
     void setHeader(const QString &header);
     void setQueryText(const QString &queryText);
+    void close();
 
 signals:
     void accepted();
@@ -53,6 +55,7 @@ private slots:
  
 private:
     HsMessageBoxWrapperImpl *mImpl;
+    HbMessageBox *mBox;
 
     HOMESCREEN_TEST_FRIEND_CLASS(t_hsUtils)
 };

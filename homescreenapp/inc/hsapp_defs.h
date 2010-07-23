@@ -71,7 +71,8 @@ enum HsContextAction {
     RenameContextAction, 
     DeleteContextAction, 
     RemoveFromCollectionContextAction,
-    AppDetailsContextAction
+    AppDetailsContextAction,
+    OpenContextAction
 };
 
 

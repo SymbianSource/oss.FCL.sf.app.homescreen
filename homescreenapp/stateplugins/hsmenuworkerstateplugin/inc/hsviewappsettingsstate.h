@@ -43,12 +43,8 @@ public:
 
     virtual ~HsViewAppSettingsState();
     
-private slots:
-    
-    void settingsDone();
-    
 signals:
-        void initialize(const QString &aUid);      
+    void initialize(const QString &aUid);      
     void exit();
 
 protected:
@@ -61,8 +57,6 @@ private:
     void construct();
     
     HbMainWindow *mainWindow() const; 
-    
-    void subscribeForMemoryCardRemove(int entryId);
 
 private:
 
@@ -71,9 +65,6 @@ private:
     HbView *mPreviousView;
     
     HbAction *mActionConfirm;
-    
-    CaNotifier *mNotifier;
-
 };
 
 

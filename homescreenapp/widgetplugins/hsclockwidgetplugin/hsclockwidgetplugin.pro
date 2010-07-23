@@ -38,7 +38,7 @@ symbian: {
     
 }
 
-win32:include(hsclockwidgetplugin_win.pri)
+!symbian:include(hsclockwidgetplugin_win.pri)
 symbian:include(hsclockwidgetplugin_symbian.pri)
 
 RESOURCES = hsclockwidgetplugin.qrc

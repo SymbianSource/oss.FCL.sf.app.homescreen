@@ -24,14 +24,14 @@
 
 HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
-class HsWidgetHost;
+class HsWidgetHostVisual;
 
 class HsWidgetTouchArea : public HbTouchArea
 {
     Q_OBJECT
 
 public:
-    HsWidgetTouchArea(HsWidgetHost *widgetHost);
+    HsWidgetTouchArea(HsWidgetHostVisual *widgetHost);
     ~HsWidgetTouchArea();
 
     bool sceneEvent(QEvent *event);
@@ -44,7 +44,7 @@ private:
     Q_DISABLE_COPY(HsWidgetTouchArea)
     
 private:
-    HsWidgetHost *mWidgetHost;
+    HsWidgetHostVisual *mWidgetHostVisual;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };

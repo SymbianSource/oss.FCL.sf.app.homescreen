@@ -22,11 +22,9 @@
 #include <QTime>
 #include <QGraphicsLinearLayout>
 
-#include <hblabel.h>
-#include <hbevent.h>
-#include <hbcolorscheme.h>
-
-#include <qsysteminfo.h>
+#include <HbEvent>
+#include <HbColorScheme>
+#include <HbMainWindow>
 
 #include "snsrbigclockcontainer.h"
 #include "snsrindicatorwidget.h"
@@ -41,7 +39,6 @@
 const QString snsrBackgroundColorRole("snsrbackground");
 const int gStep(5);
 
-QTM_USE_NAMESPACE
 
 /*!
     Constructs a new SnsrBigClockContainer.
@@ -55,7 +52,7 @@ SnsrBigClockContainer::SnsrBigClockContainer() :
     mCurrentOrientation(-1)
 {
     setBackgroundColor();
-    mBackgroundContainerLayout = new QGraphicsLinearLayout(Qt::Vertical);
+    mBackgroundContainerLayout = new QGraphicsLinearLayout(Qt::Vertical, this);
     setLayout(mBackgroundContainerLayout);
     qsrand(QTime::currentTime().msec());
 }
@@ -64,9 +61,7 @@ SnsrBigClockContainer::SnsrBigClockContainer() :
     Destructs the class.
  */
 SnsrBigClockContainer::~SnsrBigClockContainer()
-{
-    resetIndicatorConnections();
-    
+{    
     // e.g. mIndicatorWidget gets deleted during these calls
     mDocumentLoader.reset();
     qDeleteAll(mDocumentObjects);
@@ -83,10 +78,74 @@ SnsrBigClockContainer::~SnsrBigClockContainer()
  */
 
 /*!
-    \fn virtual void changeLayout(Qt::Orientation orientation) = 0;
-
-    Slot for members update in container when orientation changed.
+    Changes screensaver layout based on orientation changes.
+    \param orientation Current orientation.
  */
+void SnsrBigClockContainer::changeLayout(Qt::Orientation orientation)
+{
+    SCREENSAVER_TEST_FUNC_ENTRY("SnsrBigClockContainer::changeLayout")
+
+    if (mCurrentOrientation != orientation) {
+        mCurrentOrientation = orientation;
+        
+        // delete any old widgets
+        if ( mBackgroundContainerLayout->count() ) {
+            mBackgroundContainerLayout->removeAt(0);
+        }
+        mDocumentLoader.reset();
+        qDeleteAll(mDocumentObjects);
+        mDocumentObjects.clear();
+
+        // reload widgets from docml
+        loadWidgets();
+    }
+    mBackgroundContainerLayout->setGeometry( mainWindow()->layoutRect() );
+    update();
+
+    SCREENSAVER_TEST_FUNC_EXIT("SnsrBigClockContainer::changeLayout")
+}
+
+/*!
+    Set used indicator model that is owned by the screensaver class. 
+    Model's life cycle must be the same as screensaver's so that indicators'
+    status data can be kept in memory and one can receive updates. 
+    This method should be called when the current container is set.
+ */
+void SnsrBigClockContainer::setIndicatorModel(SnsrIndicatorModel &model)
+{
+    mIndicatorModel = &model;
+}
+
+/*!
+    @copydoc Screensaver::getActiveScreenRows()
+ */
+void SnsrBigClockContainer::getActiveScreenRows(int *firstActiveRow, int *lastActiveRow)
+{
+    // This default implementation return the whole area of the
+    // container. Inherited low power mode containers can and should
+    // return smaller area which just barely encloses all the content.
+    if ( mMainContainer ) {
+        QRect mainRect = mMainContainer->rect().toRect();
+        if ( mCurrentOrientation == Qt::Vertical ) {
+            *firstActiveRow = mainRect.top();
+            *lastActiveRow = mainRect.bottom();
+        }
+        else {
+            *firstActiveRow = mainRect.left();
+            *lastActiveRow = mainRect.right();
+        }
+    }
+}
+
+/*!
+    Tell if this container wants to lock the screen orientation.
+    Default implementation in not locked but inherited classes may
+    override this.
+ */
+bool SnsrBigClockContainer::isOrientationLocked()
+{
+    return false;
+}
 
 /*!
     \fn virtual int updateIntervalInMilliseconds() = 0;
@@ -96,22 +155,16 @@ SnsrBigClockContainer::~SnsrBigClockContainer()
  */
 
 /*!
-    Set used indicator model and do necessary initializations to show currently
-    active indicators.
+    \fn virtual int loadWidgets() = 0;
+
+    Concrete inherited container classes must implement this to instantiate
+    all the widgets shown in the container. The base class calls this
+    method when screen layuot is changed. The old widgets are already 
+    deleted by the base class before this is called. Also changing the visible
+    container is treated as a layout change, and results in call to this method.
+    Thus, inherited containers don't have to load their widgets yet in their
+    constructors.
  */
-void SnsrBigClockContainer::initIndicators(SnsrIndicatorModel &model)
-{
-    mIndicatorModel = &model;
-    if (mIndicatorWidget) {
-        connect(mIndicatorModel, SIGNAL(indicatorsUpdated(QList<SnsrIndicatorInfo>)),
-                mIndicatorWidget, SLOT(showIndicators(QList<SnsrIndicatorInfo>)));
-                
-        connect(mIndicatorModel, SIGNAL(allIndicatorsDeactivated()),
-                mIndicatorWidget, SLOT(removeAllIndicators()));
-        
-        mIndicatorModel->initializeIndicatorWidget();
-    }
-}
 
 /*!
     \reimp
@@ -229,15 +282,35 @@ QPointF SnsrBigClockContainer::nextRandomPosition(const QPointF &curPos, QPointF
 }
 
 /*!
+    Do necessary initializations to show currently active indicators.
+    Should be called after the indicator widget is created.
+ */
+void SnsrBigClockContainer::initIndicatorWidget()
+{
+    Q_ASSERT(mIndicatorModel && mIndicatorWidget);
+    
+    connect(mIndicatorModel, SIGNAL(indicatorsUpdated(QList<SnsrIndicatorInfo>)),
+            mIndicatorWidget, SLOT(showIndicators(QList<SnsrIndicatorInfo>)));
+                
+    connect(mIndicatorModel, SIGNAL(allIndicatorsDeactivated()),
+            mIndicatorWidget, SLOT(removeAllIndicators()));
+        
+    mIndicatorModel->initializeIndicatorWidget();
+}
+
+/*!
     Disconnect connections between indicator model and widget.
+    Should be called before deleting the indicator widget.
  */
 void SnsrBigClockContainer::resetIndicatorConnections()
-{
-    disconnect(mIndicatorModel, SIGNAL(indicatorsUpdated(QList<SnsrIndicatorInfo>)),
-               mIndicatorWidget, SLOT(showIndicators(QList<SnsrIndicatorInfo>)));
-    
-    disconnect(mIndicatorModel, SIGNAL(allIndicatorsDeactivated()),
-               mIndicatorWidget, SLOT(removeAllIndicators()));
+{   
+    if (mIndicatorWidget && mIndicatorModel) {
+        disconnect(mIndicatorModel, SIGNAL(indicatorsUpdated(QList<SnsrIndicatorInfo>)),
+                   mIndicatorWidget, SLOT(showIndicators(QList<SnsrIndicatorInfo>)));
+        
+        disconnect(mIndicatorModel, SIGNAL(allIndicatorsDeactivated()),
+                   mIndicatorWidget, SLOT(removeAllIndicators()));
+    }
 }
 
 /*!

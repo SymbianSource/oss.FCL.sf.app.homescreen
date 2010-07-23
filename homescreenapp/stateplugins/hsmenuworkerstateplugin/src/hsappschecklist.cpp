@@ -17,7 +17,7 @@
 
 #include <hbaction.h>
 #include <hbinstance.h>
-#include <hbview.h>
+#include <hbdialog.h>
 #include <hblistview.h>
 #include <hbdocumentloader.h>
 #include <hsmenuservice.h>
@@ -81,7 +81,7 @@
  \retval void
  */
 HsAppsCheckList::HsAppsCheckList() :
-    mView(0), mPreviousView(0), mActionConfirm(0), mListView(0), mModel(0),
+    mAppsSelectDialog(0), mActionConfirm(0), mListView(0), mModel(0),
     mSortAttribute(AscendingNameHsSortAttribute)
 {
 }
@@ -101,16 +101,10 @@ HsAppsCheckList::~HsAppsCheckList()
 void HsAppsCheckList::cleanUp()
 {
     //clean up
+    if (mAppsSelectDialog) {
+        mAppsSelectDialog->close();
+    }
 
-    qDeleteAll(mLoadedObjects);
-    mLoadedObjects.clear();
-    mListView = NULL;
-    mView = NULL;
-
-    delete mActionConfirm;
-    mActionConfirm = NULL;
-    delete mModel;
-    mModel = NULL;
     mSortAttribute = AscendingNameHsSortAttribute;
 }
 
@@ -127,9 +121,6 @@ void HsAppsCheckList::setSortOrder(HsSortAttribute sortOrder)
  Shows check box list with all application.
  \param sortAttribute order to sort applications.
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 void HsAppsCheckList::showAppsCheckboxList(HsSortAttribute sortOrder)
 {
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::showAppsCheckboxList");
@@ -139,84 +130,81 @@ void HsAppsCheckList::showAppsCheckboxList(HsSortAttribute sortOrder)
     // fills model with data
     // constucts controls such as checklist
     constructControls();
+    
+    if (mAppsSelectDialog) {
+        mAppsSelectDialog->setTimeout(HbPopup::NoTimeout);
+        mAppsSelectDialog->setAttribute(Qt::WA_DeleteOnClose);
+        mAppsSelectDialog->open(this,
+            SLOT(appsSelectionDialogFinished(HbAction*)));
+    }
 
-    // Add mListView to main window
-    HbMainWindow *hbMainWindow = mainWindow();
-
-    // add confirm action
-    mView->setNavigationAction(mActionConfirm);
-
-    hbMainWindow->addView(mView);
-    // record the current view in order to activate it once done
-    mPreviousView = hbMainWindow->currentView();
-    hbMainWindow->setCurrentView(mView);
-    hbMainWindow->show();
     HSMENUTEST_FUNC_EXIT("HsAppsCheckList::showAppsCheckboxList");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
+
 /*!
  Construct contrlos.
  */
 void HsAppsCheckList::constructControls()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::constructControls");
-    if (!mActionConfirm) {
-        mActionConfirm = new HbAction(Hb::ConfirmNaviAction, mView);
-        connect(mActionConfirm, SIGNAL(triggered()),SLOT(selectApplicationsDone()));
-    }
 
-    if (!mView) { // it implies that mListView is NULL as well
-        bool loadStatusOk = false;
+    bool loadStatusOk = false;
+    HbDocumentLoader loader;
+    loader.load(HS_APP_CHECK_LIST_LAYOUT, &loadStatusOk);
 
-        HbDocumentLoader loader;
-        mLoadedObjects = loader.load(HS_APP_CHECK_LIST_LAYOUT, &loadStatusOk);
+    Q_ASSERT_X(loadStatusOk,
+                HS_APP_CHECK_LIST_LAYOUT,
+               "Error while loading docml file.");
 
-        Q_ASSERT_X(loadStatusOk,
-                    HS_APP_CHECK_LIST_LAYOUT,
-                   "Error while loading docml file.");
+    static const QString APPS_SELECTION_DIALOG("applications_selection_dialog");
+    mAppsSelectDialog =
+        qobject_cast<HbDialog *>(loader.findWidget(APPS_SELECTION_DIALOG));
 
-        static const QString VIEW_WIDGET_NAME("view");
-        mView = qobject_cast<HbView *> (loader.findWidget(VIEW_WIDGET_NAME));
-        mView->setParent(this);
-
-        static const QString LIST_VIEW_WIDGET_NAME("listView");
+    if (mAppsSelectDialog) {
+        static const QString LIST_VIEW_WIDGET("listView");
         mListView = qobject_cast<HbListView *> (loader.findWidget(
-                LIST_VIEW_WIDGET_NAME));
+            LIST_VIEW_WIDGET));
+        mModel->setParent(mAppsSelectDialog);
         mListView->setModel(mModel);
+
+        connect(mListView,SIGNAL(activated(const QModelIndex&) ),this
+                ,SLOT(selectedItemsChanged()));
+        connect(mModel,SIGNAL(rowsRemoved(const QModelIndex&, int,int)),
+        		this, SLOT(selectedItemsChanged()));
+
+        // add confirm action
+        static const QString HS_APPS_SELECTION_DIALOG_CONFIRMATION_ACTION
+                ("aps_dialog_softkey_2_left");
+        mActionConfirm = qobject_cast<HbAction*>(loader.findObject(
+                        HS_APPS_SELECTION_DIALOG_CONFIRMATION_ACTION));
+        mActionConfirm->setEnabled(false);
+        mAppsSelectDialog->actions()[0]->setParent(mAppsSelectDialog);
+        mAppsSelectDialog->actions()[1]->setParent(mAppsSelectDialog);
     }
     HSMENUTEST_FUNC_EXIT("HsAppsCheckList::constructControls");
 }
 
 /*!
- Slot connected trrigger action of secondary soft key of check list box.
- It is called when done button is selected.
+ Action after closed application selection dialog.
+ \param finishedAction chosen action.
+ \retval void
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
-void HsAppsCheckList::selectApplicationsDone()
+void HsAppsCheckList::appsSelectionDialogFinished(HbAction* finishedAction)
 {
-    HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::selectApplicationsDone");
-    // Remove mListView from main window and restore previous view.
-    HbMainWindow *hbMainWindow = mainWindow();
-    hbMainWindow->setCurrentView(mPreviousView);
-    hbMainWindow->removeView(mView);
-    
-    QItemSelectionModel *itemSelectionModel = mListView->selectionModel();
+    HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::appsSelectionDialogFinished");
     QList<int> itemsList;
-    if (itemSelectionModel) {
-        QModelIndexList modelIndexList =
-            itemSelectionModel->selectedIndexes();
-        itemsList = getSortedItemsList(modelIndexList);
+    if (finishedAction == mActionConfirm) {
+        QItemSelectionModel *itemSelectionModel = mListView->selectionModel();
+        if (itemSelectionModel) {
+            QModelIndexList modelIndexList =
+                itemSelectionModel->selectedIndexes();
+            itemsList = getSortedItemsList(modelIndexList);
+        }
     }
+    mAppsSelectDialog = NULL;
     emit commit(itemsList);
-    HSMENUTEST_FUNC_EXIT("HsAppsCheckList::selectApplicationsDone");
+    HSMENUTEST_FUNC_EXIT("HsAppsCheckList::appsSelectionDialogFinished");
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
 
 /*!
  Returns list with selected items ids.
@@ -251,16 +239,13 @@ QList<int> HsAppsCheckList::getSortedItemsList(
 }
 
 /*!
- Returns pointer to tha main window.
- \return Pointer to the main window.
+ Slot activated then user select or unselect item
  */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
-HbMainWindow *HsAppsCheckList::mainWindow() const
+void HsAppsCheckList::selectedItemsChanged()
 {
-    return HbInstance::instance()->allMainWindows().value(0);
+    if (mListView->selectionModel()->hasSelection()) {
+        mActionConfirm->setEnabled(true);
+    } else {
+        mActionConfirm->setEnabled(false);
+    }
 }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT

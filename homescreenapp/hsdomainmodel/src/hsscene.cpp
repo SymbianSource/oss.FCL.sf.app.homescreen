@@ -321,18 +321,18 @@ void HsScene::setInstance(HsScene *instance)
 /*!
     Return main window.
 */
-HbMainWindow *HsScene::mainWindow()
+/*HbMainWindow *HsGui::instance()
 {
     return hbInstance->allMainWindows().first();
 }
-
+*/
 /*!
     Return current orientation.
 */
-Qt::Orientation HsScene::orientation()
+/*Qt::Orientation HsGui::instance()->orientation()
 {
     return mainWindow()->orientation();
-}
+}*/
 
 /*!
     Listens for application background/foreground changes.

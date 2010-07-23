@@ -18,6 +18,7 @@
 #ifndef HSVIEWAPPDETAILSSTATE_H_
 #define HSVIEWAPPDETAILSSTATE_H_
 
+
 #include <QState>
 #include <QVariant>
 
@@ -59,7 +60,6 @@ signals:
 private:
 
     void construct();
-    void subscribeForMemoryCardRemove(int entryId);
     void setFieldPresentation(QString key,
             CaSoftwareRegistry::DetailMap &detailMap,
             HbDocumentLoader &loader);
@@ -67,8 +67,6 @@ private:
 private:
 
     HbDialog *mDialog;
-    
-    CaNotifier *mNotifier;
 };
 
 #endif /* HSVIEWAPPDETAILSSTATE_H_ */

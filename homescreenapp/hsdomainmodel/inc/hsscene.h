@@ -71,8 +71,8 @@ public:
     static HsScene *instance();
     static HsScene *takeInstance();
     static void setInstance(HsScene *instance);
-    static HbMainWindow *mainWindow();
-    static Qt::Orientation orientation();
+    //static HbMainWindow *mainWindow();
+    //static Qt::Orientation orientation();
 
 signals:
     void pageTapAndHoldFinished(QGestureEvent *event);
@@ -105,7 +105,7 @@ private:
 
     friend class HsPage;
     friend class HsPageTouchArea;
-    friend class HsWidgetHost;
+    friend class HsWidgetHostVisual;
     friend class HsWidgetTouchArea;
     friend class HsWidgetMoveTouchArea;
 

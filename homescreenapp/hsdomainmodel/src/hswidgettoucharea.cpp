@@ -24,12 +24,12 @@
 #include <HbPanGesture>
 
 #include "hswidgettoucharea.h"
-#include "hswidgethost.h"
+#include "hswidgethostvisual.h"
 #include "hsscene.h"
 
-HsWidgetTouchArea::HsWidgetTouchArea(HsWidgetHost *widgetHost)
-  : HbTouchArea(widgetHost),
-    mWidgetHost(widgetHost)
+HsWidgetTouchArea::HsWidgetTouchArea(HsWidgetHostVisual *visual)
+  : HbTouchArea(visual),
+    mWidgetHostVisual(visual)
 {
     grabGesture(Qt::TapAndHoldGesture);
 }
@@ -44,14 +44,14 @@ bool HsWidgetTouchArea::sceneEvent(QEvent *event)
     switch (event->type()) {
         case QEvent::TouchBegin:
         case QEvent::GraphicsSceneMousePress:
-            emit scene->widgetTapStarted(mWidgetHost);
+            emit scene->widgetTapStarted(mWidgetHostVisual->visualModel());
             break;        
         case QEvent::TouchEnd:
             {
                 ungrabGesture(Qt::PanGesture);
                 ungrabMouse();
                 QPointF scenePos = static_cast<QTouchEvent *>(event)->touchPoints().first().scenePos();
-                emit scene->widgetMoveFinished(scenePos, mWidgetHost);
+                emit scene->widgetMoveFinished(scenePos, mWidgetHostVisual->visualModel());
             }
             break;
         case QEvent::GraphicsSceneMouseRelease:
@@ -59,7 +59,7 @@ bool HsWidgetTouchArea::sceneEvent(QEvent *event)
                 ungrabGesture(Qt::PanGesture);
                 ungrabMouse();
                 QPointF scenePos = static_cast<QGraphicsSceneMouseEvent *>(event)->scenePos();
-                emit scene->widgetMoveFinished(scenePos, mWidgetHost);
+                emit scene->widgetMoveFinished(scenePos, mWidgetHostVisual->visualModel());
             }
             break;    
         default:
@@ -71,7 +71,7 @@ bool HsWidgetTouchArea::sceneEvent(QEvent *event)
 
 QPainterPath HsWidgetTouchArea::shape() const
 {       
-    return mWidgetHost->shape();
+    return mWidgetHostVisual->shape();
 }
 
 void HsWidgetTouchArea::gestureEvent(QGestureEvent *event)
@@ -84,7 +84,7 @@ void HsWidgetTouchArea::gestureEvent(QGestureEvent *event)
         if (gesture->state() == Qt::GestureFinished) {
             grabGesture(Qt::PanGesture);
             grabMouse();
-            emit scene->widgetTapAndHoldFinished(event, mWidgetHost);
+            emit scene->widgetTapAndHoldFinished(event, mWidgetHostVisual->visualModel());
         }
         return;
     }
@@ -96,12 +96,12 @@ void HsWidgetTouchArea::gestureEvent(QGestureEvent *event)
         switch (gesture->state()) {
             case Qt::GestureStarted:
             case Qt::GestureUpdated:
-                emit scene->widgetMoveUpdated(scenePos, mWidgetHost);
+                emit scene->widgetMoveUpdated(scenePos, mWidgetHostVisual->visualModel());
                 break;
             case Qt::GestureCanceled:
             case Qt::GestureFinished:
                 ungrabGesture(Qt::PanGesture);
-                emit scene->widgetMoveFinished(scenePos, mWidgetHost);
+                emit scene->widgetMoveFinished(scenePos, mWidgetHostVisual->visualModel());
                 break;
             default:
                 break;

@@ -21,12 +21,13 @@
 #include <QTime>
 #include <QGraphicsLinearLayout>
 
-#include <hblabel.h>
-#include <hbextendedlocale.h>
+#include <HbExtendedLocale>
+#include <HbMainWindow>
 
 #include "snsranalogclockwidget.h"
 #include "snsrindicatorwidget.h"
 #include "snsrswipewidget.h"
+#include "snsrlabel.h"
 
 /*!
     \class SnsrAnalogClockContainer
@@ -61,41 +62,8 @@ SnsrAnalogClockContainer::SnsrAnalogClockContainer() :
     mDateLabel(0),
     mAnalogClockWidget(0)/*,
     mSwipeWidget(0)*/
-    {
+{
     SCREENSAVER_TEST_FUNC_ENTRY("SnsrAnalogClockContainer::SnsrAnalogClockContainer")
-
-    bool ok(true);
-
-    // load analog clock
-    qDebug() << gAnalogLayoutDocml;
-    mDocumentObjects = mDocumentLoader.load(gAnalogLayoutDocml, &ok);
-    Q_ASSERT_X(ok, gAnalogLayoutDocml, "Invalid DocML file.");
-    if (ok) {
-        mMainView = mDocumentLoader.findWidget(gMainViewName);
-        mDateLabel = qobject_cast<HbLabel *>(
-            mDocumentLoader.findWidget(gDateLabelName));
-        mAnalogClockWidget = qobject_cast<SnsrAnalogClockWidget *>(
-            mDocumentLoader.findWidget(gAnalogClockWidgetName));
-        mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
-            mDocumentLoader.findWidget(gIndicatorWidgetName));
-        //We don't implement swipe widget at this poin
-        /*mSwipeWidget = qobject_cast<SnsrSwipeWidget *>(
-            mDocumentLoader.findWidget(gSwipeWidgetName));*/
-        
-        Q_ASSERT_X(
-                mMainView && mDateLabel && mAnalogClockWidget &&
-                mIndicatorWidget /*&& mSwipeWidget*/,
-                gAnalogLayoutDocml, "Objects not found in DocML file."
-                );
-        
-        //connect( mSwipeWidget, SIGNAL(swipeDownDetected()), SIGNAL(unlockRequested()) );
-
-        mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
-        
-        mBackgroundContainerLayout->addItem(mMainView);
- //       mSwipeWidget->start();
-    }
-
     SCREENSAVER_TEST_FUNC_EXIT("SnsrAnalogClockContainer::SnsrAnalogClockContainer")
 }
 
@@ -104,6 +72,7 @@ SnsrAnalogClockContainer::SnsrAnalogClockContainer() :
  */
 SnsrAnalogClockContainer::~SnsrAnalogClockContainer()
 {
+    resetIndicatorConnections();
     //mDateLabel, mAnalogClockWidget - deleted by the parent
 }
 
@@ -131,43 +100,57 @@ void SnsrAnalogClockContainer::update()
     SCREENSAVER_TEST_FUNC_EXIT("SnsrAnalogClockContainer::update")
 }
 
-/*!
-    Changes screensaver layout basing on orientation changes.
-    \param orientation Current orientation.
- */
-void SnsrAnalogClockContainer::changeLayout(Qt::Orientation orientation)
-{
-    SCREENSAVER_TEST_FUNC_ENTRY("SnsrAnalogClockContainer::changeLayout")
-
-    bool ok(false);
-    if (mCurrentOrientation != orientation) {
-        mCurrentOrientation = orientation;
-
-        // hide controls to avoid screen flickering
-        mMainView->hide();
-
-        QString sectionToLoad("");
-        if (mCurrentOrientation == Qt::Horizontal) {
-            sectionToLoad = gLandscapeSectionName;
-        }
-        qDebug() << "loading: " << gAnalogLayoutDocml << ", section: " << sectionToLoad;
-        mDocumentLoader.load(gAnalogLayoutDocml, sectionToLoad, &ok);
-        // view is rebuilt and ready to show
-        update();
-        mMainView->show();
-        Q_ASSERT_X(ok, gAnalogLayoutDocml, "Invalid section in DocML file.");
-    }
-    // update anyway - this is needed in situations when screensaver goes to
-    // foreground but layout change did not occur
-    if (!ok) {
-        update();
-    }
-
-    SCREENSAVER_TEST_FUNC_EXIT("SnsrAnalogClockContainer::changeLayout")
-}
-
 int SnsrAnalogClockContainer::updateIntervalInMilliseconds()
 {
     return 1000;
+}
+
+void SnsrAnalogClockContainer::loadWidgets()
+{
+    bool ok(true);
+
+    // reset widget pointers, any previous widgets are already deleted by now
+    mMainView = 0;
+    mDateLabel = 0;
+    mAnalogClockWidget = 0;
+    mIndicatorWidget = 0;
+    
+    // load widgets from docml
+    qDebug() << gAnalogLayoutDocml;
+    mDocumentObjects = mDocumentLoader.load(gAnalogLayoutDocml, &ok);
+    Q_ASSERT_X(ok, gAnalogLayoutDocml, "Invalid DocML file.");
+    if (ok) {
+        mMainView = mDocumentLoader.findWidget(gMainViewName);
+        mDateLabel = qobject_cast<SnsrLabel *>(
+            mDocumentLoader.findWidget(gDateLabelName));
+        mAnalogClockWidget = qobject_cast<SnsrAnalogClockWidget *>(
+            mDocumentLoader.findWidget(gAnalogClockWidgetName));
+        mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
+            mDocumentLoader.findWidget(gIndicatorWidgetName));
+        //We don't implement swipe widget at this poin
+        /*mSwipeWidget = qobject_cast<SnsrSwipeWidget *>(
+            mDocumentLoader.findWidget(gSwipeWidgetName));*/
+        
+        Q_ASSERT_X(
+                mMainView && mDateLabel && mAnalogClockWidget &&
+                mIndicatorWidget /*&& mSwipeWidget*/,
+                gAnalogLayoutDocml, "Objects not found in DocML file."
+                );
+        
+        // In case of landscape layout, read also the landscape delta section
+        if ( mCurrentOrientation == Qt::Horizontal ) {
+            qDebug() << "loading: " << gAnalogLayoutDocml << ", section: " << gLandscapeSectionName;
+            mDocumentLoader.load(gAnalogLayoutDocml, gLandscapeSectionName, &ok);
+            Q_ASSERT_X(ok, gAnalogLayoutDocml, "Invalid section in DocML file.");
+        }
+
+        initIndicatorWidget();
+        mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        
+        mBackgroundContainerLayout->addItem(mMainView);
+
+        //connect( mSwipeWidget, SIGNAL(swipeDownDetected()), SIGNAL(unlockRequested()) );
+        //mSwipeWidget->start();
+    }
 }
 

@@ -18,14 +18,11 @@
 #ifndef HSALLCOLLECTIONSSTATE_H
 #define HSALLCOLLECTIONSSTATE_H
 
-#include <QState>
-#include <QPointF>
-
 #include "hsbaseviewstate.h"
-#include "hsmenumodewrapper.h"
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
+class QPointF;
 class HsMenuViewBuilder;
 class HbAbstractViewItem;
 class HbAction;
@@ -33,6 +30,7 @@ class HbMainWindow;
 class HsMenuItemModel;
 class HsMenuView;
 class HsMainWindow;
+class HsMenuModeWrapper;
 
 class HsAllCollectionsState: public HsBaseViewState
 {

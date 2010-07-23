@@ -51,12 +51,10 @@ HsMainWindow::~HsMainWindow()
  Add the \menuView to first instance of HbMainWindow registered in HbInstance.
  \param view View to be added to HbMainWindow.
 */
-void HsMainWindow::setCurrentView(const HsMenuView &menuView)
+void HsMainWindow::setCurrentView(HbView *view)
 {
     HbMainWindow *const hbW(
         HbInstance::instance()->allMainWindows().value(0));
-
-    HbView *const view = menuView.view();
     
     if (!hbW->views().contains(view)) {
         hbW->addView(view);

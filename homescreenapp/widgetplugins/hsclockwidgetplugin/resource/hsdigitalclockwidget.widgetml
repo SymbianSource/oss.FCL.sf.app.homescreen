@@ -27,10 +27,6 @@
         <meshitem src="digit6" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
         <meshitem src="digit6" srcEdge="LEFT" dst="digit5" dstEdge="RIGHT" />
 
-        <meshitem src="toucharea" srcEdge="TOP" dst="" dstEdge="TOP" />
-        <meshitem src="toucharea" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />
-        <meshitem src="toucharea" srcEdge="LEFT" dst="" dstEdge="LEFT" />
-        <meshitem src="toucharea" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
     </layout>
     
 </hbwidget>

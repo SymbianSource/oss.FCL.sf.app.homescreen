@@ -21,7 +21,7 @@
 #include <hbdocumentloader.h>
 #include "hstest_global.h"
 
-HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
+HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 
 class HsDocumentLoader : public HbDocumentLoader
 {
@@ -36,7 +36,7 @@ private:
 
     Q_DISABLE_COPY(HsDocumentLoader)
 
-    HOMESCREEN_TEST_FRIEND_CLASS(HomeScreenStatePluginTest)
+    HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)
 };
 
 #endif

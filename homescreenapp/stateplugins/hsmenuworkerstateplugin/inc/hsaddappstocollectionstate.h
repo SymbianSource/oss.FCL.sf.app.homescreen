@@ -25,10 +25,11 @@
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class QStandardItemModel;
+class QModelIndex;
 class HbAction;
 class HsAppsCheckList;
 class HsCollectionNameDialog;
-class HsCollectionsListDialog;
+class HbDialog;
 
 class HsAddAppsToCollectionState: public QState
 {
@@ -54,11 +55,9 @@ signals:
 
     void transitToSaveState(const QString &collectionName);
 
-    void transitToAppsCheckListState(const QString &collectionName);
-
     void transitToSaveState(int collectionId);
 
-    void transitToAppsCheckListState(int collectionId);
+    void transitToSelectCollectionState();
 
     void transitToNewCollectionState();
 
@@ -85,6 +84,8 @@ protected slots:
     void cleanData();
 
     void selectApplicationsDone(const QList<int> &appList);
+    
+    void collectionSelected(const QModelIndex &modelIndex);
 
 private slots:
 
@@ -105,6 +106,8 @@ private:
     void construct();
 
     void createStates();
+    
+    QStandardItemModel *standardItemModel(int collectionId);
 
 private:
 
@@ -132,8 +135,9 @@ private:
 
     HsCollectionNameDialog *mEditorDialog;
 
-    HsCollectionsListDialog *mListDialog;
+    HbDialog *mListDialog; // not owned
 
+    QStandardItemModel *mModel; // delete with dialog
 };
 
 #endif /* ADDAPPSTOCOLLECTIONSTATE_H */

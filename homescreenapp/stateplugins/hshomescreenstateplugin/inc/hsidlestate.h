@@ -31,11 +31,11 @@ HOMESCREEN_TEST_CLASS(HomeScreenStatePluginTest)
 
 class QGraphicsItem;
 class QGraphicsSceneMouseEvent;
-class QPropertyAnimation;
+
 class QGestureEvent;
 class HbAction;
 class HbContinuousFeedback;
-class HsIdleWidget;
+
 class HsTitleResolver;
 class QParallelAnimationGroup;
 class HbMenu;
@@ -46,7 +46,7 @@ class XQSettingsManager;
 class HsWidgetHost;
 class HsPage;
 class HsMessageBoxWrapper;
-class HsPropertyAnimationWrapper;
+
 
 class HsIdleState : public QState
 {
@@ -120,6 +120,7 @@ private slots:
     void action_moveScene_disconnectGestureHandlers();    
     void action_addPage_addPage();
     void action_preRemovePage_showQuery();
+    void action_preRemovePage_exit();
     void action_removePage_startRemovePageAnimation();
     void action_removePage_removePage();
     void action_toggleConnection_toggleConnection();
@@ -146,11 +147,11 @@ private slots:
    
 private:
     HbAction *mNavigationAction;
-    HsIdleWidget *mUiWidget;  
+    
     HsTitleResolver *mTitleResolver;
-    QPropertyAnimation *mZoneAnimation;
+  
     bool mAllowZoneAnimation;
-    HsPropertyAnimationWrapper *mPageChangeAnimation;
+    
     HbContinuousFeedback *mContinuousFeedback;
     bool mTrashBinFeedbackAlreadyPlayed;    
     QPointF mPageHotSpot;

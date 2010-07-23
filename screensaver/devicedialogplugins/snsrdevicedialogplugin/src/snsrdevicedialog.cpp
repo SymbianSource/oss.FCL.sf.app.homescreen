@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,22 +15,20 @@
 *
 */
 
-#include <HbMainWindow>
 #include <QGraphicsLinearLayout>
+#include <QGraphicsSceneResizeEvent>
 #include <QPainter>
 #include <QDebug>
+#include <QServiceManager>
+#include <QServiceFilter>
+#include <QServiceInterfaceDescriptor>
+#include <XQSettingsManager>
+#include <HbMainWindow>
 #include <HbIndicatorInterface>
 
-#include <qservicemanager.h>
-#include <qservicefilter.h>
-#include <qserviceinterfacedescriptor.h>
-
 #include <screensaver.h>
-
-#include "snsrdevicedialog.h"
 #include <screensaverdomaincrkeys.h>
-#include <xqsettingsmanager.h> 
-
+#include "snsrdevicedialog.h"
 
 const char *gBigClockInterfaceName = "com.nokia.screensaver.ISnsrBigClockScreensaver";
 
@@ -43,6 +41,8 @@ const char *gBigClockInterfaceName = "com.nokia.screensaver.ISnsrBigClockScreens
 extern const char *lViewType;
 
 const char *SnsrDeviceDialog::dataKeyUnlock = "unlock";
+const char *SnsrDeviceDialog::dataKeySwitchLights = "switch_lights";
+const char *SnsrDeviceDialog::dataKeySwitchLowPower = "switch_low_power";
 
 QTM_USE_NAMESPACE
 
@@ -52,7 +52,10 @@ QTM_USE_NAMESPACE
     \param parent Parent.
  */
 SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem *parent) :
-        HbPopup(parent) , mScreensaver(0), mLayout(0), m_setManager (0)
+        HbPopup(parent), 
+        mScreensaver(0), 
+        mLayout(0), 
+        m_setManager(0)
 {
     qDebug("SnsrDeviceDialog::SnsrDeviceDialog()");
 
@@ -76,6 +79,10 @@ SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem 
         SLOT(changeView(QGraphicsWidget*)));
     connect(mScreensaver, SIGNAL(faulted()),
         SLOT(screensaverFaulted()));
+    connect( mScreensaver, SIGNAL(unlockRequested()),
+        SLOT(requestUnlock()) );
+    connect( mScreensaver, SIGNAL(screenPowerModeRequested(Screensaver::ScreenPowerMode)),
+        SLOT(requestScreenMode(Screensaver::ScreenPowerMode)) );
     
     mScreensaver->initialize();
 
@@ -83,10 +90,10 @@ SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem 
 
     setDismissPolicy(HbPopup::NoDismiss);
     setTimeout(HbPopup::NoTimeout);
+    
+    mainWindow()->setAutomaticOrientationEffectEnabled(false);
 
     setDeviceDialogParameters( parameters );
-    
-    connect( mScreensaver, SIGNAL(unlockRequested()), SLOT(requestUnlock()) );
 }
 
 /*!
@@ -123,18 +130,19 @@ bool SnsrDeviceDialog::setDeviceDialogParameters(const QVariantMap &parameters)
         
     // Check initial view from repository
     if (viewType == ViewTypeInitial ) {
-    XQSettingsManager::Error error;
+        XQSettingsManager::Error error;
         int startupView = 0; 
-        XQSettingsKey settingsKey( XQSettingsKey::TargetCentralRepository, 
+        XQCentralRepositorySettingsKey settingsKey(
                  KCRUidScreensaverSettings.iUid, KScreensaverStartupView ); // TUid as same repository used in control panel via Symbian APIs 
         m_setManager = new XQSettingsManager(this);
-         if (m_setManager) {
-            startupView = m_setManager->readItemValue(settingsKey, XQSettingsManager::TypeInt).toUInt();
+        if (m_setManager) {
+            startupView = m_setManager->readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
             error = m_setManager->error();
-            if (error == XQSettingsManager::NoError)
+            if (error == XQSettingsManager::NoError) {
                 viewType = startupView;
+            }
             delete m_setManager;
-         }
+        }
     }
 
     switch (viewType) {
@@ -253,11 +261,17 @@ void SnsrDeviceDialog::changeView(QGraphicsWidget *widget)
     
     if (mLayout->count()) {
         mLayout->removeAt(0);
-    }    
+    }
     if (widget) {
         widget->show();
         mLayout->addItem(widget);
+
+        if ( isVisible() ) {
+           changeLayout( mainWindow()->orientation() );
+        }
     }
+    
+
 }
 
 /*!
@@ -280,6 +294,10 @@ void SnsrDeviceDialog::changeLayout(Qt::Orientation orientation)
     QRectF rect = mainWindow()->layoutRect();
     setMinimumSize( rect.size() );
     setPreferredPos( QPointF(0,0) );
+    QGraphicsSceneResizeEvent sceneResize;
+    sceneResize.setNewSize( rect.size() );
+    event( &sceneResize );
+    mScreensaver->updateLayout();
 }
 
 /*!
@@ -291,6 +309,35 @@ void SnsrDeviceDialog::requestUnlock()
     data.insert(dataKeyUnlock, 1);
     emit deviceDialogData(data);
 }
+
+/*!
+    Send low power mode on/off request to autolock.
+ */
+void SnsrDeviceDialog::requestScreenMode(Screensaver::ScreenPowerMode mode)
+{
+    QVariantMap data;
+    QVariantList rowLimits;
+    if ( mode == Screensaver::ScreenModeOff ) {
+        data.insert(dataKeySwitchLights, 0);
+        data.insert(dataKeySwitchLowPower, rowLimits); // empty list means "low power off"
+    }
+    else if ( mode == Screensaver::ScreenModeLowPower ) {
+        //data.insert(dataKeySwitchLights, 0);
+        int firstRow;
+        int lastRow;
+        mScreensaver->getActiveScreenRows(&firstRow, &lastRow);
+        rowLimits.append( firstRow );
+        rowLimits.append( lastRow );
+        data.insert(dataKeySwitchLowPower, rowLimits);
+    }
+    else if ( mode == Screensaver::ScreenModeFullPower ) {
+        data.insert(dataKeySwitchLights, 30);
+        data.insert(dataKeySwitchLowPower, rowLimits); // empty list means "low power off"
+    }
+    
+    emit deviceDialogData(data);
+}
+
 /*!
     Called when the dialog is created if they are any currently
     activate universal indicators present.

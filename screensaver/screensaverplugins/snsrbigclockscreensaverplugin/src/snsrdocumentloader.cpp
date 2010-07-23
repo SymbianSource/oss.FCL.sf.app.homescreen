@@ -21,6 +21,7 @@
 #include "snsroledclockwidget.h"
 #include "snsrlabel.h"
 #include "snsrindicatorwidget.h"
+#include "snsroledtimelabel.h"
 #include "snsrswipewidget.h"
 
 /*!
@@ -28,11 +29,11 @@
     \ingroup group_snsrbigclockscreensaverplugin
     \brief Custom screensaver docml layout loader.
 
-    Used mainly to create the analog clock widget from docml.
+    Used to create the widgets from docml.
  */
 
 /*!
-    Creates the analog clock.
+    Creates the requested widget.
     \param type Static type name.
     \param name Object name.
     \retval Created object.
@@ -63,6 +64,12 @@ QObject *SnsrDocumentLoader::createObject(const QString &type, const QString &na
         return object;
     }
 
+    if (type == SnsrOledTimeLabel::staticMetaObject.className()) {
+        QObject *object = new SnsrOledTimeLabel();
+        object->setObjectName(name);
+        return object;
+    }
+    
     /* Add swipeWidget implementation later on
      
      if (type == SnsrSwipeWidget::staticMetaObject.className()) {

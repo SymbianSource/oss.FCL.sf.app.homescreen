@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="1.1">
+     <widget name="view" type="HbView">
+         <widget name="container" role="HbView:widget" type="HbWidget">
+             <widget name="searchPanel" type="HbSearchPanel"/>
+             <widget name="listView" type="HbListView">
+                 <bool name="itemRecycling" value="TRUE"/>
+                 <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
+                 <bool name="frictionEnabled" value="TRUE"/>
+             </widget>
+             <layout orientation="Vertical" spacing="0.0un" type="linear">
+                 <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                 <linearitem itemname="listView"/>
+                 <linearitem itemname="searchPanel"/>
+             </layout>
+         </widget>
+         <string locid="txt_applib_title_applications" name="title"/>
+         <bool name="contentFullScreen" value="TRUE"/>
+     </widget>
+</hbdocument>

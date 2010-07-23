@@ -20,13 +20,12 @@
 
 #include <QModelIndexList>
 #include <hsmenuservice.h>
-#include "hbmainwindow.h"
 
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 //forward declarations
-class HbView;
+class HbDialog;
 class HbAction;
 class HbListView;
 class QStandardItemModel;
@@ -56,31 +55,27 @@ signals:
 
 protected slots:
 
-    void selectApplicationsDone();
+    void appsSelectionDialogFinished(HbAction* finishedAction);
+
+    void selectedItemsChanged();
 
 private:
 
     void constructControls();
 
-    HbMainWindow *mainWindow() const;
-
     QList<int> getSortedItemsList(const QModelIndexList &modelIndexList);
 
 private:
 
-    HbView *mView;
+    HbDialog *mAppsSelectDialog;
 
-    HbView *mPreviousView;
+    HbAction *mActionConfirm; // delete with dialog
 
-    HbAction *mActionConfirm;
+    HbListView *mListView; // delete with dialog
 
-    HbListView *mListView;
-
-    HsMenuItemModel *mModel;
+    HsMenuItemModel *mModel; // delete with dialog
 
     HsSortAttribute mSortAttribute;
-
-    QObjectList mLoadedObjects;
 
 };
 

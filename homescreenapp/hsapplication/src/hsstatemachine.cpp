@@ -92,7 +92,7 @@ HsStateMachine::HsStateMachine(QObject *parent)
 {
     HSTEST_FUNC_ENTRY("HS::HsStateMachine::HsStateMachine");
 
-    HsDatabase *db = new HsDatabase;
+    HsDatabase *db = new HsDatabase(QCoreApplication::instance());
     db->setConnectionName("homescreen.dbc");
 #ifdef Q_OS_SYMBIAN
     db->setDatabaseName("c:/private/20022f35/homescreen.db");
@@ -102,14 +102,18 @@ HsStateMachine::HsStateMachine(QObject *parent)
     db->open();
     HsDatabase::setInstance(db);
 
-    HsConfiguration::setInstance(new HsConfiguration);
+    HsConfiguration::setInstance(new HsConfiguration(QCoreApplication::instance()));
     HsConfiguration::instance()->load();
             
     HsWidgetPositioningOnOrientationChange::setInstance(
         new HsAdvancedWidgetPositioningOnOrientationChange);
-
+#ifdef HSWIDGETORGANIZER_ALGORITHM
+    HsWidgetPositioningOnWidgetAdd::setInstance(
+        new HsWidgetOrganizer);
+#else
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
+#endif
 
     HsWidgetPositioningOnWidgetMove::setInstance(
         new HsSnapToLines);
@@ -138,6 +142,8 @@ HsStateMachine::HsStateMachine(QObject *parent)
 HsStateMachine::~HsStateMachine()
 {
     HsWidgetPositioningOnOrientationChange::setInstance(0);
+    HsWidgetPositioningOnWidgetAdd::setInstance(0);
+    HsWidgetPositioningOnWidgetMove::setInstance(0);
     delete mPublisher;
 }
 

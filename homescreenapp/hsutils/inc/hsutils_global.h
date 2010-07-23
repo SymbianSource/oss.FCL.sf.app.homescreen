@@ -19,7 +19,7 @@
 #ifndef HSUTILS_GLOBAL_H
 #define HSUTILS_GLOBAL_H
 
-#include <Qt/qglobal.h>
+#include <qglobal.h>
 
 
 #ifdef HSUTILS_LIB

@@ -24,15 +24,15 @@
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
-class HsMenuView;
+class HbView;
+
 class HsMainWindow
 {
-
 public:
     HsMainWindow();
     virtual ~HsMainWindow();
 
-    virtual void setCurrentView(const HsMenuView &menuView);     
+    virtual void setCurrentView(HbView *view);
 
 };
 

@@ -23,7 +23,7 @@
 SCREENSAVER_TEST_CLASS(T_SnsrBigClockScreensaverPlugin)
 
 class SnsrOledClockWidget;
-class HbLabel;
+class SnsrLabel;
 
 class SnsrOledAnalogClockContainer : public SnsrBigClockContainer
 {
@@ -37,19 +37,24 @@ public:
 public slots:
 
     virtual void update();
-    virtual void changeLayout(Qt::Orientation orientation);
     void updatePosition();
 
 public: // from base classes
 
     virtual int updateIntervalInMilliseconds();
+    virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow);
+    virtual bool isOrientationLocked();
+
+protected: // from base classes
+
+    virtual void loadWidgets();
 
 private:
 
     QGraphicsWidget *mClockContainer;
     
     SnsrOledClockWidget *mOledClockWidget;
-    HbLabel *mDateLabel;
+    SnsrLabel *mDateLabel;
     
     QPointF mDestPosition;
     bool mInitialize;
