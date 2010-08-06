@@ -19,10 +19,21 @@
 #define CUSTOMLISTVIEWITEM_H
 
 #include <hblistviewitem.h>
+#include <HbProgressBar>
 
 #include "hsmenustates_global.h"
 
-class HbProgressBar;
+// TODO: this is only temporary class for show progress bar.
+// It should be remove when fix from orbit will be in official platfrom.
+class HsProgressBar: public HbProgressBar {
+public:
+    HsProgressBar(QGraphicsItem *parent=0):HbProgressBar(parent) {}
+    
+protected:
+    void paint ( QPainter * painter, 
+            const QStyleOptionGraphicsItem * option, 
+            QWidget * widget = 0 );
+};
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -33,17 +44,18 @@ class HsListViewItem : public HbListViewItem
                 
         explicit HsListViewItem(QGraphicsItem* parent=0);
         virtual ~HsListViewItem();
-        
+   
         virtual HbAbstractViewItem* createItem();
         virtual void updateChildItems();
     
+    protected:    
 	    virtual void polish(HbStyleParameters& params);
 
     private:
-
-        HbProgressBar *progress;
+	    HsProgressBar *progress;
         bool isProgress;
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };
+
 
 #endif // CUSTOMLISTVIEWITEM_H

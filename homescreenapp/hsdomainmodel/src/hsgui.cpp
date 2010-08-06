@@ -107,7 +107,8 @@ void HsGui::setupIdleUi()
         connect(mImpl->mNavigationAction, SIGNAL(triggered()), SIGNAL(navigateToApplibrary()));
         mImpl->mIdleView->setNavigationAction(mImpl->mNavigationAction);
     }
-    mImpl->mWindow->setCurrentView(mImpl->mIdleView);    
+    bool animate  = !mImpl->mWindow->isObscured();
+    mImpl->mWindow->setCurrentView(mImpl->mIdleView, animate);    
 }
 
 void HsGui::cleanupIdleUi()

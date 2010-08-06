@@ -13,7 +13,7 @@
                         <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Minimum" verticalStretch="0"/>
                         <enums name="elideMode" value="ElideMiddle"/>
                         <bool name="visible" value="TRUE"/>
-                        <string locid="txt_applib_formlabel_empty" name="plainText"/>
+                        <string locid="txt_applib_formlabel_no_content" name="plainText"/>
                         <fontspec name="fontSpec" role="Title" textheight="4un"/>
                     </widget>
                     <layout orientation="Horizontal" spacing="0.0un" type="linear">

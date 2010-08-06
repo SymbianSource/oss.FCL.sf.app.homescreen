@@ -16,9 +16,12 @@
  */
 
 #include <hbnamespace.h>
+#include <cauninstallnotifier.h>
+#include <casoftwareregistry.h>
 
 #include "hsmenuitemmodel.h"
 #include "hsmenuserviceutils.h"
+#include "hsiconsidleloader.h"
 
 // Constants
 const QSize smallIconSize(55, 55);
@@ -29,9 +32,15 @@ const QSize smallIconSize(55, 55);
  \param pointer to parent object
  */
 HsMenuItemModel::HsMenuItemModel(const CaQuery &query, QObject *parent) :
-    CaItemModel(query, parent)
+    CaItemModel(query, parent),
+    mIconsIdleLoader(NULL)
 {
     setIconSize(smallIconSize);
+    mComponentId = 0;
+    mUninstallNotifier = 
+        CaSoftwareRegistry::create()->createUninstallNotifier();
+    connect(mUninstallNotifier, SIGNAL(progressChange(int, int)),
+            this, SLOT(uninstallChange(int, int)));
 }
 
 /*!
@@ -39,7 +48,9 @@ HsMenuItemModel::HsMenuItemModel(const CaQuery &query, QObject *parent) :
  */
 HsMenuItemModel::~HsMenuItemModel()
 {
-
+    if (!mIds.isEmpty()) {
+        mIds.clear();
+    }
 }
 
 /*!
@@ -105,4 +116,36 @@ bool HsMenuItemModel::newIconNeeded(const QModelIndex &index) const
     }
     HSMENUTEST_FUNC_EXIT("HsMenuItemModel::newIconNeeded");
     return result;
+}
+
+/*!
+ Updating uninstall progress with value for each item
+  \param componentId Component Id of installed item
+  \param valueOfProgress % value of current progress
+ */
+void HsMenuItemModel::uninstallChange(int componentId, int valueOfProgress)
+{
+    if (componentId!=mComponentId) {
+        if (!mIds.isEmpty()) {
+            mIds.clear();
+        }
+        // get items list with same componentID
+        mIds = CaItemModel::getUninstallingEntriesIds(componentId);
+        mComponentId = componentId;
+    }
+    // update each item with progress value
+    foreach (int id, mIds) {
+        CaItemModel::updateProgress(id, valueOfProgress);
+    }
+}
+
+
+/*!
+ Start preloading icons if idle
+ \param entry entry representing an item
+ \retval void
+ */
+void HsMenuItemModel::preloadIcons()
+{
+    mIconsIdleLoader = new HsIconsIdleLoader(this, this);
 }

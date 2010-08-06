@@ -34,6 +34,7 @@ class HbAbstractViewItem;
 class CaNotifier;
 class HsMenuModeWrapper;
 class HsMainWindow;
+class HsAddModeProxyModel;
 
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
@@ -60,6 +61,7 @@ protected slots:
     virtual void stateEntered();
     virtual void stateExited();
     virtual void addModeEntered();
+    virtual void addModeExited();
     virtual void normalModeEntered();
     virtual void normalModeExited();
     virtual void launchItem(const QModelIndex &index);
@@ -68,6 +70,7 @@ protected slots:
     virtual int checkSoftwareUpdates();
     virtual bool openTaskSwitcher();
     virtual void closeContextMenu();
+    
 protected:
     
     void initialize(HsMenuViewBuilder &menuViewBuilder, HsStateContext stateContext);
@@ -75,15 +78,16 @@ protected:
     void defineTransitions();
 
 private:
+
     virtual void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags) = 0;
     virtual void setMenuOptions() = 0;
-
 
 private:
     
     QPointer<HbMessageBox> mApplicationLaunchFailMessage;
 
 protected:
+    
     HsMenuItemModel *mModel;
     QPointer<HbMenu> mContextMenu;
     QModelIndex mContextModelIndex;
@@ -91,6 +95,7 @@ protected:
     QScopedPointer<HsMenuView> mMenuView;
     HsMenuModeWrapper *mMenuMode;
     HsMainWindow &mMainWindow;
+    HbMenu *mViewOptions;
 };
 
 

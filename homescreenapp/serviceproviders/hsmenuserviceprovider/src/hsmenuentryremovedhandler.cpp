@@ -91,7 +91,7 @@ void HsMenuEntryRemovedHandler::entryChanged(int entryId,
     Q_UNUSED(entryId); // CaNotifier should care about matching id, skip it here
     
     if (changeType == RemoveChangeType) {
-        emit notify();
         mNotifier.reset(0);
+        emit notify();
     }
 }

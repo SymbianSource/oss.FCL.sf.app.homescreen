@@ -85,17 +85,15 @@ void HsAllCollectionsState::setMenuOptions()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllCollectionsState::setMenuOptions");
 
-    QScopedPointer<HbMenu> viewOptions(new HbMenu);
-
-    viewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
+    mViewOptions->clearActions();
+    mViewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                            static_cast<HsBaseViewState*>(this),
                            SLOT(openTaskSwitcher()));
-    viewOptions->addAction(hbTrId("txt_applib_opt_new_collection"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_new_collection"),
                            this, SLOT(createNewCollection()));
 
-    viewOptions->addAction(hbTrId("txt_applib_opt_arrange"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_arrange"),
         this, SLOT(createArrangeCollection()));
-    mMenuView->view()->setMenu(viewOptions.take());
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::setMenuOptions");
 }
@@ -153,7 +151,7 @@ void HsAllCollectionsState::normalModeEntered()
 */
 void HsAllCollectionsState::normalModeExited()
 {
-    mMenuView->view()->setMenu(NULL);
+
 }
 
 

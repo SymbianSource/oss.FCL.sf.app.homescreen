@@ -23,6 +23,7 @@
 #include "hsmenustates_global.h"
 
 class HsOperatorHandlerPrivate;
+class HbAction;
 
 class HsOperatorHandler: public QObject
 {
@@ -33,10 +34,17 @@ class HsOperatorHandler: public QObject
 public:
     HsOperatorHandler(QObject *parent = 0);
     virtual ~HsOperatorHandler();
-    HbIcon icon();
+    bool operatorStorePresent();
+    bool oviStorePresent();
+    bool operatorStoreFirst();
+    HbAction *prepareOperatorStoreAction(
+            HbAction *const operatorAction);
     QString text();
 
-public slots:
+private:
+    HbIcon icon();
+
+private slots:
     void action();
 
 private:

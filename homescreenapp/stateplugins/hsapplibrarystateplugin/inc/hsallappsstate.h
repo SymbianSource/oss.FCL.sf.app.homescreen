@@ -23,6 +23,7 @@
 #include "hsmenumodewrapper.h"
 
 
+
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbView;
@@ -55,6 +56,7 @@ private slots:
     void ascendingMenuAction();
     void descendingMenuAction();
     void normalModeEntered();
+    void addModeEntered();
     void stateExited();
     void contextMenuAction(HbAction *action);
 private:
@@ -64,6 +66,7 @@ private:
     void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
 
 private:
+    HsAddModeProxyModel *mAddModeProxyModel;
     HsSortAttribute mSortAttribute;
 };
 

@@ -140,8 +140,7 @@ void HsHomeScreen::registerServicePlugins()
     
     QStringList pluginPaths;
     
-    pluginPaths << "private/20022F35";    
-    pluginPaths << "hsresources/plugins";
+    pluginPaths << "private/20022F35";
 
     QFileInfoList drives = QDir::drives();
     foreach(const QString pluginPath, pluginPaths) {
@@ -162,6 +161,12 @@ void HsHomeScreen::registerServicePlugins()
     }
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::registerServicePlugins()");
 }
+
+#ifdef COVERAGE_MEASUREMENT 
+#ifndef Q_OS_SYMBIAN 
+#pragma CTC SKIP
+#endif // Q_OS_SYMBIAN
+#endif //COVERAGE_MEASUREMENT
 
 /*!
     Recursively registers service plugins starting from given /a root
@@ -195,3 +200,9 @@ void HsHomeScreen::registerServicePlugins(const QString &root, QServiceManager &
     }
     HSTEST_FUNC_EXIT("HS::HsHomeScreen::registerServicePlugins(const QString &)");
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#ifndef Q_OS_SYMBIAN 
+#pragma CTC ENDSKIP
+#endif // Q_OS_SYMBIAN
+#endif //COVERAGE_MEASUREMENT

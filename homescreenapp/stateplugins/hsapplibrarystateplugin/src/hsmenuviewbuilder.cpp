@@ -21,7 +21,6 @@
 #include <HbAction>
 #include <HbGroupBox>
 #include <HbListView>
-#include <HbSearchPanel>
 #include <HbPushButton>
 #include <HbToolBar>
 #include <HbView>
@@ -36,14 +35,14 @@
 
 static const char* DOCUMENT_BASE_NAME_MAP
         [InvalidStateContext][InvalidOperationalContext] =
-    /*HsItemViewContext,    HsSearchContext,    HsButtonContext,    HsEmptyLabelContext*/
+    /*HsItemViewContext,    HsButtonContext,    HsEmptyLabelContext*/
 {
-/*HsAllAppsContext*/        {"listview", "searchlistview", "listview", "listview"},
-/*HsAllCollectionsContext*/ {"listview", "searchlistview", "listview", "listview"},
+/*HsAllAppsContext*/        {"listview", "listview", "listview"},
+/*HsAllCollectionsContext*/ {"listview", "listview", "listview"},
 /*HsInstalledAppsContext*/  {"labeledlistview", "labeledlistview",
-                                "labeledlistview", "emptylabeledview"},
-/*HsCollectionContext*/     {"labeledlistview", "searchlabeledlistview",
-                                "addcontentlabeledview", "emptylabeledview"}
+        "emptylabeledview"},
+/*HsCollectionContext*/     {"labeledlistview", "addcontentlabeledview",
+        "emptylabeledview"}
 };
 
 static const QString DOCUMENT_NAME_PREFIX(QLatin1String(":/xml/"));
@@ -53,7 +52,6 @@ static const QString COMMON_OBJECTS_DOCUMENT_BASE_NAME(
 static const QString VIEW_NAME(QLatin1String("view"));
 static const QString LIST_VIEW_NAME(QLatin1String("listView"));
 static const QString VIEW_LABEL_NAME(QLatin1String("label"));
-static const QString SEARCH_PANEL_NAME(QLatin1String("searchPanel"));
 static const QString ADD_CONTENT_BUTTON_NAME(QLatin1String("addContentButton"));
 
 /*!
@@ -71,7 +69,7 @@ static const QString ADD_CONTENT_BUTTON_NAME(QLatin1String("addContentButton"));
 
 
 /*!
- \return Pointer to the view resulting from last \a build call or NULL if 
+ \return Pointer to the view resulting from last \a build call or NULL if
  the \a build has not yet been called.
  Memory ownership is not changed.
  */
@@ -87,7 +85,7 @@ HbView *HsMenuViewBuilder::currentView()
 }
 
 /*!
- \return Pointer to list view resulting from last \a build call or NULL if 
+ \return Pointer to list view resulting from last \a build call or NULL if
  the \a build has not yet been called.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
@@ -102,7 +100,7 @@ HbListView *HsMenuViewBuilder::currentListView()
 }
 
 /*!
- \return Pointer to the view label resulting from last \a build call. It is 
+ \return Pointer to the view label resulting from last \a build call. It is
  guaranteed to be not NULL if the \a build was called for the context
  related to view including label.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
@@ -115,22 +113,6 @@ HbGroupBox *HsMenuViewBuilder::currentViewLabel()
                     currentLoader()->findWidget(VIEW_LABEL_NAME));
 
     return viewLabel;
-}
-
-/*!
- \return Pointer to the search panel resulting from last \a build call. It is
- guaranteed to be not NULL if the \a build was called for the context
- related to view including label.
- The pointer is valid until the HsMenuViewBuilder instance is destroyed.
- Memory ownership is not changed.
- */
-HbSearchPanel *HsMenuViewBuilder::currentSearchPanel()
-{
-    HbSearchPanel *searchPanel =
-            qobject_cast<HbSearchPanel *>(currentLoader()->findWidget(
-                        SEARCH_PANEL_NAME));
-    return searchPanel;
-
 }
 
 /*!
@@ -252,15 +234,11 @@ QSharedPointer<HbDocumentLoader> HsMenuViewBuilder::currentLoader()
   Loads non-context sensitive objects.
  */
 HsMenuViewBuilder::HsMenuViewBuilder():
-    DOCUMENT_FILE_NAME(":/xml/applibrary.docml"),
     ALL_APPS_ACTION_NAME("allAppsAction"),
     ALL_COLLECTIONS_ACTION_NAME("allCollectionsAction"),
     SEARCH_ACTION_NAME("searchAction"),
     OVI_STORE_ACTION_NAME("oviStoreAction"),
     OPERATOR_ACTION_NAME("operatorAction"),
-    SEARCH_PANEL_NAME("searchPanel"),
-    BUTTON_NAME("collectionButton"),
-    TOOL_BAR_NAME("toolBar"),
     mToolBar(new HbToolBar),
     mToolBarExtension(new HbToolBarExtension),
     mStateContext(HsAllAppsContext),

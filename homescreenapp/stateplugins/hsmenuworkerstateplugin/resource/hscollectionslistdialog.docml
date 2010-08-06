@@ -7,6 +7,7 @@
         <string locid="txt_common_button_cancel" name="text"/>
     </object>
     <widget name="collection_list_dialog" type="HbDialog">
+        <enums name="dismissPolicy" value="NoDismiss"/>
         <widget name="qtl_dialog_pri_heading" role="HbDialog:headingWidget" type="HbLabel">
             <enums name="alignment" value="AlignLeft|AlignLeading"/>
             <contentsmargins bottom="var(hb-param-margin-gene-popup)" left="var(hb-param-margin-gene-popup)" right="var(hb-param-margin-gene-popup)" top="var(hb-param-margin-gene-popup)"/>

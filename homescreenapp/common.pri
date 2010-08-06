@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
@@ -97,10 +97,6 @@ symbian: plugin { # copy qtstub and manifest
 
     qtplugins.path = $$PLUGIN_SUBDIR
     qtplugins.sources += qmakepluginstubs/$${TARGET}.qtplugin
-
-    message(Remove "contains(MOBILITY, serviceframework)" after the QtSF refactorig is done!)
-        
-    !contains(MOBILITY, serviceframework):qtplugins.sources += resource/$${TARGET}.manifest
     
     hs_public_plugin {
       contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.xml z:/private/20022F35/$${TARGET}.xml"
@@ -136,11 +132,9 @@ symbian {
 }
 
 symbian {
-    !exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager) {
-        DEFINES += NO_QT_EXTENSIONS
+    exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager) {
+        DEFINES += QT_EXTENSIONS
     }
-} else {
-    DEFINES += NO_QT_EXTENSIONS
 }
 
 

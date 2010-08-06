@@ -25,6 +25,8 @@
 
 HOMESCREEN_TEST_CLASS(t_hsUtils)
 
+class QEasingCurve;
+
 struct HsPropertyAnimationWrapperImpl;
 class HSUTILS_EXPORT HsPropertyAnimationWrapper : public QObject
 {
@@ -42,6 +44,7 @@ public:
     void setForward();
     void setBackward();
     bool isForward() const;
+    void setEasingCurve(const QEasingCurve &curve);
 
 signals:
     void finished();

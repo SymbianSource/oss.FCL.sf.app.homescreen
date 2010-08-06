@@ -316,5 +316,13 @@ inline const QString activityHsIdleView()
     return key;
 }
 
+/*!
+    \return homescreen activitity name to open applib iew
+*/
+inline const QString activityAppLibMainView()
+{
+    static const QString key("AppLibMainView");
+    return key;
+}
 
 #endif

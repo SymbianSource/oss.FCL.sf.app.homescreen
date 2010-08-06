@@ -77,7 +77,9 @@ HsConfiguration::HsConfiguration(QObject *parent)
     mSnapLineFadeInDuration(200),
     mSnapLineFadeOutDuration(100),
     mIsSnapEffectsEnabled(true),    
-    mSceneType(PageWallpapers)
+    mSceneType(PageWallpapers),
+    mBounceAnimationEasingCurve(QEasingCurve::Linear),
+    mPageChangeAnimationEasingCurve(QEasingCurve::Linear)
 {    
 }
 

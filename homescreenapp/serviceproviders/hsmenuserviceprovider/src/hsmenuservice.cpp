@@ -35,6 +35,7 @@ QTM_USE_NAMESPACE
 // Initialization of a static member variable.
 int HsMenuService::mAllCollectionsId = 0;
 const char COLLECTION_TITLE_NAME[] = "title_name";
+const char COLLECTION_SHORT_NAME[] = "short_name";
 /*!
  Returns all applications model
  \param sortAttribute ::  SortAttribute
@@ -236,7 +237,6 @@ int HsMenuService::createCollection(const QString &name)
     CaEntry collection(GroupEntryRole);
     collection.setEntryTypeName(collectionTypeName());
     collection.setText(name);
-	collection.setAttribute(COLLECTION_TITLE_NAME, name);
     collection.setAttribute(groupNameAttributeName(),name);
     CaIconDescription iconDescription;
     iconDescription.setFilename(defaultCollectionIconId());
@@ -272,6 +272,7 @@ bool HsMenuService::renameCollection(int collectionId,
 
         collection->setText(newCollectionName);
         collection->setAttribute(COLLECTION_TITLE_NAME, newCollectionName);
+        collection->setAttribute(COLLECTION_SHORT_NAME, newCollectionName);
         result = CaService::instance()->updateEntry(*collection);
     }
     HSMENUTEST_FUNC_EXIT("HsMenuService::renameCollection");

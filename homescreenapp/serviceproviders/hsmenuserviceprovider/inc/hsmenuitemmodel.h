@@ -27,10 +27,13 @@
 #include "hsmenuservice_global.h"
 #include "hsmenuservice.h"
 
+class CaUninstallNotifier;
+class HsIconsIdleLoader;
 // Class declaration
 class MENUSERVICE_EXPORT HsMenuItemModel: public CaItemModel
 {
-
+HS_SERVICE_TEST_FRIEND_CLASS(MenuServiceTest)
+Q_OBJECT
 public:
 
     // Data types
@@ -47,6 +50,15 @@ public:
     virtual QVariant data(const QModelIndex &index,
                           int role = Qt::DisplayRole) const;
     bool newIconNeeded(const QModelIndex &index) const;
+    void preloadIcons();
+private slots:
+    void uninstallChange(int componentId, int valueOfProgress);
+    
+private:
+    HsIconsIdleLoader* mIconsIdleLoader;
+    CaUninstallNotifier* mUninstallNotifier;//not own
+    int mComponentId;
+    QList<int> mIds;
 };
 
 #endif // HSMENUITEMMODEL_H 

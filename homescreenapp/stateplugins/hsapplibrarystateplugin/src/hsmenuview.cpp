@@ -76,7 +76,7 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder,
     connect(mListView,
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             this, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)));
-    
+
     connect(mHsSearchView.data(), SIGNAL(activated(QModelIndex)),
             this, SIGNAL(activated(QModelIndex)));
     connect(mHsSearchView.data(),
@@ -98,7 +98,7 @@ HsMenuView::~HsMenuView()
 
  \param model Model the view is to represent in HsItemViewMode.
  */
-void HsMenuView::setModel(HsMenuItemModel *model)
+void HsMenuView::setModel(QAbstractItemModel *model)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::setModel");
 
@@ -113,6 +113,7 @@ void HsMenuView::setModel(HsMenuItemModel *model)
                         SIGNAL(listViewChange()));
         }
 
+        mListView->setItemPixmapCacheEnabled(true); // TODO: remove when enabled from default
         mListView->setModel(model, new HsListViewItem());
 
         if (mListView->model()) {
@@ -129,6 +130,13 @@ void HsMenuView::setModel(HsMenuItemModel *model)
     HSMENUTEST_FUNC_EXIT("HsMenuView::setModel");
 }
 
+/*!
+ Returns model for list item view.
+ */
+QAbstractItemModel *HsMenuView::model() const
+{
+    return mListView->model();
+}
 
 /*!
 \return View widget of the menu view.
@@ -139,7 +147,7 @@ HbView *HsMenuView::view() const
 }
 
 /*!
-\return List view widget of the menu view 
+\return List view widget of the menu view
  if available in the context or NULL otherwise.
  */
 HbListView *HsMenuView::listView() const
@@ -149,7 +157,7 @@ HbListView *HsMenuView::listView() const
 
 /*!
     Returns label appropriate for the view.
-    \return Pointer to the label 
+    \return Pointer to the label
     if available in the context or NULL otherwise.
  */
 HbGroupBox *HsMenuView::viewLabel() const
@@ -158,7 +166,7 @@ HbGroupBox *HsMenuView::viewLabel() const
 }
 
 /*!
-\return Collection button 
+\return Collection button
  if available in the context or NULL otherwise.
  */
 HbPushButton *HsMenuView::contentButton() const
@@ -281,21 +289,13 @@ void HsMenuView::reset(HsOperationalContext operationalContext)
     HbAction *const backKeyAction(mView->navigationAction());
 
     // now we can switch the context
+    mOperationalContext = operationalContext;
+    synchronizeCache();
 
-    if (operationalContext != HsSearchContext) {
-
-        mOperationalContext = operationalContext;
-        synchronizeCache();
-
-        if (mBuilder.currentViewLabel() != 0) {
-            mBuilder.currentViewLabel()->setHeading(viewLabelHeading);
-        }
-
-        mView->setNavigationAction(backKeyAction);
-
-    } else {
-        showSearchPanel();
+    if (mBuilder.currentViewLabel() != 0) {
+        mBuilder.currentViewLabel()->setHeading(viewLabelHeading);
     }
+    mView->setNavigationAction(backKeyAction);
 }
 
 /*!
@@ -304,7 +304,8 @@ void HsMenuView::reset(HsOperationalContext operationalContext)
  it is in context matching the current HsMenuView.
  */
 
-void HsMenuView::switchBuilderContext() {
+void HsMenuView::switchBuilderContext()
+{
     mBuilder.setStateContext(mStateContext);
     mBuilder.setOperationalContext(mOperationalContext);
 }

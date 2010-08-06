@@ -5,8 +5,8 @@
         <string locid="txt_common_button_ok" name="text" value="Ok"/>
     </object>
     <widget name="details_dialog" type="HbDialog">
-        <enums name="dismissPolicy" value="HbPopup::NoDismiss"/>
         <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
+        <enums name="dismissPolicy" value="NoDismiss"/>
         <widget name="qtl_dialog_pri_heading" role="HbDialog:headingWidget" type="HbLabel">
             <enums name="alignment" value="AlignLeft|AlignLeading"/>
             <contentsmargins bottom="var(hb-param-margin-gene-popup)" left="var(hb-param-margin-gene-popup)" right="var(hb-param-margin-gene-popup)" top="var(hb-param-margin-gene-popup)"/>
@@ -16,63 +16,62 @@
         <widget name="scrollArea" role="HbDialog:contentWidget" type="HbScrollArea">
             <widget name="scrollAreaContents" role="HbScrollArea:contents" type="HbWidget">
                 <widget name="_name" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <string locid="txt_applib_dialog_name" name="plainText" value="Name:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="name" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="_version" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <string locid="txt_applib_dialog_version" name="plainText" value="Version:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="version" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="_vendor" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <string locid="txt_applib_dialog_supplier" name="plainText" value="Supplier:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="vendor" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="_driveInfo" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <string locid="txt_applib_dialog_memory_in_use" name="plainText" value="Memory in use:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="driveInfo" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     <string locid="txt_applib_dialog_1_device_memory" name="plainText" value="%1 Device memory"/>
+                    <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="_size" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <string locid="txt_applib_dialog_size" name="plainText" value="Size:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="size" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                    <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     <string locid="txt_applib_dialog_l1_kb" name="plainText" value="%L1 KB"/>
+                    <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="_type" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <string locid="txt_applib_dialog_format" name="plainText" value="Format:"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
                 <widget name="type" type="HbLabel">
-                    <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                     <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>
                 </widget>
-                <sizehint type="PREFERRED" width="expr(var(hb-param-screen-width) )"/>
-                <layout orientation="Vertical" spacing="2px" type="linear">
+                <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                     <linearitem itemname="_name"/>
                     <linearitem itemname="name"/>
                     <linearitem itemname="_version"/>
@@ -92,8 +91,6 @@
     </widget>
     <section name="detailsDialogForJavaApplication">
         <widget name="details_dialog" type="HbDialog">
-            <enums name="dismissPolicy" value="HbPopup::NoDismiss"/>
-            <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
             <widget name="qtl_dialog_pri_heading" role="HbDialog:headingWidget" type="HbLabel">
                 <enums name="alignment" value="AlignLeft|AlignLeading"/>
                 <contentsmargins bottom="var(hb-param-margin-gene-popup)" left="var(hb-param-margin-gene-popup)" right="var(hb-param-margin-gene-popup)" top="var(hb-param-margin-gene-popup)"/>
@@ -103,81 +100,80 @@
             <widget name="scrollArea" role="HbDialog:contentWidget" type="HbScrollArea">
                 <widget name="scrollAreaContents" role="HbScrollArea:contents" type="HbWidget">
                     <widget name="_name" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_name" name="plainText" value="Name:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="name" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_version" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_version" name="plainText" value="Version:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="version" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_vendor" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_supplier" name="plainText" value="Supplier:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="vendor" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_driveInfo" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_memory_in_use" name="plainText" value="Memory in use:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="driveInfo" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                         <string locid="txt_applib_dialog_1_device_memory" name="plainText" value="%1 Device memory"/>
+                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_protectiondomain" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_protection_domain" name="plainText" value="Protection domain:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="protectiondomain" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_size" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_size" name="plainText" value="Size:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="size" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
-                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                         <string locid="txt_applib_dialog_l1_kb" name="plainText" value="%L1 KB"/>
+                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_type" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_format" name="plainText" value="Format:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="type" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                     </widget>
                     <widget name="_description" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
                         <string locid="txt_applib_dialog_description" name="plainText" value="Description:"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     </widget>
                     <widget name="description" type="HbLabel">
-                        <sizehint height="expr(var(hb-param-text-height-secondary))" type="PREFERRED"/>
+                        <enums name="textWrapping" value="TextWordWrap"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     </widget>
                     <sizehint type="PREFERRED" width="expr(var(hb-param-screen-width) )"/>
-                    <layout orientation="Vertical" spacing="2px" type="linear">
+                    <layout orientation="Vertical" spacing="var(hb-param-margin-gene-middle-vertical)" type="linear">
                         <linearitem itemname="_name"/>
                         <linearitem itemname="name"/>
                         <linearitem itemname="_version"/>
@@ -198,9 +194,18 @@
                 </widget>
             </widget>
             <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
+            <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
+            <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
+            <contentsmargins bottom="var(hb-param-margin-view-bottom)" left="var(hb-param-margin-view-left)" right="var(hb-param-margin-view-right)" top="var(hb-param-margin-view-top)"/>
+            <enums name="dismissPolicy" value="NoDismiss"/>
+            <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
+            <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
+            <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
+            <ref object="qtl_dialog_softkey_left" role="HbWidget:addAction"/>
         </widget>
     </section>
-    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_portrait" unit="un">
+    <metadata activeUIState="Java dialog" display="NHD-3.2-inch_portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
+        <uistate name="Java dialog" sections="#common detailsDialogForJavaApplication"/>
     </metadata>
 </hbdocument>

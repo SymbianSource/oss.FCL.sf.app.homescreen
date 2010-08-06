@@ -118,7 +118,7 @@ void HsAppLibraryState::construct()
 
     mAllCollectionsState = new HsAllCollectionsState(mMenuViewBuilder, mMenuMode,
             mMainWindow, this);
-            
+
     QState *initialState = new QState(this);
     setInitialState(initialState);
 
@@ -135,12 +135,12 @@ void HsAppLibraryState::construct()
             this);
 
     connect(mCollectionState, SIGNAL(entered()),SLOT(clearToolbarLatch()));
-    
+
     HsMenuEventTransition *openCollectionFromAppLibTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenCollectionFromAppLibrary,
                                   this, mCollectionState);
     this->addTransition(openCollectionFromAppLibTransition);
-    
+
     //It is called from: HsDefaultRuntime::activityRequested(const QString &name)
     HsMenuEventTransition *openCollectionAfterActivityRequest =
             new HsMenuEventTransition(HsMenuEvent::OpenCollection,
@@ -183,7 +183,7 @@ void HsAppLibraryState::construct()
 
     connect(mAllCollectionsState, SIGNAL(entered()),
             this, SLOT(allCollectionsStateEntered()));
-  
+
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::construct");
 }
 
@@ -197,19 +197,19 @@ void HsAppLibraryState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::onEntry");
     QState::onEntry(event);
 
-    if (static_cast<HsMenuEvent *>(event)->operation() != 
+    if (static_cast<HsMenuEvent *>(event)->operation() !=
             HsMenuEvent::OpenCollectionFromAppLibrary)
         {
     // we are back from HS, scroll those views to top
         mAllAppsState->scrollToBeginning();
-        mAllCollectionsState->scrollToBeginning();        
+        mAllCollectionsState->scrollToBeginning();
         }
-    
+
     if (event->type() == HsMenuEvent::eventType()) {
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
         mMenuMode.setHsMenuMode(
-            static_cast<HsMenuMode>(data.value(menuModeType()).toInt()), 
+            static_cast<HsMenuMode>(data.value(menuModeType()).toInt()),
             data.value(HOMESCREENDATA));
     } else {
         mMenuMode.setHsMenuMode(NormalHsMenuMode);
@@ -230,16 +230,14 @@ void HsAppLibraryState::constructToolbar()
 
     HsOperatorHandler *const operatorHandler = new HsOperatorHandler(this);
 
-    const bool operatorActionAvailable = !operatorHandler->icon().isNull();
-
-    if (operatorActionAvailable) {
+    if (operatorHandler->oviStorePresent()
+            && operatorHandler->operatorStorePresent()) {
 
         //TODO HbToolBarExtension is not supported in docml currently
         //should be changed in future
         bool loaded = HbStyleLoader::registerFilePath(
                      ":/css/hsapplibrarystateplugin.css");
         Q_ASSERT(loaded);
-        HbAction *const operatorAction(mMenuViewBuilder.operatorAction());
 
         HbToolBarExtension *const extension(
             mMenuViewBuilder.toolBarExtension());
@@ -248,25 +246,31 @@ void HsAppLibraryState::constructToolbar()
 
         extensionAction->setIcon(HbIcon("qtg_mono_store"));
 
-        operatorAction->setIcon(operatorHandler->icon());
+        HbAction *const operatorAction(
+                operatorHandler->prepareOperatorStoreAction(
+                        mMenuViewBuilder.operatorAction()));
         operatorAction->setText(hbTrId(operatorHandler->text().toLatin1()));
 
         //TODO: no locstring for ovi store currently
         mMenuViewBuilder.oviStoreAction()->setText("Ovi Store");
-
-        connect(mMenuViewBuilder.operatorAction(), SIGNAL(triggered()),
-                operatorHandler, SLOT(action()));
-
-        extension->addAction(mMenuViewBuilder.oviStoreAction());
-        extension->addAction(operatorAction);
-
-    } else {
+        if (operatorHandler->operatorStoreFirst()) {
+            extension->addAction(operatorAction);
+            extension->addAction(mMenuViewBuilder.oviStoreAction());
+        } else {
+            extension->addAction(mMenuViewBuilder.oviStoreAction());
+            extension->addAction(operatorAction);
+        }
+    } else if (operatorHandler->oviStorePresent()) {
         mMenuViewBuilder.toolBar()->addAction(
             mMenuViewBuilder.oviStoreAction());
+    } else if (operatorHandler->operatorStorePresent()) {
+        mMenuViewBuilder.toolBar()->addAction(
+            operatorHandler->prepareOperatorStoreAction(
+                    mMenuViewBuilder.operatorAction()));
     }
 
-
-    HbAction *const allCollectionsAction(mMenuViewBuilder.allCollectionsAction());
+    HbAction *const allCollectionsAction(
+            mMenuViewBuilder.allCollectionsAction());
 
     mAllAppsState->addTransition(
         allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
@@ -308,12 +312,12 @@ void HsAppLibraryState::clearToolbarLatch()
 int HsAppLibraryState::oviStoreAction()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::oviStoreAction");
-    
+
     CaEntry oviEntry;
     oviEntry.setEntryTypeName(applicationTypeName());
-    oviEntry.setAttribute( applicationUidEntryKey(), 
+    oviEntry.setAttribute( applicationUidEntryKey(),
                     QString::number(oviLauncherApplicationUid));
-    
+
     int result = CaService::instance()->executeCommand(oviEntry);
     if (result) {
         oviEntry.setEntryTypeName(urlTypeName());
@@ -321,7 +325,7 @@ int HsAppLibraryState::oviStoreAction()
                           QString("https://store.ovi.com/applications/"));
         result = CaService::instance()->executeCommand(oviEntry);
     }
-    
+
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::oviStoreAction");
     return result;
 }

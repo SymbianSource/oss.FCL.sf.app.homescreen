@@ -36,6 +36,7 @@
 #include "hsmenuitemmodel.h"
 #include "hscollectionstate.h"
 #include "hsaddappstocollectionstate.h"
+#include "hsapplibstateutils.h"
 
 /*!
  \class HsCollectionState
@@ -170,41 +171,41 @@ void HsCollectionState::setMenuOptions()
     EntryFlags flags =
         mModel->root().data(CaItemModel::FlagsRole).value<EntryFlags> ();
 
-    QScopedPointer<HbMenu> viewOptions(new HbMenu);
+    mViewOptions->clearActions();
 
-    viewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                             static_cast<HsBaseViewState*>(this),
                             SLOT(openTaskSwitcher()));
 
     if (flags & RemovableEntryFlag) {
-        viewOptions->addAction(hbTrId("txt_applib_opt_add_content"), this,
+        mViewOptions->addAction(hbTrId("txt_applib_opt_add_content"), this,
                             SLOT(addAppsAction()));
     }
 
-    viewOptions->addAction(hbTrId("txt_applib_opt_add_to_home_screen"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_add_to_home_screen"),
                         this, SLOT(addCollectionShortcutToHomeScreenAction()));
 
     if (flags & RemovableEntryFlag) {
         if (mModel->rowCount() > 0) {
-            viewOptions->addAction(
+            mViewOptions->addAction(
                 hbTrId("txt_applib_opt_arrange"),
                 this,
                 SLOT(createArrangeCollection()));
         }
-        viewOptions->addAction(
+        mViewOptions->addAction(
             hbTrId("txt_common_opt_rename_item"),
             this,
             SLOT(renameAction()));
-        viewOptions->addAction(
+        mViewOptions->addAction(
             hbTrId("txt_common_opt_delete"),
             this,
             SLOT(deleteAction()));
     }
     if (mCollectionType == collectionDownloadedTypeName()) {
-        HbMenu *sortMenu = viewOptions->addMenu(
+        HbMenu *sortMenu = mViewOptions->addMenu(
                                hbTrId("txt_applib_opt_sort_by"));
         //Grouped options are exclusive by default.
-        QActionGroup *sortGroup = new QActionGroup(viewOptions.data());
+        QActionGroup *sortGroup = new QActionGroup(this);
         sortGroup->addAction(
             sortMenu->addAction(
                 hbTrId("txt_applib_opt_sort_by_sub_latest_on_top"),
@@ -221,7 +222,7 @@ void HsCollectionState::setMenuOptions()
         static const int defaultSortingPosition = 0;
         sortGroup->actions().at(defaultSortingPosition)->setChecked(true);
     }
-    mMenuView->view()->setMenu(viewOptions.take());
+    mMenuView->view()->setMenu(mViewOptions);
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::setMenuOptions");
 }
 
@@ -478,9 +479,9 @@ void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFla
     HbAction *openAction = mContextMenu->addAction(hbTrId(
         "txt_common_menu_open"));
     openAction->setData(OpenContextAction);
-    HbAction *addShortcutAction = mContextMenu->addAction(hbTrId(
+    HbAction *addToHomeScreenAction = mContextMenu->addAction(hbTrId(
         "txt_applib_menu_add_to_home_screen"));
-    addShortcutAction->setData(AddToHomeScreenContextAction);
+    addToHomeScreenAction->setData(AddToHomeScreenContextAction);
     HbAction *addToCollection = mContextMenu->addAction(hbTrId(
         "txt_applib_menu_add_to_collection"));
     addToCollection->setData(AddToCollectionContextAction);
@@ -518,6 +519,9 @@ void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFla
                                                 "txt_common_menu_details"));
         appDetailsAction->setData(AppDetailsContextAction);
     }
+    
+    addToHomeScreenAction->setVisible(
+        !HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(entry.data()));
 }
 
 /*!

@@ -14,18 +14,17 @@
  * Description: Hs Operator Handler Private.
  *
  */
-
 #ifndef HSOPERATORHANDLER_P_H_
 #define HSOPERATORHANDLER_P_H_
 
-#ifndef NO_QT_EXTENSIONS
+#ifdef QT_EXTENSIONS
 
 #include <QObject>
+#include <XQSettingsManager>
 #include <HbIcon>
 #include "hsmenustates_global.h"
 
 class CaEntry;
-class XQSettingsManager;
 
 class HsOperatorHandlerPrivate: public QObject
 {
@@ -34,23 +33,46 @@ class HsOperatorHandlerPrivate: public QObject
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 
 public:
+
+    enum HsStoreType {
+        NoneType,
+        UrlType,
+        ApplicationType
+    };
+
     HsOperatorHandlerPrivate(QObject *parent = 0);
     virtual ~HsOperatorHandlerPrivate();
     HbIcon icon();
     QString text();
     void action();
+    bool oviStorePresent();
+    bool operatorStorePresent();
+    bool operatorStoreFirst();
 
 private:
+    bool storeValue(XQSettingsManager *crManager, int storePresenceKey);
+    QVariant getVariantFromKey(
+            XQSettingsManager *crManager,
+            int crKey,
+            XQSettingsManager::Type type);
+    HsStoreType operatorStoreType(XQSettingsManager *crManager);
+
     void readCentralRepository();
     HbIcon createIcon(XQSettingsManager *crManager);
-    QString readText(XQSettingsManager *crManager);
+    QString operatorStoreTitle(XQSettingsManager *crManager);
     CaEntry *createAppEntry(XQSettingsManager *crManager);
     CaEntry *createUrlEntry(XQSettingsManager *crManager);
+    bool operatorStoreFirst(XQSettingsManager *crManager);
 
 private:
+    bool mOviStorePresent;
+    bool mOperatorStorePresent;
+    HsStoreType mStoreType;
     CaEntry *mOperatorEntry;
     HbIcon mIcon;
-    QString mText;
+    QString mOperatorStoreTitle;
+    bool mOperatorStoreFirst;
+
 };
 
 #endif

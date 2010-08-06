@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QEasingCurve>
 
 #include <HbFeedback>
 
@@ -78,6 +79,8 @@ class HSDOMAINMODEL_EXPORT HsConfiguration : public QObject
     Q_PROPERTY(int snapLineFadeOutDuration READ snapLineFadeOutDuration WRITE setSnapLineFadeOutDuration)
     Q_PROPERTY(bool isSnapEffectsEnabled READ isSnapEffectsEnabled WRITE setSnapEffectsEnabled)
     Q_PROPERTY(SceneType sceneType READ sceneType WRITE setSceneType)
+    Q_PROPERTY(QEasingCurve::Type bounceAnimationEasingCurve READ bounceAnimationEasingCurve WRITE setBounceAnimationEasingCurve)
+    Q_PROPERTY(QEasingCurve::Type pageChangeAnimationEasingCurve READ pageChangeAnimationEasingCurve WRITE setPageChangeAnimationEasingCurve)
 
     Q_ENUMS(SceneType)
 
@@ -181,6 +184,11 @@ public:
     void setSnapEffectsEnabled(bool value) { SETVALUE(mIsSnapEffectsEnabled, "isSnapEffectsEnabled") }
     SceneType sceneType() const { return mSceneType; }
     void setSceneType(SceneType value) { SETVALUE(mSceneType, "sceneType") }
+    QEasingCurve::Type bounceAnimationEasingCurve() const { return mBounceAnimationEasingCurve; }
+    void setBounceAnimationEasingCurve(QEasingCurve::Type value) { SETVALUE(mBounceAnimationEasingCurve, "bounceAnimationEasingCurve") }
+    QEasingCurve::Type pageChangeAnimationEasingCurve() const { return mPageChangeAnimationEasingCurve; }
+    void setPageChangeAnimationEasingCurve(QEasingCurve::Type value) { SETVALUE(mPageChangeAnimationEasingCurve, "pageChangeAnimationEasingCurve") }
+
 #undef SETVALUE
 
     QSizeF minimumWidgetSizeInUnits() const;
@@ -245,7 +253,9 @@ private:
     int mSnapLineFadeOutDuration;
     bool mIsSnapEffectsEnabled;
     SceneType mSceneType;
-
+    QEasingCurve::Type mBounceAnimationEasingCurve;
+    QEasingCurve::Type mPageChangeAnimationEasingCurve;
+    
     static HsConfiguration *mInstance;
 
     HOMESCREEN_TEST_FRIEND_CLASS(TestHsDomainModel)

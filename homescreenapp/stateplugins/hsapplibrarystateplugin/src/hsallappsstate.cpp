@@ -36,6 +36,8 @@
 #include "hsmenumodewrapper.h"
 #include "hsmenuviewbuilder.h"
 #include "hsmainwindow.h"
+#include "hsaddmodeproxymodel.h"
+#include "hsapplibstateutils.h"
 
 /*!
  \class HsAllAppsState
@@ -63,10 +65,13 @@ HsAllAppsState::HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                                HsMainWindow &mainWindow,
                                QState *parent) :
     HsBaseViewState(mainWindow, menuMode, parent),
+    mAddModeProxyModel(0),
     mSortAttribute(AscendingNameHsSortAttribute)
 {
     initialize(menuViewBuilder, HsAllAppsContext);
     construct();
+	mAddModeProxyModel = new HsAddModeProxyModel(this);
+    mAddModeProxyModel->setSourceModel(mModel);
 }
 
 /*!
@@ -87,6 +92,8 @@ void HsAllAppsState::construct()
     mModel = HsMenuService::getAllApplicationsModel(mSortAttribute);
     mMenuView->setModel(mModel);
 
+    mModel->preloadIcons();
+
     mMenuView->listView()->verticalScrollBar()->setInteractive(true);
     HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView->view());
     indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
@@ -102,18 +109,18 @@ void HsAllAppsState::construct()
 void HsAllAppsState::setMenuOptions()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::setMenuOptions");
-    QScopedPointer<HbMenu> viewOptions(new HbMenu);
-    viewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
+    mViewOptions->clearActions();
+    mViewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                            static_cast<HsBaseViewState*>(this), SLOT(openTaskSwitcher()));
-    viewOptions->addAction(hbTrId("txt_applib_opt_add_to_collection"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_add_to_collection"),
                            this, SLOT(addToCollection()));
-    viewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
                            static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
 
-    HbMenu *const sortMenu = viewOptions->addMenu(hbTrId(
+    HbMenu *const sortMenu = mViewOptions->addMenu(hbTrId(
                                  "txt_applib_opt_sort_by"));
     //Grouped options are exclusive by default.
-    QActionGroup *sortGroup = new QActionGroup(viewOptions.data());
+    QActionGroup *sortGroup = new QActionGroup(this);
 
     sortGroup->addAction(
         sortMenu->addAction(hbTrId("txt_applib_opt_sub_ascending"),
@@ -122,7 +129,7 @@ void HsAllAppsState::setMenuOptions()
         sortMenu->addAction(hbTrId("txt_applib_opt_sub_descending"),
                             this, SLOT(descendingMenuAction())));
 
-    viewOptions->addAction(hbTrId("txt_applib_subtitle_installed"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_view_installed_applications"),
                            this, SLOT(openInstalledView()));
 
     foreach(QAction *action, sortMenu->actions()) {
@@ -142,7 +149,6 @@ void HsAllAppsState::setMenuOptions()
     if (currentSortingPosition >= 0) {
         sortGroup->actions().at(currentSortingPosition)->setChecked(true);
     }
-    mMenuView->view()->setMenu(viewOptions.take());
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::setMenuOptions");
 }
@@ -157,14 +163,28 @@ HsAllAppsState::~HsAllAppsState()
 
 
 /*!
- Slot invoked when add mode entered.
+ Slot invoked when normal mode entered.
  */
 void HsAllAppsState::normalModeEntered()
 {
     HsBaseViewState::normalModeEntered();
+    if (mMenuView->model() != mModel) {
+        mMenuView->setModel(mModel);
+    }
     connect(mMenuView.data(),
             SIGNAL(activated(QModelIndex)),
             static_cast<HsBaseViewState*>(this), SLOT(launchItem(QModelIndex)));
+}
+
+/*!
+ Slot invoked when add mode entered.
+ */
+void HsAllAppsState::addModeEntered()
+{
+    HsBaseViewState::addModeEntered();
+    if (mMenuView->model() != mAddModeProxyModel) {
+        mMenuView->setModel(mAddModeProxyModel);
+    }
 }
 
 /*!
@@ -337,6 +357,9 @@ void HsAllAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags 
     if (!(flags & RemovableEntryFlag)) {
         uninstallAction->setVisible(false);
     }
+
+    addToHomeScreenAction->setVisible(
+        !HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(entry.data()));
 }
 
 /*!

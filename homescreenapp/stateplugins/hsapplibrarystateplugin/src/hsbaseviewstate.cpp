@@ -53,6 +53,7 @@ HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow, QState *parent):
     mMainWindow(mainWindow)
 {
     mBackKeyAction = new HbAction(Hb::BackNaviAction, this);
+    mViewOptions = new HbMenu;
 }
 
 /*!
@@ -75,6 +76,7 @@ HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow,
     mMainWindow(mainWindow)
 {
     mBackKeyAction = new HbAction(Hb::BackNaviAction, this);
+    mViewOptions = new HbMenu;
 }
 /*!
  Initialize contained objects.
@@ -87,6 +89,7 @@ void HsBaseViewState::initialize(HsMenuViewBuilder &menuViewBuilder,
 {
     mMenuView.reset(new HsMenuView(menuViewBuilder, stateContext, mMainWindow));
     mMenuView->view()->setNavigationAction(mBackKeyAction);
+    mMenuView->view()->setMenu(mViewOptions);
 
     connect(this, SIGNAL(entered()),SLOT(stateEntered()));
     connect(this, SIGNAL(exited()),SLOT(stateExited()));
@@ -139,7 +142,7 @@ void HsBaseViewState::stateExited()
 
     mMenuView->hideSearchPanel();
     mMenuView->disconnect(this);
-    mMenuView->view()->setMenu(NULL);
+
     mMenuView->inactivate();
     if (!mApplicationLaunchFailMessage.isNull()) {
         mApplicationLaunchFailMessage->close();
@@ -153,6 +156,7 @@ void HsBaseViewState::stateExited()
  */
 void HsBaseViewState::addModeEntered()
 {
+    mViewOptions = mMenuView->view()->takeMenu();
     connect(mMenuView.data(),
             SIGNAL(activated(QModelIndex)),
             SLOT(addActivated(QModelIndex)));
@@ -162,7 +166,15 @@ void HsBaseViewState::addModeEntered()
 }
 
 /*!
- Slot invoked when add mode entered.
+ Add mode exited.
+ */
+void HsBaseViewState::addModeExited()
+{
+    mMenuView->view()->setMenu(mViewOptions);
+}
+
+/*!
+ Slot invoked when normal mode entered.
  */
 void HsBaseViewState::normalModeEntered()
 {
@@ -182,6 +194,8 @@ void HsBaseViewState::normalModeEntered()
 HsBaseViewState::~HsBaseViewState()
 {
     delete mModel;
+	mViewOptions = mMenuView->view()->takeMenu();
+	delete mViewOptions;
 }
 
 /*!
@@ -193,15 +207,12 @@ void HsBaseViewState::launchItem(const QModelIndex &index)
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::launchItem");
 
     QSharedPointer<const CaEntry> entry = mModel->entry(index);
-    if (!entry.isNull()) {
+    if (!entry.isNull() && !(entry->flags() & UninstallEntryFlag)) {
         if (entry->entryTypeName() == widgetTypeName()) {
-            EntryFlags flags = entry->flags();
-            if (!(flags & UninstallEntryFlag)) {
-                machine()->postEvent(HsMenuEventFactory::createPreviewHSWidgetEvent(entry->id(),
-                    entry->entryTypeName(), entry->attribute(widgetUriAttributeName()),
-                    entry->attribute(widgetLibraryAttributeName())));
-                HsMenuService::touch(entry->id());
-            }
+            machine()->postEvent(HsMenuEventFactory::createPreviewHSWidgetEvent(entry->id(),
+                entry->entryTypeName(), entry->attribute(widgetUriAttributeName()),
+                entry->attribute(widgetLibraryAttributeName())));
+            HsMenuService::touch(entry->id());
         }
         else {
             int errCode = HsMenuService::executeAction(entry->id());
@@ -320,6 +331,7 @@ void HsBaseViewState::defineTransitions()
 
     QState *addModeState = new QState(this);
     connect(addModeState, SIGNAL(entered()),SLOT(addModeEntered()));
+    connect(addModeState, SIGNAL(exited()),SLOT(addModeExited()));
 
     QState *normalModeState = new QState(this);
     connect(normalModeState, SIGNAL(entered()),SLOT(normalModeEntered()));

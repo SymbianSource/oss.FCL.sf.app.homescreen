@@ -54,16 +54,22 @@ const int qMaxStrLength = 248;
 HsCollectionNameDialog::HsCollectionNameDialog(const int &itemId)
 {
     HSMENUTEST_FUNC_ENTRY("HsInputDialog::HsInputDialog");
-    mCollectionsNames = HsMenuService::getCollectionNames();
+    mOtherCollectionsNames = HsMenuService::getCollectionNames();
+
+
     setInputMode(HbInputDialog::TextInput);
     setPromptText(hbTrId("txt_applib_title_collection_name"));
     lineEdit()->setMaxLength(qMaxStrLength);
     if (itemId) {
-        setValue(HsMenuService::getName(itemId));
-        mCollectionsNames.removeOne(value().toString());
+        const QString currentCollectionName(
+                HsMenuService::getName(itemId));
+        setValue(currentCollectionName);
+        mOtherCollectionsNames.removeOne(currentCollectionName);
+        mSuggestedNames << currentCollectionName;
     } else {
         setValue(hbTrId("txt_applib_dialog_entry_collection"));
     }
+
     HSMENUTEST_FUNC_EXIT("HsInputDialog::HsInputDialog");
 }
 
@@ -72,8 +78,8 @@ HsCollectionNameDialog::HsCollectionNameDialog(const int &itemId)
  */
 HsCollectionNameDialog::~HsCollectionNameDialog()
 {
-    mCollectionsNames.clear();
-    mLastCollectionName.clear();
+    mOtherCollectionsNames.clear();
+    mSuggestedNames.clear();
 }
 
 /*!
@@ -95,6 +101,16 @@ void HsCollectionNameDialog::open(QObject* receiver, const char* member)
 }
 
 /*!
+  \return User input if it is unique collection name or an unique collection name being
+  a combination of user name and a suffix matching following regular expression:
+  "\([0-9][1-9]\)|\([1-9][0-9]+\)"
+ */
+QString HsCollectionNameDialog::uniqueCollectionName() const
+{
+    return generateUniqueCollectionName(value().toString());
+}
+
+/*!
     \reimp 
     Disconnects signals and calls base class impl. which emits finished(HbAction*) 
  */
@@ -106,41 +122,50 @@ void HsCollectionNameDialog::closeEvent ( QCloseEvent * event )
 }
 
 /*!
- * Gets new collection's name.
- \param name name of collection.
- \param addLastName true
- if last found name is need to add to validation
- \retval new collection name.
+  \param name Input string which is to be basename
+    of resulting unique collection name.
+  \return Unique collection name.
  */
-QString HsCollectionNameDialog::newName(const QString &name,
-                                        bool addLastName)
+QString HsCollectionNameDialog::generateUniqueCollectionName(
+        const QString &name) const
 {
     HSMENUTEST_FUNC_ENTRY("HsInputDialog::newName");
+
     QString newName(name);
-    int numToAppend(1);
-    if (addLastName && mLastCollectionName.length() > 0
-            && !mCollectionsNames.contains(mLastCollectionName)) {
-        mCollectionsNames << mLastCollectionName;
-    }
-    while (mCollectionsNames.contains(newName)) {
-        newName = name;
-        newName.append("(");
-        if (numToAppend < 10) {
-            newName.append("0");
-        }
-        newName.append(QString::number(numToAppend));
-        newName.append(")");
+
+    unsigned int numToAppend(1);
+
+    while (mOtherCollectionsNames.contains(newName)) {
+        newName =
+                name
+                + QString("(%1)").arg(numToAppend, 2, 10, QLatin1Char('0'));
         numToAppend++;
-        if (!addLastName) {
-            if (mLastCollectionName.length() > 0
-                    && !mCollectionsNames.contains(mLastCollectionName)) {
-                mCollectionsNames << mLastCollectionName;
-            }
-            mCollectionsNames.removeOne(name);
-            mLastCollectionName = name;
-        }
     }
+
     HSMENUTEST_FUNC_EXIT("HsInputDialog::newName");
+    return newName;
+}
+/*!
+  \param name Input string which is to be basename
+    for suggested collection name.
+  \return Unique collection name if it was not yet proposed during lifetime of the dialog
+   or \a name otherwise.
+ */
+QString HsCollectionNameDialog::suggestedCollectionName(const QString &name)
+{
+    HSMENUTEST_FUNC_ENTRY("HsInputDialog::processInput");
+
+    QString newName = generateUniqueCollectionName(name);
+
+    if (mSuggestedNames.contains(newName)) {
+        newName = name;
+    }
+
+    if (newName != name) {
+        mSuggestedNames << newName;
+    }
+
+    HSMENUTEST_FUNC_EXIT("HsInputDialog::validate");
     return newName;
 }
 
@@ -184,7 +209,7 @@ void HsCollectionNameDialog::onTextChanged(const QString &text)
         actions()[0]->setEnabled(true);
     }
 
-    QString newText = newName(text);
+    QString newText = suggestedCollectionName(text);
     if (newText != text) {
         makeDisconnect();
         lineEdit()->setText(newText);

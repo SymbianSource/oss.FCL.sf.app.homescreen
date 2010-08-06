@@ -111,7 +111,7 @@ void HsCollectionNameState::onEntry(QEvent *event)
 void HsCollectionNameState::dialogFinished(HbAction* finishedAction)
 {
     if (finishedAction == mCollectionNameDialog->actions().value(0)) {
-        QString newName(mCollectionNameDialog->newName(mCollectionNameDialog->value().toString(), true));
+        QString newName(mCollectionNameDialog->uniqueCollectionName());
         if (mItemId) {
             if (newName != HsMenuService::getName(mItemId)) {
                 HsMenuService::renameCollection(mItemId, newName);

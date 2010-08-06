@@ -36,7 +36,7 @@
   <data>
     <HomeScreenDbSettings>
       <Widgets><id>1</id><uri>hsclockwidgetplugin</uri><pageId  map="HomeScreenDbSettings/Pages[@key='1']"></pageId></Widgets>
-      <Widgets><id>2</id><uri>hsdialerwidgetplugin</uri><pageId map="HomeScreenDbSettings/Pages[@key='1']"></pageId></Widgets>
+      <Widgets><id>2</id><uri>dialerwidgetplugin</uri><pageId map="HomeScreenDbSettings/Pages[@key='1']"></pageId></Widgets>
       <Widgets><id>3</id><uri>ftuhswidget</uri><pageId map="HomeScreenDbSettings/Pages[@key='1']"></pageId></Widgets>
       <Widgets><id>4</id><uri>hsshortcutwidgetplugin</uri><pageId map="HomeScreenDbSettings/Pages[@key='2']"></pageId></Widgets>
       <Widgets><id>5</id><uri>hsshortcutwidgetplugin</uri><pageId map="HomeScreenDbSettings/Pages[@key='2']"></pageId></Widgets>
@@ -115,11 +115,13 @@
       <Configuration><key>snapTimeout</key><value>100</value></Configuration>
       <Configuration><key>snapForce</key><value>30</value></Configuration>
       <Configuration><key>snapGap</key><value>6</value></Configuration>
-      <Configuration><key>snapBorderGap</key><value>0</value></Configuration>
+      <Configuration><key>pageMargin</key><value>0</value></Configuration>
       <Configuration><key>snapLineFadeInDuration</key><value>200</value></Configuration>
       <Configuration><key>snapLineFadeOutDuration</key><value>100</value></Configuration>
       <Configuration><key>isSnapEffectsEnabled</key><value>true</value></Configuration>
       <Configuration><key>sceneType</key><value>PageWallpapers</value></Configuration>
+      <Configuration><key>bounceAnimationEasingCurve</key><value>Linear</value></Configuration>
+      <Configuration><key>pageChangeAnimationEasingCurve</key><value>Linear</value></Configuration>      
     </HomeScreenDbSettings>
   </data>
 </configuration>

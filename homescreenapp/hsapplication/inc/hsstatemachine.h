@@ -47,6 +47,7 @@ public:
 signals:
     void event_exit();
     void event_toIdle();
+    void event_toAppLib();
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -59,6 +60,7 @@ private:
     void createContentServiceParts();
     void createStates();
 	void updatePSKeys();
+    void captureEndKey(bool enable); 
 
 private slots:
 	void onIdleStateEntered();
@@ -71,6 +73,7 @@ private:
 	
 	bool mHomeScreenActive;
 	bool mIdleStateActive;
+    bool mEndKeyCaptured;
 
 	QValueSpacePublisher *mPublisher;
 	

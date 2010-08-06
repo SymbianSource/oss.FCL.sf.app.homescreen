@@ -396,8 +396,8 @@ void HsAddAppsToCollectionState::editorDialogFinished(
         HbAction* finishedAction)
 {
     if (finishedAction == mEditorDialog->actions().value(0)) {
-        QString newName(mEditorDialog->newName(
-                mEditorDialog->value().toString(), true));
+        QString newName(
+                mEditorDialog->uniqueCollectionName());
         qDebug("HsAddAppsToCollectionState::newCollection() "
                "- emit collectionNameSelectedCl(newName)");
         emit transitToSaveState(newName);
@@ -499,7 +499,7 @@ void HsAddAppsToCollectionState::showMessageAppsAdded(int id)
     HbNotificationDialog *notificationDialog = new HbNotificationDialog();
     notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
     notificationDialog->setTitle(
-            hbTrId("txt_applib_dpopinfo_added_to_collection_1") .arg(
+            hbTrId("txt_applib_dpophead_added_to_collection_1") .arg(
                     HsMenuService::getName(id)));
     notificationDialog->show();
     mShowConfirmation = false;

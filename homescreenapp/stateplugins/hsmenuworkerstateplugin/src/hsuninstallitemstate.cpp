@@ -230,7 +230,7 @@ void HsUninstallItemState::createSimpleUninstallJavaMessage()
 {
     QString message;
     message.append(
-        HbParameterLengthLimiter("txt_applib_info_remove_1_all_its_shortcuts_and").arg(
+        HbParameterLengthLimiter("txt_applib_dialog_1_will_be_removed_from_phone_c").arg(
             HsMenuService::getName(mItemId)));
 
     // create and show message box

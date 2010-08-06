@@ -25,6 +25,7 @@
 
 #include "hsmenustates_global.h"
 #include "hsmenuviewbuilder.h"
+#include "hssearchviewbuilder.h"
 
 class QSortFilterProxyModel;
 class HsMainWindow;
@@ -49,8 +50,9 @@ public:
     ~HsSearchView();
 
     void setSearchPanelVisible(bool visible);
-    bool isActive() const;
 private:
+
+    bool isActive() const;
 
     QModelIndex firstVisibleItemIndex(const HbListView *view) const;
     void searchBegins();
@@ -70,15 +72,18 @@ signals:
 
 public slots:
     void hideSearchPanel();
+
+private slots:
     void activatedProxySlot(const QModelIndex &index);
     void longPressedProxySlot(
             HbAbstractViewItem *item, const QPointF &coords);
 
 private slots:
     void findItem(QString criteriaStr);
+    void setNoResultsVisibility();
+
 private:
     void setOriginatingContext();
-    void setSearchContext();
     void initSearchPanel(HbSearchPanel &searchPanel);
     HbLineEdit *searchPanelLineEdit(HbSearchPanel &searchPanel) const;
 
@@ -97,6 +102,8 @@ private:
     HsMainWindow &mMainWindow;
     HbListView *mListView;
     QScopedPointer<HbShrinkingVkbHost> mVkbHost;
+    HsSearchViewBuilder mSearchViewBuilder;
+    bool mEmptyResultText;
 
 };
 

@@ -59,5 +59,6 @@ void HsMainWindow::setCurrentView(HbView *view)
     if (!hbW->views().contains(view)) {
         hbW->addView(view);
     }
-    hbW->setCurrentView(view);
+    bool animate  = !hbW->isObscured();       
+    hbW->setCurrentView(view, animate);
 }

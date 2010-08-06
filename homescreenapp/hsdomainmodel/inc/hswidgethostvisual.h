@@ -66,7 +66,6 @@ private:
 
     void setNewSize(const QSizeF &size);
 
-
 private:
     HsWidgetTouchArea *mTouchArea;
     HsWidgetHost *mVisualModel;

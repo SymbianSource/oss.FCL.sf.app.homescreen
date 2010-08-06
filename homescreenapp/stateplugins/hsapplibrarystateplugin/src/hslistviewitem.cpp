@@ -16,20 +16,58 @@
  */
 
 #include <hbnamespace.h>
-#include <HbProgressBar>
-
+#include <HbAbstractItemView>
 #include <HbStyleLoader>
+#include <QPainter>
 #include <caitemmodel.h>
 #include "hsmenuitemmodel.h"
 
 #include "hslistviewitem.h"
 
+
+// TODO: this is only temporary class for show progress bar.
+// It should be remove when fix from orbit will be in official platfrom.
+// Remove it from header too.
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsProgressBar::paint(QPainter * painter, 
+        const QStyleOptionGraphicsItem * option, 
+        QWidget * widget)
+{
+    Q_UNUSED(widget)
+    QStyleOptionGraphicsItem pixmapOption(*option);
+    foreach (QGraphicsItem *child, childItems()) {
+        painter->save();            
+        painter->translate(child->pos());
+        pixmapOption.exposedRect = child->boundingRect();
+        child->paint(painter, &pixmapOption, 0);
+        
+        foreach (QGraphicsItem *child2, child->childItems()) {
+            if (child2->isVisible()) {
+                painter->save();            
+                painter->translate(child2->pos());
+                pixmapOption.exposedRect = child2->boundingRect();
+                child2->paint(painter, &pixmapOption, 0);
+                painter->restore(); 
+            }
+        }
+        painter->restore();
+    }
+}    
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+
 HsListViewItem::HsListViewItem(QGraphicsItem* parent) : 
     HbListViewItem(parent), progress(0), isProgress(false)
 {   
     setGraphicsSize(LargeIcon);
-    HbStyleLoader::registerFilePath(":/layout/hslistviewitem.css");
-    HbStyleLoader::registerFilePath(":/layout/hslistviewitem.widgetml");
+    if (this == prototype()) {
+        HbStyleLoader::registerFilePath(":/layout/hslistviewitem.css");        
+    }
 }
 
 HsListViewItem::~HsListViewItem()
@@ -44,41 +82,25 @@ void HsListViewItem::updateChildItems()
 {
     HbListViewItem::updateChildItems();
 
-    // DisplayRoles
-    QVariant displayRole = modelIndex().data(Qt::DisplayRole);
-    QStringList stringList;
-    if (displayRole.isValid()) {
-        if (displayRole.canConvert<QString>()) {
-            stringList.append(displayRole.toString());
-        } else if (displayRole.canConvert<QStringList>()) {
-            stringList = displayRole.toStringList();
-        }
-    }
     EntryFlags flags = modelIndex().data(
         CaItemModel::FlagsRole).value<EntryFlags> ();
     isProgress = false;
     if (flags & UninstallEntryFlag) {
         isProgress = true;
         if (!progress) {
-            progress = new HbProgressBar(this);
+            progress = new HsProgressBar(this);
+            HbStyle::setItemName(progress, "progress"); 
             progress->setRange(0, 100);
-            HbEffect::disable(progress);
+            HbEffect::disable(progress);  
             repolish();
         }
         int progresVal = modelIndex().data(
                 CaItemModel::UninstalRole).toInt();
         progress->setProgressValue(progresVal);
-        HbStyle::setItemName(progress, "progress");         
-        if (!progress->isVisible()) {
-            progress->setVisible(!progress->isVisible());
-            repolish();
-        }    
     } else if (progress) {       
-        HbStyle::setItemName(progress, "");
-        if (progress->isVisible()) {
-            progress->setVisible(!progress->isVisible());
-            repolish();
-        } 
+        delete progress;
+        progress = 0;
+        repolish();
     }
     // hide text-2 if we have to 
     foreach (QGraphicsItem * item, this->childItems()) {
@@ -97,6 +119,13 @@ HbAbstractViewItem*  HsListViewItem::createItem()
 
 void HsListViewItem::polish(HbStyleParameters& params)
 {       
+    if (isProgress) {
+        HbStyleLoader::registerFilePath(":/layout/hslistviewitem.widgetml");
+    }
     HbListViewItem::setProperty("progress", isProgress);
     HbListViewItem::polish(params);   
+    if (isProgress) {
+        HbStyleLoader::unregisterFilePath(":/layout/hslistviewitem.widgetml");
+    }
 }
+

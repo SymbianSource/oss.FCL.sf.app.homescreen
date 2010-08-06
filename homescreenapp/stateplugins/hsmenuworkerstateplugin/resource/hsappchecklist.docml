@@ -14,7 +14,7 @@
         <widget name="aps_dialog_pri_heading" role="HbDialog:headingWidget" type="HbLabel">
             <enums name="alignment" value="AlignLeft|AlignLeading"/>
             <contentsmargins bottom="var(hb-param-margin-gene-popup)" left="var(hb-param-margin-gene-popup)" right="var(hb-param-margin-gene-popup)" top="var(hb-param-margin-gene-popup)"/>
-            <string locid="txt_applib_title_select_applications" name="plainText"/>
+            <string locid="txt_applib_title_select_items" name="plainText"/>
             <fontspec name="fontSpec" role="Primary" textheight="var(hb-param-text-height-primary)"/>
         </widget>
         <widget name="listView" role="HbDialog:contentWidget" type="HbListView">

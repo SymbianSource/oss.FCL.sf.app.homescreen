@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -15,10 +15,10 @@
 #
 
 TEMPLATE = subdirs
+BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
 
-SUBDIRS  += homescreenapp \
-			homescreen_plat
-			
-symbian:SUBDIRS += screensaver
+include(homescreenclient_api/homescreenclient_api.pri)
 
-CONFIG += ordered
+for(filename,PLATFORM_HEADERS){
+    BLD_INF_RULES.prj_exports *= "$$filename APP_LAYER_PLATFORM_EXPORT_PATH($$basename(filename))"
+  }

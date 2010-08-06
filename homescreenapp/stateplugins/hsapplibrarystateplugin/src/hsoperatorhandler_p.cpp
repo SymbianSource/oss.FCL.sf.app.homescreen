@@ -14,21 +14,27 @@
  * Description: hsoperatorhandler_p.cpp
  *
  */
-#ifndef NO_QT_EXTENSIONS
+#ifdef QT_EXTENSIONS
 
 #include <QDebug>
-#include <XQSettingsManager>
 #include <XQSettingsKey>
 #include "hsoperatorhandler_p.h"
 #include "hsmenuservice.h"
 #include "caentry.h"
 #include "caservice.h"
 
-const int AppLibUid         = 0x20022F97;
-const int IconId            = 0x00000001;
-const int OperatorAppUid    = 0x00000002;
-const int OperatorUrl       = 0x00000003;
-const int OperatorText      = 0x00000004;
+const int AppLibUid                 = 0x20022F97;
+const int IncludeOperatorStore      = 0x00000001;
+const int OperatorStoreType         = 0x00000002;
+const int OperatorStoreTitle        = 0x00000003;
+const int OperatorStoreURL          = 0x00000004;
+const int OperatorStoreIconSkinID   = 0x00000005;
+const int OperatorStoreApplication  = 0x00000006;
+const int OperatorStore1stPopUp     = 0x00000007;
+const int RemoveOviStore            = 0x00000008;
+const char *operatorStoreIconPath
+        = "z:/private/20022F35/customsvg/operatorstore.svg";
+
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -38,9 +44,13 @@ const int OperatorText      = 0x00000004;
  */
 HsOperatorHandlerPrivate::HsOperatorHandlerPrivate(QObject *parent):
     QObject(parent),
+    mOviStorePresent(false),
+    mOperatorStorePresent(false),
+    mStoreType(NoneType),
     mOperatorEntry(0),
     mIcon(),
-    mText()
+    mOperatorStoreTitle(),
+    mOperatorStoreFirst(false)
 {
     readCentralRepository();
 }
@@ -72,12 +82,39 @@ HbIcon HsOperatorHandlerPrivate::icon()
 }
 
 /*!
- Returns Operator icon predefined in Central Repositoryicon
- \retval icon
+ Returns Operator title text predefined in Central Repositoryicon
+ \retval text
  */
 QString HsOperatorHandlerPrivate::text()
 {
-    return mText;
+    return mOperatorStoreTitle;
+}
+
+/*!
+ Returns Ovi Store presence value predefined in Central Repositoryicon
+ \retval true if Ovi Store should be present in toolbar
+ */
+bool HsOperatorHandlerPrivate::oviStorePresent()
+{
+    return mOviStorePresent;
+}
+
+/*!
+ Returns Operator Store presence value predefined in Central Repositoryicon
+ \retval true if Operator Store should be present in toolbar
+ */
+bool HsOperatorHandlerPrivate::operatorStorePresent()
+{
+    return mOperatorStorePresent;
+}
+
+/*!
+ Returns if Operator Store should first in toolbar
+ \retval true if Operator Store should first in toolbar
+ */
+bool HsOperatorHandlerPrivate::operatorStoreFirst()
+{
+    return mOperatorStoreFirst;
 }
 
 /*!
@@ -87,41 +124,15 @@ QString HsOperatorHandlerPrivate::text()
  */
 HbIcon HsOperatorHandlerPrivate::createIcon(XQSettingsManager *crManager)
 {
-    qDebug("HsOperatorHandlerPrivate::createIcon");
-    HbIcon icon;
-
-    XQCentralRepositorySettingsKey iconKey(AppLibUid, IconId);
-    QVariant iconVarian = crManager->readItemValue(
-                              iconKey, XQSettingsManager::TypeString);
-
-    if (!iconVarian.isNull() && !iconVarian.toString().isEmpty()) {
-        qDebug() << "HsOperatorHandlerPrivate::createIcon"
-                 << iconVarian.toString();
-        icon = HbIcon(iconVarian.toString());
+    QVariant variant = getVariantFromKey(
+            crManager,
+            OperatorStoreIconSkinID,
+            XQSettingsManager::TypeString);
+    if (!variant.isNull() && !variant.toString().isEmpty()) {
+        return HbIcon(variant.toString());
+    } else {
+        return HbIcon(operatorStoreIconPath);
     }
-    return icon;
-}
-
-/*!
- Creates text based on Central Repository
- \param crManager settings manager
- \retval icon
- */
-QString HsOperatorHandlerPrivate::readText(XQSettingsManager *crManager)
-{
-    qDebug("HsOperatorHandlerPrivate::readText");
-    QString text;
-
-    XQCentralRepositorySettingsKey textKey(AppLibUid, OperatorText);
-    QVariant textVariant = crManager->readItemValue(
-                               textKey, XQSettingsManager::TypeString);
-
-    if (!textVariant.isNull() && textVariant.isValid()) {
-        qDebug() << "HsOperatorHandlerPrivate::createIcon"
-                 << textVariant.toString();
-        text = textVariant.toString();
-    }
-    return text;
 }
 
 /*!
@@ -132,19 +143,14 @@ QString HsOperatorHandlerPrivate::readText(XQSettingsManager *crManager)
 CaEntry *HsOperatorHandlerPrivate::createAppEntry(
     XQSettingsManager *crManager)
 {
-    qDebug("HsOperatorHandlerPrivate::createAppEntry");
-    XQCentralRepositorySettingsKey appUidKey(AppLibUid, OperatorAppUid);
-    QVariant appUidVariant = crManager->readItemValue(
-                                 appUidKey, XQSettingsManager::TypeString);
-
-    if (!appUidVariant.isNull() && !appUidVariant.toString().isEmpty()) {
-        qDebug() << "HsOperatorHandlerPrivate::createAppEntry"
-                 << appUidVariant.toString();
-
+    QVariant variant = getVariantFromKey(
+            crManager, OperatorStoreApplication, XQSettingsManager::TypeString);
+    if (!variant.isNull()) {
         CaEntry *operatorEntry = new CaEntry;
         operatorEntry->setEntryTypeName(applicationTypeName());
         operatorEntry->setAttribute(
-            applicationUidEntryKey(), appUidVariant.toString());
+            applicationUidEntryKey(), variant.toString());
+
         return operatorEntry;
     }
     return NULL;
@@ -158,20 +164,104 @@ CaEntry *HsOperatorHandlerPrivate::createAppEntry(
 CaEntry *HsOperatorHandlerPrivate::createUrlEntry(
     XQSettingsManager *crManager)
 {
-    qDebug("HsOperatorHandlerPrivate::createUrlEntry");
-    CaEntry *operatorEntry = new CaEntry;
-
-    XQCentralRepositorySettingsKey urlKey(AppLibUid, OperatorUrl);
-    QVariant urlVariant = crManager->readItemValue(
-                              urlKey, XQSettingsManager::TypeString);
-
-    if (!urlVariant.isNull() && !urlVariant.toString().isEmpty()) {
+    QVariant variant = getVariantFromKey(
+            crManager, OperatorStoreURL, XQSettingsManager::TypeString);
+    if (!variant.isNull()) {
+        CaEntry *operatorEntry = new CaEntry;
         operatorEntry->setEntryTypeName(urlTypeName());
-        operatorEntry->setAttribute(urlEntryKey(), urlVariant.toString());
-        qDebug() << "HsOperatorHandlerPrivate::createUrlEntry"
-                 << urlVariant.toString();
+        operatorEntry->setAttribute(urlEntryKey(), variant.toString());
+
+        return operatorEntry;
     }
-    return operatorEntry;
+    return NULL;
+}
+
+
+/*!
+ Generic function to get stores presence values
+ \param crManager settings manager
+ \param storePresenceKey store key(Ovi or Operator)
+ \retval entry
+ */
+bool HsOperatorHandlerPrivate::storeValue(
+        XQSettingsManager *crManager, int storePresenceKey)
+{
+    QVariant variant = getVariantFromKey(
+            crManager, storePresenceKey, XQSettingsManager::TypeInt);
+    if (!variant.isNull()) {
+        return bool(variant.toInt());
+    }
+    return false;
+}
+
+/*!
+ Generic function to get QVariant for CR key
+ \param crManager settings manager
+ \param crKey CR key
+ \param type type of QVariant to be returned
+ \retval QVariant
+ */
+QVariant HsOperatorHandlerPrivate::getVariantFromKey(
+        XQSettingsManager *crManager, int crKey, XQSettingsManager::Type type)
+{
+    XQCentralRepositorySettingsKey presenceKey(AppLibUid, crKey);
+    QVariant presenceVariant = crManager->readItemValue(
+            presenceKey, type);
+
+    if (presenceVariant.isValid()) {
+        qDebug() << "HsOperatorHandlerPrivate::storePresent"
+                 << presenceVariant.toInt();
+        return presenceVariant;
+    }
+    return QVariant();
+}
+
+/*!
+ Generic function to get store type(Url/App)
+ \param crManager settings manager
+ \retval HsStoreType store type
+ */
+HsOperatorHandlerPrivate::HsStoreType
+        HsOperatorHandlerPrivate::operatorStoreType(
+                XQSettingsManager *crManager)
+{
+    QVariant variant = getVariantFromKey(
+            crManager, OperatorStoreType, XQSettingsManager::TypeInt);
+    if (!variant.isNull()) {
+        return HsOperatorHandlerPrivate::HsStoreType(variant.toInt());
+    }
+    return NoneType;
+}
+
+/*!
+ Creates text based on Central Repository
+ \param crManager settings manager
+ \retval icon
+ */
+QString HsOperatorHandlerPrivate::operatorStoreTitle(XQSettingsManager *crManager)
+{
+    QVariant variant = getVariantFromKey(
+            crManager, OperatorStoreTitle, XQSettingsManager::TypeString);
+    if (!variant.isNull()) {
+        return variant.toString();
+    }
+    return QString();
+}
+
+/*!
+ Retrives information if Operator Store should first in toolbarbased
+ (from Central Repository)
+ \param crManager settings manager
+ \retval true if Operator Store should be first
+ */
+bool HsOperatorHandlerPrivate::operatorStoreFirst(XQSettingsManager *crManager)
+{
+    QVariant variant = getVariantFromKey(
+            crManager, OperatorStore1stPopUp, XQSettingsManager::TypeInt);
+    if (!variant.isNull()) {
+        return bool(variant.toInt());
+    }
+    return false;
 }
 
 /*!
@@ -180,12 +270,21 @@ CaEntry *HsOperatorHandlerPrivate::createUrlEntry(
 void HsOperatorHandlerPrivate::readCentralRepository()
 {
     XQSettingsManager *crManager = new XQSettingsManager;
+    //this key indicates that ovi store should be removed
+    mOviStorePresent = !storeValue(crManager, RemoveOviStore);
+    //this key indicates that operator store should be added
+    mOperatorStorePresent = storeValue(crManager, IncludeOperatorStore);
 
-    mIcon = createIcon(crManager);
-    mText = readText(crManager);
-    mOperatorEntry = createAppEntry(crManager);
-    if (!mOperatorEntry) {
-        mOperatorEntry = createUrlEntry(crManager);
+    if (mOperatorStorePresent) {
+        mStoreType = operatorStoreType(crManager);
+        if (mStoreType == ApplicationType) {
+            mOperatorEntry = createAppEntry(crManager);
+        } else {
+            mOperatorEntry = createUrlEntry(crManager);
+        }
+        mOperatorStoreTitle = operatorStoreTitle(crManager);
+        mOperatorStoreFirst = operatorStoreFirst(crManager);
+        mIcon = createIcon(crManager);
     }
     delete crManager;
 }

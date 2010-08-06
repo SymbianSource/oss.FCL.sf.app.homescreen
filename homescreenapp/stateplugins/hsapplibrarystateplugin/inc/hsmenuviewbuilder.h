@@ -33,7 +33,6 @@ class HbAction;
 class HbGroupBox;
 class HbLineEdit;
 class HbListView;
-class HbSearchPanel;
 class HbToolBar;
 class HbView;
 class HbWidget;
@@ -50,7 +49,6 @@ enum HsStateContext {
 
 enum HsOperationalContext {
     HsItemViewContext = 0,
-    HsSearchContext,
     HsButtonContext,
     HsEmptyLabelContext,
     InvalidOperationalContext
@@ -81,7 +79,6 @@ public:
 
     // optional widgets accessors
     HbGroupBox *currentViewLabel();
-    HbSearchPanel *currentSearchPanel();
     HbPushButton *currentAddContentButton();
 
 
@@ -104,15 +101,12 @@ private:
 
     QSet<QObject *> mLoadedObjects;
 
-    const QString DOCUMENT_FILE_NAME;
+
     const QString ALL_APPS_ACTION_NAME;
     const QString ALL_COLLECTIONS_ACTION_NAME;
     const QString SEARCH_ACTION_NAME;
     const QString OVI_STORE_ACTION_NAME;
     const QString OPERATOR_ACTION_NAME;
-    const QString SEARCH_PANEL_NAME;
-    const QString BUTTON_NAME;
-    const QString TOOL_BAR_NAME;
 
     QActionGroup *mToolBarActionGroup;
     HbToolBar *mToolBar;

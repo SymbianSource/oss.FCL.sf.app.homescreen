@@ -15,6 +15,8 @@
  *
  */
 
+#include <QApplication>
+#include <QInputContext>
 #include <QSortFilterProxyModel>
 
 #include <HbGroupBox>
@@ -23,8 +25,6 @@
 #include <HbAbstractViewItem>
 #include <HbView>
 #include <HbSearchPanel>
-#include <QApplication>
-#include <QInputContext>
 
 #include <caitemmodel.h>
 
@@ -40,11 +40,10 @@
  */
 HsSearchView::HsSearchView(HsMenuViewBuilder &builder,
         HsStateContext stateContext, HsMainWindow &mainWindow) :
-    mProxyModel(new QSortFilterProxyModel(this)),
-    mSearchView(NULL),
+    mProxyModel(new QSortFilterProxyModel(this)), mSearchView(NULL),
     mSearchListView(NULL), mSearchPanel(NULL), mStateContext(stateContext),
     mBuilder(builder), mMainWindow(mainWindow), mListView(NULL),
-    mVkbHost(NULL)
+    mVkbHost(NULL), mSearchViewBuilder(), mEmptyResultText(true)
 {
     mProxyModel->setFilterRole(CaItemModel::TextRole);
     mProxyModel->setFilterKeyColumn(1);
@@ -70,17 +69,12 @@ void HsSearchView::setSearchPanelVisible(bool visible)
     HSMENUTEST_FUNC_ENTRY("HsMenuView::setSearchPanelVisible");
 
     if (visible && !isActive()) {
-
         searchBegins();
-
         connectSearchItemViewsSignals();
         connectSearchPanelSignals();
-
     } else if (isActive()) {
-
         disconnectSearchPanelSignals();
         disconnectSearchItemViewsSignals();
-
         searchFinished();
     }
     HSMENUTEST_FUNC_EXIT("HsMenuView::setSearchPanelVisible");
@@ -88,20 +82,16 @@ void HsSearchView::setSearchPanelVisible(bool visible)
 
 /*!
     \param view List view to operate on.
-    \return Index of F=first visible item of \a view if any 
+    \return Index of F=first visible item of \a view if any
     or default QModelIndex otherwise.
  */
 QModelIndex HsSearchView::firstVisibleItemIndex(const HbListView *view) const
 {
-    QModelIndex result;
-
-    const QList<HbAbstractViewItem *> array =
-        view->visibleItems();
-
-    if (array.count() >= 1) {
-        result = array[0]->modelIndex();
+    const QList<HbAbstractViewItem *> array = view->visibleItems();
+    if (array.count()) {
+        return array[0]->modelIndex();
     }
-    return result;
+    return QModelIndex();
 }
 
 /*!
@@ -121,37 +111,45 @@ void HsSearchView::searchBegins()
     mProxyModel->setFilterRegExp(
             QRegExp(QString(".*"), Qt::CaseInsensitive, QRegExp::RegExp));
 
-    QString viewLabelHeading;
-
-    if (mBuilder.currentViewLabel() != 0) {
-        viewLabelHeading = mBuilder.currentViewLabel()->heading();
-    }
-
-    setSearchContext();
-
-    mSearchView = mBuilder.currentView();
-    mSearchListView = mBuilder.currentListView();
-    mSearchPanel = mBuilder.currentSearchPanel();
+    mSearchView = mSearchViewBuilder.searchView();
+    mSearchListView = mSearchViewBuilder.searchListView();
+    mSearchPanel = mSearchViewBuilder.searchPanel();
     initSearchPanel(*mSearchPanel);
     mVkbHost.reset(new HbShrinkingVkbHost(mSearchView));
 
-    if (mBuilder.currentViewLabel() != 0) {
-        mBuilder.currentViewLabel()->setHeading(viewLabelHeading);
+    if (mBuilder.currentViewLabel()) {
+        mSearchViewBuilder.searchViewLabel()->setHeading(
+                mBuilder.currentViewLabel()->heading());
+        mSearchViewBuilder.setSearchLabledContext();
     }
 
-
     mSearchView->hideItems(Hb::AllItems);
-    mSearchListView->setModel(mProxyModel);
-    mSearchListView->setItemPrototype(new HsListViewItem());
+    mSearchListView->setModel(mProxyModel, new HsListViewItem());
 
     mMainWindow.setCurrentView(mSearchView);
 
     mSearchListView->scrollTo(
         mProxyModel->mapFromSource(mSearchViewInitialIndex),
         HbAbstractItemView::PositionAtTop);
+
+    setNoResultsVisibility();
     HSMENUTEST_FUNC_EXIT("HsSearchView::searchBegins");
 }
 
+/*!
+ Handles button visibility.
+ \param visibility indicates whether show or not to show 'empty' label.
+ */
+void HsSearchView::setNoResultsVisibility()
+{
+    if (mProxyModel->rowCount() && mEmptyResultText) {
+        mSearchViewBuilder.loadViewListSection();
+        mEmptyResultText = false;
+    } else if (!mProxyModel->rowCount() && !mEmptyResultText) {
+        mSearchViewBuilder.loadViewEmptySection();
+        mEmptyResultText = true;
+    }
+}
 
 /*
  Connects \a activated and \a longPressed signals coming from search list
@@ -197,6 +195,10 @@ void HsSearchView::hideSearchPanel()
 */
 void HsSearchView::connectSearchPanelSignals()
 {
+    connect(mProxyModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
+            this, SLOT(setNoResultsVisibility()));
+    connect(mProxyModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
+            this, SLOT(setNoResultsVisibility()));
     connect(mSearchPanel, SIGNAL(exitClicked()),
             this, SLOT(hideSearchPanel()));
     connect(mSearchPanel, SIGNAL(criteriaChanged(QString)),
@@ -210,10 +212,8 @@ void HsSearchView::connectSearchPanelSignals()
 */
 void HsSearchView::disconnectSearchPanelSignals()
 {
-    disconnect(mSearchPanel, SIGNAL(exitClicked()),
-           this, SLOT(hideSearchPanel()));
-    disconnect(mSearchPanel, SIGNAL(criteriaChanged(QString)),
-           this, SLOT(findItem(QString)));
+    mProxyModel->disconnect(this);
+    mSearchPanel->disconnect(this);
 }
 
 /*!
@@ -223,20 +223,21 @@ void HsSearchView::searchFinished()
 {
     HSMENUTEST_FUNC_ENTRY("HsSearchView::searchFinished");
 
-    mIndexToScrollAfterSearchDone =
-            firstVisibleItemIndex(mSearchListView);
+    mIndexToScrollAfterSearchDone = firstVisibleItemIndex(mSearchListView);
 
     setOriginatingContext();
 
     mMainWindow.setCurrentView(mBuilder.currentView());
 
-    mListView->scrollTo(mProxyModel->mapToSource(mIndexToScrollAfterSearchDone),
+    mListView->scrollTo(mProxyModel->mapToSource(
+            mIndexToScrollAfterSearchDone),
             HbAbstractItemView::PositionAtTop);
 
     HbVkbHost::detachHost(mSearchView);
     mVkbHost.reset(NULL);
     mSearchListView = NULL;
     mSearchPanel = NULL;
+    mProxyModel->setSourceModel(NULL);
     HSMENUTEST_FUNC_EXIT("HsSearchView::searchFinished");
 }
 
@@ -249,8 +250,6 @@ void HsSearchView::findItem(QString criteriaStr)
     qDebug() << "HsSearchView::findItem: " + criteriaStr;
     HSMENUTEST_FUNC_ENTRY("HsSearchView::findItem");
 
-    mProxyModel->invalidate();
-    mProxyModel->setSourceModel(mListView->model());
     mProxyModel->setFilterRegExp(
             QRegExp("(^|\\b)" + criteriaStr, Qt::CaseInsensitive));
 
@@ -275,16 +274,16 @@ void HsSearchView::activatedProxySlot(const QModelIndex &index)
   \param item Long pressed item.
   \param coords Coordinates of the long press action.
  */
-void HsSearchView::longPressedProxySlot(HbAbstractViewItem *item,
-                                      const QPointF &coords)
+void HsSearchView::longPressedProxySlot(
+        HbAbstractViewItem *item, const QPointF &coords)
 {
     /*
     this is a kind of hack, introduced for reasons:
     item object should be reusable later, but orbit (or qt) prevents setting
     its index model to previous state
     */
-    mSearchViewLongPressedIndex =
-        mProxyModel->mapToSource(item->modelIndex());
+    mSearchViewLongPressedIndex = mProxyModel->mapToSource(
+            item->modelIndex());
     QScopedPointer<HbAbstractViewItem> itemNew(item->createItem());
     itemNew->setModelIndex(mSearchViewLongPressedIndex);
     emit longPressed(itemNew.data(), coords);
@@ -301,8 +300,8 @@ void HsSearchView::initSearchPanel(HbSearchPanel &searchPanel)
 
     lineEdit->setText("");
     lineEdit->setFocus();
-    lineEdit->setInputMethodHints(Qt::ImhNoPredictiveText |
-        Qt::ImhNoAutoUppercase);
+    lineEdit->setInputMethodHints(
+            Qt::ImhNoPredictiveText | Qt::ImhNoAutoUppercase);
 }
 
 /*!
@@ -315,15 +314,10 @@ HbLineEdit *HsSearchView::searchPanelLineEdit(
     HSMENUTEST_FUNC_ENTRY("HsSearchView::searchPanelLineEdit");
 
     HbLineEdit *result(0);
-
     foreach(QGraphicsItem *obj, searchPanel.childItems()) {
-
         QGraphicsWidget *const widget = static_cast<QGraphicsWidget *>(obj);
-
         if (widget != NULL) {
-
             HbLineEdit *const lineEdit = qobject_cast<HbLineEdit *>(widget);
-
             if (lineEdit != NULL) {
                 result = lineEdit;
                 break;
@@ -345,15 +339,6 @@ void HsSearchView::setOriginatingContext()
     mBuilder.setOperationalContext(HsItemViewContext);
 }
 
-/*!
-  Sets the builder context to the one determined by \a mStateContext and
-  \a HsSearchContext.
- */
-void HsSearchView::setSearchContext()
-{
-    mBuilder.setStateContext(mStateContext);
-    mBuilder.setOperationalContext(HsSearchContext);
-}
 /*!
   \retval true when search view is already invoked, \a false otherwise.
  */

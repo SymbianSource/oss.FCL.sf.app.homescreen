@@ -49,12 +49,6 @@
 QTM_USE_NAMESPACE
 #define hbApp qobject_cast<HbApplication*>(qApp)
 
-#ifdef Q_OS_SYMBIAN
-const static Qt::Key applicationKey = Qt::Key_Menu;
-#else
-const static Qt::Key applicationKey = Qt::Key_Home;
-#endif
-
 namespace
 {
     const char KHsRootStateInterface[] = "com.nokia.homescreen.state.HsRootState";
@@ -85,6 +79,7 @@ HsStateMachine::HsStateMachine(QObject *parent)
       mContentService(0),	  
       mHomeScreenActive(false),
       mIdleStateActive(false),
+      mEndKeyCaptured(false),
       mPublisher(NULL)
 #ifdef Q_OS_SYMBIAN
 	  ,keyCapture()
@@ -162,30 +157,22 @@ bool HsStateMachine::eventFilter(QObject *watched, QEvent *event)
     switch (event->type()) {
         case QEvent::ApplicationActivate:
             qDebug() << "HsStateMachine::eventFilter: QEvent::ApplicationActivate";
-#ifdef Q_OS_SYMBIAN
-            keyCapture.captureKey(applicationKey);
-#endif
             mHomeScreenActive = true;
             updatePSKeys();
             break;
         case QEvent::ApplicationDeactivate:
             qDebug() << "HsStateMachine::eventFilter: QEvent::ApplicationDeactivate";
-#ifdef Q_OS_SYMBIAN
-            keyCapture.cancelCaptureKey(applicationKey);
-#endif
             mHomeScreenActive = false;
             updatePSKeys();
             break;
         default:
             break;
     }
-   
-    bool result =  QStateMachine::eventFilter(watched, event);
-    // temporary hack as we should not register twice for events
+        
+    bool result =  QStateMachine::eventFilter(watched, event);    
     if (event->type() == QEvent::KeyPress ) {
-        QKeyEvent* ke = static_cast<QKeyEvent *>(event);         
-        // Key_Launch0 should be removed when QT starts to send Key_Menu
-        result = (ke->key() == applicationKey) || ke->key() == Qt::Key_Launch0;        
+        QKeyEvent* ke = static_cast<QKeyEvent *>(event);                 
+        result = (ke->key() == Qt::Key_Home);
     }
     return result;
 }
@@ -314,34 +301,31 @@ void HsStateMachine::createStates()
 
     HbMainWindow *window = hbInstance->allMainWindows().first();
 
+#ifndef  Q_OS_SYMBIAN   
     // key driven transition from idle to menu
     QKeyEventTransition *idleToMenuRootTransition =
         new QKeyEventTransition(
-                window, QEvent::KeyPress, applicationKey);
+                window, QEvent::KeyPress, Qt::Key_Home);
     idleToMenuRootTransition->setTargetState(menuRootState);
     idleState->addTransition(idleToMenuRootTransition);
     // key driven transition from menu to idle
     QKeyEventTransition *menuToIdleTransition =
         new QKeyEventTransition(
-                window, QEvent::KeyPress, applicationKey);
+                window, QEvent::KeyPress, Qt::Key_Home);
     menuToIdleTransition->setTargetState(idleState);
     menuRootState->addTransition(menuToIdleTransition);
-    
-    // transition for Key_Launch0 should be removed 
-    // when OT starts to send Key_Menu (maybe wk14)
-    QKeyEventTransition *idleToMenuRootTransition2 =
-        new QKeyEventTransition(
-                window, QEvent::KeyPress, Qt::Key_Launch0);
-    idleToMenuRootTransition2->setTargetState(menuRootState);
-    idleState->addTransition(idleToMenuRootTransition2);
+#endif 
     // key driven transition from menu to idle
-    QKeyEventTransition *menuToIdleTransition2 =
+    QKeyEventTransition *menuToIdleTransitionNoKey =
         new QKeyEventTransition(
-                window, QEvent::KeyPress, Qt::Key_Launch0);
-    menuToIdleTransition2->setTargetState(idleState);
-    menuRootState->addTransition(menuToIdleTransition2);
+                window, QEvent::KeyPress, Qt::Key_No);
+    menuToIdleTransitionNoKey->setTargetState(idleState);
+    menuRootState->addTransition(menuToIdleTransitionNoKey);
+    
     // add transition to switch to idle
     menuRootState->addTransition( this, SIGNAL(event_toIdle()), idleState);    
+    // add transition to switch to applib 
+    idleState->addTransition( this, SIGNAL(event_toAppLib()), menuRootState);
     
     // transitions to child states
     // opening shortcut to a colleciton
@@ -383,6 +367,28 @@ void HsStateMachine::updatePSKeys()
     	qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenInactive";
     	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenInactive);
     }	
+    
+    if (mHomeScreenActive && !mIdleStateActive) {
+        captureEndKey(true);
+    } else {
+        captureEndKey(false);
+    }
+}
+
+/*!
+    capture End key 
+*/
+void HsStateMachine::captureEndKey(bool enable) 
+{
+#ifdef Q_OS_SYMBIAN
+    if (enable && !mEndKeyCaptured) {
+        mEndKeyCaptured = true;
+        keyCapture.captureKey(Qt::Key_No);        
+    } else if (mEndKeyCaptured) {
+        mEndKeyCaptured = false;
+        keyCapture.cancelCaptureKey(Qt::Key_No);
+    }
+#endif
 }
 
 /*!
@@ -414,5 +420,7 @@ void HsStateMachine::activityRequested(const QString &name)
             collectionDownloadedTypeName()));
     } else if (name == activityHsIdleView()) {
         emit event_toIdle();
+    } else if (name == activityAppLibMainView()) {
+        emit event_toAppLib();
     }
 }

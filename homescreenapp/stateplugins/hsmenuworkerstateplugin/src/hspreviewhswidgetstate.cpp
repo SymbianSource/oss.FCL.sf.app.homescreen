@@ -123,7 +123,7 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
         
         mPreviewDialog->open(this, SLOT(previewDialogFinished(HbAction*)));
     }
-
+    
     HSMENUTEST_FUNC_EXIT("HsPreviewHSWidgetState::onEntry");
 }
 
@@ -134,15 +134,17 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
 void HsPreviewHSWidgetState::cleanUp()
 {
     if (mPreviewDialog != NULL) {
-        mPreviewDialog->close();
+        mPreviewDialog->disconnect();
+        mPreviewDialog ->close();
         mPreviewDialog = NULL;
     }
     
     if (mCorruptedMessage != NULL) {
+        mCorruptedMessage->disconnect();
         mCorruptedMessage->close();
         mCorruptedMessage = NULL;
     }
-    mEntryObserver.reset(0);
+    
     mToken = NULL;
 }
 

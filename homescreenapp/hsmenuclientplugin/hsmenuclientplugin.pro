@@ -23,20 +23,17 @@ PLUGIN_SUBDIR = /resource/qt/plugins
 
 LIBS += -lcaclient
 
-INCLUDEPATH += inc
+INCLUDEPATH +=  inc \
+				../../homescreen_plat/homescreenclient_api
 
-HEADERS +=  inc/hsmenuclient.h \
-            inc/hsmenuclientplugin.h \
+HEADERS +=  ../../homescreen_plat/homescreenclient_api/hsmenuclient.h \
+            inc/hsmenuclientplugin.h
 
 SOURCES +=  src/hsmenuclient.cpp \
-            src/hsmenuclientplugin.cpp \
+            src/hsmenuclientplugin.cpp
 
 symbian: {
 	TARGET.UID3 = 0x20028715
-#export interface header to platform
-BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
-BLD_INF_RULES.prj_exports += "inc/hsmenuclient.h \
-	APP_LAYER_PLATFORM_EXPORT_PATH(hsmenuclient.h)"
 }
 
 include(../common.pri)

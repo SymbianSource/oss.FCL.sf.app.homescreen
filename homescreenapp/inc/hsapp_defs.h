@@ -42,6 +42,8 @@ inline const QString defaultCollectionIconId();
 inline const QString menuModeType();
 inline const QString swTypeKey();
 inline const QString javaSwType();
+static const char *const HS_CWRT_APP_TYPE="cwrt";
+static const char *const HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE="wrtwidgetuiplugin";
 inline const QString packageTypeName();
 inline const QString appSettingsPlugin();
 inline const QString groupNameAttributeName();
@@ -87,7 +89,7 @@ const char HOMESCREENDATA[] = "homescreenData";
 const char SNAPENABLED[] = "snapenabled";
 const char SNAPFORCE[] = "snapforce";
 const char SNAPGAP[] = "snapgap";
-const char SNAPBORDERGAP[] = "snapbordergap";
+const char PAGEMARGIN[] = "pagemargin";
 const char SNAPLINEFADEINDURATION[] = "snaplinefadeinduration";
 const char SNAPLINEFADEOUTDURATION[] = "snaplinefadeoutduration";
 

@@ -79,15 +79,15 @@ void HsInstalledAppsState::construct()
 void HsInstalledAppsState::setMenuOptions()
 {
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::setMenuOptions");
-    HbMenu *const mOptions = new HbMenu();
-    mOptions->setParent(this);
 
-    mOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
+    mViewOptions->clearActions();
+
+    mViewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                         this, SLOT(openTaskSwitcher()));
-    mOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
+    mViewOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
                         this, SLOT(openInstallationLog()));
 
-    mMenuView->view()->setMenu(mOptions);
+    mMenuView->view()->setMenu(mViewOptions);
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::setMenuOptions");
 }
 
@@ -149,7 +149,9 @@ void HsInstalledAppsState::stateEntered()
         mMenuView->listView()->scrollTo(
             mModel->index(0));
     }
+    
     setMenuOptions();
+
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));

@@ -16,6 +16,7 @@
 */
 
 #include <QPropertyAnimation>
+#include <QEasingCurve>
 #include "hspropertyanimationwrapper.h"
 
 /*!
@@ -105,5 +106,13 @@ void HsPropertyAnimationWrapper::start()
 void HsPropertyAnimationWrapper::stop()
 {
     mImpl->mPropertyAnimation->stop();
+}
+
+/*!
+
+*/
+void HsPropertyAnimationWrapper::setEasingCurve(const QEasingCurve &curve)
+{
+    mImpl->mPropertyAnimation->setEasingCurve(curve);
 }
 

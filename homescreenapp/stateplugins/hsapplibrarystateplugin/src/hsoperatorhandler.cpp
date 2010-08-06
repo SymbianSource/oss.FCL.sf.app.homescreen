@@ -16,11 +16,17 @@
  */
 
 #include "hsoperatorhandler.h"
-#ifndef NO_QT_EXTENSIONS
-#include "hsoperatorhandler_p.h"
+
+#include <HbAction>
+
+#ifdef QT_EXTENSIONS
+    #include "hsoperatorhandler_p.h"
 #else
-#include <HbIcon>
+    #include <HbIcon>
 #endif
+
+
+
 
 /*!
     \class HsOperatorHandler
@@ -37,7 +43,7 @@
  */
 HsOperatorHandler::HsOperatorHandler(QObject *parent):
     QObject(parent),
-#ifndef NO_QT_EXTENSIONS
+#ifdef QT_EXTENSIONS
     m_q(new HsOperatorHandlerPrivate(this))
 #else
     m_q(0)
@@ -58,7 +64,7 @@ HsOperatorHandler::~HsOperatorHandler()
  */
 HbIcon HsOperatorHandler::icon()
 {
-#ifndef NO_QT_EXTENSIONS
+#ifdef QT_EXTENSIONS
     return m_q->icon();
 #else
     return HbIcon();
@@ -71,7 +77,7 @@ HbIcon HsOperatorHandler::icon()
  */
 QString HsOperatorHandler::text()
 {
-#ifndef NO_QT_EXTENSIONS
+#ifdef QT_EXTENSIONS
     return m_q->text();
 #else
     return QString();
@@ -80,13 +86,64 @@ QString HsOperatorHandler::text()
 
 
 /*!
- Open Operator application or related url
+ Open Operator application or related url action
  */
 void HsOperatorHandler::action()
 {
-#ifndef NO_QT_EXTENSIONS
+#ifdef QT_EXTENSIONS
     m_q->action();
 #endif
 }
 
+/*!
+ Returns Operator Store presence value predefined in Central Repositoryicon
+ \retval true if Operator Store should be present in toolbar
+ */
+bool HsOperatorHandler::operatorStorePresent()
+{
+#ifdef QT_EXTENSIONS
+    return m_q->operatorStorePresent();
+#else
+    return false;
+#endif
+}
+
+/*!
+ Returns Ovi Store presence value predefined in Central Repositoryicon
+ \retval true if Ovi Store should be present in toolbar
+ */
+bool HsOperatorHandler::oviStorePresent()
+{
+#ifdef QT_EXTENSIONS
+    return m_q->oviStorePresent();
+#else
+    return false;
+#endif
+}
+
+/*!
+ Returns if Operator Store should first in toolbar
+ \retval true if Operator Store should first in toolbar
+ */
+bool HsOperatorHandler::operatorStoreFirst()
+{
+#ifdef QT_EXTENSIONS
+    return m_q->operatorStoreFirst();
+#else
+    return false;
+#endif
+}
+
+/*!
+ Prepares HbAction for Operator Store
+ \param HbAction to prepare
+ \retval HbAction prepared action
+ */
+HbAction *HsOperatorHandler::prepareOperatorStoreAction(
+        HbAction *const operatorAction)
+{
+    operatorAction->setIcon(icon());
+    connect(operatorAction, SIGNAL(triggered()), this, SLOT(action()));
+    return operatorAction;
+}
 

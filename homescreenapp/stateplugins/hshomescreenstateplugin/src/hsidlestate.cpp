@@ -336,6 +336,14 @@ void HsIdleState::startPageChangeAnimation(int targetPageIndex, int duration)
     animation->disconnect(this);
     animation->setEndValue(pageLayerXPos(targetPageIndex));
     animation->setDuration(duration);
+    
+    if (abs(mDeltaX) < HSCONFIGURATION_GET(pageChangePanDistanceInPixels)) {
+        animation->setEasingCurve(HSCONFIGURATION_GET(bounceAnimationEasingCurve)); 
+    }
+    else {
+        animation->setEasingCurve(HSCONFIGURATION_GET(pageChangeAnimationEasingCurve));
+    }
+
     connect(animation,
             SIGNAL(finished()),
             SLOT(pageChangeAnimationFinished()), 

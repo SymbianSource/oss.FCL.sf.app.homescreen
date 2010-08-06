@@ -63,7 +63,8 @@ public:
 
     HbGroupBox *viewLabel() const;
 
-    void setModel(HsMenuItemModel *model);
+    void setModel(QAbstractItemModel *model);
+    QAbstractItemModel *model() const;
 
     void reset(HsOperationalContext operationalContext);
 signals:

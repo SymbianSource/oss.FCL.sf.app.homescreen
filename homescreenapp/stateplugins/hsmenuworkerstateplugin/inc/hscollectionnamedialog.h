@@ -35,9 +35,9 @@ public:
 
     virtual ~HsCollectionNameDialog();
 
-    void open(QObject* receiver, const char* member );
-    
-    QString newName(const QString &name, bool addLastName = false);
+    void open(QObject* receiver, const char* member);
+
+    QString uniqueCollectionName() const;
 
 protected:
     void closeEvent( QCloseEvent * event );
@@ -46,6 +46,10 @@ private:
     void makeConnect();
 
     void makeDisconnect();
+
+    QString suggestedCollectionName(const QString &name);
+
+    QString generateUniqueCollectionName(const QString &name) const;
 
 private slots:
 
@@ -58,13 +62,12 @@ private:
     /*
      * Collections names list from data model.
      */
-    QStringList mCollectionsNames;
+    QStringList mOtherCollectionsNames;
 
     /*
-     * Last found collection name.
+     * Already suggested names.
      */
-    QString mLastCollectionName;
-
+    QStringList mSuggestedNames;
 };
 
 #endif /* HS_INPUT_DIALOG_H */
