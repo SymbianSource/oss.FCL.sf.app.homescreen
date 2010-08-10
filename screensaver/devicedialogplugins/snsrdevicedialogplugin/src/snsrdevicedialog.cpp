@@ -315,6 +315,7 @@ void SnsrDeviceDialog::requestUnlock()
  */
 void SnsrDeviceDialog::requestScreenMode(Screensaver::ScreenPowerMode mode)
 {
+    /* TEMPORARY FIX for the "black screen jam" bug. To be re-enabled when proper fix is found.
     QVariantMap data;
     QVariantList rowLimits;
     if ( mode == Screensaver::ScreenModeOff ) {
@@ -336,6 +337,7 @@ void SnsrDeviceDialog::requestScreenMode(Screensaver::ScreenPowerMode mode)
     }
     
     emit deviceDialogData(data);
+    */
 }
 
 /*!
