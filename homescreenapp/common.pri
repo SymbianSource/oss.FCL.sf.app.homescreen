@@ -132,9 +132,7 @@ symbian {
 }
 
 symbian {
-    exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager) {
-        DEFINES += QT_EXTENSIONS
-    }
+    DEFINES += QT_EXTENSIONS
 }
 
 
