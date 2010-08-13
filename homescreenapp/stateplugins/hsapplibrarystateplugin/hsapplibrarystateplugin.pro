@@ -32,7 +32,7 @@ symbian: {
     TARGET.UID3 = 0x20022F97
     nft::LIBS += -lhal
     include(hsapplibrarystateplugin_exports_to_rom.pri)
-    exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager):LIBS += -lxqsettingsmanager
+    LIBS += -lxqsettingsmanager
 }
 exportResources(./*.qm, resource/qt/translations)
 RESOURCES = hsapplibrarystateplugin.qrc

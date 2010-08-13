@@ -29,7 +29,7 @@ symbian: {
     TARGET.CAPABILITY = CAP_ECOM_PLUGIN
     
     include(snsrdevicedialogplugin_exports_to_rom.pri)
-    exists($${EPOCROOT}epoc32/include/mw/XQSettingsManager):LIBS += -lxqsettingsmanager
+    LIBS += -lxqsettingsmanager
 
     pluginstub.sources = snsrdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs

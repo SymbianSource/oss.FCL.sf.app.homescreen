@@ -129,7 +129,7 @@ win32 {
 }
 }
 
-!exists($${EPOCROOT}epoc32/include/mw/XQSettingsManager) {
+!symbian {
     DEFINES += NO_QT_EXTENSIONS
 }
 
