@@ -80,6 +80,8 @@ public:
 
     bool configuration(QVariantHash &configuration);
 
+    bool updateWidgetZValues(const QHash<int, qreal> &data, Qt::Orientation orientation);
+
 public:
     static void setInstance(HsDatabase *instance);
     static HsDatabase *instance();

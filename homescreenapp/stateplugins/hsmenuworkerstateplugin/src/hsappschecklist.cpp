@@ -82,7 +82,7 @@
  */
 HsAppsCheckList::HsAppsCheckList() :
     mAppsSelectDialog(0), mActionConfirm(0), mListView(0), mModel(0),
-    mSortAttribute(AscendingNameHsSortAttribute)
+    mSortAttribute(Hs::AscendingNameHsSortAttribute)
 {
 }
 
@@ -105,14 +105,14 @@ void HsAppsCheckList::cleanUp()
         mAppsSelectDialog->close();
     }
 
-    mSortAttribute = AscendingNameHsSortAttribute;
+    mSortAttribute = Hs::AscendingNameHsSortAttribute;
 }
 
 /*!
  Sets sort order for applications.
  \param sortAttribute sort order.
  */
-void HsAppsCheckList::setSortOrder(HsSortAttribute sortOrder)
+void HsAppsCheckList::setSortOrder(Hs::HsSortAttribute sortOrder)
 {
     mSortAttribute = sortOrder;
 }
@@ -121,7 +121,7 @@ void HsAppsCheckList::setSortOrder(HsSortAttribute sortOrder)
  Shows check box list with all application.
  \param sortAttribute order to sort applications.
  */
-void HsAppsCheckList::showAppsCheckboxList(HsSortAttribute sortOrder)
+void HsAppsCheckList::showAppsCheckboxList(Hs::HsSortAttribute sortOrder)
 {
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::showAppsCheckboxList");
     if (!mModel) {
@@ -227,7 +227,7 @@ QList<int> HsAppsCheckList::getSortedItemsList(
     }
 
     QList<int> list = itemsMap.values();
-    if (mSortAttribute == DescendingNameHsSortAttribute) {
+    if (mSortAttribute == Hs::DescendingNameHsSortAttribute) {
         QList<int> reversedList;
         int count = list.count();
         for (int i = 0; i < count; i++) {

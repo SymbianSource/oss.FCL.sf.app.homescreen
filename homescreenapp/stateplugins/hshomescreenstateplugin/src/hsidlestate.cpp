@@ -337,7 +337,7 @@ void HsIdleState::startPageChangeAnimation(int targetPageIndex, int duration)
     animation->setEndValue(pageLayerXPos(targetPageIndex));
     animation->setDuration(duration);
     
-    if (abs(mDeltaX) < HSCONFIGURATION_GET(pageChangePanDistanceInPixels)) {
+    if (abs(mDeltaX) < HSCONFIGURATION_GET(pageChangePanDistance)) {
         animation->setEasingCurve(HSCONFIGURATION_GET(bounceAnimationEasingCurve)); 
     }
     else {
@@ -526,7 +526,7 @@ void HsIdleState::onAddContentFromContextMenuActionTriggered()
     */
     QVariant homescreenData(mPageHotSpot);
     machine()->postEvent(
-        HsMenuEventFactory::createOpenAppLibraryEvent(AddHsMenuMode, homescreenData));
+        HsMenuEventFactory::createOpenAppLibraryEvent(Hs::AddHsMenuMode, homescreenData));
     mPageHotSpot = QPointF();
 }
 
@@ -536,7 +536,7 @@ void HsIdleState::onAddContentFromContextMenuActionTriggered()
 void HsIdleState::onAddContentFromOptionsMenuActionTriggered()
 {
     machine()->postEvent(
-         HsMenuEventFactory::createOpenAppLibraryEvent(AddHsMenuMode));
+         HsMenuEventFactory::createOpenAppLibraryEvent(Hs::AddHsMenuMode));
 }
 
 /*!
@@ -657,17 +657,17 @@ void HsIdleState::onWidgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *wid
     if (HSCONFIGURATION_GET(isSnapEnabled)) {
         mSnapResult = HsWidgetPositioningOnWidgetMove::instance()->run(widget->visual()->sceneBoundingRect());
 
+        bool isTrashbinOpen = HsGui::instance()->idleWidget()->trashBin()->isUnderMouse();
+
         if (HSCONFIGURATION_GET(isSnapEffectsEnabled)) {
-            if (mSnapResult.hasHorizontalSnap) {
+            if (mSnapResult.hasHorizontalSnap && !isTrashbinOpen) {
                 showVerticalLine();
-            }
-            else {
+            } else {
                 hideVerticalLine();
             }
-            if (mSnapResult.hasVerticalSnap) {
+            if (mSnapResult.hasVerticalSnap && !isTrashbinOpen) {
                 showHorizontalLine();
-                }
-            else {
+            } else {
                 hideHorizontalLine();
             }
         }
@@ -954,9 +954,9 @@ void HsIdleState::action_moveWidget_setWidgetSnap()
     if (HSCONFIGURATION_GET(isSnapEnabled)) {
 
         QVariantHash snapConfiguration;
-        snapConfiguration[SNAPENABLED] = QString::number(HSCONFIGURATION_GET(isSnapEnabled));
-        snapConfiguration[SNAPFORCE] = QString::number(HSCONFIGURATION_GET(snapForce));
-        snapConfiguration[SNAPGAP] = QString::number(HSCONFIGURATION_GET(snapGap));
+        snapConfiguration[Hs::snapEnabled] = QString::number(HSCONFIGURATION_GET(isSnapEnabled));
+        snapConfiguration[Hs::snapForce] = QString::number(HSCONFIGURATION_GET(snapForce));
+        snapConfiguration[Hs::snapGap] = QString::number(HSCONFIGURATION_GET(snapGap));
         HsWidgetPositioningOnWidgetMove::instance()->setConfiguration(snapConfiguration);
 
         updatePagePresentationToWidgetSnap();
@@ -1126,9 +1126,9 @@ void HsIdleState::action_moveScene_moveToNearestPage()
 
     int pageIndex = HsScene::instance()->activePageIndex();
 
-    if (mDeltaX < -HSCONFIGURATION_GET(pageChangePanDistanceInPixels)) {
+    if (mDeltaX < -HSCONFIGURATION_GET(pageChangePanDistance)) {
         pageIndex = qMin(pageIndex + 1, pages.count() - 1);
-    } else if (HSCONFIGURATION_GET(pageChangePanDistanceInPixels) < mDeltaX) {
+    } else if (HSCONFIGURATION_GET(pageChangePanDistance) < mDeltaX) {
         pageIndex = qMax(pageIndex - 1, 0);
     }
 
@@ -1212,10 +1212,13 @@ void HsIdleState::action_removePage_startRemovePageAnimation()
     bool isLastPage(scene->activePage() == scene->pages().last());
     
     int nextPageIndex(pageToRemoveIndex);
-    nextPageIndex++;
+   
     if (isLastPage) {
         nextPageIndex--; 
+    } else {
+        nextPageIndex++;
     }
+
     HsPropertyAnimationWrapper *animation = HsGui::instance()->pageChangeAnimation();
     if (animation->isRunning()) {
         animation->stop();

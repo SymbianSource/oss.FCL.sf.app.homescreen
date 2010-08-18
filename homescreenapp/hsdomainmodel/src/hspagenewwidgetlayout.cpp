@@ -211,3 +211,4 @@ QList<HsWidgetHost*> HsPageNewWidgetLayout::sortWidgets(sortOrder order)
     return tmpWidgets;
 }
 #endif // HSWIDGETORGANIZER_ALGORITHM
+

@@ -16,6 +16,8 @@
  */
 
 #include <hbnamespace.h>
+#include <HbInstance>
+#include <HbStyle>
 #include <cauninstallnotifier.h>
 #include <casoftwareregistry.h>
 
@@ -24,7 +26,7 @@
 #include "hsiconsidleloader.h"
 
 // Constants
-const QSize smallIconSize(55, 55);
+const QSizeF smallIconSize(55, 55);
 
 /*!
  Constructor
@@ -35,7 +37,13 @@ HsMenuItemModel::HsMenuItemModel(const CaQuery &query, QObject *parent) :
     CaItemModel(query, parent),
     mIconsIdleLoader(NULL)
 {
-    setIconSize(smallIconSize);
+    qreal size;
+    if (hbInstance->style()->parameter(
+            QString("hb-param-graphic-size-primary-large"), size)) {
+        setIconSize(QSizeF(size, size));
+    } else {
+        setIconSize(smallIconSize);
+    }    
     mComponentId = 0;
     mUninstallNotifier = 
         CaSoftwareRegistry::create()->createUninstallNotifier();
@@ -57,7 +65,7 @@ HsMenuItemModel::~HsMenuItemModel()
  Sets sort order in the model
  */
 void HsMenuItemModel::setSort(
-    HsSortAttribute sortAttribute)
+    Hs::HsSortAttribute sortAttribute)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuItemModel::setSort");
     CaItemModel::setSort(HsMenuServiceUtils::sortBy(sortAttribute),
@@ -82,7 +90,7 @@ QVariant HsMenuItemModel::data(const QModelIndex &index,
         QList<QVariant> icons;
 
         icons << CaItemModel::data(index, role);
-        icons << HbIcon(newIconId());
+        icons << HbIcon(Hs::newIconId);
 
         variant = QVariant(icons);
     } else if (role == Hb::IndexFeedbackRole){
@@ -111,7 +119,7 @@ bool HsMenuItemModel::newIconNeeded(const QModelIndex &index) const
     bool result = false;
     if (root().isValid()
             && (!(entry(index)->flags() & UsedEntryFlag))
-            && entry(root())->entryTypeName() == collectionDownloadedTypeName()) {
+            && entry(root())->entryTypeName() == Hs::collectionDownloadedTypeName) {
         result = true;
     }
     HSMENUTEST_FUNC_EXIT("HsMenuItemModel::newIconNeeded");

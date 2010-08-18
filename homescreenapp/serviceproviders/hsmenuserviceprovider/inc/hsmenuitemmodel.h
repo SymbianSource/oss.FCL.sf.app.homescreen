@@ -46,7 +46,7 @@ public:
     explicit HsMenuItemModel(const CaQuery &query,
                              QObject *parent = 0);
     ~HsMenuItemModel();
-    void setSort(HsSortAttribute sortAttribute);
+    void setSort(Hs::HsSortAttribute sortAttribute);
     virtual QVariant data(const QModelIndex &index,
                           int role = Qt::DisplayRole) const;
     bool newIconNeeded(const QModelIndex &index) const;

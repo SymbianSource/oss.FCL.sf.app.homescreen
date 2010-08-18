@@ -44,30 +44,27 @@ public:
                    HsMainWindow &mainWindow,
                    QState *parent = 0);
     ~HsAllAppsState();
+    void scrollToBeginning();
+    void setModel(Hs::HsMenuMode menuMode);
     
 signals:
     void toAppLibraryState();
 
 private slots:
-    void addActivated(const QModelIndex &index);
-    void addLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void addToCollection();
     void openInstalledView();
     void ascendingMenuAction();
     void descendingMenuAction();
     void normalModeEntered();
-    void addModeEntered();
     void stateExited();
-    void contextMenuAction(HbAction *action);
 private:
     void construct();
     void setMenuOptions();
-    void addToHomeScreen(const QModelIndex &index);
     void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
 
 private:
     HsAddModeProxyModel *mAddModeProxyModel;
-    HsSortAttribute mSortAttribute;
+    Hs::HsSortAttribute mSortAttribute;
 };
 
 #endif // HSALLAPPSSTATE_H

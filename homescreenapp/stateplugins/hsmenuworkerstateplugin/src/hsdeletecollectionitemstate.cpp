@@ -78,8 +78,8 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    mItemId = data.value(itemIdKey()).toInt();
-    mCollectionId = data.value(collectionIdKey()).toInt();
+    mItemId = data.value(Hs::itemIdKey).toInt();
+    mCollectionId = data.value(Hs::collectionIdKey).toInt();
 
     QString message;
     message.append(

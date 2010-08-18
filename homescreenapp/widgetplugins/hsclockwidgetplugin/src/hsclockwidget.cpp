@@ -19,6 +19,7 @@
 #include <QGraphicsLinearLayout>
 
 #include "hsclockwidget.h"
+#include "hsclockwidgettimer.h"
 #include "hsanalogclockwidget.h"
 #include "hsdigitalclockwidget.h"
 
@@ -56,7 +57,6 @@ HsClockWidget::HsClockWidget(QGraphicsItem *parent, Qt::WindowFlags flags)
   : HbWidget(parent, flags),
     mWidget(0),
     mLayout(0),
-    mTimer(0),
     mClockType(ANALOG),
     mTimeType(TIME12)
 {
@@ -90,9 +90,7 @@ void HsClockWidget::onInitialize()
     mLayout = new QGraphicsLinearLayout(Qt::Vertical);
     mLayout->setContentsMargins(0, 0, 0, 0);
     mWidget = loadClockWidget();
-    mLayout->addItem(mWidget);   
-    mTimer = new QTimer(this);
-    connect(mTimer, SIGNAL(timeout()), SLOT(updateTime()));
+    mLayout->addItem(mWidget);           
     setLayout(mLayout);
 #ifdef Q_OS_SYMBIAN  
     connect(mClockSettingsNotifier, SIGNAL(settingsChanged(QString, QString)), this, SLOT(onSettingsChanged(QString, QString)));
@@ -105,7 +103,11 @@ void HsClockWidget::onInitialize()
 */
 void HsClockWidget::onShow()
 {    
-    mTimer->start(clockUpdateInterval);
+    HsClockWidgetTimer::instance();
+    connect(HsClockWidgetTimer::instance(), 
+        SIGNAL(tick()), 
+        SLOT(updateTime()), 
+        Qt::UniqueConnection);
 }
 
 
@@ -114,7 +116,7 @@ void HsClockWidget::onShow()
 */
 void HsClockWidget::onHide()
 {
-    mTimer->stop();
+    HsClockWidgetTimer::instance()->disconnect(this);
 }
 
 /*!
@@ -122,7 +124,7 @@ void HsClockWidget::onHide()
 */
 void HsClockWidget::onUninitialize()
 {
-    mTimer->stop();
+    HsClockWidgetTimer::instance()->disconnect(this);
 }
 
 /*!

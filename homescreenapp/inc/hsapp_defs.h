@@ -15,87 +15,97 @@
  *
  */
 
-#ifndef HSAPP_DEFS_H_
-#define HSAPP_DEFS_H_
-#include <qstring.h>
+#ifndef HSAPP_DEFS_H
+#define HSAPP_DEFS_H
 
-inline const QString widgetLibraryAttributeName();
-inline const QString widgetUriAttributeName();
-inline const QString applicationTypeName();
-inline const QString urlTypeName();
-inline const QString collectionTypeName();
-inline const QString collectionDownloadedTypeName();
-inline const QString menuCollectionsTypeName();
-inline const QString widgetTypeName();
-inline const QString templatedApplicationTypeName();
-inline const QString widgetParam();
-inline const QString openActionIdentifier();
-inline const QString removeActionIdentifier();
-inline const QString itemIdKey();
-inline const QString collectionIdKey();
-inline const QString collectionSortOrderKey();
-inline const QString appSortOrderKey();
-inline const QString entryTypeNameKey();
-inline const QString applicationUidEntryKey();
-inline const QString urlEntryKey();
-inline const QString defaultCollectionIconId();
-inline const QString menuModeType();
-inline const QString swTypeKey();
-inline const QString javaSwType();
-static const char *const HS_CWRT_APP_TYPE="cwrt";
-static const char *const HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE="wrtwidgetuiplugin";
-inline const QString packageTypeName();
-inline const QString appSettingsPlugin();
-inline const QString groupNameAttributeName();
-inline const QString componentIdAttributeName();
-inline const QString entryShortName();
+namespace Hs {
+    const char widgetPathAttributeName[] = "widget:path";
+    const char widgetLibraryAttributeName[] = "widget:library";
+    const char widgetUriAttributeName[] = "widget:uri";
+    const char applicationTypeName[] = "application";
+    const char urlTypeName[] = "url";
+    const char collectionTypeName[] = "collection";
+    const char collectionDownloadedTypeName[] = "collection::downloaded";
+    const char menuCollectionsTypeName[] = "menucollections";
+    const char widgetTypeName[] = "widget";
+    const char templatedApplicationTypeName[] = "templatedApplication";
+    const char widgetParam[] = "widgetparam:";
+    const char openActionIdentifier[] = "open";
+    const char removeActionIdentifier[] = "remove";
+    const char itemIdKey[] = "item_id";
+    const char collectionIdKey[] = "collection_id";
+    const char collectionSortOrderKey[] = "collection_sort_order";
+    const char appSortOrderKey[] = "app_sort_order";
+    const char entryTypeNameKey[] = "entry_type_name";
+    const char applicationUidEntryKey[] = "application:uid";
+    const char urlEntryKey[] = "url";
+    const char defaultCollectionIconId[] = "qtg_large_applications_user";
+    const char newIconId[] = "qtg_small_new_event";
+    const char menuModeType[] = "menu_mode_type";
+    const char swTypeKey[] = "apptype";
+    const char javaSwType[] = "java";
+    static const char *const HS_CWRT_APP_TYPE="cwrt";
+    static const char *const HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE=
+        "wrtwidgetuiplugin";
+    const char packageTypeName[] = "package";
+    const char appSettingsPlugin[] = "app_settings_plugin";
+    const char groupNameAttributeName[] = "appgroup_name";
+    const char groupAppLibRecentView[] = "AppLibRecentView";
+    const char componentIdAttributeName[] = "component_id";
+    const char entryShortName[] = "short_name";
+    
+    const char translationFilename[] = "widget:translation_file";
+    const char activityHsIdleView[] = "HsIdleView";
+    const char activityAppLibMainView[] = "AppLibMainView";
+    
 
-// Sort attribute
-enum HsSortAttribute {
-    NoHsSortAttribute,
-    AscendingNameHsSortAttribute,
-    DescendingNameHsSortAttribute,
-    LatestOnTopHsSortAttribute,
-    OldestOnTopHsSortAttribute,
-    CustomHsSortAttribute
-};
+    const char tsDeviceDialogUri[] = 
+        "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
 
-enum HsMenuMode {
-    NormalHsMenuMode,
-    AddHsMenuMode
-};
+    const char library[] = "library";
+    const char uri[] = "uri";
+    const char preferences[] = "preferences";
+    const char homescreenData[] = "homescreenData";
 
-enum HsContextAction {
-    AddToHomeScreenContextAction = 1,
-    AddToCollectionContextAction,    
-    UninstallContextAction, 
-    AppSettingContextAction,
-    RenameContextAction, 
-    DeleteContextAction, 
-    RemoveFromCollectionContextAction,
-    AppDetailsContextAction,
-    OpenContextAction
-};
+    const char snapEnabled[] = "snapenabled";
+    const char snapForce[] = "snapforce";
+    const char snapGap[] = "snapgap";
+    const char pageMargin[] = "pagemargin";
+    const char snapLineFadeinDuration[] = "snaplinefadeinduration";
+    const char snapLineFadeoutDuration[] = "snaplinefadeoutduration";
 
+    const int softwareUpdateApplicationUid  = 0x2001FE2F;
+    const int oviLauncherApplicationUid  = 0x2002D07F;
 
-const char TS_DEVICE_DIALOG_URI[] = 
-    "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
+    // Sort attribute
+    enum HsSortAttribute {
+        NoHsSortAttribute,
+        AscendingNameHsSortAttribute,
+        DescendingNameHsSortAttribute,
+        LatestOnTopHsSortAttribute,
+        OldestOnTopHsSortAttribute,
+        CustomHsSortAttribute
+    };
+    
+    enum HsMenuMode {
+        NormalHsMenuMode,
+        AddHsMenuMode
+    };
+    
+    enum HsContextAction {
+        AddToHomeScreenContextAction = 1,
+        AddToCollectionFromApplicationsViewContextAction,
+        AddToCollectionFromCollectionViewContextAction,
+        UninstallContextAction, 
+        AppSettingContextAction,
+        RemoveFromCollectionContextAction,
+        AppDetailsContextAction,
+        OpenAppContextAction,
+        OpenCollectionContextAction,
+        DeleteCollectionContextAction,
+        RenameCollectionContextAction
+    };
 
-const char LIBRARY[] = "library";
-const char URI[] = "uri";
-const char PREFERENCES[] = "preferences";
-const char HOMESCREENDATA[] = "homescreenData";
+} // namespace Hs
 
-const char SNAPENABLED[] = "snapenabled";
-const char SNAPFORCE[] = "snapforce";
-const char SNAPGAP[] = "snapgap";
-const char PAGEMARGIN[] = "pagemargin";
-const char SNAPLINEFADEINDURATION[] = "snaplinefadeinduration";
-const char SNAPLINEFADEOUTDURATION[] = "snaplinefadeoutduration";
-
-const int softwareUpdateApplicationUid  = 0x2001FE2F;
-const int oviLauncherApplicationUid  = 0x2002D07F;
-
-#include "hsapp_defs.inl"
-
-#endif
+#endif // HSAPP_DEFS_H

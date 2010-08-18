@@ -174,7 +174,7 @@ HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
     QState(parent), mCollectionName(), mCollectionId(0), mAppList(),
     mShowConfirmation(0), mInitialState(0), mSelectCollectionState(0),
     mNewCollectionState(0), mAppsCheckListState(0), mActionType(
-        NoActionType), mApplicationsSortAttribute(NoHsSortAttribute),
+        NoActionType), mApplicationsSortAttribute(Hs::NoHsSortAttribute),
     mAppsCheckList(0), mEditorDialog(0), mListDialog(0), mModel(0)
 {
     construct();
@@ -284,6 +284,7 @@ void HsAddAppsToCollectionState::save()
     //Adds applications to colection.
     if ((mCollectionId > 0) && mAppList.count()) {
         HsMenuService::addApplicationsToCollection(mAppList, mCollectionId);
+        HsMenuService::touch(mAppList);
         if (mShowConfirmation) {
             showMessageAppsAdded(mCollectionId);
         }
@@ -319,25 +320,25 @@ void HsAddAppsToCollectionState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    mApplicationsSortAttribute = static_cast<HsSortAttribute>(data.value(
-                                     appSortOrderKey()).toInt());
+    mApplicationsSortAttribute = static_cast<Hs::HsSortAttribute>(data.value(
+                                     Hs::appSortOrderKey).toInt());
 
-    const int itemId = data.value(itemIdKey()).toInt();
-    mCollectionId = data.value(collectionIdKey()).toInt();
+    const int itemId = data.value(Hs::itemIdKey).toInt();
+    mCollectionId = data.value(Hs::collectionIdKey).toInt();
 
     if (itemId) {
         //add selected app item from allAppView or collectionView
         mAppList.append(itemId);
         mInitialState->addTransition(mSelectCollectionState);
         mShowConfirmation = true;
-    } else if (mApplicationsSortAttribute != NoHsSortAttribute) {
+    } else if (mApplicationsSortAttribute != Hs::NoHsSortAttribute) {
         //add apps from allAppView options menu
         mActionType = ViaAllViewOptionMenuType;
         mInitialState->addTransition(mAppsCheckListState);
         mShowConfirmation = true;
     } else if (mCollectionId) {
         //add apps from collectionView options menu
-        mApplicationsSortAttribute = AscendingNameHsSortAttribute;
+        mApplicationsSortAttribute = Hs::AscendingNameHsSortAttribute;
         mInitialState->addTransition(mAppsCheckListState);
     }
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::onEntry");
@@ -480,12 +481,13 @@ void HsAddAppsToCollectionState::listDialogFinished(HbAction* finishedAction)
 void HsAddAppsToCollectionState::collectionSelected(
         const QModelIndex &modelIndex)
 {
-    int selectedCollection = mModel->data(
-            modelIndex, CaItemModel::IdRole).toInt();
-    mListDialog->close();
-    
-    qDebug("emit collectionSelected(%d)", selectedCollection);
-    emit transitToSaveState(selectedCollection);
+    if (mListDialog) {
+        int selectedCollection = mModel->data(
+                modelIndex, CaItemModel::IdRole).toInt();
+        mListDialog->close();
+        qDebug("emit collectionSelected(%d)", selectedCollection);
+        emit transitToSaveState(selectedCollection);
+    }
 }
 
 /*!

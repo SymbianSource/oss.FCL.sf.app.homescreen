@@ -47,9 +47,9 @@ public:
 protected:
     void onEntry(QEvent *event);
 signals:
-    void sortOrderChanged(HsSortAttribute sortAttribute);
+    void sortOrderChanged(Hs::HsSortAttribute sortAttribute);
 private slots:
-    void addAppsAction(bool addApps = true);
+    void addAppsAction();
     void addCollectionShortcutToHomeScreenAction();
     void renameAction();
     void deleteAction();
@@ -69,12 +69,11 @@ private:
     void constructMenu(bool isDynamic);
     void makeConnect();
     void makeDisconnect();
-    void addElementToHomeScreen(const QModelIndex &index);
     void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
     void setMenuOptions();
 
 private:
-    HsSortAttribute mSortAttribute;
+    Hs::HsSortAttribute mSortAttribute;
     int mCollectionId;
     QString mCollectionType;
 };

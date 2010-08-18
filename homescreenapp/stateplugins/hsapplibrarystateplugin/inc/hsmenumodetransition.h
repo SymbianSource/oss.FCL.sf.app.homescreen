@@ -30,7 +30,7 @@ class HsMenuModeTransition: public QAbstractTransition
 public:
 
     HsMenuModeTransition(
-        HsMenuModeWrapper &menuMode, HsMenuMode expectedMode, QState *target);
+        HsMenuModeWrapper &menuMode, Hs::HsMenuMode expectedMode, QState *target);
 
     bool eventTest(QEvent *event);
 
@@ -39,7 +39,7 @@ public:
 private:
 
     HsMenuModeWrapper &mMenuMode;
-    const HsMenuMode mExpectedMenuMode;
+    const Hs::HsMenuMode mExpectedMenuMode;
 };
 
 #endif //HSMENUMODETRANSITION_H

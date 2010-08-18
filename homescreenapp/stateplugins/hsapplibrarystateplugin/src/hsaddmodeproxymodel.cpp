@@ -68,11 +68,11 @@ HsAddModeProxyModel::~HsAddModeProxyModel()
 void HsAddModeProxyModel::initilizeCwrtWidgetCache()
 {
     QStringList entryTypeNames;
-    entryTypeNames.append(applicationTypeName());
+    entryTypeNames.append(Hs::applicationTypeName);
     mQuery.setEntryTypeNames(entryTypeNames);
-    mQuery.setAttribute(swTypeKey(), HS_CWRT_APP_TYPE);
-    mQuery.setAttribute(widgetUriAttributeName(),
-                       HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE);
+    mQuery.setAttribute(Hs::swTypeKey, Hs::HS_CWRT_APP_TYPE);
+    mQuery.setAttribute(Hs::widgetUriAttributeName,
+                       Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE);
     QList< QSharedPointer<CaEntry> > entries =
             CaService::instance()->getEntries(mQuery);
     foreach (QSharedPointer<CaEntry> entry, entries) {
@@ -83,16 +83,33 @@ void HsAddModeProxyModel::initilizeCwrtWidgetCache()
             i.next();
             QString key(i.key());
             QString value(i.value());
-            if (key.contains(widgetParam())) {
-                preferences.insert(key.remove(widgetParam()),value);
+            if (key.contains(Hs::widgetParam)) {
+                preferences.insert(key.remove(Hs::widgetParam),value);
             }
         }
         int count(0);
         HsContentService::instance()->widgets(
-                HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE,preferences,count);
+                Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE,preferences,count);
         mCwrtWidgetCache.insert(entry->id(), count > 0);
     }
 
+}
+
+/*
+ Reimplementated from QSortFilterProxyModel to forward signals from CaItemModel.
+ \param sourceModel source model.
+ */
+void HsAddModeProxyModel::setSourceModel(QAbstractItemModel *sourceModel)
+{
+    QSortFilterProxyModel::setSourceModel(sourceModel);
+    connect(sourceModel,
+            SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
+            this,
+            SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)));
+    connect(sourceModel,
+            SIGNAL(countChange()),
+            this,
+            SIGNAL(countChange()));
 }
 
 /*!
@@ -107,11 +124,11 @@ int HsAddModeProxyModel::findCwrtWidgetEntryId(const QVariantHash &preferences)
     CaQuery query;
     QStringList entryTypeNames;
     query.setEntryTypeNames(entryTypeNames);
-    query.setAttribute(swTypeKey(), HS_CWRT_APP_TYPE);
-    query.setAttribute(widgetUriAttributeName(),
-            HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE);
+    query.setAttribute(Hs::swTypeKey, Hs::HS_CWRT_APP_TYPE);
+    query.setAttribute(Hs::widgetUriAttributeName,
+            Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE);
     foreach (QString key, preferences.keys()) {
-        query.setAttribute(widgetParam()+key,
+        query.setAttribute(Hs::widgetParam+key,
             preferences.value(key).toString());
     }
     QList< QSharedPointer<CaEntry> > entries =
@@ -131,7 +148,7 @@ int HsAddModeProxyModel::findCwrtWidgetEntryId(const QVariantHash &preferences)
  */
 void HsAddModeProxyModel::updateCacheOnAddWidget(const QString &uri,
     const QVariantHash &preferences){
-	if (uri == HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
+	if (uri == Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
         int entryId = findCwrtWidgetEntryId(preferences);
         if (!mCwrtWidgetCache.value(entryId) ) {
             mCwrtWidgetCache.insert(entryId,true);
@@ -149,7 +166,7 @@ void HsAddModeProxyModel::updateCacheOnAddWidget(const QString &uri,
 void HsAddModeProxyModel::updateCacheOnRemoveWidget(const QString &uri,
     const QVariantHash &preferences)
 {
-    if (uri == HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
+    if (uri == Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
         int entryId = findCwrtWidgetEntryId(preferences);
         if (mCwrtWidgetCache.value(entryId)) {
             mCwrtWidgetCache.insert(entryId,false);
@@ -186,3 +203,4 @@ void HsAddModeProxyModel::updateEntryStatus(const CaEntry &entry, ChangeType cha
             HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(&entry));
     }
 }
+

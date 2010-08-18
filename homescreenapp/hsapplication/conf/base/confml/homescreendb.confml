@@ -79,28 +79,24 @@
       <Pages><id>2</id><indexPosition>1</indexPosition></Pages>
       <Pages><id>3</id><indexPosition>2</indexPosition></Pages>
       <Configuration><key>bounceEffect</key><value>20</value></Configuration>
-      <Configuration><key>widgetTapAndHoldTimeout</key><value>500</value></Configuration>
-      <Configuration><key>sceneTapAndHoldTimeout</key><value>500</value></Configuration>
-      <Configuration><key>pageChangeAnimationDuration</key><value>200</value></Configuration>
-      <Configuration><key>pageChangeZoneAnimationDuration</key><value>800</value></Configuration>
+      <Configuration><key>pageChangeAnimationDuration</key><value>300</value></Configuration>
+      <Configuration><key>pageChangeZoneAnimationDuration</key><value>600</value></Configuration>
       <Configuration><key>pageChangeZoneReverseAnimationDuration</key><value>200</value></Configuration>
-      <Configuration><key>pageRemovedAnimationDuration</key><value>200</value></Configuration>
-      <Configuration><key>newPageAddedAnimationDuration</key><value>200</value></Configuration>
-      <Configuration><key>widgetDragEffectDuration</key><value>200</value></Configuration>
+      <Configuration><key>pageRemovedAnimationDuration</key><value>1000</value></Configuration>
+      <Configuration><key>newPageAddedAnimationDuration</key><value>1000</value></Configuration>
+      <Configuration><key>widgetDragEffectDuration</key><value>250</value></Configuration>
       <Configuration><key>widgetDropEffectDuration</key><value>200</value></Configuration>
       <Configuration><key>defaultPageId</key><value>1</value></Configuration>
       <Configuration><key>maximumPageCount</key><value>8</value></Configuration>
       <Configuration><key>isShortcutLabelVisible</key><value>true</value></Configuration>
-      <Configuration><key>bounceFeedbackEffectDistance</key><value>3</value></Configuration>
-      <Configuration><key>pageChangePanDistanceInPixels</key><value>120</value></Configuration>
-      <Configuration><key>tapAndHoldDistance</key><value>16</value></Configuration>
-      <Configuration><key>pageChangeZoneWidth</key><value>60</value></Configuration>
+      <Configuration><key>bounceFeedbackEffectDistance</key><value>30</value></Configuration>
+      <Configuration><key>pageChangeZoneWidth</key><value>30</value></Configuration>
       <Configuration><key>pageIndicatorSpacing</key><value>8</value></Configuration>
       <Configuration><key>maximumWidgetHeight</key><value>39</value></Configuration>
       <Configuration><key>maximumWidgetWidth</key><value>48</value></Configuration>
       <Configuration><key>minimumWidgetHeight</key><value>8.75</value></Configuration>
       <Configuration><key>minimumWidgetWidth</key><value>8.75</value></Configuration>
-      <Configuration><key>pageChangePanDistance</key><value>17.91</value></Configuration>
+      <Configuration><key>pageChangePanDistance</key><value>120</value></Configuration>
       <Configuration><key>pageChangeFeedbackEffect</key><value>Sensitive</value></Configuration>
       <Configuration><key>widgetPickFeedbackEffect</key><value>ItemPick</value></Configuration>
       <Configuration><key>widgetDropFeedbackEffect</key><value>ItemDrop</value></Configuration>
@@ -112,11 +108,11 @@
       <Configuration><key>clockWidgetTapFeedbackEffect</key><value>BasicItem</value></Configuration>
       <Configuration><key>widgetSnappingFeedbackEffect</key><value>ItemMoveOver</value></Configuration>
       <Configuration><key>isSnapEnabled</key><value>true</value></Configuration>
-      <Configuration><key>snapTimeout</key><value>100</value></Configuration>
+      <Configuration><key>snapTimeout</key><value>300</value></Configuration>
       <Configuration><key>snapForce</key><value>30</value></Configuration>
       <Configuration><key>snapGap</key><value>6</value></Configuration>
       <Configuration><key>pageMargin</key><value>0</value></Configuration>
-      <Configuration><key>snapLineFadeInDuration</key><value>200</value></Configuration>
+      <Configuration><key>snapLineFadeInDuration</key><value>100</value></Configuration>
       <Configuration><key>snapLineFadeOutDuration</key><value>100</value></Configuration>
       <Configuration><key>isSnapEffectsEnabled</key><value>true</value></Configuration>
       <Configuration><key>sceneType</key><value>PageWallpapers</value></Configuration>

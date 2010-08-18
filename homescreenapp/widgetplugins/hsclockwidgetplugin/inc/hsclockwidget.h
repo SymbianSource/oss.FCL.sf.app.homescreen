@@ -55,8 +55,7 @@ private:
 
 private:
     HbWidget *mWidget;
-    QGraphicsLinearLayout *mLayout;
-    QTimer *mTimer;
+    QGraphicsLinearLayout *mLayout;    
     QString mClockType;
     QString mTimeType;        
 #ifdef Q_OS_SYMBIAN

@@ -51,18 +51,17 @@ private slots:
 
     void openInstallationLog();
     void stateEntered();
-
     void stateExited();
-
     void setEmptyLabelVisibility(bool visibility);
-
-    void contextMenuAction(HbAction *action);
-
+    void latestOnTopMenuAction();
+    void oldestOnTopMenuAction();
+    
 private:
 
     void construct();
     void setMenuOptions();
     void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
+    Hs::HsSortAttribute mSortAttribute;
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H

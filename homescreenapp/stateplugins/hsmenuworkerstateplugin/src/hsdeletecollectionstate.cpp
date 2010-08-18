@@ -79,7 +79,7 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
 
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
-    mItemId = data.value(itemIdKey()).toInt();
+    mItemId = data.value(Hs::itemIdKey).toInt();
 
     QString message;
     if (HsShortcutService::instance()->isItemShortcutWidget(mItemId)) {

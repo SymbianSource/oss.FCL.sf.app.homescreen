@@ -80,7 +80,7 @@ QString HsMenuCollectionsItemModel::getSecondLine(const CaEntry *entry) const
     query.setParentId(entry->id());
     query.setEntryRoles(ItemEntryRole);
 
-    if (entry->entryTypeName() == collectionDownloadedTypeName()) {
+    if (entry->entryTypeName() == Hs::collectionDownloadedTypeName) {
         query.setFlagsOn(RemovableEntryFlag | VisibleEntryFlag);
     } else {
         query.setFlagsOn(VisibleEntryFlag);
@@ -95,7 +95,7 @@ QString HsMenuCollectionsItemModel::getSecondLine(const CaEntry *entry) const
     }//if
     else {
         int count(0);
-        if (entry->entryTypeName() == collectionDownloadedTypeName()) {
+        if (entry->entryTypeName() == Hs::collectionDownloadedTypeName) {
             for (int i = 0; i < entries.count(); ++i) {
                 if ((entries[i]->flags() & UsedEntryFlag) != UsedEntryFlag) {
                     count++;

@@ -80,9 +80,14 @@ void HsRecoveryManager::restoreRomDatabase()
     }          
     // Copy the rom database to c: and set permissions.
     file.setFileName("z:/private/20022f35/homescreen.db");     
-    file.copy("c:/private/20022f35/homescreen.db");
-    file.setFileName("c:/private/20022f35/homescreen.db");
-    file.setPermissions(QFile::ReadOwner | QFile::WriteOwner);
+    if (!file.copy("c:/private/20022f35/homescreen.db")) {
+        qDebug() << "copying of homescreen.db to c: drive failed";
+    } else {
+        file.setFileName("c:/private/20022f35/homescreen.db");
+        if (!file.setPermissions(QFile::ReadOwner | QFile::WriteOwner)) {
+            qDebug() << "setPermissions of homescreen.db failed";
+        }
+    }
 }
 
 /*!

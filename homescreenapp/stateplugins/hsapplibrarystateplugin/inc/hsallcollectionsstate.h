@@ -47,14 +47,11 @@ signals:
     void toAppLibraryState();
 
 private slots:
-    void addActivated(const QModelIndex &index);
-    void addLongPressed(HbAbstractViewItem *item, const QPointF &coords);
     void createNewCollection();
     void createArrangeCollection();
     void normalModeEntered();
     void normalModeExited();
     void stateExited();
-    void contextMenuAction(HbAction *action);
 private:
     void construct();
     void setMenuOptions();

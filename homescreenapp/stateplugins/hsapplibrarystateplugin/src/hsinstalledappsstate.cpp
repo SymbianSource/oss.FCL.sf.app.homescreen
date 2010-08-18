@@ -51,7 +51,8 @@
 HsInstalledAppsState::HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
         HsMainWindow &mainWindow,
         QState *parent):
-    HsBaseViewState(mainWindow, parent)
+    HsBaseViewState(mainWindow, parent),
+            mSortAttribute(Hs::OldestOnTopHsSortAttribute)
 {
     initialize(menuViewBuilder, HsInstalledAppsContext);
     construct();
@@ -86,7 +87,33 @@ void HsInstalledAppsState::setMenuOptions()
                         this, SLOT(openTaskSwitcher()));
     mViewOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
                         this, SLOT(openInstallationLog()));
-
+    if (mModel->rowCount() > 0) {
+        HbMenu *sortMenu = mViewOptions->addMenu(
+                               hbTrId("txt_applib_opt_sort_by"));
+        //Grouped options are exclusive by default.
+        QActionGroup *sortGroup = new QActionGroup(this);
+        sortGroup->addAction(
+            sortMenu->addAction(
+                hbTrId("txt_applib_opt_sort_by_sub_latest_on_top"),
+                this,
+                SLOT(latestOnTopMenuAction())));
+        sortGroup->addAction(
+            sortMenu->addAction(
+                hbTrId("txt_applib_opt_sort_by_sub_oldest_on_top"),
+                this,
+                SLOT(oldestOnTopMenuAction())));
+        foreach(QAction *action, sortMenu->actions()) {
+            action->setCheckable(true);
+        }
+        static const int defaultSortingPosition = 0;
+        if(mSortAttribute == Hs::LatestOnTopHsSortAttribute)
+            {
+            sortGroup->actions().at(defaultSortingPosition + 1)->setChecked(true);
+            }
+        else {
+            sortGroup->actions().at(defaultSortingPosition)->setChecked(true);
+        }
+    }
     mMenuView->view()->setMenu(mViewOptions);
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::setMenuOptions");
 }
@@ -101,15 +128,15 @@ void HsInstalledAppsState::setContextMenuOptions(HbAbstractViewItem *item, Entry
     HbAction *uninstallAction = mContextMenu->addAction(
                                 hbTrId("txt_common_menu_delete"));
     HbAction *appDetailsAction(NULL);
-    uninstallAction->setData(UninstallContextAction);
+    uninstallAction->setData(Hs::UninstallContextAction);
 
     QSharedPointer<const CaEntry> entry = mModel->entry(item->modelIndex());
 
-    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
+    if (!(entry->attribute(Hs::componentIdAttributeName).isEmpty()) &&
             (flags & RemovableEntryFlag) ) {
         appDetailsAction = mContextMenu->addAction(hbTrId(
                                                 "txt_common_menu_details"));
-        appDetailsAction->setData(AppDetailsContextAction);
+        appDetailsAction->setData(Hs::AppDetailsContextAction);
     }
 }
 
@@ -137,7 +164,7 @@ void HsInstalledAppsState::stateEntered()
 
     if (!mModel) {
         mModel
-            = HsMenuService::getInstalledModel(AscendingNameHsSortAttribute);
+            = HsMenuService::getInstalledModel(mSortAttribute);
     }
 
     if (mModel->rowCount() == 0) {
@@ -196,6 +223,7 @@ void HsInstalledAppsState::setEmptyLabelVisibility(bool visibility)
         mMenuView->reset(HsItemViewContext);
         mMenuView->setModel(mModel);
     }
+    setMenuOptions();
     mMenuView->activate();
 }
 
@@ -209,28 +237,25 @@ void HsInstalledAppsState::openInstallationLog()
 }
 
 /*!
- Handles context menu actions.
- \param action to handle.
+  A Slot called when an action for sorting (latest
+  on top) is invoked for Installed.
  */
-void HsInstalledAppsState::contextMenuAction(HbAction *action)
+void HsInstalledAppsState::latestOnTopMenuAction()
 {
-    HsContextAction command =
-            static_cast<HsContextAction>(action->data().toInt());
+    // as we geting already reversed list from query
+    // we set it to OldestOnTopHsSortAttribute
+    mSortAttribute = Hs::OldestOnTopHsSortAttribute;
+    mModel->setSort(mSortAttribute);
+}
 
-    const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
-
-    switch (command) {
-        case UninstallContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createUninstallApplicationEvent(
-                    itemId));
-            break;
-        case AppDetailsContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAppDetailsViewEvent(itemId));
-            break;
-        default:
-            break;
-    }
-    mMenuView->hideSearchPanel();
+/*!
+  A Slot called when an action for sorting (oldest
+  on top) is invoked for Installed.
+ */
+void HsInstalledAppsState::oldestOnTopMenuAction()
+{
+    // as we geting already reversed list from query
+    // we set it to LatestOnTopHsSortAttribute
+    mSortAttribute = Hs::LatestOnTopHsSortAttribute;
+    mModel->setSort(mSortAttribute);
 }

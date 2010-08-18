@@ -32,14 +32,14 @@
    Constructor.
  */
 
-HsMenuModeWrapper::HsMenuModeWrapper(): mMode(NormalHsMenuMode)
+HsMenuModeWrapper::HsMenuModeWrapper(): mMode(Hs::NormalHsMenuMode)
 {
 }
     
 /*!
     \return homescreen mode (add mode on / add mode off) set on the object
  */
-HsMenuMode HsMenuModeWrapper::getHsMenuMode() const
+Hs::HsMenuMode HsMenuModeWrapper::getHsMenuMode() const
 {
     return mMode;
 }
@@ -55,7 +55,7 @@ QVariant HsMenuModeWrapper::getHsToken() const
 /*!
     \return sets in the object homescreen mode (add mode on / add mode off)
  */
-void HsMenuModeWrapper::setHsMenuMode(HsMenuMode menuMode, QVariant token) 
+void HsMenuModeWrapper::setHsMenuMode(Hs::HsMenuMode menuMode, QVariant token) 
 {
     mMode = menuMode;
     mToken = token;

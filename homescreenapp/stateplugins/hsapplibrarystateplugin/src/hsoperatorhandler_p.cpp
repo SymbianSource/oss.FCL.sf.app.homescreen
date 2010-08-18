@@ -147,9 +147,9 @@ CaEntry *HsOperatorHandlerPrivate::createAppEntry(
             crManager, OperatorStoreApplication, XQSettingsManager::TypeString);
     if (!variant.isNull()) {
         CaEntry *operatorEntry = new CaEntry;
-        operatorEntry->setEntryTypeName(applicationTypeName());
+        operatorEntry->setEntryTypeName(Hs::applicationTypeName);
         operatorEntry->setAttribute(
-            applicationUidEntryKey(), variant.toString());
+            Hs::applicationUidEntryKey, variant.toString());
 
         return operatorEntry;
     }
@@ -168,8 +168,8 @@ CaEntry *HsOperatorHandlerPrivate::createUrlEntry(
             crManager, OperatorStoreURL, XQSettingsManager::TypeString);
     if (!variant.isNull()) {
         CaEntry *operatorEntry = new CaEntry;
-        operatorEntry->setEntryTypeName(urlTypeName());
-        operatorEntry->setAttribute(urlEntryKey(), variant.toString());
+        operatorEntry->setEntryTypeName(Hs::urlTypeName);
+        operatorEntry->setAttribute(Hs::urlEntryKey, variant.toString());
 
         return operatorEntry;
     }

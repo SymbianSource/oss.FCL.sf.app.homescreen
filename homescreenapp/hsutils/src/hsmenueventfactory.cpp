@@ -46,14 +46,14 @@
 */
 QEvent *HsMenuEventFactory::createAddToHomeScreenEvent(
     int entryId,
-	HsMenuMode menuMode,
+	Hs::HsMenuMode menuMode,
     QVariant homescreenData)
 {
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
-    params.insert(itemIdKey(), entryId);
-    params.insert(menuModeType(), menuMode);
-    params.insert(HOMESCREENDATA, homescreenData);
+    params.insert(Hs::itemIdKey, entryId);
+    params.insert(Hs::menuModeType, menuMode);
+    params.insert(Hs::homescreenData, homescreenData);
     return new HsMenuEvent(HsMenuEvent::AddToHomeScreen, params);
 }
 
@@ -68,8 +68,8 @@ QEvent *HsMenuEventFactory::createOpenCollectionEvent(int itemId,
         const QString &collectionType)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), itemId);
-    params.insert(entryTypeNameKey(), collectionType);
+    params.insert(Hs::itemIdKey, itemId);
+    params.insert(Hs::entryTypeNameKey, collectionType);
     return new HsMenuEvent(HsMenuEvent::OpenCollection, params);
 }
 
@@ -84,8 +84,8 @@ QEvent *HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(int itemId,
         const QString &collectionType)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), itemId);
-    params.insert(entryTypeNameKey(), collectionType);
+    params.insert(Hs::itemIdKey, itemId);
+    params.insert(Hs::entryTypeNameKey, collectionType);
     return new HsMenuEvent(HsMenuEvent::OpenCollectionFromAppLibrary, params);
 }
 
@@ -98,7 +98,7 @@ QEvent *HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(int itemId,
 QEvent *HsMenuEventFactory::createRenameCollectionEvent(int aItemId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aItemId);
+    params.insert(Hs::itemIdKey, aItemId);
     return new HsMenuEvent(HsMenuEvent::RenameCollection, params);
 }
 
@@ -110,7 +110,7 @@ QEvent *HsMenuEventFactory::createRenameCollectionEvent(int aItemId)
 QEvent *HsMenuEventFactory::createNewCollectionEvent()
 {
     QVariantMap params;
-    params.insert(itemIdKey(), 0);
+    params.insert(Hs::itemIdKey, 0);
     return new HsMenuEvent(HsMenuEvent::CreateCollection, params);
 }
 
@@ -123,7 +123,7 @@ QEvent *HsMenuEventFactory::createNewCollectionEvent()
 QEvent *HsMenuEventFactory::createDeleteCollectionEvent(int aItemId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aItemId);
+    params.insert(Hs::itemIdKey, aItemId);
     return new HsMenuEvent(HsMenuEvent::DeleteCollection, params);
 }
 
@@ -134,12 +134,12 @@ QEvent *HsMenuEventFactory::createDeleteCollectionEvent(int aItemId)
     \return Open Applications Library event.
  */
 QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(
-    HsMenuMode menuMode,
+    Hs::HsMenuMode menuMode,
 	QVariant homescreenData)
 {
     QVariantMap params;
-    params.insert(menuModeType(), menuMode);
-    params.insert(HOMESCREENDATA, homescreenData);
+    params.insert(Hs::menuModeType, menuMode);
+    params.insert(Hs::homescreenData, homescreenData);
     return new HsMenuEvent(HsMenuEvent::OpenApplicationLibrary, params);
 }
 
@@ -181,12 +181,12 @@ QEvent *HsMenuEventFactory::createCollectionDeletedEvent()
     \return Add applications to collection event.
  */
 QEvent *HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
-    HsSortAttribute aApplicationsSortOder,
+    Hs::HsSortAttribute aApplicationsSortOder,
     int aItemId)
 {
     QVariantMap params;
-    params.insert(appSortOrderKey(), aApplicationsSortOder);
-    params.insert(itemIdKey(), aItemId);
+    params.insert(Hs::appSortOrderKey, aApplicationsSortOder);
+    params.insert(Hs::itemIdKey, aItemId);
     return  new HsMenuEvent(HsMenuEvent::AddAppsToCollection, params);
 }
 
@@ -202,8 +202,8 @@ QEvent *HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
     int aApplicationId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aApplicationId);
-    params.insert(collectionIdKey(), aCollectionId);
+    params.insert(Hs::itemIdKey, aApplicationId);
+    params.insert(Hs::collectionIdKey, aCollectionId);
     return new HsMenuEvent(HsMenuEvent::AddAppsToCollection, params);
 }
 
@@ -218,8 +218,8 @@ QEvent *HsMenuEventFactory::createRemoveAppFromCollectionEvent(int aItemId,
         int aCollectionId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aItemId);
-    params.insert(collectionIdKey(), aCollectionId);
+    params.insert(Hs::itemIdKey, aItemId);
+    params.insert(Hs::collectionIdKey, aCollectionId);
     return new HsMenuEvent(HsMenuEvent::RemoveAppFromCollection, params);
 }
 
@@ -233,7 +233,7 @@ QEvent *HsMenuEventFactory::createRemoveAppFromCollectionEvent(int aItemId,
 QEvent *HsMenuEventFactory::createUninstallApplicationEvent(int aItemId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aItemId);
+    params.insert(Hs::itemIdKey, aItemId);
     return new HsMenuEvent(HsMenuEvent::UninstallApplication, params);
 }
 
@@ -249,8 +249,8 @@ QEvent *HsMenuEventFactory::createArrangeCollectionEvent(
     int aCollectionId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aTopItemId);
-    params.insert(collectionIdKey(), aCollectionId);
+    params.insert(Hs::itemIdKey, aTopItemId);
+    params.insert(Hs::collectionIdKey, aCollectionId);
     return new HsMenuEvent(HsMenuEvent::ArrangeCollection, params);
 }
 
@@ -263,7 +263,7 @@ QEvent *HsMenuEventFactory::createArrangeCollectionEvent(
 QEvent *HsMenuEventFactory::createArrangeAllCollectionsEvent(int aTopItemId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), aTopItemId);
+    params.insert(Hs::itemIdKey, aTopItemId);
     return new HsMenuEvent(HsMenuEvent::ArrangeAllCollections, params);
 }
 
@@ -284,17 +284,17 @@ QEvent *HsMenuEventFactory::createPreviewHSWidgetEvent(
     // get CaEntry type, and if widget get uri and library stored as properties...
     QVariantMap params;
 
-    params.insert(itemIdKey(), entryId);
+    params.insert(Hs::itemIdKey, entryId);
 
     params.insert(
-        widgetUriAttributeName(),
+        Hs::widgetUriAttributeName,
         uri);
 
     params.insert(
-        widgetLibraryAttributeName(),
+        Hs::widgetLibraryAttributeName,
         library);
 
-    params.insert(entryTypeNameKey(), entryTypeName);
+    params.insert(Hs::entryTypeNameKey, entryTypeName);
 
     return new HsMenuEvent(HsMenuEvent::PreviewHSWidget, params);
 }
@@ -307,7 +307,7 @@ QEvent *HsMenuEventFactory::createPreviewHSWidgetEvent(
 QEvent *HsMenuEventFactory::createAppSettingsViewEvent(int entryId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), entryId);
+    params.insert(Hs::itemIdKey, entryId);
 
     return new HsMenuEvent(HsMenuEvent::ShowAppSettings, params);
 }
@@ -320,7 +320,7 @@ QEvent *HsMenuEventFactory::createAppSettingsViewEvent(int entryId)
 QEvent *HsMenuEventFactory::createAppDetailsViewEvent(int entryId)
 {
     QVariantMap params;
-    params.insert(itemIdKey(), entryId);
+    params.insert(Hs::itemIdKey, entryId);
 
     return new HsMenuEvent(HsMenuEvent::ShowAppDetails, params);
 }

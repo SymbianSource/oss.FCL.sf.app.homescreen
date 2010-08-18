@@ -145,6 +145,16 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_applib_grid_ovi_store">
+    <comment>Text shown when operator store is defined and toolbar extension is used to show both stores.</comment>        
+    <source>Ovi Store</source>
+    <translation variants="no">Ovi Store</translation>
+    <extra-loc-layout_id>qtl_toolbar_extension_tiny_vrt</extra-loc-layout_id>    
+    <extra-loc-viewid>applib</extra-loc-viewid>
+    <extra-loc-positionid>grid</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_applib_info_delete_1_and_associated_data">
     <comment>Confirmation note displayed if the user tries to delete an application. %1 is the application name.</comment>        
     <source>Delete %1 and associated data?</source>
@@ -433,6 +443,16 @@
     <extra-loc-viewid>applib_05</extra-loc-viewid>
     <extra-loc-positionid>menu</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_common_menu_open">
+    <comment>Context menu item. Note! Only use this text ID if there are no icons. Opens a highlighted item such as an application, folder, or message</comment>        
+    <source>Open</source>
+    <translation variants="no">Open</translation>
+    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
+    <extra-loc-viewid>common</extra-loc-viewid>
+    <extra-loc-positionid>menu</extra-loc-positionid>
+    <extra-loc-feature>common</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
 <message numerus="no" id="txt_applib_opt_sub_custom">

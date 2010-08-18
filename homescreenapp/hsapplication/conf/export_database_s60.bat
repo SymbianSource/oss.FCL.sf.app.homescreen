@@ -14,4 +14,4 @@
 @rem Description:
 @rem
 
-call xcopy /r output\private\20022f35\homescreen.db \epoc32\data\z\private\20022F35
+call xcopy /r output\content\private\20022f35\homescreen.db \epoc32\data\z\private\20022F35

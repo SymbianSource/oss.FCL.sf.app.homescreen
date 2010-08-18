@@ -42,17 +42,17 @@ const char COLLECTION_SHORT_NAME[] = "short_name";
  \retval HsMenuItemModel: AllApplicationsModel
  */
 HsMenuItemModel *HsMenuService::getAllApplicationsModel(
-    HsSortAttribute sortAttribute)
+    Hs::HsSortAttribute sortAttribute)
 {
     qDebug() << "HsMenuService::getAllApplicationsModel sortAttribute:"
              << sortAttribute;
     HSMENUTEST_FUNC_ENTRY("HsMenuService::getAllApplicationsModel");
     CaQuery query;
     query.setEntryRoles(ItemEntryRole);
-    query.addEntryTypeName(applicationTypeName());
-    query.addEntryTypeName(urlTypeName());
-    query.addEntryTypeName(widgetTypeName());
-    query.addEntryTypeName(templatedApplicationTypeName());
+    query.addEntryTypeName(Hs::applicationTypeName);
+    query.addEntryTypeName(Hs::urlTypeName);
+    query.addEntryTypeName(Hs::widgetTypeName);
+    query.addEntryTypeName(Hs::templatedApplicationTypeName);
     query.setFlagsOn(VisibleEntryFlag);
     query.setFlagsOff(MissingEntryFlag);
     query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
@@ -85,14 +85,14 @@ HsMenuItemModel *HsMenuService::getAllCollectionsModel()
  \retval HsMenuItemModel: installed model
  */
 HsMenuItemModel *HsMenuService::getInstalledModel(
-    HsSortAttribute sortAttribute)
+    Hs::HsSortAttribute sortAttribute)
 {
     //TODO get proper items
     qDebug() << "HsMenuService::getInstalledModel" << "sortAttribute:"
              << sortAttribute;
     HSMENUTEST_FUNC_ENTRY("HsMenuService::getInstalledModel");
     CaQuery query;
-    query.addEntryTypeName(packageTypeName());
+    query.addEntryTypeName(Hs::packageTypeName);
     query.setFlagsOn(VisibleEntryFlag | RemovableEntryFlag);
     query.setFlagsOff(MissingEntryFlag);
     query.setSort(HsMenuServiceUtils::sortBy(sortAttribute),
@@ -109,14 +109,14 @@ HsMenuItemModel *HsMenuService::getInstalledModel(
  \retval HsMenuItemModel: collection model
  */
 HsMenuItemModel *HsMenuService::getCollectionModel(int collectionId,
-        HsSortAttribute sortAttribute, const QString &collectionType)
+        Hs::HsSortAttribute sortAttribute, const QString &collectionType)
 {
     qDebug() << "HsMenuService::getCollectionModel sortAttribute:"
              << sortAttribute;
     HSMENUTEST_FUNC_ENTRY("HsMenuService::getCollectionModel");
     CaQuery query;
     query.setFlagsOff(MissingEntryFlag);
-    if (collectionType == collectionDownloadedTypeName()) {
+    if (collectionType == Hs::collectionDownloadedTypeName) {
         query.setFlagsOn(RemovableEntryFlag | VisibleEntryFlag);
     } else {
         query.setFlagsOn(VisibleEntryFlag);
@@ -186,30 +186,7 @@ int HsMenuService::executeAction(int entryId, const QString &actionName)
 {
     qDebug() << "HsMenuService::executeAction entryId:" << entryId
              << "actionName:" << actionName;
-    int ret = CaService::instance()->executeCommand(entryId, actionName);
-
-/*    // if its remove action we need to mark all items 
-    // that are being uninstalled
-    if (actionName == caCmdRemove && ret == 0) {
-        QSharedPointer<CaEntry> entry(
-                CaService::instance()->getEntry(entryId));
-        if (!entry.isNull()) {
-            QString componentId = entry->attribute(
-                    componentIdAttributeName());
-            
-            CaQuery query;
-            query.setAttribute(componentIdAttributeName(), componentId);
-            QList< QSharedPointer<CaEntry> > entries 
-                    = CaService::instance()->getEntries(query);
-            
-            for (int i = 0; i < entries.count(); i++) {
-                entries[i]->setFlags(
-                        entries.first()->flags()| UninstallEntryFlag);
-                CaService::instance()->updateEntry(*entries[i]);
-            }
-        }
-    }*/
-    return ret;
+    return CaService::instance()->executeCommand(entryId, actionName);
 }
 
 /*!
@@ -221,7 +198,7 @@ bool HsMenuService::launchTaskSwitcher()
     qDebug() << "HsMenuService::launchTaskSwitcher";
     HbDeviceDialog deviceDialog;
     QVariantMap params;
-    return deviceDialog.show(TS_DEVICE_DIALOG_URI, params);
+    return deviceDialog.show(Hs::tsDeviceDialogUri, params);
 }
 
 /*!
@@ -235,11 +212,11 @@ int HsMenuService::createCollection(const QString &name)
     HSMENUTEST_FUNC_ENTRY("HsMenuService::createCollection");
     int entryId = 0;
     CaEntry collection(GroupEntryRole);
-    collection.setEntryTypeName(collectionTypeName());
+    collection.setEntryTypeName(Hs::collectionTypeName);
     collection.setText(name);
-    collection.setAttribute(groupNameAttributeName(),name);
+    collection.setAttribute(Hs::groupNameAttributeName,name);
     CaIconDescription iconDescription;
-    iconDescription.setFilename(defaultCollectionIconId());
+    iconDescription.setFilename(Hs::defaultCollectionIconId);
     collection.setIconDescription(iconDescription);
     QSharedPointer<CaEntry> entry = CaService::instance()->createEntry(collection);
     if (!entry.isNull()) {
@@ -356,7 +333,7 @@ int HsMenuService::allCollectionsId()
         //"menucollections" typename to the storage, but even if he or she
         //do this we fetch entry that we wanted
         collectionsQuery.setSort(DefaultSortAttribute, Qt::AscendingOrder);
-        collectionsQuery.addEntryTypeName(menuCollectionsTypeName());
+        collectionsQuery.addEntryTypeName(Hs::menuCollectionsTypeName);
         QList<int> ids = CaService::instance()->getEntryIds(
                              collectionsQuery);
         Q_ASSERT(ids.count() > 0);
@@ -400,10 +377,35 @@ int HsMenuService::collectionIdByType(const QString& collectionType)
  \param entryId of this entry.
  \retval boolean error code.
  */
-bool HsMenuService::touch(int entryId)
+void HsMenuService::touch(int entryId)
 {
     QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(entryId);
-    return CaService::instance()->touch(* entry);
+    if (entry->flags() & RemovableEntryFlag &&
+        (entry->flags() & UsedEntryFlag) == 0 &&
+        entry->role() == ItemEntryRole &&
+        entry->entryTypeName() != QString(Hs::packageTypeName)) {
+            CaService::instance()->touch(* entry);
+    }
+}
+
+/*!
+ Touch action on an lists of entries.
+ \param entryIdList of this entry.
+ \retval boolean error code.
+ */
+void HsMenuService::touch(const QList<int> &entryIdList)
+{
+    CaQuery query;
+    query.setFlagsOn(RemovableEntryFlag);
+    query.setFlagsOff(UsedEntryFlag);
+    query.setEntryRoles(ItemEntryRole);
+    QList<int> removableUnTouchEntries =
+        CaService::instance()->getEntryIds(query);
+    foreach (int item, entryIdList) {
+        if (removableUnTouchEntries.contains(item)) {
+            touch(item);
+        }
+    }
 }
 
 /*!
@@ -414,10 +416,10 @@ int HsMenuService::launchSoftwareUpdate()
 {
     qDebug() << "HsMenuService::launchSoftwareUpdate";
     QScopedPointer<CaEntry> tsEntry(new CaEntry);
-    tsEntry->setEntryTypeName(applicationTypeName());
+    tsEntry->setEntryTypeName(Hs::applicationTypeName);
     tsEntry->setAttribute(
-            applicationUidEntryKey(), QString::number(softwareUpdateApplicationUid));
+            Hs::applicationUidEntryKey, QString::number(Hs::softwareUpdateApplicationUid));
     int retval = CaService::instance()->executeCommand(*tsEntry,
-            openActionIdentifier());
+            Hs::openActionIdentifier);
     return retval;
 }

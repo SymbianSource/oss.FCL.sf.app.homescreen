@@ -15,6 +15,7 @@
  *
  */
 
+#include <QPainter>
 #include <QSize>
 #include <QTimer>
 #include "hsmenuitemmodel.h"
@@ -28,9 +29,11 @@
 HsIconsIdleLoader::HsIconsIdleLoader(HsMenuItemModel *model, QObject *parent):
     QObject(parent),
     mModel(model),
-    mTimer(NULL)
+    mTimer(NULL),
+    mIconSize(mModel->getIconSize())
 {
     mTimer = new QTimer(this);
+    mOutStandingIconToLoad = mModel->rowCount();
     connect(mTimer, SIGNAL(timeout()), this, SLOT(processWhenIdle()));
     mTimer->start(0); // NOTE: zero for idle
 }
@@ -49,11 +52,26 @@ HsIconsIdleLoader::~HsIconsIdleLoader()
  */
 void HsIconsIdleLoader::processWhenIdle()
 {
-    const QSize iconSize(mModel->getIconSize());
-    for (int i=0; i<mModel->rowCount(); i++) {
-        QModelIndex idx = mModel->index(i);
-        mModel->entry(idx)->makeIcon(iconSize);
-    }
-    mTimer->stop(); // No more timing
+    if (mOutStandingIconToLoad >= 1 
+        && mModel->rowCount() >= mOutStandingIconToLoad ) {
+    	QPixmap pixmap(mIconSize.toSize());
+    	pixmap.fill(Qt::transparent);
+
+        QModelIndex idx = mModel->index(mOutStandingIconToLoad -1);
+        HbIcon icon = mModel->entry(idx)->makeIcon(mIconSize);
+        icon.setSize(mIconSize);
+        // creating raster data
+        QPainter painter;
+        painter.begin(&pixmap);
+        icon.paint(&painter, QRectF(QPointF(), mIconSize), 
+                     Qt::KeepAspectRatio, 
+                     Qt::AlignCenter, 
+                     QIcon::Normal, 
+                     QIcon::Off);
+        painter.end();
+        --mOutStandingIconToLoad;
+    } else {
+    	mTimer->stop(); // No more timing
+	}
 }
 

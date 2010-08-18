@@ -21,6 +21,7 @@
 #include <QSortFilterProxyModel>
 #include <caquery.h>
 #include <caentry.h>
+#include <QAbstractItemView>
 
 #include "hsmenustates_global.h"
 
@@ -37,6 +38,13 @@ public:
     HsAddModeProxyModel(QObject *parent = 0);
     ~HsAddModeProxyModel();
     void initilizeCwrtWidgetCache();
+    void setSourceModel(QAbstractItemModel *sourceModel);
+
+signals:
+
+    void scrollTo(int row, QAbstractItemView::ScrollHint hint =
+        QAbstractItemView::EnsureVisible);
+    void countChange();
 
 private slots:
 

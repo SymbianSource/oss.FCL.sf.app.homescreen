@@ -39,17 +39,17 @@ public:
 
     // Function declarations
     static HsMenuItemModel *getAllApplicationsModel(
-        HsSortAttribute sortAttribute = DescendingNameHsSortAttribute);
+        Hs::HsSortAttribute sortAttribute = Hs::DescendingNameHsSortAttribute);
     static HsMenuItemModel *getAllCollectionsModel();
     static HsMenuItemModel *getInstalledModel(
-        HsSortAttribute sortAttribute = DescendingNameHsSortAttribute);
+        Hs::HsSortAttribute sortAttribute = Hs::DescendingNameHsSortAttribute);
     static HsMenuItemModel *getCollectionModel(int collectionId,
-            HsSortAttribute sortAttribute = LatestOnTopHsSortAttribute,
-            const QString &collectionType = collectionTypeName());
+            Hs::HsSortAttribute sortAttribute = Hs::LatestOnTopHsSortAttribute,
+            const QString &collectionType = Hs::collectionTypeName);
     static QStringList getCollectionNames();
     static QString getName(int entryId);
     static int executeAction(int entryId, const QString &actionName =
-                                  openActionIdentifier());
+                                  Hs::openActionIdentifier);
     static bool launchTaskSwitcher();
 
     static int createCollection(const QString &name);
@@ -67,7 +67,9 @@ public:
     
     static int collectionIdByType(const QString& collectionType);
 
-    static bool touch(int entryId);
+    static void touch(int entryId);
+    
+    static void touch(const QList<int> &entryIdList);
     
     static int launchSoftwareUpdate();
 

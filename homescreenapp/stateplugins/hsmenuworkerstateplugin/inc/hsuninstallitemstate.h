@@ -39,8 +39,7 @@ class HsUninstallItemState: public QState
 
 public:
     enum UninstallDialogType {
-        UninstallDialogDefinition01 = 1,
-        UninstallDialogDefinition02,
+        UninstallDialogDefinition02 = 1,
         UninstallDialogDefinition03,
         UninstallDialogDefinition04
     };
@@ -71,9 +70,8 @@ private:
         QStringList &applicationsNames,
         QString &confirmationMessage);
     
-    void createUninstallMessage();
+    void createSimpleUninstallMessage(bool isJava=false);
     void createUninstallJavaMessage();
-    void createSimpleUninstallJavaMessage();
 
 private:
 

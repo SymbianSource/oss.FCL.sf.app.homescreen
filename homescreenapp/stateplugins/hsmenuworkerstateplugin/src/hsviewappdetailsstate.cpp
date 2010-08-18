@@ -78,16 +78,16 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    const int entryId = data.value(itemIdKey()).toInt();
+    const int entryId = data.value(Hs::itemIdKey).toInt();
     QSharedPointer<const CaEntry> entry
         = CaService::instance()->getEntry(entryId);
     const int componentId = entry->attribute(
-        componentIdAttributeName()).toInt();
+        Hs::componentIdAttributeName).toInt();
     
     QSharedPointer<CaSoftwareRegistry> scr = CaSoftwareRegistry::create();
     CaSoftwareRegistry::DetailMap detailMap = scr->entryDetails(componentId);
 
-    QString appType = entry->attribute(swTypeKey());
+    QString appType = entry->attribute(Hs::swTypeKey);
 
     
     //TODO: Should we display something In that case?
@@ -102,7 +102,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     Q_ASSERT_X(loadStatusOk, HS_DETAILS_DIALOG_LAYOUT,
            "Error while loading docml file.");
 
-    if (!appType.compare(javaSwType())) {
+    if (!appType.compare(Hs::javaSwType)) {
         QString section = QString(HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME);
         loader.load(HS_DETAILS_DIALOG_LAYOUT,
                                   section, &loadStatusOk);
@@ -129,7 +129,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
         setFieldPresentation(CaSoftwareRegistry::componentTypeKey(),
             detailMap, loader);
 
-        if (!appType.compare(javaSwType())) {
+        if (!appType.compare(Hs::javaSwType)) {
             setFieldPresentation(CaSoftwareRegistry::componentDescriptionKey(),
                 detailMap, loader);
             setFieldPresentation(CaSoftwareRegistry::componentProtectionDomainKey(),

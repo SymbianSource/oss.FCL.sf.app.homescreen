@@ -87,7 +87,7 @@ HsCollectionState::HsCollectionState(HsMenuViewBuilder &menuViewBuilder,
                                      HsMainWindow &mainWindow,
                                      QState *parent) :
     HsBaseViewState(mainWindow, menuMode, parent),
-    mSortAttribute(LatestOnTopHsSortAttribute),
+    mSortAttribute(Hs::LatestOnTopHsSortAttribute),
     mCollectionId(-1)
 {
     initialize(menuViewBuilder, HsCollectionContext);
@@ -131,8 +131,8 @@ void HsCollectionState::onEntry(QEvent *event)
     if (event->type() == HsMenuEvent::eventType()) {
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
-        mCollectionId = data.value(itemIdKey()).toInt();
-        mCollectionType = data.value(entryTypeNameKey()).toString();
+        mCollectionId = data.value(Hs::itemIdKey).toInt();
+        mCollectionType = data.value(Hs::entryTypeNameKey).toString();
     }
 
     HSMENUTEST_FUNC_EXIT("HsCollectionState::onEntry");
@@ -201,19 +201,20 @@ void HsCollectionState::setMenuOptions()
             this,
             SLOT(deleteAction()));
     }
-    if (mCollectionType == collectionDownloadedTypeName()) {
+    if (mCollectionType == Hs::collectionDownloadedTypeName && 
+            mModel->rowCount() > 0) {
         HbMenu *sortMenu = mViewOptions->addMenu(
                                hbTrId("txt_applib_opt_sort_by"));
         //Grouped options are exclusive by default.
         QActionGroup *sortGroup = new QActionGroup(this);
         sortGroup->addAction(
             sortMenu->addAction(
-                hbTrId("txt_applib_opt_sort_by_sub_latest_on_top"),
+                hbTrId("txt_applib_opt_sub_latest_on_top"),
                 this,
                 SLOT(latestOnTopMenuAction())));
         sortGroup->addAction(
             sortMenu->addAction(
-                hbTrId("txt_applib_opt_sort_by_sub_oldest_on_top"),
+                hbTrId("txt_applib_opt_sub_oldest_on_top"),
                 this,
                 SLOT(oldestOnTopMenuAction())));
         foreach(QAction *action, sortMenu->actions()) {
@@ -237,7 +238,7 @@ void HsCollectionState::stateExited()
 
     delete mModel;
     mModel = NULL;
-    this->mSortAttribute = NoHsSortAttribute;
+    this->mSortAttribute = Hs::NoHsSortAttribute;
 
     HsBaseViewState::stateExited();
 
@@ -256,10 +257,6 @@ void HsCollectionState::makeConnect()
             SIGNAL(activated(QModelIndex)),
             static_cast<HsBaseViewState*>(this),
             SLOT(launchItem(QModelIndex)));
-    connect(mMenuView.data(),
-            SIGNAL(activated(QModelIndex)),
-            mMenuView.data(),
-            SLOT(hideSearchPanel()));
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             static_cast<HsBaseViewState*>(this),
@@ -284,10 +281,6 @@ void HsCollectionState::makeDisconnect()
                static_cast<HsBaseViewState*>(this),
                SLOT(launchItem(QModelIndex)));
     disconnect(mMenuView.data(),
-            SIGNAL(activated(QModelIndex)),
-            mMenuView.data(),
-            SLOT(hideSearchPanel()));
-    disconnect(mMenuView.data(),
                SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
                static_cast<HsBaseViewState*>(this),
                SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
@@ -303,49 +296,19 @@ void HsCollectionState::makeDisconnect()
 
 /*!
  Handles context menu actions
+ \param action action taken in context menu
  */
 void HsCollectionState::contextMenuAction(HbAction *action)
 {
-    HsContextAction command =
-        static_cast<HsContextAction>(action->data().toInt());
-
-    const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
-
-    switch (command) {
-        case AddToHomeScreenContextAction:
-            addElementToHomeScreen(mContextModelIndex);
-            break;
-        case AddToCollectionContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
-                    mCollectionId, itemId));
-            break;
-        case UninstallContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createUninstallApplicationEvent(
-                    itemId));
-            break;
-        case RemoveFromCollectionContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createRemoveAppFromCollectionEvent(
-                    itemId, mCollectionId));
-            break;
-        case AppSettingContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAppSettingsViewEvent(itemId));
-            break;
-        case AppDetailsContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAppDetailsViewEvent(itemId));
-            break;
-        case OpenContextAction:
-            launchItem(mContextModelIndex);
-            break;
-        default:
-            break;
+    HsBaseViewState::contextMenuAction(action);
+    Hs::HsContextAction command =
+            static_cast<Hs::HsContextAction>(action->data().toInt());
+    if (command == Hs::RemoveFromCollectionContextAction ) {
+        const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
+        machine()->postEvent(
+            HsMenuEventFactory::createRemoveAppFromCollectionEvent(
+                itemId, mCollectionId));
     }
-
-    mMenuView->hideSearchPanel();
 }
 
 /*!
@@ -363,7 +326,7 @@ void HsCollectionState::handleEmptyChange(bool empty)
         if (flags & RemovableEntryFlag){
             mMenuView->reset(HsButtonContext);
             connect(mMenuView->contentButton(),
-                    SIGNAL(toggled(bool)), this, SLOT(addAppsAction(bool)),
+                    SIGNAL(clicked()), this, SLOT(addAppsAction()),
                     Qt::UniqueConnection);
         } else {
             mMenuView->reset(HsEmptyLabelContext);
@@ -399,19 +362,12 @@ void HsCollectionState::lockSearchButton(bool lock)
    \param addApps if true create event for add enties to collection.
    Parametr use by toggled from HbPushButton
  */
-void HsCollectionState::addAppsAction(bool addApps)
+void HsCollectionState::addAppsAction()
 {
     // Add applications
-    if (addApps) {
-
-        if (mMenuView->contentButton()) {
-            mMenuView->contentButton()->setChecked(false);
-        }
-
-        machine()->postEvent(
-            HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
-                mCollectionId));
-    }
+    machine()->postEvent(
+        HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
+            mCollectionId));
 }
 
 /*!
@@ -419,9 +375,7 @@ void HsCollectionState::addAppsAction(bool addApps)
  */
 void HsCollectionState::addCollectionShortcutToHomeScreenAction()
 {
-    machine()->postEvent(HsMenuEventFactory::createAddToHomeScreenEvent(
-                             mCollectionId, mMenuMode->getHsMenuMode(),
-                             mMenuMode->getHsToken()));
+    addToHomeScreen(mCollectionId);
 }
 
 /*!
@@ -456,35 +410,19 @@ void HsCollectionState::updateLabel()
 }
 
 /*!
-  Triggers event so that a state adding to Home Screen is reached
-  \param index of an item to be added to homescreen.
-  \retval void
- */
-void HsCollectionState::addElementToHomeScreen(const QModelIndex &index)
-{
-    QSharedPointer<const CaEntry> entry = mModel->entry(index);
-
-    QMap<QString, QString> attributes = entry->attributes();
-
-    machine()->postEvent(
-        HsMenuEventFactory::createAddToHomeScreenEvent(
-            entry->id(), mMenuMode->getHsMenuMode(), mMenuMode->getHsToken()));
-}
-
-/*!
  Method setting context menu options.
  */
 void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
 {
     HbAction *openAction = mContextMenu->addAction(hbTrId(
         "txt_common_menu_open"));
-    openAction->setData(OpenContextAction);
+    openAction->setData(Hs::OpenAppContextAction);
     HbAction *addToHomeScreenAction = mContextMenu->addAction(hbTrId(
         "txt_applib_menu_add_to_home_screen"));
-    addToHomeScreenAction->setData(AddToHomeScreenContextAction);
+    addToHomeScreenAction->setData(Hs::AddToHomeScreenContextAction);
     HbAction *addToCollection = mContextMenu->addAction(hbTrId(
         "txt_applib_menu_add_to_collection"));
-    addToCollection->setData(AddToCollectionContextAction);
+    addToCollection->setData(Hs::AddToCollectionFromCollectionViewContextAction);
     HbAction *removeAction(NULL);
     HbAction *uninstallAction(NULL);
     HbAction *appSettingsAction(NULL);
@@ -498,26 +436,26 @@ void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFla
     if (rootFlags & RemovableEntryFlag) {
         removeAction = mContextMenu->addAction(
                            hbTrId("txt_applib_menu_remove_from_collection"));
-        removeAction->setData(RemoveFromCollectionContextAction);
+        removeAction->setData(Hs::RemoveFromCollectionContextAction);
     }
 
     if ((flags & RemovableEntryFlag)) {
         uninstallAction = mContextMenu->addAction(hbTrId("txt_common_menu_delete"));
-        uninstallAction->setData(UninstallContextAction);
+        uninstallAction->setData(Hs::UninstallContextAction);
     }
     QSharedPointer<const CaEntry> entry = mModel->entry(item->modelIndex());
 
-    if (!(entry->attribute(appSettingsPlugin()).isEmpty())) {
+    if (!(entry->attribute(Hs::appSettingsPlugin).isEmpty())) {
         appSettingsAction = mContextMenu->addAction(hbTrId(
                                                 "txt_common_menu_settings"));
-        appSettingsAction->setData(AppSettingContextAction);
+        appSettingsAction->setData(Hs::AppSettingContextAction);
     }
 
-    if (!(entry->attribute(componentIdAttributeName()).isEmpty()) &&
+    if (!(entry->attribute(Hs::componentIdAttributeName).isEmpty()) &&
             (flags & RemovableEntryFlag) ) {
         appDetailsAction = mContextMenu->addAction(hbTrId(
                                                 "txt_common_menu_details"));
-        appDetailsAction->setData(AppDetailsContextAction);
+        appDetailsAction->setData(Hs::AppDetailsContextAction);
     }
     
     addToHomeScreenAction->setVisible(
@@ -530,7 +468,7 @@ void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFla
  */
 void HsCollectionState::latestOnTopMenuAction()
 {
-    mSortAttribute = LatestOnTopHsSortAttribute;
+    mSortAttribute = Hs::LatestOnTopHsSortAttribute;
     mModel->setSort(mSortAttribute);
     emit sortOrderChanged(mSortAttribute);
 }
@@ -541,7 +479,7 @@ void HsCollectionState::latestOnTopMenuAction()
  */
 void HsCollectionState::oldestOnTopMenuAction()
 {
-    mSortAttribute = OldestOnTopHsSortAttribute;
+    mSortAttribute = Hs::OldestOnTopHsSortAttribute;
     mModel->setSort(mSortAttribute);
     emit sortOrderChanged(mSortAttribute);
 }

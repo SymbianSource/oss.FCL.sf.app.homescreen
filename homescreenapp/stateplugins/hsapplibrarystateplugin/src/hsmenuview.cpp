@@ -51,7 +51,23 @@
 */
 
 /*!
+    \fn void activated(const QModelIndex &index);
+    \param index of activated item.
+    Emitted on tap event on the list view.
+*/
 
+/*!
+    \fn void longPressed(HbAbstractViewItem *item, const QPointF &coords);
+    \param item List element that was long-pressed.
+    \param coords Coordinates of the long-press.
+    Emitted on long-press event on the list view
+ */
+/*!
+    \fn void listViewChange();
+    Emitted on model count change for current model
+    \see void setModel(QAbstractItemModel *model)
+*/
+/*!
  Retrieves UI objects for a requested context and sets up signals' connections.
 
  \param builder Menu View builder.
@@ -82,6 +98,8 @@ HsMenuView::HsMenuView(HsMenuViewBuilder &builder,
     connect(mHsSearchView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
                         this, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)));
+    connect(mHsSearchView.data(), SIGNAL(searchComplete(QModelIndex)),
+            this, SLOT(handleSearchComplete(QModelIndex)));
 }
 
 /*!
@@ -110,7 +128,7 @@ void HsMenuView::setModel(QAbstractItemModel *model)
                        SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
             disconnect(mListView->model(), SIGNAL(countChange()),
                        this,
-                        SIGNAL(listViewChange()));
+                       SIGNAL(listViewChange()));
         }
 
         mListView->setItemPixmapCacheEnabled(true); // TODO: remove when enabled from default
@@ -131,11 +149,15 @@ void HsMenuView::setModel(QAbstractItemModel *model)
 }
 
 /*!
- Returns model for list item view.
+ Returns model for list item view or null if list view is not available.
  */
 QAbstractItemModel *HsMenuView::model() const
 {
-    return mListView->model();
+    if (mListView != NULL) {
+        return mListView->model();
+    } else {
+        return NULL;
+    }
 }
 
 /*!
@@ -253,9 +275,11 @@ HbAbstractItemView::ScrollHint HsMenuView::convertScrollHint(
  */
 void HsMenuView::activate()
 {
-    mMainWindow.setCurrentView(mView);
-    connect(mBuilder.searchAction(), SIGNAL(triggered()),
-            this, SLOT(showSearchPanel()), Qt::UniqueConnection);
+    if (!mHsSearchView->isActive()) {
+        mMainWindow.setCurrentView(mView);
+        connect(mBuilder.searchAction(), SIGNAL(triggered()),
+                this, SLOT(showSearchPanel()), Qt::UniqueConnection);
+    }
 }
 
 /*!
@@ -321,4 +345,20 @@ void HsMenuView::synchronizeCache()
     mListView = mBuilder.currentListView();
     mViewLabel = mBuilder.currentViewLabel();
     mAddContentButton = mBuilder.currentAddContentButton();
+}
+
+
+/*!
+ Slot.
+ \param firstMatching Index of first item of search result.
+ If menu view is about to show it scrolls the list to \a firstMatching.
+ Makes view represented by the object main view of the application.
+ */
+void HsMenuView::handleSearchComplete(const QModelIndex& firstMatching)
+{
+    if (mListView != NULL) {
+        mListView->scrollTo(firstMatching, HbAbstractItemView::PositionAtTop);
+    }
+
+    activate();
 }

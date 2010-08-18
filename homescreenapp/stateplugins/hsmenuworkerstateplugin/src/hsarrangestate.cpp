@@ -141,7 +141,7 @@ void HsArrangeState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    mTopItemId = data.value(itemIdKey()).toInt();
+    mTopItemId = data.value(Hs::itemIdKey).toInt();
 
     HbDocumentLoader loader;
     bool loadStatusOk = false;
@@ -160,10 +160,10 @@ void HsArrangeState::onEntry(QEvent *event)
     if (mEntriesList && mDialog) {
         switch (menuEvent->operation()) {
         case HsMenuEvent::ArrangeCollection:
-            mCollectionId = data.value(collectionIdKey()).toInt();
+            mCollectionId = data.value(Hs::collectionIdKey).toInt();
             mItemModel = HsMenuService::getCollectionModel(
                 mCollectionId,
-                NoHsSortAttribute);
+                Hs::NoHsSortAttribute);
             break;
         case HsMenuEvent::ArrangeAllCollections:
             mCollectionId = HsMenuService::allCollectionsId();

@@ -17,11 +17,11 @@
 HEADERS +=  ./inc/hsanalogclockwidget.h \
             ./inc/hsclockwidget.h \
             ./inc/hsclockwidgetplugin.h \
-            ./inc/hsdigitalclockwidget.h 
+            ./inc/hsdigitalclockwidget.h \
+            ./inc/hsclockwidgettimer.h 
 
 SOURCES +=  ./src/hsanalogclockwidget.cpp \
             ./src/hsclockwidget.cpp \
             ./src/hsclockwidgetplugin.cpp \
-            ./src/hsdigitalclockwidget.cpp 
-
-
+            ./src/hsdigitalclockwidget.cpp \
+            ./src/hsclockwidgettimer.cpp

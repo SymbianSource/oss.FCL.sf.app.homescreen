@@ -123,11 +123,11 @@ void HsAppLibraryState::construct()
     setInitialState(initialState);
 
     mHistoryTransaction =  new HsMenuModeTransition(
-        mMenuMode, NormalHsMenuMode, mAllAppsState);
+        mMenuMode, Hs::NormalHsMenuMode, mAllAppsState);
 
     initialState->addTransition(mHistoryTransaction);
     initialState->addTransition(new HsMenuModeTransition(
-                                    mMenuMode, AddHsMenuMode, mAllAppsState));
+                                    mMenuMode, Hs::AddHsMenuMode, mAllAppsState));
 
     mCollectionState = new HsCollectionState(mMenuViewBuilder,
             mMenuMode,
@@ -197,22 +197,23 @@ void HsAppLibraryState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::onEntry");
     QState::onEntry(event);
 
-    if (static_cast<HsMenuEvent *>(event)->operation() !=
-            HsMenuEvent::OpenCollectionFromAppLibrary)
-        {
-    // we are back from HS, scroll those views to top
-        mAllAppsState->scrollToBeginning();
-        mAllCollectionsState->scrollToBeginning();
-        }
-
     if (event->type() == HsMenuEvent::eventType()) {
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
         mMenuMode.setHsMenuMode(
-            static_cast<HsMenuMode>(data.value(menuModeType()).toInt()),
-            data.value(HOMESCREENDATA));
+            static_cast<Hs::HsMenuMode>(data.value(Hs::menuModeType).toInt()),
+            data.value(Hs::homescreenData));
     } else {
-        mMenuMode.setHsMenuMode(NormalHsMenuMode);
+        mMenuMode.setHsMenuMode(Hs::NormalHsMenuMode);
+    }
+
+    if (event->type() != HsMenuEvent::eventType() ||
+            static_cast<HsMenuEvent *>(event)->operation() !=
+            HsMenuEvent::OpenCollectionFromAppLibrary) {
+        // we are back from HS, scroll those views to top
+        mAllAppsState->setModel(mMenuMode.getHsMenuMode());
+        mAllAppsState->scrollToBeginning();
+        mAllCollectionsState->scrollToBeginning();
     }
 
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::onEntry");
@@ -251,8 +252,7 @@ void HsAppLibraryState::constructToolbar()
                         mMenuViewBuilder.operatorAction()));
         operatorAction->setText(hbTrId(operatorHandler->text().toLatin1()));
 
-        //TODO: no locstring for ovi store currently
-        mMenuViewBuilder.oviStoreAction()->setText("Ovi Store");
+        mMenuViewBuilder.oviStoreAction()->setText(hbTrId("txt_applib_grid_ovi_store"));
         if (operatorHandler->operatorStoreFirst()) {
             extension->addAction(operatorAction);
             extension->addAction(mMenuViewBuilder.oviStoreAction());
@@ -314,14 +314,14 @@ int HsAppLibraryState::oviStoreAction()
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::oviStoreAction");
 
     CaEntry oviEntry;
-    oviEntry.setEntryTypeName(applicationTypeName());
-    oviEntry.setAttribute( applicationUidEntryKey(),
-                    QString::number(oviLauncherApplicationUid));
+    oviEntry.setEntryTypeName(Hs::applicationTypeName);
+    oviEntry.setAttribute( Hs::applicationUidEntryKey,
+                    QString::number(Hs::oviLauncherApplicationUid));
 
     int result = CaService::instance()->executeCommand(oviEntry);
     if (result) {
-        oviEntry.setEntryTypeName(urlTypeName());
-        oviEntry.setAttribute(urlEntryKey(),
+        oviEntry.setEntryTypeName(Hs::urlTypeName);
+        oviEntry.setAttribute(Hs::urlEntryKey,
                           QString("https://store.ovi.com/applications/"));
         result = CaService::instance()->executeCommand(oviEntry);
     }
@@ -335,7 +335,7 @@ int HsAppLibraryState::oviStoreAction()
  */
 void HsAppLibraryState::allAppsStateEntered()
 {
-    if (mMenuMode.getHsMenuMode() == NormalHsMenuMode) {
+    if (mMenuMode.getHsMenuMode() == Hs::NormalHsMenuMode) {
         mHistoryTransaction->setTargetState(mAllAppsState);
     }
 }
@@ -345,7 +345,7 @@ void HsAppLibraryState::allAppsStateEntered()
  */
 void HsAppLibraryState::allCollectionsStateEntered()
 {
-    if (mMenuMode.getHsMenuMode() == NormalHsMenuMode) {
+    if (mMenuMode.getHsMenuMode() == Hs::NormalHsMenuMode) {
         mHistoryTransaction->setTargetState(mAllCollectionsState);
     }
 }

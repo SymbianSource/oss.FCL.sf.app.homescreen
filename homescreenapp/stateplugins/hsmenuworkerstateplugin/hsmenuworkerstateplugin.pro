@@ -21,7 +21,7 @@ MOBILITY = serviceframework
 PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
 
 include(../../common.pri)
-
+include(docml.pri)
 LIBS += -lhsdomainmodel \
         -lhsmenuserviceprovider \
         -lhsutils \
@@ -30,22 +30,26 @@ LIBS += -lhsdomainmodel \
 
 DEPENDPATH += ./inc \
     ./src
+ 
+    
 INCLUDEPATH += ./inc \
     ../../serviceproviders/hsmenuserviceprovider/inc \
     ../../hsutils/inc \
     ../../hsdomainmodel/inc
 
-symbian: {
+symbian {
     TARGET.UID3 = 0x20022F99
 
-nft: {
-    LIBS += -lhal
+    nft: {
+        LIBS += -lhal
+    }
+    for(docmlFile, docmlFiles): DOCML+=$$docmlFile
 }
-}
+
+RESOURCES += $$qrcFile
 
 include(hsmenuworkerstateplugin.pri)
 
-RESOURCES = hsmenuworkerstateplugin.qrc
 
 
 

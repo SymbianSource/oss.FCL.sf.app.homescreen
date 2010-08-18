@@ -23,7 +23,7 @@
 #ifdef HSUTILS_TEST
 #include "mocksysteminfo.h"
 #else
-#include <qsysteminfo.h>
+#include <QSystemInfo>
 QTM_USE_NAMESPACE
 #endif
 

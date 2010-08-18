@@ -14,6 +14,8 @@ MOBILITY = serviceframework
 
 PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
 include(../../common.pri)
+include(docml.pri)
+
 LIBS += -lhsdomainmodel \
         -lhsutils \
         -lhsmenuserviceprovider \
@@ -28,12 +30,17 @@ INCLUDEPATH += ./inc \
     ../../hsutils/inc
 TRANSLATIONS = hsapplibrary.ts
 include(hsapplibrarystateplugin.pri)
-symbian: {
+
+symbian {
     TARGET.UID3 = 0x20022F97
     nft::LIBS += -lhal
+    
+    for(docmlFile, docmlFiles): DOCML+=$$docmlFile
+    
     include(hsapplibrarystateplugin_exports_to_rom.pri)
     LIBS += -lxqsettingsmanager
 }
-exportResources(./*.qm, resource/qt/translations)
-RESOURCES = hsapplibrarystateplugin.qrc
 
+RESOURCES = $$qrcFile
+    
+exportResources(./*.qm, resource/qt/translations)

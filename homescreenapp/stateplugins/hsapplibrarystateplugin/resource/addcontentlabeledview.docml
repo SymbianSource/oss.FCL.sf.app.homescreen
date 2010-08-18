@@ -10,7 +10,6 @@
             <widget name="buttonContainer" type="HbWidget">
                 <widget name="addContentButton" type="HbPushButton">
                     <string locid="txt_applib_button_add_to_collection" name="text"/>
-                    <bool name="checkable" value="TRUE"/>
                     <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Expanding" verticalStretch="0"/>
                 </widget>
                 <layout orientation="Horizontal" spacing="0.0un" type="linear">

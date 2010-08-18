@@ -57,7 +57,7 @@ const char SHORTCUT_ID[] = "caEntryId";
 HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
     QState(parent), 
     mCorruptedMessage(NULL), mConfirmAction(NULL),
-    mMenuMode(NormalHsMenuMode)
+    mMenuMode(Hs::NormalHsMenuMode)
 {
     setObjectName("/AddToHomeScreenState");
     
@@ -94,23 +94,22 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
 
-    mEntryId = data.value(itemIdKey()).toInt();
+    mEntryId = data.value(Hs::itemIdKey).toInt();
     QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(mEntryId);
     const QString entryTypeName = entry->entryTypeName();
     
-    mMenuMode = static_cast<HsMenuMode>(data.value(menuModeType()).toInt());
-    mToken = data.value(HOMESCREENDATA);
+    mMenuMode = static_cast<Hs::HsMenuMode>(data.value(Hs::menuModeType).toInt());
+    mToken = data.value(Hs::homescreenData);
 
     bool success = false;
-    if (entryTypeName == widgetTypeName()) {
-        const QString uri = entry->attribute(widgetUriAttributeName());
-        success = addWidget(*HsContentService::instance(), uri);
-        HsMenuService::touch(mEntryId);        
+    if (entryTypeName == Hs::widgetTypeName) {
+        const QString uri = entry->attribute(Hs::widgetUriAttributeName);
+        success = addWidget(*HsContentService::instance(), uri);        
     } else {
         success = addApplication(*HsContentService::instance(), *entry);
     }
     
-    if (success && (mMenuMode == NormalHsMenuMode)) {
+    if (success && (mMenuMode == Hs::NormalHsMenuMode)) {
         HbNotificationDialog *notificationDialog = new HbNotificationDialog();
         notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
         notificationDialog->setSequentialShow(false);
@@ -136,14 +135,14 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
 {
     HSMENUTEST_FUNC_ENTRY("HsAddToHomeScreenState::addWidget");
     QVariantHash params;
-    params[URI] = uri;
-    params[HOMESCREENDATA] = mToken;
+    params[Hs::uri] = uri;
+    params[Hs::homescreenData] = mToken;
     bool success = contentService.createWidget(params);
     if (!success) {
         showMessageWidgetCorrupted();
     } else {
         emit exit();
-        if (mMenuMode == AddHsMenuMode) {
+        if (mMenuMode == Hs::AddHsMenuMode) {
             machine()->postEvent(
                 HsMenuEventFactory::createOpenHomeScreenEvent());
         }
@@ -185,10 +184,10 @@ void HsAddToHomeScreenState::messageWidgetCorruptedFinished
         (HbAction* finishedAction)
 {
     if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
-        HsMenuService::executeAction(mEntryId, removeActionIdentifier());
+        HsMenuService::executeAction(mEntryId, Hs::removeActionIdentifier);
     }
     emit exit();
-    if (mMenuMode == AddHsMenuMode) {
+    if (mMenuMode == Hs::AddHsMenuMode) {
         machine()->postEvent(
             HsMenuEventFactory::createOpenHomeScreenEvent());
     }
@@ -223,11 +222,11 @@ bool HsAddToHomeScreenState::addShortcut(HsContentService &contentService)
 {
     HSMENUTEST_FUNC_ENTRY("HsAddToHomeScreenState::addShortcut");
     QVariantHash params;
-    params[URI] = SHORTCUT_WIDGET_URI;
+    params[Hs::uri] = SHORTCUT_WIDGET_URI;
     QVariantHash preferences;
     preferences[SHORTCUT_ID] = QString::number(mEntryId);
-    params[PREFERENCES] = preferences;
-    params[HOMESCREENDATA] = mToken;
+    params[Hs::preferences] = preferences;
+    params[Hs::homescreenData] = mToken;
     const bool result = contentService.createWidget(params);
     logActionResult("Adding shortcut", mEntryId, result);
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::addShortcut");
@@ -245,10 +244,10 @@ bool HsAddToHomeScreenState::addApplication(HsContentService &contentService,
                                              CaEntry& entry)
 {
     bool success = false;
-    if (entry.attributes().contains(widgetUriAttributeName())) {
+    if (entry.attributes().contains(Hs::widgetUriAttributeName)) {
         QVariantHash params;
-        const QString uri = entry.attribute(widgetUriAttributeName());
-        params[URI] = uri;       
+        const QString uri = entry.attribute(Hs::widgetUriAttributeName);
+        params[Hs::uri] = uri;       
         
         QVariantHash preferences;
         QMap<QString, QString> attributes = entry.attributes();
@@ -257,12 +256,12 @@ bool HsAddToHomeScreenState::addApplication(HsContentService &contentService,
             i.next();
             QString key(i.key());
             QString value(i.value());
-            if (key.contains(widgetParam())) {
-                preferences.insert(key.remove(widgetParam()),value);
+            if (key.contains(Hs::widgetParam)) {
+                preferences.insert(key.remove(Hs::widgetParam),value);
             }
         }
-        params[PREFERENCES] = preferences;
-        params[HOMESCREENDATA] = mToken;
+        params[Hs::preferences] = preferences;
+        params[Hs::homescreenData] = mToken;
 
         success = contentService.createWidget(params);
         if (!success) {
@@ -272,7 +271,7 @@ bool HsAddToHomeScreenState::addApplication(HsContentService &contentService,
             success = addShortcut(contentService);
     }
     emit exit();
-    if (mMenuMode == AddHsMenuMode) {
+    if (mMenuMode == Hs::AddHsMenuMode) {
         machine()->postEvent(
             HsMenuEventFactory::createOpenHomeScreenEvent());
     }

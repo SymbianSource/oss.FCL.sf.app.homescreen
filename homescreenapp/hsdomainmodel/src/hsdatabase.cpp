@@ -31,7 +31,7 @@ namespace
     QVariantList toVariantList(const QList<T> &list)
     {
         QVariantList vlist;
-        for (int i=0; i<list.count(); ++i) {
+        for (int i = 0; i < list.count(); ++i) {
             T item = list.at(i);
             vlist << item;
         }
@@ -811,6 +811,36 @@ bool HsDatabase::configuration(QVariantHash &configuration)
     }
 
     return false;
+}
+
+bool HsDatabase::updateWidgetZValues(const QHash<int, qreal> &data, Qt::Orientation orientation)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QString key = orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+    
+    QString statement = 
+        "UPDATE WidgetPresentations "
+        "SET zValue = ? "
+        "WHERE key = ? AND widgetId = ?";
+    
+    if (query.prepare(statement)) {
+        query.addBindValue(toVariantList(data.values()));
+        query.addBindValue(toVariantList(key, data.count()));
+        query.addBindValue(toVariantList(data.keys()));
+        if (!query.execBatch()) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
 /*!

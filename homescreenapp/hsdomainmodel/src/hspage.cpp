@@ -15,6 +15,8 @@
 *
 */
 
+#include <QHash>
+
 #include <HbInstance>
 
 #include "hsdomainmodeldatastructures.h"
@@ -498,6 +500,8 @@ void HsPage::updateZValues()
 {
     int z = 0;
 
+    QHash<int, qreal> widgetZValues;
+
     if (!mWidgets.isEmpty()) {
         QMultiMap<qreal, HsWidgetHost *> map;
         foreach (HsWidgetHost *widget, mWidgets) {
@@ -513,16 +517,21 @@ void HsPage::updateZValues()
         }
 
         foreach (HsWidgetHost *widget, sortedWidgets) {
+            widgetZValues.insert(widget->databaseId(), z);
             widget->visual()->setZValue(z++);
-            widget->savePresentation();
         }
     }
 
     if (!mNewWidgets.isEmpty()) {
         foreach (HsWidgetHost *widget, mNewWidgets) {
+            widgetZValues.insert(widget->databaseId(), z);
             widget->visual()->setZValue(z++);
-            widget->savePresentation();
         }
+    }
+
+    if (!widgetZValues.isEmpty()) {
+        HsDatabase::instance()->updateWidgetZValues(
+            widgetZValues, HsGui::instance()->orientation());
     }
 }
 /*!
@@ -559,6 +568,7 @@ void HsPage::disconnectWidget(HsWidgetHost *widget)
     widget->visual()->disconnect(this);
     widget->disconnect(this);
 }
+
 /*!
     Disconnect and remove widget
 */
@@ -577,12 +587,11 @@ void HsPage::onWidgetFinished()
         if (visual->scene()) {
             visual->scene()->removeItem(visual);
         }
+        disconnectWidget(widget);
+        widget->remove();
     }
-    
-
-    disconnectWidget(widget);
-    widget->remove();
 }
+
 /*!
     Remove widget if it faulted
 */

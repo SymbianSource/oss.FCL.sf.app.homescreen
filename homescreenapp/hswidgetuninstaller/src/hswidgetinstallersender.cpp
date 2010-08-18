@@ -67,7 +67,7 @@ void HsWidgetInstallerSender::widgetChanged(QString functionSignature, HsWidgetC
     widgetDescriptorHash["serviceXml"] = widgetDescriptor.serviceXml(); 
     widgetDescriptorHash["version"] = widgetDescriptor.version();
     widgetDescriptorHash["installationPath"] = widgetDescriptor.installationPath(); 
-    widgetDescriptorHash["translationFilename"] = widgetDescriptor.translationFilename();
+    widgetDescriptorHash["Hs::translationFilename"] = widgetDescriptor.translationFilename();
     
     XQServiceRequest snd(INTERFACE_NAME, functionSignature, true);
     XQRequestInfo requestInfo = snd.info();

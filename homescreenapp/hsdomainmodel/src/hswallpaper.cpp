@@ -260,10 +260,17 @@ QVariantHash HsSceneWallpaper::createTargets(const QString &sourcePath)
 {
     QVariantHash targets;
 
+    QString targetSuffix("png");
+
+    // Qt doesn't support writing GIFs, so let's save those and everything else but JPGs as PNGs
+    if (QFileInfo(sourcePath).suffix().toUpper() == "JPG" ) {
+        targetSuffix = QString("jpg");
+    }
+
     QString path = wallpaperDirectory()
                    + QString("temp%1_").arg(mId)
                    + QString("%1.")
-                   + QFileInfo(sourcePath).suffix();
+                   + targetSuffix;
 
     targets.insert(path.arg("portrait"), QSize((2 * 360) + HSCONFIGURATION_GET(bounceEffect), 640));
     targets.insert(path.arg("landscape"), QSize((2 * 640) + HSCONFIGURATION_GET(bounceEffect), 360));
@@ -318,10 +325,17 @@ QVariantHash HsPageWallpaper::createTargets(const QString &sourcePath)
 {
     QVariantHash targets;
 
+    QString targetSuffix("png");
+
+    // Qt doesn't support writing GIFs, so let's save those and everything else but JPGs as PNGs
+    if (QFileInfo(sourcePath).suffix().toUpper() == "JPG" ) {
+        targetSuffix = QString("jpg");
+    }
+
     QString path = wallpaperDirectory()
                    + QString("temp%1_").arg(mId)
                    + QString("%1.")
-                   + QFileInfo(sourcePath).suffix();
+                   + targetSuffix;
 
     targets.insert(path.arg("portrait"), QSize(360, 640));
     targets.insert(path.arg("landscape"), QSize(640, 360));

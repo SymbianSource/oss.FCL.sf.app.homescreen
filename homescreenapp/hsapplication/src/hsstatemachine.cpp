@@ -46,6 +46,13 @@
 #include "hstest_global.h"
 #include "hswidgetpositioningonwidgetmove.h"
 
+#ifdef Q_OS_SYMBIAN
+#include <xqappmgr.h>
+#include <xqcallinfo.h>
+#include <logsservices.h>
+#include <xqrequestinfo.h>
+#endif // Q_OS_SYMBIAN
+
 QTM_USE_NAMESPACE
 #define hbApp qobject_cast<HbApplication*>(qApp)
 
@@ -80,6 +87,7 @@ HsStateMachine::HsStateMachine(QObject *parent)
       mHomeScreenActive(false),
       mIdleStateActive(false),
       mEndKeyCaptured(false),
+      mSendKeyCaptured(false),
       mPublisher(NULL)
 #ifdef Q_OS_SYMBIAN
 	  ,keyCapture()
@@ -170,13 +178,82 @@ bool HsStateMachine::eventFilter(QObject *watched, QEvent *event)
     }
         
     bool result =  QStateMachine::eventFilter(watched, event);    
+
     if (event->type() == QEvent::KeyPress ) {
-        QKeyEvent* ke = static_cast<QKeyEvent *>(event);                 
-        result = (ke->key() == Qt::Key_Home);
+        QKeyEvent* ke = static_cast<QKeyEvent *>(event);
+        int key = ke->key();
+
+        if (key == Qt::Key_Home ) {
+            result = true;
+        }
+        else if (key == Qt::Key_Yes ) {
+            result = true;
+            if (mSendKeyCaptured == false && mHomeScreenActive == true) {
+                mSendKeyCaptured = true;
+                startDialer();                
+            }
+        }
     }
     return result;
 }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+/*!
+    \fn void HsStateMachine::startDialer()
+    Starts Dialer application
+*/
+void HsStateMachine::startDialer()
+    {
+    // copy-paste code from dialer widget
+#ifdef Q_OS_SYMBIAN
+    qDebug("HsStateMachine::startDialer()");
+            
+    QList<CallInfo> calls;
+    QScopedPointer<XQCallInfo> callInfo(XQCallInfo::create());
+    callInfo->getCalls(calls);
+    QList<QVariant> args;
+    QString service;
+    QString interface;
+    QString operation;
+
+    if (0 < calls.count()) {
+        qDebug("HS: call ongoing, bring Telephone to foreground");
+        service = "phoneui";
+        interface = "com.nokia.symbian.IStart";
+        operation = "start(int)";
+        int openDialer(0);
+        args << openDialer;
+    } else {
+        qDebug("HS: no calls, open Dialer");
+        service = "logs";
+        interface = "com.nokia.symbian.ILogsView";
+        operation = "show(QVariantMap)";
+        QVariantMap map;
+        map.insert("view_index", QVariant(int(LogsServices::ViewAll)));
+        map.insert("show_dialpad", QVariant(true));
+        map.insert("dialpad_text", QVariant(QString()));
+        args.append(QVariant(map));
+    }
+
+    XQApplicationManager appManager;
+    QScopedPointer<XQAiwRequest> request(appManager.create(service, interface, operation, false));
+    if (request == NULL) {
+        return;
+    }
+    request->setArguments(args);
+    XQRequestInfo info;
+    info.setForeground(true);
+    request->setInfo(info);
+    bool ret = request->send();
+    qDebug("HS: request sent successfully:", ret);
+#endif
+}
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
     Registers framework animations.
@@ -373,6 +450,7 @@ void HsStateMachine::updatePSKeys()
     } else {
         captureEndKey(false);
     }
+    mSendKeyCaptured = false;
 }
 
 /*!
@@ -414,13 +492,13 @@ void HsStateMachine::onIdleStateExited()
 */
 void HsStateMachine::activityRequested(const QString &name) 
 {
-    if (name == groupAppLibRecentView()) {
+    if (name == Hs::groupAppLibRecentView) {
         this->postEvent(
             HsMenuEventFactory::createOpenCollectionEvent(0,
-            collectionDownloadedTypeName()));
-    } else if (name == activityHsIdleView()) {
+            Hs::collectionDownloadedTypeName));
+    } else if (name == Hs::activityHsIdleView) {
         emit event_toIdle();
-    } else if (name == activityAppLibMainView()) {
+    } else if (name == Hs::activityAppLibMainView) {
         emit event_toAppLib();
     }
 }

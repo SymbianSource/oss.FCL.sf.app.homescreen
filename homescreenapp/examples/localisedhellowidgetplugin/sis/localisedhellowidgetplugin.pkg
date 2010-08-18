@@ -37,9 +37,9 @@
 
 "/epoc32/release/armv5/urel/localisedhellowidgetplugin.dll"                                             - "!:/sys/bin/localisedhellowidgetplugin.dll"
 "/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.qtplugin"    - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.qtplugin"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"    - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"
-"../resource/localisedhellowidgetplugin.xml"                                                            - "!:/data/widgets/servicefw/localisedhellowidgetplugin.xml"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"         - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"
+"../resource/localisedhellowidgetplugin.manifest"                                                       - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.manifest"
+"../resource/localisedhellowidgetplugin.xml"                                                            - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.xml"
+"../resource/localisedhellowidgetplugin.png"                                                            - "!:/private/20022F35/import/widgetregistry/20022F80/localisedhellowidgetplugin.png"
 
 "/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin.qm"      						    - "!:/resource/qt/translations/localisedhellowidgetplugin.qm"
 "/epoc32/data/z/resource/qt/translations/localisedhellowidgetplugin_fi.qm"                              - "!:/resource/qt/translations/localisedhellowidgetplugin_fi.qm"

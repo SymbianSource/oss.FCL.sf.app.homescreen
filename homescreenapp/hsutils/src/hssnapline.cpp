@@ -61,8 +61,8 @@ void HsSnapLine::setConfiguration(const QVariantHash &configuration)
 {
     bool canConvert = false;
     //The following values should be in int, so the status received in canConvert is ignored
-    mFadeInAnimationDuration = configuration[SNAPLINEFADEINDURATION].toInt(&canConvert);
-    mFadeOutAnimationDuration = configuration[SNAPLINEFADEOUTDURATION].toInt(&canConvert);
+    mFadeInAnimationDuration = configuration[Hs::snapLineFadeinDuration].toInt(&canConvert);
+    mFadeOutAnimationDuration = configuration[Hs::snapLineFadeoutDuration].toInt(&canConvert);
 }
 
 /*!

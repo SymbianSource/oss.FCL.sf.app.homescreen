@@ -77,10 +77,10 @@ HsSnapToLines::HsSnapToLines() :
 void HsSnapToLines::setConfiguration(const QVariantHash &configuration)
 {
     bool canConvert = false;
-    mSnapEnabled = configuration[SNAPENABLED].toBool();
+    mSnapEnabled = configuration[Hs::snapEnabled].toBool();
     //The following values should be in qreal, so the status received in canConvert is ignored
-    mSnapForce = configuration[SNAPFORCE].toDouble(&canConvert);
-    mSnapGap = configuration[SNAPGAP].toDouble(&canConvert);
+    mSnapForce = configuration[Hs::snapForce].toDouble(&canConvert);
+    mSnapGap = configuration[Hs::snapGap].toDouble(&canConvert);
 }
 
 /*!

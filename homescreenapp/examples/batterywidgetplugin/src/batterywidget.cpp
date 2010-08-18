@@ -15,10 +15,6 @@
 *
 */
 
-
-//#define OWN_TESTING
-
-
 #include <QGraphicsLinearLayout>
 #include <QPainter>
 #include <QTimer>
@@ -246,19 +242,13 @@ void BatteryWidget::stateChanged()
     mChargingTimer->stop();
     mChargingTimer->disconnect(this);
     connect(mDeviceInfo, SIGNAL(powerStateChanged(QSystemDeviceInfo::PowerState)), SLOT(powerStateChanged(QSystemDeviceInfo::PowerState)));
-#ifdef OWN_TESTING
-    connect(mChargingTimer, SIGNAL(timeout()), this, SLOT(updateChargingBatteryValue()));
-    mChargingTimer->start(1000);
-#else
     if (mDeviceInfo->currentPowerState() == QSystemDeviceInfo::WallPowerChargingBattery) {
         connect(mChargingTimer, SIGNAL(timeout()), this, SLOT(updateChargingBatteryValue()));
         mChargingTimer->start(500);
     } else {
-        connect(mDeviceInfo, SIGNAL(batteryStatusChanged(QSystemDeviceInfo::BatteryStatus)), SLOT(batteryStatusChanged(QSystemDeviceInfo::BatteryStatus)));
         connect(mDeviceInfo, SIGNAL(batteryLevelChanged(int)), SLOT(batteryLevelChanged(int)));
         mBatteryValue = mDeviceInfo->batteryLevel();
     }
-#endif    
     drawBatteryImage();
     update();
 }

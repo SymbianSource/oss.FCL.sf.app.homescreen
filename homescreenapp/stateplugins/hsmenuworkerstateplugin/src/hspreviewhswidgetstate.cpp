@@ -105,13 +105,13 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
    
     QVariantMap data = menuEvent->data();
-    mEntryId = data.value(itemIdKey()).toInt();
-    mToken = data.value(HOMESCREENDATA);
+    mEntryId = data.value(Hs::itemIdKey).toInt();
+    mToken = data.value(Hs::homescreenData);
     
         
     QSharedPointer<CaEntry> entry =
         CaService::instance()->getEntry(mEntryId);
-    mUri = entry->attribute(widgetUriAttributeName());
+    mUri = entry->attribute(Hs::widgetUriAttributeName);
     mPreviewDialog = buildPreviewDialog(*entry);
     mAddToHomescreenAction = mPreviewDialog->actions().value(0);
     
@@ -159,8 +159,8 @@ void HsPreviewHSWidgetState::previewDialogFinished(HbAction* finishedAction)
     if (finishedAction == mAddToHomescreenAction) {
 
         QVariantHash widgetData;
-        widgetData[URI] = mUri;
-        widgetData[HOMESCREENDATA] = mToken;
+        widgetData[Hs::uri] = mUri;
+        widgetData[Hs::homescreenData] = mToken;
         
         bool success = HsContentService::instance()->createWidget(widgetData);
         
@@ -207,7 +207,7 @@ void HsPreviewHSWidgetState::messageWidgetCorruptedFinished(HbAction* finishedAc
     mCorruptedMessage = NULL;
 	
     if (static_cast<QAction*>(finishedAction) == mConfirmRemovalAction) {
-        HsMenuService::executeAction(mEntryId, removeActionIdentifier());
+        HsMenuService::executeAction(mEntryId, Hs::removeActionIdentifier);
     }
     emit exit();
     

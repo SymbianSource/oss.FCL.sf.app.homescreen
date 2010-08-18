@@ -32,7 +32,7 @@
  \param target target state.
  */
 HsMenuModeTransition::HsMenuModeTransition(
-    HsMenuModeWrapper &menuMode, HsMenuMode expectedMenuMode, QState *target):
+    HsMenuModeWrapper &menuMode, Hs::HsMenuMode expectedMenuMode, QState *target):
     mMenuMode(menuMode), mExpectedMenuMode(expectedMenuMode)
 {
     setTargetState(target);

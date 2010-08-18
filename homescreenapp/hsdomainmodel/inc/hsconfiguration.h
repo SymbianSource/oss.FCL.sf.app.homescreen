@@ -38,8 +38,6 @@ class HSDOMAINMODEL_EXPORT HsConfiguration : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int bounceEffect READ bounceEffect WRITE setBounceEffect)
-    Q_PROPERTY(int widgetTapAndHoldTimeout READ widgetTapAndHoldTimeout WRITE setWidgetTapAndHoldTimeout)
-    Q_PROPERTY(int sceneTapAndHoldTimeout READ sceneTapAndHoldTimeout WRITE setSceneTapAndHoldTimeout)
     Q_PROPERTY(int pageChangeAnimationDuration READ pageChangeAnimationDuration WRITE setPageChangeAnimationDuration)
     Q_PROPERTY(int pageChangeZoneAnimationDuration READ pageChangeZoneAnimationDuration WRITE setPageChangeZoneAnimationDuration)
     Q_PROPERTY(int pageChangeZoneReverseAnimationDuration READ pageChangeZoneReverseAnimationDuration WRITE setPageChangeZoneReverseAnimationDuration)
@@ -51,8 +49,6 @@ class HSDOMAINMODEL_EXPORT HsConfiguration : public QObject
     Q_PROPERTY(int maximumPageCount READ maximumPageCount WRITE setMaximumPageCount)
     Q_PROPERTY(bool isShortcutLabelVisible READ isShortcutLabelVisible WRITE setShortcutLabelVisible)
     Q_PROPERTY(qreal bounceFeedbackEffectDistance READ bounceFeedbackEffectDistance WRITE setBounceFeedbackEffectDistance)
-    Q_PROPERTY(qreal pageChangePanDistanceInPixels READ pageChangePanDistanceInPixels WRITE setPageChangePanDistanceInPixels)
-    Q_PROPERTY(qreal tapAndHoldDistance READ tapAndHoldDistance WRITE setTapAndHoldDistance)
     Q_PROPERTY(qreal pageChangeZoneWidth READ pageChangeZoneWidth WRITE setPageChangeZoneWidth)
     Q_PROPERTY(qreal pageIndicatorSpacing READ pageIndicatorSpacing WRITE setPageIndicatorSpacing)
     Q_PROPERTY(qreal maximumWidgetHeight READ maximumWidgetHeight WRITE setMaximumWidgetHeight)
@@ -102,10 +98,6 @@ public:
 
     int bounceEffect() const { return mBounceEffect; }
     void setBounceEffect(int value) { SETVALUE(mBounceEffect, "bounceEffect") }
-    int widgetTapAndHoldTimeout() const { return mWidgetTapAndHoldTimeout; }
-    void setWidgetTapAndHoldTimeout(int value) { SETVALUE(mWidgetTapAndHoldTimeout, "widgetTapAndHoldTimeout") }
-    int sceneTapAndHoldTimeout() const { return mSceneTapAndHoldTimeout; }
-    void setSceneTapAndHoldTimeout(int value) { SETVALUE(mSceneTapAndHoldTimeout, "sceneTapAndHoldTimeout") }
     int pageChangeAnimationDuration() const { return mPageChangeAnimationDuration; }
     void setPageChangeAnimationDuration(int value) { SETVALUE(mPageChangeAnimationDuration, "pageChangeAnimationDuration") }
     int pageChangeZoneAnimationDuration() const { return mPageChangeZoneAnimationDuration; }
@@ -128,10 +120,6 @@ public:
     void setShortcutLabelVisible(bool value) { SETVALUE(mIsShortcutLabelVisible, "isShortcutLabelVisible") }
     qreal bounceFeedbackEffectDistance() const { return mBounceFeedbackEffectDistance; }
     void setBounceFeedbackEffectDistance(qreal value) { SETVALUE(mBounceFeedbackEffectDistance, "bounceFeedbackEffectDistance") }
-    qreal pageChangePanDistanceInPixels() const { return mPageChangePanDistanceInPixels; }
-    void setPageChangePanDistanceInPixels(qreal value) { SETVALUE(mPageChangePanDistanceInPixels, "pageChangePanDistanceInPixels") }
-    qreal tapAndHoldDistance() const { return mTapAndHoldDistance; }
-    void setTapAndHoldDistance(qreal value) { SETVALUE(mTapAndHoldDistance, "tapAndHoldDistance") }
     qreal pageChangeZoneWidth() const { return mPageChangeZoneWidth; }
     void setPageChangeZoneWidth(qreal value) { SETVALUE(mPageChangeZoneWidth, "pageChangeZoneWidth") }
     qreal pageIndicatorSpacing() const { return mPageIndicatorSpacing; }
@@ -212,8 +200,6 @@ private:
 
 private:
     int mBounceEffect;
-    int mWidgetTapAndHoldTimeout;
-    int mSceneTapAndHoldTimeout;
     int mPageChangeAnimationDuration;
     int mPageChangeZoneAnimationDuration;
     int mPageChangeZoneReverseAnimationDuration;
@@ -225,8 +211,6 @@ private:
     int mMaximumPageCount;
     bool mIsShortcutLabelVisible;
     qreal mBounceFeedbackEffectDistance;
-    qreal mPageChangePanDistanceInPixels;
-    qreal mTapAndHoldDistance;
     qreal mPageChangeZoneWidth;
     qreal mPageIndicatorSpacing;
     qreal mMaximumWidgetHeight;

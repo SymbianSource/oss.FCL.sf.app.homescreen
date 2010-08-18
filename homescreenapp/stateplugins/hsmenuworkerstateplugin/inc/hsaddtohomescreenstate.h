@@ -83,7 +83,7 @@ private:
 
     QAction *mConfirmAction;
     
-    HsMenuMode mMenuMode;
+    Hs::HsMenuMode mMenuMode;
     
     QVariant mToken;
 

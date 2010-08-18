@@ -109,21 +109,21 @@ void HsAllCollectionsState::setContextMenuOptions(HbAbstractViewItem *item, Entr
 
     HbAction *openAction = mContextMenu->addAction(hbTrId(
         "txt_common_menu_open"));
-    openAction->setData(OpenContextAction);
+    openAction->setData(Hs::OpenCollectionContextAction);
 
     // create context menu
     HbAction *addShortcutAction = mContextMenu->addAction(hbTrId(
                                       "txt_applib_menu_add_to_home_screen"));
-    addShortcutAction->setData(AddToHomeScreenContextAction);
+    addShortcutAction->setData(Hs::AddToHomeScreenContextAction);
     HbAction *renameAction = NULL;
     HbAction *deleteAction = NULL;
 
     if ((flags & RemovableEntryFlag)) {
         renameAction = mContextMenu->addAction(
                            hbTrId("txt_common_menu_rename_item"));
-        renameAction->setData(RenameContextAction);
+        renameAction->setData(Hs::RenameCollectionContextAction);
         deleteAction = mContextMenu->addAction(hbTrId("txt_common_menu_delete"));
-        deleteAction->setData(DeleteContextAction);
+        deleteAction->setData(Hs::DeleteCollectionContextAction);
     }
 }
 
@@ -166,73 +166,6 @@ void HsAllCollectionsState::stateExited()
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::stateExited");
     qDebug("AllCollectionsState::stateExited()");
-}
-
-/*!
- Slot connected to List widget in add mode.
- \param index Model index of the activated item.
- */
-void HsAllCollectionsState::addActivated(const QModelIndex &index)
-{
-    mMenuView->disconnect(this);
-    const int itemId = index.data(CaItemModel::IdRole).toInt();
-    machine()->postEvent(
-        HsMenuEventFactory::createAddToHomeScreenEvent(
-            itemId, mMenuMode->getHsMenuMode(), mMenuMode->getHsToken()));
-}
-
-/*!
- Slot connected to List widget in add mode.
- Called when item long pressed.
- \param item View item.
- \param coords Press point coordinates.
- */
-void HsAllCollectionsState::addLongPressed(HbAbstractViewItem *item,
-        const QPointF &coords)
-{
-    Q_UNUSED(coords);
-    mMenuView->disconnect(this);
-    const int itemId = item->modelIndex().data(CaItemModel::IdRole).toInt();
-    machine()->postEvent(
-        HsMenuEventFactory::createAddToHomeScreenEvent(itemId,
-                mMenuMode->getHsMenuMode(), mMenuMode->getHsToken()));
-}
-
-/*!
- Handles context menu actions.
- \param action to be handled.
- */
-void HsAllCollectionsState::contextMenuAction(HbAction *action)
-{
-    HsContextAction command =
-        static_cast<HsContextAction>(action->data().toInt());
-
-    const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
-
-    switch (command) {
-        case AddToHomeScreenContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAddToHomeScreenEvent(
-                    itemId,
-                    mMenuMode->getHsMenuMode(),
-                    mMenuMode->getHsToken()));
-            break;
-        case RenameContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createRenameCollectionEvent(itemId));
-            break;
-        case DeleteContextAction:
-             machine()->postEvent(
-                HsMenuEventFactory::createDeleteCollectionEvent(itemId));
-            break;
-        case OpenContextAction:
-            openCollection(mContextModelIndex);
-            break;
-        default:
-            break;
-    }
-
-    mMenuView->hideSearchPanel();
 }
 
 /*!

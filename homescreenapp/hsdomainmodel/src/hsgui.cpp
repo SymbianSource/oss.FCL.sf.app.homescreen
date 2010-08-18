@@ -127,6 +127,9 @@ void HsGui::cleanupIdleUi()
         
         delete mImpl->mPageCrawlingAnimation;
         mImpl->mPageCrawlingAnimation = 0;
+        // This gets deleted when mImpl->mIdleView is deleted
+        // so just nullify.
+        mImpl->mIdleWidget = 0;
     }
     
 }

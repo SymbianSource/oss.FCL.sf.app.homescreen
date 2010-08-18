@@ -17,8 +17,8 @@
 
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
-#include <settingsinternalcrkeys.h>
-
+#include <coreapplicationuissdkcrkeys.h>
+//#include <settingsinternalcrkeys.h> //TODO? these don't work in wk30..
 
 #include "snsrindicatormodel.h"
 #include "snsrindicatorinfo.h"
@@ -178,8 +178,9 @@ void SnsrIndicatorModel::offlineValueChanged( const XQSettingsKey &key, const QV
 {
     bool previousState(mOfflineStateOn);
     switch ( key.key() ) {
-        case KSettingsAirplaneMode:
-             if( value.toInt() == 1)
+        case KCoreAppUIsNetworkConnectionAllowed:
+             if(value.toInt() == ECoreAppUIsNetworkConnectionNotAllowed &&
+                value.isValid())
                  {
                  mOfflineStateOn = true;                     
                  }
@@ -407,8 +408,10 @@ void SnsrIndicatorModel::initializeOfflineModeIndication()
     //connect to offlineValueChanged slot so we get information if the value is changed while screensaver is on
     connect(mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
             this, SLOT(offlineValueChanged( const XQSettingsKey, const QVariant)));
-    mOfflineKey = new XQSettingsKey(XQSettingsKey::TargetCentralRepository, KCRUidCommunicationSettings.iUid, KSettingsAirplaneMode);
-    if(mSettingsManager->readItemValue(*mOfflineKey).toInt() == 1)
+    mOfflineKey = new XQSettingsKey(XQSettingsKey::TargetCentralRepository, 
+                                    KCRUidCoreApplicationUIs.iUid, 
+                                    KCoreAppUIsNetworkConnectionAllowed);
+    if(mSettingsManager->readItemValue(*mOfflineKey).toInt() == ECoreAppUIsNetworkConnectionNotAllowed)
         {
         mOfflineStateOn = true;
         } 
@@ -420,7 +423,7 @@ void SnsrIndicatorModel::initializeOfflineModeIndication()
  */
 void SnsrIndicatorModel::getCurrentOfflineState()
 {
-    if(mSettingsManager->readItemValue(*mOfflineKey).toInt() == 1) {
+    if(mSettingsManager->readItemValue(*mOfflineKey).toInt() == ECoreAppUIsNetworkConnectionNotAllowed) {
         mOfflineStateOn = true;
     }
     else {

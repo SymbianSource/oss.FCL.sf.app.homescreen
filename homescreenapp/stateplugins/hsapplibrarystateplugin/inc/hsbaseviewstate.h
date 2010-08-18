@@ -70,6 +70,11 @@ protected slots:
     virtual int checkSoftwareUpdates();
     virtual bool openTaskSwitcher();
     virtual void closeContextMenu();
+    virtual void addToHomeScreen(const int entryId);
+    virtual void contextMenuAction(HbAction *action);
+    virtual void addActivated(const QModelIndex &index);
+    virtual void addLongPressed(HbAbstractViewItem *item,
+                                        const QPointF &coords);
     
 protected:
     

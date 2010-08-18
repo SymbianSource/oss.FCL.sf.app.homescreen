@@ -22,18 +22,18 @@
  \param sortAttribute menu sort order
  */
 SortAttribute HsMenuServiceUtils::sortBy(
-    HsSortAttribute menuSortAttribute)
+    Hs::HsSortAttribute menuSortAttribute)
 {
     SortAttribute sortAttribute(DefaultSortAttribute);
     switch (menuSortAttribute) {
-    case AscendingNameHsSortAttribute:
-    case DescendingNameHsSortAttribute:
+    case Hs::AscendingNameHsSortAttribute:
+    case Hs::DescendingNameHsSortAttribute:
         sortAttribute = NameSortAttribute;
         break;
-    case NoHsSortAttribute:
-    case LatestOnTopHsSortAttribute:
-    case OldestOnTopHsSortAttribute:
-    case CustomHsSortAttribute:
+    case Hs::NoHsSortAttribute:
+    case Hs::LatestOnTopHsSortAttribute:
+    case Hs::OldestOnTopHsSortAttribute:
+    case Hs::CustomHsSortAttribute:
         sortAttribute = DefaultSortAttribute;
         break;
     }
@@ -45,18 +45,18 @@ SortAttribute HsMenuServiceUtils::sortBy(
  \param sortAttribute menu sort order
  */
 Qt::SortOrder HsMenuServiceUtils::sortOrder(
-    HsSortAttribute menuSortAttribute)
+    Hs::HsSortAttribute menuSortAttribute)
 {
     Qt::SortOrder sortOrder(Qt::AscendingOrder);
     switch (menuSortAttribute) {
-    case NoHsSortAttribute:
-    case AscendingNameHsSortAttribute:
-    case LatestOnTopHsSortAttribute:
-    case CustomHsSortAttribute:
+    case Hs::NoHsSortAttribute:
+    case Hs::AscendingNameHsSortAttribute:
+    case Hs::LatestOnTopHsSortAttribute:
+    case Hs::CustomHsSortAttribute:
         sortOrder = Qt::AscendingOrder;
         break;
-    case DescendingNameHsSortAttribute:
-    case OldestOnTopHsSortAttribute:
+    case Hs::DescendingNameHsSortAttribute:
+    case Hs::OldestOnTopHsSortAttribute:
         sortOrder = Qt::DescendingOrder;
         break;
     }

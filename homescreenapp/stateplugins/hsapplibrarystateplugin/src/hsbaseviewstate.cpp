@@ -34,6 +34,7 @@
 #include "hsmenumodetransition.h"
 #include "hsmenuentryremovedhandler.h"
 #include "hsmainwindow.h"
+#include "hsmenumodewrapper.h"
 
 
 /*!
@@ -180,10 +181,6 @@ void HsBaseViewState::normalModeEntered()
 {
     setMenuOptions();
     connect(mMenuView.data(),
-            SIGNAL(activated(QModelIndex)),
-            mMenuView.data(),
-            SLOT(hideSearchPanel()));
-    connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
 }
@@ -194,8 +191,8 @@ void HsBaseViewState::normalModeEntered()
 HsBaseViewState::~HsBaseViewState()
 {
     delete mModel;
-	mViewOptions = mMenuView->view()->takeMenu();
-	delete mViewOptions;
+    mViewOptions = mMenuView->view()->takeMenu();
+    delete mViewOptions;
 }
 
 /*!
@@ -208,10 +205,10 @@ void HsBaseViewState::launchItem(const QModelIndex &index)
 
     QSharedPointer<const CaEntry> entry = mModel->entry(index);
     if (!entry.isNull() && !(entry->flags() & UninstallEntryFlag)) {
-        if (entry->entryTypeName() == widgetTypeName()) {
+        if (entry->entryTypeName() == Hs::widgetTypeName) {
             machine()->postEvent(HsMenuEventFactory::createPreviewHSWidgetEvent(entry->id(),
-                entry->entryTypeName(), entry->attribute(widgetUriAttributeName()),
-                entry->attribute(widgetLibraryAttributeName())));
+                entry->entryTypeName(), entry->attribute(Hs::widgetUriAttributeName),
+                entry->attribute(Hs::widgetLibraryAttributeName)));
             HsMenuService::touch(entry->id());
         }
         else {
@@ -284,6 +281,20 @@ void HsBaseViewState::openAppLibrary()
 }
 
 /*!
+ Triggers event so that a state adding to Home Screen is reached
+ \param entryId of an item to be added to homescreen.
+ \retval void
+ */
+void HsBaseViewState::addToHomeScreen(const int entryId)
+{
+    HSMENUTEST_FUNC_ENTRY("HsBaseViewState::addToHomeScreen");
+    machine()->postEvent(
+        HsMenuEventFactory::createAddToHomeScreenEvent(
+            entryId, mMenuMode->getHsMenuMode(), mMenuMode->getHsToken()));
+    HSMENUTEST_FUNC_EXIT("HsBaseViewState::addToHomeScreen");
+}
+
+/*!
  Check software updates.
  \retval 0 if operation is successful.
  */
@@ -305,6 +316,97 @@ void HsBaseViewState::closeContextMenu()
         mContextMenu->close();
     }    
 }
+
+/*!
+ Handles context menu actions
+ \param action action taken in context menu
+ */
+void HsBaseViewState::contextMenuAction(HbAction *action)
+{
+    Hs::HsContextAction command =
+        static_cast<Hs::HsContextAction>(action->data().toInt());
+
+    const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
+
+    switch (command) {
+        case Hs::AddToHomeScreenContextAction:
+            addToHomeScreen(itemId);
+            break;
+        case Hs::AddToCollectionFromApplicationsViewContextAction:
+            // Addding a specific application to
+            // an existing collection via item specific menu.
+            machine()->postEvent(
+                HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
+                    Hs::NoHsSortAttribute, itemId));
+            break;
+        case Hs::AddToCollectionFromCollectionViewContextAction:
+            machine()->postEvent(
+                HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
+                    -1, itemId));
+            break;
+        case Hs::UninstallContextAction:
+            machine()->postEvent(
+                HsMenuEventFactory::createUninstallApplicationEvent(
+                    itemId));
+            break;
+        case Hs::AppSettingContextAction:
+            machine()->postEvent(
+                HsMenuEventFactory::createAppSettingsViewEvent(itemId));
+            break;
+        case Hs::AppDetailsContextAction:
+            machine()->postEvent(
+                HsMenuEventFactory::createAppDetailsViewEvent(itemId));
+            break;
+        case Hs::OpenAppContextAction:
+            launchItem(mContextModelIndex);
+            break;
+        case Hs::RenameCollectionContextAction:
+            machine()->postEvent(
+                HsMenuEventFactory::createRenameCollectionEvent(itemId));
+            break;
+        case Hs::DeleteCollectionContextAction:
+             machine()->postEvent(
+                HsMenuEventFactory::createDeleteCollectionEvent(itemId));
+            break;
+        case Hs::OpenCollectionContextAction:
+            openCollection(mContextModelIndex);
+            break;
+        default:
+            break;
+    }
+    
+    HsMenuService::touch(itemId);
+}
+
+/*!
+ Slot connected to List widget in add mode.
+ \param index Model index of the activated item.
+ */
+void HsBaseViewState::addActivated(const QModelIndex &index)
+{
+    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addActivated");
+    mMenuView->disconnect(this);
+    const int itemId = index.data(CaItemModel::IdRole).toInt();
+    addToHomeScreen(itemId);
+    HsMenuService::touch(itemId);
+    HSMENUTEST_FUNC_EXIT("HsAllAppsState::addActivated");
+}
+
+/*!
+ Slot connected to List widget in add mode.
+ Called when item long pressed.
+ \param item View item.
+ \param coords Press point coordinates.
+ */
+void HsBaseViewState::addLongPressed(HbAbstractViewItem *item,
+                                    const QPointF &coords)
+{
+    Q_UNUSED(coords);
+    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addLongPressed");
+    addActivated(item->modelIndex());
+    HSMENUTEST_FUNC_EXIT("HsAllAppsState::addLongPressed");
+}
+
 /*!
  Scrolls view to first item at top
  */
@@ -338,7 +440,8 @@ void HsBaseViewState::defineTransitions()
     connect(normalModeState, SIGNAL(exited()),SLOT(normalModeExited()));
 
     initialState->addTransition(new HsMenuModeTransition(
-            *mMenuMode, NormalHsMenuMode, normalModeState));
+            *mMenuMode, Hs::NormalHsMenuMode, normalModeState));
     initialState->addTransition(new HsMenuModeTransition(
-            *mMenuMode, AddHsMenuMode, addModeState));
+            *mMenuMode, Hs::AddHsMenuMode, addModeState));
 }
+

@@ -18,9 +18,9 @@
 #ifndef HSSEARCHVIEW_H
 #define HSSEARCHVIEW_H
 
+#include <QInputContext>
 #include <QModelIndex>
 #include <QScopedPointer>
-
 #include <HbShrinkingVkbHost>
 
 #include "hsmenustates_global.h"
@@ -50,9 +50,8 @@ public:
     ~HsSearchView();
 
     void setSearchPanelVisible(bool visible);
-private:
-
     bool isActive() const;
+private:
 
     QModelIndex firstVisibleItemIndex(const HbListView *view) const;
     void searchBegins();
@@ -65,11 +64,13 @@ private:
     void disconnectSearchPanelSignals();
 
     void searchFinished();
+    void sendEvent(const QEvent::Type eventType);
+    void openVkb();
 
 signals:
     void activated(const QModelIndex &index);
     void longPressed(HbAbstractViewItem *item, const QPointF &coords);
-
+    void searchComplete(const QModelIndex &firstMatching);
 public slots:
     void hideSearchPanel();
 
@@ -81,6 +82,7 @@ private slots:
 private slots:
     void findItem(QString criteriaStr);
     void setNoResultsVisibility();
+    void hideVkb();
 
 private:
     void setOriginatingContext();
@@ -104,7 +106,6 @@ private:
     QScopedPointer<HbShrinkingVkbHost> mVkbHost;
     HsSearchViewBuilder mSearchViewBuilder;
     bool mEmptyResultText;
-
 };
 
 #endif /* HSSEARCHVIEW_H_ */

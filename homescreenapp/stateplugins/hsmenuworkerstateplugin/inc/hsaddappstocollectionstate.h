@@ -129,7 +129,7 @@ private:
 
     CollectionActionType mActionType;
 
-    HsSortAttribute mApplicationsSortAttribute;
+    Hs::HsSortAttribute mApplicationsSortAttribute;
 
     HsAppsCheckList *mAppsCheckList;
 

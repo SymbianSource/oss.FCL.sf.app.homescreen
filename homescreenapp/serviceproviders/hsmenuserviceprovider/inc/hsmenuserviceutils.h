@@ -32,9 +32,9 @@ public:
 
     // Function declarations
     static SortAttribute sortBy(
-        HsSortAttribute menuSortAttribute);
+        Hs::HsSortAttribute menuSortAttribute);
     static Qt::SortOrder sortOrder(
-        HsSortAttribute menuSortAttribute);
+        Hs::HsSortAttribute menuSortAttribute);
 
 };
 

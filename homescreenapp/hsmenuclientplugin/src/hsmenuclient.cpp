@@ -139,7 +139,7 @@ bool HsMenuClientPrivate::add(const QVariantMap &entryPreference)
     else if ((pref.contains(hsItemName) || pref.contains(hsItemLocName)) && pref.contains(hsitemLaunchUri) && pref.contains(hsitemPublisherId))
         {
             CaEntry add_entry(ItemEntryRole);
-            add_entry.setEntryTypeName(templatedApplicationTypeName());
+            add_entry.setEntryTypeName(Hs::templatedApplicationTypeName);
             // mandatory values
             if(pref.contains(hsItemLocName))
                 {
@@ -206,7 +206,7 @@ QList<QVariantMap > HsMenuClientPrivate::getList(const QVariantMap &queryPrefere
     // define query
     query.setFlagsOn(VisibleEntryFlag);
     query.setEntryRoles(ItemEntryRole);
-    query.setEntryTypeNames(QStringList(templatedApplicationTypeName()));
+    query.setEntryTypeNames(QStringList(Hs::templatedApplicationTypeName));
     
     
     // add atributes to caquery

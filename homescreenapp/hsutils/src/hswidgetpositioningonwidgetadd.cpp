@@ -200,15 +200,15 @@ QList<QRectF> HsWidgetOrganizer::convert(
     mAnchors = temp;
 
     // test flag
-    int test = 0;
+//    int test = 0;
 
     // initialize anchor network for widget positions
-    if (test == 0) {
+//    if (test == 0) {
         initAnchors(contentArea.size());
-    } else {
-        mAnchorDistance = 2;
-        initAnchors(QSizeF(6,6));
-    }
+//    } else {
+//        mAnchorDistance = 2;
+//        initAnchors(QSizeF(6,6));
+//    }
 
     // mark existing rects (widgets) reserved
     foreach (QRectF rect, existingRects) {
@@ -229,12 +229,12 @@ QList<QRectF> HsWidgetOrganizer::convert(
     // get positions for all new rects (widgets)
     for ( int i = 0; i < newRects.count(); i++) {
         bool found = false;
-        if (test == 0) {
+//        if (test == 0) {
             // find first free anchor point for rect
             found = getAnchorPoint(newRects.at(i).size());
-        } else {
-            found = getAnchorPoint(QSizeF(2,2));
-        }
+//        } else {
+//            found = getAnchorPoint(QSizeF(2,2));
+//        }
 
         if (found) {
             // save to geometry list
@@ -264,6 +264,7 @@ QList<QRectF> HsWidgetOrganizer::convert(
         QList<QRectF> calculatedRects =
             centerAlgorithm->convert(contentArea, tmpExistingRects, notOrganizedRects, QPointF());
         toGeometries += calculatedRects;
+        delete centerAlgorithm;
     }
 
     return toGeometries;
@@ -289,7 +290,7 @@ bool HsWidgetOrganizer::initAnchors(const QSizeF &areaSize)
     mAnchorRows = lenghtInAnchorPoints(areaSize.height());
 
     // create anchor network
-    for (int i = 0; i < (mAnchorRows * mAnchorColumns); i = i++) {
+    for (int i = 0; i < (mAnchorRows * mAnchorColumns); i++) {
         mAnchors << false;
     }
     // zero start points
@@ -376,8 +377,8 @@ bool HsWidgetOrganizer::searchHeightSpace(int contentHeight)
 {
     mEndHeightAnchorPoint = QPointF(0,0);
  
-    for (int i = mStartWidthAnchorPoint.x(); i <= mEndWidthAnchorPoint.x(); i = i++) {
-        for (int j = mStartWidthAnchorPoint.y(); j <= (mStartWidthAnchorPoint.y() + contentHeight); j = j++) {
+    for (int i = mStartWidthAnchorPoint.x(); i <= mEndWidthAnchorPoint.x(); i++) {
+        for (int j = mStartWidthAnchorPoint.y(); j <= (mStartWidthAnchorPoint.y() + contentHeight); j++) {
             int index = getIndexForCoordinate(QPointF(i,j));
             // check that index is not out of bounds
             if (index == -1) {

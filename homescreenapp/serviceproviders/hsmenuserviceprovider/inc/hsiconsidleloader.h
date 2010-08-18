@@ -19,6 +19,7 @@
 #define HSICONSIDLELOADER_H_
 
 #include <QObject>
+#include <QSize>
 #include "hsmenuservice_global.h"
 
 class QTimer;
@@ -41,6 +42,8 @@ private slots:
 private:
     HsMenuItemModel *mModel;
     QTimer *mTimer;
+    const QSizeF mIconSize;
+    int mOutStandingIconToLoad;
 };
 
 #endif /* HSICONSIDLELOADER_H_ */

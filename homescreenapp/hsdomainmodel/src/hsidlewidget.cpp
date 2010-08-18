@@ -278,8 +278,8 @@ void HsIdleWidget::showPageIndicator()
 void HsIdleWidget::showVerticalSnapLine(const QLineF &snapLine)
 {
     QVariantHash snapConfiguration;
-    snapConfiguration[SNAPLINEFADEINDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeInDuration));
-    snapConfiguration[SNAPLINEFADEOUTDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeOutDuration));
+    snapConfiguration[Hs::snapLineFadeinDuration] = QString::number(HSCONFIGURATION_GET(snapLineFadeInDuration));
+    snapConfiguration[Hs::snapLineFadeoutDuration] = QString::number(HSCONFIGURATION_GET(snapLineFadeOutDuration));
 
     mVerticalSnapLine->setConfiguration(snapConfiguration);
     mVerticalSnapLine->showLine(snapLine);
@@ -291,8 +291,8 @@ void HsIdleWidget::showVerticalSnapLine(const QLineF &snapLine)
 void HsIdleWidget::showHorizontalSnapLine(const QLineF &snapLine)
 {
     QVariantHash snapConfiguration;
-    snapConfiguration[SNAPLINEFADEINDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeInDuration));
-    snapConfiguration[SNAPLINEFADEOUTDURATION] = QString::number(HSCONFIGURATION_GET(snapLineFadeOutDuration));
+    snapConfiguration[Hs::snapLineFadeinDuration] = QString::number(HSCONFIGURATION_GET(snapLineFadeInDuration));
+    snapConfiguration[Hs::snapLineFadeoutDuration] = QString::number(HSCONFIGURATION_GET(snapLineFadeOutDuration));
 
     mHorizontalSnapLine->setConfiguration(snapConfiguration);
     mHorizontalSnapLine->showLine(snapLine);

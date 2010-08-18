@@ -97,7 +97,7 @@ void HsCollectionNameState::onEntry(QEvent *event)
         HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
         QVariantMap data = menuEvent->data();
 
-        mItemId = data.value(itemIdKey()).toInt();
+        mItemId = data.value(Hs::itemIdKey).toInt();
     }
     mCollectionNameDialog = new HsCollectionNameDialog(mItemId);
     mCollectionNameDialog->open(this, SLOT(dialogFinished(HbAction*)));
@@ -120,7 +120,8 @@ void HsCollectionNameState::dialogFinished(HbAction* finishedAction)
             HsMenuService::createCollection(newName);
         }
     }
-    mCollectionNameDialog = NULL; //set to NULL since this will be deleted atfer close
+    //set to NULL since this will be deleted atfer close
+    mCollectionNameDialog = NULL;
     emit exit();
 }
 
@@ -130,7 +131,8 @@ void HsCollectionNameState::dialogFinished(HbAction* finishedAction)
 void HsCollectionNameState::cleanUp()
 {
     if (mCollectionNameDialog) {
-        disconnect(mCollectionNameDialog, SIGNAL(finished(HbAction*)), this, SLOT(dialogFinished(HbAction*)));
+        disconnect(mCollectionNameDialog, SIGNAL(finished(HbAction*)),
+                   this, SLOT(dialogFinished(HbAction*)));
         mCollectionNameDialog->close();
         mCollectionNameDialog = NULL;
     }

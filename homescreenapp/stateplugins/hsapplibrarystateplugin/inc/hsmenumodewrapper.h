@@ -26,13 +26,13 @@ class HsMenuModeWrapper
 public:
     HsMenuModeWrapper();
     
-    HsMenuMode getHsMenuMode() const;
+    Hs::HsMenuMode getHsMenuMode() const;
     QVariant getHsToken() const;
 
-    void setHsMenuMode(HsMenuMode menuMode, QVariant token = NULL);
+    void setHsMenuMode(Hs::HsMenuMode menuMode, QVariant token = NULL);
 
 private:
-    HsMenuMode mMode;
+    Hs::HsMenuMode mMode;
     QVariant mToken;
 };
 

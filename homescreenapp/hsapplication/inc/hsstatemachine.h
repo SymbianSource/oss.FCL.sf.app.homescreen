@@ -54,7 +54,7 @@ protected:
 private:
     Q_DISABLE_COPY(HsStateMachine)
 
-
+    void startDialer();
     void registerAnimations();
     void createStatePublisher();
     void createContentServiceParts();
@@ -74,6 +74,7 @@ private:
 	bool mHomeScreenActive;
 	bool mIdleStateActive;
     bool mEndKeyCaptured;
+    bool mSendKeyCaptured;
 
 	QValueSpacePublisher *mPublisher;
 	

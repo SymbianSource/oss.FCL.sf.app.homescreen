@@ -16,9 +16,7 @@
  */
 
 #include <QApplication>
-#include <QInputContext>
 #include <QSortFilterProxyModel>
-
 #include <HbGroupBox>
 #include <HbLineEdit>
 #include <HbListView>
@@ -33,6 +31,27 @@
 #include "hssearchview.h"
 
 /*!
+ * \fn void activated(const QModelIndex &index)
+ * This signal is emitted when item is tapped.
+ * \param index of an item that was tapped.
+ */
+
+ /*!
+ * \fn void longPressed(HbAbstractViewItem *item, const QPointF &coords)
+ * This singal is emitted when view is long pressed.
+ * \param item View item that was long pressed.
+ * \param coords View coordinates of the long press.
+ */
+ 
+ /*!
+  * \fn void searchComplete(const QModelIndex &firstMatching)
+  * This signal is emitted when search action has been finished 
+  * and search view is about to quit.
+  * \param firstMatching of first item in search filtered view.
+  */
+    
+    
+/*!
   Set up proxy model for search.
   \param builder Retrieves UI widgets.
   \param stateContext Identifies the state where search starts from.
@@ -46,8 +65,9 @@ HsSearchView::HsSearchView(HsMenuViewBuilder &builder,
     mVkbHost(NULL), mSearchViewBuilder(), mEmptyResultText(true)
 {
     mProxyModel->setFilterRole(CaItemModel::TextRole);
-    mProxyModel->setFilterKeyColumn(1);
+    mProxyModel->setFilterKeyColumn(0);
     mProxyModel->setSortRole(CaItemModel::TextRole);
+    mProxyModel->setDynamicSortFilter(true);
 }
 
 /*!
@@ -128,6 +148,8 @@ void HsSearchView::searchBegins()
 
     mMainWindow.setCurrentView(mSearchView);
 
+    openVkb();
+
     mSearchListView->scrollTo(
         mProxyModel->mapFromSource(mSearchViewInitialIndex),
         HbAbstractItemView::PositionAtTop);
@@ -157,10 +179,14 @@ void HsSearchView::setNoResultsVisibility()
 */
 void HsSearchView::connectSearchItemViewsSignals()
 {
+    connect(mSearchListView, SIGNAL(pressed(QModelIndex)),
+                this, SLOT(hideVkb()), Qt::UniqueConnection);
     connect(mSearchListView, SIGNAL(activated(QModelIndex)),
-            this, SLOT(activatedProxySlot(QModelIndex)));
+            this, SLOT(activatedProxySlot(QModelIndex)), Qt::UniqueConnection);
     connect(mSearchListView, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
-            this, SLOT(longPressedProxySlot(HbAbstractViewItem *, QPointF)));
+            this, SLOT(longPressedProxySlot(HbAbstractViewItem *, QPointF)), 
+			    Qt::UniqueConnection);
+
 }
 
 /*!
@@ -170,6 +196,8 @@ void HsSearchView::connectSearchItemViewsSignals()
 */
 void HsSearchView::disconnectSearchItemViewsSignals()
 {
+    disconnect(mSearchListView, SIGNAL(pressed(QModelIndex)),
+            this, SLOT(hideVkb()));
     disconnect(mSearchListView, SIGNAL(activated(QModelIndex)),
             this, SLOT(activatedProxySlot(QModelIndex)));
     disconnect(mSearchListView,
@@ -195,6 +223,8 @@ void HsSearchView::hideSearchPanel()
 */
 void HsSearchView::connectSearchPanelSignals()
 {
+    connect(mProxyModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+            this, SLOT(setNoResultsVisibility()), Qt::UniqueConnection);
     connect(mProxyModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
             this, SLOT(setNoResultsVisibility()));
     connect(mProxyModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
@@ -202,7 +232,7 @@ void HsSearchView::connectSearchPanelSignals()
     connect(mSearchPanel, SIGNAL(exitClicked()),
             this, SLOT(hideSearchPanel()));
     connect(mSearchPanel, SIGNAL(criteriaChanged(QString)),
-            this, SLOT(findItem(QString)));
+            this, SLOT(findItem(QString)), Qt::UniqueConnection);
 }
 
 /*!
@@ -225,18 +255,17 @@ void HsSearchView::searchFinished()
 
     mIndexToScrollAfterSearchDone = firstVisibleItemIndex(mSearchListView);
 
-    setOriginatingContext();
-
-    mMainWindow.setCurrentView(mBuilder.currentView());
-
-    mListView->scrollTo(mProxyModel->mapToSource(
-            mIndexToScrollAfterSearchDone),
-            HbAbstractItemView::PositionAtTop);
+    // emiting searchComplete must be done
+    // after this->isActive() returns false
+    mSearchListView = NULL;
+    mSearchPanel = NULL;
+    
+    emit searchComplete(mProxyModel->mapToSource(
+            mIndexToScrollAfterSearchDone));
 
     HbVkbHost::detachHost(mSearchView);
     mVkbHost.reset(NULL);
-    mSearchListView = NULL;
-    mSearchPanel = NULL;
+
     mProxyModel->setSourceModel(NULL);
     HSMENUTEST_FUNC_EXIT("HsSearchView::searchFinished");
 }
@@ -254,7 +283,7 @@ void HsSearchView::findItem(QString criteriaStr)
             QRegExp("(^|\\b)" + criteriaStr, Qt::CaseInsensitive));
 
     mSearchListView->scrollTo(
-            mProxyModel->index(0,0), HbAbstractItemView::PositionAtTop);
+            mProxyModel->index(0, 0), HbAbstractItemView::PositionAtTop);
 
     HSMENUTEST_FUNC_EXIT("HsSearchView::findItem");
 }
@@ -340,10 +369,43 @@ void HsSearchView::setOriginatingContext()
 }
 
 /*!
-  \retval true when search view is already invoked, \a false otherwise.
+  \retval true when search view is actually responsible for view management, 
+  \a false otherwise.
  */
 bool HsSearchView::isActive() const
 {
     return mSearchListView != NULL;
+}
+
+/*!
+  Slot to close virtual keyboard.
+ */
+void HsSearchView::hideVkb()
+{
+    sendEvent(QEvent::CloseSoftwareInputPanel);
+}
+
+/*!
+ Makes Vkb open provided there is an editor visible in the graphics scene.
+ */
+void HsSearchView::openVkb()
+{
+    sendEvent(QEvent::RequestSoftwareInputPanel);
+}
+
+/*!
+  Sends QEvent.
+  \param eventType Identifies event to be sent.
+ */
+void HsSearchView::sendEvent(const QEvent::Type eventType)
+{
+    QInputContext *const ic = qApp->inputContext();
+    if (ic != NULL) {
+        QScopedPointer<QEvent> event(
+            new QEvent(eventType));
+
+        ic->filterEvent(event.data());
+    }
+
 }
 

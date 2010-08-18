@@ -136,9 +136,8 @@ QString HsCollectionNameDialog::generateUniqueCollectionName(
     unsigned int numToAppend(1);
 
     while (mOtherCollectionsNames.contains(newName)) {
-        newName =
-                name
-                + QString("(%1)").arg(numToAppend, 2, 10, QLatin1Char('0'));
+        newName = hbTrId("txt_applib_dialog_entry_collectionl1").arg(
+                numToAppend);
         numToAppend++;
     }
 

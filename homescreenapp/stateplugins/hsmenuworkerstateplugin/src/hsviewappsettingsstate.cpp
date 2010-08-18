@@ -101,12 +101,12 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
     
-    const int entryId = data.value(itemIdKey()).toInt();   
+    const int entryId = data.value(Hs::itemIdKey).toInt();   
     QSharedPointer<const CaEntry> entry = CaService::instance()->getEntry(entryId);    
     
     QString pluginPath;
     pluginPath = pluginPath.append("/resource/qt/plugins/appsettings/")
-        .append(entry->attribute(appSettingsPlugin())).append(".qtplugin");
+        .append(entry->attribute(Hs::appSettingsPlugin)).append(".qtplugin");
     QPluginLoader loader(pluginPath);
     mView = qobject_cast<HbView *>(loader.instance()); 
     
@@ -121,7 +121,7 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
         
         QObject::connect(this, SIGNAL(initialize(QString)), mView, SLOT(initialize(QString)));        
         mView->setParent(this);
-        emit initialize(entry->attribute(applicationUidEntryKey()));        
+        emit initialize(entry->attribute(Hs::applicationUidEntryKey));        
         // Add View to main window
         HbMainWindow *hbMainWindow = mainWindow();
         // add confirm action

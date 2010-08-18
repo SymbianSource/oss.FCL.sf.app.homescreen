@@ -106,7 +106,7 @@ HsWidgetComponentRegistry::HsWidgetComponentRegistry(QObject *parent)
     qRegisterMetaType<HsWidgetComponentDescriptor>("HsWidgetComponentDescriptor");
     
     CaQuery query;
-    query.setEntryTypeNames(QStringList(widgetTypeName()));
+    query.setEntryTypeNames(QStringList(Hs::widgetTypeName));
     CaNotifierFilter filter(query);  
     CaNotifier *notifier = CaService::instance()->createNotifier(filter);
     notifier->setParent(this);
@@ -143,7 +143,7 @@ void HsWidgetComponentRegistry::handleEntryRemoved(const CaEntry &entry, const Q
         }
     } else {
        // uninstalled
-        QString rootPath = entry.attribute(widgetPathAttributeName());
+        QString rootPath = entry.attribute(Hs::widgetPathAttributeName);
         mServiceManager.removeService(uri);
         QCoreApplication::removeLibraryPath(rootPath);
         if (component) {
@@ -176,7 +176,7 @@ void HsWidgetComponentRegistry::handleEntryUpdated(const CaEntry &entry, const Q
 */
 void HsWidgetComponentRegistry::registerService(const CaEntry &entry, const QString& uri, bool reset)
 {
-    QString path = entry.attribute(widgetPathAttributeName());
+    QString path = entry.attribute(Hs::widgetPathAttributeName);
     QString serviceXml = entry.attribute("widget:servicexml");
     if (!path.isEmpty() && !serviceXml.isEmpty()) {
         QString service = QDir::toNativeSeparators(path + "/" + serviceXml);
@@ -194,7 +194,7 @@ void HsWidgetComponentRegistry::registerService(const CaEntry &entry, const QStr
 */
 void HsWidgetComponentRegistry::onEntryChanged(const CaEntry &entry, ChangeType changeType)
 {
-    QString uri = entry.attribute(widgetUriAttributeName());
+    QString uri = entry.attribute(Hs::widgetUriAttributeName);
     switch (changeType) {
         case AddChangeType: 
             handleEntryAdded(entry,uri);

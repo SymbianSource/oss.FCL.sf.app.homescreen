@@ -58,8 +58,8 @@ symbian: {
     include(hsapplication_exports_to_rom.pri)    
 
     CONFIG += service
-    LIBS +=  -lxqservice -lxqserviceutil -lXQKeyCapture
-           
+    LIBS +=  -lxqservice -lxqserviceutil -lXQKeyCapture -lxqtelephonyservice
+  
     SERVICE.FILE = ipc_service_conf.xml
 }
 

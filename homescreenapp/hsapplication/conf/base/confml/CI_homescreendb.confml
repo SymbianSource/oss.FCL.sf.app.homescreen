@@ -79,28 +79,24 @@
       <confml:Pages><confml:id>2</confml:id><confml:indexPosition>1</confml:indexPosition></confml:Pages>
       <confml:Pages><confml:id>3</confml:id><confml:indexPosition>2</confml:indexPosition></confml:Pages>
       <confml:Configuration><confml:key>bounceEffect</confml:key><confml:value>20</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>widgetTapAndHoldTimeout</confml:key><confml:value>500</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>sceneTapAndHoldTimeout</confml:key><confml:value>500</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageChangeAnimationDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageChangeZoneAnimationDuration</confml:key><confml:value>800</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>pageChangeAnimationDuration</confml:key><confml:value>300</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>pageChangeZoneAnimationDuration</confml:key><confml:value>600</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>pageChangeZoneReverseAnimationDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageRemovedAnimationDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>newPageAddedAnimationDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>widgetDragEffectDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>pageRemovedAnimationDuration</confml:key><confml:value>1000</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>newPageAddedAnimationDuration</confml:key><confml:value>1000</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>widgetDragEffectDuration</confml:key><confml:value>250</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>widgetDropEffectDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>defaultPageId</confml:key><confml:value>1</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>maximumPageCount</confml:key><confml:value>8</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>isShortcutLabelVisible</confml:key><confml:value>true</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>bounceFeedbackEffectDistance</confml:key><confml:value>3</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageChangePanDistanceInPixels</confml:key><confml:value>120</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>tapAndHoldDistance</confml:key><confml:value>16</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageChangeZoneWidth</confml:key><confml:value>60</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>bounceFeedbackEffectDistance</confml:key><confml:value>30</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>pageChangeZoneWidth</confml:key><confml:value>30</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>pageIndicatorSpacing</confml:key><confml:value>8</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>maximumWidgetHeight</confml:key><confml:value>39</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>maximumWidgetWidth</confml:key><confml:value>48</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>minimumWidgetHeight</confml:key><confml:value>8.75</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>minimumWidgetWidth</confml:key><confml:value>8.75</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageChangePanDistance</confml:key><confml:value>17.91</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>pageChangePanDistance</confml:key><confml:value>120</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>pageChangeFeedbackEffect</confml:key><confml:value>Sensitive</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>widgetPickFeedbackEffect</confml:key><confml:value>ItemPick</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>widgetDropFeedbackEffect</confml:key><confml:value>ItemDrop</confml:value></confml:Configuration>
@@ -112,14 +108,16 @@
       <confml:Configuration><confml:key>clockWidgetTapFeedbackEffect</confml:key><confml:value>BasicItem</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>widgetSnappingFeedbackEffect</confml:key><confml:value>ItemMoveOver</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>isSnapEnabled</confml:key><confml:value>true</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>snapTimeout</confml:key><confml:value>100</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>snapTimeout</confml:key><confml:value>300</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>snapForce</confml:key><confml:value>30</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>snapGap</confml:key><confml:value>6</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>pageMargin</confml:key><confml:value>0</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>snapLineFadeInDuration</confml:key><confml:value>200</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>snapLineFadeInDuration</confml:key><confml:value>100</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>snapLineFadeOutDuration</confml:key><confml:value>100</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>isSnapEffectsEnabled</confml:key><confml:value>true</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>sceneType</confml:key><confml:value>PageWallpapers</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>bounceAnimationEasingCurve</confml:key><confml:value>Linear</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>pageChangeAnimationEasingCurve</confml:key><confml:value>Linear</confml:value></confml:Configuration>      
     </confml:HomeScreenDbSettings>
   </confml:data>
 </confml:configuration>

@@ -18,6 +18,7 @@ TEMPLATE = subdirs
 BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
 
 include(homescreenclient_api/homescreenclient_api.pri)
+include(screensaver_api/screensaver_api.pri)
 
 for(filename,PLATFORM_HEADERS){
     BLD_INF_RULES.prj_exports *= "$$filename APP_LAYER_PLATFORM_EXPORT_PATH($$basename(filename))"

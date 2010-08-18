@@ -34,10 +34,10 @@
 bool HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(const CaEntry *entry)
 {
     bool result = false;
-    if (entry->entryTypeName() == applicationTypeName() && 
-        entry->attribute(swTypeKey()) == HS_CWRT_APP_TYPE &&
-        entry->attribute(widgetUriAttributeName()) ==
-                HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
+    if (entry->entryTypeName() == Hs::applicationTypeName && 
+        entry->attribute(Hs::swTypeKey) == Hs::HS_CWRT_APP_TYPE &&
+        entry->attribute(Hs::widgetUriAttributeName) ==
+                Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
         QVariantHash preferences;
         QMap<QString, QString> attributes = entry->attributes();
         QMapIterator<QString, QString> i(attributes);
@@ -45,12 +45,12 @@ bool HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(const CaEntry *entry)
             i.next();
             QString key(i.key());
             QString value(i.value());
-            if (key.contains(widgetParam())) {
-                preferences.insert(key.remove(widgetParam()),value);
+            if (key.contains(Hs::widgetParam)) {
+                preferences.insert(key.remove(Hs::widgetParam),value);
             }
         }
         int count(0);
-        HsContentService::instance()->widgets(HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE,preferences,count);
+        HsContentService::instance()->widgets(Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE,preferences,count);
         result = count > 0;
     }
     return result;

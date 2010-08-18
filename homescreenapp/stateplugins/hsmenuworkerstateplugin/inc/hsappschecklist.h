@@ -45,9 +45,9 @@ public:
 
     void cleanUp();
 
-    void setSortOrder(HsSortAttribute sortAttribute);
+    void setSortOrder(Hs::HsSortAttribute sortAttribute);
 
-    void showAppsCheckboxList(HsSortAttribute sortAttribute);
+    void showAppsCheckboxList(Hs::HsSortAttribute sortAttribute);
 
 signals:
 
@@ -75,7 +75,7 @@ private:
 
     HsMenuItemModel *mModel; // delete with dialog
 
-    HsSortAttribute mSortAttribute;
+    Hs::HsSortAttribute mSortAttribute;
 
 };
 

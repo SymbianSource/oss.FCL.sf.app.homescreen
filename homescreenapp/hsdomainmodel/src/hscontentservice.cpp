@@ -55,9 +55,9 @@ HsContentService::~HsContentService()
 */
 bool HsContentService::createWidget(const QVariantHash &params)
 {
-    return addWidget(params.value(URI).toString(),
-                     params.value(PREFERENCES).toHash(),
-                     params.value(HOMESCREENDATA));
+    return addWidget(params.value(Hs::uri).toString(),
+                     params.value(Hs::preferences).toHash(),
+                     params.value(Hs::homescreenData));
 }
 
 // This method will be removed.
@@ -67,10 +67,10 @@ bool HsContentService::createWidget(const QVariantHash &params)
 HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &params)
 {
     HsWidgetData widgetData;
-    widgetData.uri = params.value(URI).toString();
+    widgetData.uri = params.value(Hs::uri).toString();
 
     return HsWidgetHost::createInstance(
-        widgetData, params.value(PREFERENCES).toHash());
+        widgetData, params.value(Hs::preferences).toHash());
 }
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP

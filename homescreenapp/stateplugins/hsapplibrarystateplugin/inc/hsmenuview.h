@@ -18,9 +18,9 @@
 #ifndef HSMENUVIEW_H
 #define HSMENUVIEW_H
 
+#include <QAbstractItemView>
 #include <QObject>
 #include <QModelIndex>
-#include <QAbstractItemView>
 #include <QScopedPointer>
 #include <QSortFilterProxyModel>
 #include <HbAbstractItemView>
@@ -82,6 +82,7 @@ private slots:
     void scrollToRow(int row,
                      QAbstractItemView::ScrollHint hint =
                          QAbstractItemView::PositionAtTop);
+    void handleSearchComplete(const QModelIndex& firstMatching);
 
 private:
 
@@ -102,7 +103,6 @@ private:
     HbPushButton *mAddContentButton; // may be NULL in some contexts
 
     QScopedPointer<HsSearchView> mHsSearchView;
-
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };
 

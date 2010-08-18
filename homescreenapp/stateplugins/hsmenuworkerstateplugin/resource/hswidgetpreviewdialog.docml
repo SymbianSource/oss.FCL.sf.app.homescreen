@@ -21,10 +21,10 @@
             
             <real name="z" value="0"/>
            <layout type="anchor">
-                <anchoritem dst="icon_box" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="icon_box" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="TOP"/>
-                <anchoritem dst="icon_box" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="icon_box" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="icon_box" dstEdge="LEFT" src="" spacing="0.0un" srcEdge="LEFT"/>
+                <anchoritem dst="icon_box" dstEdge="TOP" src="" spacing="0.0un" srcEdge="TOP"/>
+                <anchoritem dst="icon_box" dstEdge="RIGHT" src="" spacing="0.0un" srcEdge="RIGHT"/>
+                <anchoritem dst="icon_box" dstEdge="BOTTOM" src="" spacing="0.0un" srcEdge="BOTTOM"/>
             </layout>
         </widget>
         <ref object="add_to_homescreen" role="HbWidget:addAction"/>

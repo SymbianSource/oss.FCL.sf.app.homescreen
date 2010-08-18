@@ -133,19 +133,19 @@ void HsShortcutWidget::onInitialize()
         //application UID for its preference. Entry Id is retrieved
         //from CA by UID.
         CaQuery query;
-        query.setEntryTypeNames(QStringList(applicationTypeName()));
+        query.setEntryTypeNames(QStringList(Hs::applicationTypeName));
         //Convert UID from hex to ten base, because CA t UIDs in ten base.
         bool ok;
         int hexBaseInteger = mUid.toInt(&ok, 0); // Qt Assistant: If base is 0, the C language convention is used:
                                              // If the string begins with "0x", base 16 is used.
         QString tenBaseString = QString::number(hexBaseInteger);
-        query.setAttribute(applicationUidEntryKey(), tenBaseString);
+        query.setAttribute(Hs::applicationUidEntryKey, tenBaseString);
         QList< QSharedPointer<CaEntry> > appEntries = CaService::instance()->getEntries(query);
 
         //Verify that entry's UID is what we want since we get all application entries
         //if UID did not match in getEntries() above.
         if (!appEntries.isEmpty()
-            && appEntries.first()->attribute(applicationUidEntryKey()) == tenBaseString) {
+            && appEntries.first()->attribute(Hs::applicationUidEntryKey) == tenBaseString) {
             caEntry = appEntries.first();
             mCaEntryId = caEntry->id();
 			//Save caEntryId to Homescreen database
@@ -260,8 +260,8 @@ void HsShortcutWidget::updateContent(const CaEntry &caEntry)
     mCaEntryTypeName = caEntry.entryTypeName();
     mIcon->setIcon(caEntry.makeIcon());
     if (mText) {
-        if(caEntry.attribute(entryShortName()).length()) {
-            mText->setText(caEntry.attribute(entryShortName()));
+        if(caEntry.attribute(Hs::entryShortName).length()) {
+            mText->setText(caEntry.attribute(Hs::entryShortName));
         } else {
             mText->setText(caEntry.text());
         }        

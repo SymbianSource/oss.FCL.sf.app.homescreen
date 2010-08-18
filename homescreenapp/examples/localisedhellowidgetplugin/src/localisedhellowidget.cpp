@@ -78,10 +78,6 @@ void LocalisedHelloWidget::onInitialize()
 {
     // localisation can be used now
     mText = hbTrId("txt_localisedhellowidgetplugin_button_hello_world2");
-    QString testing = hbTrId("txt_localisedhellowidgetplugin_button_hello_world2"); 
-    testing = hbTrId("txt_localisedhellowidgetplugin_button_hello_world1"); 
-    testing = hbTrId("txt_localisedhellowidgetplugin_dblist_hello_world_title"); 
-    testing = hbTrId("txt_localisedhellowidgetplugin_dblist_hello_world_desc"); 
     mButton->setText(hbTrId("txt_localisedhellowidgetplugin_button_hello_world1"));
     // roothPath is set thus we can use it
     QString iconPath = QDir::toNativeSeparators(mRootPath + "/localisedhellowidgetplugin.png"); 

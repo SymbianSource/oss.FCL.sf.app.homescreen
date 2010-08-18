@@ -123,19 +123,19 @@ HsWidgetComponent::HsWidgetComponent(const QString &uri, QObject *parent)
 void HsWidgetComponent::resolveRootPathAndTranslationFilename()
 {
 	CaQuery query;
-    query.setEntryTypeNames(QStringList(widgetTypeName()));
-	query.setAttribute(widgetUriAttributeName(), mUri);
+    query.setEntryTypeNames(QStringList(Hs::widgetTypeName));
+	query.setAttribute(Hs::widgetUriAttributeName, mUri);
 	QList< QSharedPointer<CaEntry> > widgetEntries = CaService::instance()->getEntries(query);
 	
     if (widgetEntries.isEmpty()) {
         return;
 	}
     QSharedPointer<CaEntry> entry = widgetEntries.first();
-    mRootPath = entry->attribute(widgetPathAttributeName());
+    mRootPath = entry->attribute(Hs::widgetPathAttributeName);
     if (mRootPath.isEmpty() || !QDir(mRootPath).exists()) {
         mState = Unavailable;
     } else {
-        mTranslationFilename = entry->attribute(translationFilename());
+        mTranslationFilename = entry->attribute(Hs::translationFilename);
     }
 }
 

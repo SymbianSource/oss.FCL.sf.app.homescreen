@@ -55,8 +55,8 @@
 */
 HsWidgetHost::HsWidgetHost(int databaseId, QObject *parent)
   : QObject(parent),
-    mVisual(new HsWidgetHostVisual),
     mDatabaseId(databaseId),
+    mVisual(new HsWidgetHostVisual),
     mStateMachine(0),
     mWidget(0),
     mPage(0),
