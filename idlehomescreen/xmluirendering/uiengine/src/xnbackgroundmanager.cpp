@@ -782,6 +782,7 @@ void CXnBackgroundManager::RemovableDiskRemovedL()
                 {
                 if ( !BaflUtils::FileExists( fs, path ) )
                     {
+                    RemoveWallpaperFromCache( path, viewData );
                     viewData->SetWallpaperImage( NULL );
                     if( viewData == &iViewManager.ActiveViewData() )
                         {
@@ -797,6 +798,7 @@ void CXnBackgroundManager::RemovableDiskRemovedL()
             {
             if ( !BaflUtils::FileExists( fs, *iBgImagePath ) )
                 {
+                RemoveWallpaperFromCache( *iBgImagePath );
                 delete iBgImage;
                 iBgImage = NULL;
                 drawingNeeded = ETrue;

@@ -80,7 +80,7 @@ RESOURCE TBUF r_idle_navi_tapped_all_prof
 
 RESOURCE TBUF r_nativeui_sk_back
     {
-    buf = text_softkey_back;
+    buf = qtn_hs_text_softkey_back;
     }
 
 RESOURCE TBUF r_nativeui_sk_newmsg

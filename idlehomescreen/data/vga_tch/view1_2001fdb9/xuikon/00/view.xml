@@ -680,7 +680,7 @@
         <property class="Settings/Shortcut" name="0x01000101" value="localapp:0x101F4CD2"/>
         <!-- UI resources for RSK shortcut -->
         <desc id="Shortcut/EmptyCaption">&shortcut_emptycaption;</desc>
-        <desc id="Shortcut/BackCaption">&text_softkey_back;</desc>
+        <desc id="Shortcut/BackCaption">&qtn_hs_text_softkey_back;</desc>
         
         <menubar id="hs_menubar">                  
             <!-- menu item grouping table is traversed through in run-time always when options menu is launched. -->                     

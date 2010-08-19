@@ -226,7 +226,7 @@
                     </actions>
                 </menuitem>
             </menu>
-            <softkey id="lsk" type="left" label="&text_softkey_options;">
+            <softkey id="lsk" type="left" label="&qtn_hs_text_softkey_options;">
                 <actions>
                     <action>
                         <trigger name="activate"/>
@@ -236,7 +236,7 @@
                     </action>
                 </actions>
             </softkey>
-            <softkey id="rsk" type="right" mode="mode_callinactive" label="&text_softkey_call;">
+            <softkey id="rsk" type="right" mode="mode_callinactive" label="&qtn_hs_text_softkey_call;">
                 <actions>
                     <action>                        
                         <trigger name="activate"/>
@@ -249,7 +249,7 @@
                     </action>
                 </actions>
             </softkey>
-            <softkey id="rsk_incall" type="right" mode="mode_callactive" label="&text_softkey_back;">
+            <softkey id="rsk_incall" type="right" mode="mode_callactive" label="&qtn_hs_text_softkey_back;">
                 <actions>
                     <action>                        
                         <trigger name="activate"/>
@@ -257,7 +257,7 @@
                     </action>
                 </actions>
             </softkey>
-            <softkey id="rsk_done" type="right" mode="mode_edit" label="&text_softkey_done;">
+            <softkey id="rsk_done" type="right" mode="mode_edit" label="&qtn_hs_text_softkey_done;">
                 <actions>
                     <action>
                         <trigger name="activate"/>
