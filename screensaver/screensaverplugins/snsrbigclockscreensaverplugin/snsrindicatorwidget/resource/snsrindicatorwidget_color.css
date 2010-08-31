@@ -1,0 +1,29 @@
+SnsrIndicatorWidget::icon1 
+{
+    color:var(snsrforeground);
+}
+
+SnsrIndicatorWidget::icon2 
+{
+    color:var(snsrforeground);
+}
+
+SnsrIndicatorWidget::icon3 
+{
+    color:var(snsrforeground);
+}
+
+SnsrIndicatorWidget::icon4 
+{
+    color:var(snsrforeground);
+}
+
+SnsrIndicatorWidget::icon5 
+{
+    color:var(qtc_snsr_foreground);
+}
+
+SnsrIndicatorWidget::icon6
+{
+    color:var(qtc_snsr_foreground);
+}

@@ -1,7 +1,0 @@
-EXPORTS
-	?DomDocument@CXnODT@@QBEAAVCXnDomDocument@@XZ @ 1 NONAME ; class CXnDomDocument & CXnODT::DomDocument(void) const
-	?InternalizeHeaderL@CXnODT@@SAXAAVRReadStream@@@Z @ 2 NONAME ; void CXnODT::InternalizeHeaderL(class RReadStream &)
-	?InternalizeDomDocumentL@CXnODT@@QAEPAVCXnDomNode@@AAVRReadStream@@@Z @ 3 NONAME ; class CXnDomNode * CXnODT::InternalizeDomDocumentL(class RReadStream &)
-	?NewL@CXnODT@@SAPAV1@XZ @ 4 NONAME ; class CXnODT * CXnODT::NewL(void)
-	?InternalizeResourceListL@CXnODT@@SAPAV?$CArrayPtrSeg@VCXnResource@@@@AAVRReadStream@@@Z @ 5 NONAME ; class CArrayPtrSeg<class CXnResource> * CXnODT::InternalizeResourceListL(class RReadStream &)
-

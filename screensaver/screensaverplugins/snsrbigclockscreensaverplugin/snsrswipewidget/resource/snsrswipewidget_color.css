@@ -1,0 +1,10 @@
+SnsrSwipeWidget::slideLabel 
+{
+    color:var(snsrforeground);
+}
+
+SnsrSwipeWidget::slideIcon 
+{
+    color:var(snsrforeground);
+}
+
