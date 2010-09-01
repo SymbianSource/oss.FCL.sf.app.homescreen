@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+// 1020726F.RSS
+//
+#include <ecom/registryinfo.rh>
+#include <platform/mw/aisystemuids.hrh>
+
+RESOURCE REGISTRY_INFO theInfo
+{
+dll_uid = AI3_UID_RENDERING_PLUGIN_VOLUMECONTROLFACTORY;
+interfaces =
+    {
+    INTERFACE_INFO
+        {
+        interface_uid = AI3_RENDERING_PLUGIN_ECOM_FACTORY_UID;
+        implementations =
+            {
+            IMPLEMENTATION_INFO
+                {
+                implementation_uid = AI3_UID_RENDERING_PLUGIN_VOLUMECONTROLFACTORY_IMPLEMENTATION;
+                version_no = 1;
+                display_name = "XnVolumeControl";
+                default_data = "slider";
+                opaque_data = "";
+                }
+            };
+        }
+    };
+}

@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project hierarchy navigator presentation model
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET          hnpresentationmodel.dll
+TARGETTYPE      dll
+
+UID             0x1000008d 0x2000F8C6
+
+CAPABILITY      CAP_GENERAL_DLL
+
+
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          hnsuitemodelcontainer.cpp
+SOURCE          hnsuitemodel.cpp
+SOURCE          hnsuitesstack.cpp
+SOURCE          hnitemmodel.cpp
+SOURCE          hnmenuitemmodel.cpp
+SOURCE          hnactionmodel.cpp 
+SOURCE          hntoolbarmodel.cpp 
+SOURCE          hnbuttonmodel.cpp 
+SOURCE          hnattributebase.cpp 
+SOURCE          hnattributeimage.cpp 
+SOURCE          hnattrimgprovider.cpp 
+SOURCE          hnattrimgprovthememif.cpp 
+SOURCE          hnattrimgprovemptyimage.cpp
+SOURCE          hnattrimgprovappimage.cpp
+SOURCE          hnattrimgprovfileimage.cpp
+SOURCE          hnattrimgprovliwimage.cpp 
+SOURCE          hnattributetext.cpp
+SOURCE          hneventhandler.cpp
+SOURCE          hnitemsorder.cpp 
+SOURCE          hnattrimgprovsvgimage.cpp
+SOURCE          hniconholder.cpp
+SOURCE          hnextbmpiconholder.cpp
+
+USERINCLUDE     ../inc
+
+SYSTEMINCLUDE   ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         hnutilities.lib
+LIBRARY         euser.lib
+LIBRARY         bafl.lib
+LIBRARY         libpthread.lib
+LIBRARY         egul.lib
+LIBRARY         liwservicehandler.lib //LIW Framework
+LIBRARY         mmextensionmanager.lib
+LIBRARY         aknskins.lib
+LIBRARY         aknskinsrv.lib
+LIBRARY         aknicon.lib
+LIBRARY         efsrv.lib
+LIBRARY         fbscli.lib
+LIBRARY         mediaclientimage.lib
+LIBRARY         imageconversion.lib 
+LIBRARY         cone.lib 
+LIBRARY         estor.lib
+LIBRARY         svgengine.lib
+LIBRARY         gdi.lib
+
+#ifdef _MATRIX_MENU_TRACE_PERFORMANCE
+LIBRARY         flogger.lib
+#else
+DEBUGLIBRARY    flogger.lib
+#endif
+
+
+
+// End of file

@@ -1,0 +1,190 @@
+/*
+* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+// ========== RESOURCE IDENTIFIER =============================================
+
+NAME    AI3X
+
+// ========== INCLUDE FILES ===================================================
+
+#include <eikon.rh>
+#include <eikcore.rsg>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <e32keys.h>
+#include <activeidle3.loc>
+
+// ========== RESOURCE DEFINITIONS ============================================
+
+RESOURCE RSS_SIGNATURE { }
+RESOURCE TBUF { buf = ""; }
+
+RESOURCE EIK_APP_INFO
+{
+    cba     = R_AVKON_SOFTKEYS_EMPTY;
+    status_pane = r_xui_status_pane;
+}
+
+// -----------------------------------------------------------------------------
+//   
+//    r_idle_title_pane
+//    It defines idle's status pane. Title pane is empty.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TITLE_PANE r_xui_title_pane
+    {
+    txt = " "; 
+    }
+
+// -----------------------------------------------------------------------------
+//   
+//    r_idle_status_pane
+//    It defines idle's status pane.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE STATUS_PANE_APP_MODEL r_xui_status_pane
+    {
+    layout = R_AVKON_WIDESCREEN_PANE_LAYOUT_IDLE_FLAT_NO_SOFTKEYS;
+    panes =
+        {
+        SPANE_PANE
+            {
+            id = EEikStatusPaneUidTitle;
+            type = EAknCtTitlePane;
+            resource = r_xui_title_pane;
+            }
+        };
+    }
+
+RESOURCE AVKON_SKEY_LIST r_xui_default_skey_list
+    {
+    list =
+        {
+        AVKON_SKEY_INFO {key='0'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='0'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='0'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='1'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='1'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='1'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='2'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='2'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='2'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='3'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='3'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='3'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='4'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='4'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='4'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='5'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='5'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='5'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='6'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='6'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='6'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='7'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='7'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='7'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='8'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='8'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='8'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='9'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='9'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='9'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key='*'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='*'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='*'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;},
+        AVKON_SKEY_INFO {key=EStdKeyHash; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key=EStdKeyHash; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key=EStdKeyHash; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;}
+#ifdef __QWERTY_INPUT
+        , 
+        AVKON_SKEY_INFO {key='+'; sid=EAvkonSIDNoSound;},
+        AVKON_SKEY_INFO {key='+'; sid=EAvkonSIDNoSound; type = ESKeyTypeLong;},
+        AVKON_SKEY_INFO {key='+'; sid=EAvkonSIDNoSound; type = ESKeyTypeRepeat;}
+#endif // __QWERTY_INPUT        
+        };
+    }
+
+RESOURCE TBUF r_qtn_hs_switch_online
+    {
+    buf = qtn_hs_switch_online;
+    }
+
+RESOURCE TBUF r_qtn_hs_disable_network
+    {
+    buf = qtn_hs_disable_network;
+    }
+
+RESOURCE TBUF r_qtn_hs_automatic_offline
+    {
+    buf = qtn_hs_automatic_offline;
+    }
+    
+RESOURCE TBUF r_qtn_hs_operation_failed_no_disk
+    {
+    buf = qtn_hs_operation_failed_no_disk;
+    }
+
+RESOURCE TBUF r_qtn_hs_title_editmode
+    {
+    buf = qtn_hs_title_editing;
+    }
+
+// home screen online dialog
+RESOURCE DIALOG r_yes_no_hs_online
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_hs_switch_online;
+                };
+            }
+        };
+    }
+
+
+// disable home screen network dialog
+RESOURCE DIALOG r_disable_hs_network
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_hs_disable_network;
+                };
+            }
+        };
+    }

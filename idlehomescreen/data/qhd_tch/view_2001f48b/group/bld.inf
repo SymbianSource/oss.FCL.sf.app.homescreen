@@ -1,0 +1,80 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* The information required for building
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+//../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/view_2001f48b/hsps/manifest.dat
+//../hsps/00/viewconfiguration.xml /epoc32/data/Z/resource/homescreen/view_2001f48b/hsps/viewconfiguration.xml
+
+../xuikon/00/View.dat /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/view_2001f48b.dat
+../xuikon/00/View.css /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/view.css
+../xuikon/00/View.xml /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/view.xml
+../xuikon/00/View.dtd /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/view.dtd
+
+// Arabic languages
+//*****************
+../xuikon/37/View.css /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/37/view.css
+../xuikon/50/View.css /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/50/view.css
+../xuikon/57/View.css /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/57/view.css
+../xuikon/94/View.css /epoc32/data/Z/resource/homescreen/view_2001f48b/xuikon/94/view.css
+
+
+//Confml and cfgml files for the customization
+//***********************************
+../conf/view2001f48b.confml   APP_LAYER_CONFML(view2001f48b.confml)
+../conf/view2001f48b.gcfml    APP_LAYER_GCFML(view2001f48b.gcfml)
+../conf/view2001f48bmanifest.confml   APP_LAYER_CONFML(view2001f48bmanifest.confml)
+../conf/view2001f48bmanifest.gcfml    APP_LAYER_GCFML(view2001f48bmanifest.gcfml)
+../conf/view2001f48bxuikon.confml   APP_LAYER_CONFML(view2001f48bxuikon.confml)
+../conf/view2001f48bxuikon.gcfml    APP_LAYER_GCFML(view2001f48bxuikon.gcfml)
+
+// Support for S60 localization
+//*****************************
+#ifndef __VIEW_LOC__
+#define __VIEW_LOC__
+../loc/view.loc APP_LAYER_LOC_EXPORT_PATH(view.loc)
+#endif // __VIEW_LOC__
+
+// Support for S60 builds
+//***********************
+../rom/view_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(view_2001f48b_resources.iby)
+../rom/view_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view_2001f48b_customer.iby)
+//../rom/view_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view_2001f48b_variant.iby)
+//../rom/view.iby CORE_APP_LAYER_IBY_EXPORT_PATH(view_2001f48b.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME view_2001f48b
+OPTION DTD_TYPE widget
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  

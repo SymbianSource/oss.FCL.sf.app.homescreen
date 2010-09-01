@@ -1,0 +1,48 @@
+<configuration>
+  <control>
+    <settings>
+      <!-- Shortcut #1, Phonebook -->
+      <item id="first" name="Shortcut1" >
+        <property  name="type" value="application"/>
+        <property  name="uid" value="0x101F4CCE"/>
+        <property  name="view" value=""/>
+        <property  name="param" value=""/>
+      </item>
+      <!-- Shortcut #2, Messaging -->
+      <item id="second" name="Shortcut2" >
+        <property  name="type" value="application"/>
+        <property  name="uid" value="0x100058C5"/>
+        <property  name="view" value=""/>
+        <property  name="param" value=""/>
+      </item>
+      <!-- Shortcut #3, Browser -->
+      <item id="third" name="Shortcut3" >
+        <property  name="type" value="application"/>
+        <property  name="uid" value="0x10008D39"/>
+        <property  name="view" value=""/>
+        <property  name="param" value=""/>
+      </item>
+      <!-- Shortcut #4, Photos -->
+      <item id="fourth" name="Shortcut4" >
+        <property  name="type" value="application"/>
+        <property  name="uid" value="0x200009EE"/>
+        <property  name="view" value=""/>
+        <property  name="param" value=""/>
+      </item>
+      <!-- Shortcut #5, Calendar -->
+      <item id="fifth" name="Shortcut5" >
+        <property  name="type" value="application"/>
+        <property  name="uid" value="0x10005901"/>
+        <property  name="view" value=""/>
+        <property  name="param" value=""/>
+      </item>
+      <!-- Shortcut #6, New message -->
+      <item id="sixth" name="Shortcut6" >
+        <property  name="type" value="shortcut"/>
+        <property  name="uid" value="0x99999999"/>
+        <property  name="view" value=""/>
+        <property  name="param" value="messaging:msg"/>
+      </item>
+    </settings>
+  </control>
+</configuration>

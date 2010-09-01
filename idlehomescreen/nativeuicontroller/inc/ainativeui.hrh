@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file contains declarations for resources of Native UI Controller.
+*                The file can be included in C++ or resource file.
+*
+*/
+
+
+#ifndef AINATIVEUI_HRH
+#define AINATIVEUI_HRH
+
+// CONSTANTS
+#define KNativeUiCmdBase 1000
+
+#define KNativeUiKeyIdLSK 0x01000100
+
+#define KNativeUiKeyIdRSK 0x01000101
+
+#define KNativeUiKeyIdLockedLSK 0x41000100
+
+#define KNativeUiKeyIdLockedRSK 0x41000101
+
+// DATA TYPES
+
+// Enumerates commands
+enum
+    {
+    ENativeUiCmdDoNothing = 100 + KNativeUiCmdBase, //1100
+    ENativeUiCmdBack,
+
+    ENativeUiSoftkeyLeft,
+    ENativeUiSoftkeyRight,
+
+    ENativeUiSelectionKey,
+    ENativeUiScrollkeyLeft,
+    ENativeUiScrollkeyUp,
+    ENativeUiScrollkeyRight,
+    ENativeUiScrollkeyDown,
+
+    // Name dialing
+    ENativeUiCmdNameDialer
+    };
+
+#endif // AINATIVEUI_HRH
+
+// End of File

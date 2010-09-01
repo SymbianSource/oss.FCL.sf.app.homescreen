@@ -1,0 +1,98 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Project definition file for project matrixmenu
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include "../inc/mmguiuid.hrh"
+
+epocheapsize  1800000 4500000
+
+TARGET          matrixmenu.exe
+TARGETTYPE      exe
+UID             0x100039CE _MATRIX_UID3  
+
+CAPABILITY      CAP_APPLICATION
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          mmgui.cpp
+SOURCE          mmapplication.cpp
+SOURCE          mmappui.cpp
+SOURCE          mmdocument.cpp
+SOURCE          mmnomemory.cpp
+SOURCE          mmappkeyhandler.cpp
+
+SOURCEPATH      ../data
+
+START RESOURCE  matrixmenu.rss
+HEADER
+TARGET matrixmenu.rsc
+TARGETPATH APP_RESOURCE_DIR
+LANGUAGE_IDS
+END //RESOURCE
+
+START RESOURCE  matrixmenu_reg.rss
+DEPENDS matrixmenu.rsg
+TARGET matrixmenu_reg.rsc
+TARGETPATH /private/10003a3f/apps
+END //RESOURCE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../loc
+
+SYSTEMINCLUDE   ../../../inc
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY           euser.lib
+
+LIBRARY           apparc.lib
+LIBRARY           avkon.lib
+LIBRARY           apgrfx.lib            // for TApaTask
+LIBRARY           eikcore.lib
+LIBRARY           eikcoctl.lib
+LIBRARY           cone.lib
+LIBRARY           fbscli.lib
+LIBRARY           egul.lib
+LIBRARY           gdi.lib
+LIBRARY			  eikctl.lib
+LIBRARY           bafl.lib
+LIBRARY           ws32.lib 
+
+LIBRARY           commonengine.lib      // for  stringloader
+LIBRARY           cdlengine.lib         // for Layout_Meta_Data
+LIBRARY           featmgr.lib
+LIBRARY           gfxtrans.lib          // effects
+
+LIBRARY           hnengine.lib
+LIBRARY           hnpresentationmodel.lib
+LIBRARY           mmwidgets.lib
+LIBRARY           hnutilities.lib
+LIBRARY           liwservicehandler.lib 
+LIBRARY           mmextensionmanager.lib
+LIBRARY           aknskins.lib
+LIBRARY           aknskinsrv.lib
+LIBRARY           aknswallpaperutils.lib
+
+#ifdef _MATRIX_MENU_TRACE_PERFORMANCE
+LIBRARY         flogger.lib
+#else
+DEBUGLIBRARY    flogger.lib
+#endif
+
+// End of File

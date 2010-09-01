@@ -1,0 +1,260 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies)..
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* widget manager plugin declaration
+*
+*/
+
+#ifndef __WMPLUGIN_
+#define __WMPLUGIN_
+
+//  INCLUDES
+#include <e32base.h>
+#include <vwsdef.h>
+
+#include <hscontentcontrolui.h>
+#include <hscontentcontroller.h>
+#include <hscontentinfo.h>
+
+class CAknViewAppUi;
+class CWmResourceLoader;
+class CWmMainContainer;
+class CWmEffectManager;
+class CWmWidgetData;
+class CWmInstaller;
+
+/**
+ * CWmPlugin 
+ */
+NONSHARABLE_CLASS( CWmPlugin ) : public CHsContentControlUi
+    {
+public:
+
+    /**
+     * Two-phased constructor.
+     */
+    static CWmPlugin* NewL();
+    
+    /** Destructor */
+    ~CWmPlugin();
+
+public: // From MHsContentControlUi
+
+    /** 
+     * shows the widget manager UI 
+     * 
+     * @see MHsContentControlUi::Activate
+     */
+    void Activate();
+
+    /** 
+     * notification for widget manager UI that its
+     * deactivated and plugin is about to be destroyed.
+     * 
+     * @see MHsContentControlUi::DeActivate
+     */
+    void DeActivate();
+
+    /** 
+     * returns array of AknViews which were added to
+     * AknViewAppUi by this plugin. 
+     * 
+     * @see MHsContentControlUi::Views
+     */
+    void Views( RPointerArray<CAknView>& aViews );
+
+    /** 
+     * Notifies widget list changes 
+     * 
+     * @see MHsContentControlUi::NotifyWidgetListChanged
+     */
+    void NotifyWidgetListChanged();
+        
+public: // plugin services
+
+    /** 
+     * whether widget manager UI is showing 
+     * 
+     * @return return ETrue if wm UI is showed 
+     */
+    TBool IsActive();
+
+    /** 
+     * hides widget manager UI 
+     */
+    void CloseView();
+
+    /** 
+     * main view activated. Sets the previous view ID and main container 
+     *
+     * @param aPreviousViewId
+     * @param aWmMainContainer 
+     */
+    void MainViewActivated( 
+            const TVwsViewId& aPreviousViewId,
+            CWmMainContainer* aWmMainContainer );
+
+    /** 
+     * main view was deactivated 
+     */
+    void MainViewDeactivated();
+
+    /** Postponed command to execute when widgetmanager has deactivated */
+    enum TCommand
+        {
+        /** no command */
+        ENone,
+        /** add content to home screen */
+        EAddToHomescreen
+        };
+    
+    /**
+     * Sets a postponed command. The postponed command will be executed after
+     * widget manager has been deactivated.
+     * 
+     * @param aCommand the command to be executed
+     * @param aContent content parameter related to the command
+     */
+    void SetPostponedCommandL(
+            TCommand aCommand, CHsContentInfo& aContent );
+    
+    /** 
+     * the CAknViewAppUi reference
+     * 
+     * @return returns CAknViewAppUi 
+     */
+    CAknViewAppUi& ViewAppUi();
+
+    /** 
+     * the resource loader 
+     * 
+     * @return returns CWmResourceLoader
+     */
+    CWmResourceLoader& ResourceLoader();
+    
+    /** 
+     * the content controller ref
+     * 
+     * @return returns MHsContentController
+     */
+    MHsContentController& ContentController();
+
+    /**
+     * the shared file server reference
+     */
+    RFs& FileServer();
+    
+    /** prestored action to be executed. */
+    void DoExecuteCommand();
+    
+    /** callback function for launcher */
+    static TInt ExecuteCommand( TAny* aSelf );
+    
+    /**
+     * reference to iWmInstaller
+     */
+    CWmInstaller& WmInstaller();
+    
+    /**
+     * Get widget by Uid. Used for getting widget details 
+     * when error has occured during uninstallation.
+     * @param aUid Uid of widget
+     */
+    CWmWidgetData* GetUninstalledWidgetByUid( TUid aUid );
+
+private:
+    /** constructor */
+    CWmPlugin();
+    /** 2nd phase constructor */
+    void ConstructL();
+    
+    /**
+     * Sets forwarding numeric keys to phone.
+     * 
+     * @param aEnabled ETrue if numeric keys are forwarded to phone
+     */
+    void ForwardNumericKeysToPhone( TBool aEnabled );
+    
+    /** 
+     * Shows error note.
+     * 
+     * @parama aError Error to be shown.
+     */
+    void ShowErrorNoteL( TInt aError );
+
+private: // data members
+
+    /**
+     * the host application view app UI (not owned)
+     */
+    CAknViewAppUi*  iViewAppUi;
+
+    /**
+     * main container (not owned)
+     */
+    CWmMainContainer*  iWmMainContainer;
+
+    /**
+     * resource loader
+     */
+    CWmResourceLoader* iResourceLoader;
+
+    /**
+     * previous view ID (shown when main view closed)
+     */
+    TVwsViewId iPreviousViewUid;
+	
+    /**
+     * Takes care of fancy UI effects
+     */    
+    CWmEffectManager* iEffectManager;
+    
+    /**
+     * The file server session
+     */
+    RFs* iFs;
+
+    /**
+     * command to be executed when widgetmanager has
+     * been deactivated
+     */
+    TCommand iPostponedCommand;
+    
+    /**
+     * content info as parameter to iPostponedCommand
+     */
+    CHsContentInfo* iPostponedContent;
+    
+    /*
+     * Handles installation
+     */
+    CWmInstaller* iWmInstaller;
+    
+    /**
+     * Used for adding widgets to homescreen.
+     */
+    CPeriodic* iLauncher;
+    
+    /**
+     * Counter for execute command delay.
+     */
+    TInt iExecutionCount;
+    
+#ifdef _WM_UNIT_TEST
+    friend class CWmUnitTest;
+#endif
+    };
+
+#endif // __WMPLUGIN_
+

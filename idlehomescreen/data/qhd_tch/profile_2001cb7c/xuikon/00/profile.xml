@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmluiml SYSTEM "profilewidget.dtd">
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+    <widget id="profilewidget" >
+        <!-- Data plugins in this widget -->
+        <contentsource name="Profile" value="0x10275101" />
+        <contentsource name="SAT" value="0x102078EB"/>
+        <contentsource name="DeviceStatus" value="0x102750F8" />
+                
+        <box id="clock_profile_container">
+            <clock id="clock" focusable="true" _s60-initial-focus="1">
+              <actions>
+                  <action>
+                      <trigger name="activate"/>
+                      <event name="EventHandler/LaunchApp" uid="0x10005903"/><!--clock application-->
+                  </action>
+              </actions>
+            </clock>
+          <box id="date_profiles_container" focusable="false">
+              <box id="date_container" class="clock_profile" focusable="true">
+                  <box id="date_content" focusable="false">
+                      <text id="date_text" focusable="false">
+                          <property class="DeviceStatus/Date"/>
+                      </text>                 
+                  </box>
+                  <actions>
+                      <action>
+                          <trigger name="activate"/>
+                          <!-- open organizer -->
+                          <event name="EventHandler/LaunchApp" uid="0x10005901"/><!--organizer application-->
+                      </action>
+                  </actions>
+              </box>
+                <box id="profile_softindicator" class="clock_profile" focusable="true">                                     
+                    <!-- UI resources -->
+                    <desc id="Profile/ActiveProfileGeneralIconResource" path="SKIN(270501603 8586 74)"/>
+                    <desc id="Profile/ActiveProfileSilentIconResource" path="SKIN(270501603 8587 74)"/>
+                    <desc id="Profile/ActiveProfileTimedIconResource" path="SKIN(270501603 8631 74)"/>
+                    <actions>
+                        <!-- Show profiles dialog menu -->
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="system/trydisplayinglistquerydialog">
+                                <property name="id" value="profiledialog"/>
+                            </event>                                                            
+                        </action>                               
+                    </actions>                                                                                
+                    <box id="NT_CUGMCN" >
+                        <newsticker id="profile_CUGMCN" class="SIText" >                          
+                            <title id="title_mcn" titleindex="0">                                   
+                                <property class="DeviceStatus/MCNIndicator"/>
+                            </title>
+                            <title id="title_cug" titleindex="1">
+                                <property class="DeviceStatus/CUGIndicator"/>
+                            </title>
+                            <title id="title_profile" titleindex="2">                       
+                                <property class="Profile/ActiveProfileNameAndIconChar" />
+                                <!--<property class="Profile/ActiveProfileName" name="ordinal" value="1"/>-->
+                            </title>
+                        </newsticker>
+                    </box>
+                    <box id="NT_SATVHZ" >                                        
+                        <image id="SatIdleModeIcon" class="SATNewstickerIcon" >
+                            <property class="SAT/SatIdleModeIcon"/>
+                            <property class="policy/emptyContent" name="SatIdleModeIcon" value="display:none"/>
+                            <property class="policy/Content" name="SatIdleModeIcon" value="display:block"/>
+                            <property class="policy/Visibility" name="NT_SATVHZ" value="if (title_vhz,title_sat,SatIdleModeIcon) display:block" />
+                            <property class="policy/Visibility" name="NT_SATVHZ" value="if !+(title_vhz,title_sat,SatIdleModeIcon) display:none" />
+                        </image>
+                        <newsticker id="SATVHZ" class="SIText" >
+                            <actions>
+                                <action>
+                                    <trigger name="titletoscroll" titleindex="0"/>
+                                    <event name="system/set">
+                                        <property name="name" value="visibility"/>
+                                        <property name="value" value="visible"/>
+                                        <property name="type" value="string"/>
+                                        <property name="id" value="SatIdleModeIcon"/>
+                                    </event>
+                                </action>
+                                <action>
+                                    <trigger name="titletoscroll" titleindex="1"/>
+                                    <event name="system/set">
+                                        <property name="name" value="visibility"/>
+                                        <property name="value" value="hidden"/>
+                                        <property name="type" value="string"/>
+                                        <property name="id" value="SatIdleModeIcon"/>
+                                    </event>
+                                </action>
+                            </actions>
+                            <title id="title_sat" titleindex="0">
+                                <property class="SAT/SatIdleModeText"/>
+                                <property class="policy/emptyContent" name="title_sat" value="display: none;" />
+                                <property class="policy/Content" name="title_sat" value="display: block;" />
+                                <property class="policy/Visibility" name="NT_SATVHZ" value="if (title_vhz,title_sat,SatIdleModeIcon) display:block" />
+                                <property class="policy/Visibility" name="NT_SATVHZ" value="if !+(title_vhz,title_sat,SatIdleModeIcon) display:none" />
+                            </title>
+                            <title id="title_vhz" titleindex="1">
+                                <property class="DeviceStatus/VHZText"/>    
+                                <property class="policy/emptyContent" name="title_vhz" value="display: none;" />
+                                <property class="policy/Content" name="title_vhz" value="display: block;" />
+                                <property class="policy/Visibility" name="NT_SATVHZ" value="if (title_vhz,title_sat,SatIdleModeIcon) display:block" />
+                                <property class="policy/Visibility" name="NT_SATVHZ" value="if !+(title_vhz,title_sat,SatIdleModeIcon) display:none" />
+                            </title>
+                        </newsticker>
+                    </box>
+                </box>
+            </box>
+            <!-- Profile list query dialog. Avkon dialog is not layout capable -->
+            <listquerydialog id="profiledialog" display="none">
+                <property class="Profile/ProfileName"/>
+                <menuitem id="profileseditactive" label="&qtn_hs_profile_edit;">
+                  <actions>
+                      <action>
+                          <trigger name="activate"/>
+                          <event name="Profile/EditActiveProfile"/>
+                      </action>
+                  </actions>		
+                </menuitem>
+                <dynmenuitem id="profileitem">
+                    <actions>
+                        <action>
+                            <trigger name="activate"/>
+                            <event name="Profile/SwitchProfileByIndex(#)"/>
+                        </action>
+                    </actions>
+                </dynmenuitem>
+            </listquerydialog>
+        </box>
+    </widget>
+</xmluiml>

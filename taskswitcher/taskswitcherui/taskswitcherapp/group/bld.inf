@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for task switcher
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_EXPORTS
+../loc/taskswitcher.loc       MW_LAYER_LOC_EXPORT_PATH(taskswitcher.loc)
+backup_registration.xml     /epoc32/data/z/private/20016BF0/backup_registration.xml
+backup_registration.xml     /epoc32/release/winscw/udeb/z/private/20016BF0/backup_registration.xml
+../inc/tsuid.hrh    |../../inc/tsuid.hrh
+
+PRJ_MMPFILES
+tsapp.mmp
+
+PRJ_TESTMMPFILES

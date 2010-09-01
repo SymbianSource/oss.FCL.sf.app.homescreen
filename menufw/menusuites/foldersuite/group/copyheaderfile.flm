@@ -1,0 +1,44 @@
+# copyheaderfile.flm
+#
+# Copyright (c) 2008-2009 Nokia Ltd. All rights reserved.
+#
+# Header file exporting Function Like Makefile (FLM)
+# The file destinations  relative to EPOCROOT
+
+## Inputs
+# SRCFILE
+
+CLEANTARGETS:=
+RELEASEABLES:=
+CREATABLEPATHS:=
+
+# Check if all the inputs are present
+$(if $(SRCFILE),,$(error Must define SRCFILE))
+
+ifeq ($(PLATFORM),WINSCW)
+TRGDIR:=$(EPOCROOT)/epoc32/release/winscw/$(CFG)/z/resource/apps
+TARGET:=$(TRGDIR)/$(SRCFILE)
+RSGFILE:=$(EPOCROOT)/epoc32/include/$(SRCFILE)
+CREATABLEPATHS:=$(TRGDIR)
+RELEASEABLES:=$(TARGET)
+CLEANTARGETS:=$(RELEASEABLES)
+
+define copyheaderfile
+$(GUARD)_$(CFG):=1
+ALL:: $(TARGET)
+
+$(TARGET) : $(RSGFILE)
+	$(call startrule,copyheaderfile,FORCESUCCESS) \
+	$(GNUCP) $$< $$@ && \
+	$(GNUCHMOD) a+rw "$$@" \
+	$(call endrule,copyheaderfile)
+endef
+
+ifeq ($($(GUARD)_$(CFG)),)
+$(eval -$(copyheaderfile))
+$(eval $(call makepath,$(CREATABLEPATHS)))
+$(eval $(call whatmacro,$(RELEASEABLES),WHATMAKEFILE))
+$(eval $(call GenerateStandardCleanTarget,$(CLEANTARGETS)))
+endif
+
+endif  

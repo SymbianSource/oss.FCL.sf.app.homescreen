@@ -1,0 +1,58 @@
+widget{
+    width:auto;
+    height:30px;
+    }
+box#single_row_icon_widget{ 
+    direction: rtl;
+    block-progression:tb;
+ 		nav-index:appearance;
+}
+box#single_row_icon_widget:focus{
+    background-image: "SKIN(268458534 24576)";
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+box.row{
+    direction: rtl;
+    block-progression:rl;
+    padding-left  : 10px;
+    padding-right : 10px;
+    padding-top   : 2px;
+    padding-bottom: 2px;
+}
+
+box#single_rc_image1_box
+{
+    height:auto;
+    width:20px;
+    direction: ltr;
+}
+
+box#single_rc_text1_box
+{
+    padding-left  : 10px;
+    direction: rtl;
+    width:auto;
+    height:20px;
+}
+
+text
+{
+    width:auto;
+    height:auto;
+    display: block;
+    visibility: visible;
+    position: static;
+    direction: rtl;
+    block-progression:tb;
+    text-align:right;
+	  font-family: EAknLogicalFontPrimaryFont;
+	  font-size:18px;
+    color:white;
+}
+
+image
+{
+  _s60-aspect-ratio:preserve;
+}
+

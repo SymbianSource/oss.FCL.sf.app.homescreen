@@ -1,0 +1,108 @@
+EXPORTS
+	??1CXnDomAttribute@@UAE@XZ @ 1 NONAME ; CXnDomAttribute::~CXnDomAttribute(void)
+	?Value@CXnDomAttribute@@QAEABVTDesC8@@XZ @ 2 NONAME ; class TDesC8 const & CXnDomAttribute::Value(void)
+	?NewL@CXnDomDocument@@SAPAV1@AAVRReadStream@@@Z @ 3 NONAME ; class CXnDomDocument * CXnDomDocument::NewL(class RReadStream &)
+	?InternalizeL@CXnDomDocument@@QAEXAAVRReadStream@@@Z @ 4 NONAME ; void CXnDomDocument::InternalizeL(class RReadStream &)
+	?SetContentType@CXnDomNode@@QAEXABW4TContentType@@@Z @ 5 NONAME ; void CXnDomNode::SetContentType(enum TContentType const &)
+	?RemoveItem@CXnDomList@@QAEXPAVMXnDomListItem@@@Z @ 6 NONAME ; void CXnDomList::RemoveItem(class MXnDomListItem *)
+	?SwapStringPoolL@CXnDomList@@QAEXPAVCXnDomStringPool@@@Z @ 7 NONAME ; void CXnDomList::SwapStringPoolL(class CXnDomStringPool *)
+	?MarshallL@CXnDomDocument@@QAEPAVHBufC8@@XZ @ 8 NONAME ; class HBufC8 * CXnDomDocument::MarshallL(void)
+	??1CXnDomDepthIterator@@UAE@XZ @ 9 NONAME ; CXnDomDepthIterator::~CXnDomDepthIterator(void)
+	?IsValueSet@CXnDomProperty@@QAEHXZ @ 10 NONAME ; int CXnDomProperty::IsValueSet(void)
+	?SetPCDataL@CXnDomNode@@QAEXABVTDesC8@@@Z @ 11 NONAME ; void CXnDomNode::SetPCDataL(class TDesC8 const &)
+	?DescendantCount@CXnDomNode@@QBEHXZ @ 12 NONAME ; int CXnDomNode::DescendantCount(void) const
+	?IsAutoIdent@CXnDomPropertyValue@@QAEHXZ @ 13 NONAME ; int CXnDomPropertyValue::IsAutoIdent(void)
+	?AttributeList@CXnDomNode@@QBEAAVCXnDomList@@XZ @ 14 NONAME ; class CXnDomList & CXnDomNode::AttributeList(void) const
+	?StringValue@CXnDomPropertyValue@@QAEABVTDesC8@@XZ @ 15 NONAME ; class TDesC8 const & CXnDomPropertyValue::StringValue(void)
+	?AddItemL@CXnDomList@@QAEXPAVMXnDomListItem@@@Z @ 16 NONAME ; void CXnDomList::AddItemL(class MXnDomListItem *)
+	?AddChildL@CXnDomNode@@QAEXPAV1@H@Z @ 17 NONAME ; void CXnDomNode::AddChildL(class CXnDomNode *, int)
+	?IsInheritIdent@CXnDomPropertyValue@@QAEHXZ @ 18 NONAME ; int CXnDomPropertyValue::IsInheritIdent(void)
+	?Parent@CXnDomNode@@QBEPAV1@XZ @ 19 NONAME ; class CXnDomNode * CXnDomNode::Parent(void) const
+	?Name@CXnDomAttribute@@UAEABVTDesC8@@XZ @ 20 NONAME ; class TDesC8 const & CXnDomAttribute::Name(void)
+	?CloneL@CXnDomProperty@@QAEPAV1@XZ @ 21 NONAME ; class CXnDomProperty * CXnDomProperty::CloneL(void)
+	?Last@CXnDomList@@QAEPAVMXnDomListItem@@XZ @ 22 NONAME ; class MXnDomListItem * CXnDomList::Last(void)
+	?StringValueL@CXnDomPropertyValue@@QAEABVTDesC8@@XZ @ 23 NONAME ; class TDesC8 const & CXnDomPropertyValue::StringValueL(void)
+	?SetPseudoClass@CXnDomProperty@@QAEXW4TPseudoClass@1@@Z @ 24 NONAME ; void CXnDomProperty::SetPseudoClass(enum CXnDomProperty::TPseudoClass)
+	?ReplaceChildL@CXnDomNode@@QAEXPAV1@0@Z @ 25 NONAME ; void CXnDomNode::ReplaceChildL(class CXnDomNode *, class CXnDomNode *)
+	?Length@CXnDomList@@QBEHXZ @ 26 NONAME ; int CXnDomList::Length(void) const
+	?SetOwnershipL@CXnDomNode@@QAEXABVTDesC8@@@Z @ 27 NONAME ; void CXnDomNode::SetOwnershipL(class TDesC8 const &)
+	?AppendPCDataL@CXnDomNode@@QAEXABVTDesC8@@@Z @ 28 NONAME ; void CXnDomNode::AppendPCDataL(class TDesC8 const &)
+	?ReleaseData@CXnDomPropertyValue@@QAEXXZ @ 29 NONAME ; void CXnDomPropertyValue::ReleaseData(void)
+	?ItemIndex@CXnDomList@@QBEHABVMXnDomListItem@@@Z @ 30 NONAME ; int CXnDomList::ItemIndex(class MXnDomListItem const &) const
+	?FloatValueL@CXnDomPropertyValue@@QBENXZ @ 31 NONAME ; double CXnDomPropertyValue::FloatValueL(void) const
+	?LayoutNode@CXnDomNode@@QAEPAVCXnNode@@XZ @ 32 NONAME ; class CXnNode * CXnDomNode::LayoutNode(void)
+	?StringPoolIndexL@CXnDomPropertyValue@@QBEFXZ @ 33 NONAME ; short CXnDomPropertyValue::StringPoolIndexL(void) const
+	?FindByName@CXnDomList@@QAEPAVMXnDomListItem@@ABVTDesC8@@@Z @ 34 NONAME ; class MXnDomListItem * CXnDomList::FindByName(class TDesC8 const &)
+	?First@CXnDomList@@QAEPAVMXnDomListItem@@XZ @ 35 NONAME ; class MXnDomListItem * CXnDomList::First(void)
+	?ValueStringPoolIndex@CXnDomAttribute@@QBEFXZ @ 36 NONAME ; short CXnDomAttribute::ValueStringPoolIndex(void) const
+	?NewL@CXnDomDocument@@SAPAV1@PBVHBufC8@@@Z @ 37 NONAME ; class CXnDomDocument * CXnDomDocument::NewL(class HBufC8 const *)
+	?DeleteChild@CXnDomNode@@QAEXPAV1@@Z @ 38 NONAME ; void CXnDomNode::DeleteChild(class CXnDomNode *)
+	?NewL@CXnDomPropertyValue@@SAPAV1@PAVCXnDomStringPool@@@Z @ 39 NONAME ; class CXnDomPropertyValue * CXnDomPropertyValue::NewL(class CXnDomStringPool *)
+	?AddChildL@CXnDomNode@@QAEXPAV1@@Z @ 40 NONAME ; void CXnDomNode::AddChildL(class CXnDomNode *)
+	?SwapStringPoolL@CXnDomAttribute@@QAEXPAVCXnDomStringPool@@@Z @ 41 NONAME ; void CXnDomAttribute::SwapStringPoolL(class CXnDomStringPool *)
+	?ChildNodes@CXnDomNode@@QAEAAVCXnDomList@@XZ @ 42 NONAME ; class CXnDomList & CXnDomNode::ChildNodes(void)
+	?NodeId@CXnDomNode@@QBEHXZ @ 43 NONAME ; int CXnDomNode::NodeId(void) const
+	?IsNoneIdent@CXnDomPropertyValue@@QAEHXZ @ 44 NONAME ; int CXnDomPropertyValue::IsNoneIdent(void)
+	?NewL@CXnDomProperty@@SAPAV1@ABVTDesC8@@PAVCXnDomStringPool@@@Z @ 45 NONAME ; class CXnDomProperty * CXnDomProperty::NewL(class TDesC8 const &, class CXnDomStringPool *)
+	?ItemIndex@CXnDomNode@@QBEHABVMXnDomListItem@@@Z @ 46 NONAME ; int CXnDomNode::ItemIndex(class MXnDomListItem const &) const
+	?Item@CXnDomList@@QBEPAVMXnDomListItem@@H@Z @ 47 NONAME ; class MXnDomListItem * CXnDomList::Item(int) const
+	?ExternalizeL@CXnDomDocument@@QBEXAAVRWriteStream@@@Z @ 48 NONAME ; void CXnDomDocument::ExternalizeL(class RWriteStream &) const
+	?SetNamespaceL@CXnDomNode@@QAEXABVTDesC8@@@Z @ 49 NONAME ; void CXnDomNode::SetNamespaceL(class TDesC8 const &)
+	?CloneL@CXnDomPropertyValue@@QAEPAV1@XZ @ 50 NONAME ; class CXnDomPropertyValue * CXnDomPropertyValue::CloneL(void)
+	?ContentType@CXnDomNode@@QAEABW4TContentType@@XZ @ 51 NONAME ; enum TContentType const & CXnDomNode::ContentType(void)
+	?DeleteItem@CXnDomList@@QAEXPAVMXnDomListItem@@@Z @ 52 NONAME ; void CXnDomList::DeleteItem(class MXnDomListItem *)
+	?PCData@CXnDomNode@@QAEABVTDesC8@@XZ @ 53 NONAME ; class TDesC8 const & CXnDomNode::PCData(void)
+	?Reset@CXnDomList@@QAEXXZ @ 54 NONAME ; void CXnDomList::Reset(void)
+	?SwapStringPoolL@CXnDomPropertyValue@@QAEXPAVCXnDomStringPool@@@Z @ 55 NONAME ; void CXnDomPropertyValue::SwapStringPoolL(class CXnDomStringPool *)
+	?PropertyList@CXnDomNode@@QAEAAVCXnDomList@@XZ @ 56 NONAME ; class CXnDomList & CXnDomNode::PropertyList(void)
+	?CloneL@CXnDomAttribute@@QAEPAV1@XZ @ 57 NONAME ; class CXnDomAttribute * CXnDomAttribute::CloneL(void)
+	?RootNode@CXnDomDocument@@QBEPAVCXnDomNode@@XZ @ 58 NONAME ; class CXnDomNode * CXnDomDocument::RootNode(void) const
+	??1CXnDomPropertyValue@@UAE@XZ @ 59 NONAME ; CXnDomPropertyValue::~CXnDomPropertyValue(void)
+	?SetLayoutNode@CXnDomNode@@QAEXPAVCXnNode@@@Z @ 60 NONAME ; void CXnDomNode::SetLayoutNode(class CXnNode *)
+	?PropertyValueList@CXnDomProperty@@QAEAAVCXnDomList@@XZ @ 61 NONAME ; class CXnDomList & CXnDomProperty::PropertyValueList(void)
+	??1CXnDomDocument@@UAE@XZ @ 62 NONAME ; CXnDomDocument::~CXnDomDocument(void)
+	?StringPool@CXnDomDocument@@QBEPAVCXnDomStringPool@@XZ @ 63 NONAME ; class CXnDomStringPool * CXnDomDocument::StringPool(void) const
+	?DeleteItem@CXnDomList@@QAEXH@Z @ 64 NONAME ; void CXnDomList::DeleteItem(int)
+	?NewL@CXnDomDepthIterator@@SAPAV1@AAVCXnDomNode@@@Z @ 65 NONAME ; class CXnDomDepthIterator * CXnDomDepthIterator::NewL(class CXnDomNode &)
+	?RemoveItem@CXnDomList@@QAEXH@Z @ 66 NONAME ; void CXnDomList::RemoveItem(int)
+	?CloneL@CXnDomDocument@@QAEPAV1@XZ @ 67 NONAME ; class CXnDomDocument * CXnDomDocument::CloneL(void)
+	?NameStringPoolIndex@CXnDomAttribute@@QBEFXZ @ 68 NONAME ; short CXnDomAttribute::NameStringPoolIndex(void) const
+	?PrimitiveValueType@CXnDomPropertyValue@@QBE?AW4TPrimitiveValueType@1@XZ @ 69 NONAME ; enum CXnDomPropertyValue::TPrimitiveValueType CXnDomPropertyValue::PrimitiveValueType(void) const
+	?StringPool@CXnDomNode@@QBEPAVCXnDomStringPool@@XZ @ 70 NONAME ; class CXnDomStringPool * CXnDomNode::StringPool(void) const
+	?SetInherited@CXnDomProperty@@QAEXH@Z @ 71 NONAME ; void CXnDomProperty::SetInherited(int)
+	?SetRgbColorL@CXnDomPropertyValue@@QAEXABVTRgb@@@Z @ 72 NONAME ; void CXnDomPropertyValue::SetRgbColorL(class TRgb const &)
+	?AttributeValue@CXnDomNode@@QBEABVTDesC8@@ABV2@@Z @ 73 NONAME ; class TDesC8 const & CXnDomNode::AttributeValue(class TDesC8 const &) const
+	?SetRootNode@CXnDomDocument@@QAEXPAVCXnDomNode@@@Z @ 74 NONAME ; void CXnDomDocument::SetRootNode(class CXnDomNode *)
+	?DeleteAttributeList@CXnDomNode@@QAEXXZ @ 75 NONAME ; void CXnDomNode::DeleteAttributeList(void)
+	?Inherited@CXnDomProperty@@QAEHXZ @ 76 NONAME ; int CXnDomProperty::Inherited(void)
+	?NewL@CXnDomDocument@@SAPAV1@XZ @ 77 NONAME ; class CXnDomDocument * CXnDomDocument::NewL(void)
+	?SetValueL@CXnDomAttribute@@QAEXABVTDesC8@@@Z @ 78 NONAME ; void CXnDomAttribute::SetValueL(class TDesC8 const &)
+	?AddItemL@CXnDomList@@QAEXPAVMXnDomListItem@@H@Z @ 79 NONAME ; void CXnDomList::AddItemL(class MXnDomListItem *, int)
+	?Namespace@CXnDomNode@@QAEABVTDesC8@@XZ @ 80 NONAME ; class TDesC8 const & CXnDomNode::Namespace(void)
+	?NewL@CXnDomAttribute@@SAPAV1@ABVTDesC8@@PAVCXnDomStringPool@@@Z @ 81 NONAME ; class CXnDomAttribute * CXnDomAttribute::NewL(class TDesC8 const &, class CXnDomStringPool *)
+	?NewL@CXnDomProperty@@SAPAV1@FPAVCXnDomStringPool@@@Z @ 82 NONAME ; class CXnDomProperty * CXnDomProperty::NewL(short, class CXnDomStringPool *)
+	?ReadL@CXnDomDocument@@QAEPAVCXnDomNode@@AAVRReadStream@@@Z @ 83 NONAME ; class CXnDomNode * CXnDomDocument::ReadL(class RReadStream &)
+	?SwapStringPoolL@CXnDomProperty@@QAEXPAVCXnDomStringPool@@@Z @ 84 NONAME ; void CXnDomProperty::SwapStringPoolL(class CXnDomStringPool *)
+	?SetNodeId@CXnDomNode@@QAEXH@Z @ 85 NONAME ; void CXnDomNode::SetNodeId(int)
+	?PseudoClass@CXnDomProperty@@QBE?AW4TPseudoClass@1@XZ @ 86 NONAME ; enum CXnDomProperty::TPseudoClass CXnDomProperty::PseudoClass(void) const
+	?SetStringValueL@CXnDomPropertyValue@@QAEXW4TPrimitiveValueType@1@ABVTDesC8@@@Z @ 87 NONAME ; void CXnDomPropertyValue::SetStringValueL(enum CXnDomPropertyValue::TPrimitiveValueType, class TDesC8 const &)
+	?SetFloatValueL@CXnDomPropertyValue@@QAEXW4TPrimitiveValueType@1@N@Z @ 88 NONAME ; void CXnDomPropertyValue::SetFloatValueL(enum CXnDomPropertyValue::TPrimitiveValueType, double)
+	?Name@CXnDomNode@@UAEABVTDesC8@@XZ @ 89 NONAME ; class TDesC8 const & CXnDomNode::Name(void)
+	?RgbColorValueL@CXnDomPropertyValue@@QBEABVTRgb@@XZ @ 90 NONAME ; class TRgb const & CXnDomPropertyValue::RgbColorValueL(void) const
+	?First@CXnDomDepthIterator@@UAEPAVCXnDomNode@@XZ @ 91 NONAME ; class CXnDomNode * CXnDomDepthIterator::First(void)
+	?Name@CXnDomProperty@@UAEABVTDesC8@@XZ @ 92 NONAME ; class TDesC8 const & CXnDomProperty::Name(void)
+	?NextL@CXnDomDepthIterator@@UAEPAVCXnDomNode@@XZ @ 93 NONAME ; class CXnDomNode * CXnDomDepthIterator::NextL(void)
+	?StringPoolIndex@CXnDomProperty@@QBEFXZ @ 94 NONAME ; short CXnDomProperty::StringPoolIndex(void) const
+	?CreateElementNSL@CXnDomDocument@@QAEPAVCXnDomNode@@ABVTDesC8@@0@Z @ 95 NONAME ; class CXnDomNode * CXnDomDocument::CreateElementNSL(class TDesC8 const &, class TDesC8 const &)
+	?CloneL@CXnDomNode@@QAEPAV1@AAVCXnDomStringPool@@@Z @ 96 NONAME ; class CXnDomNode * CXnDomNode::CloneL(class CXnDomStringPool &)
+	?SetStringPoolIndexL@CXnDomPropertyValue@@QAEXW4TPrimitiveValueType@1@F@Z @ 97 NONAME ; void CXnDomPropertyValue::SetStringPoolIndexL(enum CXnDomPropertyValue::TPrimitiveValueType, short)
+	?StringPool@CXnDomProperty@@QBEPAVCXnDomStringPool@@XZ @ 98 NONAME ; class CXnDomStringPool * CXnDomProperty::StringPool(void) const
+	?SetParent@CXnDomNode@@QAEXPAV1@@Z @ 99 NONAME ; void CXnDomNode::SetParent(class CXnDomNode *)
+	?DomNodeCount@CXnDomDocument@@QBEHXZ @ 100 NONAME ; int CXnDomDocument::DomNodeCount(void) const
+	?CloneL@CXnDomProperty@@QAEPAV1@AAVCXnDomStringPool@@@Z @ 101 NONAME ; class CXnDomProperty * CXnDomProperty::CloneL(class CXnDomStringPool &)
+	?SwapStringPoolL@CXnDomNode@@QAEXPAVCXnDomStringPool@@@Z @ 102 NONAME ; void CXnDomNode::SwapStringPoolL(class CXnDomStringPool *)
+	?Size@CXnDomDocument@@QBEHXZ @ 103 NONAME ; int CXnDomDocument::Size(void) const
+	?StringPool@CXnDomList@@QBEPAVCXnDomStringPool@@XZ @ 104 NONAME ; class CXnDomStringPool * CXnDomList::StringPool(void) const
+	??1CXnDomProperty@@UAE@XZ @ 105 NONAME ; CXnDomProperty::~CXnDomProperty(void)
+	?LastNode@CXnDomDocument@@QBEPAVCXnDomNode@@XZ @ 106 NONAME ; class CXnDomNode * CXnDomDocument::LastNode(void) const
+

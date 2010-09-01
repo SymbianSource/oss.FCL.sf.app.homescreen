@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package version="2.0">
+
+    <family>qhd_tch</family>
+
+    <type>application</type>
+    
+    <!-- application uid -->
+	<interfaceuid>0x102750F0</interfaceuid>
+
+	<!-- vendor uid -->
+	<provideruid>0x101fb657</provideruid>
+
+	<!--  configuration uid -->
+	<configurationuid>0x2001f482</configurationuid>
+
+  <status>statuslicenceerestorable</status>
+  
+	<!-- description -->
+	<fullname>&amp;qtn_root_2001f482_name;</fullname>
+	<shortname>ai3_root</shortname>
+	<version>2.0</version>
+
+	<!-- configuration -->
+	<filexml>rootconfiguration.xml</filexml>
+	
+	<!-- Locale independent/common resources -->
+  <fileresource>root.o0000</fileresource>
+
+  <!-- Locale specific resources -->
+	<localization/>
+
+</package>

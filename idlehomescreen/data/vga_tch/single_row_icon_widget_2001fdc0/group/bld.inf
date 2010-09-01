@@ -1,0 +1,64 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  The information required for building
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/hsps/widgetconfiguration.xml
+
+../xuikon/00/single_row_icon_widget.dat /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/single_row_icon_widget_2001fdc0.dat
+../xuikon/00/single_row_icon_widget.css /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/single_row_icon_widget.css
+../xuikon/00/single_row_icon_widget.xml /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/single_row_icon_widget.xml
+
+// Arabic languages
+//*****************
+../xuikon/37/single_row_icon_widget.css /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/37/single_row_icon_widget.css
+../xuikon/50/single_row_icon_widget.css /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/50/single_row_icon_widget.css
+../xuikon/57/single_row_icon_widget.css /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/57/single_row_icon_widget.css
+../xuikon/94/single_row_icon_widget.css /epoc32/data/Z/resource/homescreen/single_row_icon_widget_2001fdc0/xuikon/94/single_row_icon_widget.css
+
+
+// Support for S60 builds
+//***********************
+../rom/single_row_icon_widget_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(single_row_icon_widget_2001fdc0_resources.iby)
+../rom/single_row_icon_widget_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(single_row_icon_widget_2001fdc0_customer.iby)
+../rom/single_row_icon_widget_variant.iby CUSTOMER_VARIANT_APP_LAYER_IBY_EXPORT_PATH(single_row_icon_widget_2001fdc0_variant.iby)
+../rom/single_row_icon_widget.iby CORE_APP_LAYER_IBY_EXPORT_PATH(single_row_icon_widget_2001fdc0.iby)
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME single_row_icon_widget_2001fdc0
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+
+PRJ_MMPFILES
+
+
+PRJ_TESTMMPFILES
+
+//  End of File  

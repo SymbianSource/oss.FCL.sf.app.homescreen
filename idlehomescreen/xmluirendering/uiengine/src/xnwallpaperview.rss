@@ -1,0 +1,113 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies)..
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* 
+*
+*/
+
+//  System includes
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <appinfo.rh>
+#include <avkon.mbg>
+#include <activeidle3.loc>
+#include <drmcommon.loc>
+
+//  RESOURCE IDENTIFIER
+NAME    XNWP // 4 letter ID
+
+RESOURCE RSS_SIGNATURE
+	{
+	}
+
+// ----------------------------------------------------
+// r_wallpaper_view
+//
+// ----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_wallpaper_view
+    {
+    cba = R_AVKON_SOFTKEYS_CANCEL;
+    menubar = 0;
+    toolbar = 0;
+    }
+
+// ----------------------------------------------------
+// r_qtn_hs_corrupted_image_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_corrupted_image_note 
+    {
+    buf = qtn_hs_corrupted_image_note; 
+    }
+
+// ----------------------------------------------------
+// r_qtn_hs_too_big_image_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_too_big_image_note 
+    {
+    buf = qtn_hs_too_big_image_note;
+    }
+
+// ----------------------------------------------------
+// r_qtn_hs_drm_protected_image_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_drm_protected_image_note 
+    {
+    buf = qtn_drm_mgr_det_exp;
+    }
+
+// ----------------------------------------------------
+// r_qtn_hs_processing_note
+//
+// ----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_hs_processing_note
+    {
+    buf = qtn_gen_note_processing;
+    }
+
+// ----------------------------------------------------
+// r_change_wallpaper_wait_dialog
+//
+// ----------------------------------------------------
+//
+RESOURCE DIALOG r_change_wallpaper_wait_dialog
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_gen_note_processing;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }    
+    
+// End of file

@@ -1,0 +1,39 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project hnmetadatamodel
+*
+*/
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS 
+../inc/hnmdmodel.h              |../../../inc/hnmdmodel.h
+../inc/hnfilter.h               |../../../inc/hnfilter.h 
+../inc/hnitemid.h               |../../../inc/hnitemid.h
+../inc/hnutils.h                |../../../inc/hnutils.h
+../inc/hnglobals.h              |../../../inc/hnglobals.h
+../inc/hnhelper.inl             |../../../inc/hnhelper.inl
+../inc/hnqueryresultcollector.h |../../../inc/hnqueryresultcollector.h 
+../inc/hnmdsuite.h              |../../../inc/hnmdsuite.h 
+../inc/hnmdvaluebase.h          |../../../inc/hnmdvaluebase.h
+
+PRJ_MMPFILES
+hnmetadatamodel.mmp
+
+PRJ_TESTMMPFILES
+#ifdef _MATRIX_MENU_INCLUDE_TEST_CONTENT
+#include "../internal/test/group/bld.inf"
+#endif

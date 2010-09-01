@@ -1,0 +1,27 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Iby file for fast swap server
+*
+*/
+
+
+#ifndef TSFSWSERVER_IBY
+#define TSFSWSERVER_IBY
+
+file=ABI_DIR/BUILD_DIR/tsfswclient.dll                                     SHARED_LIB_DIR/tsfswclient.dll
+file=ABI_DIR/BUILD_DIR/tsfswutils.dll                                      SHARED_LIB_DIR/tsfswutils.dll
+file=ABI_DIR/BUILD_DIR/tsfswengine.dll                                     SHARED_LIB_DIR/tsfswengine.dll
+file=ABI_DIR/BUILD_DIR/tsfswserver.exe                                     SHARED_LIB_DIR/tsfswserver.exe
+
+#endif 

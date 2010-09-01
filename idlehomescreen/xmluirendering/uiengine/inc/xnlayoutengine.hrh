@@ -1,0 +1,213 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Layout file resource header
+*
+*/
+
+
+#ifndef XNLAYOUTENGINE_HRH
+#define XNLAYOUTENGINE_HRH
+
+// Data types
+
+STRUCT LAYOUT
+    {
+    STRUCT nodes[];
+    }
+
+STRUCT MAPPINGS
+    {
+    STRUCT mappings[];
+    }
+
+/** node type - bitmap,skinbitmap,control */
+STRUCT NODE
+    {
+    LONG type;
+    
+    // node identification 
+    /** area id */
+    LTEXT nodeid;
+    /** parent area id */
+    LTEXT parentnodeid = "";
+    /** branch id, used for identifying optional branches */
+    LTEXT branchid = "";
+    /** 1 or 0, tells whether a branch is enabled */
+    LONG enabled = 1;
+    /** horizontal alignment of the area: 0-100000, 50000 is center */
+    LONG horizontalalignment = 0;
+    /** vertical alignment of the area: 0-100000, 50000 is center */
+    LONG verticalalignment = 0;
+    
+    /** 
+     * area priority, 0 is "must", consequent values are so that higher 
+     * numbers 
+     * mean higher priority 
+     */
+    LONG priority = 0;
+    
+    /** 
+     * 1 or 0, tells whether area aspect ratio should be preserved when 
+     * resizing
+     */
+    LONG lockaspectratio = 0;
+
+    // we assume that minimum dimensions are always absolute and always 
+    // in pixels
+
+    /** minimum width in pixels */
+    LONG pixelminimumwidth;
+    /** minimum width in pixels */
+    LONG pixelminimumheight;
+    /** maximum size */
+    STRUCT maximumsize;
+    /** preferred size */
+    STRUCT preferredsize;
+    /** area margins */
+    STRUCT margins;
+    /** include data for included layout file */
+    STRUCT include;
+    /** orientation of child areas	*/
+    STRUCT childorientation;
+    /** node-specific data, depending on the node type */
+    STRUCT nodedata; 
+    }
+
+/** child area layout is defined as rows x columns */
+STRUCT CHILD_ORIENTATION
+    {
+    LONG rows = 0;
+    LONG columns = 0;
+    }
+
+/** margins are assumed absolute and in pixels */
+STRUCT MARGIN
+    {
+    LONG left = 0;
+    LONG right = 0;
+    LONG top = 0; 
+    LONG bottom = 0;
+    }
+
+/** maximum size can be pixels, twips or percentage of parent area */
+STRUCT MAXIMUMSIZE
+    {
+    LONG pixelmaximumwidth = 0;
+    LONG pixelmaximumheight = 0;
+
+    LONG twipmaximumwidth = 0;
+    LONG twipmaximumheight = 0;
+
+    /** percentage, 0-1000000, 1000000 is 100% */
+    LONG relativemaximumwidth = 0; 
+    /** percentage, 0-1000000, 1000000 is 100% */
+    LONG relativemaximumheight = 0; 
+    }
+
+/** preferred size can be pixels, twips or percentage of parent area */
+STRUCT PREFERREDSIZE
+    {
+    LONG pixelpreferredwidth = 0;
+    LONG pixelpreferredheight = 0;
+
+    LONG twippreferredwidth = 0;
+    LONG twippreferredheight = 0;
+
+    /** percentage, 0-1000000, 1000000 is 100% */
+    LONG relativepreferredwidth = 0; 
+    /** percentage, 0-1000000, 1000000 is 100% */
+    LONG relativepreferredheight = 0; 
+    }
+
+/** sub-areas are included from external files by filename */
+STRUCT INCLUDE
+    {
+    LTEXT file = "";
+    }
+
+/** bitmap area defines a file name and a bitmap id */
+STRUCT BITMAPAREA
+    {
+    /** file name */
+    LTEXT file; 
+    
+    /** 
+     * id is string in order to allow different representations for image data
+     */ 
+    LTEXT bitmapid; 
+    /** mask file name is optional */
+    LTEXT maskfile = ""; 
+    
+    /**
+     *  mask id is optional. id is string in order to allow different 
+     *  representations for image data
+     */
+    LTEXT maskbitmapid = "";
+    /** is mask inverted  */
+    LONG invertmask = 0;
+    /** is mask enabled */
+    LONG enablemask = 0;
+    }
+
+/** skin area defines a skin id and a bitmap id */
+STRUCT SKINBITMAPAREA
+    {
+    /** skin file id */
+    LONG skinfileid;
+    /** skin bitmap id */
+    LONG bitmapid; 
+    /** mask file id */
+    LONG maskfileid = 0; 
+    /** mask bitmap id */
+    LONG maskbitmapid = 0;
+    /** is mask inverted */
+    LONG invertmask = 0; 
+    /** is mask enabled */
+    LONG enablemask = 0; 
+    }
+
+STRUCT CONTROLAREA
+    {
+    /** node UI type, an UID */
+    LONG uitype;
+    /** construction data file name */
+    LTEXT resourcefile = "";
+    
+    /** 
+     * construction data id in the file - string in order to allow different 
+     * data representations
+     */
+    LTEXT resourceid = ""; 
+    }
+
+/** mapping defines a name that maps a hierarchical name */
+STRUCT MAPPING
+    {
+    /** mapping name (for example, "button1") */
+    LTEXT key; 
+    
+    /** 
+     * mapping path, a blank-separated path 
+     * (for example, "rootnode statusnode left_area")
+     */
+    LTEXT path; 
+    }
+
+STRUCT FILEVERSION
+    {
+    /** version string */
+    LTEXT version; 
+    }
+
+#endif // XNLAYOUTENGINE_HRH

@@ -1,0 +1,69 @@
+widget{
+    width:auto;
+    height:90px;
+    }
+box#triple_row_icon_widget{ 
+    direction: rtl;
+    block-progression:tb;
+ 		nav-index:appearance;
+}
+box#triple_row_icon_widget:focus{
+    background-image: "SKIN(268458534 24576)";
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+box.row{
+    direction: rtl;
+    block-progression:rl;
+    padding-left  : 10px;
+    padding-right : 10px;
+}
+
+box#triple_rc_row1_box{
+    padding-top   : 2px;
+    padding-bottom: 2px;
+}
+
+box#triple_rc_row2_box{
+    padding-top   : 2px;
+    padding-bottom: 2px;
+}
+box#triple_rc_row3_box{
+    padding-top   : 2px;
+    padding-bottom: 2px;
+}
+
+box.imagebox
+{
+    height:auto;
+    width:20px;
+    direction: rtl;
+}
+box.textbox
+{
+    padding-left  : 10px;
+    direction: rtl;
+    width:auto;
+    height:20px;
+}
+
+text
+{
+    width:auto;
+    height:auto;
+    display: block;
+    visibility: visible;
+    position: static;
+    direction: rtl;
+    block-progression:tb;
+    text-align:right;
+	  font-family: EAknLogicalFontPrimaryFont;
+	  font-size:18px;
+    color:white;
+}
+
+image
+{
+  _s60-aspect-ratio:preserve;
+}
+

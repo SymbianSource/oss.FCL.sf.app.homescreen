@@ -1,0 +1,40 @@
+/*
+* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+* Onerow widget HSPS-plugin language specific IBY file.
+*
+*/
+
+#ifndef __ONEROW_2001F480_RESOURCES_IBY__
+#define __ONEROW_2001F480_RESOURCES_IBY__
+
+#if defined(__LAYOUT_360_640_TOUCH) || defined(__LAYOUT_640_360_TOUCH)
+
+// Enabled by DTD-localization tools, language specific
+#if defined (__LOCALES_37_IBY__)
+data=ZPRIVATE\200159c0\install\onerow_2001f480\xuikon\37\onerow.o0037 \private\200159c0\install\onerow_2001f480\xuikon\37\onerow.o0037
+#endif
+#if defined  (__LOCALES_50_IBY__)
+data=ZPRIVATE\200159c0\install\onerow_2001f480\xuikon\50\onerow.o0050 \private\200159c0\install\onerow_2001f480\xuikon\50\onerow.o0050
+#endif
+#if defined  (__LOCALES_57_IBY__)
+data=ZPRIVATE\200159c0\install\onerow_2001f480\xuikon\57\onerow.o0057 \private\200159c0\install\onerow_2001f480\xuikon\57\onerow.o0057
+#endif
+#if defined  (__LOCALES_94_IBY__)
+data=ZPRIVATE\200159c0\install\onerow_2001f480\xuikon\94\onerow.o0094 \private\200159c0\install\onerow_2001f480\xuikon\94\onerow.o0094
+#endif
+
+#endif // __LAYOUT_360_640_TOUCH || __LAYOUT_640_360_TOUCH
+
+#endif // __ONEROW_2001F480_RESOURCES_IBY__

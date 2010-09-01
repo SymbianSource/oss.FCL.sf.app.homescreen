@@ -1,0 +1,9 @@
+EXPORTS
+	?HandleRequestL@CHnEngine@@UAEXABVCLiwGenericParamList@@PAV2@@Z @ 1 NONAME ; void CHnEngine::HandleRequestL(class CLiwGenericParamList const &, class CLiwGenericParamList *)
+	?InitializeL@CHnEngine@@UAEHAAVCLiwGenericParamList@@@Z @ 2 NONAME ; int CHnEngine::InitializeL(class CLiwGenericParamList &)
+	?LoadSuitesFromUriL@CHnEngine@@UAEXABVTDesC8@@@Z @ 3 NONAME ; void CHnEngine::LoadSuitesFromUriL(class TDesC8 const &)
+	?NewL@CHnEngine@@SAPAV1@AAVMHnControllerInterface@@@Z @ 4 NONAME ; class CHnEngine * CHnEngine::NewL(class MHnControllerInterface &)
+	?NewLC@CHnEngine@@SAPAV1@AAVMHnControllerInterface@@@Z @ 5 NONAME ; class CHnEngine * CHnEngine::NewLC(class MHnControllerInterface &)
+	?ResetModelsL@CHnEngine@@UAEXXZ @ 6 NONAME ; void CHnEngine::ResetModelsL(void)
+	?TriggerHnEventL@CHnEngine@@UAEHHHPAVCLiwGenericParamList@@@Z @ 7 NONAME ; int CHnEngine::TriggerHnEventL(int, int, class CLiwGenericParamList *)
+

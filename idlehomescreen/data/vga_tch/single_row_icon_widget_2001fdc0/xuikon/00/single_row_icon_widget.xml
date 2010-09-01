@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <!DOCTYPE xmluiml SYSTEM "AI3_Demo.dtd"> -->
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+    <widget>
+      <contentsource id="single_row_icon_widget" class="ContentSource" name="" value="0x20019594"/>
+      <configuration name="service" value="Service.ContentPublishing"/>
+      <configuration name="interface" value="IContentPublishing"/>
+      <configuration name="command" value="GetList"/>
+      <configuration id="pub_id" name="publisher" value=""/>
+      
+      <box id="single_row_icon_widget" focusable="true" _s60-initial-focus="1">      
+    	 <actions>
+	        <action>
+	          <trigger name="stylus">
+	            <property name="eventtype" value="downup" />
+	          </trigger>
+	          <trigger name="activate"/>
+	          <trigger name="keyevent">
+	              <property name="scancode" value="3"/>
+	              <property name="eventtype" value="1"/>
+	          </trigger>
+	          <event id="trigger1" name="" />
+	        </action>
+	      </actions>
+	    
+	    <box id="single_rc_row1_box" class="row" > 
+       <box id="single_rc_image1_box">
+         <image id="row1img"> 
+           <configuration name="content_type" value="row1_image1"/>
+           <property id="prop1" class=""/>
+         </image>
+       </box>        
+       <box id="single_rc_text1_box">
+         <text id="row1txt"> 
+					 <configuration name="content_type" value="row1_text1"/>
+           <property id="prop2" class=""/>
+         </text>
+       </box>
+      </box> 
+    </box>
+    </widget>
+</xmluiml>

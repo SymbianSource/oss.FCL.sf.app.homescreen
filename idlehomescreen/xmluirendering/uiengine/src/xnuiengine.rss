@@ -1,0 +1,208 @@
+/*
+* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+// ========== RESOURCE IDENTIFIER =============================================
+
+NAME    XNAI
+
+// ========== INCLUDE FILES ===================================================
+
+#include <eikon.rh>
+#include <eikcore.rsg>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <AvkonIcons.hrh>
+#include <e32keys.h>
+#include <activeidle3.loc>
+
+// ========== RESOURCE DEFINITIONS ============================================
+
+RESOURCE RSS_SIGNATURE { }
+RESOURCE TBUF { buf = ""; }
+
+// Select widget-dialog
+RESOURCE AVKON_LIST_QUERY r_listquery_add_widget
+    {
+    items =
+        {
+        AVKON_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                heading = qtn_hs_select_widget;
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    // dynamically filled
+                    };
+                };
+            }
+        };
+    softkeys = R_AVKON_SOFTKEYS_SELECT_BACK;
+    }
+
+
+// xml listquery dialog
+RESOURCE AVKON_LIST_QUERY r_xml_listquery
+    {
+    items =
+        {
+        AVKON_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                // heading = dynamically filled
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    // dynamically filled
+                    };
+                };
+            }
+        };
+    softkeys = R_AVKON_SOFTKEYS_SELECT_BACK;
+    }
+
+RESOURCE TBUF r_qtn_hs_add_widget_full
+  {
+  buf = qtn_hs_add_widget_full;
+  }
+
+RESOURCE TBUF r_qtn_hs_error_widgets_removed
+    {
+    buf = qtn_hs_error_widgets_removed;
+    }
+
+RESOURCE TBUF r_qtn_hs_hs_memory_full
+    {
+    buf = qtn_hs_hs_memory_full;
+    }
+
+RESOURCE TBUF r_qtn_hs_max_amount_of_pages_note 
+    { 
+    buf = qtn_hs_max_amount_of_pages_note; 
+    } 
+
+RESOURCE TBUF r_qtn_hs_delete_page 
+    { 
+    buf = qtn_hs_delete_current_page; 
+    }
+    
+RESOURCE TBUF r_hs_error_content_removed
+		{
+		buf = qtn_hs_error_content_removed;
+		}    
+    
+RESOURCE DIALOG r_yes_no_hs_remove_view 
+    { 
+    flags = EGeneralQueryFlags; 
+    buttons = R_AVKON_SOFTKEYS_YES_NO; 
+    items = 
+        { 
+        DLG_LINE 
+            { 
+            type = EAknCtQuery; 
+            id = EGeneralQuery; 
+            control = AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout; 
+                label = qtn_hs_delete_current_page; 
+                }; 
+            } 
+        }; 
+    }
+
+RESOURCE ARRAY r_array_change_wallpaper
+    {
+    items =
+        {
+        LBUF {txt = qtn_hs_default; },
+        LBUF {txt = qtn_hs_image; }
+        };
+    }
+    
+// Change wallpaper-dialog
+RESOURCE AVKON_LIST_QUERY r_listquery_change_wallpaper
+    {
+    items =
+        {
+        AVKON_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                heading = qtn_hs_title_change_wallpaper;
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    array_id = r_array_change_wallpaper;
+                    };
+                };
+            }
+        };
+    softkeys = R_AVKON_SOFTKEYS_SELECT_BACK;
+    }
+    
+RESOURCE DIALOG r_hs_content_removed_view 
+    { 
+    flags = EGeneralQueryFlags; 
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY; 
+    items = 
+        { 
+        DLG_LINE 
+            { 
+            type = EAknCtQuery; 
+            id = EGeneralQuery; 
+            control = AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationQueryLayout; 
+                label = r_hs_error_content_removed;
+                bmpfile = AVKON_ICON_FILE;
+                bmpid = EMbmAvkonQgn_note_error;
+                bmpmask = EMbmAvkonQgn_note_error_mask;                
+                }; 
+            } 
+        }; 
+    }    
+
+RESOURCE TBUF r_qtn_hs_operation_failed_no_disk 
+    { 
+    buf = qtn_hs_operation_failed_no_disk; 
+    }
+
+RESOURCE DIALOG r_backup_restore_wait_dialog
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_hs_backup_use_prevented;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+
+// End of file

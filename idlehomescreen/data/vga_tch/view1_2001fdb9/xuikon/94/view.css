@@ -1,0 +1,543 @@
+view {
+    display: block; 
+    position: static;
+    width: 100%;
+    height: 100%;
+    direction: rtl;
+    block-progression: tb;
+    background-image: wallpaper;
+    nav-index: appearance;
+    _s60-focus-visibility: true;
+    _s60-status-pane-layout: widescreen-flat-3softkeys;
+
+}
+
+trigger.western{
+    display: none;
+}
+
+
+/** Softkeys **/
+softkey.normal_mode_sk
+{
+    display: block;
+}
+
+softkey.normal_mode_sk:edit
+{
+    display: none;
+}
+
+softkey.edit_mode_sk
+{
+    display: none;
+}
+
+softkey.edit_mode_sk:edit
+{
+    display: block;
+}
+
+/** General **/
+
+plugin.widget_full_width{
+    /* every plug-in decides its own height */
+    height: adaptive;
+    background-color: "SKIN(268458534 9906)";
+    background-size: 100%;
+    width: 100%;
+/*    padding-left: 1.7u;
+    padding-right: 1.7u;*/
+    margin-bottom: 0.55u;
+    nav-index: auto;
+}
+
+plugin.widget_full_width:focus {
+    focus-background:"SKIN(268458534 9896)";
+}
+
+plugin:edit {
+    background-color:"SKIN(270501603 8582)";
+}
+
+text{
+    text-align: center;
+    font-family: tahoma;
+    font-size: 3.0u;
+    /*color:"SKIN(268458534 13056 19)";*/
+    color: white;
+}
+
+/************
+Page switcher
+*************
+					
+text#switchertext{
+	position: static;
+	text-align: right;
+	margin-left: 6.0u;
+}
+
+image#switcherimage{
+	position: absolute;
+   	top: 1.4u;
+    	left: 2.5u;
+	height: 3.5u;
+	width: 3.0u;
+	_s60-aspect-ratio: preserve;
+}
+*/
+
+
+/****************** 
+container areas 
+******************/
+box#mainbox{
+    width: 100%;
+    height: 100%;
+}
+
+box.profile_date
+{
+    background-color: "SKIN(268458534 9916)";
+    nav-index: appearance;
+    height: auto;
+}
+
+box.profile_date:focus
+{
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+
+/********************************************* 
+Clock Profiles - portrait specific containers 
+**********************************************/
+
+box#clock_profiles_portrait{
+    display: block;
+    visibility: visible;
+    direction: rtl;
+    block-progression: rl;
+    padding-left: 1.7u;
+    padding-right: 1.7u;
+    margin-bottom: 0.55u;
+    height:13.86u;
+    visualisationaware:true;
+}
+
+box#profiles_pages_portrait{
+    block-progression: tb;
+    direction: rtl;
+    height: adaptive;
+}
+
+box#clock_container_portrait{
+    display: block;
+    visibility: visible;
+    position: static;    
+    nav-index: appearance;
+    block-progression: tb;
+    background-color: "SKIN(268458534 9906)";
+
+    margin-left: 0.7u;
+    visualisationaware:true;
+    _s60-initial-focus: 1;
+}
+
+box#clock_container_portrait:focus{
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+clock#clock_portrait{
+    display: block;
+    visibility: visible;
+    position: static;     
+    width: auto;
+    /*height: 70%;*/
+    height: auto;
+    direction: rtl;
+    block-progression: tb;        
+    background: none;
+    nav-index: appearance;
+    _s60-format: locale;
+    _s60-ampm-font-size: 16px;
+    _s60-digital-font-size: 56px;
+    color: white;	
+}
+
+box#date_container_portrait
+{
+    width: auto;
+    direction: rtl;
+    block-progression: rl;
+    height: 4.05u;
+    margin-bottom: 0.55u;
+    padding-top: 3px;
+    visualisationaware:true;
+}
+
+box#date_content_portrait
+{
+    width: adaptive;
+    height: adaptive;
+}
+
+text#datetext2_portrait
+{
+    text-align: center;
+    width: auto;
+    height: auto;
+    font-family: EAknLogicalFontPrimaryFont;
+    font-size: 3u;
+    color: white;
+}
+
+box#profile_softindicator_portrait
+{
+    width: auto;
+    direction: rtl;
+    block-progression: tb;
+    background-color: "SKIN(268458534 9906)";
+    nav-index: appearance;
+    height: 9.0u;
+    visualisationaware:true;
+}
+
+box#NT_CUGMCN_portrait
+{
+    text-align: center;
+    width: adaptive;
+    height: auto;
+    block-progression: rl;
+}
+
+
+box#NT_SATVHZ_portrait
+{
+    display: none;
+    text-align: center;
+    width: adaptive;
+    height: auto;
+    block-progression: rl;
+}
+
+title#title_vhz_portrait
+{
+    display: none;
+}
+
+title#title_sat_portrait
+{
+    display: none;
+}
+
+/********************************************* 
+Clock Profiles - landscape specific containers 
+**********************************************/
+
+box#clock_profiles_landscape{
+    display: block;
+    visibility: visible;
+    direction: rtl;
+    block-progression: tb;
+    width: 30%;
+    height: 100%;
+    padding-left: 5px;
+    padding-top: 5px;
+    visualisationaware:true;
+}
+
+box#profiles_pages_landscape{
+    block-progression: tb;
+    direction: rtl;
+    height: adaptive;
+}
+
+box#clock_container_landscape{
+    
+    display: block;
+    visibility: visible;
+    position: static;    
+    nav-index: appearance;
+    block-progression: tb;
+    background-color: "SKIN(268458534 9906)";
+    height: 10.74u;
+    width: auto;
+    margin-bottom: 0.55u;
+    visualisationaware:true;
+    _s60-initial-focus: 2;
+}
+
+box#clock_container_landscape:focus{
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+box#date_container_landscape
+{
+    width: auto;
+    direction: rtl;
+    block-progression: rl;
+    height: 6.7u;
+    margin-bottom: 0.55u;
+    visualisationaware:true;
+}
+
+box#profile_softindicator_landscape
+{
+    width: auto;
+    direction: rtl;
+    block-progression: tb;
+    background-color: "SKIN(268458534 9906)";
+    nav-index: appearance;
+    height: 6.7u;
+    margin-bottom: 0.55u;
+    visualisationaware:true;
+}
+
+clock#clock_landscape{
+    display: block;
+    visibility: visible;
+    position: static;     
+    width: 100%;
+    height: auto;
+    direction: rtl;
+    block-progression: tb;        
+    background: none;
+    nav-index: appearance;
+    _s60-format: locale;
+    _s60-ampm-font-size: 16px;
+    _s60-digital-font-size: 56px;
+    color: white;	
+}
+
+clock:focus{
+    background-color: "SKIN(268458534 5120 9)";
+}
+/* Date in the clock widget */
+text#datetext{
+    nav-index: appearance;
+    text-align: center;
+    padding-top: 0.5u;
+    padding-bottom: 0.5u;
+    width: 100%;
+    height: 24%;
+    font-family: EAknLogicalFontPrimaryFont;
+    font-size: 3u;
+    color: white;
+}
+/* Date in the clock widget */
+text#datetext:focus{
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+/* Date in separate widget above profiles */
+
+box#date_content_landscape
+{
+    width: inherit;
+    height: inherit;
+}
+
+text#datetext2_landscape
+{
+    text-align: center;
+    width: auto;
+    height: auto;
+    font-family: EAknLogicalFontPrimaryFont;
+    font-size: 3u;
+    color: white;
+}
+
+box#profile_softindicator:focus
+{
+    focus-background:"SKIN(268458534 5120 9)";
+}
+
+image#profileicon {
+    display: block;
+    visibility: hidden;
+    width: 18px;
+    height: 20px;
+    position: static;
+    margin-top: auto;
+    z-index: 2;
+}
+
+image#SatIdleModeIcon
+{
+    display: block;
+    visibility: hidden;
+    width: 18px;
+    height: 20px;
+    position: static;
+    margin-top: auto;
+}
+
+text#profiletext
+{
+    text-align: center;
+    margin-left: 2px;
+    margin-right: 2px;
+    width: adaptive;
+    height: adaptive;
+    font-family: EAknLogicalFontPrimaryFont;
+    font-size: 3u;
+    color:"SKIN(268458534 13056 19)";
+}
+
+/* Profiles dialog */
+listquerydialog#profiledialog
+{
+    /* Avkon dialog is not layout capable */
+    display: none;    
+}
+
+/* Default system profiles */
+text.systemprofileitem
+{
+    display: block;
+}
+
+/* Placeholders for profiles added by user */
+text.userprofileitem
+{
+    display: none;
+}
+
+/******************
+    SOFT INDICATOR WIDGET AREA 
+*******************/
+
+newsticker.SIText {
+    text-align: center;
+    display: block;
+    visibility: visible;
+    width: auto;
+    margin-left: 2px;
+    margin-right: 2px;
+    font-family: EAknLogicalFontPrimaryFont;
+    font-size: 3u;
+    white-space-collapse: collapse;
+    _s60-scroll-behaviour: alternate;
+    /*_s60-scroll-behaviour: scroll;*/
+    _s60-display-time: 2000;
+    _s60-scroll-loop: false;
+    _s60-start-delay: 0;
+    _s60-restart-after-update: true;
+    color: white;
+    /*color:"SKIN(268458534 13056 19)";*/
+}
+
+box#NT_CUGMCN_landscape
+{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: adaptive;
+    height: auto;
+    block-progression: rl;
+}
+
+box#NT_SATVHZ_landscape
+{
+    display: none;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: adaptive;
+    height: auto;
+    block-progression: rl;
+}
+
+title#title_vhz_landscape
+{
+    display: none;
+}
+
+title#title_sat_landscape
+{
+   display: none;
+}
+
+image#SatIdleModeIcon_portrait
+{
+    display: none;
+}
+
+image#SatIdleModeIcon_landscape
+{
+    display: none;
+}
+
+/************
+Page switcher
+*************
+box#switcher{
+    display: block;
+    visibility: visible;
+    block-progression: rl;
+    direction: ltr;
+    height: 4.5u;
+    background-color: "SKIN(268458534 9906)";
+    background-size: 100%;		
+    margin-top: 0.55u;
+}
+
+box#switcher:focus {
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+text#switchertext
+{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: adaptive;
+    height: 3.5u;
+    font-family: EAknLogicalFontPrimaryFont;
+    font-size: 3u;
+    color:"SKIN(268458534 13056 19)";
+    color: white;
+    padding-top: 0.5u;
+    padding-bottom: 0.5u;
+}
+
+image#switcherimage
+{
+    position: static;
+    height: 3.5u;
+    width: 3.5u;
+    margin-top: 0.5u;
+    margin-left: 2u;
+}
+*/
+
+menuitem#webonlineitem
+{
+   display: block;
+}
+
+menuitem#webonlineitem:edit
+{
+   display: none;
+}
+
+menuitem#webofflineitem
+{
+   display: block;
+}
+
+menuitem#webofflineitem:edit
+{
+   display: none;
+}
+
+box#main_plugins{
+    block-progression: tb;
+    display: block;
+    visibility: visible;
+    padding-left: 1.7u;
+    padding-right: 1.7u;
+}
+

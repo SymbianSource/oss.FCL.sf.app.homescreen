@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<data>
+    <AppUid>2001CB4F</AppUid>
+    <Provideruid>101FB657</Provideruid>
+    <ThemeUid>200184C8</ThemeUid>
+    <ThemeFullName>DesktopWidget</ThemeFullName>
+    <ThemeShortName>Desktop</ThemeShortName>
+    <ThemeVersion>1.0</ThemeVersion>
+    <FileXML>desktop.xml</FileXML>
+    <FileCSS>desktop.css</FileCSS>
+</data>

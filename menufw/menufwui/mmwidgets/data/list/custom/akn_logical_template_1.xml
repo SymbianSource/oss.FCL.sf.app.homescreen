@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dhuiml version="1.0" xmlns="http://www.series60.com/xml/dhuiml/1">
+
+<orientation id ="portrait" width="360">
+	<element id="read">
+        <layout id="anchor" name="anchor" width="340" height="55">
+    		<textvisual id="mul_title" positionx="10" positiony="13" width="263" height="27">
+    			<attributesetter name="text" targetvalue="mul_title" category="data" />
+    			<attributesetter name="style" targetvalue="qfn_secondary" />
+    			<attributesetter name="fontthemecolor" targetvalue="7" />
+    			<attributesetter name="horizontalalign" targetvalue="0" />
+    			<attributesetter name="verticalalign" targetvalue="0" />
+    			<attributesetter name="opacity" targetvalue="0.5" />
+    		</textvisual>
+    		<imagevisual id="mul_indicator_1" positionx="300" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+    		<imagevisual id="mul_indicator_2" positionx="273" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+		</layout>
+ 	</element>	
+		
+    <element id="nohighlight">
+        <layout id="anchor" name="anchor" width="340" height="55">
+    		<textvisual id="mul_title" positionx="10" positiony="13" width="263" height="27">
+    			<attributesetter name="text" targetvalue="mul_title" category="data" />
+    			<attributesetter name="style" targetvalue="qfn_secondary" />
+    			<attributesetter name="fontthemecolor" targetvalue="8" />
+    			<attributesetter name="horizontalalign" targetvalue="0" />
+    			<attributesetter name="verticalalign" targetvalue="0" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</textvisual>
+    		<imagevisual id="mul_indicator_1" positionx="300" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+    		<imagevisual id="mul_indicator_2" positionx="273" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+		</layout>
+ 	</element>		  
+
+	<element id ="highlight">
+	    <layout id="anchor" name="anchor" width="340" height="55">		
+    		<textvisual id="mul_title" positionx="10" positiony="13" width="263" height="27">
+    			<attributesetter name="text" targetvalue="mul_title" category="data" />
+    			<attributesetter name="style" targetvalue="qfn_secondary" />
+    			<attributesetter name="fontthemecolor" targetvalue="9" />
+    			<attributesetter name="horizontalalign" targetvalue="0" />
+    			<attributesetter name="verticalalign" targetvalue="0" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</textvisual>
+    		<imagevisual id="mul_indicator_1" positionx="300" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+    		<imagevisual id="mul_indicator_2" positionx="273" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+		</layout>
+ 	</element>		  
+	 	
+ </orientation>
+ 
+ <orientation id ="landscape" width="502" >
+		
+		 <element id="read">
+        <layout id="anchor" name="anchor" width="482" height="55">
+    		<textvisual id="mul_title" positionx="10" positiony="13" width="392" height="27">
+    			<attributesetter name="text" targetvalue="mul_title" category="data" />
+    			<attributesetter name="style" targetvalue="qfn_secondary" />
+    			<attributesetter name="fontthemecolor" targetvalue="8" />
+    			<attributesetter name="horizontalalign" targetvalue="0" />
+    			<attributesetter name="verticalalign" targetvalue="0" />
+    			<attributesetter name="opacity" targetvalue="0.5" />
+    		</textvisual>
+    		<imagevisual id="mul_indicator_1" positionx="440" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+    		<imagevisual id="mul_indicator_2" positionx="413" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+		</layout>
+ 	</element>
+ 	
+    <element id="nohighlight">
+        <layout id="anchor" name="anchor" width="482" height="55">
+    		<textvisual id="mul_title" positionx="10" positiony="13" width="392" height="27">
+    			<attributesetter name="text" targetvalue="mul_title" category="data" />
+    			<attributesetter name="style" targetvalue="qfn_secondary" />
+    			<attributesetter name="fontthemecolor" targetvalue="8" />
+    			<attributesetter name="horizontalalign" targetvalue="0" />
+    			<attributesetter name="verticalalign" targetvalue="0" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</textvisual>
+    		<imagevisual id="mul_indicator_1" positionx="440" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+    		<imagevisual id="mul_indicator_2" positionx="413" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+		</layout>
+ 	</element>
+		
+	<element id ="highlight">
+	    <layout id="anchor" name="anchor" width="482" height="55">	
+    		<textvisual id="mul_title" positionx="10" positiony="13" width="340" height="27">
+    			<attributesetter name="text" targetvalue="mul_title" category="data" />
+    			<attributesetter name="style" targetvalue="qfn_secondary" />
+    			<attributesetter name="fontthemecolor" targetvalue="9" />
+    			<attributesetter name="horizontalalign" targetvalue="0" />
+    			<attributesetter name="verticalalign" targetvalue="0" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</textvisual>
+    		<imagevisual id="mul_indicator_1" positionx="440" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+    		<imagevisual id="mul_indicator_2" positionx="413" positiony="13" width="27" height="27">
+    			<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+    			<attributesetter name="opacity" targetvalue="1" />
+    		</imagevisual>
+		</layout>
+ 	</element>		  
+ 	
+</orientation>
+</dhuiml>

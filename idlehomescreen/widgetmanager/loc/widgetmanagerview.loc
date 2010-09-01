@@ -1,0 +1,197 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Localisation file of Widget Manager 
+*
+*/
+
+
+
+// TITLES OF EACH VIEW
+
+// d: Title of Application
+// d: 
+// d: 
+// l: title_pane_t2/opt12
+// w:
+// r: TB9.2
+#define qtn_wm_title_text "Widget Catalog"
+
+
+
+// OPTIONS-MENU MENUITEMS
+
+// d: Add-menuitem in Options-menu 
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_add "Add To Home screen"
+
+// d: Launch-menuitem in Options-menu
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_launch_widget "Launch"
+
+// d: Search-menuitem in Options-menu
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_search "Search"
+
+// d: Uninstall-menuitem in Options-menu 
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_uninstall "Uninstall"
+
+// d: Open-menuitem in Options-menu 
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_open "Open"
+
+// d: Sort alphabetically-menuitem in Options-menu
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_sort_alpha "Sort alphabetically"
+
+// d: Details-menuitem in Options-menu
+// d: 
+// d: 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_options_wm_show_details "Details"
+
+
+// MISC
+
+// d: Text displayed on OVI Store button 
+// d: 
+// d: 
+// l: wgtman_btn_pane_t1
+// w:
+// r: TB9.2
+//
+#define qtn_wm_ovi_store_title "Get more"
+
+// d: Info popup to indicate that an item can not be added to home screen
+// d: because current view is full
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_add_widget_no_space_note "Not enough space to add new widget to active page. Remove some content first."
+
+// d: Info popup to indicate that an item can not be added to home screen
+// d: because maximum instance count of current widget would be exceeded in whole Home screen
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_add_widget_max_count_note "Unable to add. Home screen does not allow more instances of this widget."
+
+// d: widget details dialog left softkey for adding widget to home screen
+// d: Note: widgets dialog is not necessarily full screen width, which may affect
+// d: string max length!
+// l: control_pane_t1/opt7
+// w:
+// r: TB9.2
+//
+#define qtn_wm_details_add_to_hs "Add"
+
+// d: widget details dialog - no description
+// d: 
+// d: 
+// l: listrow_wgtman_pane_t2
+// w:
+// r: TB9.2
+//
+#define qtn_wm_details_no_description "No description available"
+
+// d: widget uninstall not allowed
+// d: 
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninst_not_allowed "%U can not be uninstalled"
+
+// d: widget details dialog default text for wrt widgets
+// d: 
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_wm_widget_details_wrt "Home Screen application that uses internet connection to show dynamic updates from web."
+
+// d: Query for unistallation
+// d: 
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninstall_widget_query "Uninstall %U?"
+
+// d: Note when installer allready inuse
+// d: 
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninst_process_busy "Installation process already ongoing. Try again later."
+
+// d: Note when trying to add widget hs and max number of allowed instances 
+// d: of that widget is already reached in active page
+// d: 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_add_widget_max_reached "Unable to add. No more instances allowed of this item for active page."
+
+// d: Replace widget name when uninstalling
+// d: 
+// d: 
+// l: listrow_wgtman_pane_t1
+// w:
+// r: TB9.2
+//
+#define qtn_wm_uninstall_text "Uninstalling.."

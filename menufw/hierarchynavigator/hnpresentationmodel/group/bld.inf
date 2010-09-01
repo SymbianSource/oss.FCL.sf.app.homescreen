@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project hnpresentationmodel
+*
+*/
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../inc/hnsuitemodelcontainer.h      |../../../inc/hnsuitemodelcontainer.h
+../inc/hnsuitemodel.h               |../../../inc/hnsuitemodel.h
+../inc/hnitemmodel.h                |../../../inc/hnitemmodel.h
+../inc/hnmenuitemmodel.h            |../../../inc/hnmenuitemmodel.h
+../inc/hnactionmodel.h              |../../../inc/hnactionmodel.h
+../inc/hntoolbarmodel.h             |../../../inc/hntoolbarmodel.h
+../inc/hnbuttonmodel.h              |../../../inc/hnbuttonmodel.h
+../inc/hnattributetext.h            |../../../inc/hnattributetext.h
+../inc/hnattributeimage.h           |../../../inc/hnattributeimage.h
+../inc/hneventhandler.h             |../../../inc/hneventhandler.h 
+../inc/hnattributebase.h            |../../../inc/hnattributebase.h 
+../inc/hnsuiteobserver.h            |../../../inc/hnsuiteobserver.h 
+../inc/hnitemsorder.h               |../../../inc/hnitemsorder.h
+../inc/hniconholder.h               |../../../inc/hniconholder.h
+../inc/hnextbmpiconholder.h         |../../../inc/hnextbmpiconholder.h
+
+PRJ_MMPFILES
+hnpresentationmodel.mmp
+
+PRJ_TESTMMPFILES
+#ifdef _MATRIX_MENU_INCLUDE_TEST_CONTENT
+#include "../internal/test/group/bld.inf"
+#endif

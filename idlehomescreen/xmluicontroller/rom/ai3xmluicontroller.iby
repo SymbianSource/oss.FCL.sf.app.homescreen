@@ -1,0 +1,51 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Image description file for project ActiveIdle3
+*
+*/
+
+
+#ifndef XMLUICONTROLLER_IBY
+#define XMLUICONTROLLER_IBY
+
+
+#include <data_caging_paths_for_iby.hrh>
+
+ECOM_PLUGIN( ai3xmluimain.dll, ai3xmluimain.rsc )
+data=\epoc32\data\Z\resource\apps\ai3xmlui.rsc      APP_RESOURCE_DIR\ai3xmlui.rsc
+
+// Reference UI theme
+//data=CPRIVATE\10207254\themes\3772834016\270513751\285221529\1.0\TMP04f65.o0000				PRIVATE\10207254\themes\271012080\270513751\271063147\1.0\TMP04f65.o0000
+
+
+// NOTE!! FILES BELOW ARE INCLUDED TO IMAGE BY OLD XUIKON AND ACTIVEIDLE2. UNCOMMENT WHEN AI2 AND XUIKON
+//        ARE REMOVED FROM RELEASE.
+
+// Theme skeletons
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271063149\1.0\AI.o0000                                 PRIVATE\10207254\themes\271012080\270513751\271063149\1.0\AI.o0000
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271063148\1.0\BI.o0000                                 PRIVATE\10207254\themes\271012080\270513751\271063148\1.0\BI.o0000
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271063147\1.0\CI.o0000                                 PRIVATE\10207254\themes\271012080\270513751\271063147\1.0\CI.o0000
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271068379\1.0\FT.o0000								 PRIVATE\10207254\themes\271012080\270513751\271068379\1.0\FT.o0000
+
+// Semitransparencymask for Navibar (AI) theme
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271063149\1.0\sources\qsn_fr_popup_sub_mask_icon.svg                                 PRIVATE\10207254\themes\271012080\270513751\271063149\1.0\sources\qsn_fr_popup_sub_mask_icon.svg
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271063148\1.0\sources\idle_toolbaricons.mif                                PRIVATE\10207254\themes\271012080\270513751\271063148\1.0\sources\idle_toolbaricons.mif
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271068379\1.0\sources\idle_toolbaricons.mif                                 PRIVATE\10207254\themes\271012080\270513751\271068379\1.0\sources\idle_toolbaricons.mif
+
+//data=ZPRIVATE\10207254\themes\271012080\270513751\271068379\1.0\sources\fmradioclassicidle.mif                                PRIVATE\10207254\themes\271012080\270513751\271068379\1.0\sources\fmradioclassicidle.mif
+
+//data=ZPRIVATE\10275102\backup_registration.xml  private\10275102\backup_registration.xml
+
+
+#endif // XMLUICONTROLLER_IBY

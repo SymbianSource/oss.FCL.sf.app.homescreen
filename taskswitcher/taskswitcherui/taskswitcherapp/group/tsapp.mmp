@@ -1,0 +1,102 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  mmp file for taskswitcher application
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+#include "../inc/tsuid.hrh"
+
+EPOCHEAPSIZE    0x100000 0xa00000  // 1 Mb - 10 Mb
+EPOCSTACKSIZE   0x5000 // 20KB
+
+TARGET          taskswitcher.exe
+
+TARGETTYPE      exe
+UID             0x100039CE KTsAppUidValue
+CAPABILITY      CAP_APPLICATION NetworkControl PowerMgmt
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          tsappui.cpp
+SOURCE          tsapplication.cpp
+SOURCE          tsdocument.cpp
+SOURCE          tstaskswitcher.cpp 
+SOURCE          tsappview.cpp
+SOURCE          tsfastswaparea.cpp
+SOURCE          tsfastswapgrid.cpp
+SOURCE          tsdevicestate.cpp
+SOURCE          tseventcontroler.cpp
+SOURCE          tsphysicsengine.cpp
+SOURCE          tsphysics.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../trace
+USERINCLUDE     ../../../contextengine/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib
+LIBRARY         avkon.lib
+LIBRARY         apgrfx.lib
+LIBRARY         ws32.lib
+LIBRARY         aknskins.lib
+LIBRARY         egul.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         fbscli.lib
+LIBRARY         aknskinsrv.lib
+LIBRARY		    commonengine.lib
+LIBRARY		    efsrv.lib
+LIBRARY		    estor.lib
+LIBRARY         aknnotify.lib
+LIBRARY         hlplch.lib
+LIBRARY         aknicon.lib
+LIBRARY         bitgdi.lib
+LIBRARY         gdi.lib
+LIBRARY         cdlengine.lib
+LIBRARY         aknlayout2.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         oommonitor.lib
+LIBRARY         hal.lib
+LIBRARY         gfxtrans.lib
+LIBRARY         akntransitionutils.lib
+LIBRARY         bafl.lib
+LIBRARY         akntouchgesturefw.lib
+LIBRARY         aknphysics.lib
+LIBRARY         touchfeedback.lib
+
+DEBUGLIBRARY    flogger.lib
+
+LIBRARY         tscontextservicesutils.lib
+LIBRARY         tsfswclient.lib
+LIBRARY         tsfswutils.lib
+
+SOURCEPATH      ../data
+START RESOURCE  taskswitcher.rss
+HEADER
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
+
+SOURCEPATH      ../data
+START RESOURCE  taskswitcher_reg.rss
+DEPENDS taskswitcher.rsg
+TARGETPATH      /private/10003a3f/apps
+END

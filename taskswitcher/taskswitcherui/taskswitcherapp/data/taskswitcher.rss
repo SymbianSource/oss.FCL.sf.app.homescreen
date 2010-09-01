@@ -1,0 +1,281 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource files for task switcher app
+*
+*/
+
+
+NAME HGTL
+
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <appinfo.rh>
+
+#include <avkon.loc>
+#include <taskswitcher.loc>
+
+#include "tscommands.hrh"
+
+// ---------------------------------------------------------
+//   
+//    Define the resource file signature 
+//    This resource should be empty.
+//
+// ---------------------------------------------------------
+//
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------
+//   
+//    Default Document Name
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_default_document_name { buf=""; }
+
+// ---------------------------------------------------------
+//   
+//    Define default menu and CBA key.
+//
+// ---------------------------------------------------------
+//
+RESOURCE EIK_APP_INFO
+    {
+    menubar = r_ts_menubar;
+    cba = r_ts_cba_nontouch;
+    }
+
+// ---------------------------------------------------------
+//   
+//    CBA for non-touch.
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_ts_cba_nontouch
+	{
+	flags = 0;
+	buttons = 
+    	{
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_select;}, // left softkey
+    	CBA_BUTTON {id=EAknSoftkeyBack; txt=text_softkey_back;}, // right softkey
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_select;} // middle softkey, same as lsk, label is not shown in touch
+    	};
+	}
+
+// ---------------------------------------------------------
+//   
+//    CBA for touch.
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_ts_cba_touch
+	{
+	flags = 0;
+	buttons = 
+    	{
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_empty;}, // left softkey, no label
+    	CBA_BUTTON {id=EAknSoftkeyBack; txt=text_softkey_back;}, // right softkey
+    	CBA_BUTTON {id=EAknSoftkeySelect; txt=text_softkey_select;} // middle softkey, same as lsk, label is not shown in touch
+    	};
+	}
+
+
+// ---------------------------------------------------------
+//   
+//   r_ts_menubar
+//   Menubar for ts
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_ts_menubar
+    {
+    titles =
+        {
+        MENU_TITLE {menu_pane = r_ts_menu;}
+        };
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_ts_menu
+//   Menu for "Options"
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_ts_menu
+    {
+    items = 
+        {
+        MENU_ITEM { command = ETsCmdHelp; 	 txt = qtn_options_help; },
+        MENU_ITEM { command = EAknSoftkeyExit;   	txt = text_softkey_exit; }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_ts_panel__name
+//   task switcher panel name
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_ts_panel_name
+    {
+    buf="Task Switcher";
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_ts_message_dialog_okcancel
+//   message dialog with ok and cancel softkeys labels
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_ts_message_dialog_okcancel
+    {
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
+	items =
+	    {
+		DLG_LINE
+		    {
+			type = EAknCtPopupHeadingPane;
+			id = EAknMessageQueryHeaderId;
+			control = AVKON_HEADING
+			    {
+			    headinglayout = 0;			
+			    };
+		    },
+		DLG_LINE
+	    	{
+			type = EAknCtMessageQuery;
+			id = EAknMessageQueryContentId;
+			control = AVKON_MESSAGE_QUERY { };
+		    }
+	    };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_ts_message_dialog_yesno
+//   message dialog with yes and no softkeys labels
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_ts_message_dialog_yesno
+    {
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_YES_NO;
+	items =
+	    {
+		DLG_LINE
+		    {
+			type = EAknCtPopupHeadingPane;
+			id = EAknMessageQueryHeaderId;
+			control = AVKON_HEADING
+			    {
+			    headinglayout = 0;			
+			    };
+		    },
+		DLG_LINE
+	    	{
+			type = EAknCtMessageQuery;
+			id = EAknMessageQueryContentId;
+			control = AVKON_MESSAGE_QUERY { };
+		    }
+	    };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_ts_message_dialog_ok
+//   message dialog with ok softkey label
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_ts_message_dialog_ok
+    {
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+	items =
+	    {
+		DLG_LINE
+		    {
+			type = EAknCtPopupHeadingPane;
+			id = EAknMessageQueryHeaderId;
+			control = AVKON_HEADING
+			    {
+			    headinglayout = 0;			
+			    };
+		    },
+		DLG_LINE
+	    	{
+			type = EAknCtMessageQuery;
+			id = EAknMessageQueryContentId;
+			control = AVKON_MESSAGE_QUERY { };
+		    }
+	    };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_ts_fsw_confirm_close_query
+//   shown when Clear key is pressed in FSW
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_ts_fsw_confirm_close_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+
+
+RESOURCE LOCALISABLE_APP_INFO r_localisable_app_info
+	{
+	short_caption = "Task Switcher";
+	caption_and_icon =
+		{
+		CAPTION_AND_ICON_INFO 
+			{
+			caption="Task Switcher";
+			}
+		};
+	}
+
+
+RESOURCE TBUF r_ts_title { buf = "Task Switcher"; }
+
+RESOURCE TBUF r_ts_fsw_close { buf = qtn_task_switcher_popup_close_app; }
+RESOURCE TBUF r_ts_fsw_close_all { buf = qtn_task_switcher_popup_close_all; }
+RESOURCE TBUF r_ts_fsw_no_apps { buf = qtn_task_switcher_no_apps; }
+
+RESOURCE TBUF r_task_switcher_heading_applications { buf = qtn_task_switcher_heading_applications; }
+
+// end of file

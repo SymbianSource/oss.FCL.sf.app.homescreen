@@ -1,0 +1,97 @@
+/*
+* Copyright (c) 2006 - 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#include <platform_paths.hrh>
+
+#include        <platform/mw/aisystemuids.hrh>
+#include        <data_caging_paths.hrh>
+
+TARGET          Ai3NatiUi.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D AI_UID_ECOM_DLL_UICONTROLLER_NATIVE
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_ECOM_PLUGIN
+
+SOURCEPATH      ../src
+SOURCE          appui.cpp
+SOURCE          document.cpp
+SOURCE          application.cpp
+SOURCE          ainativeuiview.cpp
+SOURCE          nativeuicontroller.cpp
+SOURCE          ainavipanerenderer.cpp
+SOURCE          ainavipaneanimator.cpp
+SOURCE          aistatuspanel.cpp
+SOURCE          aititlepanerenderer.cpp
+SOURCE          ainativerenderer.cpp
+SOURCE          aidialogrenderer.cpp
+SOURCE          aisoftkeyrenderer.cpp
+SOURCE          ainativeuimodel.cpp
+SOURCE      	  aistatuspanetouchui.cpp
+SOURCE			    ainotifierrenderer.cpp
+
+
+START RESOURCE  ai3natiui.rss
+TARGET          Ai3NatiUi.rsc
+END
+
+START RESOURCE  ai3nativeui.rss
+HEADER
+TARGET          AiNativeUi.rsc
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
+
+USERINCLUDE     .
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         avkon.lib
+LIBRARY         aknskins.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikcore.lib
+LIBRARY         commonengine.lib
+LIBRARY         efsrv.lib
+LIBRARY         fbscli.lib
+LIBRARY         aknicon.lib
+LIBRARY         eikdlg.lib
+LIBRARY         egul.lib
+LIBRARY         centralrepository.lib
+LIBRARY         cenrepnotifhandler.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         aifw.lib
+LIBRARY         aiutils.lib
+LIBRARY         bafl.lib
+LIBRARY         flogger.lib
+LIBRARY         aiidleint.lib
+LIBRARY         featmgr.lib
+LIBRARY         profileeng.lib
+LIBRARY         networkhandling.lib
+LIBRARY     	  viewcli.lib
+LIBRARY		      gdi.lib
+LIBRARY         aknnotify.lib
+
+#ifdef RD_TACTILE_FEEDBACK
+LIBRARY		touchfeedback.lib
+#endif
+LIBRARY         phonesettings.lib

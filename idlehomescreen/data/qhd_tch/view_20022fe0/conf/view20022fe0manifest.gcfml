@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+	<tag name="target" value="core"/>
+	<tag name="target" value="rofs2"/>
+	<tag name="target" value="rofs3"/>
+<file xmlns="http://www.s60.com/xml/genconfml/1" name="manifest.dat" target="\private\200159c0\install\view_20022fe0\hsps\00\">
+	<setting ref="Homescreen4manifest/PackageVersion"/>
+	<setting ref="Homescreen4manifest/DeviceFamily"/>
+	<setting ref="Homescreen4manifest/ConfigurationType"/>
+	<setting ref="Homescreen4manifest/InterfaceUid"/>
+	<setting ref="Homescreen4manifest/ProviderUid"/>
+	<setting ref="Homescreen4manifest/ConfigurationUid"/>
+	<setting ref="Homescreen4manifest/FullName"/>
+	<setting ref="Homescreen4manifest/ShortName"/>
+	<setting ref="Homescreen4manifest/ConfigurationVersion"/>
+	<setting ref="Homescreen4manifest/ConfigurationFile"/>
+	<setting ref="Homescreen4manifest/UiResourceFile"/>
+		<xsl:stylesheet version="1.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration/data">
+		<package>
+	  <xsl:attribute name="version"><xsl:value-of select="Homescreen4manifest/PackageVersion"/></xsl:attribute>
+    <family>
+    <xsl:value-of select="Homescreen4manifest/DeviceFamily"/>
+    </family>
+    <type>
+    <xsl:value-of select="Homescreen4manifest/ConfigurationType"/>
+    </type>
+    <interfaceuid>
+    <xsl:value-of select="Homescreen4manifest/InterfaceUid"/>
+    </interfaceuid>
+    <provideruid>
+    <xsl:value-of select="Homescreen4manifest/ProviderUid"/>
+    </provideruid>
+    <configurationuid>
+    <xsl:value-of select="Homescreen4manifest/ConfigurationUid"/>
+    </configurationuid>
+    <fullname>
+    <xsl:text>&#x26;</xsl:text>
+    <xsl:value-of select="Homescreen4manifest/FullName"/>
+    <xsl:text>&#x3B;</xsl:text>
+    </fullname>
+    <shortname>
+    <xsl:value-of select="Homescreen4manifest/ShortName"/>
+    </shortname>
+    <version>
+    <xsl:value-of select="Homescreen4manifest/ConfigurationVersion"/>
+    </version>
+    <filexml>
+    <xsl:value-of select="Homescreen4manifest/ConfigurationFile"/>
+    </filexml>
+    <localization>
+        <fileresource>
+        <xsl:value-of select="Homescreen4manifest/UiResourceFile"/>
+        </fileresource>
+    </localization>
+  </package>
+  </xsl:template>
+	</xsl:stylesheet>
+</file>
+</container>

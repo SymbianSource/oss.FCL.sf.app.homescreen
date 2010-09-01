@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Task Switcher application's localization texts
+*
+*/
+
+
+//d:Popup menu item text
+//d:Close selected application
+//l:list_single_touch_menu_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_popup_close_app "Close"
+
+//d:Popup menu item text
+//d:Close all application
+//l:list_single_touch_menu_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_popup_close_all "Close all"
+
+//d:Text for heading pane above the task swapper
+//l:heading_pane_t1
+//r:5.0
+//
+#define qtn_task_switcher_heading_applications "Open applications (%N)"
+
+//d:Text seen in taskswitcher if there is no open applications
+//l:main_list_empty_pane
+//r:5.0
+//
+#define qtn_task_switcher_no_apps "No open applications"

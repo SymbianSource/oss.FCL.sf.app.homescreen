@@ -1,0 +1,3 @@
+EXPORTS
+	?NewL@CMMExtensionManager@@SAPAV1@AAVMMmActionRequest@@@Z @ 1 NONAME ; class CMMExtensionManager * CMMExtensionManager::NewL(class MMmActionRequest &)
+

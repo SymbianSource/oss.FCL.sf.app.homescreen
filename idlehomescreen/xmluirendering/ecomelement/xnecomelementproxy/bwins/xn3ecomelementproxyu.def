@@ -1,0 +1,3 @@
+EXPORTS
+	?CreateImplementationL@TXnEComElementProxy@@SAPAVMXnDomVisitor@@ABVTDesC8@@@Z @ 1 NONAME ; class MXnDomVisitor * TXnEComElementProxy::CreateImplementationL(class TDesC8 const &)
+

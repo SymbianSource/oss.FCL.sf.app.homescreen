@@ -1,0 +1,67 @@
+view 
+{
+    direction: ltr;
+    block-progression: tb;
+    background-image: wallpaper;
+    swipe: true;
+
+    _s60-status-pane-layout: widescreen-flat-3softkeys;
+}
+
+box#plugins_container
+{
+    direction: ltr;
+    block-progression: rl;
+    padding-top: 3px;
+}
+
+plugin.plugins
+{
+    height: 82px; 
+    width: 312px; 
+
+    margin-bottom: 4px;
+    margin-right: 5px;
+    margin-left: 5px;
+ 
+    _s60-longtap: true;
+
+    nav-index: appearance;
+}
+
+plugin:edit
+{
+    background-color:"SKIN(270501603 8582)";
+}
+
+trigger#hs_popup_open_hold:edit
+{
+    display: none;
+}
+
+trigger#hs_popup_open_up
+{
+    display: none;
+}
+
+trigger#hs_popup_open_up:edit
+{
+    display: block;
+}
+
+softkey#rsk
+{
+    _s60-longtap: true;
+    _s60-aspect-ratio: preserve;
+}
+
+softkey#msk_ltr
+{
+    display: block;
+}
+
+softkey#msk_rtl
+{
+    display: none;
+}
+

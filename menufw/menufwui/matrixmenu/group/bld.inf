@@ -1,0 +1,49 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project matrixmenu
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+//  Help exports
+#include "../help/group/bld.inf"
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../loc/matrix_menu.loc          APP_LAYER_LOC_EXPORT_PATH(matrix_menu.loc)
+../rom/matrixmenu.iby           CORE_APP_LAYER_IBY_EXPORT_PATH(matrixmenu.iby)
+../rom/matrixmenu_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(matrixmenu_resources.iby)
+../inc/mmactionrequest.h        |../../../inc/mmactionrequest.h
+../inc/mmguiconstants.h         |../../../inc/mmguiconstants.h
+../inc/mmguiuid.hrh             |../../../inc/mmguiuid.hrh
+
+// backup registration
+backup_registration.xml Z:/private/101F4CD2/backup_registration.xml
+
+PRJ_MMPFILES
+matrixmenu.mmp
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE matrixmenu.mif
+OPTION SOURCES 	-c8,8 qgn_menu_appsgrid 
+END
+
+#ifdef _MATRIX_MENU_INCLUDE_TEST_CONTENT
+#include "../internal/test/group/bld.inf"
+#endif

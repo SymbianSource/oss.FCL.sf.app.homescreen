@@ -1,0 +1,61 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  ECOM-plugin for menu-component
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include        <platform/mw/aisystemuids.hrh>
+
+TARGET          xn3menufactory.dll
+TARGETTYPE      PLUGIN
+UID             0x10009d8d AI3_UID_RENDERING_PLUGIN_MENUFACTORY
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src 
+SOURCE          xnmenu.cpp
+SOURCE          xnmenufactory.cpp
+SOURCE          xnmenuadapter.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib  
+LIBRARY         eikcore.lib  
+LIBRARY         eikcoctl.lib
+LIBRARY         cone.lib
+LIBRARY         xn3layoutengine.lib
+LIBRARY         xn3utils.lib
+LIBRARY         avkon.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         aknicon.lib
+LIBRARY         fbscli.lib
+LIBRARY         bitgdi.lib
+LIBRARY         bitmaptransforms.lib
+LIBRARY         xn3domdocument.lib
+LIBRARY         charconv.lib
+
+START RESOURCE  xn3menufactory.rss
+#ifdef SYMBIAN_SECURE_ECOM
+TARGET xn3menufactory.rsc
+#endif
+END
+

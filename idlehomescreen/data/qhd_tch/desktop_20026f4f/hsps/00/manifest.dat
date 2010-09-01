@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package version="2.0">
+
+    <family>qhd_tch</family>
+
+    <type>widget</type>
+
+    <!-- interface uid -->
+    <interfaceuid>0x2001f48a</interfaceuid>
+
+    <!-- vendor uid  -->
+    <provideruid>0x101fb657</provideruid>
+
+    <!-- uid -->
+    <configurationuid>0x20026f4f</configurationuid>
+
+    <!-- description -->
+    <fullname>&amp;qtn_desktop_configuration_name;</fullname>
+    <shortname>sc</shortname>
+    <version>1.0</version>
+
+    <!-- configuration -->
+    <filexml>widgetconfiguration.xml</filexml>
+    
+    <!-- Name of the localization files -->
+    <filedtd>desktopconfiguration.dtd</filedtd>
+
+    <multiinstance>unlimited</multiinstance>
+
+    <description>&amp;qtn_desktop_configuration_desc;</description>
+    <filelogo>skin(270501603 9361):mif(icon.mif 16384 16385)</filelogo>
+    
+    <!-- Locale independent/common resources -->
+
+    <!-- Locale specific resources -->
+    <localization>
+        <fileresource tag="xuikon">desktop.o0000</fileresource>
+    </localization>
+
+</package>

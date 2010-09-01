@@ -1,0 +1,26 @@
+EXPORTS
+	?CacheType@CXnResource@@QBE?AW4TXnCacheType@@XZ @ 1 NONAME ; enum TXnCacheType CXnResource::CacheType(void) const
+	?CloneL@CXnResource@@QAEPAV1@XZ @ 2 NONAME ; class CXnResource * CXnResource::CloneL(void)
+	?ExternalizeL@CXnResource@@QBEXAAVRWriteStream@@@Z @ 3 NONAME ; void CXnResource::ExternalizeL(class RWriteStream &) const
+	?FileName@CXnResource@@QBEABVTDesC16@@XZ @ 4 NONAME ; class TDesC16 const & CXnResource::FileName(void) const
+	?GetDataStreamLength@CXnResource@@QBEHXZ @ 5 NONAME ; int CXnResource::GetDataStreamLength(void) const
+	?InternalizeL@CXnResource@@QAEXAAVRReadStream@@@Z @ 6 NONAME ; void CXnResource::InternalizeL(class RReadStream &)
+	?LockingPolicy@CXnResource@@QBE?AW4TXnLockingPolicy@@XZ @ 7 NONAME ; enum TXnLockingPolicy CXnResource::LockingPolicy(void) const
+	?MimeType@CXnResource@@QBE?AVTDataType@@XZ @ 8 NONAME ; class TDataType CXnResource::MimeType(void) const
+	?NameSpace@CXnResource@@QBEABVTDesC16@@XZ @ 9 NONAME ; class TDesC16 const & CXnResource::NameSpace(void) const
+	?NewL@CXnResource@@SAPAV1@XZ @ 10 NONAME ; class CXnResource * CXnResource::NewL(void)
+	?NewLC@CXnResource@@SAPAV1@AAVRReadStream@@@Z @ 11 NONAME ; class CXnResource * CXnResource::NewLC(class RReadStream &)
+	?Offset@CXnResource@@QBEIXZ @ 12 NONAME ; unsigned int CXnResource::Offset(void) const
+	?ReadStream@CXnResource@@QAEAAVRBufReadStream@@I@Z @ 13 NONAME ; class RBufReadStream & CXnResource::ReadStream(unsigned int)
+	?ResourceId@CXnResource@@QBEABVTDesC16@@XZ @ 14 NONAME ; class TDesC16 const & CXnResource::ResourceId(void) const
+	?ResourceType@CXnResource@@QBE?AW4TXnResourceType@@XZ @ 15 NONAME ; enum TXnResourceType CXnResource::ResourceType(void) const
+	?SetCacheType@CXnResource@@QAEXW4TXnCacheType@@@Z @ 16 NONAME ; void CXnResource::SetCacheType(enum TXnCacheType)
+	?SetFileNameL@CXnResource@@QAEXABVTDesC16@@@Z @ 17 NONAME ; void CXnResource::SetFileNameL(class TDesC16 const &)
+	?SetLockingPolicy@CXnResource@@QAEXW4TXnLockingPolicy@@@Z @ 18 NONAME ; void CXnResource::SetLockingPolicy(enum TXnLockingPolicy)
+	?SetMimeTypeL@CXnResource@@QAEXVTDataType@@@Z @ 19 NONAME ; void CXnResource::SetMimeTypeL(class TDataType)
+	?SetNameSpaceL@CXnResource@@QAEXABVTDesC16@@@Z @ 20 NONAME ; void CXnResource::SetNameSpaceL(class TDesC16 const &)
+	?SetOffset@CXnResource@@QAEXI@Z @ 21 NONAME ; void CXnResource::SetOffset(unsigned int)
+	?SetResourceIdL@CXnResource@@QAEXABVTDesC16@@@Z @ 22 NONAME ; void CXnResource::SetResourceIdL(class TDesC16 const &)
+	?SetResourceType@CXnResource@@QAEXW4TXnResourceType@@@Z @ 23 NONAME ; void CXnResource::SetResourceType(enum TXnResourceType)
+	?WriteStream@CXnResource@@QAEAAVRBufWriteStream@@I@Z @ 24 NONAME ; class RBufWriteStream & CXnResource::WriteStream(unsigned int)
+

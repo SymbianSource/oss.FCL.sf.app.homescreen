@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+	<tag name="target" value="uda"/>
+	<tag name="target" value="emmc"/>
+	<phase name='post'/> <!-- post phase for making sure that all required data is available -->
+	
+<file xmlns="http://www.s60.com/xml/genconfml/1" name="viewconfiguration.xml" target="\private\200159c0\install\view_200286ed\hsps\00\">
+		<setting ref="BlankoHomescreenPlugins/Plugins"/>
+	<xsl:stylesheet version="1.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration/data">
+			<configuration>
+			 	<control>
+				  <plugins>
+						<xsl:for-each select="BlankoHomescreenPlugins/Plugins">
+							<plugin>
+								<xsl:attribute name="uid"><xsl:value-of select="Uid"/></xsl:attribute>
+								<xsl:attribute name="bundle_id"><xsl:value-of select="BundleIdentifier"/></xsl:attribute>
+								<xsl:attribute name="template_id"><xsl:value-of select="TemplateIdentifier"/></xsl:attribute>
+								<xsl:attribute name="locking_status"><xsl:value-of select="LockingStatus"/></xsl:attribute>
+							</plugin>
+						</xsl:for-each>
+					</plugins>
+				</control>
+			</configuration>
+		</xsl:template>
+	</xsl:stylesheet>
+</file>
+</container>

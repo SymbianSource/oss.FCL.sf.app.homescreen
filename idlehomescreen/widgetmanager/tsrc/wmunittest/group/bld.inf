@@ -1,0 +1,39 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+* 
+* Description:
+* Widget manager unit tests
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_TESTEXPORTS
+// test case configuration
+../conf/wmunittest.bat              /epoc32/winscw/c/wmunittest.bat
+../conf/wmunittest.ini              /epoc32/winscw/c/testframework/testframework.ini
+../conf/ui_wmunittest.cfg           /epoc32/winscw/c/testframework/ui_wmunittest.cfg
+// test data
+../data/wmlogo/logo.jpg             /epoc32/winscw/c/testframework/wmunittest/wmlogo/logo.jpg
+../data/wmlogo/logo.mif             /epoc32/winscw/c/testframework/wmunittest/wmlogo/logo.mif
+../data/wmlogo/logo.png             /epoc32/winscw/c/testframework/wmunittest/wmlogo/logo.png
+../data/wmlogo/logo.svg             /epoc32/winscw/c/testframework/wmunittest/wmlogo/logo.svg
+../data/wmlogo/logocorrupt.jpg      /epoc32/winscw/c/testframework/wmunittest/wmlogo/logocorrupt.jpg
+../data/wmlogo/logocorrupt.png      /epoc32/winscw/c/testframework/wmunittest/wmlogo/logocorrupt.png
+../data/wmlogo/logocorrupt.svg      /epoc32/winscw/c/testframework/wmunittest/wmlogo/logocorrupt.svg
+../data/wmlogo/test.wgz             /epoc32/winscw/c/testframework/wmunittest/wmlogo/test.wgz
+
+PRJ_TESTMMPFILES
+wmunittest.mmp
+
+//  End of File

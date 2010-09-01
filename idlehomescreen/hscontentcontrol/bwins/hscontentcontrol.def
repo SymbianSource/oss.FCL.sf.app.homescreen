@@ -1,0 +1,7 @@
+EXPORTS
+	?NewL@CHsContentControlUi@@SAPAV1@VTUid@@@Z @ 1 NONAME ; class CHsContentControlUi * CHsContentControlUi::NewL(class TUid)
+	?GetHsContentController@CHsContentControlFactory@@QAEPAVMHsContentControlUi@@ABVTDesC8@@@Z @ 2 NONAME ; class MHsContentControlUi * CHsContentControlFactory::GetHsContentController(class TDesC8 const &)
+	??1CHsContentControlFactory@@UAE@XZ @ 3 NONAME ; CHsContentControlFactory::~CHsContentControlFactory(void)
+	?NewL@CHsContentControlFactory@@SAPAV1@AAVCXnAppUiAdapter@@@Z @ 4 NONAME ; class CHsContentControlFactory * CHsContentControlFactory::NewL(class CXnAppUiAdapter &)
+	?PrepareToExit@CHsContentControlFactory@@QAEXXZ @ 5 NONAME ; void CHsContentControlFactory::PrepareToExit(void)
+

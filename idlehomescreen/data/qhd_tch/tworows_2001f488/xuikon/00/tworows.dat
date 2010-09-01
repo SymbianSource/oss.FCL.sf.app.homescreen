@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<data>
+    <AppUid>2001CB4F</AppUid>
+    <Provideruid>101FB657</Provideruid>
+    <ThemeUid>110012F7</ThemeUid>
+    <ThemeFullName>tworows</ThemeFullName>
+    <ThemeShortName>tworows</ThemeShortName>
+    <ThemeVersion>1.0</ThemeVersion>
+    <FileXML>tworows.xml</FileXML>
+    <FileCSS>tworows.css</FileCSS>
+    
+</data>

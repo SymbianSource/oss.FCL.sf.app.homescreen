@@ -1,0 +1,9 @@
+<configuration>
+    <control>
+        <settings>
+            <item id="pub_id" name="ContentSource">
+                <property name="value" value=""/>
+            </item>
+        </settings>
+    </control>
+</configuration>

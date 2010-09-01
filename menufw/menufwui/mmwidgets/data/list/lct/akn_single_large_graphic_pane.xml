@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dhuiml version="1.0" xmlns="http://www.series60.com/xml/dhuiml/1">
+
+<orientation id ="portrait" width="360">
+
+    <element id="nohighlight">
+        <layout id="anchor" name="anchor" lct="list_single_large_graphic_pane" variety="0" >
+            <imagevisual id="mul_icon" lct="list_single_large_graphic_pane_g1" variety="0" fitmode="on">
+                <attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <textvisual id="mul_title" lct="list_single_large_graphic_pane_t1" variety="0" >
+                <attributesetter name="text" targetvalue="mul_title" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </textvisual>
+            <imagevisual id="mul_indicator_1" lct="list_single_large_graphic_pane_g2_cp2" variety="0" >
+                <attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <!--missign second indicator in definition -->
+            <!--imagevisual id="mul_indicator_2" lct="" variety="" >
+                <attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual-->
+        </layout>
+    </element>
+        
+    <element id ="highlight">
+        <layout id = "anchor" name="anchor" lct="list_single_large_graphic_pane" variety="0" >	
+            <imagevisual id="mul_icon" lct="list_single_large_graphic_pane_g1" variety="0" fitmode="on">
+                <attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <textvisual id="mul_title" lct="list_single_large_graphic_pane_t1" variety="0">
+                <attributesetter name="text" targetvalue="mul_title" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </textvisual>
+            <imagevisual id="mul_indicator_1" lct="list_single_large_graphic_pane_g2_cp2" variety="0">
+                <attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <!--missign second indicator in definition -->
+            <!--imagevisual id="mul_indicator_2" lct="" variety="" >
+                <attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual-->
+        </layout>
+    </element>
+
+</orientation>
+ 
+<orientation id ="landscape" width="502" >
+
+    <element id="nohighlight">
+        <layout id="anchor" name="anchor" lct="list_single_large_graphic_pane" variety="0" >
+            <imagevisual id="mul_icon" lct="list_single_large_graphic_pane_g1" variety="0" fitmode="on">
+                <attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <textvisual id="mul_title" lct="list_single_large_graphic_pane_t1" variety="0" >
+                <attributesetter name="text" targetvalue="mul_title" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </textvisual>
+            <imagevisual id="mul_indicator_1" lct="list_single_large_graphic_pane_g2_cp2" variety="0" >
+                <attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <!--missign second indicator in definition -->
+            <!--imagevisual id="mul_indicator_2" lct="" variety="" >
+                <attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual-->
+        </layout>
+    </element>
+        
+    <element id ="highlight">
+        <layout id = "anchor" name="anchor" lct="list_single_large_graphic_pane" variety="0" >	
+            <imagevisual id="mul_icon" lct="list_single_large_graphic_pane_g1" variety="0" fitmode="on">
+                <attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <textvisual id="mul_title" lct="list_single_large_graphic_pane_t1" variety="0">
+                <attributesetter name="text" targetvalue="mul_title" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </textvisual>
+            <imagevisual id="mul_indicator_1" lct="list_single_large_graphic_pane_g2_cp2" variety="0">
+                <attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual>
+            <!--missign second indicator in definition -->
+            <!--imagevisual id="mul_indicator_2" lct="" variety="" >
+                <attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+                <attributesetter name="opacity" targetvalue="1" />
+            </imagevisual-->
+        </layout>
+    </element>
+ 
+</orientation>
+</dhuiml>

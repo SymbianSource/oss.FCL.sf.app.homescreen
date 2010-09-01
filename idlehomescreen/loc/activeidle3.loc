@@ -1,0 +1,325 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project Active Idle 3
+*
+*/
+
+
+// d: It is text of Active Idle 2 application in application shell grid. 
+// d: When user selects that item, then phone goes to idle state 
+// d: or call related state.
+// l: cell_app_pane_t1
+// w:
+// r: TB9.2
+//
+#define qtn_apps_idle_grid "Idle"
+
+// d: It is text shown in note when SIM registration has failed. 
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define text_imsi_unknown_in_hlr "SIM registration failed"
+
+
+// d: It is possible that user activates Idle theme which
+// d: contains one or more plug-ins which can not be loaded to framework.
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_idle_theme_error_incompatible "Problems with theme. It may not work correctly."
+
+// d: In case plug-in dies during operation error note is shown.
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_idle_theme_error_notloaded "Error in theme."
+
+// d: Title field for stylus activated popup.
+// l: heading_sub_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_idle_title_tapped_header "Registered network"
+
+// d: When user activates the link, SAT application is launched.
+// d: Link label for stylus activated popup.
+// l: list_single_touch_info_pane_t2/opt1
+// w:
+// r: 5.0
+//
+#define qtn_idle_title_tapped_link1	"Go to own SIM services"
+
+// d: When user activates the link, automatic network search is started.
+// d: Link label for stylus activated popup.
+// l: list_single_touch_info_pane_t2/opt1
+// w:
+// r: 5.0
+//
+#define qtn_idle_title_tapped_link2	"Search network"
+
+// d: When user activates the link, calendar application is launched.
+// d: Link label for stylus menu popup.
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_idle_navi_tapped_cale "Go to Calendar"
+
+// d: When user activates the link, profile application is launched.
+// d: Link label for stylus menu popup.
+// l: list_single_touch_menu_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_idle_navi_tapped_all_prof "Show all profiles"
+
+// d: Back text for SK2
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: 3.2
+//
+#define text_softkey_back "Back"
+
+// d: New message shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_idle_skey_new_msg "New msg."
+
+// d: New e-mail shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_email_skey "New mail"
+
+// d: New SyncML mail shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_syncml_mail_skey "New sync.mail"
+
+// d: New MMS postcard shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_mmspostcard_skey "New postcard"
+
+// d: New audio message shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_audio_msg_skey "New audiomsg"
+
+// d: Select message type shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_skey_select_msg_type "Select msg type"
+
+// d: Change theme shortcut
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_idle_skin_skey "Idle theme"
+
+// d: Heading of add widget dialog. 
+// l: list_single_pane_t1_cp2
+// w:
+// r: 3.2
+//
+#define qtn_hs_add_widget "Add content"
+
+// d: Heading of remove widget dialog. 
+// l: list_single_pane_t1_cp2
+// w:
+// r: 3.2
+//
+#define qtn_hs_remove_widget "Remove content"
+
+// d: Popup shown when trying to add content to full homescreen. 
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_hs_add_widget_full "Homescreen is already full, remove some content"
+
+// d: Options menu item which switches home to online. Web widgets get updates from network.
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_online "Switch Home to online"
+
+// d: Options menu item which switches home to offline. Web widgets are not updated
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_offline "Switch Home to offline"
+
+// d: Information note text which informs user that home is automatically switched to offline because user is roaming.
+// l: popup_note_window
+// w:
+// r: TB9.2
+#define qtn_hs_automatic_offline "Select Options - Switch Home to online to reconnect while roaming outside home network."
+
+// d: Error  note text. In case widget dies during operation, widget information is cleaned from the screen
+// l: popup_note_window
+// w:
+// r: TB9.2
+#define qtn_hs_error_widgets_removed "Problem occurred. Widget(s) removed."
+
+// d: User can download new HS widgets. String visible in add content list query
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_download_new_widgets "Download"
+
+// d: Promt text for Add content list query
+// l: heading_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_hs_select_widget "Select content"
+
+// d: Popup shown when first web widget is added OR web widget is tapped while offline
+// l: popup_note_window
+// w:
+// r: 5.0
+//
+#define qtn_hs_switch_online "Allow all Home screen widgets to access network? (You can disable/enable connection from Home screen options menu)?"
+
+// d: Popup shown when disabling the home screen network 
+// l: popup_note_window
+// w:
+// r: 5.0
+//
+#define qtn_hs_disable_network "Would you like to disable Home screen network access for now? To re-enable select Options - Switch Home to online"
+
+// d: Shown when HSPS fails to personalize an active application configuration
+// l: popup_note_window
+// w:
+// r: 5.0
+//
+#define qtn_hs_operation_failed_no_disk "Operation failed. Try again later."
+
+// d: Edit active profile
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.1
+#define qtn_hs_profile_edit  "Edit active profile"
+
+// d: Notifies when maximum amout of pages has been reached
+// l: popup_info_list_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_max_amount_of_pages_note  "Maximum amount of pages reached. Cannot create a new one."
+
+// d: remove widget query
+// l: popup_note_window
+// w:
+// r: TB9.2
+#define qtn_hs_edit_remove_widget  "Remove selected content?"
+
+// d: delete page query
+// l: popup_note_window
+// w:
+// r: TB9.2
+#define qtn_hs_delete_page  "Delete page %U?"
+
+// d: edit mode title
+// l: title_pane_t2/opt12
+// w:
+// r: TB9.2
+#define qtn_hs_title_editing  "Editing"
+
+// d: delete current page query
+// l: popup_note_window
+// w:
+// r: TB9.2
+#define qtn_hs_delete_current_page  "Delete current page?"
+
+// d: Error  note text. OOM failure handled
+// l: popup_note_window
+// w:
+// r: TB9.2
+#define qtn_hs_hs_memory_full "Not enough memory to add more content. Please remove some Homescreen content and try again."
+
+// d: Heading of change wallpaper dialog. 
+// l: heading_pane_t1
+// w:
+// r: TB9.2
+#define qtn_hs_title_change_wallpaper  "Change wallpaper"
+
+// d: Change wallpaper dialog default item 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_hs_default "Default"
+
+// d: Change wallpaper dialog image item 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_hs_image "Image"
+
+// d: Change wallpaper dialog slideshow item 
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+//
+#define qtn_hs_slideshow "Slideshow"
+
+// d: Shown when user select corrupted image file as a wallpaper 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_corrupted_image_note "Unable to select. Image corrupted or format not supported."
+
+// d: Shown when user select too large image file as a wallpaper 
+// l: popup_note_window
+// w:
+// r: TB9.2
+//
+#define qtn_hs_too_big_image_note "Unable to select. Image size is too large."
+
+// d: Show when default configuration is loaded (critical error case)
+// l: list_single_pane_t1_cp2
+// w:
+// r: TB9.2
+#define qtn_hs_error_content_removed "Critical error occurred. Content removed."
+
+// d: Wait/progress note text that is shown when backup or restore process is ongoing.
+// l: popup_note_wait_window
+// w:
+// r: TB9.2
+#define qtn_hs_backup_use_prevented  "Home screen is not in use during backup or restore operation. Wait to finish."
+
+// d: Back text for SK2
+// l: nhd_control_pane_t2/opt7
+// w:
+// r: 3.2
+//
+#define qtn_hs_text_softkey_back "Back"

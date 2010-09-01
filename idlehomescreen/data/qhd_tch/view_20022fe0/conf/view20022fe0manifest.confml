@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://www.s60.com/xml/confml/1" name="Home screen 4 manifest" version="1">
+  <feature ref="Homescreen4manifest" name="Homescreen4 manifest">
+    <setting ref="PackageVersion" name="Configuration package type version" type="selection">
+      <option name="NotDefined" value="0"/>
+      <option name="2.0" value="2.0"/>
+      <option name="1.0" value="1.0"/>
+    </setting>
+    <setting ref="DeviceFamily" name="Display type" type="selection">
+      <option name="NotDefined" value="0"/>
+      <option name="QhdTouch" value="qhd_tch"/>
+      <option name="VgaTouch" value="vga_tch"/>
+    </setting>
+     <setting ref="ConfigurationVersion" name="Configuration version" type="selection">
+      <option name="NotDefined" value="0"/>
+      <option name="2.0" value="2.0"/>
+      <option name="1.0" value="1.0"/>
+    </setting>
+    <setting ref="ConfigurationType" name="Type of the configuration" type="string" readOnly="true"/>
+    <setting ref="InterfaceUid" name="Interface Uid for Homescreen View" type="string" readOnly="true"/>
+    <setting ref="ProviderUid" name="Provider Uid for Homescreen view" type="string" readOnly="true"/>
+    <setting ref="ConfigurationUid" name="Configuration Uid for Homescreen view" type="string" readOnly="true"/>
+    <setting ref="FullName" name="Fullname of the Homescreen view" type="string" readOnly="true"/>
+    <setting ref="ShortName" name="Shortname of the Homescreen view" type="string" readOnly="true"/>
+    <setting ref="ConfigurationVersion" name="Version of the Homescreen view" type="string" readOnly="true"/>
+    <setting ref="ConfigurationFile" name="Configuration fIle of the Homescreen view" type="string" readOnly="true"/>
+    <setting ref="UiResourceFile" name="Ui resource file of the Homescreen view" type="string" readOnly="true"/>
+  </feature>
+<data>
+    <Homescreen4manifest>
+      <PackageVersion>2.0</PackageVersion>
+    <DeviceFamily>qhd_tch</DeviceFamily>
+    <ConfigurationType>view</ConfigurationType>
+    <InterfaceUid>0x2001f48a</InterfaceUid>
+    <ProviderUid>0x101fb657</ProviderUid>
+    <ConfigurationUid>0x20022fe0</ConfigurationUid>
+    <FullName>qtn_view_20022fe0_name</FullName>
+    <ShortName>ai3_view4</ShortName>
+    <ConfigurationVersion>1.0</ConfigurationVersion>
+    <ConfigurationFile>viewconfiguration.xml</ConfigurationFile>
+    <UiResourceFile>view.o0000</UiResourceFile>
+    </Homescreen4manifest>
+  </data>
+</configuration>

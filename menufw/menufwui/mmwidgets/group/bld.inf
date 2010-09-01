@@ -1,0 +1,103 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project mmwidgets
+*  Version     : %version: 8.1.3.1.8 % << Don't touch! Updated by Synergy at check-out.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../rom/mmwidgets.iby  CORE_APP_LAYER_IBY_EXPORT_PATH(mmwidgets.iby)
+
+// list exports
+../data/list/custom/akn_single_large_graphic_pane.xml Z:/resource/list/custom/akn_single_large_graphic_pane.xml
+
+../data/list/custom/akn_logical_template_1.xml Z:/resource/list/custom/akn_logical_template_1.xml
+
+../data/list/custom/akn_logical_template_2.xml Z:/resource/list/custom/akn_logical_template_2.xml
+
+../data/list/custom/akn_logical_template_3.xml Z:/resource/list/custom/akn_logical_template_3.xml
+
+../data/list/custom/akn_logical_template_4.xml Z:/resource/list/custom/akn_logical_template_4.xml
+
+../data/list/custom/akn_logical_template_5.xml Z:/resource/list/custom/akn_logical_template_5.xml
+
+../data/list/custom/akn_logical_template_6.xml Z:/resource/list/custom/akn_logical_template_6.xml
+
+../data/list/custom/akn_logical_template_7.xml Z:/resource/list/custom/akn_logical_template_7.xml
+
+../data/list/custom/akn_logical_template_8.xml Z:/resource/list/custom/akn_logical_template_8.xml
+
+../data/list/custom/akn_logical_template_10.xml Z:/resource/list/custom/akn_logical_template_10.xml
+
+../data/list/custom/akn_logical_template_11.xml Z:/resource/list/custom/akn_logical_template_11.xml
+
+../data/list/custom/akn_logical_template_12.xml Z:/resource/list/custom/akn_logical_template_12.xml
+
+../data/list/custom/akn_logical_template_13.xml Z:/resource/list/custom/akn_logical_template_13.xml
+
+// grid exports
+../data/grid/custom/akn_single_large_graphic_pane.xml Z:/resource/grid/custom/akn_single_large_graphic_pane.xml
+ 
+../data/grid/custom/akn_logical_template_1.xml Z:/resource/grid/custom/akn_logical_template_1.xml
+
+../data/grid/custom/akn_logical_template_2.xml Z:/resource/grid/custom/akn_logical_template_2.xml
+
+../data/grid/custom/akn_logical_template_3.xml Z:/resource/grid/custom/akn_logical_template_3.xml
+
+../data/grid/custom/akn_logical_template_4.xml Z:/resource/grid/custom/akn_logical_template_4.xml
+
+//lct exports
+../data/list/lct/akn_list_single_hc_apps_pane.xml Z:/resource/list/lct/akn_list_single_hc_apps_pane.xml
+
+../data/list/lct/akn_single_large_graphic_pane.xml Z:/resource/list/lct/akn_single_large_graphic_pane.xml
+
+../data/list/lct/akn_logical_template_1.xml Z:/resource/list/lct/akn_logical_template_1.xml
+
+../data/list/lct/akn_logical_template_2.xml Z:/resource/list/lct/akn_logical_template_2.xml
+
+../data/list/lct/akn_logical_template_3.xml Z:/resource/list/lct/akn_logical_template_3.xml
+
+../data/list/lct/akn_logical_template_4.xml Z:/resource/list/lct/akn_logical_template_4.xml
+
+../data/list/lct/akn_logical_template_5.xml Z:/resource/list/lct/akn_logical_template_5.xml
+
+../data/list/lct/akn_logical_template_6.xml Z:/resource/list/lct/akn_logical_template_6.xml
+
+../data/list/lct/akn_logical_template_6a.xml Z:/resource/list/lct/akn_logical_template_6a.xml
+
+../data/list/lct/akn_logical_template_7.xml Z:/resource/list/lct/akn_logical_template_7.xml
+
+../data/list/lct/akn_logical_template_8.xml Z:/resource/list/lct/akn_logical_template_8.xml
+
+../data/list/lct/akn_logical_template_12.xml Z:/resource/list/lct/akn_logical_template_12.xml
+
+../data/grid/lct/akn_logical_template_3.xml Z:/resource/grid/lct/akn_logical_template_3.xml
+
+../inc/mmdraganddropobserver.h         |../../../inc/mmdraganddropobserver.h 
+../inc/mmlongtapobserver.h         |../../../inc/mmlongtapobserver.h 
+../inc/mmkeyeventobserver.h            |../../../inc/mmkeyeventobserver.h
+../inc/mmwidgetobserver.h              |../../../inc/mmwidgetobserver.h 
+../inc/mmwidgetcontainer.h             |../../../inc/mmwidgetcontainer.h 
+../inc/mmvisibilityobserver.h          |../../../inc/mmvisibilityobserver.h 
+../inc/mmtemplatelibrary.h             |../../../inc/mmtemplatelibrary.h
+../inc/mmwidgetsconstants.h             |../../../inc/mmwidgetsconstants.h
+
+PRJ_MMPFILES
+mmwidgets.mmp

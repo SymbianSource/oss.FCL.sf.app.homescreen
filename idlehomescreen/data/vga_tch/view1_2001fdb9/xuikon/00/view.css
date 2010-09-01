@@ -1,0 +1,337 @@
+view#homescreen
+{
+    position: static;    
+    display: block; 
+
+    block-progression: tb;
+    direction: ltr;
+   
+    width: auto;
+    height: auto;
+    
+    background-image: wallpaper;
+    
+    _s60-status-pane-layout: widescreen-flat-3softkeys;     
+}
+
+box#main_container
+{
+    position: static;
+    display: block; 
+    
+    width: auto;
+    height: auto;
+    
+    margin-top: 5px;
+    
+    /* These will be set by screendevicechange triggers: */          
+    /* landscape
+    ************
+    margin-left: 5px;
+    margin-right: 5px;*/
+
+    /* portrait
+    ***********
+    margin-left: 17px;
+    margin-right: 17px;*/
+}
+
+box.sub_container
+{
+    position: absolute;
+    display: block; 
+    
+    /* These will be set by screendevicechange triggers: */      
+    /* landscape
+    ************ 
+    width: 184px;
+    height: 106px;*/    
+
+    /* portrait 
+    ***********
+    width: 223px;
+    height: 132px;*/      
+}
+
+box#clock_container
+{    
+    /* This box belongs to class="sub_container" */
+    top: 0px;
+    left: 0px;
+}
+
+clock#clock
+{
+    position: static;
+    display: block; 
+    
+    margin-top: 3px;    
+    margin-bottom: 3px;
+    margin-left: 3px;    
+    margin-right: 3px;    
+    
+    nav-index: appearance;    
+    
+    background-color: "SKIN(268458534 9906)";    
+    color: "SKIN(268458534 13056 19)";
+    
+    /* Face is format is fetched from locale */
+    _s60-format: locale;
+            
+    /* These will be set by screendevicechange triggers: */      
+    /* landscape 
+    ************        
+    _s60-ampm-font-size: 3.0u;
+    _s60-digital-font-size: 56px;
+    _s60-date-font-size: 3.0u;*/
+            
+    /* portrait 
+    ***********
+    _s60-ampm-font-size: 3.5u;
+    _s60-digital-font-size: 56px;
+    _s60-date-font-size: 3.5u;*/                
+}
+
+clock#clock:focus
+{
+    focus-background: "SKIN(268458534 5120 9)";
+}
+
+box#profile_switcher_container
+{
+    block-progression: tb;
+    direction: ltr;
+
+    /* These will be set by screendevicechange triggers: */      
+    /* landscape 
+    ************        
+    top: 106px;
+    left: 0px;*/
+    
+    /* portrait 
+    ***********
+    top: 0px;
+    left: 223px;*/
+}
+
+box#profile
+{
+    position: static;
+    display: block; 
+    
+    width: auto;
+    height: auto;
+    
+    margin-top: 3px;    
+    margin-bottom: 6px;
+    margin-left: 3px;    
+    margin-right: 3px;    
+       
+    background-color: "SKIN(268458534 9906)";    
+    
+    nav-index: appearance;
+}
+
+box#profile:focus
+{
+    focus-background: "SKIN(268458534 5120 9)";
+}
+
+/**********************
+ * MCN, CUG & Profile *
+ **********************/
+box#mcn_cug_profile_container
+{    
+    width: auto;
+    height: auto;
+    
+
+}
+
+/*************
+ * SAT & VHZ *
+ *************/
+box#sat_vhz_container
+{
+    display: none;
+    width: auto;
+    height: auto;
+    block-progression: rl;
+}
+
+image#sat_icon
+{
+    display: none;
+    visibility: hidden;
+    width: 18px;
+    height: 20px;
+    position: static;
+    margin-top: auto;
+}
+
+title#sat
+{
+    display: none;
+}    
+title#vhz
+{
+    display: none;
+}    
+
+
+newsticker.statusindicator 
+{    
+    width: auto;
+    height: auto;
+              
+    text-align: center;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 3.5u;
+    color: "SKIN(268458534 13056 19)";
+    
+    white-space-collapse: collapse;
+
+    _s60-scroll-behaviour: alternate;
+    _s60-display-time: 2000;
+    _s60-scroll-loop: false;
+    _s60-start-delay: 0;
+    _s60-restart-after-update: true;    
+}
+ 
+box#switcher
+{                    
+    width: auto;
+    height: auto;
+    
+    block-progression: lr;
+    
+    margin-top: 6px;    
+    margin-bottom: 3px;
+    margin-left: 3px;    
+    margin-right: 3px;    
+        
+    background-color: "SKIN(268458534 9906)";    
+        
+    nav-index: appearance;
+}
+
+box#switcher:focus
+{
+    focus-background: "SKIN(268458534 5120 9)";
+}
+
+image#switcher_icon
+{         
+    margin-top: auto;
+    margin-bottom: auto;        
+    
+    margin-left: 5px;
+    height: 4u;
+    width: 4u;
+       
+    path: "SKIN(270501603 8585 19)";
+}
+
+text#switcher_text
+{        
+    width: auto;
+    height: auto;
+     
+    text-align: left;
+    
+    font-size: 3.5u;
+    font-family: EAknLogicalFontSecondaryFont;
+        
+    color:"SKIN(268458534 13056 19)";        
+}
+
+box#plugins_container
+{
+    position: absolute;
+    display: block; 
+
+    /* These will be set by screendevicechange triggers: */      
+    /* landscape 
+    ************        
+    top: 0px;
+    left: 184px;*/
+    
+    /* portrait 
+    ***********
+    top: 129px;
+    left: 0px;*/
+
+    block-progression: tb;
+    direction: ltr;
+    
+    width: 440px;
+    height: auto;
+    
+    padding-left: 3px;
+    padding-right: 3px;    
+}
+
+/***********
+ * Plugins *
+ ***********/
+plugin
+{
+    position: static;
+    
+    width: auto;
+    height: adaptive;
+        
+    margin-bottom: 6px;
+    
+    background-color: "SKIN(268458534 9906)";    
+    
+    nav-index: appearance;    
+}
+
+plugin:focus 
+{
+    focus-background: "SKIN(268458534 5120 9)";    
+}
+
+plugin:edit 
+{
+    background-color: "SKIN(270501603 8582)";
+}
+
+/************
+ * Profiles *
+ ************/
+/* Default system profiles */
+text.systemprofileitem
+{
+    display: block;
+}
+
+/* Placeholders for profiles added by user */
+text.userprofileitem
+{
+    display: none;
+}
+
+/************
+ * Softkeys *
+ ************/
+softkey.normal_mode_sk
+{
+    display: block;
+}
+
+softkey.normal_mode_sk:edit
+{
+    display: none;
+}
+
+softkey.edit_mode_sk
+{
+    display: none;
+}
+
+softkey.edit_mode_sk:edit
+{
+    display: block;
+}

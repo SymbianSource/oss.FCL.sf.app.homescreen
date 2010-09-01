@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project .mmp file
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET      xn3domvisitor.dll
+TARGETTYPE  PLUGIN
+UID         0x10009d8d 0x102072BE
+CAPABILITY  CAP_ECOM_PLUGIN
+VENDORID    VID_DEFAULT
+
+SOURCEPATH	../src
+SOURCE      xndomvisitorproxy.cpp 
+SOURCE      xndomvisitor.cpp
+
+START RESOURCE  102072BE.rss
+#ifdef SYMBIAN_SECURE_ECOM
+TARGET xn3domvisitor.rsc
+#endif
+END
+
+
+USERINCLUDE . 
+USERINCLUDE ../inc
+USERINCLUDE ../../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY			ecom.lib
+LIBRARY         xn3domdocument.lib
+LIBRARY   	    flogger.lib
+LIBRARY			charconv.lib
+
+LANG			SC

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration max_child="3" xmlns:xi="http://www.w3.org/2001/xinclude">
+    <control>
+        <plugins>
+            <plugin uid="0x2001f48b" locking_status="locked"/>
+            <plugin uid="0x20026f50" locking_status="none"/>
+            <plugin uid="0x20026f50" locking_status="none"/>
+        </plugins>
+        <settings/>
+    </control>
+</configuration>
