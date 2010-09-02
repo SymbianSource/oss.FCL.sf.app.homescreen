@@ -36,6 +36,8 @@ LANGUAGE_IDS
 
 CAPABILITY CAP_ECOM_PLUGIN
 
+MACRO NO_ALF_OBSERVER			// break link to ALF server
+
 SOURCEPATH      ../src
 SOURCE  wmpluginproxy.cpp
 SOURCE  wmplugin.cpp
