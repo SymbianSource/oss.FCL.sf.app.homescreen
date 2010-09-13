@@ -40,13 +40,17 @@ INCLUDEPATH += . \
                ../hsutils/inc \
                ../hsapplication/inc
 
-RESOURCES += hsdomainmodel.qrc
+
+
 
 symbian: {
+    DOCML+=resource/controllayer.docml
+    RESOURCES += hsdomainmodel.qrc
     TARGET.UID3 = 0x20022F38
     LIBS += -lxqsettingsmanager -labclient
 }
 !symbian:{
+    RESOURCES += hsdomainmodel_win.qrc
     QT += network 
 }
 

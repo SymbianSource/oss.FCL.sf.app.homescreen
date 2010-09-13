@@ -38,11 +38,13 @@ public:
 public slots:
     bool addWidget(const QString &uri, const QVariantHash &preferences);
     bool setWallpaper(const QString &fileName);
+    bool setWallpaper(const QString &portraitFileName, const QString &landscapeFileName);
 private slots:
     void onRequestCompleted(const QVariant &result);
     void onRequestError(int error);
     void doAddWidget(const QString &uri, const QVariantHash &preferences);
     void doSetWallpaper(const QString &fileName);
+    void doSetWallpaper2(const QString &portraitFileName, const QString &landscapeFileName);
 signals:
     void requestFinished();
 private:

@@ -54,5 +54,5 @@ EXPORTS
 	?handleDeactivatedIndicator@Screensaver@@QAEXPAVHbIndicatorInterface@@@Z @ 53 NONAME ; void Screensaver::handleDeactivatedIndicator(class HbIndicatorInterface *)
 	?onHandleActiveIndicators@Screensaver@@MAEXABV?$QList@PAVHbIndicatorInterface@@@@@Z @ 54 NONAME ; void Screensaver::onHandleActiveIndicators(class QList<class HbIndicatorInterface *> const &)
 	?handleActiveIndicators@Screensaver@@QAEXABV?$QList@PAVHbIndicatorInterface@@@@@Z @ 55 NONAME ; void Screensaver::handleActiveIndicators(class QList<class HbIndicatorInterface *> const &)
-	?screenPowerModeRequested@Screensaver@@IAEXW4ScreenPowerMode@1@@Z @ 56 NONAME ; void Screensaver::screenPowerModeRequested(enum Screensaver::ScreenPowerMode)
+	?activeAreaMoved@Screensaver@@IAEXXZ @ 56 NONAME ; void Screensaver::activeAreaMoved(void)
 

@@ -65,6 +65,8 @@ private:
 private:
     HsAddModeProxyModel *mAddModeProxyModel;
     Hs::HsSortAttribute mSortAttribute;
+    HbAction *mAscendingMenuAction; //not own
+    HbAction *mDescendingMenuAction; //not own
 };
 
 #endif // HSALLAPPSSTATE_H

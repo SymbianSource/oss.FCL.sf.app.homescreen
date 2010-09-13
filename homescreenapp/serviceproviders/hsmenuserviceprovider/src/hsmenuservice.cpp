@@ -182,11 +182,13 @@ QString HsMenuService::getName(int entryId)
  \param actionName string with action name
  \retval int error code, 0 if no error
  */
-int HsMenuService::executeAction(int entryId, const QString &actionName)
+int HsMenuService::executeAction(int entryId, const QString &actionName, 
+        QObject* receiver, const char* member)
 {
     qDebug() << "HsMenuService::executeAction entryId:" << entryId
              << "actionName:" << actionName;
-    return CaService::instance()->executeCommand(entryId, actionName);
+    return CaService::instance()->executeCommand(
+            entryId, actionName, receiver, member);
 }
 
 /*!
@@ -380,12 +382,7 @@ int HsMenuService::collectionIdByType(const QString& collectionType)
 void HsMenuService::touch(int entryId)
 {
     QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(entryId);
-    if (entry->flags() & RemovableEntryFlag &&
-        (entry->flags() & UsedEntryFlag) == 0 &&
-        entry->role() == ItemEntryRole &&
-        entry->entryTypeName() != QString(Hs::packageTypeName)) {
-            CaService::instance()->touch(* entry);
-    }
+    CaService::instance()->touch(* entry);
 }
 
 /*!

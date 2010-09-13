@@ -49,7 +49,9 @@ public:
     
     IndicatorLayoutType layoutType() const;
     void setLayoutType(IndicatorLayoutType type);
-        
+
+    void setPowerSaveModeColor(bool savemode);
+
 public slots:
     
     void showIndicators(const QList<SnsrIndicatorInfo> &indicators);
@@ -64,6 +66,7 @@ private:
 
     QList<HbIconItem*> mIcons;   
     IndicatorLayoutType mLayoutType;
+    bool mPowerSaveModeColor;
 
     Q_DISABLE_COPY(SnsrIndicatorWidget)
     SCREENSAVER_TEST_FRIEND_CLASS(T_SnsrIndicatorWidget)

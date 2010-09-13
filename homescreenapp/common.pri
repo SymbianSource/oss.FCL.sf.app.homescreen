@@ -78,14 +78,13 @@ symbian {
 
 plugin: !isEmpty(PLUGIN_SUBDIR): DESTDIR = $$OUTPUT_DIR/$$PLUGIN_SUBDIR
 
-!symbian: plugin { # copy manifiers
+!symbian: plugin { # copy service xml
     manifest.path = $$DESTDIR
-    manifest.files = ./resource/*.manifest ./resource/*.xml
+    manifest.files = ./resource/*.xml
     manifest.CONFIG += no_build
 
     INSTALLS += manifest
     PRE_TARGETDEPS += install_manifest
-
 }
 
 symbian: plugin { # copy qtstub and manifest
@@ -97,12 +96,9 @@ symbian: plugin { # copy qtstub and manifest
 
     qtplugins.path = $$PLUGIN_SUBDIR
     qtplugins.sources += qmakepluginstubs/$${TARGET}.qtplugin
-    
-    hs_public_plugin {
-      contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.xml z:/private/20022F35/$${TARGET}.xml"
-    } else {
-      contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.xml z:$$qtplugins.path/$${TARGET}.xml"
-    }
+
+    CONFIG += qtservice
+    QTSERVICE.DESCRIPTOR = ./resource/$${TARGET}.xml
     
     for(qtplugin, qtplugins.sources):BLD_INF_RULES.prj_exports += "./$$qtplugin z:$$qtplugins.path/$$basename(qtplugin)"
 }

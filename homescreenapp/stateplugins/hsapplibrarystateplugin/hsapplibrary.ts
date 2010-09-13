@@ -42,26 +42,6 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_opt_sub_ascending">
-    <comment>Options list item. Sorts by name, starting from the beginning of the alphabets</comment>        
-    <source>Ascending</source>
-    <translation variants="no">Ascending</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_01, applib_03, applib_05, applib_07, applib_09</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_sub_oldest_on_top">
-    <comment>Sorting submenu item in Downloaded collection</comment>        
-    <source>Oldest on top</source>
-    <translation variants="no">Oldest on top</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_common_button_cancel">
     <comment>Button. Note! Use this text ID only if there are max. two buttons in the dialog. Allows the user to cancel the action or process.</comment>        
     <source>Cancel</source>
@@ -95,53 +75,13 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_common_opt_help">
-    <comment>Options list item. Note! Only use this text ID if there are no icons. Opens a help dialog.</comment>        
-    <source>Help</source>
-    <translation variants="no">Help</translation>
-    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>common</extra-loc-viewid>
-    <extra-loc-positionid>opt</extra-loc-positionid>
-    <extra-loc-feature>common</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_sub_latest_on_top">
-    <comment>Sorting submenu item in Downloaded view</comment>        
-    <source>Latest on top</source>
-    <translation variants="no">Latest on top</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_applib_dialog_installed">
     <comment>Shown in text entry of installed app in installation log dialog</comment>        
     <source>Installed</source>
     <translation variants="no">Installed</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_20</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_common_menu_pause">
-    <comment>Item specific menu item. Note! Only use this text ID if there are no icons. Pauses the ongoing action, such as playing an audio or video clip or presentation.</comment>        
-    <source>Pause</source>
-    <translation variants="no">Pause</translation>
-    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>common</extra-loc-viewid>
-    <extra-loc-positionid>menu</extra-loc-positionid>
-    <extra-loc-feature>common</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_sub_descending">
-    <comment>Sub-menu item. Sorts by name, starting from the end of the alphabets</comment>        
-    <source>Descending</source>
-    <translation variants="no">Descending</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_01, applib_03, applib_05, applib_07, applib_09</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -189,7 +129,7 @@
     <comment>Name label shown in application details dialog</comment>        
     <source>Name:</source>
     <translation variants="no">Name:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -199,7 +139,7 @@
     <comment>Size field in app details dialog. App size shown in megabytes, shown after Size-label.</comment>        
     <source>%L1 MB</source>
     <translation variants="no">%L1 MB</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -219,19 +159,9 @@
     <comment>Shown after &quot;Memory in use&quot; header in Application details dialog</comment>        
     <source>%1: Mass storage</source>
     <translation variants="no">%1: Mass storage</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_sub_installation_time">
-    <comment>Sub-menu item. Sorts by installation time in the Downloaded collection (latest first, default sort)</comment>        
-    <source>Installation time</source>
-    <translation variants="no">Installation time</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -242,6 +172,16 @@
     <extra-loc-layout_id>qtl_dialog_pri5</extra-loc-layout_id>    
     <extra-loc-viewid>applib_29</extra-loc-viewid>
     <extra-loc-positionid>info</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_menu_sort_by_oldest_on_top">
+    <comment>Option for sorting the list by their installation time. Oldest installations are shown on top of the list.</comment>        
+    <source>Sort by oldest on top</source>
+    <translation variants="no">Sort by oldest on top</translation>
+    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_07, applib_05</extra-loc-viewid>
+    <extra-loc-positionid>menu</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -285,16 +225,6 @@
     <extra-loc-feature>common</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_common_menu_cancel_download">
-    <comment>Item specific menu item. Note! Only use this text ID if there are no icons. Cancels the ongoing download.</comment>        
-    <source>Cancel download</source>
-    <translation variants="no">Cancel download</translation>
-    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>common</extra-loc-viewid>
-    <extra-loc-positionid>menu</extra-loc-positionid>
-    <extra-loc-feature>common</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_applib_title_arrange">
     <comment>Heading for the Arrange dialog</comment>        
     <source>Arrange</source>
@@ -315,26 +245,6 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_opt_sort_by">
-    <comment>Options list item. Opens sublist for sorting criteria</comment>        
-    <source>Sort by</source>
-    <translation variants="no">Sort by</translation>
-    <extra-loc-layout_id>qtl_menu_pri_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_01, applib_03, applib_05, applib_07, applib_09</extra-loc-viewid>
-    <extra-loc-positionid>opt_3</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_sort_by_sub_oldest_on_top">
-    <comment>Sub-menu item. Sorts by installation time, oldest first.</comment>        
-    <source>Oldest on top</source>
-    <translation variants="no">Oldest on top</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_applib_opt_task_switcher">
     <comment>Options menu item. Opens the Task Switcher application. (Same command in Home Screen Options menu.)</comment>        
     <source>Task Switcher</source>
@@ -352,16 +262,6 @@
     <extra-loc-layout_id>qtl_dialog_pri5</extra-loc-layout_id>    
     <extra-loc-viewid>applib_30</extra-loc-viewid>
     <extra-loc-positionid>info</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_menu_cancel_installing">
-    <comment>Item specific menu item for an item showing the dowload progress. Cancels the ongoing installing progress</comment>        
-    <source>Cancel installing</source>
-    <translation variants="no">Cancel installing</translation>
-    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
-    <extra-loc-positionid>menu</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -405,16 +305,6 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_dialog_1_must_be_closed_before_deletin">
-    <comment>Confirmation note displayed if the user tries to delete a java application that is active at the time.</comment>        
-    <source>%1 must be closed before deleting. Close now? </source>
-    <translation variants="no">%1 must be closed before deleting. Close now? </translation>
-    <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_28</extra-loc-viewid>
-    <extra-loc-positionid>info</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_applib_dialog_entry_collectionl1">
     <comment>Default entry text when naming a new collection, where %L1 is the next available number differentiating between otherwise similar collection names.</comment>        
     <source>Collection(%L1)</source>
@@ -422,6 +312,16 @@
     <extra-loc-layout_id>qtl_list_pri_large_graphic</extra-loc-layout_id>    
     <extra-loc-viewid>applib_15</extra-loc-viewid>
     <extra-loc-positionid>dialog_1_entry</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_menu_sort_by_ascending">
+    <comment>Option for sorting the list by name in ascending order</comment>        
+    <source>Sort by ascending</source>
+    <translation variants="no">Sort by ascending</translation>
+    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_01</extra-loc-viewid>
+    <extra-loc-positionid>menu</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -435,12 +335,22 @@
     <extra-loc-feature>common</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_menu_resume">
-    <comment>Item specific menu item for an item showing the dowload progress. Resumes the download progress (toggles between the Pause command in the item menu)</comment>        
-    <source>Resume</source>
-    <translation variants="no">Resume</translation>
-    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
+<message numerus="no" id="txt_applib_info_installer_is_currently_busy">
+    <comment>Dialog shown when uninstallation of an application cannot be started because another uninstallation is going on</comment>        
+    <source>Installer is currently busy</source>
+    <translation variants="no">Installer is currently busy</translation>
+    <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_08</extra-loc-viewid>
+    <extra-loc-positionid>info</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_menu_sort_by_descending">
+    <comment>Option for sorting the list by name in descending order</comment>        
+    <source>Sort by descending</source>
+    <translation variants="no">Sort by descending</translation>
+    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_01</extra-loc-viewid>
     <extra-loc-positionid>menu</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -455,26 +365,6 @@
     <extra-loc-feature>common</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_opt_sub_custom">
-    <comment>Sub-menu item. Sorts by default order or user&apos;s own order when user has organised the list</comment>        
-    <source>Custom</source>
-    <translation variants="no">Custom</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_03, applib_09</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_sort_by_sub_latest_on_top">
-    <comment>Sub-menu item. Sorts by installation time, latest first (default sort).</comment>        
-    <source>Latest on top</source>
-    <translation variants="no">Latest on top</translation>
-    <extra-loc-layout_id>qtl_menu_sec_add</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_05</extra-loc-viewid>
-    <extra-loc-positionid>opt_3_sub</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_applib_dialog_delete_1">
     <comment>Confirmation note for deleting a collection that has no shortcuts on Home Screen.</comment>        
     <source>Delete %1?</source>
@@ -487,21 +377,11 @@
 </message>
 <message numerus="no" id="txt_applib_info_launching_the_application_failed">
     <comment>If lauching an application fails, thie note is shown. %1 is error code.</comment>        
-    <source>Launching the application failed (error code %1)</source>
-    <translation variants="no">Launching the application failed (error code %1)</translation>
+    <source>Launching the application failed (error code %L1)</source>
+    <translation variants="no">Launching the application failed (error code %L1)</translation>
     <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
     <extra-loc-viewid>applib_31</extra-loc-viewid>
     <extra-loc-positionid>info</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_dialog_format">
-    <comment>Format label of application details dialog. Format can be for example Symbian, Java or Widget</comment>        
-    <source>Format:</source>
-    <translation variants="no">Format:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_17</extra-loc-viewid>
-    <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -515,21 +395,11 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_common_button_delete">
-    <comment>Delete button</comment>        
-    <source>Delete</source>
-    <translation variants="no">Delete</translation>
-    <extra-loc-layout_id>qtl_dialog_softkey_2</extra-loc-layout_id>    
-    <extra-loc-viewid>common</extra-loc-viewid>
-    <extra-loc-positionid>button</extra-loc-positionid>
-    <extra-loc-feature>common</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_dialog_l1_kb">
-    <comment>Size field in app details dialog. App size shown in kilobytes, shown after Size-label.</comment>        
-    <source>%L1 KB</source>
-    <translation variants="no">%L1 KB</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+<message numerus="no" id="txt_applib_dialog_format">
+    <comment>Format label of application details dialog. Format can be for example Symbian, Java or Widget</comment>        
+    <source>Format:</source>
+    <translation variants="no">Format:</translation>
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -539,7 +409,17 @@
     <comment>Description label of application details dialog. Free-form description of the purpose of the application.</comment>        
     <source>Description:</source>
     <translation variants="no">Description:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_17</extra-loc-viewid>
+    <extra-loc-positionid>dialog</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_dialog_l1_kb">
+    <comment>Size field in app details dialog. App size shown in kilobytes, shown after Size-label.</comment>        
+    <source>%L1 KB</source>
+    <translation variants="no">%L1 KB</translation>
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -599,7 +479,7 @@
     <comment>Shown in text entry of removed app in installation log dialog</comment>        
     <source>Removed</source>
     <translation variants="no">Removed</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_20</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -615,16 +495,6 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_common_menu_install">
-    <comment>Item specific menu item. Note! Only use this text ID if there are no icons. Allows the user to install a file or files.</comment>        
-    <source>Install</source>
-    <translation variants="no">Install</translation>
-    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>common</extra-loc-viewid>
-    <extra-loc-positionid>menu</extra-loc-positionid>
-    <extra-loc-feature>common</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_applib_opt_arrange">
     <comment>Options menu item. Allows user to move items in the view (no hierarchy, no folders)</comment>        
     <source>Arrange</source>
@@ -635,11 +505,21 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_applib_menu_sort_by_latest_on_top">
+    <comment>Option for sorting the list by their installation time. New installations are shown on top of the list.</comment>        
+    <source>Sort by latest on top</source>
+    <translation variants="no">Sort by latest on top</translation>
+    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_07, applib_05</extra-loc-viewid>
+    <extra-loc-positionid>menu</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_applib_dialog_1_memory_card">
     <comment>Shown after &quot;Memory in use&quot; header in Application details dialog if the app is installed in memory card without name</comment>        
     <source>%1: Memory card</source>
     <translation variants="no">%1: Memory card</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -649,9 +529,19 @@
     <comment>Supplier label of application details dialog</comment>        
     <source>Supplier:</source>
     <translation variants="no">Supplier:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_title_select_item">
+    <comment>When AppLibrary is opened by selecting &quot;Add&quot; in Homescreen, AppLibrary&apos;s title is Select item:</comment>        
+    <source>Select item:</source>
+    <translation variants="no">Select item:</translation>
+    <extra-loc-layout_id>qtl_titlebar</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_11</extra-loc-viewid>
+    <extra-loc-positionid>title</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -679,17 +569,7 @@
     <comment>Size label on application details dialog. Size of the app is shown after this label.</comment>        
     <source>Size:</source>
     <translation variants="no">Size:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_17</extra-loc-viewid>
-    <extra-loc-positionid>dialog</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_dialog_1_2">
-    <comment>Shown after &quot;Memory in use&quot; header in Application details dialog. %1 is the drive letter and %2 is the user-given</comment>        
-    <source>%1: %2</source>
-    <translation variants="no">%1: %2</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -699,7 +579,17 @@
     <comment>Shown after &quot;Memory in use&quot; header in Application details dialog</comment>        
     <source>%1: Device memory</source>
     <translation variants="no">%1: Device memory</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_17</extra-loc-viewid>
+    <extra-loc-positionid>dialog</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_dialog_1_2">
+    <comment>Shown after &quot;Memory in use&quot; header in Application details dialog. %1 is the drive letter and %2 is the user-given</comment>        
+    <source>%1: %2</source>
+    <translation variants="no">%1: %2</translation>
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
@@ -722,16 +612,6 @@
     <extra-loc-layout_id>qtl_dialog_pri_heading</extra-loc-layout_id>    
     <extra-loc-viewid>applib_20</extra-loc-viewid>
     <extra-loc-positionid>title</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_menu_send_to_friend">
-    <comment>Item specific menu item. Allows the user to send the download URL of the application/widget. User is prompted for the method used for sending (SMS, email, bluetooth, etc)</comment>        
-    <source>Send to friend</source>
-    <translation variants="no">Send to friend</translation>
-    <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_01, applib_05, applib_09</extra-loc-viewid>
-    <extra-loc-positionid>menu</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -789,29 +669,9 @@
     <comment>Memory in use label in application details dialog</comment>        
     <source>Memory in use:</source>
     <translation variants="no">Memory in use:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_dialog_partially_installed">
-    <comment>Shown in text entry of partially installed app in installation log dialog</comment>        
-    <source>Partially installed</source>
-    <translation variants="no">Partially installed</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_20</extra-loc-viewid>
-    <extra-loc-positionid>dialog</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_opt_new_collection">
-    <comment>Options menu item. User can create a new (empty) collection </comment>        
-    <source>New collection</source>
-    <translation variants="no">New collection</translation>
-    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_03</extra-loc-viewid>
-    <extra-loc-positionid>opt</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -825,13 +685,13 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_dialog_remove_1_from_collection">
-    <comment>Confirmation for removing an app/widget from a collection. Does not delete the item from the device.</comment>        
-    <source>Remove %1 from collection?</source>
-    <translation variants="no">Remove %1 from collection?</translation>
-    <extra-loc-layout_id>qtl_dialog_pri5</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_26</extra-loc-viewid>
-    <extra-loc-positionid>info</extra-loc-positionid>
+<message numerus="no" id="txt_applib_opt_new_collection">
+    <comment>Options menu item. User can create a new (empty) collection </comment>        
+    <source>New collection</source>
+    <translation variants="no">New collection</translation>
+    <extra-loc-layout_id>qtl_menu_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_03</extra-loc-viewid>
+    <extra-loc-positionid>opt</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -845,23 +705,13 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_applib_dialog_protection_domain">
-    <comment>Protection domain label shown in application details dialog. The value of this field is retrieved from the value, not from platform. The value can be one of the following: Operator, Manufacturer, Trusted 3rd party, Untrusted 3rd party.</comment>        
-    <source>Protection domain:</source>
-    <translation variants="no">Protection domain:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_17</extra-loc-viewid>
-    <extra-loc-positionid>dialog</extra-loc-positionid>
-    <extra-loc-feature>applib</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_applib_title_select_items">
-    <comment>Heading for the mark mode dialog when selecting one or more apps to be added into a collection.</comment>        
-    <source>Select items:</source>
-    <translation variants="no">Select items:</translation>
-    <extra-loc-layout_id>qtl_dialog_pri_heading</extra-loc-layout_id>    
-    <extra-loc-viewid>applib_35</extra-loc-viewid>
-    <extra-loc-positionid>title</extra-loc-positionid>
+<message numerus="no" id="txt_applib_dialog_remove_1_from_collection">
+    <comment>Confirmation for removing an app/widget from a collection. Does not delete the item from the device.</comment>        
+    <source>Remove %1 from collection?</source>
+    <translation variants="no">Remove %1 from collection?</translation>
+    <extra-loc-layout_id>qtl_dialog_pri5</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_26</extra-loc-viewid>
+    <extra-loc-positionid>info</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -875,11 +725,31 @@
     <extra-loc-feature>applib</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_applib_title_select_items">
+    <comment>Heading for the mark mode dialog when selecting one or more apps to be added into a collection.</comment>        
+    <source>Select items:</source>
+    <translation variants="no">Select items:</translation>
+    <extra-loc-layout_id>qtl_dialog_pri_heading</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_35</extra-loc-viewid>
+    <extra-loc-positionid>title</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_applib_dialog_protection_domain">
+    <comment>Protection domain label shown in application details dialog. The value of this field is retrieved from the value, not from platform. The value can be one of the following: Operator, Manufacturer, Trusted 3rd party, Untrusted 3rd party.</comment>        
+    <source>Protection domain:</source>
+    <translation variants="no">Protection domain:</translation>
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>applib_17</extra-loc-viewid>
+    <extra-loc-positionid>dialog</extra-loc-positionid>
+    <extra-loc-feature>applib</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_applib_dialog_version">
     <comment>Version label shown in application details dialog</comment>        
     <source>Version:</source>
     <translation variants="no">Version:</translation>
-    <extra-loc-layout_id>qtl_dialog_sec</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_popup_pri</extra-loc-layout_id>    
     <extra-loc-viewid>applib_17</extra-loc-viewid>
     <extra-loc-positionid>dialog</extra-loc-positionid>
     <extra-loc-feature>applib</extra-loc-feature>

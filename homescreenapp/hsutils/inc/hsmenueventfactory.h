@@ -90,6 +90,8 @@ public:
     static QEvent *createAppDetailsViewEvent(int entryId);
     
     static QEvent *createInstallationLogEvent();
+    
+    static QEvent *createUninstallFailedEvent(int error);
 
     static QEvent *createUnknownEvent();
 

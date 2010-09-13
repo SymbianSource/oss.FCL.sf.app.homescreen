@@ -52,6 +52,7 @@ public:
         ShowAppSettings,
         ShowAppDetails,
         ShowInstallationLog,
+        UninstallationFailed,
         Unknown
     };
 

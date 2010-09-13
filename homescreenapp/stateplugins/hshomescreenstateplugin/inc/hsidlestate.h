@@ -108,11 +108,12 @@ private slots:
     void action_moveWidget_reparentToControlLayer();
     void action_moveWidget_startWidgetDragEffect();
     void action_moveWidget_connectGestureHandlers();
+    void action_moveWidget_connectOrientationChangeEventHandler();
     void action_moveWidget_setWidgetSnap();
-
     void action_moveWidget_reparentToPage();
     void action_moveWidget_startWidgetDropEffect();
     void action_moveWidget_disconnectGestureHandlers();
+    void action_moveWidget_disconnectOrientationChangeEventHandler();
     void action_moveWidget_preventZoneAnimation();
     void action_moveWidget_deleteWidgetSnap();
     void action_moveScene_connectGestureHandlers();
@@ -131,7 +132,7 @@ private slots:
     void onPagePanStarted(QGestureEvent *event);
     void onPagePanUpdated(QGestureEvent *event);
     void onPagePanFinished(QGestureEvent *event);
-    void onWidgetTapStarted(HsWidgetHost *widget);
+    void onWidgetTapStarted(QPointF point, HsWidgetHost *widget);
     void onWidgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost *widget);
     void onWidgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *widget);
     void onWidgetMoveFinished(const QPointF &scenePos, HsWidgetHost *widget);
@@ -143,8 +144,13 @@ private slots:
     void pageChangeAnimationFinished();
     void onVerticalSnapLineTimerTimeout();
     void onHorizontalSnapLineTimerTimeout();
-    void onActivePageChanged();
-   
+    void updateSnapAlgorithmParameters();
+    
+    void closeVirtualKeyboard();
+
+private:
+    bool isEditor(const QPointF &point, HsWidgetHost *widget);
+    
 private:
     HbAction *mNavigationAction;
     

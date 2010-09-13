@@ -20,7 +20,7 @@
 #include <HbInstance>
 #include "hsmainwindow.h"
 #include "hsmenuview.h"
-
+#include "hsmenumodewrapper.h"
 
 /*!
  Constructor
@@ -36,7 +36,7 @@
  */
 
 
-HsMainWindow::HsMainWindow() 
+HsMainWindow::HsMainWindow(HsMenuModeWrapper* wrapper):mMenuMode(wrapper) 
 {
 }
 
@@ -56,9 +56,16 @@ void HsMainWindow::setCurrentView(HbView *view)
     HbMainWindow *const hbW(
         HbInstance::instance()->allMainWindows().value(0));
     
+    if (mMenuMode && mMenuMode->getHsMenuMode() == Hs::AddHsMenuMode) {
+        view->setTitle(hbTrId("txt_applib_title_select_item"));
+    } else {
+        view->setTitle(hbTrId("txt_applib_title_applications"));
+    }
+        
     if (!hbW->views().contains(view)) {
         hbW->addView(view);
     }
+    
     bool animate  = !hbW->isObscured();       
-    hbW->setCurrentView(view, animate);
+    hbW->setCurrentView(view, animate, Hb::ViewSwitchCachedFullScreen);
 }

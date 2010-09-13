@@ -18,6 +18,8 @@
 #include <hbnamespace.h>
 #include <HbAbstractItemView>
 #include <HbStyleLoader>
+#include <HbTextItem>
+#include <HbParameterLengthLimiter>
 #include <QPainter>
 #include <caitemmodel.h>
 #include "hsmenuitemmodel.h"
@@ -28,6 +30,7 @@
 // TODO: this is only temporary class for show progress bar.
 // It should be remove when fix from orbit will be in official platfrom.
 // Remove it from header too.
+// It is only about paint method.
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
@@ -61,10 +64,32 @@ void HsProgressBar::paint(QPainter * painter,
 #endif //COVERAGE_MEASUREMENT
 
 
+void HsProgressBar::setTargetProgressValue(int value) {
+    mTargetValue = value;
+    if (value > progressValue() && value <= maximum()) {
+        if (!mTimerId) {
+            mTimerId = startTimer(10);
+        }
+    } else {
+        setProgressValue(value);
+    }
+}
+
+void HsProgressBar::timerEvent(QTimerEvent *event)
+ {
+     if (mTargetValue == progressValue()) {
+         killTimer(mTimerId);
+         mTimerId = 0;
+     } else {
+         setProgressValue(progressValue()+1);
+     }
+ }
+
 HsListViewItem::HsListViewItem(QGraphicsItem* parent) : 
     HbListViewItem(parent), progress(0), isProgress(false)
 {   
     setGraphicsSize(LargeIcon);
+    setStretchingStyle(StretchLandscape);
     if (this == prototype()) {
         HbStyleLoader::registerFilePath(":/layout/hslistviewitem.css");        
     }
@@ -86,18 +111,31 @@ void HsListViewItem::updateChildItems()
         CaItemModel::FlagsRole).value<EntryFlags> ();
     isProgress = false;
     if (flags & UninstallEntryFlag) {
+        int progresVal = modelIndex().data(
+                CaItemModel::UninstalRole).toInt();
         isProgress = true;
         if (!progress) {
             progress = new HsProgressBar(this);
             HbStyle::setItemName(progress, "progress"); 
             progress->setRange(0, 100);
             HbEffect::disable(progress);  
+            progress->setProgressValue(progresVal);
             repolish();
+            connect(progress, SIGNAL(valueChanged(int)), SLOT(updatePixmapCache()));
         }
-        int progresVal = modelIndex().data(
-                CaItemModel::UninstalRole).toInt();
-        progress->setProgressValue(progresVal);
+        progress->setTargetProgressValue(progresVal);
+        // TODO, consider moving this logic to model
+        foreach (QGraphicsItem * item, this->childItems()) {
+               if (HbStyle::itemName(item) == "text-1") {
+                   HbTextItem* text = (HbTextItem*)item;
+                   text->setText(
+                           HbParameterLengthLimiter("txt_applib_dblist_uninstalling_1")
+                           .arg(text->text()));
+                   break;
+               } 
+           }
     } else if (progress) {       
+        disconnect(progress, SIGNAL(valueChanged()));
         delete progress;
         progress = 0;
         repolish();

@@ -11,7 +11,7 @@
 #
 # Contributors:
 #
-# Description: Example of home screen widget
+# Description: Example home screen widget
 #
 
 TEMPLATE = lib
@@ -24,48 +24,62 @@ SOURCES += ./src/*.cpp
 INCLUDEPATH += ./inc               
 
 symbian: {
-		    
+	
+	WIDGET_DIR = /private/20022F35/import/widgetregistry/20022F80	    
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
     TARGET.UID3 = 0x20022F80
     TARGET.EPOCALLOWDLLDATA=1
     TARGET.CAPABILITY = ALL -TCB
-    
-    DESTDIR = /private/20022F35/import/widgetregistry/20022F80
-    
-    plugins.path = $${DESTDIR}
+            
+    plugins.path = /resource/qt/plugins/homescreen
     plugins.sources = $${TARGET}.dll 
     
-    widgetResources.path = $${DESTDIR}
-    widgetResources.sources += resource/$${TARGET}.xml    
+    CONFIG += qtservice
+    QTSERVICE.DESCRIPTOR = resource/$${TARGET}.xml
+    
+    widgetResources.path = $${WIDGET_DIR}
     widgetResources.sources += resource/$${TARGET}.manifest
+    widgetResources.sources += resource/$${TARGET}.xml
     widgetResources.sources += resource/$${TARGET}.png
     
-    localisedFiles.path = /resource/qt/translations
-    localisedFiles.sources += ./locales/*.qm 
+    widgetTranslations.path = /resource/qt/translations
+    widgetTranslations.sources += ./locales/*.qm 
     
     DEPLOYMENT += plugins \
                   widgetResources \
-                  localisedFiles
+                  widgetTranslations
+                  
+    BLD_INF_RULES.prj_exports += \
+      "./rom/localisedhellowidgetplugin.iby            CORE_APP_LAYER_IBY_EXPORT_PATH(localisedhellowidgetplugin.iby)" \
+      "./rom/localisedhellowidgetpluginresources.iby   LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(localisedhellowidgetpluginresources.iby)"
 }
 
 win32: {
 
     CONFIG(debug, debug|release) {
-      SUBDIRPART = debug
+      TARGET_DIR = debug
     } else {
-      SUBDIRPART = release
-    }    				 
-   
-    PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F80
+      TARGET_DIR = release
+    }
     
-    DESTDIR = $$PWD/../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
-	
-    manifest.path = $${DESTDIR}
-    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png
+    HOMESCREEN_DIR = $$PWD/../../../../bin/$${TARGET_DIR}
     
-    widgetLocalisation.path = $$PWD/../../../../bin/$${SUBDIRPART}/resource/qt/translations
-    widgetLocalisation.files += ./locales/*.qm 
+    PLUGIN_DIR = $${HOMESCREEN_DIR}/resource/qt/plugins/homescreen    
+    WIDGET_DIR = $${HOMESCREEN_DIR}/private/20022F35/import/widgetregistry/20022F80
+    TRANSLATIONS_DIR = $${HOMESCREEN_DIR}/resource/qt/translations
+    
+    DESTDIR = $${PLUGIN_DIR}
+    
+    widgetResources.path = $${WIDGET_DIR}
+    widgetResources.files = ./resource/*.manifest \
+                            ./resource/*.xml \
+                            ./resource/*.png
+    
+    widgetTranslations.path = $${TRANSLATIONS_DIR}
+    widgetTranslations.files += ./locales/*.qm 
         
-    INSTALLS += manifest widgetLocalisation      
+    INSTALLS += widgetResources \
+                widgetTranslations
+
 }

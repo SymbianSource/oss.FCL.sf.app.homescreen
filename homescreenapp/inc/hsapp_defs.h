@@ -44,6 +44,7 @@ namespace Hs {
     const char menuModeType[] = "menu_mode_type";
     const char swTypeKey[] = "apptype";
     const char javaSwType[] = "java";
+    const char uninstallError[] = "uninstall_error";
     static const char *const HS_CWRT_APP_TYPE="cwrt";
     static const char *const HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE=
         "wrtwidgetuiplugin";

@@ -104,26 +104,25 @@ void SnsrDigitalClockContainer::update()
         );
 
     // date
-    if (mCurrentOrientation == Qt::Vertical) {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(
-                QDate::currentDate(), gDateFormatVerticalStr)
-            );
-    } else {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(
-                QDate::currentDate(), gDateFormatHorizontalStr)
-            );
-    }
+    const char *dateFormat = (mCurrentOrientation == Qt::Vertical) ?
+        gDateFormatVerticalStr : gDateFormatHorizontalStr;
+    QString dateText = HbExtendedLocale().format( QDate::currentDate(), dateFormat );
+    mDateLabel->setPlainText( dateText );
 
     SCREENSAVER_TEST_FUNC_EXIT("SnsrDigitalClockContainer::update")
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::updateIntervalInMilliseconds()
+ */
 int SnsrDigitalClockContainer::updateIntervalInMilliseconds()
 {
     return 1000;
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::loadWidgets()
+ */
 void SnsrDigitalClockContainer::loadWidgets()
 {
     // reset widget pointers, any previous widgets are already deleted by now
@@ -167,6 +166,7 @@ void SnsrDigitalClockContainer::loadWidgets()
         }
 
         mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        mIndicatorWidget->setPowerSaveModeColor(false);
         initIndicatorWidget();
         
         mBackgroundContainerLayout->addItem(mMainView);

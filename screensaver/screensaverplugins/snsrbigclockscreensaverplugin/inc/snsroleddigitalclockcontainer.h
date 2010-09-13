@@ -43,6 +43,7 @@ public slots:
 public: // from base classes
 
     virtual int updateIntervalInMilliseconds();
+    virtual Screensaver::ScreenPowerMode displayPowerMode();
     virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow);
     virtual bool isOrientationLocked();
     

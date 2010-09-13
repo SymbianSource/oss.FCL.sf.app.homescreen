@@ -27,10 +27,10 @@
 #include "snsrtest_global.h"
 
 class Screensaver;
-class SnsrUserActivityServiceInterface;
 class QGraphicsLinearLayout;
-class XQSettingsManager;
 class HbIndicatorInterface;
+class SnsrDeviceDialogDisplayControl;
+class QTimer;
 
 SCREENSAVER_TEST_CLASS(T_SnsrDeviceDialogPlugin)
 
@@ -54,8 +54,6 @@ public: // constants
     };
     
     static const char *dataKeyUnlock;
-    static const char *dataKeySwitchLights;
-    static const char *dataKeySwitchLowPower;
 
 public: // methods
 
@@ -76,25 +74,30 @@ private slots:
 
     void changeView(QGraphicsWidget *widget);
     void screensaverFaulted();
-    void changeLayout(Qt::Orientation);
+    void handleOrientationChange(Qt::Orientation);
+    void changeLayout();
+    void updateDisplayMode();
+    void updateDisplayModeDeferred();
     void requestUnlock();
-    void requestScreenMode(Screensaver::ScreenPowerMode mode);
     // slots for signals emitted by HbIndicatorPluginManager
     void indicatorsActivated(const QList<HbIndicatorInterface*> &activatedIndicators);
     void indicatorActivated(HbIndicatorInterface *activatedIndicator);
-    void indicatorRemoved(HbIndicatorInterface *indicatorRemoved);
+    void indicatorDeactivated(HbIndicatorInterface *deactivatedIndicator);
 
 private:
 
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
     void closeEvent(QCloseEvent *event);
+    bool event(QEvent *event);
 
 private:
 
     Screensaver *mScreensaver;
     QGraphicsLinearLayout *mLayout;
-    XQSettingsManager *m_setManager;
+    SnsrDeviceDialogDisplayControl *mDisplayControl;
+    QTimer *mDisplayModeTimer;
+    bool mHasFocus;
     
     SCREENSAVER_TEST_FRIEND_CLASS(T_SnsrDeviceDialogPlugin)
 };

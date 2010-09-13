@@ -17,7 +17,8 @@
 
 #include "hspagevisual.h"
 #include "hspagetoucharea.h"
-
+#include "hsscene.h"
+#include "hspage.h"
 
 
 /*!
@@ -49,6 +50,17 @@ HsPageVisual::HsPageVisual(QGraphicsItem* parent)
 */
 HsPageVisual::~HsPageVisual()
 {
+}
+
+int HsPageVisual::pageIndex() const
+{
+    QList<HsPage *> pages = HsScene::instance()->pages();
+    for (int i = 0; i < pages.count(); ++i) {
+        if (pages.at(i)->visual() == this) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void HsPageVisual::setGeometry(const QRectF &rect)

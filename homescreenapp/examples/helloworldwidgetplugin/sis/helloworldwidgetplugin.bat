@@ -18,7 +18,7 @@
 if exist helloworldwidgetplugin.sisx del helloworldwidgetplugin.sisx
 
 makesis helloworldwidgetplugin.pkg
-signsis helloworldwidgetplugin.sis helloworldwidgetplugin.sisx ../../../sis/rd.cer ../../../sis/rd-key.pem
+signsis helloworldwidgetplugin.sis helloworldwidgetplugin.sisx ../../../internal/sis/rd.cer ../../../internal/sis/rd-key.pem
 
 if exist helloworldwidgetplugin.sisx (
 echo helloworldwidgetplugin.sisx creation SUCCEEDED

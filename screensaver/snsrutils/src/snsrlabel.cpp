@@ -20,7 +20,7 @@
 #include <hbevent.h>
 #include <hbcolorscheme.h>
 
-const QString snsrForegroundColorRole("snsrforeground");
+const QString snsrForegroundColorRole("qtc_screensaver");
 
 /*!
     \class SnsrLabel

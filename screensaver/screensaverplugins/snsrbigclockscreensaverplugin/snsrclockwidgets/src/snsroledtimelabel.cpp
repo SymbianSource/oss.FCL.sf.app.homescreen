@@ -18,11 +18,9 @@
 #include "snsroledtimelabel.h"
 
 #include <hbevent.h>
-#include <hbcolorscheme.h>
 #include <QPainter>
 
 
-const QString snsrForegroundColorRole("snsrforeground");
 
 /*!
     \class SnsrOledTimeLabel
@@ -38,7 +36,7 @@ const QString snsrForegroundColorRole("snsrforeground");
 SnsrOledTimeLabel::SnsrOledTimeLabel(QGraphicsItem *parent)
     : HbTextItem(parent)
 {
-    setThemedTextColor();
+    setTextColor(Qt::white);
     
     setMinimumLines( 1 );
     setMaximumLines( 1 );
@@ -111,31 +109,4 @@ void SnsrOledTimeLabel::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     painter->restore();
 
 }
-
-/*!
-    \reimp
- */
-void SnsrOledTimeLabel::changeEvent(QEvent * event)
-{
-    if (event->type() == HbEvent::ThemeChanged) {
-        setThemedTextColor();
-    }
-    return HbTextItem::changeEvent(event);
-}
-
-
-/*!
-    Sets the time label's color to follow the theme.
- */
-void SnsrOledTimeLabel::setThemedTextColor()
-{
-    QColor textColor(HbColorScheme::color(snsrForegroundColorRole));
-    if (textColor.isValid()) {
-        setTextColor(textColor);
-    } else {
-        // fallback mechanism when color definition is missing in default theme
-        setTextColor(Qt::white);
-    }
-}
-
 

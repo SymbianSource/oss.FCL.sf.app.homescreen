@@ -24,7 +24,6 @@
 #include <HbMainWindow>
 #include <HbInstance>
 #include <HbSearchPanel>
-#include <HbPushButton>
 #include <HbToolBar>
 #include <HbView>
 #include <HbToolBarExtension>
@@ -188,15 +187,6 @@ HbGroupBox *HsMenuView::viewLabel() const
 }
 
 /*!
-\return Collection button
- if available in the context or NULL otherwise.
- */
-HbPushButton *HsMenuView::contentButton() const
-{
-    return mAddContentButton;
-}
-
-/*!
  Makes search panel visible.
  Equivalent to \a setSearchPanelVisible(true)
  */
@@ -344,7 +334,6 @@ void HsMenuView::synchronizeCache()
     mView = mBuilder.currentView();
     mListView = mBuilder.currentListView();
     mViewLabel = mBuilder.currentViewLabel();
-    mAddContentButton = mBuilder.currentAddContentButton();
 }
 
 

@@ -11,11 +11,11 @@
 *
 * Contributors:
 *
-* Description:
+* Description: homescreen resources iby file
 *
 */
-#ifndef __HOMESCREENAPP_RESOURCE_IBY__
-#define __HOMESCREENAPP_RESOURCE_IBY__
+#ifndef __HOMESCREENAPP_RESOURCES_IBY__
+#define __HOMESCREENAPP_RESOURCES_IBY__
 
 #include <data_caging_paths_for_iby.hrh> 
 
@@ -25,5 +25,8 @@ data=DATAZ_\QT_TRANSLATIONS_DIR\homescreen.qm       QT_TRANSLATIONS_DIR\homescre
 // -------- hsapplibrarystateplugin
 data=DATAZ_\QT_TRANSLATIONS_DIR\hsapplibrary.qm     QT_TRANSLATIONS_DIR\hsapplibrary.qm
 
-data=\epoc32\data\z\resource\apps\hsapplication.rsc       resource\apps\hsapplication.rsc
-#endif //__HOMESCREENAPP_LANGUAGE_IBY__
+data=\epoc32\data\z\resource\apps\hsapplication.rsc resource\apps\hsapplication.rsc
+
+data=ZPRIVATE\20022f35\backup_registration.xml      private\20022f35\backup_registration.xml
+
+#endif //__HOMESCREENAPP_RESOURCES_IBY__

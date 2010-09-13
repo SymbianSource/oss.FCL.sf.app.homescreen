@@ -88,7 +88,8 @@ HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow,
 void HsBaseViewState::initialize(HsMenuViewBuilder &menuViewBuilder,
     HsStateContext stateContext)
 {
-    mMenuView.reset(new HsMenuView(menuViewBuilder, stateContext, mMainWindow));
+    mMenuView.reset(new HsMenuView(
+            menuViewBuilder, stateContext, mMainWindow));
     mMenuView->view()->setNavigationAction(mBackKeyAction);
     mMenuView->view()->setMenu(mViewOptions);
 
@@ -104,17 +105,17 @@ void HsBaseViewState::initialize(HsMenuViewBuilder &menuViewBuilder,
 void HsBaseViewState::createApplicationLaunchFailMessage(int errorCode,
     int itemId)
 {
-    QString message;
-    message.append(
-        HbParameterLengthLimiter("txt_applib_info_launching_the_application_failed").arg(
-            errorCode));
+    QString message(HbParameterLengthLimiter(
+            "txt_applib_info_launching_the_application_failed").arg(
+                    errorCode));
 
     // create and show message box
     mApplicationLaunchFailMessage = HsMenuDialogFactory().create(
             message, HsMenuDialogFactory::Close);
 
     QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
-        new HsMenuEntryRemovedHandler(itemId, mApplicationLaunchFailMessage.data(), SLOT(close())));
+            new HsMenuEntryRemovedHandler(itemId, 
+                    mApplicationLaunchFailMessage.data(), SLOT(close())));
 
     entryObserver.take()->setParent(mApplicationLaunchFailMessage.data());
 
@@ -163,7 +164,7 @@ void HsBaseViewState::addModeEntered()
             SLOT(addActivated(QModelIndex)));
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
-            SLOT(addLongPressed(HbAbstractViewItem *, QPointF)));
+            SLOT(addModeShowContextMenu(HbAbstractViewItem *, QPointF)));
 }
 
 /*!
@@ -244,7 +245,8 @@ void HsBaseViewState::openCollection(const QModelIndex &index)
  Slot connected to List widget in normal mode.
  \param index Model index of the activated item.
  */
-void HsBaseViewState::showContextMenu(HbAbstractViewItem *item, const QPointF &coords)
+void HsBaseViewState::showContextMenu(
+        HbAbstractViewItem *item, const QPointF &coords)
 {
     HSMENUTEST_FUNC_ENTRY("HsBaseViewState::showContextMenu");
 
@@ -398,12 +400,26 @@ void HsBaseViewState::addActivated(const QModelIndex &index)
  \param item View item.
  \param coords Press point coordinates.
  */
-void HsBaseViewState::addLongPressed(HbAbstractViewItem *item,
+void HsBaseViewState::addModeShowContextMenu(HbAbstractViewItem *item,
                                     const QPointF &coords)
 {
     Q_UNUSED(coords);
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::addLongPressed");
-    addActivated(item->modelIndex());
+    EntryFlags flags = item->modelIndex().data(
+            CaItemModel::FlagsRole).value<EntryFlags> ();
+
+    if (!(flags & UninstallEntryFlag)) {
+        mContextMenu = new HbMenu;
+
+        HbAction *addToHomeScreenAction = mContextMenu->addAction(
+            hbTrId("txt_applib_menu_add_to_home_screen"));
+        addToHomeScreenAction->setData(Hs::AddToHomeScreenContextAction);
+
+        mContextModelIndex = item->modelIndex();
+        mContextMenu->setPreferredPos(coords);
+        mContextMenu->setAttribute(Qt::WA_DeleteOnClose);
+        mContextMenu->open(this, SLOT(contextMenuAction(HbAction*)));
+    }
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::addLongPressed");
 }
 

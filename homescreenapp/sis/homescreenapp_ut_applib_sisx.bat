@@ -18,7 +18,7 @@
 if exist homescreenapp_ut_applib.sisx del homescreenapp_ut_applib.sisx
 
 makesis homescreenapp_ut_applib.pkg
-signsis homescreenapp_ut_applib.sis homescreenapp_ut_applib.sisx rd.cer rd-key.pem
+signsis homescreenapp_ut_applib.sis homescreenapp_ut_applib.sisx ../internal/sis/rd.cer ../internal/sis/rd-key.pem
 
 if exist homescreenapp_ut_applib.sisx (
 echo homescreenapp_ut_applib.sisx creation SUCCEEDED

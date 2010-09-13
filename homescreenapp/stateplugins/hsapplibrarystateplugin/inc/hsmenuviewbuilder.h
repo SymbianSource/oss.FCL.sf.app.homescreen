@@ -37,7 +37,6 @@ class HbToolBar;
 class HbView;
 class HbWidget;
 class HbToolBarExtension;
-class HbPushButton;
 
 enum HsStateContext {
     HsAllAppsContext = 0,
@@ -49,7 +48,6 @@ enum HsStateContext {
 
 enum HsOperationalContext {
     HsItemViewContext = 0,
-    HsButtonContext,
     HsEmptyLabelContext,
     InvalidOperationalContext
 };
@@ -79,8 +77,6 @@ public:
 
     // optional widgets accessors
     HbGroupBox *currentViewLabel();
-    HbPushButton *currentAddContentButton();
-
 
     void setStateContext(HsStateContext stateContext);
     void setOperationalContext(HsOperationalContext operationalContext);

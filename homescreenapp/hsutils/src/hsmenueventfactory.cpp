@@ -336,6 +336,18 @@ QEvent *HsMenuEventFactory::createInstallationLogEvent()
 }
 
 /*!
+    Creates an HsMenuEvent::createUninstallationFailedEvent event.
+	\param error Uninstallation error.
+    \return Event for uninstall failed.
+*/
+QEvent *HsMenuEventFactory::createUninstallFailedEvent(int error)
+{
+    QVariantMap params;
+    params.insert(Hs::uninstallError, error);
+    return new HsMenuEvent(HsMenuEvent::UninstallationFailed, params);
+}
+
+/*!
     Creates an HsMenuEvent::Unknown event.
 
     \return Unknown event.

@@ -20,7 +20,8 @@ MOBILITY = serviceframework
 
 HB += hbfeedback
 
-PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F46
+WIDGET_SUBDIR = /private/20022F35/import/widgetregistry/20022F46
+PLUGIN_SUBDIR = /resource/qt/plugins/homescreen
 
 include(../../common.pri)
 
@@ -42,4 +43,4 @@ symbian: {
     TARGET.UID3 = 0x20022F46
 }
 
-exportResources(./resource/*.manifest, $$PLUGIN_SUBDIR)
+exportResources(./resource/*.manifest, $$WIDGET_SUBDIR)

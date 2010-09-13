@@ -61,12 +61,13 @@ private:
     virtual void onHandleActiveIndicators(const QList<HbIndicatorInterface*> &activeIndicators);
     virtual void onHandleActivatedIndicator(HbIndicatorInterface *activatedIndicator);
     virtual void onHandleDeactivatedIndicator(HbIndicatorInterface *deactivatedIndicator);
+    virtual Screensaver::ScreenPowerMode currentPowerMode();
     virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow);
     virtual void updateLayout();
 
 private slots:
 
-    void updateActiveAreaForLowPower();
+    void updateTime();
 
 private:
 

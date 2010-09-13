@@ -75,11 +75,12 @@ public:
     //static Qt::Orientation orientation();
 
 signals:
+    void pageTapFinished(QGestureEvent *event);
     void pageTapAndHoldFinished(QGestureEvent *event);
     void pagePanStarted(QGestureEvent *event);
     void pagePanUpdated(QGestureEvent *event);
     void pagePanFinished(QGestureEvent *event);    
-    void widgetTapStarted(HsWidgetHost *widget);
+    void widgetTapStarted(QPointF, HsWidgetHost *widget);
     void widgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost *widget);
     void widgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *widget);
     void widgetMoveFinished(const QPointF &scenePos, HsWidgetHost *widget);

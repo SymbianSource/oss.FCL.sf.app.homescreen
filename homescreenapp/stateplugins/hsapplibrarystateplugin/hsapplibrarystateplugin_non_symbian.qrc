@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/xml">
-        <file alias="addcontentlabeledview.docml">resource/addcontentlabeledview.docml</file>
         <file alias="common_objects.docml">resource/common_objects.docml</file>
         <file alias="emptylabeledview.docml">resource/emptylabeledview.docml</file>
         <file alias="labeledlistview.docml">resource/labeledlistview.docml</file>

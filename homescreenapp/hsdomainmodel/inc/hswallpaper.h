@@ -41,6 +41,7 @@ signals:
 
 public slots:
     void setImage(const QString &path);
+    void setImages(const QString &portraitFileName, const QString &landscapeFileName);
     void setDefaultImage();
     void remove();
 

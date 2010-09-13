@@ -31,12 +31,14 @@ HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 class HSDOMAINMODEL_EXPORT HsPageVisual : public HbWidget
 {
     Q_OBJECT
-   
+    Q_PROPERTY(int pageIndex READ pageIndex)
 
 public:
     HsPageVisual(QGraphicsItem *parent = 0);
     ~HsPageVisual();
    
+    int pageIndex() const;
+
     void setGeometry(const QRectF &rect);
 
 private:

@@ -18,7 +18,7 @@
 if exist localisedhellowidgetplugin.sisx del localisedhellowidgetplugin.sisx
 
 makesis localisedhellowidgetplugin.pkg
-signsis localisedhellowidgetplugin.sis localisedhellowidgetplugin.sisx ../../../sis/rd.cer ../../../sis/rd-key.pem
+signsis localisedhellowidgetplugin.sis localisedhellowidgetplugin.sisx ../../../internal/sis/rd.cer ../../../internal/sis/rd-key.pem
 
 if exist localisedhellowidgetplugin.sisx (
 echo localisedhellowidgetplugin.sisx creation SUCCEEDED

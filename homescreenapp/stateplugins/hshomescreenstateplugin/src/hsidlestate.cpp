@@ -20,17 +20,21 @@
 #include <QPropertyAnimation>
 #include <QApplication>
 #include <QVariantHash>
+#include <QInputContext>
 
 #include <HbMainWindow>
 #include <HbView>
 #include <HbMenu>
 #include <HbAction>
 #include <HbMessageBox>
+#include <HbInstance>
 #include <HbLabel>
 #include <HbInstantFeedback>
 #include <HbContinuousFeedback>
 #include <HbPanGesture>
 #include <HbTapAndHoldGesture>
+#include <HbVkbHostBridge>
+#include <HbInputFocusObject>
 
 #ifdef Q_OS_SYMBIAN
 #include <XQSettingsManager>
@@ -292,11 +296,13 @@ void HsIdleState::setupStates()
     ENTRY_ACTION(state_moveWidget, action_moveWidget_reparentToControlLayer)
     ENTRY_ACTION(state_moveWidget, action_moveWidget_startWidgetDragEffect)
     ENTRY_ACTION(state_moveWidget, action_moveWidget_connectGestureHandlers)
+    ENTRY_ACTION(state_moveWidget, action_moveWidget_connectOrientationChangeEventHandler)
     ENTRY_ACTION(state_moveWidget, action_moveWidget_setWidgetSnap)
 
     EXIT_ACTION(state_moveWidget, action_moveWidget_reparentToPage)
     EXIT_ACTION(state_moveWidget, action_moveWidget_startWidgetDropEffect)
     EXIT_ACTION(state_moveWidget, action_moveWidget_disconnectGestureHandlers)
+    EXIT_ACTION(state_moveWidget, action_moveWidget_disconnectOrientationChangeEventHandler)
     EXIT_ACTION(state_moveWidget, action_moveWidget_preventZoneAnimation)
     EXIT_ACTION(state_moveWidget, action_moveWidget_deleteWidgetSnap)
 
@@ -329,6 +335,7 @@ qreal HsIdleState::pageLayerXPos(int pageIndex) const
 */
 void HsIdleState::startPageChangeAnimation(int targetPageIndex, int duration)
 {
+    hbInstance->allMainWindows().first()->setInteractive(false);
     HsPropertyAnimationWrapper *animation = HsGui::instance()->pageChangeAnimation();
     if (animation->isRunning()) {
         animation->stop();
@@ -605,12 +612,16 @@ void HsIdleState::onPagePanFinished(QGestureEvent *event)
     emit event_waitInput();
 }
 
-void HsIdleState::onWidgetTapStarted(HsWidgetHost *widget)
+void HsIdleState::onWidgetTapStarted(QPointF point, HsWidgetHost *widget)
 {
     HsScene *scene = HsScene::instance();
     scene->setActiveWidget(widget);
     HsPage *page = scene->activePage();
     QMetaObject::invokeMethod(page, "updateZValues", Qt::QueuedConnection);
+    HbVkbHost::HbVkbStatus status = HbVkbHostBridge::instance()->keypadStatus();
+    if ( status == HbVkbHost::HbVkbStatusOpened && !isEditor(point, widget) ) {
+        closeVirtualKeyboard();
+    }
 }
  
 void HsIdleState::onWidgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost *widget)
@@ -872,6 +883,15 @@ void HsIdleState::action_waitInput_connectGestureHandlers()
     HsScene *scene = HsScene::instance();
 
     connect(scene, 
+        SIGNAL(pageTapFinished(QGestureEvent*)), 
+        SLOT(closeVirtualKeyboard()),
+        Qt::UniqueConnection);
+    connect(scene, 
+        SIGNAL(pagePanStarted(QGestureEvent*)), 
+        SLOT(closeVirtualKeyboard()),
+        Qt::UniqueConnection);
+
+    connect(scene, 
         SIGNAL(pageTapAndHoldFinished(QGestureEvent*)), 
         SLOT(onPageTapAndHoldFinished(QGestureEvent*)),
         Qt::UniqueConnection);
@@ -882,8 +902,8 @@ void HsIdleState::action_waitInput_connectGestureHandlers()
         Qt::UniqueConnection);
 
     connect(scene, 
-        SIGNAL(widgetTapStarted(HsWidgetHost*)), 
-        SLOT(onWidgetTapStarted(HsWidgetHost*)),
+        SIGNAL(widgetTapStarted(QPointF, HsWidgetHost*)), 
+        SLOT(onWidgetTapStarted(QPointF, HsWidgetHost*)),
         Qt::UniqueConnection);
     
     connect(scene, 
@@ -929,6 +949,8 @@ void HsIdleState::action_moveWidget_startWidgetDragEffect()
     mAllowZoneAnimation = true;
 }
 
+/*!
+*/
 void HsIdleState::action_moveWidget_connectGestureHandlers()
 {
     HsScene *scene = HsScene::instance();
@@ -942,6 +964,17 @@ void HsIdleState::action_moveWidget_connectGestureHandlers()
         SIGNAL(widgetMoveFinished(const QPointF&,HsWidgetHost*)), 
         SLOT(onWidgetMoveFinished(const QPointF&,HsWidgetHost*)),
         Qt::UniqueConnection);
+}
+
+/*!
+    Connects the SIGNAL for changing the orientation for moveWidget state 
+    to update the snapping algorithm accordingly.
+*/
+void HsIdleState::action_moveWidget_connectOrientationChangeEventHandler()
+{
+    connect(HsGui::instance(),
+        SIGNAL(orientationChanged(Qt::Orientation)),
+        SLOT(updateSnapAlgorithmParameters()));
 }
 
 /*!
@@ -962,7 +995,7 @@ void HsIdleState::action_moveWidget_setWidgetSnap()
         updatePagePresentationToWidgetSnap();
 
         connect(HsScene::instance(), SIGNAL(activePageChanged()),
-            SLOT(onActivePageChanged()));
+            SLOT(updateSnapAlgorithmParameters()));
 
         if (HSCONFIGURATION_GET(isSnapEffectsEnabled)) {
             mVerticalSnapLineTimer.setInterval(HSCONFIGURATION_GET(snapTimeout));
@@ -1065,10 +1098,24 @@ void HsIdleState::action_moveWidget_startWidgetDropEffect()
     }
 }
 
+/*!
+    Disconnects gesture handlers
+*/
 void HsIdleState::action_moveWidget_disconnectGestureHandlers()
 {
     HsScene *scene = HsScene::instance();
     scene->disconnect(this);
+}
+
+/*!
+    Disconnects orientation change on moveWidget state
+*/
+void HsIdleState::action_moveWidget_disconnectOrientationChangeEventHandler()
+{
+    disconnect(HsGui::instance(),
+        SIGNAL(orientationChanged(Qt::Orientation)),
+        this, SLOT(updateSnapAlgorithmParameters()));
+
 }
 
 /*!
@@ -1082,7 +1129,7 @@ void HsIdleState::action_moveWidget_deleteWidgetSnap()
         resetSnapPosition();
 
         disconnect(HsScene::instance(), SIGNAL(activePageChanged()),
-                    this, SLOT(onActivePageChanged()));
+                    this, SLOT(updateSnapAlgorithmParameters()));
 
         if (HSCONFIGURATION_GET(isSnapEffectsEnabled)) {
             disconnect(&mVerticalSnapLineTimer, SIGNAL(timeout()),
@@ -1323,6 +1370,7 @@ void HsIdleState::zoneAnimationFinished()
  */
 void HsIdleState::pageChangeAnimationFinished()
 {
+    hbInstance->allMainWindows().first()->setInteractive(true);
     updateZoneAnimation();
 }
 
@@ -1422,10 +1470,45 @@ void HsIdleState::hideHorizontalLine()
 /*!
     Handles updating the Snap algorithm with page presentation on page change
 */
-void HsIdleState::onActivePageChanged()
+void HsIdleState::updateSnapAlgorithmParameters()
 {
     updatePagePresentationToWidgetSnap();
     resetSnapPosition();
 }
 
+/*!
+    Closes virtual keyboard
+*/
+void HsIdleState::closeVirtualKeyboard()
+{
+    HbVkbHost::HbVkbStatus status = HbVkbHostBridge::instance()->keypadStatus();
+    if (status == HbVkbHost::HbVkbStatusOpened ) {
+        QInputContext *ic = qApp->inputContext();
+        if (ic) {
+            QEvent *event = new QEvent(QEvent::CloseSoftwareInputPanel);
+            ic->filterEvent(event);
+            delete event;
+        }
+    }
+}
 
+/*!
+    Returns true if \a widget has editor field under \a point.
+*/
+bool HsIdleState::isEditor(const QPointF &point, HsWidgetHost *widget)
+{
+    bool isWidgetEditor = false;
+    QList<QGraphicsItem *> items;
+    if ( widget->visual()->scene() ) {
+        items = widget->visual()->scene()->items(point);
+        }
+    int count = items.count();
+    for (int i=0; i<count && !isWidgetEditor; i++ ) {
+        QGraphicsItem *item = items.at(i);
+        if (item->isWidget()) {
+            isWidgetEditor = HbInputFocusObject::isEditor(item->toGraphicsObject()) && 
+                qobject_cast<QGraphicsWidget *>(widget->visual()->widget())->isAncestorOf(item);
+        }
+    }
+    return isWidgetEditor;
+}

@@ -37,6 +37,11 @@
 "/epoc32/data/z/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"     - "c:/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.qtplugin"
 "/epoc32/data/z/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.xml"          - "c:/private/20022f5f/hsresources/plugins/stateplugins/mockstateplugins.xml"
 
+;--------------- hsapplicationlauncher ---------------
+"/epoc32/release/armv5/urel/t_hsapplicationlauncher.exe"                         - "c:/sys/bin/t_hsapplicationlauncher.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsapplicationlauncher_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsapplicationlauncher_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsapplicationlauncher.rsc"                       - "c:/resource/apps/t_hsapplicationlauncher.rsc"
+
 ;--------------- hsutils ---------------
 "/epoc32/release/armv5/urel/t_hsutils.exe"                         - "c:/sys/bin/t_hsutils.exe"
 "/epoc32/data/z/private/10003a3f/import/apps/t_hsutils_reg.rsc"    - "c:/private/10003a3f/import/apps/t_hsutils_reg.rsc"

@@ -52,7 +52,9 @@ HsInstalledAppsState::HsInstalledAppsState(HsMenuViewBuilder &menuViewBuilder,
         HsMainWindow &mainWindow,
         QState *parent):
     HsBaseViewState(mainWindow, parent),
-            mSortAttribute(Hs::OldestOnTopHsSortAttribute)
+    mSortAttribute(Hs::OldestOnTopHsSortAttribute),
+    mLatestOnTopMenuAction(0),
+    mOldestOnTopMenuAction(0)
 {
     initialize(menuViewBuilder, HsInstalledAppsContext);
     construct();
@@ -88,30 +90,21 @@ void HsInstalledAppsState::setMenuOptions()
     mViewOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
                         this, SLOT(openInstallationLog()));
     if (mModel->rowCount() > 0) {
-        HbMenu *sortMenu = mViewOptions->addMenu(
-                               hbTrId("txt_applib_opt_sort_by"));
-        //Grouped options are exclusive by default.
-        QActionGroup *sortGroup = new QActionGroup(this);
-        sortGroup->addAction(
-            sortMenu->addAction(
-                hbTrId("txt_applib_opt_sort_by_sub_latest_on_top"),
-                this,
-                SLOT(latestOnTopMenuAction())));
-        sortGroup->addAction(
-            sortMenu->addAction(
-                hbTrId("txt_applib_opt_sort_by_sub_oldest_on_top"),
-                this,
-                SLOT(oldestOnTopMenuAction())));
-        foreach(QAction *action, sortMenu->actions()) {
-            action->setCheckable(true);
-        }
-        static const int defaultSortingPosition = 0;
+
+        mLatestOnTopMenuAction = mViewOptions->addAction(
+            hbTrId("txt_applib_menu_sort_by_latest_on_top"),
+            this, SLOT(latestOnTopMenuAction()));
+        mOldestOnTopMenuAction = mViewOptions->addAction(
+            hbTrId("txt_applib_menu_sort_by_oldest_on_top"),
+            this, SLOT(oldestOnTopMenuAction()));
+
+        // as we geting already reversed list from query
+        // we set it to OldestOnTopHsSortAttribute
         if(mSortAttribute == Hs::LatestOnTopHsSortAttribute)
-            {
-            sortGroup->actions().at(defaultSortingPosition + 1)->setChecked(true);
-            }
-        else {
-            sortGroup->actions().at(defaultSortingPosition)->setChecked(true);
+        {
+            mOldestOnTopMenuAction->setVisible(false);
+        } else {
+            mLatestOnTopMenuAction->setVisible(false);
         }
     }
     mMenuView->view()->setMenu(mViewOptions);
@@ -182,6 +175,10 @@ void HsInstalledAppsState::stateEntered()
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
+    
+    connect(mMenuView.data(),
+                SIGNAL(activated(QModelIndex)),
+                SLOT(launchDetails(QModelIndex)));
 
     connect(mModel, SIGNAL(empty(bool)),this,
             SLOT(setEmptyLabelVisibility(bool)));
@@ -200,6 +197,10 @@ void HsInstalledAppsState::stateExited()
 
     disconnect(mModel, SIGNAL(empty(bool)),this,
                SLOT(setEmptyLabelVisibility(bool)));
+    
+    disconnect(mMenuView.data(),
+                SIGNAL(activated(QModelIndex)), this,
+                SLOT(launchDetails(QModelIndex)));
 
     disconnect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)), this,
@@ -236,6 +237,24 @@ void HsInstalledAppsState::openInstallationLog()
         HsMenuEventFactory::createInstallationLogEvent());
 }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+
+// calls tested factory method
+
+/*!
+ Launches detail for app under index
+ */
+void HsInstalledAppsState::launchDetails(const QModelIndex &index)
+{
+	machine()->postEvent(HsMenuEventFactory::createAppDetailsViewEvent(
+			index.data(CaItemModel::IdRole).toInt()));	
+}
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 /*!
   A Slot called when an action for sorting (latest
   on top) is invoked for Installed.
@@ -246,6 +265,8 @@ void HsInstalledAppsState::latestOnTopMenuAction()
     // we set it to OldestOnTopHsSortAttribute
     mSortAttribute = Hs::OldestOnTopHsSortAttribute;
     mModel->setSort(mSortAttribute);
+    mLatestOnTopMenuAction->setVisible(false);
+    mOldestOnTopMenuAction->setVisible(true);
 }
 
 /*!
@@ -258,4 +279,6 @@ void HsInstalledAppsState::oldestOnTopMenuAction()
     // we set it to LatestOnTopHsSortAttribute
     mSortAttribute = Hs::LatestOnTopHsSortAttribute;
     mModel->setSort(mSortAttribute);
+    mLatestOnTopMenuAction->setVisible(true);
+    mOldestOnTopMenuAction->setVisible(false);
 }

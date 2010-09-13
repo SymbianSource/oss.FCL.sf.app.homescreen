@@ -22,7 +22,9 @@ HB += hbfeedback
 
 LIBS += -lhsdomainmodel
 
-PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F6C
+WIDGET_SUBDIR = /private/20022F35/import/widgetregistry/20022F6C
+PLUGIN_SUBDIR = /resource/qt/plugins/homescreen
+
 include(../../common.pri)
 
 DEPENDPATH += ./inc \
@@ -43,6 +45,6 @@ symbian:include(hsclockwidgetplugin_symbian.pri)
 
 RESOURCES = hsclockwidgetplugin.qrc
 
-exportResources(./resource/*.manifest, $$PLUGIN_SUBDIR)
-exportResources(./resource/*.png, $$PLUGIN_SUBDIR)
-exportResources(./resource/*.svg, $$PLUGIN_SUBDIR)
+exportResources(./resource/*.manifest, $$WIDGET_SUBDIR)
+exportResources(./resource/*.png, $$WIDGET_SUBDIR)
+exportResources(./resource/*.svg, $$WIDGET_SUBDIR)

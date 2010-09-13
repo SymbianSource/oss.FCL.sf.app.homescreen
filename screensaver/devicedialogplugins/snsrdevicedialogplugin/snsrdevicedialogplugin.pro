@@ -25,6 +25,8 @@ LIBS += -lxqsettingsmanager
 LIBS += -lscreensavermodel
 
 symbian: {
+    LIBS += -lsnsrdisplaycontrolclient
+
     TARGET.UID3 = 0x2002704E
     TARGET.CAPABILITY = CAP_ECOM_PLUGIN
     

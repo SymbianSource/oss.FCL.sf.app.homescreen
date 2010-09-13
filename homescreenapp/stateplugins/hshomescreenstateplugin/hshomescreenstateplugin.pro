@@ -31,7 +31,7 @@ HB += hbfeedback
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework systeminfo
 
-PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
+PLUGIN_SUBDIR = /resource/qt/plugins/homescreen
 
 include(../../common.pri)
 

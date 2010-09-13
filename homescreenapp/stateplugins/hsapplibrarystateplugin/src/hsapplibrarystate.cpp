@@ -89,7 +89,8 @@
  */
 HsAppLibraryState::HsAppLibraryState(QState *parent) :
     QState(parent), mAllAppsState(0),
-    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0)
+    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0), 
+    mMenuMode(),mMainWindow(&mMenuMode)
 {
     construct();
 }

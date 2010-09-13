@@ -25,15 +25,17 @@
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbView;
+class HsMenuModeWrapper;
 
 class HsMainWindow
 {
 public:
-    HsMainWindow();
+    HsMainWindow(HsMenuModeWrapper* wrapper = 0);
     virtual ~HsMainWindow();
 
     virtual void setCurrentView(HbView *view);
-
+private:
+    HsMenuModeWrapper* mMenuMode;
 };
 
 #endif // HS_MAIN_WINDOW_H

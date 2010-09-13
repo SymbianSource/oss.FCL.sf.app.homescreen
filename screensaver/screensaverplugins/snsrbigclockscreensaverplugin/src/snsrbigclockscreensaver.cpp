@@ -88,8 +88,6 @@ bool SnsrBigClockScreensaver::onForeground()
 
     removeCurrentContainer();
 
-    emit screenPowerModeRequested( Screensaver::ScreenModeFullPower );
-    
     SnsrBigClockContainer* newContainer( 0 );
     if (clockFormat() == ClockFormatAnalog) {
         newContainer = new SnsrAnalogClockContainer();
@@ -222,6 +220,21 @@ void SnsrBigClockScreensaver::onHandleDeactivatedIndicator(
 }
 
 /*!
+    @copydoc Screensaver::currentPowerMode
+ */
+Screensaver::ScreenPowerMode SnsrBigClockScreensaver::currentPowerMode()
+{
+    Screensaver::ScreenPowerMode mode( Screensaver::ScreenModeFullPower );
+    if ( mCurrentContainer ) {
+        mode = mCurrentContainer->displayPowerMode();
+    }
+    else {
+        qWarning() << "No current container when current power mode queried.";
+    }
+    return mode;
+}
+
+/*!
     @copydoc Screensaver::getActiveScreenRows
  */
 void SnsrBigClockScreensaver::getActiveScreenRows(int *firstActiveRow, int *lastActiveRow)
@@ -254,12 +267,18 @@ void SnsrBigClockScreensaver::updateLayout()
 }
 
 /*!
-    Update the area visible in the power save screen mode. Power save mode gets
-    also activated on call if not already active.
+    Update clock time when timer is triggered
  */
-void SnsrBigClockScreensaver::updateActiveAreaForLowPower()
+void SnsrBigClockScreensaver::updateTime()
 {
-    emit screenPowerModeRequested( Screensaver::ScreenModeLowPower );
+    if ( mCurrentContainer ) {
+        mCurrentContainer->update();
+        
+        // Move the active area of display device if current container uses the power save mode.
+        if ( mCurrentContainer->displayPowerMode() == Screensaver::ScreenModeLowPower ) {
+            emit activeAreaMoved();
+        }
+    }
 }
 
 /*!
@@ -289,7 +308,7 @@ void SnsrBigClockScreensaver::removeCurrentContainer()
     if ( mCurrentContainer ) {
         disconnect(
             &mTimer, SIGNAL(timeout()),
-            mCurrentContainer, SLOT(update())
+            this, SLOT(updateTime())
             );
         disconnect( 
             mCurrentContainer, SIGNAL(unlockRequested()), 
@@ -310,10 +329,9 @@ void SnsrBigClockScreensaver::setCurrentContainer( SnsrBigClockContainer* newCon
 {
     mCurrentContainer = newContainer;
     mCurrentContainer->setParent(this);
-    connect( &mTimer, SIGNAL(timeout()), mCurrentContainer, SLOT(update()) );
+    connect( &mTimer, SIGNAL(timeout()), SLOT(updateTime()) );
     connect( mCurrentContainer, SIGNAL(unlockRequested()), SIGNAL(unlockRequested()) );
-    connect( mCurrentContainer, SIGNAL(activeAreaMoved()), SLOT(updateActiveAreaForLowPower()) );
-
+    
     mCurrentContainer->setIndicatorModel(*mIndicatorModel);
 
     int updateInterval = mCurrentContainer->updateIntervalInMilliseconds(); 
@@ -321,7 +339,6 @@ void SnsrBigClockScreensaver::setCurrentContainer( SnsrBigClockContainer* newCon
     if ( updateInterval != -1) {
         mTimer.start(updateInterval);
     }
-    
     
     emit viewChanged(mCurrentContainer);
 }

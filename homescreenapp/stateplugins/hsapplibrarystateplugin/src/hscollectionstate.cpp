@@ -88,7 +88,9 @@ HsCollectionState::HsCollectionState(HsMenuViewBuilder &menuViewBuilder,
                                      QState *parent) :
     HsBaseViewState(mainWindow, menuMode, parent),
     mSortAttribute(Hs::LatestOnTopHsSortAttribute),
-    mCollectionId(-1)
+    mCollectionId(-1),
+    mLatestOnTopMenuAction(0),
+    mOldestOnTopMenuAction(0)
 {
     initialize(menuViewBuilder, HsCollectionContext);
     construct();
@@ -153,7 +155,7 @@ void HsCollectionState::stateEntered()
     handleEmptyChange(mModel->rowCount() == 0);
 
     makeConnect();
-    
+
     mMenuView->viewLabel()->setHeading(
         mModel->root().data(CaItemModel::CollectionTitleRole).toString());
 
@@ -201,28 +203,25 @@ void HsCollectionState::setMenuOptions()
             this,
             SLOT(deleteAction()));
     }
-    if (mCollectionType == Hs::collectionDownloadedTypeName && 
+    if (mCollectionType == Hs::collectionDownloadedTypeName &&
             mModel->rowCount() > 0) {
-        HbMenu *sortMenu = mViewOptions->addMenu(
-                               hbTrId("txt_applib_opt_sort_by"));
-        //Grouped options are exclusive by default.
-        QActionGroup *sortGroup = new QActionGroup(this);
-        sortGroup->addAction(
-            sortMenu->addAction(
-                hbTrId("txt_applib_opt_sub_latest_on_top"),
-                this,
-                SLOT(latestOnTopMenuAction())));
-        sortGroup->addAction(
-            sortMenu->addAction(
-                hbTrId("txt_applib_opt_sub_oldest_on_top"),
-                this,
-                SLOT(oldestOnTopMenuAction())));
-        foreach(QAction *action, sortMenu->actions()) {
-            action->setCheckable(true);
+        mLatestOnTopMenuAction = mViewOptions->addAction(
+                hbTrId("txt_applib_menu_sort_by_latest_on_top"),
+                this, SLOT(latestOnTopMenuAction()));
+        mOldestOnTopMenuAction = mViewOptions->addAction(
+                hbTrId("txt_applib_menu_sort_by_oldest_on_top"),
+                this, SLOT(oldestOnTopMenuAction()));
+
+        if(mSortAttribute == Hs::LatestOnTopHsSortAttribute)
+        {
+            mLatestOnTopMenuAction->setVisible(false);
+        } else {
+            mOldestOnTopMenuAction->setVisible(false);
         }
-        static const int defaultSortingPosition = 0;
-        sortGroup->actions().at(defaultSortingPosition)->setChecked(true);
+
     }
+
+
     mMenuView->view()->setMenu(mViewOptions);
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::setMenuOptions");
 }
@@ -299,15 +298,26 @@ void HsCollectionState::makeDisconnect()
  \param action action taken in context menu
  */
 void HsCollectionState::contextMenuAction(HbAction *action)
-{
-    HsBaseViewState::contextMenuAction(action);
-    Hs::HsContextAction command =
-            static_cast<Hs::HsContextAction>(action->data().toInt());
-    if (command == Hs::RemoveFromCollectionContextAction ) {
-        const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
+	{
+    Hs::HsContextAction command = static_cast<Hs::HsContextAction> (action->data().toInt());
+
+    if (command == Hs::RemoveFromCollectionContextAction) {
+        const int itemId = mContextModelIndex.data(
+            CaItemModel::IdRole).toInt();
         machine()->postEvent(
-            HsMenuEventFactory::createRemoveAppFromCollectionEvent(
-                itemId, mCollectionId));
+            HsMenuEventFactory::createRemoveAppFromCollectionEvent(itemId,
+            mCollectionId));
+        HsMenuService::touch(itemId);
+    } else if (
+        command == Hs::AddToCollectionFromCollectionViewContextAction) {
+        const int itemId = mContextModelIndex.data(
+            CaItemModel::IdRole).toInt();
+        machine()->postEvent(
+            HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
+            mCollectionId, itemId));
+        HsMenuService::touch(itemId);
+    } else {
+        HsBaseViewState::contextMenuAction(action);
     }
 }
 
@@ -317,32 +327,19 @@ void HsCollectionState::contextMenuAction(HbAction *action)
  */
 void HsCollectionState::handleEmptyChange(bool empty)
 {
-
-    EntryFlags flags =
-        mModel->root().data(CaItemModel::FlagsRole).value<
-        EntryFlags> ();
+    EntryFlags flags = mModel->root().data(
+            CaItemModel::FlagsRole).value<EntryFlags> ();
 
     if (empty){
-        if (flags & RemovableEntryFlag){
-            mMenuView->reset(HsButtonContext);
-            connect(mMenuView->contentButton(),
-                    SIGNAL(clicked()), this, SLOT(addAppsAction()),
-                    Qt::UniqueConnection);
-        } else {
-            mMenuView->reset(HsEmptyLabelContext);
-        }
-
+        mMenuView->reset(HsEmptyLabelContext);
     } else {
         mMenuView->reset(HsItemViewContext);
         mMenuView->setModel(mModel);
         mMenuView->listView()->scrollTo(
             mModel->index(0), HbAbstractItemView::PositionAtTop);
     }
-	
     mMenuView->disableSearch(empty);
-    
     mMenuView->activate();
-
     setMenuOptions();
 }
 
@@ -457,7 +454,7 @@ void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFla
                                                 "txt_common_menu_details"));
         appDetailsAction->setData(Hs::AppDetailsContextAction);
     }
-    
+
     addToHomeScreenAction->setVisible(
         !HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(entry.data()));
 }
@@ -470,7 +467,8 @@ void HsCollectionState::latestOnTopMenuAction()
 {
     mSortAttribute = Hs::LatestOnTopHsSortAttribute;
     mModel->setSort(mSortAttribute);
-    emit sortOrderChanged(mSortAttribute);
+    mLatestOnTopMenuAction->setVisible(false);
+    mOldestOnTopMenuAction->setVisible(true);
 }
 
 /*!
@@ -481,7 +479,8 @@ void HsCollectionState::oldestOnTopMenuAction()
 {
     mSortAttribute = Hs::OldestOnTopHsSortAttribute;
     mModel->setSort(mSortAttribute);
-    emit sortOrderChanged(mSortAttribute);
+    mLatestOnTopMenuAction->setVisible(true);
+    mOldestOnTopMenuAction->setVisible(false);
 }
 
 /*!

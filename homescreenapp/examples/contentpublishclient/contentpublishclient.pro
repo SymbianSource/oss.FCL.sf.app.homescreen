@@ -38,7 +38,8 @@ symbian: {
     LIBS += -lefsrv
     
     testwallpaperimages.path = /data/images
-    testwallpaperimages.sources += ./resource/*.jpg
+    testwallpaperimages.sources += ./resource/*.jpg \
+                                   ./resource/*.png
     
     DEPLOYMENT += testwallpaperimages
     

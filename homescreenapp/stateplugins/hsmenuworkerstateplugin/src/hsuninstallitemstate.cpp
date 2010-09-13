@@ -27,6 +27,7 @@
 #include <QScopedPointer>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QStateMachine>
 #include <casoftwareregistry.h>
 #include <caquery.h>
 #include <canotifier.h>
@@ -35,6 +36,8 @@
 #include "hsmenuevent.h"
 #include "hsmenudialogfactory.h"
 #include "hsmenuentryremovedhandler.h"
+#include "hsmenueventfactory.h"
+
 /*!
  \class HsUninstallItemState
  \ingroup group_hsworkerstateplugin
@@ -111,7 +114,9 @@ void HsUninstallItemState::onEntry(QEvent *event)
 void HsUninstallItemState::uninstallMessageFinished(HbAction* finishedAction)
 {
     if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
-        HsMenuService::executeAction(mItemId, Hs::removeActionIdentifier);
+
+        HsMenuService::executeAction(mItemId, Hs::removeActionIdentifier, 
+                this, SLOT(uninstallFailed(int)));
     }
     mConfirmAction = NULL;
     mUninstallMessage = NULL;
@@ -186,6 +191,23 @@ void HsUninstallItemState::cleanUp()
     mConfirmAction = NULL;
     mItemId = 0;
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (only returns HbMainWindow)
+/*!
+ Slot invoked when unninstallation failed.
+ \param error Uninstallation error.
+ \retval void
+ */
+void HsUninstallItemState::uninstallFailed(int error)
+{
+    machine()->postEvent(
+            HsMenuEventFactory::createUninstallFailedEvent(error));
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  Method create uninstall confirmation message.

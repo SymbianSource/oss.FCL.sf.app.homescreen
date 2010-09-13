@@ -22,6 +22,7 @@
 #include <QServiceManager>
 #include <QServiceFilter>
 #include <QServiceInterfaceDescriptor>
+#include <QTimer>
 #include <XQSettingsManager>
 #include <HbMainWindow>
 #include <HbIndicatorInterface>
@@ -29,6 +30,7 @@
 #include <screensaver.h>
 #include <screensaverdomaincrkeys.h>
 #include "snsrdevicedialog.h"
+#include "snsrdevicedialogdisplaycontrol.h"
 
 const char *gBigClockInterfaceName = "com.nokia.screensaver.ISnsrBigClockScreensaver";
 
@@ -41,8 +43,6 @@ const char *gBigClockInterfaceName = "com.nokia.screensaver.ISnsrBigClockScreens
 extern const char *lViewType;
 
 const char *SnsrDeviceDialog::dataKeyUnlock = "unlock";
-const char *SnsrDeviceDialog::dataKeySwitchLights = "switch_lights";
-const char *SnsrDeviceDialog::dataKeySwitchLowPower = "switch_low_power";
 
 QTM_USE_NAMESPACE
 
@@ -52,10 +52,12 @@ QTM_USE_NAMESPACE
     \param parent Parent.
  */
 SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem *parent) :
-        HbPopup(parent), 
-        mScreensaver(0), 
-        mLayout(0), 
-        m_setManager(0)
+        HbPopup(parent),
+        mScreensaver(0),
+        mLayout(0),
+        mDisplayControl(0),
+        mDisplayModeTimer(0),
+        mHasFocus(false)
 {
     qDebug("SnsrDeviceDialog::SnsrDeviceDialog()");
 
@@ -81,8 +83,8 @@ SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem 
         SLOT(screensaverFaulted()));
     connect( mScreensaver, SIGNAL(unlockRequested()),
         SLOT(requestUnlock()) );
-    connect( mScreensaver, SIGNAL(screenPowerModeRequested(Screensaver::ScreenPowerMode)),
-        SLOT(requestScreenMode(Screensaver::ScreenPowerMode)) );
+    connect( mScreensaver, SIGNAL(activeAreaMoved()),
+        SLOT(updateDisplayMode()) );
     
     mScreensaver->initialize();
 
@@ -94,6 +96,11 @@ SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem 
     mainWindow()->setAutomaticOrientationEffectEnabled(false);
 
     setDeviceDialogParameters( parameters );
+    
+    mDisplayControl = new SnsrDeviceDialogDisplayControl();
+    
+    mDisplayModeTimer = new QTimer(this);
+    connect( mDisplayModeTimer, SIGNAL(timeout()), SLOT(updateDisplayMode()) );
 }
 
 /*!
@@ -104,6 +111,13 @@ SnsrDeviceDialog::~SnsrDeviceDialog()
     qDebug("SnsrDeviceDialog::~SnsrDeviceDialog()");
     QServiceManager serviceManager;
     serviceManager.removeService(gBigClockInterfaceName);
+
+    // We should get the FocusOut event when closing, but deactivate the
+    // power save also here in case we haven't got the event for some reason.
+    if ( mDisplayControl ) {
+        mDisplayControl->setDisplayFullPower();
+        delete mDisplayControl;
+    }
 }
 
 /*!
@@ -134,14 +148,11 @@ bool SnsrDeviceDialog::setDeviceDialogParameters(const QVariantMap &parameters)
         int startupView = 0; 
         XQCentralRepositorySettingsKey settingsKey(
                  KCRUidScreensaverSettings.iUid, KScreensaverStartupView ); // TUid as same repository used in control panel via Symbian APIs 
-        m_setManager = new XQSettingsManager(this);
-        if (m_setManager) {
-            startupView = m_setManager->readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
-            error = m_setManager->error();
-            if (error == XQSettingsManager::NoError) {
-                viewType = startupView;
-            }
-            delete m_setManager;
+        XQSettingsManager settingsManager;
+        startupView = settingsManager.readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
+        error = settingsManager.error();
+        if (error == XQSettingsManager::NoError) {
+            viewType = startupView;
         }
     }
 
@@ -204,11 +215,11 @@ void SnsrDeviceDialog::showEvent(QShowEvent *event)
     // showEvent is called for HbDeviceDialogManager showDeviceDialog()
     // and for HbPopup itemChange(), both events are set to QEvent::Show type
     disconnect(mainWindow(), SIGNAL(orientationChanged(Qt::Orientation)),
-        this, SLOT(changeLayout(Qt::Orientation)));
+        this, SLOT(handleOrientationChange(Qt::Orientation)));
     connect(mainWindow(), SIGNAL(orientationChanged(Qt::Orientation)),
-        this, SLOT(changeLayout(Qt::Orientation)));
+        this, SLOT(handleOrientationChange(Qt::Orientation)));
 
-    changeLayout(mainWindow()->orientation());
+    changeLayout();
 }
 
 #ifdef COVERAGE_MEASUREMENT
@@ -242,8 +253,29 @@ void SnsrDeviceDialog::closeEvent(QCloseEvent *event)
     HbPopup::closeEvent(event);
 
     disconnect(mainWindow(), SIGNAL(orientationChanged(Qt::Orientation)), 
-        this, SLOT(changeLayout(Qt::Orientation)));
+        this, SLOT(handleOrientationChange(Qt::Orientation)));
     mScreensaver->close();
+}
+
+/*!
+    Handle focus in/out events and just pass through the rest of the events
+ */
+bool SnsrDeviceDialog::event(QEvent *event)
+{
+    if ( event->type() == QEvent::FocusOut ) {
+        mHasFocus = false;
+        // Some other dialog came on top of us (or dialog was closed).
+        // Set screen to full power.
+        mDisplayModeTimer->stop();
+        mDisplayControl->setDisplayFullPower();
+    }
+    else if ( event->type() == QEvent::FocusIn ) {
+        mHasFocus = true;
+        // We became (again) the top-most dialog. Switch screen to
+        // applicable power mode.
+        updateDisplayModeDeferred();
+    }
+    return HbPopup::event(event);
 }
 
 /*!
@@ -263,15 +295,20 @@ void SnsrDeviceDialog::changeView(QGraphicsWidget *widget)
         mLayout->removeAt(0);
     }
     if (widget) {
-        widget->show();
         mLayout->addItem(widget);
-
+        
+        // Update layout and display mode immediately if view is
+        // changed while Screensaver is visible. This is the case when
+        // mode changes from standby to active or vice versa. In case of the
+        // initial view setting, Screensaver is not yet visible, and the update
+        // will happen later on Show/FocusIn events.
         if ( isVisible() ) {
-           changeLayout( mainWindow()->orientation() );
+           changeLayout();
+           updateDisplayMode();
         }
+        
+        widget->show();
     }
-    
-
 }
 
 /*!
@@ -284,13 +321,21 @@ void SnsrDeviceDialog::screensaverFaulted()
 }
 
 /*!
-    Resize device dialog.
+    Handle orientation change event
     \param orientation New orientation value.
  */
-void SnsrDeviceDialog::changeLayout(Qt::Orientation orientation)
+void SnsrDeviceDialog::handleOrientationChange(Qt::Orientation orientation)
 {
     Q_UNUSED(orientation)
-    
+    changeLayout();
+    updateDisplayMode();
+}
+
+/*!
+    Resize device dialog.
+ */
+void SnsrDeviceDialog::changeLayout()
+{
     QRectF rect = mainWindow()->layoutRect();
     setMinimumSize( rect.size() );
     setPreferredPos( QPointF(0,0) );
@@ -301,6 +346,49 @@ void SnsrDeviceDialog::changeLayout(Qt::Orientation orientation)
 }
 
 /*!
+    Update power mode of the display device
+ */
+void SnsrDeviceDialog::updateDisplayMode()
+{
+    // Cancel any pending deferred update order
+    mDisplayModeTimer->stop();
+    
+    // Check desidred display power mode from screensaver but only when
+    // we are the top-most device dialog. If some other dialog is on top of us, 
+    // then always default to full power mode.
+    Screensaver::ScreenPowerMode mode( Screensaver::ScreenModeFullPower );
+    if ( mHasFocus ) {
+        mode = mScreensaver->currentPowerMode();
+    }
+    
+    switch ( mode ) {
+        case Screensaver::ScreenModeOff: {
+            mDisplayControl->setDisplayOff();
+            break;
+        }
+        case Screensaver::ScreenModeLowPower: {
+            int firstRow(-1);
+            int lastRow(-1);
+            mScreensaver->getActiveScreenRows(&firstRow, &lastRow);
+            mDisplayControl->setDisplayLowPower(firstRow, lastRow);
+            break;
+        }
+        case Screensaver::ScreenModeFullPower: {
+            mDisplayControl->setDisplayFullPower();
+            break;
+        }
+    }
+}
+
+/*!
+    Update power mode of the display device after a short delay
+ */
+void SnsrDeviceDialog::updateDisplayModeDeferred()
+{
+    mDisplayModeTimer->start(200); // milliseconds
+}
+
+/*!
     Send unlock signal to autolock.
  */
 void SnsrDeviceDialog::requestUnlock()
@@ -308,36 +396,6 @@ void SnsrDeviceDialog::requestUnlock()
     QVariantMap data;
     data.insert(dataKeyUnlock, 1);
     emit deviceDialogData(data);
-}
-
-/*!
-    Send low power mode on/off request to autolock.
- */
-void SnsrDeviceDialog::requestScreenMode(Screensaver::ScreenPowerMode mode)
-{
-    /* TEMPORARY FIX for the "black screen jam" bug. To be re-enabled when proper fix is found.
-    QVariantMap data;
-    QVariantList rowLimits;
-    if ( mode == Screensaver::ScreenModeOff ) {
-        data.insert(dataKeySwitchLights, 0);
-        data.insert(dataKeySwitchLowPower, rowLimits); // empty list means "low power off"
-    }
-    else if ( mode == Screensaver::ScreenModeLowPower ) {
-        //data.insert(dataKeySwitchLights, 0);
-        int firstRow;
-        int lastRow;
-        mScreensaver->getActiveScreenRows(&firstRow, &lastRow);
-        rowLimits.append( firstRow );
-        rowLimits.append( lastRow );
-        data.insert(dataKeySwitchLowPower, rowLimits);
-    }
-    else if ( mode == Screensaver::ScreenModeFullPower ) {
-        data.insert(dataKeySwitchLights, 30);
-        data.insert(dataKeySwitchLowPower, rowLimits); // empty list means "low power off"
-    }
-    
-    emit deviceDialogData(data);
-    */
 }
 
 /*!
@@ -363,10 +421,10 @@ void SnsrDeviceDialog::indicatorActivated(
 /*!
     Called when some universal indicator is deactivated.
  */
-void SnsrDeviceDialog::indicatorRemoved(
-        HbIndicatorInterface *indicatorRemoved)
+void SnsrDeviceDialog::indicatorDeactivated(
+        HbIndicatorInterface *deactivatedIndicator)
 {
-    mScreensaver->handleDeactivatedIndicator(indicatorRemoved);
+    mScreensaver->handleDeactivatedIndicator(deactivatedIndicator);
 }
 
 // end of file

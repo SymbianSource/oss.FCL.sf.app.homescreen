@@ -47,11 +47,8 @@ private:
     void construct();
 
     template<class T>
-    T *createChildState(HsMenuEvent::OperationType operation);
-
-private:
-
-    QState *mInitialState;
+    T *createChildState(HsMenuEvent::OperationType operation, 
+            QState* parentState, QState* initialState);
 
 };
 

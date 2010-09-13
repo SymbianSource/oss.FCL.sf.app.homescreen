@@ -56,7 +56,6 @@ public:
     HbView *view() const;
 
     HbListView *listView() const;
-    HbPushButton *contentButton() const;
 
     void activate();
     void inactivate();
@@ -100,7 +99,6 @@ private:
     HbView *mView; // once this is constructed it is not NULL
     HbListView *mListView; // may be NULL in some contexts
     HbGroupBox *mViewLabel; // may be NULL in some contexts
-    HbPushButton *mAddContentButton; // may be NULL in some contexts
 
     QScopedPointer<HsSearchView> mHsSearchView;
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)

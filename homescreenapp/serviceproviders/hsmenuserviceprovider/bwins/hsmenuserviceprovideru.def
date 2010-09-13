@@ -25,12 +25,12 @@ EXPORTS
 	?organizeCollection@HsMenuService@@SA_NHAAV?$QList@H@@@Z @ 24 NONAME ; bool HsMenuService::organizeCollection(int, class QList<int> &)
 	?getInstalledModel@HsMenuService@@SAPAVHsMenuItemModel@@W4HsSortAttribute@Hs@@@Z @ 25 NONAME ; class HsMenuItemModel * HsMenuService::getInstalledModel(enum Hs::HsSortAttribute)
 	?metaObject@HsMenuItemModel@@UBEPBUQMetaObject@@XZ @ 26 NONAME ; struct QMetaObject const * HsMenuItemModel::metaObject(void) const
-	?executeAction@HsMenuService@@SAHHABVQString@@@Z @ 27 NONAME ; int HsMenuService::executeAction(int, class QString const &)
-	?tr@HsMenuEntryRemovedHandler@@SA?AVQString@@PBD0@Z @ 28 NONAME ; class QString HsMenuEntryRemovedHandler::tr(char const *, char const *)
-	?createCollection@HsMenuService@@SAHABVQString@@@Z @ 29 NONAME ; int HsMenuService::createCollection(class QString const &)
-	?data@HsMenuItemModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 30 NONAME ; class QVariant HsMenuItemModel::data(class QModelIndex const &, int) const
-	?launchSoftwareUpdate@HsMenuService@@SAHXZ @ 31 NONAME ; int HsMenuService::launchSoftwareUpdate(void)
-	?getStaticMetaObject@HsMenuItemModel@@SAABUQMetaObject@@XZ @ 32 NONAME ; struct QMetaObject const & HsMenuItemModel::getStaticMetaObject(void)
+	?tr@HsMenuEntryRemovedHandler@@SA?AVQString@@PBD0@Z @ 27 NONAME ; class QString HsMenuEntryRemovedHandler::tr(char const *, char const *)
+	?createCollection@HsMenuService@@SAHABVQString@@@Z @ 28 NONAME ; int HsMenuService::createCollection(class QString const &)
+	?data@HsMenuItemModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 29 NONAME ; class QVariant HsMenuItemModel::data(class QModelIndex const &, int) const
+	?launchSoftwareUpdate@HsMenuService@@SAHXZ @ 30 NONAME ; int HsMenuService::launchSoftwareUpdate(void)
+	?getStaticMetaObject@HsMenuItemModel@@SAABUQMetaObject@@XZ @ 31 NONAME ; struct QMetaObject const & HsMenuItemModel::getStaticMetaObject(void)
+	?executeAction@HsMenuService@@SAHHABVQString@@PAVQObject@@PBD@Z @ 32 NONAME ; int HsMenuService::executeAction(int, class QString const &, class QObject *, char const *)
 	?touch@HsMenuService@@SAXABV?$QList@H@@@Z @ 33 NONAME ; void HsMenuService::touch(class QList<int> const &)
 	?getSecondLine@HsMenuCollectionsItemModel@@ABE?AVQString@@PBVCaEntry@@@Z @ 34 NONAME ; class QString HsMenuCollectionsItemModel::getSecondLine(class CaEntry const *) const
 	?sortOrder@HsMenuServiceUtils@@SA?AW4SortOrder@Qt@@W4HsSortAttribute@Hs@@@Z @ 35 NONAME ; enum Qt::SortOrder HsMenuServiceUtils::sortOrder(enum Hs::HsSortAttribute)

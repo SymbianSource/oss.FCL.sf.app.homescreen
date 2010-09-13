@@ -84,6 +84,24 @@ bool HsHomescreenClient::setWallpaper(const QString &fileName)
    
     return mRequestResult;
 }
+
+/*!
+
+*/
+bool HsHomescreenClient::setWallpaper(const QString &portraitFileName, const QString &landscapeFileName)
+{
+    QEventLoop eventLoop;
+    connect(this, SIGNAL(requestFinished()), &eventLoop, SLOT(quit()));
+    QMetaObject::invokeMethod(
+            this, 
+            "doSetWallpaper2", 
+            Qt::QueuedConnection,
+            Q_ARG(QString,portraitFileName),
+            Q_ARG(QString,landscapeFileName));
+    eventLoop.exec();
+   
+    return mRequestResult;
+}
     
 /*!
    Called when request is completed.
@@ -158,6 +176,29 @@ void HsHomescreenClient::doSetWallpaper(const QString &fileName)
     mRequestResult = false;
     if (!mAsyncRequest->send()) {
        emit requestFinished();
-    }
+    }    
+}
+
+void HsHomescreenClient::doSetWallpaper2(const QString &portraitFileName, const QString &landscapeFileName)
+{
+    delete mAsyncRequest;
+    mAsyncRequest = 0;
+    mAsyncRequest = new XQServiceRequest(INTERFACE_NAME,
+                        "setWallpaper(QString,QString)", false);
+    XQRequestInfo requestInfo = mAsyncRequest->info();
+    requestInfo.setBackground(true);
+    mAsyncRequest->setInfo(requestInfo);
     
+    *mAsyncRequest << portraitFileName;
+    *mAsyncRequest << landscapeFileName;
+    
+    connect(mAsyncRequest, SIGNAL(requestCompleted(QVariant)), 
+            SLOT(onRequestCompleted(QVariant)));
+    connect(mAsyncRequest, SIGNAL(requestError(int)),
+            SLOT(onRequestError(int)));
+       
+    mRequestResult = false;
+    if (!mAsyncRequest->send()) {
+       emit requestFinished();
+    }
 }

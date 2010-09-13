@@ -276,7 +276,8 @@ void HsStateMachine::createStatePublisher()
     	mPublisher = new QValueSpacePublisher(HsStatePSKeyPath);
     }
 
-    mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenInactive);
+    // initialize state to invalid, actual status updates after state creation
+    mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenInvalid);
 }
 
 /*!
@@ -436,18 +437,21 @@ void HsStateMachine::updatePSKeys()
 		createStatePublisher();
 	}
 
-	if (mHomeScreenActive && mIdleStateActive){
-    	qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenIdleState";
-    	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenIdleState);
-    }
-    else{
-    	qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenInactive";
-    	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenInactive);
-    }	
-    
-    if (mHomeScreenActive && !mIdleStateActive) {
+    if (mHomeScreenActive && mIdleStateActive) {
+    	qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenWidgetViewForeground";
+    	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenWidgetViewForeground);
+        captureEndKey(false);
+    } else if (mHomeScreenActive && !mIdleStateActive) {
+    	qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenApplicationLibraryViewForeground";
+    	mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenApplicationLibraryViewForeground);
         captureEndKey(true);
+    } else if (!mHomeScreenActive && mIdleStateActive){
+        qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenApplicationBackground | EHomeScreenWidgetViewActive";
+        mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenApplicationBackground | EHomeScreenWidgetViewActive);
+        captureEndKey(false);
     } else {
+        qDebug() << "HsStateMachine::updatePSKeys: EHomeScreenApplicationBackground | EHomeScreenApplicationLibraryViewActive";
+        mPublisher->setValue(HsStatePSKeySubPath, EHomeScreenApplicationBackground | EHomeScreenApplicationLibraryViewActive);
         captureEndKey(false);
     }
     mSendKeyCaptured = false;
@@ -466,6 +470,8 @@ void HsStateMachine::captureEndKey(bool enable)
         mEndKeyCaptured = false;
         keyCapture.cancelCaptureKey(Qt::Key_No);
     }
+#else
+    Q_UNUSED(enable)
 #endif
 }
 

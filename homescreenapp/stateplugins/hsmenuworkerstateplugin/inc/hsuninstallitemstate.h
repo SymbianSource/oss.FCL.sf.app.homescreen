@@ -57,6 +57,10 @@ private slots:
     void uninstallMessageFinished(HbAction* finishedAction);
 
     void cleanUp();
+    
+public slots:
+
+    void uninstallFailed(int error);
 
 signals:
 

@@ -16,7 +16,6 @@
 
 symbian {
 docmlFiles+= \
-    resource/addcontentlabeledview.docml \
     resource/common_objects.docml \
     resource/emptylabeledview.docml \
     resource/labeledlistview.docml \

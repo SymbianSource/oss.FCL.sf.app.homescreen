@@ -21,7 +21,6 @@
 #include <HbAction>
 #include <HbGroupBox>
 #include <HbListView>
-#include <HbPushButton>
 #include <HbToolBar>
 #include <HbView>
 #include <HbWidget>
@@ -35,14 +34,12 @@
 
 static const char* DOCUMENT_BASE_NAME_MAP
         [InvalidStateContext][InvalidOperationalContext] =
-    /*HsItemViewContext,    HsButtonContext,    HsEmptyLabelContext*/
+                            /*HsItemViewContext,    HsEmptyLabelContext*/
 {
-/*HsAllAppsContext*/        {"listview", "listview", "listview"},
-/*HsAllCollectionsContext*/ {"listview", "listview", "listview"},
-/*HsInstalledAppsContext*/  {"labeledlistview", "labeledlistview",
-        "emptylabeledview"},
-/*HsCollectionContext*/     {"labeledlistview", "addcontentlabeledview",
-        "emptylabeledview"}
+/*HsAllAppsContext*/        {"listview",             "listview"},
+/*HsAllCollectionsContext*/ {"listview",             "listview"},
+/*HsInstalledAppsContext*/  {"labeledlistview",     "emptylabeledview"},
+/*HsCollectionContext*/     {"labeledlistview",     "emptylabeledview"}
 };
 
 static const QString DOCUMENT_NAME_PREFIX(QLatin1String(":/xml/"));
@@ -52,7 +49,6 @@ static const QString COMMON_OBJECTS_DOCUMENT_BASE_NAME(
 static const QString VIEW_NAME(QLatin1String("view"));
 static const QString LIST_VIEW_NAME(QLatin1String("listView"));
 static const QString VIEW_LABEL_NAME(QLatin1String("label"));
-static const QString ADD_CONTENT_BUTTON_NAME(QLatin1String("addContentButton"));
 
 /*!
     \class HsMenuViewBuilder
@@ -113,22 +109,6 @@ HbGroupBox *HsMenuViewBuilder::currentViewLabel()
                     currentLoader()->findWidget(VIEW_LABEL_NAME));
 
     return viewLabel;
-}
-
-/*!
- \return Pointer to the 'Add content' button resulting from last
- \a build call. It is
- guaranteed to be not NULL if the \a build was called for the context
- related to view including label.
- The pointer is valid until the HsMenuViewBuilder instance is destroyed.
- Memory ownership is not changed.
- */
-HbPushButton *HsMenuViewBuilder::currentAddContentButton()
-{
-    HbPushButton *pushButton =
-            qobject_cast<HbPushButton *>(currentLoader()->findWidget(
-                        ADD_CONTENT_BUTTON_NAME));
-    return pushButton;
 }
 
 /*!

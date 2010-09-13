@@ -23,6 +23,7 @@
 HsPageTouchArea::HsPageTouchArea(QGraphicsItem *parent)
   : HbTouchArea(parent)
 {
+    grabGesture(Qt::TapGesture);
     grabGesture(Qt::TapAndHoldGesture);
     grabGesture(Qt::PanGesture);
 }
@@ -35,6 +36,18 @@ void HsPageTouchArea::gestureEvent(QGestureEvent *event)
 {
     HsScene *scene = HsScene::instance();
     
+    // Tap gesture.
+    QGesture *tapGesture = event->gesture(Qt::TapGesture);
+    if (tapGesture) {
+        switch (tapGesture->state()) {
+            case Qt::GestureFinished:
+                emit scene->pageTapFinished(event);
+                break;
+            default:
+                break;
+        }
+    } 
+    
     // Tap-and-hold gesture.
     QGesture *gesture = event->gesture(Qt::TapAndHoldGesture);
     if (gesture) {
@@ -45,7 +58,6 @@ void HsPageTouchArea::gestureEvent(QGestureEvent *event)
             default:
                 break;
         }
-        return;
     } 
 
     // Pan gesture.
@@ -65,6 +77,5 @@ void HsPageTouchArea::gestureEvent(QGestureEvent *event)
             default:
                 break;
         }
-        return;
     }
 }

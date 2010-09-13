@@ -105,8 +105,6 @@ void SnsrOledDigitalClockContainer::updatePosition()
             mDestPosition = randomPosition( containerRect );
             mInitialize = true;
         }
-        // the active area of power save mode needs to be updated when clock container is moved
-        emit activeAreaMoved();
     }
 }
 
@@ -128,17 +126,10 @@ void SnsrOledDigitalClockContainer::update()
         );
 
     // date
-    if (mCurrentOrientation == Qt::Vertical) {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(
-                QDate::currentDate(), gDateFormatVerticalStr)
-            );
-    } else {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(
-                QDate::currentDate(), gDateFormatHorizontalStr)
-            );
-    }
+    const char *dateFormat = (mCurrentOrientation == Qt::Vertical) ?
+        gDateFormatVerticalStr : gDateFormatHorizontalStr;
+    QString dateText = HbExtendedLocale().format( QDate::currentDate(), dateFormat );
+    mDateLabel->setPlainText( dateText );
 
     updatePosition();
 
@@ -148,6 +139,14 @@ void SnsrOledDigitalClockContainer::update()
 int SnsrOledDigitalClockContainer::updateIntervalInMilliseconds()
 {
     return 60*1000;
+}
+
+/*!
+    @copydoc Screensaver::DisplayPowerMode()
+ */
+Screensaver::ScreenPowerMode SnsrOledDigitalClockContainer::displayPowerMode()
+{
+    return Screensaver::ScreenModeLowPower;
 }
 
 /*!
@@ -188,6 +187,7 @@ void SnsrOledDigitalClockContainer::loadWidgets()
     mTimeLabel = 0;
     mAmPmLabel = 0;
     mIndicatorWidget = 0;
+    mInitialize = false;
     
     // load widgets from docml
     bool ok(false);
@@ -222,8 +222,13 @@ void SnsrOledDigitalClockContainer::loadWidgets()
         }
 
         mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        mIndicatorWidget->setPowerSaveModeColor(true);
         initIndicatorWidget();
-               
+
+        // powersave mode color
+        mDateLabel->setTextColor(Qt::white);
+        mAmPmLabel->setTextColor(Qt::white);
+
         mBackgroundContainerLayout->addItem(mMainView);
     }
 }

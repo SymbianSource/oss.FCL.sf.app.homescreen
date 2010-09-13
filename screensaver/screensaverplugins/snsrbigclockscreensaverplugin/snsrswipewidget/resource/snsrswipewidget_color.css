@@ -1,10 +1,10 @@
 SnsrSwipeWidget::slideLabel 
 {
-    color:var(snsrforeground);
+    color:var(qtc_screensaver);
 }
 
 SnsrSwipeWidget::slideIcon 
 {
-    color:var(snsrforeground);
+    color:var(qtc_screensaver);
 }
 

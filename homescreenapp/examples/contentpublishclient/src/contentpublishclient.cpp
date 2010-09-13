@@ -154,6 +154,16 @@ void ContentPublishClient::setWallpaper2()
 }
 
 /*!
+
+*/
+void ContentPublishClient::setWallpaper3()
+{
+    QString portraitWallpaper = "c:/data/images/testwallpaper_p.png";
+    QString landscapeWallpaper = "c:/data/images/testwallpaper_l.png";
+    setWallpaper(portraitWallpaper, landscapeWallpaper);
+}
+
+/*!
     Changes home screen wallpaper to \a wallpaper image.
     Note. load function needs to be called before this, it creates mService object.
     
@@ -186,3 +196,30 @@ bool ContentPublishClient::setWallpaper(QString wallpaper)
 }
 
 // End of snippet 2
+
+bool ContentPublishClient::setWallpaper(const QString &portraitFileName, const QString &landscapeFileName)
+{   
+    QByteArray signature = QMetaObject::normalizedSignature("setWallpaper(QString,QString)");
+    int methodIndex = mService->metaObject()->indexOfMethod(signature);   
+    if (methodIndex<0) {
+        return false;
+    }
+    QMetaMethod method = mService->metaObject()->method(methodIndex);
+    bool retVal(false);
+
+    bool ret = method.invoke( mService,
+                              Qt::DirectConnection,
+                              Q_RETURN_ARG(bool, retVal),
+                              Q_ARG(QString,portraitFileName),
+                              Q_ARG(QString,landscapeFileName));
+                    
+    if(!ret){
+        // invokeMethod returned error
+        return false;
+    }
+    if(!retVal){
+        // setWallpaper returned error
+        return false;
+    }
+    return true;
+}

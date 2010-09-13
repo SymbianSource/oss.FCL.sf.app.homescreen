@@ -37,6 +37,7 @@ public slots:
 
 public: // from base classes
 
+    virtual Screensaver::ScreenPowerMode displayPowerMode();
     virtual int updateIntervalInMilliseconds();
 
 protected: // from base classes

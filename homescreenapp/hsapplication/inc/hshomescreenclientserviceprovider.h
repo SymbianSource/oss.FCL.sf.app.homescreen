@@ -46,6 +46,7 @@ signals:
 public slots:
     bool addWidget(const QString &uri,const QVariantHash &preferences);
     void setWallpaper(const QString &fileName);
+    void setWallpaper(const QString &portraitFileName, const QString &landscapeFileName);
     bool widgetUninstalled(const QVariantHash &widgetDescriptor);
     void onImageSet();
     void onImageSetFailed();    

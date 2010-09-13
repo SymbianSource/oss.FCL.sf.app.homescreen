@@ -44,10 +44,10 @@ public:
                       HsMainWindow &mainWindow,
                       QState *parent = 0);
     ~HsCollectionState();
+
 protected:
     void onEntry(QEvent *event);
-signals:
-    void sortOrderChanged(Hs::HsSortAttribute sortAttribute);
+
 private slots:
     void addAppsAction();
     void addCollectionShortcutToHomeScreenAction();
@@ -76,6 +76,8 @@ private:
     Hs::HsSortAttribute mSortAttribute;
     int mCollectionId;
     QString mCollectionType;
+    HbAction *mLatestOnTopMenuAction; //not own
+    HbAction *mOldestOnTopMenuAction; //not own
 };
 
 #endif // HSCOLLECTIONSTATE_H

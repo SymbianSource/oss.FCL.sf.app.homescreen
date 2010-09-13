@@ -48,8 +48,10 @@ public:
             const QString &collectionType = Hs::collectionTypeName);
     static QStringList getCollectionNames();
     static QString getName(int entryId);
-    static int executeAction(int entryId, const QString &actionName =
-                                  Hs::openActionIdentifier);
+    static int executeAction(int entryId,
+            const QString &actionName = Hs::openActionIdentifier, 
+            QObject* receiver = NULL,
+            const char* member = NULL);
     static bool launchTaskSwitcher();
 
     static int createCollection(const QString &name);

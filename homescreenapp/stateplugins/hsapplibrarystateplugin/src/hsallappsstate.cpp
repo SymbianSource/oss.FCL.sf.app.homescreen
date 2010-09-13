@@ -66,7 +66,9 @@ HsAllAppsState::HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
                                QState *parent) :
     HsBaseViewState(mainWindow, menuMode, parent),
     mAddModeProxyModel(0),
-    mSortAttribute(Hs::AscendingNameHsSortAttribute)
+    mSortAttribute(Hs::AscendingNameHsSortAttribute),
+    mAscendingMenuAction(0),
+    mDescendingMenuAction(0)
 {
     initialize(menuViewBuilder, HsAllAppsContext);
     construct();
@@ -117,37 +119,21 @@ void HsAllAppsState::setMenuOptions()
     mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
                            static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
 
-    HbMenu *const sortMenu = mViewOptions->addMenu(hbTrId(
-                                 "txt_applib_opt_sort_by"));
-    //Grouped options are exclusive by default.
-    QActionGroup *sortGroup = new QActionGroup(this);
+    mAscendingMenuAction =
+        mViewOptions->addAction(hbTrId("txt_applib_menu_sort_by_ascending"),
+                            this, SLOT(ascendingMenuAction()));
 
-    sortGroup->addAction(
-        sortMenu->addAction(hbTrId("txt_applib_opt_sub_ascending"),
-                            this, SLOT(ascendingMenuAction())));
-    sortGroup->addAction(
-        sortMenu->addAction(hbTrId("txt_applib_opt_sub_descending"),
-                            this, SLOT(descendingMenuAction())));
+    mDescendingMenuAction =
+        mViewOptions->addAction(hbTrId("txt_applib_menu_sort_by_descending"),
+                            this, SLOT(descendingMenuAction()));
 
     mViewOptions->addAction(hbTrId("txt_applib_opt_view_installed_applications"),
                            this, SLOT(openInstalledView()));
 
-    foreach(QAction *action, sortMenu->actions()) {
-        action->setCheckable(true);
-    }
-    int currentSortingPosition(-1);
-    switch (mSortAttribute) {
-    case Hs::AscendingNameHsSortAttribute:
-        currentSortingPosition = 0;
-        break;
-    case Hs::DescendingNameHsSortAttribute:
-        currentSortingPosition = 1;
-        break;
-    default:
-        break;
-    }
-    if (currentSortingPosition >= 0) {
-        sortGroup->actions().at(currentSortingPosition)->setChecked(true);
+    if (mSortAttribute == Hs::AscendingNameHsSortAttribute) {
+        mAscendingMenuAction->setVisible(false);
+    } else {
+        mDescendingMenuAction->setVisible(false);
     }
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::setMenuOptions");
@@ -299,6 +285,8 @@ void HsAllAppsState::ascendingMenuAction()
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::ascendingMenuAction");
     mSortAttribute = Hs::AscendingNameHsSortAttribute;
     mModel->setSort(mSortAttribute);
+    mAscendingMenuAction->setVisible(false);
+    mDescendingMenuAction->setVisible(true);
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::ascendingMenuAction");
 }
 
@@ -310,6 +298,8 @@ void HsAllAppsState::descendingMenuAction()
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::descendingMenuAction");
     mSortAttribute = Hs::DescendingNameHsSortAttribute;
     mModel->setSort(mSortAttribute);
+    mAscendingMenuAction->setVisible(true);
+    mDescendingMenuAction->setVisible(false);
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::descendingMenuAction");
 
 }

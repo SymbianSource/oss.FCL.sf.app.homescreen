@@ -35,8 +35,6 @@ namespace
     const char DIGITAL[] = "digital";
     const char TIME12[] = "TIME12";
     const char TIME24[] = "TIME24";
-
-    const int clockUpdateInterval = 1000; // msec
 }
 
 #ifdef Q_OS_SYMBIAN

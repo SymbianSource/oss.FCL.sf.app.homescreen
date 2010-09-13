@@ -54,6 +54,7 @@ public:
     virtual ~Screensaver();
 
     ScreensaverState currentState();
+    virtual Screensaver::ScreenPowerMode currentPowerMode() = 0;
     virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow) = 0;
     virtual void updateLayout() = 0;
 
@@ -90,7 +91,7 @@ signals:
     void faulted();
     void viewChanged(QGraphicsWidget *widget);
     void unlockRequested();
-    void screenPowerModeRequested(Screensaver::ScreenPowerMode mode);
+    void activeAreaMoved();
 
 private:
 

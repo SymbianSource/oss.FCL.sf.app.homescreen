@@ -185,7 +185,10 @@ void HsWidgetComponentRegistry::registerService(const CaEntry &entry, const QStr
             mServiceManager.removeService(uri);
         }
         QCoreApplication::addLibraryPath(path);
-        mServiceManager.addService(service);
+        QCoreApplication::addLibraryPath(
+            path[0] + QLatin1String(":/resource/qt/plugins/homescreen"));
+
+        mServiceManager.addService(service);        
     }    
 }
 

@@ -93,6 +93,44 @@ void HsWallpaper::setImage(const QString &path)
 /*!
 
 */
+void HsWallpaper::setImages(const QString &portraitFileName, const QString &landscapeFileName)
+{
+    if (portraitFileName.isEmpty() || 
+        landscapeFileName.isEmpty()) {
+        emit imageSetFailed();
+        return;
+    }
+    
+    // Qt doesn't support writing GIFs, so let's save those 
+    // and everything else but JPGs as PNGs
+    QString suffix("png");
+    if (QFileInfo(portraitFileName).suffix().toUpper() == "JPG" ) {
+        suffix = "jpg";
+    }
+    QString portraitTargetFileName = wallpaperDirectory()
+        + QString("%1_portrait.").arg(mId) + suffix;
+    QString landscapeTargetFileName = wallpaperDirectory()
+        + QString("%1_landscape.").arg(mId) + suffix;
+    
+    if (mIsDefaultImage) {
+        mIsDefaultImage = false;
+    } else {
+        QFile::remove(mPortraitImagePath);
+        QFile::remove(mLandscapeImagePath);
+    }
+    
+    QFile::copy(portraitFileName, portraitTargetFileName);
+    QFile::copy(landscapeFileName, landscapeTargetFileName);
+    QFile::remove(portraitFileName);
+    QFile::remove(landscapeFileName);
+
+    setExistingImage();
+    emit imageSet();
+}
+
+/*!
+
+*/
 void HsWallpaper::setDefaultImage()
 {
     if (mIsDefaultImage) {

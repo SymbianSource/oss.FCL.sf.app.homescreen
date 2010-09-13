@@ -96,6 +96,32 @@ void HsHomeScreenClientServiceProvider::setWallpaper(const QString &fileName)
 }
 
 /*!
+    Changes the active page's wallpaper based on the \a portraitFileName and \a landscapeFileName.
+*/
+void HsHomeScreenClientServiceProvider::setWallpaper(const QString &portraitFileName, const QString &landscapeFileName)
+{
+#ifndef HOMESCREEN_TEST //We can't use QtHighway at unit tests due to missing service client connection
+    mAsyncRequestIndex = setCurrentRequestAsync();
+#endif
+    if (!mWaitDialog) {
+        mWaitDialog = new HsSpinnerDialog();
+    }
+    mWaitDialog->start();
+    mShowAnimation = true;
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        mWallpaper = HsScene::instance()->activePage()->wallpaper();
+    } else {
+        mWallpaper = HsScene::instance()->wallpaper();
+    }
+    connect(mWallpaper, SIGNAL(imageSet()), 
+        SLOT(onImageSet()));
+    connect(mWallpaper, SIGNAL(imageSetFailed()),
+        SLOT(onImageSetFailed()));
+    
+    mWallpaper->setImages(portraitFileName, landscapeFileName);
+}
+
+/*!
     \internal
     Called when wallpaper image has been set successfully
 */
@@ -153,7 +179,7 @@ bool HsHomeScreenClientServiceProvider::widgetUninstalled(const QVariantHash &wi
 */
 HsWidgetComponentDescriptor HsHomeScreenClientServiceProvider::widgetComponentDescriptor(const QVariantHash& widgetDescriptor)
 {
-    HsWidgetComponentDescriptor widget;
+    HsWidgetComponentDescriptor widget; 
     widget.setInstallationPath(widgetDescriptor["installationPath"].toString());
     widget.setUri(widgetDescriptor["uri"].toString());
     widget.setTitle(widgetDescriptor["title"].toString());

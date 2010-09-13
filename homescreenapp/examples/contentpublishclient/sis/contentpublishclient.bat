@@ -18,7 +18,7 @@
 if exist contentpublishclient.sisx del contentpublishclient.sisx
 
 makesis contentpublishclient.pkg
-signsis contentpublishclient.sis contentpublishclient.sisx ../../../sis/rd.cer ../../../sis/rd-key.pem
+signsis contentpublishclient.sis contentpublishclient.sisx ../../../internal/sis/rd.cer ../../../internal/sis/rd-key.pem
 
 if exist contentpublishclient.sisx (
 echo contentpublishclient.sisx creation SUCCEEDED

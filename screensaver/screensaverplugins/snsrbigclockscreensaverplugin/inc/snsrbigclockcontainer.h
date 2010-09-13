@@ -22,6 +22,7 @@
 
 #include "snsrtest_global.h"
 #include "snsrdocumentloader.h"
+#include "screensaver.h"
 
 SCREENSAVER_TEST_CLASS(T_SnsrBigClockScreensaverPlugin)
 
@@ -47,6 +48,7 @@ public slots:
 public:
     
     void setIndicatorModel(SnsrIndicatorModel &model);
+    virtual Screensaver::ScreenPowerMode displayPowerMode();
     virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow);
     virtual bool isOrientationLocked();
     virtual int updateIntervalInMilliseconds() = 0;

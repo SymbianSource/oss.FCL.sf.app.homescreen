@@ -87,24 +87,25 @@ void SnsrAnalogClockContainer::update()
     mAnalogClockWidget->tick();
 
     // date
-    if (mCurrentOrientation == Qt::Vertical) {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(QDate::currentDate(), gDateFormatVerticalStr)
-        );
-    } else {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(QDate::currentDate(), gDateFormatHorizontalStr)
-        );
-    }
+    const char *dateFormat = (mCurrentOrientation == Qt::Vertical) ?
+        gDateFormatVerticalStr : gDateFormatHorizontalStr;
+    QString dateText = HbExtendedLocale().format( QDate::currentDate(), dateFormat );
+    mDateLabel->setPlainText( dateText );
     
     SCREENSAVER_TEST_FUNC_EXIT("SnsrAnalogClockContainer::update")
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::updateIntervalInMilliseconds()
+ */
 int SnsrAnalogClockContainer::updateIntervalInMilliseconds()
 {
     return 1000;
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::loadWidgets()
+ */
 void SnsrAnalogClockContainer::loadWidgets()
 {
     bool ok(true);
@@ -144,8 +145,9 @@ void SnsrAnalogClockContainer::loadWidgets()
             Q_ASSERT_X(ok, gAnalogLayoutDocml, "Invalid section in DocML file.");
         }
 
-        initIndicatorWidget();
         mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        mIndicatorWidget->setPowerSaveModeColor(false);
+        initIndicatorWidget();
         
         mBackgroundContainerLayout->addItem(mMainView);
 

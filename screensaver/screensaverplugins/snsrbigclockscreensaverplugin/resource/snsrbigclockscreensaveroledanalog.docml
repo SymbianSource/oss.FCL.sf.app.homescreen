@@ -5,14 +5,14 @@
             <sizehint height="var(hb-param-screen-height)" type="PREFERRED" width="var(hb-param-screen-width)"/>
             <contentsmargins bottom="var(hb-param-margin-gene-bottom)" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="var(hb-param-margin-gene-top)"/>
             <widget name="clockContainer" type="HbWidget">
-                <sizehint height="expr( 32.8un + 2.5un + var(hb-param-text-height-tiny) + var(hb-param-margin-gene-top) + var(hb-param-margin-gene-bottom) + var(hb-param-margin-gene-bottom) + var(hb-param-margin-gene-top) )" type="PREFERRED" width="45un"/>
+                <sizehint height="expr( 32.8un + 2.4un + var(hb-param-text-height-tiny) + var(hb-param-margin-gene-top) + var(hb-param-margin-gene-bottom) + var(hb-param-margin-gene-bottom) + var(hb-param-margin-gene-top) )" type="PREFERRED" width="45un"/>
                 <widget name="oledAnalogClockWidget" type="SnsrOledClockWidget">
                     <real name="z" value="1"/>
                     <sizehint height="32.8un" type="PREFERRED" width="32.8un"/>
                 </widget>
                 <widget name="indicatorWidget" type="SnsrIndicatorWidget">
-                    <sizehint height="2.5un" type="PREFERRED"/>
-                    <sizehint width="2.5un" type="MINIMUM"/>
+                    <sizehint height="2.4un" type="PREFERRED"/>
+                    <sizehint width="2.4un" type="MINIMUM"/>
                     <sizepolicy horizontalPolicy="Expanding" verticalPolicy="Preferred"/>
                     <real name="z" value="2"/>
                 </widget>

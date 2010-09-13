@@ -18,7 +18,7 @@
 if exist t_hshomescreenclientplugin.sisx del t_hshomescreenclientplugin.sisx
 
 makesis t_hshomescreenclientplugin.pkg
-signsis t_hshomescreenclientplugin.sis t_hshomescreenclientplugin.sisx ../../../../sis/rd.cer ../../../../sis/rd-key.pem
+signsis t_hshomescreenclientplugin.sis t_hshomescreenclientplugin.sisx ../../../../internal/sis/rd.cer ../../../../internal/sis/rd-key.pem
 
 if exist t_hshomescreenclientplugin.sisx (
 echo t_hshomescreenclientplugin.sisx creation SUCCEEDED

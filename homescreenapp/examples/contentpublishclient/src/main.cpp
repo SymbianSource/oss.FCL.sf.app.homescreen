@@ -48,20 +48,23 @@ int main(int argc, char *argv[])
     
     HbPushButton* button1 = new HbPushButton(buttonString);
     layout->addItem(button1);
-    contentPublishClient.connect(button1, SIGNAL(pressed()), SLOT(addHelloworldWidget()));
+    contentPublishClient.connect(button1, SIGNAL(clicked()), SLOT(addHelloworldWidget()));
     
     if (clientOk) {
         HbPushButton* button2 = new HbPushButton("Add Clock widget");
         HbPushButton* button3 = new HbPushButton("Set wallpaper1");
         HbPushButton* button4 = new HbPushButton("Set wallpaper2");
+        HbPushButton* button5 = new HbPushButton("Set wallpaper3");
         
         layout->addItem(button2);
         layout->addItem(button3);
         layout->addItem(button4);
+        layout->addItem(button5);
         
-        contentPublishClient.connect(button2, SIGNAL(pressed()), SLOT(addClockWidget()));
-        contentPublishClient.connect(button3, SIGNAL(pressed()), SLOT(setWallpaper1()));
-        contentPublishClient.connect(button4, SIGNAL(pressed()), SLOT(setWallpaper2()));
+        contentPublishClient.connect(button2, SIGNAL(clicked()), SLOT(addClockWidget()));
+        contentPublishClient.connect(button3, SIGNAL(clicked()), SLOT(setWallpaper1()));
+        contentPublishClient.connect(button4, SIGNAL(clicked()), SLOT(setWallpaper2()));
+        contentPublishClient.connect(button5, SIGNAL(clicked()), SLOT(setWallpaper3()));
     }
     
     

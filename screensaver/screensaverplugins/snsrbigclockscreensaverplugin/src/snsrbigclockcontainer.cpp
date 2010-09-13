@@ -36,7 +36,8 @@
     \brief Base class. Container used for drawing background and for preparing layout.
  */
 
-const QString snsrBackgroundColorRole("snsrbackground");
+
+
 const int gStep(5);
 
 
@@ -114,6 +115,16 @@ void SnsrBigClockContainer::changeLayout(Qt::Orientation orientation)
 void SnsrBigClockContainer::setIndicatorModel(SnsrIndicatorModel &model)
 {
     mIndicatorModel = &model;
+}
+
+/*!
+    @copydoc Screensaver::currentPowerMode()
+ */
+Screensaver::ScreenPowerMode SnsrBigClockContainer::displayPowerMode()
+{
+    // The default implementation returns full power mode. Inherited classes
+    // must override this if low power or display off mode are required.
+    return Screensaver::ScreenModeFullPower;
 }
 
 /*!
@@ -318,13 +329,7 @@ void SnsrBigClockContainer::resetIndicatorConnections()
  */
 void SnsrBigClockContainer::setBackgroundColor()
 {
-    QColor backgroundColor = HbColorScheme::color(snsrBackgroundColorRole);
-    if (backgroundColor.isValid()) {
-        mBackgroundColor = backgroundColor;
-    }
-    else {
-        mBackgroundColor = Qt::black;
-    }
+    mBackgroundColor = Qt::black;
 }
 
 /*!

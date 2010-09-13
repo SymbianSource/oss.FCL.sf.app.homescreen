@@ -95,8 +95,6 @@ void SnsrOledAnalogClockContainer::updatePosition()
             mDestPosition = randomPosition( containerRect );
             mInitialize = true;
         }
-        // the active area of power save mode needs to be updated when clock container is moved
-        emit activeAreaMoved();
     }
 }
 
@@ -111,15 +109,10 @@ void SnsrOledAnalogClockContainer::update()
     mOledClockWidget->tick();
     
     // date
-    if (mCurrentOrientation == Qt::Vertical) {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(QDate::currentDate(), gDateFormatVerticalStr)
-        );
-    } else {
-        mDateLabel->setPlainText(
-            HbExtendedLocale().format(QDate::currentDate(), gDateFormatHorizontalStr)
-        );
-    }
+    const char *dateFormat = (mCurrentOrientation == Qt::Vertical) ?
+        gDateFormatVerticalStr : gDateFormatHorizontalStr;
+    QString dateText = HbExtendedLocale().format( QDate::currentDate(), dateFormat );
+    mDateLabel->setPlainText( dateText );
     
     // position
     updatePosition();
@@ -130,6 +123,14 @@ void SnsrOledAnalogClockContainer::update()
 int SnsrOledAnalogClockContainer::updateIntervalInMilliseconds()
 {
     return 60*1000;
+}
+
+/*!
+    @copydoc Screensaver::DisplayPowerMode()
+ */
+Screensaver::ScreenPowerMode SnsrOledAnalogClockContainer::displayPowerMode()
+{
+    return Screensaver::ScreenModeLowPower;
 }
 
 /*!
@@ -171,6 +172,7 @@ void SnsrOledAnalogClockContainer::loadWidgets()
     mOledClockWidget = 0;
     mDateLabel = 0;
     mIndicatorWidget = 0;
+    mInitialize = false;
     
     // load widgets from docml
     qDebug() << gOledAnalogLayoutDocml;
@@ -200,8 +202,12 @@ void SnsrOledAnalogClockContainer::loadWidgets()
         }
 
         mIndicatorWidget->setLayoutType(SnsrIndicatorWidget::IndicatorsCentered);
+        mIndicatorWidget->setPowerSaveModeColor(true);
         initIndicatorWidget();
-        
+
+        // powersave mode color
+        mDateLabel->setTextColor(Qt::white);
+
         mBackgroundContainerLayout->addItem(mMainView);
     }
 }

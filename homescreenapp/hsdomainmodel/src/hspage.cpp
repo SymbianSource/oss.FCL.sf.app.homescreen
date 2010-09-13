@@ -666,28 +666,31 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
     HsWidgetPresentationData presentation;
     presentation.orientation = orientation;
     
+    HsPageVisual *pageVisual = visual();
     HsWidgetHostVisual *visual(0);
 #ifdef HSWIDGETORGANIZER_ALGORITHM
     QList<HsWidgetHost*> newWidgets;
 #endif //HSWIDGETORGANIZER_ALGORITHM    
     foreach (HsWidgetHost *widget, mWidgets) {
         visual = widget->visual();
-        if (!widget->getPresentation(presentation)) {
+        if ( pageVisual->isAncestorOf(visual)) {
+            if (!widget->getPresentation(presentation)) {
 #ifndef HSWIDGETORGANIZER_ALGORITHM
-            QList<QRectF> geometries = converter->convert(
-                from, QList<QRectF>() << visual->geometry(), to);
-            visual->setGeometry(geometries.first());
-            widget->savePresentation();
+                QList<QRectF> geometries = converter->convert(
+                    from, QList<QRectF>() << visual->geometry(), to);
+                visual->setGeometry(geometries.first());
+                widget->savePresentation();
 #else //HSWIDGETORGANIZER_ALGORITHM
-            newWidgets << widget;
+                newWidgets << widget;
 #endif //HSWIDGETORGANIZER_ALGORITHM
-        } else {
-            QRectF adjustWidgetPosition;
-            adjustWidgetPosition = visual->geometry();
-            adjustWidgetPosition.moveTopLeft(presentation.pos());
-            visual->setPos(adjustedWidgetPosition(adjustWidgetPosition));
-            visual->setZValue(presentation.zValue);
-            widget->savePresentation(); //Needed to follow pageMargin dynamic change
+            } else {
+                QRectF adjustWidgetPosition;
+                adjustWidgetPosition = visual->geometry();
+                adjustWidgetPosition.moveTopLeft(presentation.pos());
+                visual->setPos(adjustedWidgetPosition(adjustWidgetPosition));
+                visual->setZValue(presentation.zValue);
+                widget->savePresentation(); //Needed to follow pageMargin dynamic change
+            }
         }
     }
     

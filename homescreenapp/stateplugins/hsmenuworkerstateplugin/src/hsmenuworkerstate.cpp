@@ -29,6 +29,7 @@
 #include "hsviewappsettingsstate.h"
 #include "hsviewappdetailsstate.h"
 #include "hsinstallationlogstate.h"
+#include "hsuinstallfailedstate.h"
 
 /*!
  \class HsMenuWorkerState
@@ -47,7 +48,7 @@
  \param parent Parent state. 
  */
 HsMenuWorkerState::HsMenuWorkerState(QState *parent) :
-    QState(parent), mInitialState(0)
+    QState(parent)
 {
     construct();
 }
@@ -67,20 +68,39 @@ void HsMenuWorkerState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuWorkerState::construct");
     setObjectName("homescreen.nokia.com/state/MenuWorkerState");
+    
+    QState *menuWorkerParallelState = new QState(
+            QState::ParallelStates, this);
+    setInitialState(menuWorkerParallelState);
+    
+    QState *menuWorkerCommonState = new QState(menuWorkerParallelState);
+    QState *menuWorkerFailedMessageState = new QState(menuWorkerParallelState);
+    
 
-    mInitialState = new QState(this);
-    setInitialState(mInitialState);
+    QState *initialCommonState = new QState(menuWorkerCommonState);
+    menuWorkerCommonState->setInitialState(initialCommonState);
+    QState *initialFailedMessageState = new QState(menuWorkerFailedMessageState);
+    menuWorkerFailedMessageState->setInitialState(initialFailedMessageState);
 
     // use templated creation method - less boilerplate code
-    createChildState<HsAddToHomeScreenState> (HsMenuEvent::AddToHomeScreen);
+    createChildState<HsAddToHomeScreenState> (
+            HsMenuEvent::AddToHomeScreen, 
+            menuWorkerCommonState, initialCommonState);
     createChildState<HsDeleteCollectionState> (
-        HsMenuEvent::DeleteCollection);
+            HsMenuEvent::DeleteCollection,
+            menuWorkerCommonState, initialCommonState);
     createChildState<HsDeleteCollectionItemState> (
-        HsMenuEvent::RemoveAppFromCollection);
+            HsMenuEvent::RemoveAppFromCollection,
+            menuWorkerCommonState, initialCommonState);
     createChildState<HsUninstallItemState> (
-        HsMenuEvent::UninstallApplication);
-    createChildState<HsArrangeState> (HsMenuEvent::ArrangeCollection);
-    createChildState<HsArrangeState> (HsMenuEvent::ArrangeAllCollections);
+            HsMenuEvent::UninstallApplication, 
+            menuWorkerCommonState, initialCommonState);
+    createChildState<HsArrangeState> (
+            HsMenuEvent::ArrangeCollection, 
+            menuWorkerCommonState, initialCommonState);
+    createChildState<HsArrangeState> (
+            HsMenuEvent::ArrangeAllCollections, 
+            menuWorkerCommonState, initialCommonState);
 
     
     // create a new child state based on the template
@@ -89,15 +109,15 @@ void HsMenuWorkerState::construct()
     // an event with specified operation type
     HsMenuEventTransition *renameCollectionTransition =
         new HsMenuEventTransition(HsMenuEvent::RenameCollection,
-                                  mInitialState, newChildState);
-    mInitialState->addTransition(renameCollectionTransition);
+                                  initialCommonState, newChildState);
+    initialCommonState->addTransition(renameCollectionTransition);
 
     HsMenuEventTransition *createCollectionTransition =
         new HsMenuEventTransition(HsMenuEvent::CreateCollection,
-                                  mInitialState, newChildState);
-    mInitialState->addTransition(createCollectionTransition);
+                                  initialCommonState, newChildState);
+    initialCommonState->addTransition(createCollectionTransition);
     // set a transition to the initial state after child processing finished
-    newChildState->addTransition(newChildState, SIGNAL(exit()), mInitialState);
+    newChildState->addTransition(newChildState, SIGNAL(exit()), initialCommonState);
     connect(this, SIGNAL(reset()), newChildState, SIGNAL(exit()));
     
     HsAddAppsToCollectionState *addAppsToCollectionState =
@@ -106,18 +126,29 @@ void HsMenuWorkerState::construct()
     // an event with specified operation type
     HsMenuEventTransition *addAppsToCollectionTransition =
         new HsMenuEventTransition(HsMenuEvent::AddAppsToCollection,
-                                  mInitialState, addAppsToCollectionState);
-    mInitialState->addTransition(addAppsToCollectionTransition);
+                                  initialCommonState, addAppsToCollectionState);
+    initialCommonState->addTransition(addAppsToCollectionTransition);
     // set a transition to the initial state after child processing finished
     addAppsToCollectionState->addTransition(addAppsToCollectionState,
-                                            SIGNAL(finished()), mInitialState);
+                                            SIGNAL(finished()), initialCommonState);
     connect(this, SIGNAL(reset()), addAppsToCollectionState, SIGNAL(finished()));
     
     
-    createChildState<HsPreviewHSWidgetState> (HsMenuEvent::PreviewHSWidget);
-    createChildState<HsViewAppSettingsState> (HsMenuEvent::ShowAppSettings);
-    createChildState<HsViewAppDetailsState> (HsMenuEvent::ShowAppDetails);
-    createChildState<HsInstallationLogState> (HsMenuEvent::ShowInstallationLog);
+    createChildState<HsPreviewHSWidgetState> (
+            HsMenuEvent::PreviewHSWidget, 
+            menuWorkerCommonState, initialCommonState);
+    createChildState<HsViewAppSettingsState> (
+            HsMenuEvent::ShowAppSettings, 
+            menuWorkerCommonState, initialCommonState);
+    createChildState<HsViewAppDetailsState> (
+            HsMenuEvent::ShowAppDetails, 
+            menuWorkerCommonState, initialCommonState);
+    createChildState<HsInstallationLogState> (
+            HsMenuEvent::ShowInstallationLog,
+            menuWorkerCommonState, initialCommonState);
+    createChildState<HsUninstallFailedState> (
+            HsMenuEvent::UninstallationFailed, 
+            menuWorkerFailedMessageState, initialFailedMessageState);
 
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::construct");
 }
@@ -126,24 +157,33 @@ void HsMenuWorkerState::construct()
  Template method for constructing child states.
  \param operation Operation type triggering transition to the
  newely created state.
+ \param parentState Parent state for new state.
+ \param initialState Initial state.
  \return newely created state.
  */
 template<class T>
 T *HsMenuWorkerState::createChildState(
-    HsMenuEvent::OperationType operation)
+    HsMenuEvent::OperationType operation,
+    QState* parentState,
+    QState* initialState)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuWorkerState::createChildState");
+    
     // create a new child state based on the template
-    T *newChildState = new T(this);
+    T *newChildState = new T(parentState);
+    
     // create a transition to the new child state which will be triggered by
     // an event with specified operation type
     HsMenuEventTransition *newChildStateTransition =
-        new HsMenuEventTransition(operation, mInitialState, newChildState);
-    mInitialState->addTransition(newChildStateTransition);
+        new HsMenuEventTransition(operation, initialState, newChildState);
+    initialState->addTransition(newChildStateTransition);
+    
     // set a transition to the initial state after child processing finished
-    newChildState->addTransition(newChildState, SIGNAL(exit()), mInitialState);
+    newChildState->addTransition(newChildState, SIGNAL(exit()), initialState);
     connect(this, SIGNAL(reset()), newChildState, SIGNAL(exit()));
+    
     HSMENUTEST_FUNC_EXIT("HsMenuWorkerState::createChildState");
 
     return newChildState;
 }
+

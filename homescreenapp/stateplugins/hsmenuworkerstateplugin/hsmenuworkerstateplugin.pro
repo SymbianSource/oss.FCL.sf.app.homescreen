@@ -18,7 +18,7 @@ TEMPLATE = lib
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
 
-PLUGIN_SUBDIR = /private/20022F35/plugins/stateplugins
+PLUGIN_SUBDIR = /resource/qt/plugins/homescreen
 
 include(../../common.pri)
 include(docml.pri)

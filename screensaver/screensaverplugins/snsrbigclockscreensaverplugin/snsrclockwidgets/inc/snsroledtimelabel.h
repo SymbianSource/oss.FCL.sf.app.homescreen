@@ -36,14 +36,6 @@ public:
     
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-protected:
-    
-    virtual void changeEvent(QEvent *event);
-
-private:
-
-    void setThemedTextColor();
-    
 private:
         
     Q_DISABLE_COPY(SnsrOledTimeLabel)

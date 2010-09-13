@@ -9,8 +9,8 @@
                 <sizehint height="32.8un" type="PREFERRED" width="32.8un"/>
             </widget>
             <widget name="indicatorWidget" type="SnsrIndicatorWidget">
-                <sizehint height="2.5un" type="PREFERRED"/>
-                <sizehint width="2.5un" type="MINIMUM"/>
+                <sizehint height="2.4un" type="PREFERRED"/>
+                <sizehint width="2.4un" type="MINIMUM"/>
                 <sizepolicy horizontalPolicy="Expanding" verticalPolicy="Preferred"/>
                 <real name="z" value="2"/>
             </widget>

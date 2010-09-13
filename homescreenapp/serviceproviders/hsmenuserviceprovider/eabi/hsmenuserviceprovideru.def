@@ -1,5 +1,5 @@
 EXPORTS
-	_ZN13HsMenuService13executeActionEiRK7QString @ 1 NONAME
+	_ZN13HsMenuService13executeActionEiRK7QStringP7QObjectPKc @ 1 NONAME
 	_ZN13HsMenuService16allCollectionsIdEv @ 2 NONAME
 	_ZN13HsMenuService16createCollectionERK7QString @ 3 NONAME
 	_ZN13HsMenuService16removeCollectionEi @ 4 NONAME

@@ -135,12 +135,25 @@ void HsHomeScreen::onRuntimeStopped()
 void HsHomeScreen::registerServicePlugins()
 {    
     HSTEST_FUNC_ENTRY("HS::HsHomeScreen::registerServicePlugins()");
+
+#ifdef Q_OS_SYMBIAN    
+    foreach(QFileInfo drive, QDir::drives()) {
+        QApplication::addLibraryPath(drive.absolutePath() 
+            + QLatin1String("resource/qt/plugins/homescreen"));
+    }
+#else
+    QApplication::addLibraryPath("resource/qt/plugins/homescreen");
+#endif    
     
     QServiceManager serviceManager;
     
     QStringList pluginPaths;
     
     pluginPaths << "private/20022F35";
+    
+#ifndef Q_OS_SYMBIAN
+    pluginPaths << "resource/qt/plugins/homescreen";
+#endif
 
     QFileInfoList drives = QDir::drives();
     foreach(const QString pluginPath, pluginPaths) {

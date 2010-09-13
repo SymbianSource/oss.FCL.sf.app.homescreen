@@ -45,6 +45,7 @@ public:
     
     QPainterPath shape() const;
     void setWidget(QObject *widget);
+    QObject *widget() { return mWidget; }
     void setVisualModel(HsWidgetHost *model);
     HsWidgetHost *visualModel() const;
 signals:

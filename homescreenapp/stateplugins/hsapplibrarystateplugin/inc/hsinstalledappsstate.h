@@ -55,6 +55,7 @@ private slots:
     void setEmptyLabelVisibility(bool visibility);
     void latestOnTopMenuAction();
     void oldestOnTopMenuAction();
+    void launchDetails(const QModelIndex &index);
     
 private:
 
@@ -62,6 +63,8 @@ private:
     void setMenuOptions();
     void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
     Hs::HsSortAttribute mSortAttribute;
+    HbAction *mLatestOnTopMenuAction; //not own
+    HbAction *mOldestOnTopMenuAction; //not own
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H

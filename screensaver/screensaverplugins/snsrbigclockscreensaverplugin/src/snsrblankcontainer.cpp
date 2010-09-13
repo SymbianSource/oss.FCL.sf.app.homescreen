@@ -38,17 +38,34 @@ SnsrBlankContainer::~SnsrBlankContainer()
 {
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::update()
+ */
 void SnsrBlankContainer::update()
 {
     // nothing to do
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::displayPowerMode()
+ */
+Screensaver::ScreenPowerMode SnsrBlankContainer::displayPowerMode()
+{
+    return Screensaver::ScreenModeOff;
+}
+
+/*!
+    @copydoc SnsrBigClockContainer::updateIntervalInMilliseconds()
+ */
 int SnsrBlankContainer::updateIntervalInMilliseconds()
 {
     // don't start timer
     return -1;
 }
 
+/*!
+    @copydoc SnsrBigClockContainer::loadWidgets()
+ */
 void SnsrBlankContainer::loadWidgets()
 {
     // nothing to do as we have no visual components

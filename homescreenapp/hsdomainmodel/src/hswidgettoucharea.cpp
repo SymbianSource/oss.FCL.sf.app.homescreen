@@ -43,9 +43,21 @@ bool HsWidgetTouchArea::sceneEvent(QEvent *event)
     HsScene *scene = HsScene::instance();
     switch (event->type()) {
         case QEvent::TouchBegin:
-        case QEvent::GraphicsSceneMousePress:
-            emit scene->widgetTapStarted(mWidgetHostVisual->visualModel());
+            {
+            QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+            QPointF scenePos;
+            if (touchEvent && !touchEvent->touchPoints().isEmpty() ) {
+                scenePos = static_cast<QTouchEvent *>(event)->touchPoints().first().scenePos();
+                }
+            emit scene->widgetTapStarted(scenePos, mWidgetHostVisual->visualModel());
             break;        
+            }
+        case QEvent::GraphicsSceneMousePress:
+            {
+            QPointF scenePos = static_cast<QGraphicsSceneMouseEvent *>(event)->lastScenePos();
+            emit scene->widgetTapStarted(scenePos, mWidgetHostVisual->visualModel());
+            break;        
+            }
         case QEvent::TouchEnd:
             {
                 ungrabGesture(Qt::PanGesture);

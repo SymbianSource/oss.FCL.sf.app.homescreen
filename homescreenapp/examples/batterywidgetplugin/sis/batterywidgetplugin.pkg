@@ -33,10 +33,10 @@
 [0x102752AE],0,0,0,{"S60ProductID"}
 [0x1028315F],0,0,0,{"S60ProductID"}
  
-"../resource/batterywidgetplugin.manifest"                                                      - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.manifest",FM,"application/hs-widget-uninstall+xml",RR,RW
-"/epoc32/release/armv5/urel/batterywidgetplugin.dll"                                            - "!:/sys/bin/batterywidgetplugin.dll"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.qtplugin"   - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.qtplugin"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.manifest"   - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.manifest"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.xml"        - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.xml"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.png"        - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.png"
-"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidget_bg.png"           - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidget_bg.png"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.manifest" - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.manifest",FM,"application/hs-widget-uninstall+xml",RR,RW
+
+"/epoc32/release/armv5/urel/batterywidgetplugin.dll"                                          - "!:/sys/bin/batterywidgetplugin.dll"
+"/epoc32/data/z/resource/qt/plugins/homescreen/batterywidgetplugin.qtplugin"                  - "!:/resource/qt/plugins/homescreen/batterywidgetplugin.qtplugin"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.xml"      - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.xml"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.png"      - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidgetplugin.png"
+"/epoc32/data/z/private/20022F35/import/widgetregistry/20022F7A/batterywidget_bg.png"         - "!:/private/20022F35/import/widgetregistry/20022F7A/batterywidget_bg.png"

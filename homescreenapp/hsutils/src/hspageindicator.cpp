@@ -136,7 +136,10 @@ void HsPageIndicator::removeItem(int activeItemIndex)
 */
 bool HsPageIndicator::isAnimationRunning() const
 {
-    return mItems.at(mActiveItemIndex)->isAnimationRunning();
+    if (0 <= mActiveItemIndex && mActiveItemIndex <= itemCount()){
+        return mItems.at(mActiveItemIndex)->isAnimationRunning();
+    }
+    return false;
 }
 
 /*!

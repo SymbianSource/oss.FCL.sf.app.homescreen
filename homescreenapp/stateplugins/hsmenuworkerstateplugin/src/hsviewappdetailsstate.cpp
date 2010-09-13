@@ -81,21 +81,25 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     const int entryId = data.value(Hs::itemIdKey).toInt();
     QSharedPointer<const CaEntry> entry
         = CaService::instance()->getEntry(entryId);
+    if (!entry) {
+        stateExited();
+        return;
+    }
     const int componentId = entry->attribute(
         Hs::componentIdAttributeName).toInt();
-    
+
     QSharedPointer<CaSoftwareRegistry> scr = CaSoftwareRegistry::create();
     CaSoftwareRegistry::DetailMap detailMap = scr->entryDetails(componentId);
 
     QString appType = entry->attribute(Hs::swTypeKey);
 
-    
+
     //TODO: Should we display something In that case?
     if (detailMap.size() < 1){
         stateExited();
         return;
     }
-    
+
     HbDocumentLoader loader;
     bool loadStatusOk = false;
     loader.load(HS_DETAILS_DIALOG_LAYOUT, &loadStatusOk);
@@ -115,7 +119,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
         mDialog->setTimeout(HbPopup::NoTimeout);
         mDialog->setAttribute(Qt::WA_DeleteOnClose, true);
         mDialog->actions()[0]->setParent(mDialog);
-        
+
         setFieldPresentation(CaSoftwareRegistry::componentNameKey(),
             detailMap, loader);
         setFieldPresentation(CaSoftwareRegistry::componentVersionKey(),
@@ -135,12 +139,12 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
             setFieldPresentation(CaSoftwareRegistry::componentProtectionDomainKey(),
                 detailMap, loader);
         }
-        
+
         QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
             new HsMenuEntryRemovedHandler(entryId, this, SIGNAL(exit())));
-        
+
         entryObserver.take()->setParent(mDialog);
-        
+
         mDialog->open(this, SLOT(stateExited()));
     } else {
         stateExited();

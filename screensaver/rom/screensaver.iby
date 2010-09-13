@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -36,12 +36,5 @@ data=\epoc32\data\z\snsrresources\plugins\screensaverplugins\snsrbigclockscreens
 // ---- snsrutils --------------------------------------------
 
 file=ABI_DIR\BUILD_DIR\snsrutils.dll    SHARED_LIB_DIR\snsrutils.dll
-
-// ---- themes patch --------------------------------------------
-data=\epoc32\data\z\resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-background.svg      resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-background.svg
-data=\epoc32\data\z\resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-date-frame.svg      resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-date-frame.svg
-data=\epoc32\data\z\resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-hour-hand.svg       resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-hour-hand.svg
-data=\epoc32\data\z\resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-minute-hand.svg     resource\hb\themes\icons\sfblacktheme\scalable\oled-clock-minute-hand.svg
-data=\epoc32\data\z\resource\hb\themes\icons\sfblacktheme\scalable\drawing.svg      resource\hb\themes\icons\sfblacktheme\scalable\drawing.svg
 
 #endif //__SCREENSAVERAPP_IBY__

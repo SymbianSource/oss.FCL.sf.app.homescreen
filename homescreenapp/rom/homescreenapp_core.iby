@@ -11,15 +11,13 @@
 *
 * Contributors:
 *
-* Description:
+* Description: homescreen core iby file
 *
 */
 #ifndef __HOMESCREENAPP_CORE_IBY__
 #define __HOMESCREENAPP_CORE_IBY__
 
-
 // ---- hsapplication --------------------------------------------
-
 file=ABI_DIR\BUILD_DIR\hsapplicationlauncher.exe                PROGRAMS_DIR\hsapplicationlauncher.exe
 file=ABI_DIR\BUILD_DIR\hsapplication.exe                        PROGRAMS_DIR\hsapplication.exe
 data=ZPRIVATE\10003a3f\import\apps\hsapplication_reg.rsc        private\10003a3f\import\apps\hsapplication_reg.rsc
@@ -45,22 +43,20 @@ data=ZPRIVATE\10003a3f\import\apps\hswidgetuninstaller_reg.rsc private\10003a3f\
 data=\epoc32\data\z\resource\apps\hswidgetuninstaller.rsc resource\apps\hswidgetuninstaller.rsc
 
 // ---- hsutils --------------------------------------------
-
 file=ABI_DIR\BUILD_DIR\hsutils.dll  SHARED_LIB_DIR\hsutils.dll
 
 // ---- hsdomainmodel --------------------------------------------
-
 file=ABI_DIR\BUILD_DIR\hsdomainmodel.dll  SHARED_LIB_DIR\hsdomainmodel.dll
+
+// ---- Client plugins --------------------------------------------
 
 // -------- hshomescreenclientplugin
 file=ABI_DIR\BUILD_DIR\hshomescreenclientplugin.dll                        SHARED_LIB_DIR\hshomescreenclientplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\hshomescreenclientplugin.qtplugin  resource\qt\plugins\hshomescreenclientplugin.qtplugin
-data=ZPRIVATE\20022f35\hshomescreenclientplugin.xml                        private\20022f35\hshomescreenclientplugin.xml
 
-
-
-
-
+// -------- hsmenuclientplugin
+file=ABI_DIR\BUILD_DIR\hsmenuclientplugin.dll                           SHARED_LIB_DIR\hsmenuclientplugin.dll
+data=\epoc32\data\z\resource\qt\plugins\hsmenuclientplugin.qtplugin     resource\qt\plugins\hsmenuclientplugin.qtplugin
 
 // ---- serviceproviders --------------------------------------------
 
@@ -71,41 +67,28 @@ file=ABI_DIR\BUILD_DIR\hsmenuserviceprovider.dll  SHARED_LIB_DIR\hsmenuservicepr
 
 // -------- hsapplibrarystateplugin
 file=ABI_DIR\BUILD_DIR\hsapplibrarystateplugin.dll                            SHARED_LIB_DIR\hsapplibrarystateplugin.dll
-data=ZPRIVATE\20022f35\plugins\stateplugins\hsapplibrarystateplugin.qtplugin  private\20022f35\plugins\stateplugins\hsapplibrarystateplugin.qtplugin
-data=ZPRIVATE\20022f35\plugins\stateplugins\hsapplibrarystateplugin.xml       private\20022f35\plugins\stateplugins\hsapplibrarystateplugin.xml
+data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hsapplibrarystateplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hsapplibrarystateplugin.qtplugin
 
 // -------- hshomescreenstateplugin
 file=ABI_DIR\BUILD_DIR\hshomescreenstateplugin.dll                            SHARED_LIB_DIR\hshomescreenstateplugin.dll
-data=ZPRIVATE\20022f35\plugins\stateplugins\hshomescreenstateplugin.qtplugin  private\20022f35\plugins\stateplugins\hshomescreenstateplugin.qtplugin
-data=ZPRIVATE\20022f35\plugins\stateplugins\hshomescreenstateplugin.xml       private\20022f35\plugins\stateplugins\hshomescreenstateplugin.xml
+data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hshomescreenstateplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hshomescreenstateplugin.qtplugin
 
 // -------- hsmenuworkerstateplugin
 file=ABI_DIR\BUILD_DIR\hsmenuworkerstateplugin.dll                            SHARED_LIB_DIR\hsmenuworkerstateplugin.dll
-data=ZPRIVATE\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.qtplugin  private\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.qtplugin
-data=ZPRIVATE\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.xml       private\20022f35\plugins\stateplugins\hsmenuworkerstateplugin.xml
+data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hsmenuworkerstateplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hsmenuworkerstateplugin.qtplugin
 
 // ---- widgetplugins --------------------------------------------
 
 // -------- hsshortcutwidgetplugin
 file=ABI_DIR\BUILD_DIR\hsshortcutwidgetplugin.dll                                      SHARED_LIB_DIR\hsshortcutwidgetplugin.dll
-data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.qtplugin  private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.qtplugin
+data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hsshortcutwidgetplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hsshortcutwidgetplugin.qtplugin
 data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.manifest  private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.manifest
-data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.xml       private\20022f35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.xml
 
 // -------- hsclockwidgetplugin
 file=ABI_DIR\BUILD_DIR\hsclockwidgetplugin.dll                                         SHARED_LIB_DIR\hsclockwidgetplugin.dll
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.qtplugin
+data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hsclockwidgetplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hsclockwidgetplugin.qtplugin
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\tclock.png                       private\20022f35\import\widgetregistry\20022F6C\tclock.png
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\qtg_graf_hswidget_preview_clock.svg  private\20022f35\import\widgetregistry\20022F6C\qtg_graf_hswidget_preview_clock.svg
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml          private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.xml
-
-// ---- IMenuClient --------------------------------------------
-
-// -------- hsmenuclientplugin
-file=ABI_DIR\BUILD_DIR\hsmenuclientplugin.dll                           SHARED_LIB_DIR\hsmenuclientplugin.dll
-data=\epoc32\data\z\resource\qt\plugins\hsmenuclientplugin.qtplugin     resource\qt\plugins\hsmenuclientplugin.qtplugin
-data=ZPRIVATE\20022f35\hsmenuclientplugin.xml                           private\20022f35\hsmenuclientplugin.xml
-
 
 #endif //__HOMESCREENAPP_CORE_IBY__

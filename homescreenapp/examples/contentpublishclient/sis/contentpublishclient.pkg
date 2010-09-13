@@ -38,3 +38,5 @@
 "/epoc32/data/z/resource/apps/contentpublishclient.rsc"                     - "c:/resource/apps/contentpublishclient.rsc"
 "/epoc32/data/z/data/images/testwallpaper.jpg"                              - "c:/data/images/testwallpaper.jpg"
 "/epoc32/data/z/data/images/testwallpaper2.jpg"                             - "c:/data/images/testwallpaper2.jpg"
+"/epoc32/data/z/data/images/testwallpaper_p.png"                            - "c:/data/images/testwallpaper_p.png"
+"/epoc32/data/z/data/images/testwallpaper_l.png"                            - "c:/data/images/testwallpaper_l.png"

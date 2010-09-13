@@ -27,12 +27,17 @@
 // It should be remove when fix from orbit will be in official platfrom.
 class HsProgressBar: public HbProgressBar {
 public:
-    HsProgressBar(QGraphicsItem *parent=0):HbProgressBar(parent) {}
-    
+    HsProgressBar(QGraphicsItem *parent=0):HbProgressBar(parent),mTargetValue(0),mTimerId(0) {}
+    void setTargetProgressValue(int value);
+
 protected:
     void paint ( QPainter * painter, 
             const QStyleOptionGraphicsItem * option, 
             QWidget * widget = 0 );
+    void timerEvent(QTimerEvent *event);
+private:
+    int mTargetValue;
+    int mTimerId;
 };
 
 HS_STATES_TEST_CLASS(MenuStatesTest)

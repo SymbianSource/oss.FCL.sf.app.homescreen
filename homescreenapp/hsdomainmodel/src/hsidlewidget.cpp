@@ -141,33 +141,18 @@ void HsIdleWidget::setSceneX(qreal x)
 
 /*!
     Layouts the ui layers according to the given \a rect.
-    If given \a rect has different size than a fullscreen view, rect
-    is lifted up by statuspane height. Normally HsIdleWidget position is 0,0 
-    relative to it's parent container (HbView). This functionality tackles
-    problem caused by HbStackedLayout which sets top most rect for all items 
-    (views) in a stack (not considering fullscreen mode).
 */
 void HsIdleWidget::setGeometry(const QRectF &rect)
 {
     
-    int n = HsScene::instance()->pages().count();
-    QRectF layoutRect(HsGui::instance()->layoutRect());
-    if (layoutRect == rect || (layoutRect.height() == rect.width() && layoutRect.width() == rect.height())) {
-        mControlLayer->resize(rect.size());
-        mPageLayer->resize(n * rect.width(), rect.height());
-        if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
-            mPageWallpaperLayer->resize(n * rect.width(), rect.height());
-        }
-        mSceneLayer->resize(2 * rect.width() + HSCONFIGURATION_GET(bounceEffect), rect.height());
-        HbWidget::setGeometry(rect);
-    } else {
-        QRectF sceneRect = mapToScene(rect).boundingRect();
-        // HbView is a container item for widget, thus 0,0 is relative to view's position.
-        // Lift rect by offset. Fullscreen view is in 0,0 position in scene coordinates otherwise
-        // it's e.g 0,68 (statuspane being at 0,0 and view at 0,68)
-        sceneRect.setTop(-sceneRect.top());
-        HbWidget::setGeometry(sceneRect);
+    int n = HsScene::instance()->pages().count();    
+    mControlLayer->resize(rect.size());
+    mPageLayer->resize(n * rect.width(), rect.height());
+    if (HSCONFIGURATION_GET(sceneType) == HsConfiguration::PageWallpapers) {
+        mPageWallpaperLayer->resize(n * rect.width(), rect.height());
     }
+    mSceneLayer->resize(2 * rect.width() + HSCONFIGURATION_GET(bounceEffect), rect.height());
+    HbWidget::setGeometry(rect);
 }
 
 /*!

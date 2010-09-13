@@ -108,7 +108,7 @@ void HsGui::setupIdleUi()
         mImpl->mIdleView->setNavigationAction(mImpl->mNavigationAction);
     }
     bool animate  = !mImpl->mWindow->isObscured();
-    mImpl->mWindow->setCurrentView(mImpl->mIdleView, animate);    
+    mImpl->mWindow->setCurrentView(mImpl->mIdleView, animate, Hb::ViewSwitchCachedFullScreen);    
 }
 
 void HsGui::cleanupIdleUi()

@@ -11,7 +11,7 @@
 #
 # Contributors:
 #
-# Description: Example of home screen widget
+# Description: Example home screen widget
 #
 
 TEMPLATE = lib
@@ -25,41 +25,53 @@ INCLUDEPATH += ./inc
 
 symbian: {
 
-    DESTDIR = /private/20022F35/import/widgetregistry/20022F7E
+    WIDGET_DIR = /private/20022F35/import/widgetregistry/20022F7E
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
     TARGET.UID3 = 0x20022F7E
     TARGET.EPOCALLOWDLLDATA=1
     TARGET.CAPABILITY = ALL -TCB
     
-    plugins.path = $${DESTDIR}
+    plugins.path = /resource/qt/plugins/homescreen
     plugins.sources = $${TARGET}.dll 
+
+    CONFIG += qtservice
+    QTSERVICE.DESCRIPTOR = resource/$${TARGET}.xml
     
-    widgetResources.path = $${DESTDIR}
-    widgetResources.sources += resource/$${TARGET}.xml    
+    widgetResources.path = $${WIDGET_DIR}    
     widgetResources.sources += resource/$${TARGET}.manifest
+    widgetResources.sources += resource/$${TARGET}.xml
     widgetResources.sources += resource/$${TARGET}preview.png
     widgetResources.sources += resource/$${TARGET}.svg
         
     DEPLOYMENT += plugins \
                   widgetResources
+
+    BLD_INF_RULES.prj_exports += \
+      "./rom/helloworldwidgetplugin.iby  CORE_APP_LAYER_IBY_EXPORT_PATH(helloworldwidgetplugin.iby)" 
 }
 
 win32: {
 
     CONFIG(debug, debug|release) {
-      SUBDIRPART = debug
+      TARGET_DIR = debug
     } else {
-      SUBDIRPART = release
-    }    
+      TARGET_DIR = release
+    }        
     
-    PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F7E
+    HOMESCREEN_DIR = $$PWD/../../../../bin/$${TARGET_DIR}
     
-    DESTDIR = $$PWD/../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
-
-    manifest.path = $${DESTDIR}
-    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png ./resource/*.svg
+    PLUGIN_DIR = $${HOMESCREEN_DIR}/resource/qt/plugins/homescreen
+    WIDGET_DIR = $${HOMESCREEN_DIR}/private/20022F35/import/widgetregistry/20022F7E
+        
+    DESTDIR = $${PLUGIN_DIR}
     
-    INSTALLS += manifest    
+    widgetResources.path = $${WIDGET_DIR}
+    widgetResources.files = ./resource/*.manifest \
+                            ./resource/*.xml \
+                            ./resource/*.png \
+                            ./resource/*.svg
+    
+    INSTALLS += widgetResources
     
 }

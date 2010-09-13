@@ -21,8 +21,8 @@
                 <string name="alignment" value="AlignVCenter|AlignHCenter"/>
              </widget>
              <widget name="indicatorWidget" type="SnsrIndicatorWidget">
-                <sizehint type="MINIMUM" width="2.5un"/>
-                <sizehint height="2.5un" type="PREFERRED"/>
+                <sizehint type="MINIMUM" width="2.4un"/>
+                <sizehint height="2.4un" type="PREFERRED"/>
                 <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
                 <real name="z" value="3"/>
               </widget>

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -114,10 +114,9 @@ Screensaver::~Screensaver()
  */
 
 /*!
-    \fn void Screensaver::screenPowerModeRequested(ScreenPowerMode mode)
+    \fn void Screensaver::activeAreaMoved()
 
-    This signal is emitted when screensaver wants to switch the power
-    mode of the screen, or update the visible area in power save mode.
+    This signal is emitted when active area of power-save mode screensaver has moved.
  */
 
 /*!
@@ -128,6 +127,13 @@ ScreensaverState Screensaver::currentState()
 {
     return m_d->currentState();
 }
+
+/*!
+    \fn virtual Screensaver::ScreenPowerMode currentPowerMode() = 0
+
+    Inherited screensavers must implement this function to return the
+    display power mode to be used in the current state.
+ */
 
 /*!
     \fn virtual void getActiveScreenRows(int *firstActiveRow, int *lastActiveRow) = 0

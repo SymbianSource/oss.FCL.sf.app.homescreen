@@ -18,7 +18,7 @@
 if exist minibrowserwidgetplugin.sisx del minibrowserwidgetplugin.sisx
 
 makesis minibrowserwidgetplugin.pkg
-signsis minibrowserwidgetplugin.sis minibrowserwidgetplugin.sisx ../../../sis/rd.cer ../../../sis/rd-key.pem
+signsis minibrowserwidgetplugin.sis minibrowserwidgetplugin.sisx ../../../internal/sis/rd.cer ../../../internal/sis/rd-key.pem
 
 if exist minibrowserwidgetplugin.sisx (
 echo minibrowserwidgetplugin.sisx creation SUCCEEDED

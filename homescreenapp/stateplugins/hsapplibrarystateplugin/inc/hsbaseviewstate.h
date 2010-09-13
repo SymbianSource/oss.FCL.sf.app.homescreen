@@ -73,7 +73,7 @@ protected slots:
     virtual void addToHomeScreen(const int entryId);
     virtual void contextMenuAction(HbAction *action);
     virtual void addActivated(const QModelIndex &index);
-    virtual void addLongPressed(HbAbstractViewItem *item,
+    virtual void addModeShowContextMenu(HbAbstractViewItem *item,
                                         const QPointF &coords);
     
 protected:

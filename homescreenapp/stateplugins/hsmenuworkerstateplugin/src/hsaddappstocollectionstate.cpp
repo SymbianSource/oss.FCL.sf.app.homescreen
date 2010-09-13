@@ -599,10 +599,15 @@ QStandardItemModel *HsAddAppsToCollectionState::standardItemModel(
     QStandardItemModel *model = new QStandardItemModel(this);
     QList<QStandardItem *> items;
     for (int row = 0; row < caModel->rowCount(); row++) {
+        int itemId = caModel->data(caModel->index(row, 0),
+                               CaItemModel::IdRole).toInt();
+        // do not add actual collection to model
+        if(itemId == mCollectionId)
+        	{
+            continue;
+        	}
         uint flags = caModel->data(caModel->index(row, 0),
                 CaItemModel::FlagsRole).value<EntryFlags> ();
-        int itemId = caModel->data(caModel->index(row, 0),
-                                   CaItemModel::IdRole).toInt();
         if ((flags & RemovableEntryFlag) && (itemId != collectionId)) {
             QStandardItem *standardItem = new QStandardItem();
             standardItem->setData(caModel->data(caModel->index(row, 0),

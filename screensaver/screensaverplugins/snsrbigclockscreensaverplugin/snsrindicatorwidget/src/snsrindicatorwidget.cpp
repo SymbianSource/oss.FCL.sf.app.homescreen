@@ -43,7 +43,7 @@ const int gNumberOfIcons(6);
     \param parent Parent object.
  */
 SnsrIndicatorWidget::SnsrIndicatorWidget(QGraphicsItem* parent):
-    HbWidget(parent), mLayoutType(IndicatorsCentered)
+    HbWidget(parent), mLayoutType(IndicatorsCentered), mPowerSaveModeColor(false)
 {
     HbStyleLoader::registerFilePath(gIndicatorCssFilePath);
     HbStyleLoader::registerFilePath(gIndicatorWidgetMLFilePath);
@@ -98,6 +98,16 @@ void SnsrIndicatorWidget::setLayoutType(IndicatorLayoutType type)
 } 
 
 /*!
+    Set powersave mode status. If save mode is true then we use
+    by default Qt::white as color. Otherwise we use themed color.
+ */
+void SnsrIndicatorWidget::setPowerSaveModeColor(bool savemode)
+{
+    mPowerSaveModeColor = savemode;
+}
+
+
+/*!
     This is called whenever indicators' status changes: parameter list
     tells which indicators should be shown at the given moment. All
     previously shown indicators should be hidden and show only these
@@ -115,10 +125,15 @@ void SnsrIndicatorWidget::showIndicators(const QList<SnsrIndicatorInfo> &indicat
     // TODO: after wk18 color is lost after icon name is set again - bug or what?
     // workaround: ask color from theme and set it again here
     // If this must be left here, then change back-up color to white?
-    QColor iconColor = HbColorScheme::color("snsrforeground"); // TODO: final variable name?
+    QColor iconColor = HbColorScheme::color("qtc_screensaver");
     if (iconColor.spec() == QColor::Invalid ) {
-        iconColor = Qt::magenta;
+        iconColor = Qt::white;
     }
+
+    if ( mPowerSaveModeColor ) {        
+        iconColor = Qt::white;
+    }
+    
     // update icon paths for items that are gonna be shown
     for (int i=0; i < indicatorAmount && i < mIcons.size(); ++i) {
         mIcons.at(i)->setIconName(indicators.at(i).iconPath);

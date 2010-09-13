@@ -40,6 +40,7 @@
                     <enums name="textWrapping" value="TextWordWrap"/>
                     <bool name="visible" value="TRUE"/>
                     <string locid="txt_applib_info_following_applications_will_be_rem" name="plainText"/>
+                    <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 </widget>
                 <widget name="delete_message_label" type="HbLabel">
                     <enums name="textWrapping" value="TextWordWrap"/>
@@ -92,6 +93,7 @@
                         <enums name="textWrapping" value="TextWordWrap"/>
                         <bool name="visible" value="TRUE"/>
                         <string locid="txt_applib_info_following_applications_will_be_rem" name="plainText"/>
+                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     </widget>
                     <widget name="delete_message_label" type="HbLabel">
                         <enums name="textWrapping" value="TextWordWrap"/>
@@ -147,6 +149,7 @@
                         <enums name="textWrapping" value="TextWordWrap"/>
                         <bool name="visible" value="TRUE"/>
                         <string locid="txt_applib_info_following_applications_will_be_rem" name="plainText"/>
+                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     </widget>
                     <widget name="list_view_label" type="HbLabel">
                         <bool name="visible" value="TRUE"/>
@@ -201,6 +204,7 @@
                         <enums name="textWrapping" value="TextWordWrap"/>
                         <bool name="visible" value="FALSE"/>
                         <string locid="txt_applib_info_following_applications_will_be_rem" name="plainText"/>
+                        <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     </widget>
                     <widget name="delete_message_label" type="HbLabel">
                         <enums name="textWrapping" value="TextWordWrap"/>

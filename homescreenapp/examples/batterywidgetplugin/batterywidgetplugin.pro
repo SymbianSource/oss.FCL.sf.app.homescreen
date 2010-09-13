@@ -25,37 +25,50 @@ INCLUDEPATH += ./inc
 
 symbian: {
 
-    DESTDIR = /private/20022F35/import/widgetregistry/20022F7A
+    WIDGET_DIR = /private/20022F35/import/widgetregistry/20022F7A
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
     TARGET.UID3 = 0x20022F7A
     TARGET.EPOCALLOWDLLDATA=1
     TARGET.CAPABILITY = ALL -TCB
     
-    plugins.path = $${DESTDIR}
+    plugins.path = /resource/qt/plugins/homescreen
     plugins.sources = $${TARGET}.dll 
     
-    widgetResources.path = $${DESTDIR}
-    widgetResources.sources += resource/$${TARGET}.xml    
+    CONFIG += qtservice
+    QTSERVICE.DESCRIPTOR = resource/$${TARGET}.xml
+    
+    widgetResources.path = $${WIDGET_DIR}
     widgetResources.sources += resource/$${TARGET}.manifest
+    widgetResources.sources += resource/$${TARGET}.xml
     widgetResources.sources += resource/$${TARGET}.png
     widgetResources.sources += resource/batterywidget_bg.png
         
     DEPLOYMENT += plugins \
                   widgetResources
-} else {
-    CONFIG(debug, debug|release) {
-      SUBDIRPART = debug
-    } else {
-      SUBDIRPART = release
-    }    
-    
-    PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F7A
-    
-    DESTDIR = $$PWD/../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
+} 
 
-    manifest.path = $${DESTDIR}
-    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png ./resource/*.svg
+win32: {
+
+    CONFIG(debug, debug|release) {
+      TARGET_DIR = debug
+    } else {
+      TARGET_DIR = release
+    }        
     
-    INSTALLS += manifest    
+    HOMESCREEN_DIR = $$PWD/../../../../bin/$${TARGET_DIR}
+    
+    PLUGIN_DIR = $${HOMESCREEN_DIR}/resource/qt/plugins/homescreen
+    WIDGET_DIR = $${HOMESCREEN_DIR}/private/20022F35/import/widgetregistry/20022F7A
+
+    DESTDIR = $${PLUGIN_DIR}
+
+    widgetResources.path = $${WIDGET_DIR}
+    widgetResources.files = ./resource/*.manifest \
+                            ./resource/*.xml \
+                            ./resource/*.png \
+                            ./resource/*.svg
+    
+    INSTALLS += widgetResources    
+
 }

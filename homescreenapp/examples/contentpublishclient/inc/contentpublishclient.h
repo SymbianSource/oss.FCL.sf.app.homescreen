@@ -35,10 +35,12 @@ public slots:
     void addClockWidget();
     void setWallpaper1();
     void setWallpaper2();
+    void setWallpaper3();
 
 protected:
     bool addWidget(QString widgetUri);
     bool setWallpaper(QString fileName);
+    bool setWallpaper(const QString &portraitFileName, const QString &landscapeFileName);
     
 private:
     QObject* mService;

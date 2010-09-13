@@ -17,6 +17,7 @@
         <widget name="listView" role="HbDialog:contentWidget" type="HbListView">
             <widget name="qtl_list_pri" role="HbAbstractView:prototype" type="HbListViewItem">
                 <enums name="graphicsSize" value="LargeIcon"/>
+                <enums name="stretchingStyle" value="StretchLandscape"/>
             </widget>
             <enums name="selectionMode" value="SingleSelection"/>
             <real name="z" value="1"/>

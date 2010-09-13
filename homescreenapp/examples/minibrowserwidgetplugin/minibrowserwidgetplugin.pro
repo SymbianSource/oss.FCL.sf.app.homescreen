@@ -27,19 +27,22 @@ INCLUDEPATH += ./inc
 
 symbian: {
 
-    DESTDIR = /private/20022F35/import/widgetregistry/20022F6F
+    WIDGET_DIR = /private/20022F35/import/widgetregistry/20022F6F
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
     TARGET.UID3 = 0x20022F6F
     TARGET.EPOCALLOWDLLDATA=1
     TARGET.CAPABILITY = ALL -TCB
     
-    plugins.path = $${DESTDIR}
+    plugins.path = /resource/qt/plugins/homescreen
     plugins.sources = $${TARGET}.dll 
     
-    widgetResources.path = $${DESTDIR}
-    widgetResources.sources += resource/$${TARGET}.xml    
+    CONFIG += qtservice
+    QTSERVICE.DESCRIPTOR = resource/$${TARGET}.xml
+    
+    widgetResources.path = $${WIDGET_DIR}
     widgetResources.sources += resource/$${TARGET}.manifest
+    widgetResources.sources += resource/$${TARGET}.xml
     widgetResources.sources += resource/$${TARGET}preview.png
     widgetResources.sources += resource/$${TARGET}.svg
         
@@ -50,18 +53,24 @@ symbian: {
 win32: {
 
     CONFIG(debug, debug|release) {
-      SUBDIRPART = debug
+      TARGET_DIR = debug
     } else {
-      SUBDIRPART = release
-    }    
+      TARGET_DIR = release
+    }        
     
-    PLUGIN_SUBDIR = /private/20022F35/import/widgetregistry/20022F6F
+    HOMESCREEN_DIR = $$PWD/../../../../bin/$${TARGET_DIR}
     
-    DESTDIR = $$PWD/../../../../bin/$${SUBDIRPART}/$${PLUGIN_SUBDIR}
+    PLUGIN_DIR = $${HOMESCREEN_DIR}/resource/qt/plugins/homescreen
+    WIDGET_DIR = $${HOMESCREEN_DIR}/private/20022F35/import/widgetregistry/20022F6F
+        
+    DESTDIR = $${PLUGIN_DIR}
 
-    manifest.path = $${DESTDIR}
-    manifest.files = ./resource/*.manifest ./resource/*.xml ./resource/*.png ./resource/*.svg
+    widgetResources.path = $${WIDGET_DIR}
+    widgetResources.files = ./resource/*.manifest \
+                            ./resource/*.xml \
+                            ./resource/*.png \
+                            ./resource/*.svg
     
-    INSTALLS += manifest    
+    INSTALLS += widgetResources    
     
 }
