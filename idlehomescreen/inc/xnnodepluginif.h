@@ -183,7 +183,15 @@ public:
      * @return ETrue if node is focused.
      */
     IMPORT_C TBool IsFocusedState();
-
+    
+    /**
+     * Is the node in edit state
+     *
+     * @since Series 60 3.1
+     * @return ETrue if node is in edit state.
+     */    
+    IMPORT_C TBool IsEditState();
+    
     /**
      * Get node type
      *

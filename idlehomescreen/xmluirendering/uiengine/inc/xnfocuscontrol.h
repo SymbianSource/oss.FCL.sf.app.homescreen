@@ -106,8 +106,6 @@ private:
     CXnAppUiAdapter& iAppUiAdapter;
     /** Flag to indicate whether it is allowed to show focus */
     TBool iVisible;
-    /** Flag to indicate refusal */
-    TBool iRefused;
     };
 
 #endif // _XNFOCUSCONTROL_H

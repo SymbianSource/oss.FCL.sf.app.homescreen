@@ -1,66 +1,38 @@
 widget#desktop_widget
 {
-    width: auto;
-    height: 70px;
-
     block-progression: rl;
     direction: rtl;
+    color: "SKIN(268458534 13056 74)";
+    background-color: "SKIN(268458534 9916)";
 }
 
 button.button
 {
-    width: 70px;
-    height: auto;
-
     nav-index: appearance;
-
-    margin-left: 4px;
-    margin-right: 4px;
-    background-color: "SKIN(268458534 9906)";
+    width: 105px;
+    height: 105px;
+    margin-top: 5px;
 }
 
 button#button1
 {
-    margin-left: 0px;
-}
-
-button#button6
-{
-    margin-right: 0px;
-}
-
-button.button:focus
-{
-    focus-background: "SKIN(268458534 5120 9)";
+    margin-right: 10px;
 }
 
 image.icon
 {
-    width: auto;
-    height: auto;
-
     _s60-aspect-ratio: preserve;
-}
-
-/* For presence */
-image.second_icon
-{
-    margin-top:0%;
-    width: 25%;
-    height: 25%;
-    position: absolute;
-    bottom: 0%;
-    left: 70%;
-    top: 3%;
-    _s60-aspect-ratio:preserve;
+    padding-left: 5px;
+    padding-top: 5px;
+    width: 95px;
+    height: 95px;
 }
 
 tooltip.tooltip
 {
-    width: 15.0u; /* any fixed lenghts works here if the owerflow is set to
-                   both tooltip and text inside it */
-    height: 5.5u;
-
+    width: adaptive;
+    max-width: 350px;
+    height: 33px;
     border-style: solid;
     border-width: 5px;
 
@@ -68,23 +40,21 @@ tooltip.tooltip
     _s60-display-time: 1000000;
 
     background-color:"SKIN(268458534 8480)";
-    overflow: visible;
+    display: block;
+    padding-left: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-right: 6px;
 }
 
 
 text.tooltiptext
-{
-    position: static;
+{   
     font-family: EAknLogicalFontSecondaryFont;
-    font-size: 3.5u;
-    width: 100%;
-    height: 85%;
-    text-align: center;
+    font-size: 23px;
+    width: adaptive;
     color: "SKIN(268458534 13056 19)";
     overflow: visible;
-    padding-right: 1u;
-    padding-left: 1u;
-    padding-bottom: 1u;
 }
 
 /*********************
@@ -95,7 +65,7 @@ tooltip.tooltipext
     width: 15.0u;
     height: adaptive;
     border-style: solid;
-    border-width: 5px; 
+    border-width: 5px;
     /* delay comes from the xSP server */
     _s60-start-delay: 0;
     _s60-display-time: 60000000; /* 6 sec */

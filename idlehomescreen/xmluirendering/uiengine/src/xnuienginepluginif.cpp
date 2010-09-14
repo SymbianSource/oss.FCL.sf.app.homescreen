@@ -173,11 +173,15 @@ EXPORT_C void TXnUiEnginePluginIf::SetFocusedNode(
         node = &( aFocusedNode->Node() );
         }
 
-    TRAP_IGNORE
-        (               
-        node->SetStateWithoutNotificationL(
-            XnPropertyNames::style::common::KFocus );        
-        );
+    if ( node )
+        {
+        TRAP_IGNORE( node->SetStateWithoutNotificationL(
+            XnPropertyNames::style::common::KFocus ) );         
+        }
+    else
+        {
+        TRAP_IGNORE( iUiEngine->SetFocusedNodeL( NULL ) );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -353,17 +357,6 @@ EXPORT_C CXnNodePluginIf& TXnUiEnginePluginIf::PluginNodeL(
 EXPORT_C void TXnUiEnginePluginIf::DisableRenderUiLC()
     {
     iUiEngine->DisableRenderUiLC();
-    }
-
-// -----------------------------------------------------------------------------
-// TXnUiEnginePluginIf::EnablePartialTouchInput
-// 
-// -----------------------------------------------------------------------------
-//               
-EXPORT_C void TXnUiEnginePluginIf::EnablePartialTouchInput( 
-    CXnNodePluginIf& aNode, TBool aEnable )
-    {
-    iUiEngine->EnablePartialTouchInput(aNode.Node(), aEnable);
     }
 
 // -----------------------------------------------------------------------------

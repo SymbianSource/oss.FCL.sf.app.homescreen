@@ -21,6 +21,7 @@
 
 #include <e32hashtab.h>
 
+#include "aipolicyelement.h"
 
 inline TUint32 NodeHash(const TAny* aPtr)
     {
@@ -87,7 +88,8 @@ public:
      *
      * @param [out] aLayoutChanged true if UI layout changes
      */
-    virtual void CommitL( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap ) = 0;
+    virtual void CommitL( RAiPolicyElementArray& aPolicyArray, 
+            RPropertyHashMap& aPropertyHashMap ) = 0;
     
     /**
      * Resets this transaction for reuse.

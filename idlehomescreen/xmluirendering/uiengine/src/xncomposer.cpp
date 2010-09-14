@@ -52,6 +52,9 @@ _LIT8( KEmptyWidgetUid, "0x2001F47F" );
 _LIT( KCDrive, "C:" );
 _LIT8( KTagXuikon, "xuikon" );
 
+_LIT8( KTemplateViewSetting, "templateView" );
+_LIT8( KViewUidSetting, "uid" );
+
 using namespace hspswrapper;
 
 // ======== LOCAL FUNCTIONS ========
@@ -510,6 +513,25 @@ CXnODT* CXnComposer::ComposeRootL( CXnRootData& aRootData )
         CleanupStack::PopAndDestroy( 2, configuration );
         
         return NULL;        
+        }
+
+    RPointerArray<CItemMap>& settings( configuration->Settings() );
+    
+    for ( TInt i = 0; i < settings.Count(); i++ )
+        {
+        CItemMap* setting( settings[i] );
+        if ( (setting != NULL) && setting->ItemId() == KTemplateViewSetting )
+            {
+            RPointerArray<CPropertyMap>& properties = setting->Properties(); 
+            for ( TInt j = 0; j < properties.Count(); j++ )
+                {
+                CPropertyMap* property( properties[i] );
+                if ( (property != NULL) && property->Name() == KViewUidSetting )
+                    {
+                    aRootData.SetTemplateViewUidL( property->Value() );
+                    }
+                }
+            }
         }
 
     CPluginInfo& info( configuration->PluginInfo() );

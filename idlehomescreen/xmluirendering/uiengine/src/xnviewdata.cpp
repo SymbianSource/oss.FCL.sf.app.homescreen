@@ -33,14 +33,11 @@
 #include "ainativeuiplugins.h"
 #include "xnpanic.h"
 
-
 #include "debug.h"
 
 // Constants
 _LIT8( KNs, "namespace" );
         
-// ============================ LOCAL FUNCTIONS ================================
-
 // ============================ MEMBER FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
 // CXnViewData::NewL()
@@ -211,6 +208,11 @@ TInt CXnViewData::Load()
     
     iLoadError = err;
                 
+    if( !iLoadError )
+        {
+        TRAP_IGNORE( iManager.NotifyViewLoadedL( *this ) );
+        }
+
     return iLoadError;
     }
 
@@ -319,7 +321,11 @@ CXnPluginData* CXnViewData::Plugin( const TDesC8& aNamespace )
 //
 CXnNode* CXnViewData::ViewNode() const
     {
-    return iNode->LayoutNode();
+    if( iNode )
+        {
+        return iNode->LayoutNode();
+        }
+    return NULL;
     }
 
 // -----------------------------------------------------------------------------

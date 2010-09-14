@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<package version="2.0">
+    <family>vga_tch</family>
+    
+    <type>widget</type>
+
+    <!-- interface uid -->
+    <interfaceuid>0x2001f48a</interfaceuid>
+
+    <!-- vendor uid  -->
+    <provideruid>0x101fb657</provideruid>
+    <!-- uid -->
+
+    <configurationuid>0x200286e6</configurationuid>
+
+    <fullname>Time and Date</fullname>
+    <shortname>clockdate</shortname>
+    <version>1.0</version>
+
+    <!-- description -->
+    <description>Clock widget</description>
+    
+    <!-- configuration -->
+    <filexml>widgetconfiguration.xml</filexml>
+   
+    <filelogo>skin(270501603 9360):mif(icon.mif 16384 16385)</filelogo>
+    <!-- Locale specific resources -->
+    <localization>
+    <fileresource tag="xuikon">clockdate.o0000</fileresource>
+    </localization>
+
+</package>

@@ -364,6 +364,7 @@ TBool CTsFswEngine::CollectTasksL()
 void CTsFswEngine::HiddenAppListUpdated()
     {
     UpdateTaskList();
+    TRAP_IGNORE( iDataList->RemoveHiddenAppsScrenshotsL(); )
     }
 
 // --------------------------------------------------------------------------
@@ -489,10 +490,15 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
         wgId = aWgId;
         }
     TInt err = iDataList->AppUidForWgId( wgId, appUid );
-    if ( err || appUid == KTsCameraUid )
+    TBool hidden = EFalse;
+    TRAP_IGNORE( 
+    hidden = iDataList->HiddenApps()->IsHiddenL( appUid, iWsSession, aWgId) );
+    if ( err || 
+         KTsCameraUid == appUid ||
+         hidden )
         {
-        // Dont't assign screenshot to camera app
-        TSLOG0( TSLOG_LOCAL, "Screenshot for camera - ignore" );
+        // Dont't assign screenshot to camera app or hidden app
+        TSLOG0( TSLOG_LOCAL, "Screenshot for camera or hidden app - ignore" );
         iPreviewProvider->AckPreview(aFbsHandle);
         TSLOG_OUT();
         return;
@@ -529,10 +535,13 @@ void CTsFswEngine::HandleFswPpApplicationUnregistered( TInt aWgId )
 // Callback from CTsFastSwapPreviewProvider
 // --------------------------------------------------------------------------
 //
-void CTsFswEngine::HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise )
+void CTsFswEngine::HandleFswPpApplicationBitmapRotation( TInt aWgId,
+        TInt aFbsHandle, TBool aClockwise )
     {
     TSLOG_CONTEXT( HandleFswPpApplicationBitmapRotation, TSLOG_LOCAL );
     TSLOG1_IN( "aWgId = %d", aWgId );
+    
+    HandleFswPpApplicationChange( aWgId, aFbsHandle );
     
     CFbsBitmap** bmp = iDataList->FindScreenshot(aWgId);
             

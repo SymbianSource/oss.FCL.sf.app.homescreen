@@ -24,8 +24,8 @@ DEFAULT
 PRJ_EXPORTS
 // Support for productization and Carbide.Ui customization
 //********************************************************
-../hsps/00/manifest.dat /epoc32/data/z/resource/homescreen/view1_2001fdb9/hsps/manifest.dat
-../hsps/00/viewconfiguration.xml /epoc32/data/z/resource/homescreen/view1_2001fdb9/hsps/viewconfiguration.xml
+//../hsps/00/manifest.dat /epoc32/data/z/resource/homescreen/view1_2001fdb9/hsps/manifest.dat
+//../hsps/00/viewconfiguration.xml /epoc32/data/z/resource/homescreen/view1_2001fdb9/hsps/viewconfiguration.xml
 //../hsps/00/viewconfiguration.dtd /epoc32/data/z/resource/homescreen/view1_2001fdb9/hsps/viewconfiguration.dtd
 
 ../xuikon/00/view.dat /epoc32/data/z/resource/homescreen/view1_2001fdb9/xuikon/view1_2001fdb9.dat
@@ -41,6 +41,15 @@ PRJ_EXPORTS
 ../xuikon/94/view.css /epoc32/data/z/resource/homescreen/view1_2001fdb9/xuikon/94/view.css
 
 
+//Confml and cfgml files for the customization
+// starting use confml it is need to remove root_configuration.xml direct exporting (view_200286e4_variant.iby)
+//***********************************
+../conf/view2001fdb9.confml   APP_LAYER_CONFML(view2001fdb9.confml)
+../conf/view2001fdb9.gcfml    APP_LAYER_GCFML(view2001fdb9.gcfml)
+../conf/view2001fdb9manifest.confml   APP_LAYER_CONFML(view2001fdb9manifest.confml)
+../conf/view2001fdb9manifest.gcfml    APP_LAYER_GCFML(view2001fdb9manifest.gcfml)
+../conf/view2001fdb9xuikon.confml   APP_LAYER_CONFML(view2001fdb9xuikon.confml)
+../conf/view2001fdb9xuikon.gcfml    APP_LAYER_GCFML(view2001fdb9xuikon.gcfml)
 // Support for S60 localization
 //*****************************
 //#ifndef __VIEWCONFIGURATION_LOC__
@@ -58,7 +67,7 @@ PRJ_EXPORTS
 ../rom/view_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_resources.iby)
 ../rom/view_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_customer.iby)
 ../rom/view_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_variant.iby)
-../rom/view.iby CORE_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9.iby)
+//../rom/view.iby CORE_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9.iby)
 
 
 // Dtd-localization

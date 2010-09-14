@@ -31,6 +31,7 @@ SOURCE          xnclockfactory.cpp
 SOURCE          xnclock.cpp
 SOURCE          xnclockadapter.cpp
 SOURCE          xnclockcontrol.cpp
+SOURCE          xndatecontrol.cpp
 SOURCE          xnclockface.cpp
 
 USERINCLUDE     ../inc
@@ -51,6 +52,8 @@ LIBRARY         aknicon.lib
 LIBRARY         fbscli.lib
 LIBRARY         gdi.lib
 LIBRARY         hwrmlightclient.lib
+LIBRARY         commonengine.lib
+LIBRARY         bafl.lib
 
 LANG            SC
 

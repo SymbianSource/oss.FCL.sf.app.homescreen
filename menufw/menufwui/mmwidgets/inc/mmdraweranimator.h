@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmDrawerAnimator declaration
-*  Version     : %version: MM_17.1.10 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_17.1.11 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -160,8 +160,8 @@ public:
      * and end in the EDrag floating item position, when item had been start drag.
      *
      * @since S60 v5.0
-	 * @param aDraggedIndex Draged item index to be animated.
-	 * @param aPoint End position of animated item.
+     * @param aDraggedIndex Draged item index to be animated.
+     * @param aPoint End position of animated item.
      */
     void AnimateDragItemStartL( TInt aDraggedIndex, TPoint aPoint );
 
@@ -237,11 +237,6 @@ private: // Data
      * Delay between redrawing.
      */
     TTimeIntervalMicroSeconds iDelay;
-
-    /**
-     * Last redraw time
-     */
-    TTime iLastRedrawTime;
 
     /**
      * Effects api.

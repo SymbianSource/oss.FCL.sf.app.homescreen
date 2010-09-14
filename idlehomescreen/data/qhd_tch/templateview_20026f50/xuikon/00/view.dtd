@@ -494,3 +494,21 @@ qtn_hs_text_softkey_call.description "RSK caption call inactive"
 qtn_hs_text_softkey_call.parents ""
 -->
 <!ENTITY qtn_hs_text_softkey_call "Call">
+
+<!--
+qtn_hs_page_edit_options_delete.attributes
+qtn_hs_page_edit_options_delete.layout "list_single_pane_t1_cp2"
+qtn_hs_page_edit_options_delete.release "TB9.2"
+qtn_hs_page_edit_options_delete.description "Lock keypad"
+qtn_hs_page_edit_options_delete.parents ""
+-->
+<!ENTITY qtn_hs_lock_keypad "Lock keypad">
+
+<!--
+qtn_hs_text_softkey_call.attributes
+qtn_hs_text_softkey_call.layout "nhd_control_pane_t2/opt7"
+qtn_hs_text_softkey_call.release "TB9.2"
+qtn_hs_text_softkey_call.description "RSK caption"
+qtn_hs_text_softkey_call.parents ""
+-->
+<!ENTITY qtn_hs_apps_menu_skey "Menu">

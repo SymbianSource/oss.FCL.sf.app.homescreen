@@ -737,6 +737,10 @@ TBool CTsFswDataList::FitDataToListL(RTsFswArray& aListToFit,
         if ( (iData[i]->Widget() == aConsiderWidgets) &&
             !CheckIfExists(*iData[i], aListToFit) )
             {
+            if( aConsiderWidgets )
+                {
+                RemoveScreenshot( iData[i]->AppUid().iUid );
+                }
             delete iData[i];
             iData.Remove(i);
             changed = ETrue;
@@ -831,5 +835,29 @@ TBool CTsFswDataList::RemoveScreenshotFromParent( TInt aBmpHandle )
     return changed;
     }
 
+// --------------------------------------------------------------------------
+// CTsFswDataList::RemoveScreenshotFromParent
+// --------------------------------------------------------------------------
+//
+void CTsFswDataList::RemoveHiddenAppsScrenshotsL()
+    {
+    RArray<TInt> hiddenWgIds;
+    THashMapIter<TInt, CFbsBitmap*> iter( iScreenshots );
+    while ( const TInt* wgIdkey = iter.NextKey() )
+        {
+        TInt wgId = *wgIdkey;
+        TBool hidden = HiddenApps()->IsHiddenL( AppUidForWgIdL( wgId),
+                iWsSession, wgId );
+        if( hidden )
+            {
+            hiddenWgIds.Append( wgId );
+            }
+        }
+    for ( TInt i = 0; i < hiddenWgIds.Count(); i++)
+        {
+        RemoveScreenshot( hiddenWgIds[i] );
+        }
+    hiddenWgIds.Reset();
+    }
 
 // end of file

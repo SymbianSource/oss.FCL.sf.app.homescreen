@@ -132,13 +132,21 @@ void CWmWidgetData::InitL(
     // get publisher uid from widget registry
     FetchPublisherUidL( aHsContentInfo->PublisherId(), 
                         aRegistryClientSession );
-    
+
+    // delete the old list box item
+    delete iMdcaPoint;
+    iMdcaPoint = NULL;
+        
     // create iMdcaPoint for listbox    
     _LIT( KFormatStr, "0\t%S");
     iMdcaPoint = HBufC::NewL( 
             aHsContentInfo->Name().Length() + KFormatStr().Length() );
     iMdcaPoint->Des().Format( KFormatStr(), &aHsContentInfo->Name() );
 
+    // delete the old content info
+    delete iHsContentInfo;
+    iHsContentInfo = NULL;
+    
     // take ownership of the content info
     iHsContentInfo = aHsContentInfo;
     }
@@ -423,10 +431,6 @@ TBool CWmWidgetData::ReplaceContentInfo(
     TBool sameLogo = (
             iHsContentInfo->IconPath() == aHsContentInfo->IconPath() );
 
-    // delete the old content info
-    delete iHsContentInfo;
-    iHsContentInfo = NULL;
-    
     // re-init the object, take care about leave.
     TRAPD( err, InitL( aHsContentInfo, NULL ); );
     if ( KErrNone != err )

@@ -332,6 +332,8 @@ private:
     
     void NotifyViewActivatedL( const CXnViewData& aViewData );
 
+    void NotifyViewLoadedL( const CXnViewData& aViewData );
+
     void NotifyViewDeactivatedL( const CXnViewData& /*aViewData*/ );
 
     void NotifyConfigureWidgetL( const CHsContentInfo& aContentInfo,
@@ -341,9 +343,9 @@ private:
     
     void NotifyWidgetRemovalL( const CXnPluginData& aPluginData );
 
-    void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ );
+    void NotifyViewAdditionL( const CXnViewData& /*aViewData*/ );
     
-    void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ );
+    void NotifyViewRemovalL( const CXnViewData& /*aViewData*/ );
     
     void NotifyAllViewsLoadedL();
 

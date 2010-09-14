@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+	<tag name="target" value="core"/>
+	<tag name="target" value="rofs2"/>
+	<tag name="target" value="rofs3"/>
+  <file xmlns="http://www.s60.com/xml/genconfml/1" name="manifest.dat" target="\private\200159c0\install\view1_2001fdb9\hsps\00\">
+	<setting ref="VGAHomescreen1manifest/PackageVersion"/>
+	<setting ref="VGAHomescreen1manifest/DeviceFamily"/>
+	<setting ref="VGAHomescreen1manifest/ConfigurationType"/>
+	<setting ref="VGAHomescreen1manifest/InterfaceUid"/>
+	<setting ref="VGAHomescreen1manifest/ProviderUid"/>
+	<setting ref="VGAHomescreen1manifest/ConfigurationUid"/>
+	<setting ref="VGAHomescreen1manifest/FullName"/>
+	<setting ref="VGAHomescreen1manifest/ShortName"/>
+	<setting ref="VGAHomescreen1manifest/ConfigurationVersion"/>
+	<setting ref="VGAHomescreen1manifest/ConfigurationFile"/>
+	<setting ref="VGAHomescreen1manifest/UiResourceFile"/>
+		<xsl:stylesheet version="1.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration/data">
+		<package>
+	  <xsl:attribute name="version"><xsl:value-of select="VGAHomescreen1manifest/PackageVersion"/></xsl:attribute>
+    <family>
+    <xsl:value-of select="VGAHomescreen1manifest/DeviceFamily"/>
+    </family>
+    <type>
+    <xsl:value-of select="VGAHomescreen1manifest/ConfigurationType"/>
+    </type>
+    <interfaceuid>
+    <xsl:value-of select="VGAHomescreen1manifest/InterfaceUid"/>
+    </interfaceuid>
+    <provideruid>
+    <xsl:value-of select="VGAHomescreen1manifest/ProviderUid"/>
+    </provideruid>
+    <configurationuid>
+    <xsl:value-of select="VGAHomescreen1manifest/ConfigurationUid"/>
+    </configurationuid>
+    <fullname>
+    <!--xsl:text>&#x26;</xsl:text-->
+    <xsl:value-of select="VGAHomescreen1manifest/FullName"/>
+    <!--xsl:text>&#x3B;</xsl:text-->
+    </fullname>
+    <shortname>
+    <xsl:value-of select="VGAHomescreen1manifest/ShortName"/>
+    </shortname>
+    <version>
+    <xsl:value-of select="VGAHomescreen1manifest/ConfigurationVersion"/>
+    </version>
+    <filexml>
+    <xsl:value-of select="VGAHomescreen1manifest/ConfigurationFile"/>
+    </filexml>
+    <localization>
+        <fileresource>
+        <xsl:value-of select="VGAHomescreen1manifest/UiResourceFile"/>
+        </fileresource>
+    </localization>
+  </package>
+  </xsl:template>
+	</xsl:stylesheet>
+</file>
+</container>

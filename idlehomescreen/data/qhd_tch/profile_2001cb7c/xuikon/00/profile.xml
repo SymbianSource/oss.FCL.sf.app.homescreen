@@ -9,6 +9,14 @@
                 
         <box id="clock_profile_container">
             <clock id="clock" focusable="true" _s60-initial-focus="1">
+            	<digital>
+            		<face24/>
+            		<face12/>
+            		<ampm/>
+            	</digital>
+            	<analog>
+            		<face/>
+            	</analog>
               <actions>
                   <action>
                       <trigger name="activate"/>
@@ -17,20 +25,16 @@
               </actions>
             </clock>
           <box id="date_profiles_container" focusable="false">
-              <box id="date_container" class="clock_profile" focusable="true">
-                  <box id="date_content" focusable="false">
-                      <text id="date_text" focusable="false">
-                          <property class="DeviceStatus/Date"/>
-                      </text>                 
-                  </box>
-                  <actions>
+                  <clock id="date_content" focusable="true">
+                    <date/>
+                    <actions>
                       <action>
                           <trigger name="activate"/>
                           <!-- open organizer -->
                           <event name="EventHandler/LaunchApp" uid="0x10005901"/><!--organizer application-->
                       </action>
-                  </actions>
-              </box>
+                  	</actions>
+                  </clock>
                 <box id="profile_softindicator" class="clock_profile" focusable="true">                                     
                     <!-- UI resources -->
                     <desc id="Profile/ActiveProfileGeneralIconResource" path="SKIN(270501603 8586 74)"/>

@@ -57,10 +57,8 @@ void CTransaction::Append(MTransactionElement& aElement )
     iTransactionElements.AddLast(dynamic_cast<CTransactionElement&>(aElement));
     }
     
-void CTransaction::CommitL( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap )
+void CTransaction::CommitL( RAiPolicyElementArray& aPolicyArray, RPropertyHashMap& aPropertyHashMap )
     {
-    aLayoutChanged = EFalse;
-        
     if ( iTransactionElements.IsEmpty() )
         {
         // Nothing to do
@@ -75,7 +73,7 @@ void CTransaction::CommitL( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHa
     while ( iter )
         {
         // Commit element and advance iterator 
-        (iter++)->CommitL( aLayoutChanged, aPropertyHashMap );
+        (iter++)->CommitL( aPolicyArray, aPropertyHashMap );
         }
     }
 

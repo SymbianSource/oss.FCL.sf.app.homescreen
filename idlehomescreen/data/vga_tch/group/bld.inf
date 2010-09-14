@@ -15,15 +15,20 @@
 *
 */
 
-
+#include "../clockdate_200286e6/group/bld.inf"
+#include "../desktop_20018eee/group/bld.inf"
 #include "../double_row_icon_widget_2001fdbd/group/bld.inf"
 #include "../double_row_widget_2001fdc2/group/bld.inf"
+#include "../profilemode_200286e7/group/bld.inf"
 #include "../root_2001f48f/group/bld.inf"
 #include "../single_row_icon_widget_2001fdc0/group/bld.inf"
 #include "../single_row_widget_2001fdc1/group/bld.inf"
 #include "../triple_row_icon_widget_2001fdbe/group/bld.inf"
 #include "../triple_row_widget_2001fdbf/group/bld.inf"
 #include "../view1_2001fdb9/group/bld.inf"
+#include "../view2_200286ea/group/bld.inf"
+#include "../view3_200286eb/group/bld.inf"
+#include "../templateview_200286ec/group/bld.inf"
 #include "../wideimage_10009dff/group/bld.inf"
 
 PRJ_PLATFORMS

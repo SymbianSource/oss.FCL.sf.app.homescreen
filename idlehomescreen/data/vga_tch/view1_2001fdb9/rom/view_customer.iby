@@ -19,12 +19,12 @@
 #ifndef __AI3VIEW_2001FDB9_CUSTOMER_IBY__
 #define __AI3VIEW_2001FDB9_CUSTOMER_IBY__
 
-#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools, language specific
 data=ZPRIVATE\200159c0\install\view1_2001fdb9\xuikon\00\view.o0000 \private\200159c0\install\view1_2001fdb9\xuikon\00\view.o0000
 //data=ZPRIVATE\200159c0\install\view1_2001fdb9\hsps\00\viewconfiguration.dtd \private\200159c0\install\view1_2001fdb9\hsps\00\viewconfiguration.dtd
 
-#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
 
 #endif // __AI3VIEW_2001FDB9_CUSTOMER_IBY__

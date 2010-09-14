@@ -192,7 +192,7 @@ TInt CHnEngine::LoadSuiteFromUriL( const TDesC8& aSuiteName,
     if( !( aSuiteName.Compare( KRoot8 ) ) )
         {
         CLiwGenericParamList* uriParams =
-			UriQueryToLiwListLC( aUriQuery, aUriFragment, aSuiteName );
+      UriQueryToLiwListLC( aUriQuery, aUriFragment, aSuiteName );
         CLiwGenericParamList* params = CLiwGenericParamList::NewLC();
         params->AppendL( iMetaDataModel->GetSuiteParameters( 0 ) );
         params->AppendL( *uriParams );
@@ -205,7 +205,7 @@ TInt CHnEngine::LoadSuiteFromUriL( const TDesC8& aSuiteName,
     else
         {
         CLiwGenericParamList* params =
-			UriQueryToLiwListLC( aUriQuery, aUriFragment, aSuiteName );
+      UriQueryToLiwListLC( aUriQuery, aUriFragment, aSuiteName );
 
         HBufC* suiteName = HnConvUtils::Str8ToStrLC( aSuiteName );
         params->AppendL( TLiwGenericParam( KNewSuiteParamNameEn,
@@ -267,27 +267,27 @@ void CHnEngine::HandleTheSameSuitesL( TBool aNextExists, const TDesC8& aParams )
 // ---------------------------------------------------------------------------
 //
 EXPORT_C void CHnEngine::LoadSuitesFromUriL( const TDesC8& aUri )
-	{
-	DEBUG(("_MM_:CHnEngine::LoadSuitesFromUriL IN"));
-	DEBUG8(("_MM_:\tURI: %S",&aUri));
+  {
+  DEBUG(("_MM_:CHnEngine::LoadSuitesFromUriL IN"));
+  DEBUG8(("_MM_:\tURI: %S",&aUri));
 
-	TBool consumed(EFalse);
+  TBool consumed(EFalse);
 
     if ( aUri.Find( KSetFocusWithPref ) != KErrNotFound )
-	    {
-	    LoadFromCrL( aUri );
-	    consumed = ETrue;
-	    }
+      {
+      LoadFromCrL( aUri );
+      consumed = ETrue;
+      }
 
     if ( !consumed )
-    	{
-    	consumed = HandleActionL( aUri );
-    	}
+      {
+      consumed = HandleActionL( aUri );
+      }
 
     if ( !consumed )
-    	{
-    	LoadSuitesL( aUri );
-    	}
+      {
+      LoadSuitesL( aUri );
+      }
 
     DEBUG(("_MM_:CHnEngine::LoadSuitesFromUriL OUT"));
     }
@@ -353,19 +353,19 @@ TInt CHnEngine::HandleModelEventL( const TDesC& aEventName,
         ret = HandleSetFocusEventL( aParams );
         }
     else if (aEventName == KAppGainForeground )
-    	{
-    	//force matrix gain foreground
+      {
+      //force matrix gain foreground
         DEBUG(("_MM_:CHnEngine::HandleModelEventL EForegroundGain"));
         iControllerInterface.NotifyUiRefreshL( EForegroundGain );
         ret = KErrNone;
-    	}
+      }
     else if (aEventName == KAppGainBackground )
-    	{
-    	//force matrix gain background
+      {
+      //force matrix gain background
         DEBUG(("_MM_:CHnEngine::HandleModelEventL EBackgroundGain"));
         iControllerInterface.NotifyUiRefreshL( EBackgroundGain );
         ret = KErrNone;
-    	}
+      }
 
     return ret;
     }
@@ -602,41 +602,41 @@ TInt CHnEngine::HandleSetFocusEventL( const CLiwGenericParamList& aParams  )
 
     TInt posSuite( 0 );
     TInt posItem( 0 );
-	TInt64 suiteCustomId( KErrNotFound );
-	TInt64 itemCustomId( KErrNotFound );
+  TInt64 suiteCustomId( KErrNotFound );
+  TInt64 itemCustomId( KErrNotFound );
 
-	// Get suite's and item's custom ids.
-	const TLiwGenericParam* paramSuiteId = aParams.FindFirst( posSuite,  KSuiteCustomId8 );
-	const TLiwGenericParam* paramItemId = aParams.FindFirst( posItem,  KItemCustomId8 );
+  // Get suite's and item's custom ids.
+  const TLiwGenericParam* paramSuiteId = aParams.FindFirst( posSuite,  KSuiteCustomId8 );
+  const TLiwGenericParam* paramItemId = aParams.FindFirst( posItem,  KItemCustomId8 );
 
 
-	if ( posSuite >= 0 && posItem >= 0 )
-    	{
-    	suiteCustomId = paramSuiteId->Value().AsTInt64();
-    	itemCustomId = paramItemId->Value().AsTInt64();
+  if ( posSuite >= 0 && posItem >= 0 )
+      {
+      suiteCustomId = paramSuiteId->Value().AsTInt64();
+      itemCustomId = paramItemId->Value().AsTInt64();
 
-    	// Get matching suite.
-    	CHnSuiteModel* suiteModel = iSuiteContainer->GetMatchingSuiteModel( suiteCustomId );
+      // Get matching suite.
+      CHnSuiteModel* suiteModel = iSuiteContainer->GetMatchingSuiteModel( suiteCustomId );
 
-    	if ( suiteModel )
-    		{
-    		// If suite is not null, then find matching item model.
-    		TInt index( KErrNotFound );
-    		CHnItemModel* itemModel = suiteModel->GetMatchingItemModelL( itemCustomId, index );
+      if ( suiteModel )
+        {
+        // If suite is not null, then find matching item model.
+        TInt index( KErrNotFound );
+        CHnItemModel* itemModel = suiteModel->GetMatchingItemModelL( itemCustomId, index );
 
-    		if ( itemModel )
-    			{
-    			// If itemModel is not null then set highlight and set highligh
-    			// on matching item.
-    			suiteModel->SetSuiteHighlightL( index );
-        		iControllerInterface.HandleSuiteEventL( ESuiteHighlightChanged, suiteModel );
-    			}
-    		else
-    			{
-    			suiteModel->QueueFocus( itemCustomId );
-    			}
-    		}
-    	}
+        if ( itemModel )
+          {
+          // If itemModel is not null then set highlight and set highligh
+          // on matching item.
+          suiteModel->SetSuiteHighlightL( index );
+            iControllerInterface.HandleSuiteEventL( ESuiteHighlightChanged, suiteModel );
+          }
+        else
+          {
+          suiteModel->QueueFocus( itemCustomId );
+          }
+        }
+      }
 
     DEBUG(("_MM_:CHnEngine::HandleSetFocusEventL OUT"));
     return KErrNone;
@@ -895,11 +895,40 @@ RPointerArray< HBufC8 > CHnEngine::SplitL( const TDesC8& aSource,
             {
             TInt length = tmpSource.Find( aSeparator );
 
+            if( aSeparator == HnLogicalRelations::KParamUid8
+                    && length != KErrNotFound )
+                {
+                TInt ampPos( KErrNotFound );
+                TInt eqPos( KErrNotFound );
+                do
+                    {
+                    ampPos = tmpSource.Mid(
+                            length + HnLogicalRelations::KParamUid8().Length() ).
+                                Find( HnLogicalRelations::KLogicalAnd8 );
+                    if( ampPos >= 0 )
+                        {
+                        length += (ampPos + HnLogicalRelations::KParamUid8().Length());
+                        ampPos = 0;
+                        }
+                    else if( (length + HnLogicalRelations::KParamUid8().Length())
+                                == tmpSource.Length())
+                        {    
+                        length = KErrNotFound;
+                        }
+                    }while( !ampPos );
+                }
+
             if ( length >= 0 )
                 {
                 token.Set( tmpSource.Mid( 0, length ) );
                 tokens.AppendL( token.AllocL() );
                 tmpSource.Set( tmpSource.Mid( length + 1 ) );
+                if( aSeparator == HnLogicalRelations::KLogicalEqual8 )
+                    {
+                    token.Set( tmpSource );
+                    tokens.AppendL( token.AllocL() );
+                    break;
+                    }
                 }
             else
                 {
@@ -993,16 +1022,16 @@ EXPORT_C void CHnEngine::HandleRequestL( const CLiwGenericParamList& aParam,
 // ---------------------------------------------------------------------------
 //
 void CHnEngine::LoadFromCrL( const TDesC8& aUri )
-	{
-	HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
-	uriBuf->Des().Copy( aUri );
+    {
+    HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
+    uriBuf->Des().Copy( aUri );
 
-	TUriParser8 parser;
-	parser.Parse( *uriBuf );
-	User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
+    TUriParser8 parser;
+    parser.Parse( *uriBuf );
+    User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
 
-	const TDesC8& query = parser.Extract( EUriQuery );
-    RPointerArray< HBufC8 > params = SplitL( query, HnLogicalRelations::KLogicalAnd8);
+    const TDesC8& query = parser.Extract( EUriQuery );
+    RPointerArray< HBufC8 > params = SplitL( query, HnLogicalRelations::KParamUid8);
 
     TBuf8<KApaMaxAppGroupName + KTimeStampBufferLength + KUidStringLength + 2> item;
 
@@ -1020,34 +1049,34 @@ void CHnEngine::LoadFromCrL( const TDesC8& aUri )
         	    appgrname.Append( *paramValue[1] );
         	    }
 
-        	//get current time
-        	TTime currentTime;
-        	currentTime.HomeTime();
-        	TDateTime date(currentTime.DateTime());
-        	item.Format(KCRepTimeFormat, &appgrname , date.Year(), date.Month(),
-        		date.Day(), date.Hour(), date.Minute(), date.Second(), date.MicroSecond());
-        	}
+          //get current time
+          TTime currentTime;
+          currentTime.HomeTime();
+          TDateTime date(currentTime.DateTime());
+          item.Format(KCRepTimeFormat, &appgrname , date.Year(), date.Month(),
+            date.Day(), date.Hour(), date.Minute(), date.Second(), date.MicroSecond());
+          }
         else if ( !paramValue[0]->Compare( KKeyTypeUid ) )
-        	{
-        	item.Append( KComma8 );
+          {
+          item.Append( KComma8 );
             if( paramValue[1]->Length()<=KUidStringLength )
                 {
                 item.Append( *paramValue[1] );
                 }
-        	}
+          }
         CleanupStack::PopAndDestroy( &paramValue );
         }
 
     TBuf<KApaMaxAppGroupName + KTimeStampBufferLength + KUidStringLength + 2> item1;
     item1.Copy(item);
-	CRepository *cenRep = CRepository::NewLC( KCRUidMenu );
-	cenRep->Set(KMenuShowFolder, item1);
-	CleanupStack::PopAndDestroy( cenRep );
+    CRepository *cenRep = CRepository::NewLC( KCRUidMenu );
+    cenRep->Set(KMenuShowFolder, item1);
+    CleanupStack::PopAndDestroy( cenRep );
 
     params.ResetAndDestroy();
     CleanupStack::PopAndDestroy( uriBuf );
 
-	}
+  }
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -1081,96 +1110,96 @@ void CHnEngine::LightStatusChanged(TInt aTarget,
 // ---------------------------------------------------------------------------
 //
 TBool CHnEngine::HandleActionL( const TDesC8& aUri )
-	{
-	TBool exitActionConsumed(EFalse);
+  {
+  TBool exitActionConsumed(EFalse);
 
-	HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
-	uriBuf->Des().Copy( aUri );
+  HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
+  uriBuf->Des().Copy( aUri );
 
-	TUriParser8 parser;
+  TUriParser8 parser;
     parser.Parse( *uriBuf );
     User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
 
     const TDesC8& host8 = parser.Extract( EUriHost );
     const TDesC8& query = parser.Extract( EUriQuery );
 
-	RBuf action;
+  RBuf action;
     CleanupClosePushL( action );
     CLiwGenericParamList* paramsUri = UriQueryToLiwListLC( query, KNullDesC8, KNullDesC8 );
     HnLiwUtils::GetStringL( *paramsUri, KActionParams, action );
 
     if ( !action.Compare( KActionExit ) )
-    	{
-    	RBuf host;
-		host.CreateL( host8.Length() );
-		CleanupClosePushL( host );
-		host.Copy(host8);
-    	CHnSuiteModel* suiteModel = iSuiteContainer->GetSuiteModel( host );
-    	TBool exitHideHostNotFound( ETrue  );
-    	if( suiteModel  && suiteModel->ExitMode() == EExitModeHide )
-    	    {
-    	    exitHideHostNotFound = EFalse;
-    	    }
+      {
+      RBuf host;
+    host.CreateL( host8.Length() );
+    CleanupClosePushL( host );
+    host.Copy(host8);
+      CHnSuiteModel* suiteModel = iSuiteContainer->GetSuiteModel( host );
+      TBool exitHideHostNotFound( ETrue  );
+      if( suiteModel  && suiteModel->ExitMode() == EExitModeHide )
+          {
+          exitHideHostNotFound = EFalse;
+          }
 
-		if ( exitHideHostNotFound )
-			{
-			//send to foreground
-			CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
-			CleanupStack::PushL( pl );
-			HandleModelEventL( KAppGainForeground, *pl );
-			CleanupStack::PopAndDestroy( pl );
-			}
-		else
-			{
-			//send to background
-			CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
-			CleanupStack::PushL( pl );
-			HandleModelEventL( KAppGainBackground, *pl );
-			CleanupStack::PopAndDestroy( pl );
-			}
+    if ( exitHideHostNotFound )
+      {
+      //send to foreground
+      CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
+      CleanupStack::PushL( pl );
+      HandleModelEventL( KAppGainForeground, *pl );
+      CleanupStack::PopAndDestroy( pl );
+      }
+    else
+      {
+      //send to background
+      CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
+      CleanupStack::PushL( pl );
+      HandleModelEventL( KAppGainBackground, *pl );
+      CleanupStack::PopAndDestroy( pl );
+      }
 
-    	if ( exitHideHostNotFound && iSuiteContainer->GetLastSuiteModel() == suiteModel  )
-    		{
+      if ( exitHideHostNotFound && iSuiteContainer->GetLastSuiteModel() == suiteModel  )
+        {
             HandleBackEventL( host,  1 );
-    		}
-    	else
-    		{
-        	//reset to root
+        }
+      else
+        {
+          //reset to root
             CLiwGenericParamList* params = CLiwGenericParamList::NewLC();
             params->AppendL( iMetaDataModel->GetSuiteParameters( 0 ) );
-        	ResetModelsL();
+          ResetModelsL();
             InitializeL( *params );
             CleanupStack::PopAndDestroy( params );
-    		}
+        }
 
-    	CleanupStack::PopAndDestroy( &host );
-    	exitActionConsumed = ETrue;
-    	}
+      CleanupStack::PopAndDestroy( &host );
+      exitActionConsumed = ETrue;
+      }
 
     CleanupStack::PopAndDestroy( paramsUri );
     CleanupStack::PopAndDestroy( &action );
     CleanupStack::PopAndDestroy( uriBuf );
     return exitActionConsumed;
-	}
+  }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
 void CHnEngine::LoadSuitesL( const TDesC8& aUri )
-	{
-	TBool sendToForeground(EFalse);
-	HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
-	uriBuf->Des().Copy( aUri );
+  {
+  TBool sendToForeground(EFalse);
+  HBufC8* uriBuf = HBufC8::NewLC( aUri.Length() );
+  uriBuf->Des().Copy( aUri );
 
-	TUriParser8 parser;
-	parser.Parse( *uriBuf );
-	User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
+  TUriParser8 parser;
+  parser.Parse( *uriBuf );
+  User::LeaveIfError( parser.IsSchemeValid() ? KErrNone : KErrPathNotFound );
 
-	CDesC8ArrayFlat* suiteNameArray = new( ELeave ) CDesC8ArrayFlat( KDefaultGranularity ) ;
-	CleanupStack::PushL( suiteNameArray );
+  CDesC8ArrayFlat* suiteNameArray = new( ELeave ) CDesC8ArrayFlat( KDefaultGranularity ) ;
+  CleanupStack::PushL( suiteNameArray );
 
-	const TDesC8& host = parser.Extract( EUriHost );
+  const TDesC8& host = parser.Extract( EUriHost );
     RBuf8 host8;
     CleanupClosePushL( host8 );
     if (host.Compare( KNullDesC8 ))
@@ -1181,19 +1210,19 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
         DEBUG8(( "_MM_:\tURI host part: %S", &host8 ));
         }
 
-	const TDesC8& path = parser.Extract( EUriPath );
-	if (path.Compare( KNullDesC8 ))
-		{
-		HBufC8* path8 = HBufC8::NewLC( path.Length() );
-		path8->Des().Copy( path );
-		path8->Des().LowerCase();
-		ParseSuiteUriPathL( *path8, *suiteNameArray );
-		CleanupStack::PopAndDestroy( path8 );
-		}
+  const TDesC8& path = parser.Extract( EUriPath );
+  if (path.Compare( KNullDesC8 ))
+    {
+    HBufC8* path8 = HBufC8::NewLC( path.Length() );
+    path8->Des().Copy( path );
+    path8->Des().LowerCase();
+    ParseSuiteUriPathL( *path8, *suiteNameArray );
+    CleanupStack::PopAndDestroy( path8 );
+    }
 
-	TBool suiteExists( EFalse );
-	iMetaDataModel->IgnoreEvaluations( ETrue );
-	iMetaDataModel->QueueForeground( CHnMdModel::EWhenAnySuiteIsEvaluated );
+  TBool suiteExists( EFalse );
+  iMetaDataModel->IgnoreEvaluations( ETrue );
+  iMetaDataModel->QueueForeground( CHnMdModel::EWhenAnySuiteIsEvaluated );
 
     if( host8.Length() == 0 || ( host8.Length() > 0 &&
             !iMetaDataModel->SuiteModelExistsL( host8 ) ) )
@@ -1202,101 +1231,101 @@ void CHnEngine::LoadSuitesL( const TDesC8& aUri )
         suiteNameArray->AppendL( KRoot8 );
         }
 
-	for( TInt i = 0; i < suiteNameArray->Count(); ++i )
-		{
-		suiteExists = iMetaDataModel->SuiteModelExistsL(
-			( *suiteNameArray )[i] );
-		TBool nextExists = i < suiteNameArray->Count() - 1 &&
-			iMetaDataModel->SuiteModelExistsL( ( *suiteNameArray )[i + 1] );
-		TBool isLast = ( i == ( suiteNameArray->Count() - 1 ) );
+  for( TInt i = 0; i < suiteNameArray->Count(); ++i )
+    {
+    suiteExists = iMetaDataModel->SuiteModelExistsL(
+      ( *suiteNameArray )[i] );
+    TBool nextExists = i < suiteNameArray->Count() - 1 &&
+      iMetaDataModel->SuiteModelExistsL( ( *suiteNameArray )[i + 1] );
+    TBool isLast = ( i == ( suiteNameArray->Count() - 1 ) );
 
-		TBool turnOnEvaluation = ( suiteExists && ( !nextExists || isLast ) );
-		if( turnOnEvaluation || !suiteExists )
-			{
-			iMetaDataModel->IgnoreEvaluations( EFalse );
-			}
+    TBool turnOnEvaluation = ( suiteExists && ( !nextExists || isLast ) );
+    if( turnOnEvaluation || !suiteExists )
+      {
+      iMetaDataModel->IgnoreEvaluations( EFalse );
+      }
 
-		TInt err( KErrNone );
+    TInt err( KErrNone );
 
-		// Ignore loading new suite if the last suite in model is the same
-		// as first one in the uri.
-		if ( i == 0 )
-			{
-			if ( SuitesAreTheSameL( iMetaDataModel->GetLastSuite()->SuiteName(), (*suiteNameArray)[i] ) )
-				{
-				HandleTheSameSuitesL( nextExists, parser.Extract( EUriQuery ) );
-				sendToForeground = ETrue;
-				continue;
-				}
-			}
+    // Ignore loading new suite if the last suite in model is the same
+    // as first one in the uri.
+    if ( i == 0 )
+      {
+      if ( SuitesAreTheSameL( iMetaDataModel->GetLastSuite()->SuiteName(), (*suiteNameArray)[i] ) )
+        {
+        HandleTheSameSuitesL( nextExists, parser.Extract( EUriQuery ) );
+        sendToForeground = ETrue;
+        continue;
+        }
+      }
 
-		if( suiteExists )
-			{
-			if (!nextExists)
-			    {
-			    // Tricky: queue foreground so that if the suite is evaluated synchronously
-			    // the foreground will be gained.
-			    iMetaDataModel->QueueForeground( CHnMdModel::EWhenAnySuiteIsEvaluated );
-			    }
-			err = LoadSuiteFromUriL(
-				( *suiteNameArray )[i], parser.Extract( EUriQuery ), parser.Extract( EUriFragment ) );
-			if ( KErrNone == err && !nextExists && iMetaDataModel->IsForegroundQueued() )
-			    {
-			    // Tricky: if foreground is still queued it means that the suite is evaluated
-			    // asynchronously. Override the previos foreground queue setting with one
-			    // that will be effective only if the last loaded suite is evaluated.
-			    iMetaDataModel->QueueForeground( CHnMdModel::EWhenCurrentTopSuiteIsEvaluated );
-			    }
-			if ( err != KErrNone )
-				{
-				sendToForeground = ETrue;
-				}
-			}
+    if( suiteExists )
+      {
+      if (!nextExists)
+          {
+          // Tricky: queue foreground so that if the suite is evaluated synchronously
+          // the foreground will be gained.
+          iMetaDataModel->QueueForeground( CHnMdModel::EWhenAnySuiteIsEvaluated );
+          }
+      err = LoadSuiteFromUriL(
+        ( *suiteNameArray )[i], parser.Extract( EUriQuery ), parser.Extract( EUriFragment ) );
+      if ( KErrNone == err && !nextExists && iMetaDataModel->IsForegroundQueued() )
+          {
+          // Tricky: if foreground is still queued it means that the suite is evaluated
+          // asynchronously. Override the previos foreground queue setting with one
+          // that will be effective only if the last loaded suite is evaluated.
+          iMetaDataModel->QueueForeground( CHnMdModel::EWhenCurrentTopSuiteIsEvaluated );
+          }
+      if ( err != KErrNone )
+        {
+        sendToForeground = ETrue;
+        }
+      }
 
-		if( !suiteExists || err != KErrNone || !nextExists )
-			{
-			CHnFilter* filter = CHnFilter::NewLC();
+    if( !suiteExists || err != KErrNone || !nextExists )
+      {
+      CHnFilter* filter = CHnFilter::NewLC();
 
-			filter->SetSuiteId(
-				iSuiteContainer->GetLastSuiteModel()->CustomId() );
+      filter->SetSuiteId(
+        iSuiteContainer->GetLastSuiteModel()->CustomId() );
 
-			filter->SetEvaluateSuiteL( ETrue );
-			iMetaDataModel->IgnoreEvaluations( EFalse );
+      filter->SetEvaluateSuiteL( ETrue );
+      iMetaDataModel->IgnoreEvaluations( EFalse );
 
-			TRAPD( err, iMetaDataModel->EvaluateL( *filter ) );
+      TRAPD( err, iMetaDataModel->EvaluateL( *filter ) );
 
-			CleanupStack::PopAndDestroy( filter );
-			if( err )
-				{
-				iMetaDataModel->DeleteLastSuite();
-				iSuiteContainer->PopSuiteModelL(
-					 HnConvUtils::Str8ToStr( ( *suiteNameArray )[i] )->Des() );
-				sendToForeground = ETrue;
-				}
-			break;
-			}
-		}
+      CleanupStack::PopAndDestroy( filter );
+      if( err )
+        {
+        iMetaDataModel->DeleteLastSuite();
+        iSuiteContainer->PopSuiteModelL(
+           HnConvUtils::Str8ToStr( ( *suiteNameArray )[i] )->Des() );
+        sendToForeground = ETrue;
+        }
+      break;
+      }
+    }
 
-	// set highlight only when path is valid!
-	if( suiteExists )
-		{
-		HighlightPlacementFromUriL( parser.Extract( EUriFragment ) );
-		}
+  // set highlight only when path is valid!
+  if( suiteExists )
+    {
+    HighlightPlacementFromUriL( parser.Extract( EUriFragment ) );
+    }
 
     CleanupStack::PopAndDestroy( &host8 );
-	CleanupStack::PopAndDestroy( suiteNameArray );
-	CleanupStack::PopAndDestroy( uriBuf );
+  CleanupStack::PopAndDestroy( suiteNameArray );
+  CleanupStack::PopAndDestroy( uriBuf );
 
 //    send to foreground
-	if ( sendToForeground )
-		{
-		CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
-		CleanupStack::PushL( pl );
-		HandleModelEventL( KAppGainForeground, *pl );
-		CleanupStack::PopAndDestroy( pl );
-		iMetaDataModel->QueueForeground( CHnMdModel::ENever );
-		}
+  if ( sendToForeground )
+    {
+    CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( pl );
+    HandleModelEventL( KAppGainForeground, *pl );
+    CleanupStack::PopAndDestroy( pl );
+    iMetaDataModel->QueueForeground( CHnMdModel::ENever );
+    }
 
-	}
+  }
 
 // End of file

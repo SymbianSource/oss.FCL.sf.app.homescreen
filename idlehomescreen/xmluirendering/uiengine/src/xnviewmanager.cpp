@@ -60,7 +60,6 @@
 
 // Constants
 _LIT8( KEmptyWidgetUid, "0x2001f47f" );
-_LIT8( KTemplateViewUID, "0x20026f50" );
 
 const TInt KPSCategoryUid( 0x200286E3 );
 const TInt KPSCrashCountKey( 1 );     
@@ -892,27 +891,10 @@ CXnViewData& CXnViewManager::NextViewData() const
 // Activates the next view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
+void CXnViewManager::ActivateNextViewL()
     { 
     CXnViewData& next( NextViewData() );
-    
-    if ( !next.Occupied() )
-        {    
-        TInt err( next.Load() );
-        
-        if ( err )
-            {
-            HandleErrorNotes( err );            
-            return;            
-            }
-        }
-        
-    // Activate view
-    if ( next.Occupied() && !next.Active() )
-        {
-        iAppUiAdapter.ViewAdapter().ActivateContainerL( 
-            next, EFalse, KGfxContextActivateNextView );                        
-        }
+    ActivateViewL( next, KGfxContextActivateNextView );
     }
 
 // -----------------------------------------------------------------------------
@@ -920,13 +902,23 @@ void CXnViewManager::ActivateNextViewL( TInt /*aEffectId*/ )
 // Activates the previous view
 // -----------------------------------------------------------------------------
 //
-void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
+void CXnViewManager::ActivatePreviousViewL()
     {    
     CXnViewData& prev( PreviousViewData() );
+    ActivateViewL( prev, KGfxContextActivatePrevView );
+    }
 
-    if ( !prev.Occupied() )
+// -----------------------------------------------------------------------------
+// CXnViewManager::ActivatePreviousViewL()
+// Activates the previous view
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::ActivateViewL( CXnViewData& aViewData, TUid aEffect, 
+    TBool aUpdateBg )
+    {    
+    if ( !aViewData.Occupied() )
         {
-        TInt err( prev.Load() );
+        TInt err( aViewData.Load() );
         
         if ( err )
             {
@@ -936,10 +928,10 @@ void CXnViewManager::ActivatePreviousViewL( TInt /*aEffectId*/ )
         }
         
     // Activate view
-    if ( prev.Occupied() && !prev.Active() )
+    if ( aViewData.Occupied() && !aViewData.Active() )
         {
         iAppUiAdapter.ViewAdapter().ActivateContainerL( 
-            prev, EFalse, KGfxContextActivatePrevView );                                
+            aViewData, EFalse, aEffect, aUpdateBg );
         }
     }
 
@@ -954,11 +946,14 @@ TInt CXnViewManager::AddViewL( const CHsContentInfo& aInfo )
         {
         return KErrGeneral;
         }
-
+    
+    // If phone layout is mirrored new view needs to be added to left. Other right.
+    TInt mirror = AknLayoutUtils::LayoutMirrored() ? 0 : 1;
+    
     // Add new view (template view) to hsps
     CAddPluginResult* result = iHspsWrapper->AddPluginL( 
         iRootData->ConfigurationId(), aInfo.Uid(),
-        ViewIndex() + 1 ); 
+        ViewIndex() + mirror ); 
     CleanupStack::PushL( result );
 
     TInt retval( result->Status() );
@@ -987,7 +982,7 @@ TInt CXnViewManager::AddViewL( const CHsContentInfo& aInfo )
             
             TInt index( views.Find( &ActiveViewData() ) );
             
-            views.InsertL( newView, index + 1 );
+            views.InsertL( newView, index + mirror );
             
             // Root data owns the new view now
             CleanupStack::Pop( newView );            
@@ -1030,11 +1025,14 @@ void CXnViewManager::AddViewL( TInt aEffectId )
         
         return;        
         }
-
+    
+    // If phone layout is mirrored new view needs to be added to left. Other right.
+    TInt mirror = AknLayoutUtils::LayoutMirrored() ? 0 : 1;
+    
     // Add new view (template view) to hsps
     CAddPluginResult* result = iHspsWrapper->AddPluginL( 
-        iRootData->ConfigurationId(), KTemplateViewUID,
-        ViewIndex() + 1 ); 
+        iRootData->ConfigurationId(), iRootData->TemplateViewUid(),
+        ViewIndex() + mirror ); 
     CleanupStack::PushL( result );
         
     TInt status( result->Status() );
@@ -1070,16 +1068,16 @@ void CXnViewManager::AddViewL( TInt aEffectId )
             
             TInt index( views.Find( &ActiveViewData() ) );
             
-            views.InsertL( newView, index + 1 );
+            views.InsertL( newView, index + mirror );
             
             // Root data owns the new view now
             CleanupStack::Pop( newView );
             
-            // Activate view
-            iAppUiAdapter.ViewAdapter().ActivateContainerL( *newView, ETrue );
-            
             // Inform observers about added view
             NotifyViewAdditionL( *newView );
+
+            // Activate view
+            iAppUiAdapter.ViewAdapter().ActivateContainerL( *newView, ETrue );            
             }
         else
             {                      
@@ -1411,7 +1409,7 @@ void CXnViewManager::NotifyContainerChangedL( CXnViewData& aViewToActivate )
         UpdateCachesL();
         
         // Schedule remaining views loading
-        iRootData->LoadRemainingViews();
+        iRootData->LoadRemainingViewsL();
         }
     
     HandleErrorNotes( err );         
@@ -1485,7 +1483,7 @@ void CXnViewManager::PublishersReadyL( CXnViewData& aViewData, TInt aResult )
         
     TRAP_IGNORE( bg.StoreWallpaperL() );
 
-    self->NotifyContainerActivatedL( active );
+    TRAP_IGNORE( self->NotifyContainerActivatedL( active ) );
     
     return KErrNone;
     }
@@ -1503,6 +1501,19 @@ void CXnViewManager::NotifyViewActivatedL( const CXnViewData& aViewData )
     for ( TInt i = 0; i < iObservers.Count(); i++ )
         {
         iObservers[i]->NotifyViewActivatedL( aViewData );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnViewManager::NotifyViewLoadedL()
+// Notifies view is activated
+// -----------------------------------------------------------------------------
+//
+void CXnViewManager::NotifyViewLoadedL( const CXnViewData& aViewData )
+    {
+    for ( TInt i = 0; i < iObservers.Count(); i++ )
+        {
+        iObservers[i]->NotifyViewLoadedL( aViewData );
         }
     }
 

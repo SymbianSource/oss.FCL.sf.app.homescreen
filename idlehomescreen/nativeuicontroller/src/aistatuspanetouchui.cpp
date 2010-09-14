@@ -30,7 +30,7 @@
 #include <hscontentpublisher.h>
 #include <hspublisherinfo.h>
 #include <aidevicestatuscontentmodel.h>
-#include <AiNativeUi.rsg>
+#include <ainativeui.rsg>
 
 // User includes
 #include "aistrcnv.h"
@@ -334,8 +334,9 @@ void CAiStatusPaneTouchUi::DoPublishL( CHsContentPublisher& aPlugin,
           iProfileNamePointerArray.Remove( aIndex - 1);
           }
 
-        HBufC* name = aText.AllocL();
-        iProfileNamePointerArray.Insert( name, aIndex - 1 );
+        HBufC* name = aText.AllocLC();
+        iProfileNamePointerArray.InsertL( name, aIndex - 1 );
+        CleanupStack::Pop( name );
         break;
         }
         default:

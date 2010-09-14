@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_71.1.17.1.70 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_71.1.17.1.75 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -111,7 +111,8 @@ CMmWidgetContainer::CMmWidgetContainer()
     , iRecipientId( KErrNotFound )
     , iEventParameters( NULL )
     , iDialogOpened( EFalse )
-    , iHighlightVisibleBeforeLongTap( EFalse )
+    , iHighlightVisibleBeforeLongTap( EFalse )    
+    , iResetHighlight( EFalse )
     {
     iWidgetPositionCache.iValid = EFalse;
     }
@@ -142,7 +143,7 @@ EXPORT_C void CMmWidgetContainer::EnableLongTapAnimation( TBool aEnable )
         // cancel longTap timer, avoid showing popupmenu
         if( !aEnable )
             {
-            TRAP_IGNORE( iLongTapDetector->PointerEventL( TPointerEvent() ) );
+            TRAP_IGNORE( iLongTapDetector->CancelAnimationL() );
             }
         }
     }
@@ -215,8 +216,8 @@ void CMmWidgetContainer::HandleButtonDownL(const TPointerEvent& aPointerEvent )
         {
         iDraggedIndex = KErrNotFound;
         }
-    iItemRelativeTapPoint = aPointerEvent.iPosition - iWidget->View()->ItemPos(
-        iDraggedIndex );
+    iItemRelativeTapPoint = aPointerEvent.iPosition
+            - iWidget->View()->ItemPos( iDraggedIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -313,7 +314,7 @@ void CMmWidgetContainer::HandleDragL( const TPointerEvent& aPointerEvent,
         {
         iDragAndDropObserver->HandleDragOverL( GetHighlight() );
         }
-    
+
     TPoint centerPoint( aPointerEvent.iPosition );
     if( WidgetType() == EGridWidget )
         { // move item's TL corner by half width/height to center item horizontally.
@@ -326,7 +327,7 @@ void CMmWidgetContainer::HandleDragL( const TPointerEvent& aPointerEvent,
         // move item's L of corner by half height to center item horizontally.
         centerPoint.iY -= ( iWidget->View()->ItemSize( highlight ).iHeight / 2 );
         }
-    
+
     if( !tooFast )
         {
         TSize itemSize = iWidget->View()->ItemSize( highlight );
@@ -676,6 +677,16 @@ void CMmWidgetContainer::HandlePointerEventsInEditModeL(
         //        	}
         HandleButtonDownL( aPointerEvent );
         iDragAndDropObserver->HandleDragStartL( GetHighlight() );
+        }
+    else if( IsNoItemDragged() && ( aPointerEvent.iType
+            == TPointerEvent::EButton1Up ) )
+        {
+        iWidget->View()->ItemDrawer()->SetFlags(
+                CListItemDrawer::ESingleClickDisabledHighlight );
+        TInt highlight = GetHighlight();
+        CListBoxView* view = Widget()->View();
+        Widget()->DrawNow( TRect( view->ItemPos( highlight ),
+                view->ItemSize( highlight ) ) );
         }
     else if( ( aPointerEvent.iType == TPointerEvent::EDrag
             || aPointerEvent.iType == TPointerEvent::EButtonRepeat )
@@ -1143,9 +1154,9 @@ TKeyResponse CMmWidgetContainer::OfferKeyEventL(const TKeyEvent &aKeyEvent,
 
     if( resp == EKeyWasNotConsumed )
         {
-        resp = iWidget->OfferKeyEventL( aKeyEvent, aType );
+        resp = iWidget->OfferKeyEventL( aKeyEvent, aType );        
         }
-
+        
     if( iKeyEventObserver )
         {
         resp = iKeyEventObserver->HandleKeyPressedL( aKeyEvent, aType );
@@ -1165,7 +1176,7 @@ TKeyResponse CMmWidgetContainer::OfferKeyEventL(const TKeyEvent &aKeyEvent,
 
             SetHighlightVisibilityL( ETrue );
             SetDefaultHighlightL( ETrue );
-            HandleForegroundGainedL();
+            HandleForegroundGainedL();            
             }
         }
     return resp;
@@ -1733,7 +1744,9 @@ EXPORT_C void CMmWidgetContainer::ResetWidgetPosition()
     iWidgetPositionCache.iValid = EFalse;
     iWidgetPositionCache.iHighlightedItemId = KErrNotFound;
     Widget()->SetTopItemIndex( 0 );
+    Widget()->View()->SetCurrentItemIndex( 0 );
     SetVerticalItemOffset( 0 );
+    iResetHighlight = ETrue;
     }
 
 // ---------------------------------------------------------------------------
@@ -1877,11 +1890,12 @@ void CMmWidgetContainer::ScrollInPixelsL( TInt aPixels )
 //
 EXPORT_C TBool CMmWidgetContainer::ScrollToItemL( TInt aIndex )
     {
-    TInt scrollConsumed( EFalse );
+    TBool scrollConsumed( EFalse );
     if( aIndex >= 0 && aIndex <= NumberOfItems() )
         {
         scrollConsumed = AlignBottomOfViewL();
-        if ( !scrollConsumed && Widget()->View()->ItemIsPartiallyVisible(aIndex))
+        if ( ( !scrollConsumed || iResetHighlight )
+                && Widget()->View()->ItemIsPartiallyVisible(aIndex) )
             {
             //			the case when the item is partially visible at top or
             //			bottom of screen. The view is scrolled the offset to
@@ -1897,7 +1911,6 @@ EXPORT_C TBool CMmWidgetContainer::ScrollToItemL( TInt aIndex )
                 ScrollInPixelsL( offset );
                 scrollConsumed = ETrue;
                 }
-
             }
         else if( !Widget()->View()->ItemIsVisible( aIndex ) )
             {
@@ -1907,6 +1920,7 @@ EXPORT_C TBool CMmWidgetContainer::ScrollToItemL( TInt aIndex )
             AlignBottomOfViewL();
             scrollConsumed = ETrue;
             }
+        iResetHighlight = EFalse;
         }
     return scrollConsumed;
     }
@@ -2069,4 +2083,14 @@ void CMmWidgetContainer::HandleListBoxEventL( CEikListBox* aListBox,
         iListBoxObserver->HandleListBoxEventL( aListBox, aEventType );
         }
     }
+                                  
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CMmWidgetContainer::SetWidgetCommingFromBackground( TBool /*aCommingFromBackground*/)
+    {
+    // this method must not be implemented. Change and implement only descended methods.    
+    }
+
 //End of file

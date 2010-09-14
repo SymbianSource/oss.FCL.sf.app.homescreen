@@ -20,6 +20,7 @@
 
 //  System includes
 #include <e32base.h>
+#include <babitflags.h>
 
 // User includes
 #include "xncontroladapter.h"
@@ -49,7 +50,7 @@ public:
     ~CXnTextEditorAdapter();
 
 public: 
-    // New functions
+    // new functions
 
     /**
      * Gets editor
@@ -57,7 +58,7 @@ public:
      * @since S60 5.0
      * @return Editor, ownership is not transfered
      */
-    CEikEdwin* Editor() const { return iEditor; };
+    CEikEdwin* Editor() const;
 
     /**
      * Set text to the text field
@@ -68,6 +69,14 @@ public:
     void SetTextL( const TDesC& aText );
     
     /**
+     * Queries wheter text content change is caused by call to SetTextL
+     * 
+     * @since S60 5.2
+     * @return ETrue if set text, EFalse otherwise
+     */
+    TBool IsSetText() const;
+        
+    /**
      * Return the text of the text field
      * 
      * @since S60 5.0
@@ -75,15 +84,8 @@ public:
      */
     HBufC* Text() const;
 
-    /**
-     * Handles editor events
-     * 
-     * @since S60 5.2
-     * @param aReason, editor event        
-     */
-    void HandleEditorEvent( TInt aReason );
-
-public: // from base classes
+public: 
+    // from base classes
 
     /**
     * See CCoeControl documentation
@@ -104,12 +106,7 @@ public: // from base classes
     * See CCoeControl documentation
     */    	
     TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);    
-    
-    /**
-    * See CXnControlAdapter documentation
-    */          
-    TBool RefusesFocusLoss() const;
-    
+        
     /**
     * See CCoeControl documentation
     */    	
@@ -122,23 +119,14 @@ public: // from base classes
 
     /**
     * See CCoeControl documentation
-    */          
-    void HandleResourceChange( TInt aType );
-    
-    /**
-    * See CCoeControl documentation
     */  
     void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 
-    /**
-     * See CCoeAppUiBase.
-     */
-    void HandleScreenDeviceChangedL();
-
-private: // from base classes
+private: 
+    // from MCoeControlBackground 
 
     /**
-    * See MCoeControlBackground documentation
+    * @see MCoeControlBackground 
     */          
     void Draw( CWindowGc& aGc, const CCoeControl& aControl, 
         const TRect& aRect ) const;
@@ -146,8 +134,14 @@ private: // from base classes
 private:
     // private constrcutors 
 
+    /**
+     * C++ constructor
+     */
 	CXnTextEditorAdapter( CXnControlAdapter* aParent, CXnNodePluginIf& aNode );
 	
+	/**
+	 * 2nd phase constructor
+	 */
 	void ConstructL();
 
 private:
@@ -156,9 +150,10 @@ private:
     void SetPropertiesL();
     
     void SetEditorMarginPropertiesL();
-
+    
 private:
     // data
+
     /** Parent control, not owned */
     CXnControlAdapter*  	iParent;
     /** UI node, not owned */
@@ -176,11 +171,9 @@ private:
     /** Flag to indicate whether the font needs to be released or not */
     TBool                   iReleaseFont;
     /** Max line amount */
-    TInt                    iMaxLines; 
-    /** Flag to indicate whether focus loss is refused */
-    TBool                   iRefusesFocusLoss;
-    /** Split input states*/
-    TInt                    iSplitInputFlags;
+    TInt                    iMaxLines;
+    /** Flags */
+    TBitFlags32             iFlags;
     };
 
 #endif      // _XNTEXTEDITORADAPTER_H

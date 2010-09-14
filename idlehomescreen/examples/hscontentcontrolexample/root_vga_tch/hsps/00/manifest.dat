@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package version="2.0">
+    <family>vga_tch</family>
+    <type>application</type>
+
+    <interfaceuid>0x102750F0</interfaceuid>
+    <provideruid>0x101fb657</provideruid>
+    <configurationuid>0x20102020</configurationuid>
+
+    <fullname>HS Configuration</fullname>
+    <shortname>root2</shortname>
+    <version>1.0</version>
+
+    <filexml>widgetconfiguration.xml</filexml>
+    <!-- Locale specific resources -->
+    <localization>
+        <fileresource tag="xuikon">root2.o0000</fileresource>
+    </localization>
+</package>

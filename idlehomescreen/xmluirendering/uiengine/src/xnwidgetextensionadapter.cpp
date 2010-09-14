@@ -98,12 +98,12 @@ CXnWidgetExtensionAdapter::~CXnWidgetExtensionAdapter()
 // 
 void CXnWidgetExtensionAdapter::HandleScreenDeviceChangedL()
 	{
-    if( IsVisible() )
+    if( iPopup )
 		{
-	    CCoeControl::MakeVisible( EFalse );
+        HidePopupL();	    
 		}
-	CXnControlAdapter::HandleScreenDeviceChangedL();
-	
+    
+	CXnControlAdapter::HandleScreenDeviceChangedL();	
 	}
 
 // -----------------------------------------------------------------------------
@@ -178,7 +178,7 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
         }
     
     CXnPluginData* plugin( 
-            iAppUiAdapter->ViewManager().ActiveViewData().Plugin( &iNode.Node() ) );
+        iAppUiAdapter->ViewManager().ActiveViewData().Plugin( &iNode.Node() ) );
 
     if ( !plugin )
         {
@@ -186,6 +186,7 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
         }
 
     SetPointerCapture( aVisible );
+    Window().SetPointerGrab( aVisible );
 
     plugin->SetIsDisplayingPopup( aVisible, &iNode.Node() );
     
@@ -231,6 +232,11 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
         effectStarted = ETrue;
         }
 
+    if ( aVisible && OwnsWindow() )
+        {
+        Window().SetOrdinalPosition( 0 );
+        }
+
     CCoeControl::MakeVisible( aVisible );
 
     if ( effectStarted )
@@ -247,8 +253,7 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
 //    
 void CXnWidgetExtensionAdapter::HandlePointerEventL( 
     const TPointerEvent& aPointerEvent )
-    {
-    
+    {    
     // in case of popup, we have to make sure that 
     // it will be closed after tapping outside of the
     // area of itself and its parent

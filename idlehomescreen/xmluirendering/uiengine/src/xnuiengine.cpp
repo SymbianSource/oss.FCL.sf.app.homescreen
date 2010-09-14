@@ -160,6 +160,16 @@ void CXnUiEngine::RenderUIL( CXnNode* aNode )
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiEngine::RenderFromNodeL
+// Forwards the call to the ui engine implementation
+// -----------------------------------------------------------------------------
+void CXnUiEngine::RenderFromNodeL( CXnNode& aNode )
+    {
+    iUiEngineImpl->LayoutFromNodeL( aNode );
+    iUiEngineImpl->RenderFromNodeL( aNode );
+    }
+
+// -----------------------------------------------------------------------------
 // CXnUiEngine::LayoutUIL
 // Forwards the call to the ui engine implementation
 // -----------------------------------------------------------------------------
@@ -167,6 +177,16 @@ void CXnUiEngine::RenderUIL( CXnNode* aNode )
 void CXnUiEngine::LayoutUIL( CXnNode* aNode )
     {
     iUiEngineImpl->LayoutUIL( aNode );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngine::LayoutFromNodeL
+// Forwards the call to the ui engine implementation
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngine::LayoutFromNodeL( CXnNode& aNode )
+    {
+    iUiEngineImpl->LayoutFromNodeL( aNode );
     }
 
 // -----------------------------------------------------------------------------
@@ -526,7 +546,7 @@ void CXnUiEngine::SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher )
 // CXnUiEngine::EnablePartialTouchInput()
 // -----------------------------------------------------------------------------
 //               
-void CXnUiEngine::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
+void CXnUiEngine::EnablePartialTouchInput( CXnNode* aNode, TBool aEnable )
     {
     iUiEngineImpl->EnablePartialTouchInput(aNode, aEnable);
     }

@@ -12,22 +12,17 @@
 * Contributors:
 *
 * Description:
-* Top Contacts widget HSPS-plugin customer specific IBY file.
+* Desktop widget HSPS-plugin customer specific IBY file.
 *
 */
-
-#ifdef FF_TOPCONTACTSWIDGET_COMPONENT
 
 #ifndef __DESKTOP_20018EEE_CUSTOMER_IBY__
 #define __DESKTOP_20018EEE_CUSTOMER_IBY__
 
-#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
 
-data=ZPRIVATE\200159c0\install\topcontacts\xuikon\00\TopContacts.o0000 \private\200159c0\install\topcontacts\xuikon\00\TopContacts.o0000
-data=ZPRIVATE\200159c0\install\topcontacts\hsps\00\topcontact_hs_widget.dtd \private\200159c0\install\topcontacts\hsps\00\topcontact_hs_widget.dtd
+data=ZPRIVATE\200159c0\install\desktop_20018eee\xuikon\00\Desktop.o0000 \private\200159c0\install\desktop_20018eee\xuikon\00\Desktop.o0000
 
-#endif // FF_LAYOUT_480_640_VGA3
+#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
 
 #endif  // __DESKTOP_20018EEE_CUSTOMER_IBY__
-
-#endif // FF_TOPCONTACTSWIDGET_COMPONENT

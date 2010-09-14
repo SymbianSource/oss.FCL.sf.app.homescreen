@@ -515,16 +515,14 @@ void CTsFastSwapGrid::LoadCloseIconAndStrokeParams()
                 EMbmAvkonQgn_indi_button_preview_close_mask
                 ));
 
-    TAknLayoutRect gridAppPane;
     TAknLayoutRect gridItem;
     TAknLayoutRect gridImage;
     TAknLayoutRect gridCloseButton;
     TAknLayoutRect gridCloseIcon;
     TInt variety = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
-    TRect source = iParent ? iParent->Rect() : Rect();
-    gridAppPane.LayoutRect( source,
-            AknLayoutScalable_Apps::tport_appsw_pane( variety ) );
-    gridItem.LayoutRect( gridAppPane.Rect(),
+    
+    TRect source = Rect();
+    gridItem.LayoutRect( source,
             AknLayoutScalable_Apps::cell_tport_appsw_pane( variety, 0, 0 ) );
     gridImage.LayoutRect( gridItem.Rect(),
             AknLayoutScalable_Apps::cell_tport_appsw_pane_g1( variety ) ); 
@@ -865,53 +863,5 @@ TRect CTsGridItemDrawer::CalculateInnerButtonRect( const TRect& aOuterRect ) con
     retVal.iBr.iY -= iCloseButtonRect.iBr.iY - iCloseIconRect.iBr.iY;
     return retVal;
     }
- 
- 
- 
- /* ================================================================================
-  * CTsGridHighlightTimer
-  * ================================================================================
-  */
-
-// -----------------------------------------------------------------------------
-// CTsGridHighlightTimer::CTsGridHighlightTimer
-// -----------------------------------------------------------------------------
-//
-CTsFastSwapTimer::CTsFastSwapTimer( MTsFastSwapTimerObserver& aObserver )
-: CTimer( EPriorityStandard ),
-  iObserver( &aObserver )
-    {
-    }
-
-
-// -----------------------------------------------------------------------------
-// CTsGridHighlightTimer::CTsGridHighlightTimer
-// -----------------------------------------------------------------------------
-//
-CTsFastSwapTimer::~CTsFastSwapTimer()
-    {
-    Cancel();
-    }
-
-
-// -----------------------------------------------------------------------------
-// CTsGridHighlightTimer::ConstructL
-// -----------------------------------------------------------------------------
-//
-void CTsFastSwapTimer::ConstructL()
-    {
-    CTimer::ConstructL();
-    CActiveScheduler::Add( this );
-    }
-
-
-// -----------------------------------------------------------------------------
-// CTsGridHighlightTimer::CTsGridHighlightTimer
-// -----------------------------------------------------------------------------
-//
-void CTsFastSwapTimer::RunL()
-    {
-    iObserver->TimerCompletedL(this);
-    }
- 
+  
  // End of file

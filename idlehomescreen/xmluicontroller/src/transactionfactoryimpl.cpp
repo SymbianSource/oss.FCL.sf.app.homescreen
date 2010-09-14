@@ -49,8 +49,17 @@ CTransactionFactoryImpl* CTransactionFactoryImpl::NewL(
     CTransactionFactoryImpl* self =
                 new( ELeave ) CTransactionFactoryImpl( aContentPriorityMap,
                                                        aPropertyMap );
-    
     return self;
+    }
+
+RAiPolicyElementArray& CTransactionFactoryImpl::PolicyArray()
+    {
+    return iPolicyArray;
+    }
+
+void CTransactionFactoryImpl::ResetPolicyArray()
+    {
+    iPolicyArray.Reset();
     }
     
 CTransactionFactoryImpl::~CTransactionFactoryImpl()
@@ -62,6 +71,8 @@ CTransactionFactoryImpl::~CTransactionFactoryImpl()
     // Delete transaction elements
     DeleteElementList( iAvailableElements );
     DeleteElementList( iReservedElements );
+    
+    ResetPolicyArray();
     }
 
 MTransaction* CTransactionFactoryImpl::CreateTransactionL( TInt aTxId )

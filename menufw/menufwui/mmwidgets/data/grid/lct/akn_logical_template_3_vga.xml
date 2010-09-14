@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dhuiml version="1.0" xmlns="http://www.series60.com/xml/dhuiml/1">
+
+<orientation id ="portrait" lct="uiaccel_main_aa_listscroll_pane" variety="0">
+  	
+	<element id="nohighlight">
+		<layout id="anchor" name="anchor" lct="cell_hc_apps_pane" variety="3" >
+			<textvisual id="mul_title" lct="cell_hc_apps_pane_t1" variety="0" >
+				<attributesetter name="text" targetvalue="mul_title" category="data" />
+			</textvisual>
+			<imagevisual id="mul_icon" lct="cell_hc_apps_pane_g1" variety="0" halign="center" >
+				<attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+			</imagevisual>
+			<imagevisual id="mul_indicator_1" lct="cell_hc_apps_pane_g2" variety="0" >
+				<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+			</imagevisual>
+			<imagevisual id="mul_indicator_2" lct="cell_hc_apps_pane_g3" variety="0" >
+				<attributesetter name="imagepath" targetvalue="mul_indicator_2" category="data" />
+			</imagevisual>
+		</layout>	
+ 	</element>
+	
+	<element id="highlight">
+	</element>
+</orientation>
+
+<orientation id ="landscape" lct="uiaccel_main_aa_listscroll_pane" variety="0" >
+
+	<element id="nohighlight">
+		<layout id="anchor" name="anchor" lct="cell_app_pane" variety="2" >
+			<textvisual id="mul_title" lct="cell_app_pane_t1"  variety="0" >
+				<attributesetter name="text" targetvalue="mul_title" category="data" />
+			</textvisual>
+			<imagevisual id="mul_icon" lct="cell_app_pane_g1" variety="0" halign="center" >
+				<attributesetter name="imagepath" targetvalue="mul_icon" category="data" />
+			</imagevisual>
+			<imagevisual id="mul_indicator_1" lct="cell_app_pane_g2" variety="0" >
+				<attributesetter name="imagepath" targetvalue="mul_indicator_1" category="data" />
+			</imagevisual>
+		</layout>
+	</element>	
+	
+	<element id ="highlight">	
+ 	</element>		  
+
+</orientation>
+</dhuiml>

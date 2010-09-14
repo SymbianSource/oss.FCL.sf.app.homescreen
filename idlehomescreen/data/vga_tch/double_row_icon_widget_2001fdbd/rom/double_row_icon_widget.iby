@@ -19,11 +19,11 @@
 #ifndef __DOUBLE_ROW_ICON_WIDGET_2001FDBD_IBY__
 #define __DOUBLE_ROW_ICON_WIDGET_2001FDBD_IBY__
 
-#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools
 data=ZPRIVATE\200159c0\install\double_row_icon_widget_2001fdbd\hsps\00\manifest.dat \private\200159c0\install\double_row_icon_widget_2001fdbd\hsps\00\manifest.dat
 
-#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
 
 #endif // __DOUBLE_ROW_ICON_WIDGET_2001FDBD_IBY__

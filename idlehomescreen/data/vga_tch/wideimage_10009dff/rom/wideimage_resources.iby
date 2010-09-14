@@ -18,11 +18,11 @@
 #ifndef __WIDEIMAGE_10009DFF_RESOURCES_IBY__
 #define __WIDEIMAGE_10009DFF_RESOURCES_IBY__
 
-#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools, language specific
-data=ZPRIVATE\200159c0\install\wideimage_10009dff\xuikon\00\wideimage.o0000 \private\200159c0\install\wideimage_10009dff\xuikon\00\wideimage.o0000
+//data=ZPRIVATE\200159c0\install\wideimage_10009dff\xuikon\00\wideimage.o0000 \private\200159c0\install\wideimage_10009dff\xuikon\00\wideimage.o0000
 
-#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
 
 #endif // __WIDEIMAGE_10009DFF_RESOURCES_IBY__

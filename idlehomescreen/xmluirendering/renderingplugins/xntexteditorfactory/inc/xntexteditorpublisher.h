@@ -19,53 +19,85 @@
 #define XNTEXTEDITORPUBLISHER_H
 
 #include <e32base.h>
-#include <eikedwob.h>
+#include <frmtview.h>
 
 // FORWARD DECLARATIONS
 class CLiwServiceHandler;
 class MLiwInterface;
 class CXnTextEditorAdapter;
 
-class CXnTextEditorPublisher : public CBase, public MEikEdwinObserver
+class CXnTextEditorPublisher : public CBase, public CTextView::MObserver
     {
-    public:
-        /**
-        * Two-phased constructor.
-        */
-        static CXnTextEditorPublisher* NewL( CXnTextEditorAdapter& aAdapter, 
-            const TDesC8& aNodeId );
+public:
+    /**
+    * Two-phased constructor.
+    */
+    static CXnTextEditorPublisher* NewL( CXnTextEditorAdapter& aAdapter, 
+        const TDesC8& aNodeId );
 
-        /**
-        * Destructor.
-        */
-        virtual ~CXnTextEditorPublisher();
-        
-    private:
-        CXnTextEditorPublisher( CXnTextEditorAdapter& aAdapter );
-        void ConstructL( const TDesC8& aNodeId );
+    /**
+    * Destructor.
+    */
+    virtual ~CXnTextEditorPublisher();
+    
+private:
+    // constructors
+    
+    /**
+     * C++ constructor
+     */
+    CXnTextEditorPublisher( CXnTextEditorAdapter& aAdapter );
+    
+    /**
+     * 2nd phase constructor
+     */
+    void ConstructL( const TDesC8& aNodeId );
 
-    public: // From MEikEdwinObserver
-        /**
-        * @see MEikEdwinObserver.
-        */    
-        void HandleEdwinEventL(CEikEdwin* aEdwin,TEdwinEvent aEventType);
-        
-        void PublishTextL( const TDesC& aText );
+public: 
+    // from CTextView::MObserver
+    
+    /**
+    * @see CTextView::MObserver
+    */           
+    void OnReformatL( const CTextView* aTextView );
+    
+public:
+    // new functions
+    
+    /**
+     * Publishes given text to CPS
+     * 
+     * @since S60 5.2
+     * @param aText Text to publish
+     */
+    void PublishTextL( const TDesC& aText );
 
-    private: // New functions
-        void InitCpsInterfaceL();
-        void AddDataToCpsL( const TDesC& aPublisherId, const TDesC& aContentType, 
-            const TDesC& aContentId, const TDesC8& aDataKey, const TDesC& aData );
-        void RemoveDataFromCpsL( const TDesC& aPublisherId, const TDesC& aContentType, 
-            const TDesC& aContentId );
+private: 
+    // new functions
+    
+    void InitCpsInterfaceL();
+    
+    void AddDataToCpsL( const TDesC& aPublisherId, const TDesC& aContentType, 
+        const TDesC& aContentId, const TDesC8& aDataKey, const TDesC& aData );
+    
+    void RemoveDataFromCpsL( const TDesC& aPublisherId, const TDesC& aContentType, 
+        const TDesC& aContentId );
 
-
-    private:
-        CXnTextEditorAdapter&  iAdapter;
-        HBufC*                 iNodeId; // Own
-		MLiwInterface*         iCpsInterface; // Not own
-		CLiwServiceHandler*    iServiceHandler;	// Own
-		HBufC*                 iTextBuffer;   // Own
+private:
+    // data
+    
+    /** Text editor adapter, not owned */
+    CXnTextEditorAdapter& iAdapter;
+    /** <texteditor> element node id, owned */
+    HBufC* iNodeId; 
+    /** CPS intertace, owned */
+    MLiwInterface* iCpsInterface; 
+    /** Service handler, owned */
+    CLiwServiceHandler* iServiceHandler;	
+    /** Text publish buffer, owned */
+    HBufC* iTextBuffer;   
+    /** Text publish temp buffer, owned */
+    HBufC* iTempBuffer;   
     };
 
 #endif //XNTEXTEDITORPUBLISHER_H

@@ -1,0 +1,107 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Content Control example
+*
+*/
+
+NAME HSCO
+
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <appinfo.rh>
+#include "hscontentcontrolexample.loc"
+
+RESOURCE RSS_SIGNATURE
+    {
+    }
+
+RESOURCE TBUF
+    {
+    buf = "HsContentControl";
+    }
+
+RESOURCE EIK_APP_INFO r_application_hs_content_control_app_ui
+    {
+    cba = R_AVKON_SOFTKEYS_EXIT;
+    status_pane = r_application_status_pane;
+    menubar = r_application_options_menu;
+    }
+
+RESOURCE STATUS_PANE_APP_MODEL r_application_status_pane
+    {
+    panes =
+        {
+        SPANE_PANE
+            {
+            id = EEikStatusPaneUidNavi;
+            type = EAknCtNaviPane;
+            resource = r_navi_decorator;
+            }
+
+        };
+    }
+
+RESOURCE NAVI_DECORATOR r_navi_decorator
+    {
+    type = ENaviDecoratorControlTabGroup;
+
+    control = TAB_GROUP
+        {
+        tab_width = EAknTabWidthWithOneTab;
+
+        active = 0;
+
+        tabs = 
+            {
+            TAB
+                {
+                id = 0;
+                txt = "Active configuration";
+                },
+            TAB
+                {
+                id = 1;
+                txt = "Configurations";
+                },
+            TAB
+                {
+                id = 2;
+                txt = "Views";
+                },
+            TAB
+                {
+                id = 3;
+                txt = "Widgets";
+                }                
+            };
+
+        };
+    }
+
+
+RESOURCE MENU_BAR r_application_options_menu
+    {
+    }
+
+RESOURCE LOCALISABLE_APP_INFO r_localisable_app_info
+    {
+    short_caption = STR_HsContentControlApplication_5;
+    caption_and_icon = CAPTION_AND_ICON_INFO
+        {
+        caption = STR_HsContentControlApplication_4;
+        number_of_icons = 0;
+        };
+    }
+

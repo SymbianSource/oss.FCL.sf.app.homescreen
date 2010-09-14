@@ -110,7 +110,12 @@ namespace HnLogicalRelations
     /**
      * Has not.
      */
-	_LIT8( KLogicalHasNot8,         "HASNOT" );
+    _LIT8( KLogicalHasNot8,         "HASNOT" );
+
+    /**
+     * Uid param for uri.
+     */
+    _LIT8( KParamUid8,              "&uid=" );
     }
 
 /**
@@ -427,11 +432,11 @@ _LIT( 	KSuiteLoadingLogFile, 		"c:\\logs\\menu" );
 
 // info notes for notifying lack of configuration files
 _LIT( KDebugNoteDirNotFound,
-	"Directory containing suite configuration not found!" );
+  "Directory containing suite configuration not found!" );
 _LIT( KDebugNoteFileNotFound,
-	"File containing suite configuration not found!" );
+  "File containing suite configuration not found!" );
 _LIT( KDebugNoteOtherError,
-	"Loading suite configuration returned error: %d" );
+  "Loading suite configuration returned error: %d" );
 
 _LIT8( KStar8, "*" );
 
@@ -518,9 +523,9 @@ const TInt KTimeStampCutOff = 5;
  * Order in which drives are searched for suites.
  */
 const TInt KDriveSearchOrder[] = { EDriveY, EDriveX, EDriveW, EDriveV, EDriveU,
-		EDriveT, EDriveS, EDriveR, EDriveQ, EDriveP, EDriveO, EDriveN, EDriveM,
-		EDriveL, EDriveK, EDriveJ, EDriveI, EDriveH, EDriveG, EDriveF, EDriveE,
-		EDriveD, EDriveC, EDriveB, EDriveA,	EDriveZ	};
+    EDriveT, EDriveS, EDriveR, EDriveQ, EDriveP, EDriveO, EDriveN, EDriveM,
+    EDriveL, EDriveK, EDriveJ, EDriveI, EDriveH, EDriveG, EDriveF, EDriveE,
+    EDriveD, EDriveC, EDriveB, EDriveA,	EDriveZ	};
 
 /**
  * Type of the widget which displays Suite data
@@ -562,10 +567,10 @@ enum TImageSource
  * Custom item ids.
  */
 enum TCustomId
-	{
-	ECustomIdFirstItem = -2,
-	ECustomIdLastItem = -3
-	};
+  {
+  ECustomIdFirstItem = -2,
+  ECustomIdLastItem = -3
+  };
 
 /**
  * Suite's exit mode
@@ -580,8 +585,8 @@ enum TExitMode
  * Type of change in items number
  */
 enum TItemsChangeType {
-	EItemsAdded = 0,
-	EItemsRemoved
+  EItemsAdded = 0,
+  EItemsRemoved
 };
 
 _LIT8( KExitModeParams,  "params:exit" );

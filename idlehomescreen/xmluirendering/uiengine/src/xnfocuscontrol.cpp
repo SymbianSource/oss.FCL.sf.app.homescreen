@@ -109,43 +109,20 @@ void CXnFocusControl::DoMakeVisibleL( TBool aVisible )
     {
     if ( aVisible != iVisible )
         {
+        iVisible = aVisible;
+        
         if ( !aVisible )
             {
-            iVisible = aVisible;
-            
-            iRefused = EFalse;
-            
             CXnNode* node( iAppUiAdapter.UiEngine().FocusedNode() ); 
                                    
             if ( node )
                 {
-                node->HideTooltipsL();
-                                    
-                CXnControlAdapter* control( node->Control() );
-                
-                if  ( control && control->RefusesFocusLoss() )
-                    {
-                    // Need to keep drawing focus appearance
-                    iRefused = ETrue;
-                    
-                    node->UnsetStateL( 
-                        XnPropertyNames::style::common::KPressedDown );
-                    }
-                else
-                    {
-                    node->UnsetStateL(  
-                        XnPropertyNames::style::common::KFocus );                    
-                    }
+                node->UnsetStateL(  
+                    XnPropertyNames::style::common::KFocus );                    
                                 
                 iAppUiAdapter.UiEngine().RenderUIL();                
-                }    
+                }
             }
-        else
-            {
-            iRefused = EFalse;
-            
-            iVisible = aVisible;
-            }              
         }        
     }
 
@@ -174,42 +151,17 @@ void CXnFocusControl::Draw( const TRect& aRect, CWindowGc& aGc ) const
         return;
         }
     
-    if ( IsVisible() || iRefused ) 
+    if ( IsVisible() ) 
         {                                       
-        CXnNode* node( iAppUiAdapter.UiEngine().FocusedNode() );
+        TRect innerRect( aRect );            
         
-        if ( node )
-            {            
-            CXnProperty* prop( NULL );
-            
-            TRAP_IGNORE( prop = node->GetPropertyL( 
-                XnPropertyNames::common::KFocusAppearance ) );
-                                            
-            if ( prop && prop->StringValue() == XnPropertyNames::KNone )
-                {
-                // Current element refuses to draw focus appearance
-                return;
-                }
-            
-            TRect innerRect( aRect );            
-            
-            innerRect.Shrink( 
-                KSkinGfxInnerRectShrink, KSkinGfxInnerRectShrink );
-            
-            MAknsSkinInstance* skin( AknsUtils::SkinInstance() );
-                 
-            if ( node->IsStateSet( XnPropertyNames::style::common::KPressedDown ) )
-                {
-                AknsDrawUtils::DrawFrame( skin, aGc, aRect, innerRect,
-                    KAknsIIDQsnFrHomePressed, KAknsIIDDefault );                
-                }            
-            
-            if ( node->IsStateSet( XnPropertyNames::style::common::KFocus ) )
-                {
-                AknsDrawUtils::DrawFrame( skin, aGc, aRect, innerRect, 
-                    KAknsIIDQsnFrHome, KAknsIIDDefault );                
-                }            
-            }       
+        innerRect.Shrink( 
+            KSkinGfxInnerRectShrink, KSkinGfxInnerRectShrink );
+        
+        MAknsSkinInstance* skin( AknsUtils::SkinInstance() );
+                     
+        AknsDrawUtils::DrawFrame( skin, aGc, aRect, innerRect, 
+            KAknsIIDQsnFrHome, KAknsIIDDefault );                
         }
     }
 

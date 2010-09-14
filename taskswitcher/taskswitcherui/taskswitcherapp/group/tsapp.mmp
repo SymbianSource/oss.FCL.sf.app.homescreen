@@ -20,7 +20,9 @@
 #include <platform_paths.hrh>
 #include "../inc/tsuid.hrh"
 
-EPOCHEAPSIZE    0x100000 0xa00000  // 1 Mb - 10 Mb
+#ifndef WINSCW
+    EPOCHEAPSIZE    0x100000 0xa00000  // 1 Mb - 10 Mb
+#endif
 EPOCSTACKSIZE   0x5000 // 20KB
 
 TARGET          taskswitcher.exe
@@ -37,6 +39,7 @@ SOURCE          tsdocument.cpp
 SOURCE          tstaskswitcher.cpp 
 SOURCE          tsappview.cpp
 SOURCE          tsfastswaparea.cpp
+SOURCE          tsfastswapareautils.cpp
 SOURCE          tsfastswapgrid.cpp
 SOURCE          tsdevicestate.cpp
 SOURCE          tseventcontroler.cpp
@@ -81,6 +84,7 @@ LIBRARY         bafl.lib
 LIBRARY         akntouchgesturefw.lib
 LIBRARY         aknphysics.lib
 LIBRARY         touchfeedback.lib
+LIBRARY         bitmaptransforms.lib
 
 DEBUGLIBRARY    flogger.lib
 

@@ -139,6 +139,7 @@ public:
      * @param aThis Active view
      * @param aOther View to activate
      * @param aEffect Effect uid 
+     * @param aBgEffectOnly Show only background effect without view animation 
      * @return ETrue of effect is started, EFalse otherwise
      */    
     TBool BeginActivateViewEffect( const CXnViewData& aThis, 

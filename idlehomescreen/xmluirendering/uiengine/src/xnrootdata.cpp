@@ -45,6 +45,7 @@
 
 // Constants
 const TInt KScheduleInterval( 2000000 );
+_LIT8( KTemplateViewUID, "0x20026f50" );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -94,6 +95,9 @@ CXnRootData::CXnRootData( CXnViewManager& aManager, TUid aApplicationUid )
 //
 CXnRootData::~CXnRootData()
     {
+    delete iTemplateViewUid;
+    iTemplateViewUid = NULL;
+    
     if ( iLoadTimer )
         {
         iLoadTimer->Cancel();
@@ -250,7 +254,7 @@ void CXnRootData::Destroy()
 // 
 // -----------------------------------------------------------------------------
 //
-void CXnRootData::LoadRemainingViews()
+void CXnRootData::LoadRemainingViewsL()
     {
     if ( iFlags.IsClear( EIsDispose ) )
         {
@@ -434,10 +438,9 @@ void CXnRootData::DestroyViewData( CXnViewData* aViewData )
         {
         iPluginsData.Remove( index );
                 
-        if ( iViewsToDestroy.Find( aViewData ) == KErrNotFound )
+        if ( iViewsToDestroy.Find( aViewData ) == KErrNotFound && 
+           iViewsToDestroy.Append( aViewData ) == KErrNone )
             {
-            iViewsToDestroy.Append( aViewData );
-            
             iDestroyTimer->Cancel();
             
             iDestroyTimer->Start( TTimeIntervalMicroSeconds32( 0 ),
@@ -599,6 +602,28 @@ TInt32 CXnRootData::MaxPages()
     {
     return iMaxPages;
     }
+
+// ---------------------------------------------------------------------------
+// Returns TemplateViewUid
+// ---------------------------------------------------------------------------
+//
+const TDesC8& CXnRootData::TemplateViewUid() const
+    {
+    const TDesC8& templateViewUid = KTemplateViewUID;
+    return iTemplateViewUid ? *iTemplateViewUid : templateViewUid; // qhd uid
+    };
+
+// ---------------------------------------------------------------------------
+// Sets TemplateViewUid
+// ---------------------------------------------------------------------------
+//
+void CXnRootData::SetTemplateViewUidL( const TDesC8& aTemplateViewUid )
+    {
+    delete iTemplateViewUid;
+    iTemplateViewUid = NULL;
+
+    iTemplateViewUid = aTemplateViewUid.AllocL();
+    };
 
 // -----------------------------------------------------------------------------
 // CXnRootData::RunDestroyL()

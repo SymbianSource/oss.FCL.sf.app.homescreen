@@ -17,9 +17,11 @@
 
 // System includes
 #include <AknUtils.h>
+#include <AknPriv.hrh>
 
 // User includes
 #include "xnappuiadapter.h"
+#include "xnviewadapter.h"
 #include "xnfocuscontrol.h"
 #include "xnkeyeventdispatcher.h"
 #include "xntype.h"
@@ -40,7 +42,11 @@
     ( k == EStdKeyLeftArrow || k == EStdKeyRightArrow || \
       k == EStdKeyUpArrow || k == EStdKeyDownArrow ) 
 
-const TInt KOneView = 1;
+// Constants
+const TInt KOneView( 1 );
+
+_LIT8( KEnablePartialInput, "splitinputenabled" );
+_LIT8( KTextEditor, "texteditor" );
 
 // -----------------------------------------------------------------------------
 // SetInitialFocusL
@@ -145,7 +151,11 @@ CXnKeyEventDispatcher::~CXnKeyEventDispatcher()
     {
     iCoeEnv->RemoveMessageMonitorObserver( *this );
     
-    iUiEngine.ViewManager()->RemoveObserver( *this );
+    CXnAppUiAdapter& appui( iUiEngine.AppUiAdapter() );
+    
+    appui.ViewManager().RemoveObserver( *this );
+    
+    appui.UiStateListener().RemoveObserver( *this );
     
     delete iLoseFocus;
     delete iGainFocus;
@@ -171,7 +181,11 @@ void CXnKeyEventDispatcher::ConstructL()
     {
     MakeVisible( EFalse );
 
-    iUiEngine.ViewManager()->AddObserver( *this );
+    CXnAppUiAdapter& appui( iUiEngine.AppUiAdapter() );
+    
+    appui.UiStateListener().AddObserver( *this );
+    
+    appui.ViewManager().AddObserver( *this );
            
     iCoeEnv->AddMessageMonitorObserverL( *this );    
     }
@@ -228,6 +242,44 @@ void CXnKeyEventDispatcher::MonitorWsMessage( const TWsEvent& aEvent )
     }
 
 // -----------------------------------------------------------------------------
+// CXnKeyEventDispatcher::NotifyStatusPaneSizeChanged()
+//
+// -----------------------------------------------------------------------------
+//
+void CXnKeyEventDispatcher::NotifyStatusPaneSizeChanged()
+    {
+    // No implementation required
+    }
+
+// -----------------------------------------------------------------------------
+// CXnKeyEventDispatcher::NotifyResourceChanged()
+//
+// -----------------------------------------------------------------------------
+//
+void CXnKeyEventDispatcher::NotifyResourceChanged( TInt aType )
+    {
+    if ( aType == KAknSplitInputEnabled )
+        {
+        if ( iActiveTextEditor )
+            {   
+            CXnProperty* prop( NULL );
+            
+            TRAP_IGNORE( prop = 
+                iActiveTextEditor->GetPropertyL( KEnablePartialInput ) );
+                       
+            if ( prop && prop->StringValue() == XnPropertyNames::KTrue ) 
+                {
+                iUiEngine.EnablePartialTouchInput( iActiveTextEditor, ETrue );
+                }
+            }
+        }
+    else if ( aType == KAknSplitInputDisabled )
+        {
+        iUiEngine.EnablePartialTouchInput( NULL, EFalse );             
+        }    
+    }
+
+// -----------------------------------------------------------------------------
 // CXnKeyEventDispatcher::PointerEvent()
 //
 // -----------------------------------------------------------------------------
@@ -235,6 +287,43 @@ void CXnKeyEventDispatcher::MonitorWsMessage( const TWsEvent& aEvent )
 const TPointerEvent& CXnKeyEventDispatcher::PointerEvent() const
     {
     return iPointerEvent;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnKeyEventDispatcher::SetTextEditorActive()
+//
+// -----------------------------------------------------------------------------
+//
+void CXnKeyEventDispatcher::SetTextEditorActive( CXnNode* aNode, 
+    TBool aActivate )
+    {
+    if ( iActiveTextEditor && iActiveTextEditor != aNode )
+        {
+        CXnNode* activeTextEditor( iActiveTextEditor );
+        iActiveTextEditor = NULL;
+        
+        // Run lose focus to text editor node
+        TRAP_IGNORE( SetNodeL( activeTextEditor, NULL, ETrue ) );                    
+        }           
+
+    if ( aActivate && aNode && aNode->Type()->Type() == KTextEditor )
+        {
+        iActiveTextEditor = aNode;
+        }    
+    else
+        {
+        iActiveTextEditor = NULL;
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnKeyEventDispatcher::IsTextEditorActive
+// 
+// -----------------------------------------------------------------------------
+//
+TBool CXnKeyEventDispatcher::IsTextEditorActive() const
+    {
+    return iActiveTextEditor ? ETrue : EFalse;
     }
 
 // -----------------------------------------------------------------------------
@@ -269,6 +358,11 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
         {
         keyYesNoApps = ETrue;
         
+        if ( aKeyEvent.iScanCode == EStdKeyNo && aType == EEventKey )
+            {
+            iUiEngine.AppUiAdapter().ViewAdapter().CloseAllPopupsL();
+            }        
+        
         iFocusChanged = EFalse;
         
         // AppsKey, YesKey, NoKey events must be always handled, and if we don't
@@ -281,38 +375,45 @@ TKeyResponse CXnKeyEventDispatcher::OfferKeyEventL(
         
         if ( IS_ARROW_KEY( aKeyEvent.iScanCode ) && aType == EEventKey )
             {
-            if ( !appui.FocusShown() )
+            if ( !appui.FocusShown() || !iNode )
                 {
                 appui.ShowFocus();
                 
                 if ( !iNode )
                     {
-                    // Find initial location for focus
-                    ResolveAndSetFocusL();
-                    
-                    // If focus is still not set, we are in normal mode and the view is empty.
-                    // left and right arrows lead to next/previous view. When other arrows
-                    // are pressed, the focus is hidden.
-                    if( !iNode )
+                    if ( iActiveTextEditor )
                         {
-                        if( iUiEngine.ViewManager()->ViewAmount() != KOneView &&
-                            aKeyEvent.iScanCode == EStdKeyRightArrow )
-                            {
-                            iUiEngine.ViewManager()->ActivateNextViewL();
-                            }
-                        else if( iUiEngine.ViewManager()->ViewAmount() != KOneView &&
-                                 aKeyEvent.iScanCode == EStdKeyLeftArrow )
-                            {
-                            iUiEngine.ViewManager()->ActivatePreviousViewL();
-                            }
-                        else
-                            {
-                            // hide focus if view is not switched
-                            appui.HideFocus();
-                            }
+                        iNode = iActiveTextEditor;
                         }
-
-                    return EKeyWasConsumed;
+                    else
+                        {
+                        // Find initial location for focus
+                        ResolveAndSetFocusL();
+                        
+                        // If focus is still not set, we are in normal mode and the view is empty.
+                        // left and right arrows lead to next/previous view. When other arrows
+                        // are pressed, the focus is hidden.
+                        if( !iNode )
+                            {
+                            if( iUiEngine.ViewManager()->ViewAmount() != KOneView &&
+                                aKeyEvent.iScanCode == EStdKeyRightArrow )
+                                {
+                                iUiEngine.ViewManager()->ActivateNextViewL();
+                                }
+                            else if( iUiEngine.ViewManager()->ViewAmount() != KOneView &&
+                                     aKeyEvent.iScanCode == EStdKeyLeftArrow )
+                                {
+                                iUiEngine.ViewManager()->ActivatePreviousViewL();
+                                }
+                            else
+                                {
+                                // hide focus if view is not switched
+                                appui.HideFocus();
+                                }
+                            }
+    
+                        return EKeyWasConsumed;                    
+                        }
                     }
                 }
             }
@@ -431,6 +532,14 @@ void CXnKeyEventDispatcher::SetNodeL( CXnNode* aToLose, CXnNode* aToGain,
     {
     if ( aToLose )
         {
+        CXnControlAdapter* adapter( aToLose->Control() );
+    
+        // Don't change control focus when <texteditor> element is focused
+        if ( adapter && !iActiveTextEditor )
+            {
+            adapter->SetFocus( EFalse );
+            }
+    
         aToLose->SetDirtyL( XnDirtyLevel::ERender );
 
         aToLose->UnsetStateL( XnPropertyNames::style::common::KFocus );
@@ -444,20 +553,34 @@ void CXnKeyEventDispatcher::SetNodeL( CXnNode* aToLose, CXnNode* aToGain,
                 iLoseFocus = BuildTriggerNodeL( iUiEngine,
                     XnPropertyNames::action::trigger::name::KLoseFocus );
                 }
-
-            aToLose->ReportXuikonEventL( *iLoseFocus );
-            }
-
-        CXnControlAdapter* adapter( aToLose->Control() );
-
-        if ( adapter )
-            {
-            adapter->SetFocus( EFalse );
+            
+            if ( iActiveTextEditor != aToLose )
+                {
+                aToLose->ReportXuikonEventL( *iLoseFocus );
+                }
             }
         }
 
     if ( aToGain )
         {
+        TBool isTextEditor( aToGain->Type()->Type() == KTextEditor );
+        
+        if ( iActiveTextEditor && ( ( aSource != XnEventSource::EStylus && !isTextEditor ) || 
+            ( iActiveTextEditor->Namespace() != aToGain->Namespace() ) ||  
+            ( isTextEditor && iActiveTextEditor != aToGain ) ) )
+            {            
+            // Remove focus from active <texteditor> element
+            SetTextEditorActive( NULL, EFalse );            
+            }
+
+        CXnControlAdapter* adapter( aToGain->Control() );
+    
+        // Don't change control focus when <texteditor> element is focused
+        if ( adapter && !iActiveTextEditor )
+            {
+            adapter->SetFocus( ETrue );
+            }
+    
         aToGain->SetDirtyL( XnDirtyLevel::ERender );
 
         if ( aNotify )
@@ -468,15 +591,17 @@ void CXnKeyEventDispatcher::SetNodeL( CXnNode* aToLose, CXnNode* aToGain,
                         XnPropertyNames::action::trigger::name::KGainFocus );
                 }
 
-            aToGain->ReportXuikonEventL( *iGainFocus, aSource );
+            if ( iActiveTextEditor != aToGain )
+                {
+                aToGain->ReportXuikonEventL( *iGainFocus, aSource );
+                }            
             }
-
-        CXnControlAdapter* adapter( aToGain->Control() );
-
-        if ( adapter )
+        
+        if ( isTextEditor )
             {
-            adapter->SetFocus( ETrue );
-            }
+            // Set active <texteditor> element
+            SetTextEditorActive( aToGain, ETrue );            
+            }               
         }
     }
 
@@ -641,6 +766,9 @@ void CXnKeyEventDispatcher::NotifyViewDeactivatedL(
     const CXnViewData& /*aViewData*/ )
     {    
     iMenuNode = NULL;
+    
+    SetTextEditorActive( NULL, EFalse );
+    
     ClearPassiveFocusedNodesL();
     ClearStateL();
     
@@ -667,11 +795,11 @@ void CXnKeyEventDispatcher::NotifyWidgetRemovalL(
         {
         ClearPassiveFocusedNodesL();
 
+        CXnViewData& activeViewData(
+            iUiEngine.ViewManager()->ActiveViewData() );
+
         if ( iNode )
             {                              
-            CXnViewData& activeViewData(
-                iUiEngine.ViewManager()->ActiveViewData() );
-    
             const CXnPluginData* pluginData(
                 activeViewData.Plugin( iNode ) );
     
@@ -680,6 +808,17 @@ void CXnKeyEventDispatcher::NotifyWidgetRemovalL(
                 // The plugin is removed which was holding focus
                 ClearStateL();
                 }
+            }
+        
+        if ( iActiveTextEditor )
+            {
+            const CXnPluginData* pluginData(
+                activeViewData.Plugin( iActiveTextEditor ) );
+            
+            if ( pluginData == &aPluginData )
+                {
+                SetTextEditorActive( NULL, EFalse );
+                }        
             }
         }    
     }

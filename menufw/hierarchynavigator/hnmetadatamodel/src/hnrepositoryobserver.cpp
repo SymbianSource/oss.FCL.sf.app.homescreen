@@ -229,7 +229,7 @@ void CHnRepositoryShowFolderObserver::ConstructL( const TUid aRepositoryUid )
     TInt ret = iRepository->Create( iId, KBlank );
     iNotifyHandler = CCenRepNotifyHandler::NewL(
         *this, *iRepository,
-    	CCenRepNotifyHandler::EStringKey, iId );
+      CCenRepNotifyHandler::EStringKey, iId );
     iNotifyHandler->StartListeningL();
     }
 
@@ -273,23 +273,23 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
 
     //++Show Folder
     if( aId == iId && aNewValue.Length())
-		{
+    {
         iNotifyType = 0;
-		ExtractCRKeyShowFolderName( aNewValue );
+    ExtractCRKeyShowFolderName( aNewValue );
 
-		// iCRKeyFolderItemUid can contain mcs id or uid
-		// in case of uid it will be replaced whith id in HandleNotifyL callback
-		if( iCRKeyFolderItemUid.Length()>0 )
-		    {
-		    if( iCRKeyFolderItemUid.FindF( KHexPrefix8 )==0 )
-		        {
-		        iNotifyType |= EAPP_UID;
-		        }
-		    else
-		        {
-		        iNotifyType |= EAPP_ID;
-		        }
-		    }
+    // iCRKeyFolderItemUid can contain mcs id or uid
+    // in case of uid it will be replaced whith id in HandleNotifyL callback
+    if( iCRKeyFolderItemUid.Length()>0 )
+        {
+        if( iCRKeyFolderItemUid.FindF( KHexPrefix8 )==0 )
+            {
+            iNotifyType |= EAPP_UID;
+            }
+        else
+            {
+            iNotifyType |= EAPP_ID;
+            }
+        }
 
         CHnMdBaseKey* inDataKey = HnMdKeyFactory::CreateL(
             KInData8, KKeyTypeMap, KDefaultParentId8 );
@@ -392,7 +392,7 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
             CleanupStack::PopAndDestroy( id );
             }
         CleanupStack::PopAndDestroy( inDataKey );
-		}
+    }
 
     DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyStringL OUT"));
 
@@ -403,91 +403,91 @@ void CHnRepositoryShowFolderObserver::HandleNotifyStringL(TUint32 aId, const TDe
 // ---------------------------------------------------------------------------
 //
 void CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName( const TDesC& aNewValue )
-	{
-	DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName IN" ));
-	iCRKeyFolderName.Copy( KBlank );
-	iCRKeyFolderItemUid.Copy( KBlank );
+  {
+  DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName IN" ));
+  iCRKeyFolderName.Copy( KBlank );
+  iCRKeyFolderItemUid.Copy( KBlank );
 
-	int keyValueLength = aNewValue.Length();
-	if( keyValueLength )
-		{
-			TApaAppGroupName folder;
-	        TBuf<KTimeStampBufferLength + KUidStringLength + 1> tempBuf;
-	        TBuf<KTimeStampBufferLength> timeStamp;
+  int keyValueLength = aNewValue.Length();
+  if( keyValueLength )
+    {
+      TApaAppGroupName folder;
+          TBuf<KTimeStampBufferLength + KUidStringLength + 1> tempBuf;
+          TBuf<KTimeStampBufferLength> timeStamp;
 
-	        TInt ret = aNewValue.Find( KComma );
-	        if( (ret == KErrNotFound )|| ( ret == ( keyValueLength-1 ) ) )
-	            {
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad CR key value input) OUT" ));
-	        	return;	//bad CR key value input
-	            }
-	        if( ret>KApaMaxAppGroupName )
-	            {
-	            return;
-	            }
-	        folder.Copy(aNewValue.Left(ret));
-	        if( aNewValue.Length()-ret > tempBuf.MaxLength() )
-	            {
-	            return;
-	            }
-	        tempBuf.Copy(aNewValue.Mid( ret + 1 ) );
+          TInt ret = aNewValue.Find( KComma );
+          if( (ret == KErrNotFound )|| ( ret == ( keyValueLength-1 ) ) )
+              {
+              DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad CR key value input) OUT" ));
+            return;	//bad CR key value input
+              }
+          if( ret>KApaMaxAppGroupName )
+              {
+              return;
+              }
+          folder.Copy(aNewValue.Left(ret));
+          if( aNewValue.Length()-ret > tempBuf.MaxLength() )
+              {
+              return;
+              }
+          tempBuf.Copy(aNewValue.Mid( ret + 1 ) );
 
-	        TInt posUid = tempBuf.Find( KComma );
-	        if ( KErrNotFound != posUid )
-	        	{
-	        	if( posUid>KTimeStampBufferLength )
-	        	    {
-	        	    return;
-	        	    }
-	        	timeStamp.Copy( tempBuf.Left(posUid) );
-	        	if( tempBuf.Length()-(posUid+1) > KUidStringLength )
-	        	    {
-	        	    return;
-	        	    }
-	        	iCRKeyFolderItemUid.Copy( tempBuf.Mid( posUid + 1 ) );
-	        	}
-	        else
-	        	{
+          TInt posUid = tempBuf.Find( KComma );
+          if ( KErrNotFound != posUid )
+            {
+            if( posUid>KTimeStampBufferLength )
+                {
+                return;
+                }
+            timeStamp.Copy( tempBuf.Left(posUid) );
+            if( tempBuf.Length()-(posUid+1) > KUidStringLength )
+                {
+                return;
+                }
+            iCRKeyFolderItemUid.Copy( tempBuf.Mid( posUid + 1 ) );
+            }
+          else
+            {
                 if( tempBuf.Length()>KTimeStampBufferLength )
                     {
                     return;
                     }
-	        	timeStamp.Copy( tempBuf );
-	        	}
+            timeStamp.Copy( tempBuf );
+            }
 
-	        TTime currentTime;
-	        currentTime.HomeTime();
-	        TTimeIntervalSeconds interval;
+          TTime currentTime;
+          currentTime.HomeTime();
+          TTimeIntervalSeconds interval;
 
-	        TTime timeStampTime;
-	        ret = timeStampTime.Set(timeStamp);
+          TTime timeStampTime;
+          ret = timeStampTime.Set(timeStamp);
 
-	        if(ret == KErrGeneral )
-	            {
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad timestamp) OUT" ));
-	        	return; // bad time stamp value
-	            }
+          if(ret == KErrGeneral )
+              {
+              DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (bad timestamp) OUT" ));
+            return; // bad time stamp value
+              }
 
-	        ret = currentTime.SecondsFrom( timeStampTime, interval );
+          ret = currentTime.SecondsFrom( timeStampTime, interval );
 
-	        if( interval.Int() < 0 )
-	            {//negative timestamp is set ahead of current time...!
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (negative interval) OUT" ));
-	        	return;
-	            }
+          if( interval.Int() < 0 )
+              {//negative timestamp is set ahead of current time...!
+              DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (negative interval) OUT" ));
+            return;
+              }
 
-	        if(( interval.Int()) > KTimeStampCutOff )
-	            {//positive timestamp but more than 5 seconds
-	            DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (more than 5 seconds) OUT" ));
-	        	return;
-	            }
-	        else
-        	    {
-	        	iCRKeyFolderName.Copy(folder);
-        	    }
-		}
-	DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName OUT" ));
-	}
+          if(( interval.Int()) > KTimeStampCutOff )
+              {//positive timestamp but more than 5 seconds
+              DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName (more than 5 seconds) OUT" ));
+            return;
+              }
+          else
+              {
+            iCRKeyFolderName.Copy(folder);
+              }
+    }
+  DEBUG(( "_MM_:CHnRepositoryShowFolderObserver::ExtractCRKeyShowFolderName OUT" ));
+  }
 
 // ---------------------------------------------------------------------------
 //
@@ -615,9 +615,9 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
     TInt aEventId,
     CLiwGenericParamList& aEventParamList,
     const CLiwGenericParamList& /*aInParamList*/)
-	{
-	DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyL IN"));
-	if( aEventId == KLiwEventCanceled )
+  {
+  DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyL IN"));
+  if( aEventId == KLiwEventCanceled )
         {
         return KErrNotFound;
         }
@@ -732,7 +732,6 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
             if ( iCmnPtrs->iContainer->GetLastSuiteModel()->CustomId() != varId.AsTInt64() )
                 {
                 iCmnPtrs->iModelEventObserver->HandleModelEventL( KNewSuiteLoadedMdEvent, *paramList );
-                iCmnPtrs->iContainer->GetLastSuiteModel()->RegisterSuiteObserverL( this );
                 iCmnPtrs->iModel->QueueForeground( CHnMdModel::EWhenCurrentTopSuiteIsEvaluated );
                 }
             else
@@ -769,37 +768,8 @@ TInt CHnRepositoryShowFolderObserver::HandleNotifyL(
             CleanupStack::PopAndDestroy( &varId );
         }
 
-	DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyL OUT"));
-	return KErrNone;
-	}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CHnRepositoryShowFolderObserver::HandleSuiteEventL ( THnCustomSuiteEvent aCustomSuiteEvent,
-        CHnSuiteModel *aModel )
-	{
-
-	if ( aCustomSuiteEvent == ESuiteModelInitialized && iCRKeyFolderItemUid.Length() > 0 )
-		{
-	      if (iCRKeyFolderItemUid.Length() > 0 )
-            {
-            TLex8 lex( iCRKeyFolderItemUid );
-            TInt64 id (0);
-            TInt err = lex.Val( id );
-            TInt focus( KErrNotFound );
-            // If suite is not null, then find matching item model.
-            CHnItemModel* itemModel = aModel->GetMatchingItemModelL( id, focus );
-            aModel->SetSuiteHighlightL( focus );
-            }
-		iCRKeyFolderItemUid.Copy( KBlank );
-		aModel->UnregisterSuiteObserver( this );
-		CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
-		CleanupStack::PushL( pl );
-		iCmnPtrs->iModelEventObserver->HandleModelEventL( KAppGainForeground, *pl );
-		CleanupStack::PopAndDestroy( pl );
-		}
-	}
+  DEBUG(("_MM_:CHnRepositoryShowFolderObserver::HandleNotifyL OUT"));
+  return KErrNone;
+  }
 
 // End of File

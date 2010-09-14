@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<!-- Localization removed until localized strings are available -->
+
+<package version="2.0">
+
+    <family>vga_tch</family>
+        
+    <type>widget</type>
+
+    <!-- interface uid -->
+    <interfaceuid>0x2001f48a</interfaceuid>
+
+    <!-- vendor uid  -->
+    <provideruid>0x101fb657</provideruid>
+    <!-- uid -->
+
+    <configurationuid>0x200286e7</configurationuid>
+
+    <!-- <filedtd>profilemodeconfiguration.dtd</filedtd> -->
+    
+    <!-- <fullname>&amp;qtn_profilemode_configuration_name;</fullname> -->
+    <fullname>Profilemode</fullname>
+    
+    <shortname>profilemode</shortname>
+    <version>1.0</version>
+
+    <!-- description -->
+    <!-- <description>&amp;qtn_profilemode_configuration_desc;</description> -->
+    <description>Change and edit active profile</description>
+    
+    <!-- configuration -->
+    <filexml>widgetconfiguration.xml</filexml>
+   
+    <filelogo>skin(270501603 9360):mif(icon.mif 16384 16385)</filelogo>
+    <!-- Locale specific resources -->
+    <localization>
+    <fileresource tag="xuikon">profilemode.o0000</fileresource>
+    </localization>
+
+</package>

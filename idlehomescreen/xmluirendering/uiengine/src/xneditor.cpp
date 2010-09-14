@@ -235,7 +235,7 @@ CXnPluginData* DeterminePlugin( CXnViewManager& aViewManager,
 
         CXnPluginData* plugin( viewData.Plugin( node ) );
 
-        if ( plugin && !plugin->Occupied() )
+        if ( plugin && !plugin->Occupied() && plugin->Editable() )
             {
             return plugin;
             }
@@ -1087,6 +1087,14 @@ void CXnEditor::NotifyViewActivatedL( const CXnViewData& aViewData )
         }                           
     }
 
+// -----------------------------------------------------------------------------
+// CXnEditor::NotifyViewLoadedL
+// -----------------------------------------------------------------------------
+//
+void CXnEditor::NotifyViewLoadedL( const CXnViewData& /*aViewData*/ )
+    {
+    }
+
 // ---------------------------------------------------------------------------
 // CXnEditor::NotifyConfigureWidgetL
 // ---------------------------------------------------------------------------
@@ -1339,7 +1347,7 @@ void CXnEditor::NotifyWidgetRemovalL( const CXnPluginData& aPluginData )
 // CXnEditor::NotifyViewAdditionL
 // ---------------------------------------------------------------------------
 //
-void CXnEditor::NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ )
+void CXnEditor::NotifyViewAdditionL( const CXnViewData& /*aViewData*/ )
     {
     NotifyViewListChanged();
     }
@@ -1348,7 +1356,7 @@ void CXnEditor::NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ )
 // CXnEditor::NotifyViewRemovalL
 // ---------------------------------------------------------------------------
 //
-void CXnEditor::NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ )
+void CXnEditor::NotifyViewRemovalL( const CXnViewData& /*aViewData*/ )
     {
     NotifyViewListChanged();
     }
@@ -1422,7 +1430,6 @@ void CXnEditor::NotifyWidgetListChanged()
         KNotifyWidgetListChangedDelay,
         KNotifyWidgetListChangedDelay,
         TCallBack( WidgetListChangedCallBack, this ) );
-
     }
 
 // ---------------------------------------------------------------------------
@@ -1928,11 +1935,22 @@ TInt CXnEditor::AddWidgetL( CHsContentInfo& aInfo )
     const TDesC8& type( aInfo.Type() );
     
     if ( ( type != KKeyWidget && type != KKeyTemplate ) ||
-         aInfo.Uid() == KNullDesC8  || !aInfo.CanBeAdded() )
+         aInfo.Uid() == KNullDesC8 )
         {
         // malformed content info
         return KErrArgument;
         }
+
+    // the widget can not be added. Return proper error code
+    if ( IsCurrentViewFull() )
+        {
+        return KHsErrorViewFull;
+        }
+    else if ( !aInfo.CanBeAdded() )
+        {
+        return KHsErrorMaxInstanceCountExceeded;
+        }
+
 
     CXnPluginData* plugin( NULL );
     
@@ -1947,27 +1965,9 @@ TInt CXnEditor::AddWidgetL( CHsContentInfo& aInfo )
     
     iTargetPlugin = NULL;
     
-    // the widget can not be added. Return proper error code
-    if ( IsCurrentViewFull() || !plugin )
+    if ( !plugin )
         {
-        return KHsErrorViewFull;
-        }
-    else
-        {
-        TInt result;
-        if ( aInfo.Type() != KKeyTemplate() )
-            { 
-            result = NonTemplateWidgetCanBeAddedRemovedL( aInfo ); 
-            }
-        else
-            {
-            result = TemplateWidgetCanBeAddedRemovedL( aInfo );
-            } 
-        
-        if ( !( result & ECanBeAdded ) )
-            {
-            return KHsErrorMaxInstanceCountExceeded;
-            } 
+        return KErrGeneral;
         }
     
     ret = iViewManager.LoadWidgetToPluginL( aInfo, *plugin );
@@ -2193,7 +2193,7 @@ TBool CXnEditor::IsViewFull( CXnViewData& aViewData )
         {
         CXnPluginData* plugin = plugins[ i ];
 
-        if ( !plugin->Occupied() )
+        if ( plugin && !plugin->Occupied() && plugin->Editable() )
             {
             isFull = EFalse;
             break;

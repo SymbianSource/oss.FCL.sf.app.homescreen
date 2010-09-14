@@ -58,7 +58,6 @@ CMmListBox::CMmListBox() : AKNDOUBLELISTBOXNAME(R_LIST_PANE_LINES_AB_COLUMN)
 //
 CMmListBox::~CMmListBox()
   {
-  delete iRedrawTimer;
   }
 
 // -----------------------------------------------------------------------------
@@ -120,7 +119,6 @@ void CMmListBox::ConstructL( const CCoeControl* aParent, TInt aFlags,
     iItemDrawer->SetDrawMark(EFalse);
     CEikListBox::ConstructL(aParent,aFlags);
     iMmDrawer->SetView( this );
-    iRedrawTimer = CPeriodic::NewL( EPriorityRealTime );
   }
 
 // -----------------------------------------------------------------------------
@@ -234,53 +232,68 @@ TBool CMmListBox::IsPointerInBottomScrollingThreshold(
 //
 // -----------------------------------------------------------------------------
 //
+void CMmListBox::ScrollWithoutRedraw( TInt distanceInPixels )
+    {
+    // desired view position relative to the first item in list (always positive)
+    TInt desiredViewPosition = ItemHeight() * TopItemIndex() - VerticalItemOffset();
+    desiredViewPosition += distanceInPixels;
+
+    const TInt viewPositionMax = Max( 0, ( iModel->NumberOfItems()
+            * ItemHeight() ) - iView->ViewRect().Height() );
+
+    desiredViewPosition = Min( desiredViewPosition, viewPositionMax );
+    desiredViewPosition = Max( desiredViewPosition, 0 );
+
+    ASSERT( desiredViewPosition >= 0 );
+
+    SetTopItemIndex( desiredViewPosition / ItemHeight() );
+    SetVerticalItemOffset( -( desiredViewPosition % ItemHeight() ) );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TInt CMmListBox::ScrollIfNeeded( const TPointerEvent& aPointerEvent )
     {
     TInt nextScrollDelay = 0;
 
-  TBool readyForScrolling =
-      iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
-          && iMmDrawer->GetFloatingItemCount() != 0;
+    TBool readyForScrolling = iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
+            && iMmDrawer->GetFloatingItemCount() != 0;
 
-  if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
-    {
-    // scroll up by one row
-    TInt newCurrentItemIndex = CurrentItemIndex() - 1;
-
-    if ( newCurrentItemIndex >= 0 )
-      {
-      nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-        Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
-      if (readyForScrolling)
+    if( IsPointerInTopScrollingThreshold( aPointerEvent ) )
         {
-        View()->VScrollTo( View()->CalcNewTopItemIndexSoItemIsVisible(
-                        newCurrentItemIndex ) );
-                View()->SetCurrentItemIndex( newCurrentItemIndex );
-                UpdateScrollBarThumbs();
+        // scroll up
+        TInt startPos = MmListBox::KFocusScrollingThreshold * TReal(
+                View()->ItemSize().iHeight );
+        TInt diff = Max( 1, Min( aPointerEvent.iPosition.iY
+                - Rect().iTl.iY, startPos ) );
+        nextScrollDelay = ( (TReal) diff / (TReal) startPos )
+                * ( MmListBox::KEditModeScrollingListBoxMaxDelay
+                        - MmListBox::KEditModeScrollingListBoxMinDelay )
+                + MmListBox::KEditModeScrollingListBoxMinDelay;
+        if( readyForScrolling )
+            {
+            ScrollWithoutRedraw( -MmListBox::KScrollingStep );
+            }
         }
-      }
-    }
-  else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
-    {
-    // scroll down by one row
-    TInt lastItemIndex = iModel->NumberOfItems() - 1;
-    TInt newCurrentItemIndex = CurrentItemIndex() + 1;
-
-
-    if ( newCurrentItemIndex <= lastItemIndex )
-      {
-      nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
-        Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
-
-      if (readyForScrolling)
+    else if( IsPointerInBottomScrollingThreshold( aPointerEvent ) )
         {
-        View()->VScrollTo( View()->CalcNewTopItemIndexSoItemIsVisible(
-            newCurrentItemIndex ) );
-        View()->SetCurrentItemIndex( newCurrentItemIndex );
-                UpdateScrollBarThumbs();
+        // scroll down
+        TInt startPos = MmListBox::KFocusScrollingThreshold * TReal(
+                View()->ItemSize().iHeight );
+        TInt diff = Max( 1, Min( Rect().iBr.iY
+                - aPointerEvent.iPosition.iY, startPos ) );
+        nextScrollDelay = ( (TReal) diff / (TReal) startPos )
+                * ( MmListBox::KEditModeScrollingListBoxMaxDelay
+                        - MmListBox::KEditModeScrollingListBoxMinDelay )
+                + MmListBox::KEditModeScrollingListBoxMinDelay;
+
+        if( readyForScrolling )
+            {
+            ScrollWithoutRedraw( MmListBox::KScrollingStep );
+            }
         }
-      }
-    }
 
     return nextScrollDelay;
     }
@@ -383,33 +396,6 @@ void CMmListBox::ProcessScrollEventL( CEikScrollBar* aScrollBar,
     {
     CEikFormattedCellListBoxTypedef::HandleScrollEventL(
             aScrollBar, aEventType );
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CMmListBox::HandleRedrawTimerEventL()
-    {
-    if ( iSkippedScrollbarEventsCount )
-        {
-        ProcessScrollEventL( ScrollBarFrame()->VerticalScrollBar(),
-                EEikScrollThumbDragVert );
-        }
-    iSkippedScrollbarEventsCount = 0;
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-TInt CMmListBox::RedrawTimerCallback( TAny* aPtr )
-    {
-    CMmListBox* self = static_cast<CMmListBox*>( aPtr );
-    TRAP_IGNORE( self->HandleRedrawTimerEventL() );
-    // Do not bother returning a meaningful error code, CPeriodic will ignore it
-    // anyway.
-    return 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -956,34 +942,17 @@ void CMmListBox::SetDisableChildComponentDrawing( TBool aDisable )
 void CMmListBox::HandleScrollEventL( CEikScrollBar* aScrollBar,
             TEikScrollEvent aEventType )
     {
-    if ( aEventType == EEikScrollThumbDragVert && !iScrollbarThumbIsBeingDragged )
+    if ( aEventType == EEikScrollThumbDragVert )
         {
-        iScrollbarThumbIsBeingDragged = ETrue;
         static_cast<CMmListBoxItemDrawer*>(
                 View()->ItemDrawer() )->EnableCachedDataUse( ETrue );
-        iRedrawTimer->Start( KScrollingRedrawInterval, KScrollingRedrawInterval,
-                TCallBack( &CMmListBox::RedrawTimerCallback, static_cast<TAny*>( this ) ) );
         }
     else if ( aEventType == EEikScrollThumbReleaseVert )
         {
-        iScrollbarThumbIsBeingDragged = EFalse;
         static_cast<CMmListBoxItemDrawer*>(
                 View()->ItemDrawer() )->EnableCachedDataUse( EFalse );
-        // The view will be redrawn with cache disabled when ProcessScrollEventL
-        // calls the base class's HandleScrollEventL method -- no need to
-        // explicitly redraw the view.
-        iRedrawTimer->Cancel();
         }
-
-    if ( !iScrollbarThumbIsBeingDragged )
-        {
-        ProcessScrollEventL( aScrollBar, aEventType );
-        }
-    else
-        {
-        __ASSERT_DEBUG( aEventType == EEikScrollThumbDragVert, User::Invariant() );
-        ++iSkippedScrollbarEventsCount;
-        }
+    ProcessScrollEventL( aScrollBar, aEventType );
     }
 
 // End of file

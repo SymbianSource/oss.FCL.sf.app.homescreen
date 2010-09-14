@@ -58,7 +58,8 @@ public:
         EIsEmpty,
         EIsRemovable,
         EIsActive,             
-        EIsInitial        
+        EIsInitial,
+        EIsEditable
         };
         
 public:    
@@ -373,6 +374,13 @@ public:
     inline TBool Removable() const;
     
     /*
+     * Checks whether editable
+     * 
+     * @return ETrue when editable EFalse when not
+     */      
+    inline TBool Editable() const;
+    
+    /*
      * Queries whether this plugin is holding "empty" widget
      * 
      * @return ETrue if empty, EFalse otherwise     
@@ -440,9 +448,9 @@ public:
     void ShowOutOfMemError();
     
     /**
-     * Sets locking_status attribute (locked/none) 
+     * Sets locking_status attribute (none/locked/permanent) 
      * 
-     * @param aStatus "locked" / "none"
+     * @param aStatus "none" / "locked" / "permanent"
      */
     void SetLockingStatus( const TDesC8& aStatus );    
         

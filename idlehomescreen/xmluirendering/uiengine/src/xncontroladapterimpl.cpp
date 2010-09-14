@@ -61,6 +61,7 @@
 #include "xnscrollablecontroladapter.h"
 #include "xnfocuscontrol.h"
 #include "xneditmode.h"
+#include "xnviewswitcher.h"
 
 _LIT8(KScrollableBoxNodeName, "scrollablebox");
 _LIT8( KView, "view" );
@@ -207,7 +208,6 @@ static TInt AccessResourceFileL(
     CXnResource& aResource, RFile& aFile, RFs& aFsSession );
 static void DrawFocusAppearance( CXnNode& aNode, CWindowGc& aGc );
 static CXnDomNode* HasHoldTrigger( CXnDomNode* aNode );
-static void CancelFocusRefusalL( CXnUiEngine& aUiEngine );
     
 // ============================= LOCAL FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
@@ -3414,30 +3414,6 @@ static CXnDomNode* HasHoldTrigger( CXnDomNode* aNode )
     }
 
 // -----------------------------------------------------------------------------
-// CancelFocusRefusalL
-// Cancels focus refusal
-// -----------------------------------------------------------------------------
-//
-static void CancelFocusRefusalL( CXnUiEngine& aUiEngine )
-    {
-    CXnNode* focused( aUiEngine.FocusedNode() );
-    
-    if ( focused )
-        {
-        CXnControlAdapter* control( focused->Control() );
-        
-        if ( control && control->RefusesFocusLoss() )
-            {
-            focused->HideTooltipsL();
-            
-            // It is now time to give up holding focus
-            focused->UnsetStateL( 
-                XnPropertyNames::style::common::KFocus );
-            }
-        }    
-    }
-
-// -----------------------------------------------------------------------------
 // Calculates scaled bitmap size (rect)
 // -----------------------------------------------------------------------------
 //
@@ -3690,20 +3666,7 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
         if ( aType == EEventKeyDown )
             {            
             iLongtap = EFalse;
-            
-            if ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-                 aKeyEvent.iCode == EKeyEnter )
-                {
-                if ( node->IsStateSet( XnPropertyNames::style::common::KFocus ) )
-                    {
-                    // Set "pressed down"
-                    node->SetStateL( 
-                        XnPropertyNames::style::common::KPressedDown );
-                    
-                    node->UiEngine()->RenderUIL();
-                    }                
-                }
-            
+                        
             _LIT8( KDown, "3" ); // EEventKeyDown == 3
             
             CXnNode* keydown( BuildTriggerNodeL( *engine,                
@@ -3765,17 +3728,7 @@ TKeyResponse CXnControlAdapterImpl::OfferKeyEventL(
                     CleanupStack::PopAndDestroy( keyup );                    
                     }
                 }
-            
-            if ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-                 aKeyEvent.iCode == EKeyEnter )
-                {
-                // Reset "pressed down"
-                node->UnsetStateL( 
-                    XnPropertyNames::style::common::KPressedDown );
-                
-                node->UiEngine()->RenderUIL();
-                }                                    
-            
+                        
             iLongtap = EFalse;
             }
         }
@@ -3823,9 +3776,9 @@ void CXnControlAdapterImpl::HandleLongTapEventL(
         if ( prop && prop->StringValue() == XnPropertyNames::KTrue )
             {                        
             CXnUiEngine* engine( node->UiEngine() );
-            CXnAppUiAdapter& appui( engine->AppUiAdapter() );
-
-            CancelFocusRefusalL( *engine );
+            CXnAppUiAdapter& appui( engine->AppUiAdapter() );           
+            
+            appui.ViewAdapter().CloseAllPopupsL();
             
             appui.HideFocus();
 
@@ -3887,7 +3840,7 @@ TBool CXnControlAdapterImpl::IsDragThresholdExceeded( const TPoint& aPoint )
 //
 TBool CXnControlAdapterImpl::HandlePointerEventL(
     const TPointerEvent& aPointerEvent )
-    {    
+    {
     const TPointerEvent& event( aPointerEvent );
     
     CXnNode* node( &iNode.Node() );
@@ -3970,11 +3923,6 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
         
         if ( !menuBar )
             {
-            CancelFocusRefusalL( *engine );
-            }
-                        
-        if ( !menuBar && !engine->FocusedNode() )
-            {
             // save starting point
             iButtonDownStartPoint = event.iPosition;
             // Require focus to be shown
@@ -4043,21 +3991,41 @@ TBool CXnControlAdapterImpl::HandlePointerEventL(
 //
 void CXnControlAdapterImpl::DoDrawL( const TRect& aRect, CWindowGc& aGc ) const
     {
+    if( !iComponent )
+        {
+        return;
+        }
     CXnNode& node = iComponent->Node()->Node();
         
     DrawBordersL( aRect, node, aGc );
 
     const_cast< CXnControlAdapterImpl* >( this )->DrawBackgroundDataL( aRect, node, aGc );
     
-    if ( iAdapter->IsFocused() )
+    if ( node.IsStateSet( XnPropertyNames::style::common::KFocus ) )
         {
-        DrawFocusAppearance( node, aGc );
+        CXnProperty* prop( node.GetPropertyL( 
+            XnPropertyNames::common::KFocusAppearance ) );
+                                        
+        if ( prop && prop->StringValue() == XnPropertyNames::KNone )
+            {
+            // Current element refuses to draw focus appearance            
+            }
+        else
+            {
+            DrawFocusAppearance( node, aGc );        
+            }
         }
     
     // Draw plus sign for empty plugins in edit mode.
     if( node.UiEngine()->EditMode()->EditState() )
         {
-        const_cast< CXnControlAdapterImpl* >( this )->DrawPlusSign( node, aGc );
+        CXnControlAdapterImpl* adapter = const_cast< CXnControlAdapterImpl* >( this );    
+        TBool editstate = iNode.IsEditState();
+
+        if( editstate )
+            {
+            adapter->DrawPlusSign( node, aGc );
+            }
         }
     
     if ( iAnimation )
@@ -4302,9 +4270,18 @@ void CXnControlAdapterImpl::DrawBackgroundSkinL(CXnNode& aNode,
 	                TRect paddingRect = aRect;
                     TRect shrunkRect = paddingRect;
 
-                    shrunkRect.Shrink(
-                        KSkinGfxInnerRectShrink,
-                        KSkinGfxInnerRectShrink );
+                    if ( itemID == KAknsIIDQsnFrPopupSub )
+                        {
+                        shrunkRect.Shrink(
+                            KSkinGfxInnerRectShrink + 2,
+                            KSkinGfxInnerRectShrink + 2 );                    
+                        }
+                    else
+                        {
+                        shrunkRect.Shrink(
+                            KSkinGfxInnerRectShrink,
+                            KSkinGfxInnerRectShrink );                    
+                        }
 
                     CAknsFrameBackgroundControlContext* frameContext =
                         CAknsFrameBackgroundControlContext::NewL(
@@ -4334,7 +4311,7 @@ void CXnControlAdapterImpl::DrawBackgroundSkinL(CXnNode& aNode,
 // -----------------------------------------------------------------------------
 //
 void CXnControlAdapterImpl::DrawBackgroundImageL(
-    const TRect& aRect,
+    const TRect& /*aRect*/,
     CXnNode& aNode,
     CWindowGc& aGc,
     CFbsBitmap* aBitmap,
@@ -4425,7 +4402,7 @@ void CXnControlAdapterImpl::DrawBackgroundImageL(
             TPoint(
                 rect.iTl.iX + imageRect.Width(),
                 rect.iTl.iY + imageRect.Height() ) );
-        aGc.SetClippingRect( aRect );
+        //aGc.SetClippingRect( aRect );
 
         if ( aMask )
             {           
@@ -4442,7 +4419,7 @@ void CXnControlAdapterImpl::DrawBackgroundImageL(
                 TPoint(
                     rect.iTl.iX + imageRect.Width(),
                     rect.iTl.iY + imageRect.Height() ) );
-            aGc.SetClippingRect( aRect );
+            //aGc.SetClippingRect( aRect );
 
             aGc.DrawBitmap( newRect, aBitmap, bitmapRect );
             }
@@ -5746,22 +5723,26 @@ void CXnControlAdapterImpl::HandleTouchGestureL( MAknTouchGestureFwEvent& aEvent
             {
             swipe = &XnPropertyNames::action::trigger::name::swipe::direction::KRight;
             }
-
+        
         if ( swipe && iGestureDestination )
             {
             CXnUiEngine* engine = iNode.Node().UiEngine();
-            if ( iGestureDestination == &iNode.Node() )
-                {
-                CancelFocusRefusalL( *engine );
-                }
             
             // Remove focus
             engine->AppUiAdapter().HideFocus();
 
-            CXnNode* trigger( BuildSwipeTriggerNodeLC( *engine, *swipe ) );
-            iGestureDestination->ReportXuikonEventL( *trigger );
-            CleanupStack::PopAndDestroy( trigger );
-            
+            if ( ( engine->AppUiAdapter().ViewSwitcher() != NULL ) &&
+                ( engine->AppUiAdapter().ViewSwitcher()->FingerFollowSupported() ) && 
+                ( !iGestureDestination || iGestureDestination == &iNode.Node() ) )
+                {
+                engine->AppUiAdapter().ViewSwitcher()->TouchGesture( type );
+                }
+            else if ( iGestureDestination )
+                {
+                CXnNode* trigger( BuildSwipeTriggerNodeLC( *engine, *swipe ) );
+                iGestureDestination->ReportXuikonEventL( *trigger );
+                CleanupStack::PopAndDestroy( trigger );
+                }
             CXnAppUiAdapter& appui( engine->AppUiAdapter() );
             CXnViewData& data( appui.ViewManager().ActiveViewData() );
             
@@ -5773,6 +5754,13 @@ void CXnControlAdapterImpl::HandleTouchGestureL( MAknTouchGestureFwEvent& aEvent
         }
     }
 
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+TBool CXnControlAdapterImpl::IsWidgetGestureDest()
+    {
+    return ( !iGestureDestination || iGestureDestination != &iNode.Node() );
+    }
 
 // ============================= TIconProvider ===============================
 

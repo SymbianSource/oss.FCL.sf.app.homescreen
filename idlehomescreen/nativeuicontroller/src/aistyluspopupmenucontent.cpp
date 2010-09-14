@@ -108,14 +108,15 @@ void CAiStylusPopUpMenuContent::AddMenuItemL( const TDesC& aItem,
     flags = KAknButtonTextLeft | KAknButtonSizeFitText | KAknButtonNoFrame;
     CAknButton* item = CAknButton::NewL( NULL, NULL, NULL, NULL, aItem,
         KNullDesC, flags, 0 );
-
+    CleanupStack::PushL( item );
     item->SetTextFont( AknLayoutUtils::FontFromId(
         AknLayoutScalable_Avkon::
             list_single_popup_submenu_pane_t1( 0 ).LayoutLine().FontId() ) );
     item->SetBackground( Background() );
     item->SetObserver( &aObserver );
-    iItems.Append( item );
-    iCommands.Append( aCommandId );
+    iItems.AppendL( item );
+    CleanupStatck::Pop( item );
+    iCommands.AppendL( aCommandId );    
     SizeChanged();
     }
 

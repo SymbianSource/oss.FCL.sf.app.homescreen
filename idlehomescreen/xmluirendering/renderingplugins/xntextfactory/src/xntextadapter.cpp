@@ -1044,9 +1044,9 @@ void CXnTextAdapter::SetLineSpacingL( TInt aReference )
         lineSpace = iNode.UiEngineL()->VerticalPixelValueL( lineSpaceProp, aReference );
         }
         
-    if( lineSpace < 1 )
+    if( lineSpace < 0 )
         {
-        // Must be at least 1
+        // Default
         lineSpace = 1;
         }
 

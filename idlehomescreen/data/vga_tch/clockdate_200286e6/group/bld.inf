@@ -1,0 +1,71 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/clockdate_200286e6/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/clockdate_200286e6/hsps/widgetconfiguration.xml
+
+../xuikon/00/clockdate.dat /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/clockdate_200286e6.dat
+../xuikon/00/clockdate.css /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/clockdate.css
+../xuikon/00/clockdate.xml /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/clockdate.xml
+
+// logo icon
+../gfx/icon.mif /epoc32/data/Z/resource/homescreen/clockdate_200286e6/hsps/icon.mif
+
+// Arabic languages
+//*****************
+../xuikon/37/clockdate.css /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/37/clockdate.css
+../xuikon/50/clockdate.css /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/50/clockdate.css
+../xuikon/57/clockdate.css /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/57/clockdate.css
+../xuikon/94/clockdate.css /epoc32/data/Z/resource/homescreen/clockdate_200286e6/xuikon/94/clockdate.css
+
+// Support for S60 localization
+//*****************************
+// export localizable loc files (engineering versions)
+../loc/clockdatewidget.loc    APP_LAYER_LOC_EXPORT_PATH(clockdatewidget.loc)
+../loc/clockdateconfiguration.loc    APP_LAYER_LOC_EXPORT_PATH(clockdateconfiguration.loc)
+
+// Support for S60 builds
+//***********************
+../rom/clockdatewidget_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(clockdate_200286e6_resources.iby)
+../rom/clockdatewidget_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(clockdate_200286e6_customer.iby)
+../rom/clockdatewidget_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(clockdate_200286e6_variant.iby)
+../rom/clockdatewidget.iby CORE_APP_LAYER_IBY_EXPORT_PATH(clockdate_200286e6.iby)
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME clockdate_200286e6
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  
+
+
+
+

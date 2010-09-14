@@ -154,6 +154,11 @@ void CXnNewstickerControl::DeleteTitleL( TInt aIndex )
             }
 
         UpdateTitleL( KNullDesC, aIndex );      
+        
+        if( aIndex == iCurrentTitleIndex )
+            {
+            iCurrentTitleIndex = GetNextTitleWithContent( aIndex );
+            }
         }
     }
 

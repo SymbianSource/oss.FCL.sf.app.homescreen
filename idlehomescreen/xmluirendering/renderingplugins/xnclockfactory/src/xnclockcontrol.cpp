@@ -24,7 +24,7 @@
 #include "xncontroladapter.h"
 #include "xnclockadapter.h"
 #include "xnclockface.h"
-
+#include "xnnodepluginif.h"
 #include "xnclockcontrol.h"
 
 // Constants
@@ -39,12 +39,12 @@ static const TInt KIntervalTime( 60000000 ); // in microseconds
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CXnClockControl::CXnClockControl( CXnClockAdapter* aAdapter,
+CXnClockControl::CXnClockControl( CXnClockAdapter& aAdapter,
                                   const TBool aFormatFromLocale,
                                   const TClockFormat aFormat )
     : iAdapter( aAdapter ), 
       iClockFormat( aFormat ),
-      iFormatFromLocale ( aFormatFromLocale )      
+      iFormatFromLocale ( aFormatFromLocale )
     {
     }
 
@@ -56,7 +56,7 @@ CXnClockControl::CXnClockControl( CXnClockAdapter* aAdapter,
 void CXnClockControl::ConstructL()
     {           
     iTimer = CPeriodic::NewL( CActive::EPriorityHigh );
-            
+    iTimeFormat = TLocale().TimeFormat();
     SetFormatL( iFormatFromLocale, iClockFormat );   
     }
 
@@ -65,24 +65,20 @@ void CXnClockControl::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CXnClockControl* CXnClockControl::NewL( CXnClockAdapter* aAdapter,
+CXnClockControl* CXnClockControl::NewL( CXnClockAdapter& aAdapter,
                                         const TBool aFormatFromLocale,
                                         const TClockFormat aFormat )
     {
     CXnClockControl* self =
         new (ELeave) CXnClockControl( aAdapter, aFormatFromLocale, aFormat );
-        
     CleanupStack::PushL( self );    
     self->ConstructL();
-    
     CleanupStack::Pop( self );
-    
     return self;
     }
 
 // -----------------------------------------------------------------------------
 // Destructor
-//
 // -----------------------------------------------------------------------------
 //
 CXnClockControl::~CXnClockControl()
@@ -93,7 +89,6 @@ CXnClockControl::~CXnClockControl()
 
 // -----------------------------------------------------------------------------
 // CXnClockControl::UpdateDisplay
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockControl::UpdateDisplay()
@@ -103,12 +98,11 @@ void CXnClockControl::UpdateDisplay()
         return;
         }
             
-    iAdapter->UpdateDisplay();
+    iAdapter.UpdateDisplay();
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockControl::SetFormatL
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockControl::SetFormatL( const TBool aFormatFromLocale, 
@@ -122,14 +116,17 @@ void CXnClockControl::SetFormatL( const TBool aFormatFromLocale,
         }
         
     iFormatFromLocale = aFormatFromLocale;
+    
+    TTimeFormat timeFormat = TLocale().TimeFormat();
         
-    if( format == iClockFormat && iFace )
+    if( format == iClockFormat && iFace && timeFormat == iTimeFormat )
         {
         // Already correct face
         return;    
         }      
             
     iClockFormat = format;
+    iTimeFormat = timeFormat;
     
     delete iFace;
     iFace = NULL;
@@ -141,12 +138,22 @@ void CXnClockControl::SetFormatL( const TBool aFormatFromLocale,
     else if( format == EClockDigital )
         {
         iFace = CXnClockFaceDigital::NewL();
-        }       
+        }
+    
+    iAdapter.SetClockFormatL( format );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnClockControl::CheckClockFormatL
+// -----------------------------------------------------------------------------
+//
+void CXnClockControl::CheckClockFormatL()
+    {
+    SetFormatL( iFormatFromLocale, iClockFormat );
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockControl::Format
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //       
 TClockFormat CXnClockControl::Format() const
@@ -156,28 +163,38 @@ TClockFormat CXnClockControl::Format() const
 
 // -----------------------------------------------------------------------------
 // CXnClockControl::Draw
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //       
-void CXnClockControl::Draw( CWindowGc& aGc, const TRect& aRect )
+void CXnClockControl::Draw( CWindowGc& aGc, CXnNodePluginIf* aNode,
+        CXnNodePluginIf* aAmpm )
     {
-    // Ensure correct appearance
-    TRAP_IGNORE( SetFormatL( iFormatFromLocale, iClockFormat ) );
+    if ( !aNode )
+        {
+        return;
+        }
     
-    if( iFace && !aRect.IsEmpty() )
+    if( iFace && !aNode->Rect().IsEmpty() )
         {
         __PRINT( __DBG_FORMAT( "CXnClockControl::Draw: 0x%X" ), this );
                 
         TTime homeTime;
         homeTime.HomeTime();
 
-        TRAP_IGNORE( iFace->DrawL( *iAdapter, aGc, aRect, homeTime ) );
+        TRAP_IGNORE( iFace->DrawL( iAdapter, aGc, *aNode, homeTime, aAmpm ) );
         }
     }
 
 // -----------------------------------------------------------------------------
+// CXnClockControl::ResetFont
+// -----------------------------------------------------------------------------
+//
+void CXnClockControl::ResetFont()
+    {
+    iFace->ResetFont();
+    }
+
+// -----------------------------------------------------------------------------
 // CXnClockControl::TimerCallback
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 TInt CXnClockControl::TimerCallback( TAny* aThis )
@@ -206,7 +223,6 @@ TInt CXnClockControl::TimerCallback( TAny* aThis )
     
 // -----------------------------------------------------------------------------
 // CXnClockControl::StartTimer
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockControl::StartTimer()
@@ -230,7 +246,6 @@ void CXnClockControl::StartTimer()
 
 // -----------------------------------------------------------------------------
 // CXnClockControl::StopTimer
-// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockControl::StopTimer()

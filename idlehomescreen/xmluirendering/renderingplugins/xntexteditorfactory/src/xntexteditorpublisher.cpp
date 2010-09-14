@@ -94,13 +94,10 @@ CXnTextEditorPublisher::~CXnTextEditorPublisher()
         delete iServiceHandler;
         iServiceHandler = NULL;
         }    
-    CEikEdwin* editor = iAdapter.Editor();
-    if( editor )
-        {
-        editor->RemoveEdwinObserver( this );    
-        }
+
     delete iNodeId;
     delete iTextBuffer;
+    delete iTempBuffer;
     }
 
 // -----------------------------------------------------------------------------
@@ -120,12 +117,18 @@ void CXnTextEditorPublisher::ConstructL( const TDesC8& aNodeId )
     {
     iNodeId = CnvUtfConverter::ConvertToUnicodeFromUtf8L( aNodeId );
     InitCpsInterfaceL();
-    CEikEdwin* editor = iAdapter.Editor();
-    if( editor )
-        {
-        editor->SetEdwinObserver( this );  
-        TInt len = editor->MaxLength();
+    
+    CEikEdwin* editor( iAdapter.Editor() );
+    
+    // Editor must be activated before setting observer
+    if( editor && editor->TextView() )
+        {                                    
+        TInt len( editor->MaxLength() );
+        
         iTextBuffer = HBufC::NewL( len );
+        iTempBuffer = HBufC::NewL( len );
+        
+        editor->TextView()->SetObserver( this );
         }
     }
 
@@ -250,19 +253,35 @@ void CXnTextEditorPublisher::InitCpsInterfaceL()
     iCpsInterface = msgInterface;
     }
 
+
 // -----------------------------------------------------------------------------
-// CXnTextEditorPublisher::HandleEdwinEventL
+// CXnTextEditorPublisher::OnReformatL
 // -----------------------------------------------------------------------------
 //
-void CXnTextEditorPublisher::HandleEdwinEventL(CEikEdwin* aEdwin, TEdwinEvent aEventType)
+void CXnTextEditorPublisher::OnReformatL( const CTextView* aTextView )
     {
-    if( aEventType == MEikEdwinObserver::EEventTextUpdate)
+    CEikEdwin* editor( iAdapter.Editor() );
+               
+    if ( editor )
         {
-        TPtr bufferDes = iTextBuffer->Des();
-        bufferDes.Zero();
-        aEdwin->GetText( bufferDes );
-        PublishTextL( bufferDes );
-        }         
+        editor->OnReformatL( aTextView );
+    
+    	TPtr ptr( iTempBuffer->Des() );
+        
+    	ptr.Zero();
+	    
+        editor->GetText( ptr );
+        
+        if ( *iTextBuffer != *iTempBuffer )
+            {
+            *iTextBuffer = *iTempBuffer;
+            
+            if ( !iAdapter.IsSetText() )
+                {
+                PublishTextL( *iTextBuffer );
+                }                       
+            }               
+        }
     }
 
 // -----------------------------------------------------------------------------

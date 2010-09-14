@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package version="2.0">
+
+    <family>vga_tch</family>
+    
+    <type>view</type>
+
+    <!-- interface uid -->
+    <interfaceuid>0x2001f48a</interfaceuid>
+
+    <!-- vendor uid -->
+    <provideruid>0x101fb657</provideruid>
+
+    <!-- configuration uid -->
+    <configurationuid>0x200286ea</configurationuid>
+
+    <!-- description -->
+    <fullname>view2</fullname>
+    <shortname>ai3_nokia</shortname>
+    <version>1.0</version>
+
+    <!-- configuration -->
+    <filexml>viewconfiguration.xml</filexml>
+    
+    <!-- Name of the localization files -->
+    <!--filedtd>viewconfiguration.dtd</filedtd-->
+
+    <!-- Locale specific resources -->
+    <localization>
+        <fileresource>view.o0000</fileresource>
+    </localization>
+  
+</package>

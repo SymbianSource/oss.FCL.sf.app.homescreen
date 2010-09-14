@@ -1,0 +1,57 @@
+clock#clock
+{
+    width: 176px;
+    height: 115px;
+    _s60-font-size: 48px;
+    color: "SKIN(268458534 13056 74)";
+    background-color: "SKIN(268458534 9916)";
+    nav-index: appearance;
+}
+
+face12
+{
+	position: absolute;
+	left: 55px;
+	top: 14px;
+	width: 102px;
+	height: 59px;
+	text-align: left;
+}
+
+ampm
+{
+	position: absolute;
+	width: 46px;
+	height: 28px;
+	left: 6px;
+	top: 37px;
+	text-align: right;
+	_s60-font-size: 28px;
+}
+
+face24
+{
+	position: absolute;
+	top: 14px;
+	width: auto;
+	height: 59px;
+}
+
+date
+{
+	position: absolute;
+	top: 78px;
+	width: auto;
+	height: 28px;
+	_s60-font-size: 26px;
+}
+
+face
+{
+	width: auto;
+	height: auto;
+
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-bottom: 5px;
+}

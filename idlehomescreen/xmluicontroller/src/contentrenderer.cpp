@@ -442,7 +442,7 @@ TInt CContentRenderer::Commit( TInt aTxId )
         
         TBool layoutChanged( EFalse );
         
-        TRAPD( error, tr->CommitL( layoutChanged, propertyHashMap ) );
+        TRAPD( error, tr->CommitL( iFactory->PolicyArray(), propertyHashMap ) );
 
         if( error == KErrNone )
             {
@@ -464,7 +464,8 @@ TInt CContentRenderer::Commit( TInt aTxId )
             );
                 
         
-        iFactory->ReleaseTransaction( tr );  
+        iFactory->ReleaseTransaction( tr );
+        iFactory->ResetPolicyArray();
         
         return error;
         }
@@ -1014,10 +1015,10 @@ TInt CContentRenderer::DoPublishL( CHsContentPublisher& aPlugin, TInt aContent,
                 }
             
             iPolicyEvaluator->EvaluateContentPolicyL( 
-                    *target, element->PolicyArray() );
+                    *target, iFactory->PolicyArray() );
                                                      
             iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-                    *target, element->PolicyArray() );
+                    *target, iFactory->PolicyArray() );
                                                          
             ProcessTransactionElementL( element );
             }
@@ -1131,10 +1132,10 @@ TInt CContentRenderer::DoPublishL( CHsContentPublisher& aPlugin, TInt aContent,
                         *target, aFile, priority );
                                                           
             iPolicyEvaluator->EvaluateContentPolicyL( 
-                    *target, element->PolicyArray() );
+                    *target, iFactory->PolicyArray() );
                                                       
             iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-                    *target, element->PolicyArray() );
+                    *target, iFactory->PolicyArray() );
                                                                      
             ProcessTransactionElementL( element );
             }
@@ -1214,10 +1215,10 @@ TInt CContentRenderer::DoCleanL( CHsContentPublisher& aPlugin, TInt aContent,
                 *target, aIndex );
 
     iPolicyEvaluator->EvaluateEmptyContentPolicyL( 
-            *target, element->PolicyArray() );
+            *target, iFactory->PolicyArray() );
                                                    
     iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-            *target, element->PolicyArray() );
+            *target, iFactory->PolicyArray() );
                                                    
     ProcessTransactionElementL( element );
       
@@ -1275,7 +1276,7 @@ void CContentRenderer::ProcessTransactionElementL(
         RPropertyHashMap propertyHashMap;
         CleanupClosePushL( propertyHashMap );
         
-        aElement->CommitL( layoutChanged, propertyHashMap );
+        aElement->CommitL( iFactory->PolicyArray(), propertyHashMap );
         SetPropertyArraysL( propertyHashMap );
         
         CleanupStack::PopAndDestroy( &propertyHashMap );
@@ -1444,22 +1445,22 @@ TInt CContentRenderer::PublishIconL( CHsContentPublisher& aPlugin,
     if ( aResource )
         {
         iPolicyEvaluator->EvaluateResourcePolicyL( 
-            *target, *aResource, element->PolicyArray() );
+            *target, *aResource, iFactory->PolicyArray() );
 
         iPolicyEvaluator->EvaluateContentPolicyL( 
-            *target, element->PolicyArray() );
+            *target, iFactory->PolicyArray() );
                                                   
         iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-            *target, element->PolicyArray() );                                                     
+            *target, iFactory->PolicyArray() );                                                     
         }
 
     else
         {
         iPolicyEvaluator->EvaluateContentPolicyL( 
-            *target, element->PolicyArray() );
+            *target, iFactory->PolicyArray() );
                                                   
         iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-            *target, element->PolicyArray() );                                                    
+            *target, iFactory->PolicyArray() );                                                    
         }
 
     ProcessTransactionElementL( element );
@@ -1522,21 +1523,21 @@ TInt CContentRenderer::PublishDataL( CHsContentPublisher& aPlugin,
     if ( aResource )
         {
         iPolicyEvaluator->EvaluateResourcePolicyL( 
-            *target, *aResource, element->PolicyArray() );
+            *target, *aResource, iFactory->PolicyArray() );
                                                    
         iPolicyEvaluator->EvaluateContentPolicyL( 
-            *target, element->PolicyArray() );
+            *target, iFactory->PolicyArray() );
                                                   
         iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-            *target, element->PolicyArray() );                                                     
+            *target, iFactory->PolicyArray() );                                                     
         }
     else
         {
         iPolicyEvaluator->EvaluateContentPolicyL( 
-            *target, element->PolicyArray() );
+            *target, iFactory->PolicyArray() );
                                                   
         iPolicyEvaluator->EvaluateVisibilityPolicyL( 
-            *target, element->PolicyArray() );                                                     
+            *target, iFactory->PolicyArray() );                                                     
         }
 
     ProcessTransactionElementL( element );

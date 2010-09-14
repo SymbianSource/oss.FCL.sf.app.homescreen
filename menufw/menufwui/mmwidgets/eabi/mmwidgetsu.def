@@ -41,4 +41,5 @@ EXPORTS
 	_ZN18CMmWidgetContainer19SetTriggerMoveItemLEiP20CLiwGenericParamList @ 40 NONAME
 	_ZNK18CMmWidgetContainer9AllowMoveEv @ 41 NONAME
 	_ZN18CMmWidgetContainer17SetExDialogOpenedEi @ 42 NONAME
+	_ZN18CMmWidgetContainer30SetWidgetCommingFromBackgroundEi @ 43 NONAME
 

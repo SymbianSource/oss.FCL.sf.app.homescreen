@@ -11,10 +11,10 @@
 *
 * Contributors:
 *
-* Description:  The information required for building
+* Description:
+* The information required for building
 *
 */
-
 
 #include <platform_paths.hrh>
 
@@ -24,27 +24,25 @@ DEFAULT
 PRJ_EXPORTS
 // Support for productization and Carbide.Ui customization
 //********************************************************
-../hsps/00/manifest.dat /epoc32/data/z/resource/homescreen/wideimage_10009dff/hsps/manifest.dat
-../hsps/00/widgetconfiguration.xml /epoc32/data/z/resource/homescreen/wideimage_10009dff/hsps/widgetconfiguration.xml
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/wideimage_10009dff/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/wideimage_10009dff/hsps/widgetconfiguration.xml
+../xuikon/00/wideimage.dat /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/wideimage_10009dff.dat
+../xuikon/00/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/wideimage.css
+../xuikon/00/wideimage.xml /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/wideimage.xml
 
-../xuikon/00/wideimage.dat /epoc32/data/z/resource/homescreen/wideimage_10009dff/xuikon/wideimage_10009dff.dat
-../xuikon/00/wideimage.css /epoc32/data/z/resource/homescreen/wideimage_10009dff/xuikon/wideimage.css
-../xuikon/00/wideimage.xml /epoc32/data/z/resource/homescreen/wideimage_10009dff/xuikon/wideimage.xml
-../xuikon/00/wideimage.dtd /epoc32/data/z/resource/homescreen/wideimage_10009dff/xuikon/wideimage.dtd
+// Arabic languages
+//*****************
+//../xuikon/37/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/37/wideimage.css
+//../xuikon/50/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/50/wideimage.css
+//../xuikon/57/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/57/wideimage.css
+//../xuikon/94/wideimage.css /epoc32/data/Z/resource/homescreen/wideimage_10009dff/xuikon/94/wideimage.css
 
 // Support for S60 builds
 //***********************
 ../rom/wideimage_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(wideimage_10009dff_resources.iby)
 ../rom/wideimage_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(wideimage_10009dff_customer.iby)
-../rom/wideimage_variant.iby CUSTOMER_VARIANT_APP_LAYER_IBY_EXPORT_PATH(wideimage_10009dff_variant.iby)
+../rom/wideimage_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(wideimage_10009dff_variant.iby)
 ../rom/wideimage.iby CORE_APP_LAYER_IBY_EXPORT_PATH(wideimage_10009dff.iby)
-
-// Support for S60 localization
-//*****************************
-#ifndef __WIDEIMAGE_LOC__
-#define __WIDEIMAGE_LOC__
-../loc/wideimage.loc APP_LAYER_LOC_EXPORT_PATH(wideimage.loc)
-#endif // __WIDEIMAGE_LOC__
 
 // Dtd-localization
 //*****************
@@ -61,7 +59,3 @@ PRJ_MMPFILES
 PRJ_TESTMMPFILES
 
 //  End of File  
-
-
-
-

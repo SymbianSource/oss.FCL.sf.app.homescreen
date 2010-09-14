@@ -44,7 +44,7 @@
 #include "application.h"
 #include "nativeuicontroller.h"
 #include "aifweventhandler.h"
-#include <AiNativeUi.rsg>
+#include <ainativeui.rsg>
 
 #include "aicontentmodel.h"
 #include "aiuiidleintegration.h"

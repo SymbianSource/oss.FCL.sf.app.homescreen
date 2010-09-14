@@ -38,7 +38,8 @@ class CXnAppUiAdapter;
 NONSHARABLE_CLASS( CXnViewControlAdapter ) : public CXnControlAdapter,
     public MXnUiStateObserver
    {
-public: 
+
+public:
     // Constructors and destructor
     
     /**
@@ -103,7 +104,7 @@ private:
     /**
      * C++ default constructor
      */    
-    CXnViewControlAdapter( CXnNodePluginIf& aNode );
+    CXnViewControlAdapter();
     
     /**
      * 2nd phase constructor
@@ -112,14 +113,14 @@ private:
     
 private: 
     // data
-
-    /** Node */
-    CXnNodePluginIf& iNode;
     /** AppUi */
     CXnAppUiAdapter& iAppUi;
+
     /** HS foreground status*/
     MXnUiStateObserver::TForegroundStatus iForegroundStatus;
-    };
+
+    //friend class CXnViewSwitcher;
+   };
     
 #endif // _XNVIEWCONTROLADAPTER_H
             

@@ -16,7 +16,6 @@
 */
 
 #include "../desktop_20026f4f/group/bld.inf"
-#include "../empty_2001f47f/group/bld.inf"
 #include "../onerow_2001f480/group/bld.inf"
 #include "../tworows_2001f488/group/bld.inf"
 #include "../threerows_2001f486/group/bld.inf"
@@ -28,7 +27,6 @@
 #include "../view_20022fe0/group/bld.inf"
 #include "../view_200286e4/group/bld.inf"
 #include "../view_200286e5/group/bld.inf"
-#include "../view_200286ed/group/bld.inf"
 #include "../templateview_20026f50/group/bld.inf"
 #include "../root_2001f482/group/bld.inf"
 

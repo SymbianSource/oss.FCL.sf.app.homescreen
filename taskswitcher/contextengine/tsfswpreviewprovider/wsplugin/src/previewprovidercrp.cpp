@@ -33,7 +33,7 @@
 
 // CONSTANTS
 const TInt KImpId( 0x20016BEC );
-const TInt KMinTimeForOrientationSwitch = 1; // 1 second
+const TInt64 KMinTimeForOrientationSwitch = 500000; // 0.5 second
 
 // --------------------------------------------------------------------------
 // CPreviewProviderCRP::CreateL
@@ -126,7 +126,7 @@ void CPreviewProviderCRP::DoHandleMessageL( const TDesC8& aData )
             iScreenshotMode = static_cast<TDisplayMode>( in.ReadInt32L() );
             break;
         case NPreviewMsg::ETakePreview:
-            ScreenshotL();
+            ScreenshotL( FALSE );
             break;
         case NPreviewMsg::EAckPreviewReady:
             RemoveScreenshot( in.ReadInt32L() );
@@ -172,21 +172,18 @@ void CPreviewProviderCRP::DoHandleEvent( const TWservCrEvent& aEvent )
             {
             TTime currTime;
             currTime.HomeTime();
-            TTimeIntervalSeconds secondsFrom;
-            TInt err = currTime.SecondsFrom( iScreenChangedTime, secondsFrom );
-            if ( err != KErrNone || secondsFrom.Int() > KMinTimeForOrientationSwitch )
+            TTimeIntervalMicroSeconds micSecondsFrom = currTime.MicroSecondsFrom( iScreenChangedTime );
+            if ( micSecondsFrom.Int64() > KMinTimeForOrientationSwitch )
                 {
                 if ( iLastWgIdRedraw )
                     {
-                    TRAP_IGNORE( ScreenshotL() );
+                    TRAP_IGNORE( ScreenshotL( FALSE ) );
                     }
                 }
             else
                 {
                 // Reset time to allow screenshot taking on next wg change
                 iScreenChangedTime = 0;
-                // Order screenshot rotation
-                BitmapRotationNeeded( iPrevId?iPrevId:iPrevReg, iClockwiseRot );
                 }
             iPrevReg = 0;
             }
@@ -198,7 +195,9 @@ void CPreviewProviderCRP::DoHandleEvent( const TWservCrEvent& aEvent )
         iScreenChangedTime.HomeTime();
         if ( iLastWgIdRedraw )
             {
-            TRAP_IGNORE( ScreenshotL() );
+            TRAP_IGNORE( 
+                ScreenshotL( TRUE ); 
+                );
             }
         }
     else if ( aEvent.Type() == TWservCrEvent::EScreenDrawing )
@@ -213,13 +212,22 @@ void CPreviewProviderCRP::DoHandleEvent( const TWservCrEvent& aEvent )
 // CPreviewProviderCRP::ScaleComplete
 // --------------------------------------------------------------------------
 //    
-void CPreviewProviderCRP::ScaleCompleteL( const CFbsBitmap& aBitmap )
+void CPreviewProviderCRP::ScaleCompleteL( const CFbsBitmap& aBitmap, 
+                    TBool aRotation )
     {
     TSLOG_CONTEXT( ScaleComplete, TSLOG_LOCAL );
     TSLOG_IN();
     
+    TInt msgType = NPreviewMsg::EPreviewReady;
+    if ( aRotation )
+        {
+        msgType = iClockwiseRot ? 
+                NPreviewMsg::EBitmapRotationNeeded90 : 
+                NPreviewMsg::EBitmapRotationNeeded270;
+        }
+    
     const TInt msg[] = {
-            NPreviewMsg::EPreviewReady,
+            msgType,
             iPrevId?iPrevId:iPrevReg,
             aBitmap.Handle()
             };
@@ -251,28 +259,6 @@ void CPreviewProviderCRP::UnregisterComplete( TInt aWgId )
     
     TSLOG_OUT();
     }
-
-
-// --------------------------------------------------------------------------
-// CPreviewProviderCRP::BitmapRotationNeeded
-// --------------------------------------------------------------------------
-//
-void CPreviewProviderCRP::BitmapRotationNeeded( TInt aWgId, TBool aClockwise )
-    {
-    TSLOG_CONTEXT( BitmapRotationNeeded, TSLOG_LOCAL );
-    TSLOG_IN();
-    
-    const TInt msg[] = {
-            aClockwise ? NPreviewMsg::EBitmapRotationNeeded90 : NPreviewMsg::EBitmapRotationNeeded270,
-            aWgId,
-            0
-            };
-    TPckgC<TInt[sizeof(msg) / sizeof(TInt)]> buf(msg);
-    SendMessage(buf);
-    
-    TSLOG_OUT();
-    }
-
 
 // --------------------------------------------------------------------------
 // CPreviewProviderCRP::Register
@@ -313,12 +299,12 @@ void CPreviewProviderCRP::Unregister( TInt aWgId )
 // CPreviewProviderCRP::ScreenShotL
 // --------------------------------------------------------------------------
 //
-void CPreviewProviderCRP::ScreenshotL()
+void CPreviewProviderCRP::ScreenshotL( TBool aRotation )
     {
     CFbsBitmap* screenshot = new (ELeave)CFbsBitmap();
     CleanupStack::PushL( screenshot );
     ScreenshotL( *screenshot );
-    ScaleCompleteL( *screenshot );
+    ScaleCompleteL( *screenshot, aRotation );
     iScreenshots.InsertL( screenshot, iScreenshots.Count() );
     CleanupStack::Pop( screenshot );
     CheckOverflow();

@@ -156,8 +156,7 @@ void CXnScrollableControlAdapter::HandlePointerEventL(
                     {
                     // Remove pressed down
                     focused->UnsetStateL( 
-                        XnPropertyNames::style::common::KPressedDown );
-                    focused->HideTooltipsL();                                
+                        XnPropertyNames::style::common::KFocus );                                                   
                     }
                 }
             
@@ -274,41 +273,47 @@ void CXnScrollableControlAdapter::ShowItem( CXnNode& aNode )
     {
     TRect rect( aNode.MarginRect() );
     
-    if( !iViewPort.Contains( rect.iTl ) || !iViewPort.Contains( rect.iBr ) )
+    if ( !iViewPort.Contains( rect.iTl ) || !iViewPort.Contains( rect.iBr ) )
         {
         if ( iDirection == EVertical )
             {                            
             TInt delta( 0 );
 
-            if( rect.iTl.iY < iViewPort.iTl.iY )
+            if ( rect.iTl.iY < iViewPort.iTl.iY )
                 {
                 delta = rect.iTl.iY - iViewPort.iTl.iY;
                 }
-            else if( rect.iBr.iY > iViewPort.iBr.iY )
+            else if ( rect.iBr.iY > iViewPort.iBr.iY )
                 {
                 delta = rect.iBr.iY - iViewPort.iBr.iY;
                 }
             
-            TPoint newPosition( iPreviousPosition + TPoint( 0, delta ) );
-            
-            ViewPositionChanged( newPosition, ETrue, 0 );
+            if ( delta != 0 )
+                {
+                TPoint newPosition( iPreviousPosition + TPoint( 0, delta ) );
+                
+                ViewPositionChanged( newPosition, ETrue, 0 );            
+                }
             }
         else
             {
             TInt delta( 0 );
             
-            if( rect.iTl.iX < iViewPort.iTl.iX )
+            if ( rect.iTl.iX < iViewPort.iTl.iX )
                 {
                 delta = rect.iTl.iX - iViewPort.iTl.iX;
                 }
-            else if( rect.iBr.iX > iViewPort.iBr.iX )
+            else if ( rect.iBr.iX > iViewPort.iBr.iX )
                 {
                 delta = rect.iBr.iX - iViewPort.iBr.iX;
                 }
             
-            TPoint newPosition( iPreviousPosition + TPoint( delta, 0 ) );
-            
-            ViewPositionChanged( newPosition, ETrue, 0 );            
+            if ( delta != 0 )
+                {
+                TPoint newPosition( iPreviousPosition + TPoint( delta, 0 ) );
+                
+                ViewPositionChanged( newPosition, ETrue, 0 );                        
+                }
             }
         }
     }

@@ -177,10 +177,21 @@ public:
      * @param aContainer Container to activate
      * @param aEnterEditState ETrue if activated container should be set to edit state.
      * @param aEffect Effect uid, default no effect
+     * @param aUpdateBg Whether to update wallpaper or not. 
      */
     void ActivateContainerL( CXnViewData& aContainer, 
-        TBool aEnterEditState = EFalse, TUid aEffect = TUid::Null() );
-    
+        TBool aEnterEditState = EFalse, TUid aEffect = TUid::Null(), 
+        TBool aUpdateBg = ETrue );
+
+    /**
+     * Sets edit state property of container
+     * 
+     * @since S60 5.0
+     * @param aView container
+     * @param aEnter ETrue if container should be set to edit state.
+     */
+    void EnterEditStateL( CXnViewData& aView, TBool aEnter );
+
 private:
     // new functions
     
@@ -200,15 +211,6 @@ private:
      * @param aEnterEditState ETrue if default container should be set to edit state.
      */
     void ActivateDefaultContainerL( TBool aEnterEditState = EFalse );
-
-    /**
-     * Sets edit state property of container
-     * 
-     * @since S60 5.0
-     * @param aView container
-     * @param aEnter ETrue if container should be set to edit state.
-     */
-    void EnterEditStateL( CXnViewData& aView, TBool aEnter );
     
     /**
      * Callback function to be used with CPeriodic.

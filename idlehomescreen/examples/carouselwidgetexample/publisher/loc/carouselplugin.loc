@@ -1,0 +1,34 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Localization strings for project carousel Plugin
+*
+*/
+
+// d: A dialog which is shown to user when (s)he is trying to 
+// d: launch shortcut item during backup state.
+// l: popup_note_window
+// w:
+// r: tb9.2
+//
+#define qtn_mcs_disable_open_item "Application cannot be opened during backup"
+
+// d: A dialog which is shown to user when (s)he is trying to 
+// d: launch shortcut item which is missing from menu.
+// l: popup_note_window
+// w:
+// r: tb9.2
+//
+#define qtn_mcs_disable_open_item_missing "Shortcut cannot be opened because item is missing. Try to insert memory card which contains the item or reinstall the application."
+
+//End file

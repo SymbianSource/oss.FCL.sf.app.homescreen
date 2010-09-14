@@ -20,7 +20,7 @@
 #include        <platform/mw/aisystemuids.hrh>
 #include        <data_caging_paths.hrh>
 
-TARGET          Ai3NatiUi.dll
+TARGET          ai3natiui.dll
 TARGETTYPE      PLUGIN
 UID             0x10009D8D AI_UID_ECOM_DLL_UICONTROLLER_NATIVE
 VENDORID        VID_DEFAULT
@@ -45,12 +45,12 @@ SOURCE			    ainotifierrenderer.cpp
 
 
 START RESOURCE  ai3natiui.rss
-TARGET          Ai3NatiUi.rsc
+TARGET          ai3natiui.rsc
 END
 
 START RESOURCE  ai3nativeui.rss
 HEADER
-TARGET          AiNativeUi.rsc
+TARGET          ainativeui.rsc
 TARGETPATH      APP_RESOURCE_DIR
 LANGUAGE_IDS
 END

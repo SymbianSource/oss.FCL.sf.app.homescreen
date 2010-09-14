@@ -935,8 +935,7 @@ void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
                         CAknSearchField::EAdaptiveSearch,
                         0, KTextLimit );
     AddControlL( iFindbox, EFindBox );
-    iFindbox->AddAdaptiveSearchTextObserverL(this);
-    
+
     UpdateFocusMode();
     StartLoadingWidgetsL();
     }

@@ -19,11 +19,11 @@
 #ifndef __WIDEIMAGE_10009DFF_VARIANT_IBY__
 #define __WIDEIMAGE_10009DFF_VARIANT_IBY__
 
-#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by variation tools, variant specific
 data=ZPRIVATE\200159c0\install\wideimage_10009dff\hsps\00\widgetconfiguration.xml \private\200159c0\install\wideimage_10009dff\hsps\00\widgetconfiguration.xml
 
-#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
+#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
 
 #endif  // __WIDEIMAGE_10009DFF_VARIANT_IBY__

@@ -58,6 +58,7 @@
 #include "xnbackgroundmanager.h"
 #include "xntexteditor.h"
 #include "xnrootdata.h"
+#include "xnviewswitcher.h"
 
 #ifdef _XN_PERFORMANCE_TEST_
 #include "xntimemon.h"
@@ -77,14 +78,16 @@ const TInt KFocusGrowValue = 3;
 
 _LIT8( KBoxNodeName, "box" );
 _LIT8( KButtonNodeName, "button" );
-_LIT8( KWidgetNodeName, "widget" );
 _LIT8( KWidgetExtensionNodeName, "widgetextension" );
 _LIT8( KScrollableBoxNodeName, "scrollablebox" );
 _LIT8( KMenuBar, "menubar" );
 _LIT8( KPopUpNodeName, "popup" );
-_LIT8( KEditorNodeName, "texteditor" );
 
 _LIT8( KPlugin, "plugin" );
+
+_LIT8( KSplitScreenEnabledTrigger , "splitscreenenabled" );
+_LIT8( KSplitScreenDisabledTrigger, "splitscreendisabled" );
+
 
 // LOCAL CONSTANTS AND MACROS
 static const TReal KIntConversionConstant = 0.5;
@@ -286,23 +289,6 @@ static void TraceTreeL( CXnNode* aRootNode );
 #endif
 
 // ============================= LOCAL FUNCTIONS ===============================
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-//
-CXnNode* FindPlugin( CXnNode& aNode )
-    {
-    CXnNode* pluginNode( NULL );
-    for( CXnNode* node = &aNode; node; node = node->Parent() )
-        {
-        if( node->DomNode()->Name() == KPlugin )
-            {
-            pluginNode = node;
-            break;
-            }
-        }
-    return pluginNode;
-    }
 
 // -----------------------------------------------------------------------------
 // GrowIfNeeded()
@@ -3183,18 +3169,18 @@ static void CalculateMarginL( CXnNode& aParent, CXnNode& aNode,
                     {
                     TInt width =
                         aNode.BorderRect().Width() + marginLeft + marginRight;
-                    if ( aColumnMargin < marginLeft )
+                    if ( aColumnMargin < marginRight )
                         {
                         width -= aColumnMargin;
                         }
                     else
                         {
-                        width -= marginLeft;
+                        width -= marginRight;
                         }
                     if ( width + aColumnWidth <= aParentRect.Width() )
                         {
                         offsety = aParentRect.iTl.iY + marginTop;
-                        if ( aColumnMargin < marginLeft )
+                        if ( aColumnMargin < marginRight )
                             {
                             offsetx = aParentRect.iBr.iX - aColumnWidth +
                                 aColumnMargin - marginRight -
@@ -3280,7 +3266,7 @@ static void CalculateMarginL( CXnNode& aParent, CXnNode& aNode,
                         {
                         offsety = aParentRect.iBr.iY - marginBottom -
                             aNode.BorderRect().Height();
-                        if ( aColumnMargin < marginLeft )
+                        if ( aColumnMargin < marginRight )
                             {
                             offsetx = aParentRect.iBr.iX - aColumnWidth +
                                 aColumnMargin - marginRight -
@@ -6030,19 +6016,21 @@ static void PlaceAreasL( CXnNode& aNode, RPointerArray< CXnNode >& aLaidOutList,
     TRect parentRect;
 
 #ifdef _XN3_DEBUG_
-    RDebug::Print( _L("Xuikon: Layout:") );
-    TBuf8< 256 > debug;
+    RDebug::Print( _L("*** XML UI place areas, layout phase=%d"), aLayoutPhase );
+    
+    TBuf8< 256 > debug;       
 #endif
 
     // Place areas according their parents and positioning
     for( CXnNode* node = iterator->Value(); node; node = iterator->NextL() )
         {
 #ifdef _XN3_DEBUG_
-        debug = node->Type()->Type();
+        debug = _L8( "* layouting node: " );
+        debug.Append( node->Type()->Type() );
         CXnProperty* id( node->IdL() );
         if ( id )
             {
-            debug.Append( _L8( ", id: " ) );
+            debug.Append( _L8( " id=" ) );
             debug.Append( id->StringValue() );
             }
 #endif
@@ -7098,71 +7086,71 @@ static TSize ScaleAutoAreaL( CXnNode& aNode, TInt aWidthToFit,
     if ( IsPropertyAutoL( *top ) )
         {
         TPtrC8 propertyName = top->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* bottom = aNode.BottomL();
     if ( IsPropertyAutoL( *bottom ) )
         {
         TPtrC8 propertyName = bottom->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* left = aNode.LeftL();
     if ( IsPropertyAutoL( *left ) )
         {
         TPtrC8 propertyName = left->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* right = aNode.RightL();
     if ( IsPropertyAutoL( *right ) )
         {
         TPtrC8 propertyName = right->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* width = aNode.WidthL();
     if ( IsPropertyAutoL( *width ) )
         {
         TPtrC8 propertyName = width->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     if ( !width )
         {
         TPtrC8 propertyName = XnPropertyNames::style::common::KWidth();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* height = aNode.HeightL();
     if ( IsPropertyAutoL( *height ) )
         {
         TPtrC8 propertyName = height->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     if ( !height )
         {
         TPtrC8 propertyName = XnPropertyNames::style::common::KHeight();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* marginTop = aNode.MarginTopL();
     if ( IsPropertyAutoL( *marginTop ) )
         {
         TPtrC8 propertyName = marginTop->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* marginBottom = aNode.MarginBottomL();
     if ( IsPropertyAutoL( *marginBottom ) )
         {
         TPtrC8 propertyName = marginBottom->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* marginLeft = aNode.MarginLeftL();
     if ( IsPropertyAutoL( *marginLeft ) )
         {
         TPtrC8 propertyName = marginLeft->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
     CXnProperty* marginRight = aNode.MarginRightL();
     if ( IsPropertyAutoL( *marginRight ) )
         {
         TPtrC8 propertyName = marginRight->Property()->Name();
-        autoArray.Append( propertyName );
+        autoArray.AppendL( propertyName );
         }
 
     if ( aParentDirection == XnPropertyNames::style::common::direction::KLTR )
@@ -7626,10 +7614,63 @@ static void CalculateAdaptiveSizeL( CXnNode& aNode,
     if ( count == 0 )
         {
         TRect parentRect( parent->Rect() );
+        
         if( parent->Control() && parent->Control()->OwnsWindow() )
             {
             parentRect = TRect( parentRect.iTl - parent->MarginRect().iTl, parentRect.Size() );
             }
+                
+        RPointerArray< CXnNode >& siblings( parent->Children() );
+        
+        for ( TInt i = 0; i < siblings.Count(); i++ )
+            {
+            CXnNode* sibling( siblings[i] );
+            
+            if ( sibling == &aNode )
+                {
+                break;
+                }
+            
+            if ( IsNodeDisplayedL( *sibling ) && !sibling->IsDropped() &&
+                 !IsAbsoluteL( *sibling ) && !IsNodeTooltip( *sibling ) )
+                {
+                TRect marginRect( sibling->MarginRect() );
+            
+                TInt availableWidth( parentRect.Width() );
+                TInt availableHeight( parentRect.Height() );    
+                
+                if ( aParentBlockProgression ==
+                     XnPropertyNames::style::common::block_progression::KTB ||
+                     aParentBlockProgression ==
+                     XnPropertyNames::style::common::block_progression::KBT )
+                    {
+                    availableHeight -= marginRect.Height();
+                    
+                    if ( availableHeight < 0 )
+                        {
+                        parentRect.SetHeight( 0 );                        
+                        }
+                    else
+                        {
+                        parentRect.SetHeight( availableHeight );
+                        }
+                    }
+                else // LR / RL
+                    {
+                    availableWidth -= marginRect.Width();
+                    
+                    if ( availableWidth < 0 )
+                        {
+                        parentRect.SetWidth( 0 );
+                        }
+                    else
+                        {
+                        parentRect.SetWidth( availableWidth );
+                        }
+                    }                 
+                }
+            }
+        
         // I don't have any displayed childrens, fix my own size
         size = CalculateTotalDimensionsL( aNode, ETrue, EFalse,
             parentRect, aGraphicsDevice, aHorizontalUnitInPixels,
@@ -7928,6 +7969,37 @@ static CXnNode* BuildScreenDeviceChangeTriggerNodeLC( CXnUiEngine& aUiEngine )
     }
 
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+static void ReportScreenDeviceChangedL( const CXnPluginData& aPluginData )
+    {    
+    CXnNode* node( NULL );
+    
+    if ( aPluginData.Node() )
+        {
+        node = aPluginData.Node()->LayoutNode();
+        }
+    
+    if ( !node )
+        {
+        return;        
+        }
+    
+    CXnNode* trigger( BuildScreenDeviceChangeTriggerNodeLC( *node->UiEngine() ) );
+
+    node->ReportXuikonEventL( *trigger );
+    
+    CleanupStack::PopAndDestroy( trigger );
+    
+    RPointerArray< CXnPluginData >& plugins( aPluginData.PluginData() );
+    
+    for( TInt i = 0; i < plugins.Count(); i++ )
+        {
+        ReportScreenDeviceChangedL( *plugins[i] );
+        }     
+    }
+
+// -----------------------------------------------------------------------------
 // FillFocusCandidatesL
 // -----------------------------------------------------------------------------
 //
@@ -7985,23 +8057,16 @@ static void TraceTreeL( CXnNode* aRootNode )
             CXnDepthFirstTreeIterator< CXnNode >::NewL( *aRootNode );
     CleanupStack::PushL( iterator );
 
-    RDebug::Print( _L("Xuikon: UI tree:") );
+    RDebug::Print( _L("*** XML UI layout:") );
 
-    TBuf8< 256 > debug;
+    TBuf8< 512 > debug;
 
     TInt level( 0 );
 
     for( CXnNode* node = iterator->Value(); node;
         node = iterator->NextL() )
         {
-        debug = _L8( "Xuikon: " );
-
-        level = iterator->Level();
-
-        for ( TInt i = 0; i < level; i++ )
-            {
-            debug.Append( '  ' );
-            }
+        debug = _L8( "* " );
 
         debug.Append( node->Type()->Type() );
 
@@ -8009,12 +8074,12 @@ static void TraceTreeL( CXnNode* aRootNode )
 
         if ( id )
             {
-            debug.Append( _L8( ", id: " ) );
+            debug.Append( _L8( " id=" ) );
             debug.Append( id->StringValue() );
             }
                             
-        debug.AppendFormat( _L8( ", laidout: %d" ), node->IsLaidOut() );
-        debug.AppendFormat( _L8( ", displayed: %d" ),
+        debug.AppendFormat( _L8( " laidout=%d" ), node->IsLaidOut() );
+        debug.AppendFormat( _L8( " displayed=%d" ),
             IsNodeDisplayedL( *node ) );
 
         CCoeControl* control( node->Control() );
@@ -8022,12 +8087,55 @@ static void TraceTreeL( CXnNode* aRootNode )
         if ( control )
             {
             TBool visible( control->IsVisible() );
-            TRect rect( control->Rect() );
-            TPoint tl( rect.iTl );
-            TPoint br( rect.iBr );
-            debug.AppendFormat( _L8( ", visible %d:" ), visible );
+            debug.AppendFormat( _L8( " visible=%d" ), visible );
+
+            TRect rect;
+            TPoint tl;
+            TPoint br;
+            
+            rect = node->MarginRect();
+            tl = rect.iTl;
+            br = rect.iBr;
+            
+            debug.Append( _L8( "; Margin " ) );
             debug.AppendFormat(
-                _L8( ", Tl: %d %d, Br: %d %d" ), tl.iX, tl.iY, br.iX, br.iY );
+                _L8( "tl(%d,%d) br(%d,%d)" ), tl.iX, tl.iY, br.iX, br.iY );
+
+            rect = node->BorderRect();
+            tl = rect.iTl;
+            br = rect.iBr;
+            
+            debug.Append( _L8( "; Border " ) );
+            debug.AppendFormat(
+                _L8( "tl(%d,%d) br(%d,%d)" ), tl.iX, tl.iY, br.iX, br.iY );
+
+            rect = node->PaddingRect();
+            tl = rect.iTl;
+            br = rect.iBr;
+            
+            debug.Append( _L8( "; Padding " ) );
+            debug.AppendFormat(
+                _L8( "tl(%d,%d) br(%d,%d)" ), tl.iX, tl.iY, br.iX, br.iY );
+
+            rect = node->Rect();
+            tl = rect.iTl;
+            br = rect.iBr;
+            
+            debug.Append( _L8( "; Content " ) );
+            debug.AppendFormat(
+                _L8( "tl(%d,%d) br(%d,%d)" ), tl.iX, tl.iY, br.iX, br.iY );
+            
+            if ( control->Rect() != node->BorderRect() )
+                {
+                debug.Append( _L8( "; control rect != rect set by layout algorithm " ) );
+
+                rect = control->Rect();
+                tl = rect.iTl;
+                br = rect.iBr;
+                                
+                debug.AppendFormat(
+                    _L8( "tl(%d,%d) br(%d,%d)" ), tl.iX, tl.iY, br.iX, br.iY );                
+                }
             }
         else
             {
@@ -8188,6 +8296,22 @@ void CXnUiEngineImpl::LayoutUIL( CXnNode* /*aNode*/ )
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiEngineImpl::LayoutFromNodeL()
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::LayoutFromNodeL( CXnNode& aNode )
+    {
+    PrepareRunLayoutL( aNode );
+
+    // Run layout until it is fully calculated
+    do
+        {
+        iLayoutPhase = RunLayoutFromNodeL( aNode );
+        }
+    while ( iLayoutPhase != XnLayoutPhase::ENone );
+    }
+
+// -----------------------------------------------------------------------------
 // PrepareRunLayoutL()
 // Set dropped flags of all nodes in the tree to ENone.
 // -----------------------------------------------------------------------------
@@ -8210,6 +8334,31 @@ void CXnUiEngineImpl::PrepareRunLayoutL()
                 // Adaptive node causes measure phase
                 iLayoutPhase = XnLayoutPhase::EMeasure;
                 }
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// PrepareRunLayoutL()
+// Set dropped flags of all nodes in the tree to ENone.
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::PrepareRunLayoutL( CXnNode& aNode )
+    {
+    if ( iLayoutPhase == XnLayoutPhase::ENone )
+        {
+        iLayoutPhase = XnLayoutPhase::ELayout;
+
+        CXnNode* dirty( &aNode );
+        dirty->ClearRenderedAndLaidOut();
+        
+        // Clear dropped flags recursively
+        SetNodeDroppedL( *dirty, XnNodeLayout::ENone );
+
+        if ( SetAdaptivesL( *dirty ) )
+            {
+            // Adaptive node causes measure phase
+            iLayoutPhase = XnLayoutPhase::EMeasure;
             }
         }
     }
@@ -8315,6 +8464,87 @@ TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiEngineImpl::RunLayoutL()
+// -----------------------------------------------------------------------------
+//
+TInt CXnUiEngineImpl::RunLayoutFromNodeL( CXnNode& aNode )
+    {
+    TRect clientRect( ClientRect() );
+    // Move it to 0, 0
+    clientRect.Move( -clientRect.iTl.iX, -clientRect.iTl.iY );
+
+    RPointerArray< CXnNode > laidOutList;
+    CleanupClosePushL( laidOutList );
+
+    if ( IsNodeDisplayedL( aNode ) )
+        {
+        if ( aNode.ViewNodeImpl() && !aNode.IsLaidOut() )
+            {
+            aNode.SetMarginRect( clientRect );
+            aNode.SetBorderRect( clientRect );
+            aNode.SetNormalFlowBorderRect( clientRect );
+            aNode.SetPaddingRect( clientRect );
+            aNode.SetRect( clientRect );
+            }
+
+        // Put areas to place
+        PlaceAreasL( aNode, laidOutList, iLayoutPhase,
+            *iCurrentGraphicsDevice, iHorizontalUnitInPixels,
+            iVerticalUnitInPixels );
+        }
+
+    TInt nextPhase;
+
+    switch ( iLayoutPhase )
+        {
+        case XnLayoutPhase::EMeasure:
+            nextPhase = XnLayoutPhase::ELayout;
+            break;
+        case XnLayoutPhase::ELayout:
+            // Layout is now calculated
+            aNode.SetLaidOutL();
+
+            // Check nodes which dimensions are changed
+            for ( TInt i = 0; i < laidOutList.Count(); i++ )
+                {
+                CXnNode* node( laidOutList[i] );
+                if( IsSrollableBox( *node ) && node->ScrollableControl() )
+                    {
+                    node->ScrollableControl()->LayoutChangedL();
+                    }
+                if ( !node->IsLaidOut() )
+                    {
+                    continue;
+                    }
+                CXnControlAdapter* adapter( node->Control() );
+                if ( adapter )
+                    {
+                    TRect rect;
+                    
+                    if ( node->ViewNodeImpl() )
+                        {
+                        rect = ClientRect();
+                        }
+                    else
+                        {
+                        rect = node->BorderRect();
+                        }
+                    if ( adapter->Rect() != rect )
+                        {
+                        adapter->SetRect( rect );
+                        }
+                    }
+                }
+            /* flow through */
+        default:
+            nextPhase = XnLayoutPhase::ENone;
+            break;
+        }
+    CleanupStack::PopAndDestroy( &laidOutList );
+    return nextPhase;
+    }
+
+// -----------------------------------------------------------------------------
 // CXnUiEngineImpl::RenderUIL()
 // -----------------------------------------------------------------------------
 //
@@ -8403,6 +8633,19 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
     iAppUiAdapter.EffectManager()->UiRendered();
     
     __PRINTS("*** CXnUiEngineImpl::RenderUIL - done ***");
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::RenderFromNodeL()
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::RenderFromNodeL( CXnNode& aNode )
+    {
+#ifdef _XN3_DEBUG_
+    TraceTreeL( &aNode );
+#endif 
+    CCoeControl* control = WindowOwningControl( aNode );
+    control->DrawNow();                                              
     }
 
 // -----------------------------------------------------------------------------
@@ -8713,8 +8956,6 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
             }
         }
 
-    ReportScreenDeviceChangeL();
-            
     SetClientRectL( iAppUiAdapter.ClientRect(), EFalse );
     
     RootNode()->SetDirtyL();
@@ -8725,14 +8966,33 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
     }
 
 // -----------------------------------------------------------------------------
+// CXnUiEngineImpl::NotifyViewLoadedL()
+// -----------------------------------------------------------------------------
+// 
+void CXnUiEngineImpl::NotifyViewLoadedL( const CXnViewData& aViewData )
+    {
+    ReportScreenDeviceChangedL( aViewData );
+    }
+
+// -----------------------------------------------------------------------------
 // CXnUiEngineImpl::NotifyWidgetAdditionL()
 // -----------------------------------------------------------------------------
 //
 void CXnUiEngineImpl::NotifyWidgetAdditionL(
-    const CXnPluginData& /*aPluginData*/ )
+    const CXnPluginData& aPluginData )
     {
+    ReportScreenDeviceChangedL( aPluginData );
     }
 
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::NotifyViewAdditionL()
+// -----------------------------------------------------------------------------
+// 
+void CXnUiEngineImpl::NotifyViewAdditionL( const CXnViewData& aViewData )
+    {
+    ReportScreenDeviceChangedL( aViewData );
+    }
+    
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::DynInitMenuItemL()
 // -----------------------------------------------------------------------------
@@ -9033,10 +9293,6 @@ void CXnUiEngineImpl::HandleResourceChangeL( TInt aType )
     else if ( aType == KAknsMessageSkinChange )
         {
         HandleSkinChangeL();
-        }
-    else if( iCurrentViewControlAdapter )
-        {
-        iCurrentViewControlAdapter->HandleResourceChange( aType );
         }
     }
 
@@ -9560,7 +9816,13 @@ void CXnUiEngineImpl::SetClientRectL( TRect aRect, TBool aDrawNow )
             iClientRect );
         
         iEditMode->SetClientRect( aRect );
-
+		
+        CXnViewSwitcher* viewSwitcher( iAppUiAdapter.ViewSwitcher() );
+        if( viewSwitcher )
+            {
+            viewSwitcher->SizeChanged( aRect );
+            }
+    
         if ( aDrawNow )
             {
             RootNode()->SetDirtyL();
@@ -9848,58 +10110,50 @@ EXPORT_C /* static */ void CXnUiEngineImpl::EnableRenderUi( TAny* aAny )
         }
     }
 
-
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 //
 void CXnUiEngineImpl::ReportScreenDeviceChangeL()
-    {
-    CXnNode* trigger( BuildScreenDeviceChangeTriggerNodeLC( *iUiEngine ) );
-    
-    // Notify current orientation to iCurrentView
-    iCurrentView->ReportXuikonEventL( *trigger );
+    {    
+    // Notify current orientation to all views    
+    RPointerArray< CXnPluginData >& plugins( 
+        iViewManager.ActiveAppData().PluginData() );
 
-    // Notify also plugins
-    RPointerArray<CXnNode> plugins = *Plugins();
-    for( TInt i=0; i<plugins.Count(); i++ )
-        {
-        CXnNode* pluginNode = plugins[i];
-        RPointerArray<CXnNode> pluginChildren = pluginNode->Children();
-        for( TInt ii=0; ii<pluginChildren.Count(); ii++ )
-            {
-            CXnDomNode* widgetNode = pluginChildren[ii]->DomNode();
-            if( widgetNode && widgetNode->Name() == KWidgetNodeName )
-                {
-                pluginChildren[ii]->ReportXuikonEventL( *trigger );
-                }                    
-            }
+    for( TInt i = 0; i < plugins.Count(); i++ )
+        {        
+        ReportScreenDeviceChangedL( *plugins[i] );
         }
-    
-    CleanupStack::PopAndDestroy(); // trigger    
     }
 
 // -----------------------------------------------------------------------------
 // CXnUiEngineImpl::HandlePartialTouchInputL()
 // -----------------------------------------------------------------------------
-void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
-    {
-    CXnNode* editorplugin = FindPlugin( aNode );
-    if ( !editorplugin )
+void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode* aNode, TBool aEnable )
+    {    
+    CXnViewData& view( iViewManager.ActiveViewData() );
+
+    CXnNode* editor( aEnable ? aNode : iSplitScreenState.iPartialScreenEditorNode ); 
+		      
+    CXnPluginData* plugin( view.Plugin( editor ) );
+            
+    if ( !plugin || !editor )
         {
-        User::Leave( KErrNotFound );
+        return;
         }
+		
+    CXnNode* editorplugin( plugin->Owner()->LayoutNode() );    
     
     DisableRenderUiLC();
 
     if ( aEnable )    
         {        
         iSplitScreenState.iPartialScreenOpen = ETrue;           
-        iSplitScreenState.iPartialScreenEditorNode = &aNode;           
+        iSplitScreenState.iPartialScreenEditorNode = editor;           
 
         // make sure that we always get up event
-        CXnViewControlAdapter* control = static_cast< CXnViewControlAdapter* >(  
-            iViewManager.ActiveViewData().ViewNode()->Control() );            
-                   
+        CXnViewControlAdapter* control = 
+            static_cast< CXnViewControlAdapter* >( view.ViewNode()->Control() );  
+                                           
         control->ResetGrabbing();  
          
         // Block progression must be bottom-to-top when partial screen is open
@@ -9966,6 +10220,17 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable )
     RootNode()->SetDirtyL();
     ForceRenderUIL();
     CleanupStack::PopAndDestroy();
+    
+    if ( aEnable )
+        {    
+        editor->PluginIfL().ReportTriggerEventL( 
+            KSplitScreenEnabledTrigger, KNullDesC8, KNullDesC8 );             
+        }
+    else
+        {
+        editor->PluginIfL().ReportTriggerEventL( 
+            KSplitScreenDisabledTrigger, KNullDesC8, KNullDesC8 );                                  
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -10063,7 +10328,7 @@ void CXnUiEngineImpl::NotifyResourceChanged( TInt aType )
 // -----------------------------------------------------------------------------
 // EnablePartialTouchInput 
 // -----------------------------------------------------------------------------
-void CXnUiEngineImpl::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
+void CXnUiEngineImpl::EnablePartialTouchInput( CXnNode* aNode, TBool aEnable )
     {
     if( aEnable && !iSplitScreenState.iPartialScreenOpen ||
         !aEnable && iSplitScreenState.iPartialScreenOpen )
@@ -10139,18 +10404,11 @@ TBool CXnUiEngineImpl::IsPartialInputActive()
 //               
 TBool CXnUiEngineImpl::IsTextEditorActive()
     {
-    if( iSplitScreenState.iPartialScreenOpen )
+    if( iKeyEventDispatcher )         
         {
-        return ETrue;
+        return iKeyEventDispatcher->IsTextEditorActive();         
         }
-    CXnNode* focusedNode = FocusedNode();
-    if( focusedNode )
-        {
-        if( focusedNode->Type()->Type() == KEditorNodeName )
-            {
-            return ETrue;
-            }
-        }
+    
     return EFalse;
     }
 

@@ -17,7 +17,7 @@
 
 // System includes
 #include <StringLoader.h>
-#include <AiNativeUi.rsg>
+#include <ainativeui.rsg>
 #include <gulicon.h>
 
 // User includes
@@ -105,6 +105,7 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 	            }
 	        default:
 	            {
+                __PRINTS( "XAI: Rendering title pane > different content - leave");                
 	            User::Leave( KErrNotFound );
 	            break;
 	            }
@@ -112,6 +113,7 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 	    }
 	else
 		{
+        __PRINTS( "XAI: Rendering title pane > Uid mismatch - leave");        
 		User::Leave( KErrNotFound );
 		}
     }
@@ -150,12 +152,13 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 	                // We're publishing bitmap -> set text as invalid
 	                iStatusPanel.SetTitlePaneTextL( KNullDesC );
 	                iStatusPanel.RenderTitlePaneL();
-	                 __PRINTS("XAI: Rendering title pane - done");
+	                __PRINTS("XAI: Rendering title pane - done");
 	                }
 	            break;
 	            }
 	        default:
 	            {
+                __PRINTS( "XAI: Rendering title pane > different content - leave");
 	            User::Leave( KErrNotFound );
 	            break;
 	            }
@@ -163,6 +166,7 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 	   	}
 	else
 		{
+        __PRINTS( "XAI: Rendering title pane > Uid mismatch - leave");
 		User::Leave( KErrNotFound );
 		}
     }
@@ -175,6 +179,8 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin, 
     TInt aContent, TInt aResource, TInt /*aIndex*/ )
     {
+    __PRINT(__DBG_FORMAT("XAI: CAiTitlePaneRenderer::DoPublishL - aContent %d"), aContent );
+
     const THsPublisherInfo& info( aPlugin.PublisherInfo() );
     
     if( info.Uid() == KDeviceStatusPluginUid )
@@ -190,10 +196,12 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 	            iStatusPanel.RenderTitlePaneL();
 	       
 	            CleanupStack::PopAndDestroy(text); //text
+                __PRINTS("XAI: Rendering title pane - done");
 	            break;
 	            }
 	        default:
 	            {
+                __PRINTS( "XAI: Rendering title pane > different content - leave");
 	            User::Leave( KErrNotFound );
 	            break;
 	            }
@@ -201,6 +209,7 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 	    }
 	else
 		{
+        __PRINTS( "XAI: Rendering title pane > Uid mismatch - leave");
 		User::Leave( KErrNotFound );
 		}
     }
@@ -213,7 +222,7 @@ void CAiTitlePaneRenderer::DoPublishL( CHsContentPublisher& aPlugin,
 void CAiTitlePaneRenderer::DoCleanL( CHsContentPublisher& aPlugin, 
     TInt aContent )
 	{
-    __PRINT(__DBG_FORMAT("XAI: Clean title pane - %d"), aContent );
+    __PRINT(__DBG_FORMAT("XAI: Clean title pane - aContent %d"), aContent );
 	
     const THsPublisherInfo& info( aPlugin.PublisherInfo() );
     
@@ -233,13 +242,15 @@ void CAiTitlePaneRenderer::DoCleanL( CHsContentPublisher& aPlugin,
 
 	        default:
 	            {
-				User::Leave( KErrNotFound );
+				__PRINTS( "XAI: clean > different content - leave");
+                User::Leave( KErrNotFound );
 	            break;
 	            }
 	        };
 		}
 	else
 		{
+        __PRINTS( "XAI: clean > Uid mismatch - leave");
 		User::Leave( KErrNotFound );
 		}
 	}

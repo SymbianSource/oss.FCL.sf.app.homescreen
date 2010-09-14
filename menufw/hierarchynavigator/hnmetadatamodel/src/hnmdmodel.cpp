@@ -247,9 +247,9 @@ EXPORT_C void CHnMdModel::QueueForeground(
 // ---------------------------------------------------------------------------
 //
 EXPORT_C TBool CHnMdModel::IsForegroundQueued() const
-	{
-	return iForegroundQueued;
-	}
+    {
+    return iForegroundQueued;
+    }
 
 // ---------------------------------------------------------------------------
 //
@@ -264,13 +264,13 @@ void CHnMdModel::SuiteModelReadyToShowL( CHnSuiteModel* aJustEvaluatedSuite )
 
     if ( IsForegroundQueued() && ( !iForegroundTriggeringSuite ||
             iForegroundTriggeringSuite == aJustEvaluatedSuite ) )
-    	{
-    	CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
-    	CleanupStack::PushL( pl );
-    	iCmnPtrs.iModelEventObserver->HandleModelEventL( KAppGainForeground, *pl );
-    	CleanupStack::PopAndDestroy( pl );
-    	QueueForeground( ENever );
-    	}
+        {
+        CLiwGenericParamList* pl = CLiwGenericParamList::NewL();
+        CleanupStack::PushL( pl );
+        iCmnPtrs.iModelEventObserver->HandleModelEventL( KAppGainForeground, *pl );
+        CleanupStack::PopAndDestroy( pl );
+        QueueForeground( ENever );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -316,11 +316,11 @@ EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
     {
     TInt err( KErrNone );
 
-	RXmlEngDocument xmlDoc;
-	// Xml model provider takes ownership of xmlDoc.
-	TRAP( err, iXmlModelProvider->GetModelL( aGenre, xmlDoc ) );
+    RXmlEngDocument xmlDoc;
+    // Xml model provider takes ownership of xmlDoc.
+    TRAP( err, iXmlModelProvider->GetModelL( aGenre, xmlDoc ) );
 
-	TXmlEngElement element;
+    TXmlEngElement element;
     if ( !err )
         {
         element = xmlDoc.DocumentElement().AsElement();
@@ -342,10 +342,10 @@ EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
         TInt pos( 0 );
         newSuite->GetSuiteParameters().FindFirst( pos, KSuiteName8);
         if ( pos == KErrNotFound )
-        	{
-        	newSuite->GetSuiteParameters().AppendL(
-        			TLiwGenericParam(KSuiteName8, TLiwVariant( aGenre ) ) );
-        	}
+            {
+            newSuite->GetSuiteParameters().AppendL(
+                TLiwGenericParam(KSuiteName8, TLiwVariant( aGenre ) ) );
+            }
 
         iCmnPtrs.iContainer->PushNewSuiteModelL( newSuite->SuiteName() );
         iCmnPtrs.iContainer->GetLastSuiteModel()->GetItemsOrder()->
@@ -355,9 +355,9 @@ EXPORT_C TInt CHnMdModel::LoadSuiteL( const TDesC& aGenre,
         iLoadedSuites.AppendL( newSuite );
         }
     else
-    	{
-    	MMPERF(("CHnMdModel::LoadSuiteL - Error TRAPPED!"));
-    	}
+        {
+        MMPERF(("CHnMdModel::LoadSuiteL - Error TRAPPED!"));
+        }
 
     return err;
     }
@@ -395,8 +395,8 @@ void CHnMdModel::EvaluateTopSuiteL()
 // ---------------------------------------------------------------------------
 //
 TInt CHnMdModel::LoadedSuitesCount()
-	{
-	return iLoadedSuites.Count();
-	}
+    {
+    return iLoadedSuites.Count();
+    }
 
 

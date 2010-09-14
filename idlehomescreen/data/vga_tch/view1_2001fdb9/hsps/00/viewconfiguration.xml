@@ -1,13 +1,55 @@
-<configuration>
+<?xml version="1.0" encoding="UTF-8"?>
 
-	<control>
-		<plugins>
-			<plugin uid="0x2001f490"/>
-			<!--plugin uid="0x10207c18"/-->
-			<!--plugin uid="0x2001f48d"/-->
-		</plugins>
-		<settings/>
-	</control>
-
-
+<configuration max_child="6" xmlns:xi="http://www.w3.org/2001/xinclude">
+    <control>
+        <settings>
+            <item id="hs_vga_tch_view">
+                <property name="use_empty_widget" value="true"/>
+            </item>
+            <item id="wallpaper">
+                <property name="path" value=""/>
+            </item>
+        </settings>
+        <plugins>
+            <plugin uid="0x200286e6" bundle_id="0" template_id="0" locking_status="permanent"/>
+            <plugin uid="0x200286e7" bundle_id="0" template_id="0" locking_status="permanent"/>
+            <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="permanent"/>
+            <plugin uid="0x20018eee" bundle_id="0" template_id="0" locking_status="none">
+		<initial_settings>
+	            <settings>
+	             <!-- Shortcut #1, Phonebook -->
+	             <item id="first" name="Shortcut1" >
+	                <property  name="type" value="application"/>
+	                <property  name="uid" value="0x101F4CCE"/>
+	                <property  name="view" value=""/>
+	                <property  name="param" value=""/>
+	             </item>
+	           <!-- Shortcut #2, New Message -->
+	             <item id="second" name="Shortcut2" >
+	                 <property  name="type" value="shortcut"/>
+	                 <property  name="uid" value="0x99999999"/>
+	                 <property  name="view" value=""/>
+	                 <property  name="param" value="messaging:msg"/>
+	             </item>
+	           <!-- Shortcut #3, Browser -->
+	             <item id="third" name="Shortcut3" >
+	                 <property  name="type" value="application"/>
+	                 <property  name="uid" value="0x10008D39"/>
+	                 <property  name="view" value=""/>
+	                 <property  name="param" value=""/>
+	             </item>
+	           <!-- Shortcut #4, Calendar -->
+	             <item id="fourth" name="Shortcut4" >
+	                 <property  name="type" value="application"/>
+	                 <property  name="uid" value="0x10005901"/>
+	                 <property  name="view" value=""/>
+	                 <property  name="param" value=""/>
+	             </item>
+	           </settings>
+		</initial_settings>
+	    </plugin>    	    
+            <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>
+            <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>            
+        </plugins>
+    </control>
 </configuration>

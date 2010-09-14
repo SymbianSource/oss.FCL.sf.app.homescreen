@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+	<tag name="target" value="core"/>
+	<tag name="target" value="rofs2"/>
+	<tag name="target" value="rofs3"/>
+<file xmlns="http://www.s60.com/xml/genconfml/1" name="rootconfiguration.xml" target="\private\200159c0\install\root_2001f48f\hsps\00\">
+	<setting ref="VGA_HSViews/MaxPages"/>
+	<setting ref="VGA_HSViews/Views"/>
+	<setting ref="VGA_HSViews/ItemId"/>
+	<setting ref="VGA_HSViews/PropertyName"/>
+	<setting ref="VGA_HSViews/PropertyValue"/>
+	<xsl:stylesheet version="1.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xi="http://www.w3.org/2001/xinclude">
+		<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+		<xsl:template match="configuration/data">
+			<configuration>
+			 <xsl:attribute name="max_child"><xsl:value-of select="VGA_HSViews/MaxPages"/></xsl:attribute>
+				<control> 
+					<plugins>
+						<xsl:for-each select="VGA_HSViews/Views">
+							<plugin>
+								<xsl:attribute name="uid"><xsl:value-of select="Uid"/></xsl:attribute>
+								<xsl:attribute name="locking_status"><xsl:value-of select="LockingStatus"/></xsl:attribute>
+							</plugin>
+						</xsl:for-each>
+					</plugins>
+					<settings>
+				    <item>
+				      <xsl:attribute name="id"><xsl:value-of select="VGA_HSViews/ItemId"/></xsl:attribute>
+				   <property>
+					  <xsl:attribute name="name"><xsl:value-of select="VGA_HSViews/PropertyName"/></xsl:attribute>
+					  <xsl:attribute name="value"><xsl:value-of select="VGA_HSViews/PropertyValue"/></xsl:attribute>				
+					</property>
+				  </item>			      
+				   
+          </settings>
+				</control>
+			  
+			</configuration>
+		</xsl:template>
+	</xsl:stylesheet>
+</file>
+</container>

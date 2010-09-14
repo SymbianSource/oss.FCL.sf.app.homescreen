@@ -366,17 +366,17 @@ TBool CXnEffectManager::BeginActivateViewEffect( const CXnViewData& aThis,
         
         iBgEffect = ETrue;
         }
-    
+
     // because of changes in nga end has to call here. Effects below are
     // grouped and those will be triggered when calling GfxTransEffect::EndGroup
     if ( iLandscape )
         {
         GfxTransEffect::Begin( thisView, KGfxControlActionDisappearLsc );
         GfxTransEffect::Begin( otherView, KGfxControlActionAppearLsc );
-        
+    
         GfxTransEffect::SetDemarcation( otherView, otherView->Position() );
         GfxTransEffect::End( otherView );
-            
+        
         GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
         GfxTransEffect::End( thisView );
         }
@@ -387,11 +387,11 @@ TBool CXnEffectManager::BeginActivateViewEffect( const CXnViewData& aThis,
         
         GfxTransEffect::SetDemarcation( otherView, otherView->Position() );
         GfxTransEffect::End( otherView );
-            
+        
         GfxTransEffect::SetDemarcation( thisView, thisView->Position() );
         GfxTransEffect::End( thisView );
-        }    
-    
+        }
+
     return ETrue;
     }
 
@@ -452,8 +452,7 @@ void CXnEffectManager::BgAppearEffect( CCoeControl* aBg, TBool aWaitActiveEffect
 void CXnEffectManager::CleanupControlEffect()
     {
     iBgEffect = EFalse;
-    iGroupId = -1;       
-    
+    iGroupId = -1;
     iControls.Reset();        
     }
 

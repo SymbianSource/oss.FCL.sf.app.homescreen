@@ -205,9 +205,18 @@ void CTsAppView::UpdatePopupRects(  )
     bgTport.LayoutRect( iViewRect,
         AknLayoutScalable_Apps::bg_popup_window_pane_cp01( variety ) );
     iBgContextOuterRect = bgTport.Rect();
-    bgTport.LayoutRect( iBgContextOuterRect,
-        AknLayoutScalable_Avkon::aid_inside_area_window_primary( variety ) );
-    iBgContextInnerRect = bgTport.Rect();
+    if( iBgContextOuterRect == iViewRect )
+        {
+        //full screen
+        iBgContextInnerRect = iBgContextOuterRect;
+        }
+    else
+        {
+        bgTport.LayoutRect( iBgContextOuterRect,
+                AknLayoutScalable_Avkon::
+                aid_inside_area_window_primary( variety ) );
+        iBgContextInnerRect = bgTport.Rect();
+        }
     TSLOG4( TSLOG_INFO, "outer rect for popup = %d %d %d %d",
             iBgContextOuterRect.iTl.iX, iBgContextOuterRect.iTl.iY,
             iBgContextOuterRect.iBr.iX, iBgContextOuterRect.iBr.iY );
@@ -243,7 +252,6 @@ void CTsAppView::CreateControlsL()
     iAppsHeading->ConstructL( KNullDesC() );
     iAppsHeading->SetLayout( CAknPopupHeadingPane::EListHeadingPane ); 
 
-    //TODO: check why we need to set rect (set already in contructL)
     iFastSwapArea->SetRect( rects[1] ); // cannot be before iAppsHeading constructL
     iAppsHeading->SetRect( rects[0] );
     

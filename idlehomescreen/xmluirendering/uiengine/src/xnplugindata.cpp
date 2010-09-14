@@ -37,6 +37,7 @@
 
 // Constants
 _LIT8( KLockingStatusLocked, "locked" );
+_LIT8( KLockingStatusPermanent, "permanent" );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -497,12 +498,22 @@ void CXnPluginData::InitialFocusNodesL( RPointerArray< CXnNode >& aList ) const
 void CXnPluginData::Flush()
     {
     // Don't touch to iOwner, because this plugin might be reused later
-           
+    
+    // clear all flags, except editable and removable
+    TBool removable = iFlags.IsSet( EIsRemovable );
+    TBool editable = iFlags.IsSet( EIsEditable );
+    
     iFlags.ClearAll();
     
-    // This is default
-    iFlags.Set( EIsRemovable );    
-           
+    if( removable )
+        {
+        iFlags.Set( EIsRemovable );
+        }
+    if( editable )
+        {
+        iFlags.Set( EIsEditable );
+        }    
+
     iNode = NULL;
     
     delete iConfigurationId;
@@ -551,7 +562,7 @@ TBool CXnPluginData::Empty() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnPluginData::SetEmpty()
+// CXnPluginData::SetEmptyL()
 // 
 // -----------------------------------------------------------------------------
 //
@@ -624,13 +635,20 @@ void CXnPluginData::PopupNodesL( RPointerArray< CXnNode >& aList ) const
 //
 void CXnPluginData::SetLockingStatus( const TDesC8& aStatus )
     {
-    if ( aStatus.CompareF( KLockingStatusLocked ) == 0 )
+    if( aStatus.CompareF( KLockingStatusPermanent ) == 0 )
         {
         iFlags.Clear( EIsRemovable );
+        iFlags.Clear( EIsEditable );
+        }
+    else if( aStatus.CompareF( KLockingStatusLocked ) == 0 )
+        {
+        iFlags.Clear( EIsRemovable );
+        iFlags.Set( EIsEditable );
         }
     else
         {
         iFlags.Set( EIsRemovable );
+        iFlags.Set( EIsEditable );               
         }
     }
 

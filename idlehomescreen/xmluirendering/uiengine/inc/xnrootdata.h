@@ -93,7 +93,7 @@ public:
     /**
      * Loads remaining application views
      */    
-    void LoadRemainingViews();
+    void LoadRemainingViewsL();
 
     /**
      * Cancels load remaining application views
@@ -169,7 +169,21 @@ public:
      * @return number of pages allowed
      */
     TInt32 MaxPages();
-
+    
+    /**
+     * Returns template view's uid
+     * 
+     * @return Returns template view's uid, or if not set qhd default
+     */
+    const TDesC8& TemplateViewUid() const;
+    
+    /**
+     * Sets template view's uid
+     * 
+     * @param Template view's uid
+     */
+    void SetTemplateViewUidL( const TDesC8& aTemplateViewUid );
+    
     /**
      * Returns ETrue, if all views are loaded
      */
@@ -206,6 +220,8 @@ private:
     TBool iLoadForward;
     /** Maximum of views allowed */
     TInt32 iMaxPages;
+    /** Template view uid is uid of the view when user selects New view */
+    HBufC8* iTemplateViewUid;
     /** Load error code */
     TInt iLoadError;
     };

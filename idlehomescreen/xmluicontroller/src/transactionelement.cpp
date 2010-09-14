@@ -24,6 +24,7 @@
 #include    "xmluicontrollerpanic.h"
 #include    "aixmluiutils.h"
 #include    "aixmluiconstants.h"
+#include    "aipolicyelement.h"
 
 #include    "contentprioritymap.h"
 
@@ -35,13 +36,14 @@ using namespace AiUiDef::xml;
 /**
  * Template method implementation
  */
-void MTransactionElement::CommitL( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap )
+void MTransactionElement::CommitL( RAiPolicyElementArray& aPolicyArray, 
+                                   RPropertyHashMap& aPropertyHashMap )
     {
     // Update UI element data
     UpdateDataL();
     
     // Update CSS properties
-    ApplyPublishingPolicy( aLayoutChanged, aPropertyHashMap );
+    ApplyPublishingPolicy( aPolicyArray, aPropertyHashMap );
     }
 
 CTransactionElement::CTransactionElement( AiUtility::CContentPriorityMap& aContentPriorityMap )
@@ -61,13 +63,6 @@ void CTransactionElement::Reset()
     iContentPriority = KErrNotFound;
     
     iElementLink.Deque();
-    
-    iPolicyArray.Reset();
-    }
-    
-RAiPolicyElementArray& CTransactionElement::PolicyArray()
-    {
-    return iPolicyArray;
     }
 
 void CTransactionElement::SetContentPriority( TInt aPriority )
@@ -86,20 +81,22 @@ void CTransactionElement::SetTarget(CXnNodeAppIf& aTarget)
     iTarget = &aTarget;
     }
 
-void CTransactionElement::ApplyPublishingPolicy( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap )
+void CTransactionElement::ApplyPublishingPolicy( RAiPolicyElementArray& aPolicyArray, 
+                                                 RPropertyHashMap& aPropertyHashMap )
     {
     // Ignore errors if CSS property could not be modified
-    TRAP_IGNORE( DoApplyPublishingPolicyL( aLayoutChanged, aPropertyHashMap ) );
+    TRAP_IGNORE( DoApplyPublishingPolicyL( aPolicyArray, aPropertyHashMap ) );
     }
             
-void CTransactionElement::DoApplyPublishingPolicyL( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap )
+void CTransactionElement::DoApplyPublishingPolicyL( RAiPolicyElementArray& aPolicyArray, 
+                                                    RPropertyHashMap& aPropertyHashMap )
     {
     RArray<CXnNodeAppIf*> targetArray;
     CleanupClosePushL( targetArray );
     
-    for ( TInt i = 0; i < iPolicyArray.Count() && iPropertyMap; ++i )
+    for ( TInt i = 0; i < aPolicyArray.Count() && iPropertyMap; ++i )
         {
-        TAiPolicyElement& element = iPolicyArray[ i ];
+        TAiPolicyElement& element = aPolicyArray[ i ];
         
         RArray<TAiPolicyElement> elementArray;
         CleanupClosePushL( elementArray );
@@ -118,15 +115,15 @@ void CTransactionElement::DoApplyPublishingPolicyL( TBool& aLayoutChanged, RProp
         if( !found )
             {
             // Mark this target to be processed
-            targetArray.Append( &(element.Target()) );
+            targetArray.AppendL( &(element.Target()) );
             
-            for( TInt i3 = 0; i3 < iPolicyArray.Count(); ++i3 )
+            for( TInt i3 = 0; i3 < aPolicyArray.Count(); ++i3 )
                 {
-                TAiPolicyElement& element2 = iPolicyArray[ i3 ];
+                TAiPolicyElement& element2 = aPolicyArray[ i3 ];
                 // find form target array
                 if( &(element.Target()) == &(element2.Target()) )
                     {
-                    elementArray.Append( element2 );
+                    elementArray.AppendL( element2 );
                     }
                 }
                 
@@ -144,10 +141,6 @@ void CTransactionElement::DoApplyPublishingPolicyL( TBool& aLayoutChanged, RProp
     
     CleanupStack::PopAndDestroy(); // targetArray
     
-    if ( iPolicyArray.Count() > 0 )
-        {
-        aLayoutChanged |= ETrue;
-        }
     }
     
 CXnNodeAppIf& CTransactionElement::Target() const

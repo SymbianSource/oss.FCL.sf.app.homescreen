@@ -33,7 +33,7 @@
 #include <hscontentpublisher.h>
 #include <hspublisherinfo.h>
 
-#include <AiNativeUi.rsg>
+#include <ainativeui.rsg>
 
 #include "ainativeui.hrh"
 #include "aisoftkeyrenderer.h"

@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_76 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_76 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_77 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_77 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -400,5 +400,14 @@ TBool CMmGridContainer::ItemIsVisible( TInt aItemIndex ) const
     return isVisible;
     }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmGridContainer::SetWidgetCommingFromBackground( TBool /*aCommingFromBackground*/)
+    {
+    }
+
 // End of File
+
 

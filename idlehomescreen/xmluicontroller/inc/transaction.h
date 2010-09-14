@@ -57,7 +57,7 @@ public:  // Constructors and destructor
     
     void Append(MTransactionElement& aElement);
     
-    void CommitL(TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap);
+    void CommitL(RAiPolicyElementArray& aPolicyArray, RPropertyHashMap& aPropertyHashMap);
     
     void Reset(MTransactionFactory& aFactory);
     

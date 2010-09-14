@@ -149,6 +149,11 @@ public:
      */
     TInt FindMostTopParentWgId( TInt aWgId );
     
+    /**
+     * Remove all screenshots from hidden apps, they are not used.
+     */
+    void RemoveHiddenAppsScrenshotsL();
+    
 private:
     /**
      * Adds running apps to the list.

@@ -615,3 +615,14 @@ EXPORT_C void CXnControlAdapter::SetDataL( const TDesC8& /*aData*/, const TDesC&
     {
     
     }
+
+// -----------------------------------------------------------------------------
+// CXnControlAdapter::IsWidgetGestureDest
+// -----------------------------------------------------------------------------
+//
+TBool CXnControlAdapter::IsWidgetGestureDest()
+    {
+    return iImpl->IsWidgetGestureDest();
+    }
+
+// End of file

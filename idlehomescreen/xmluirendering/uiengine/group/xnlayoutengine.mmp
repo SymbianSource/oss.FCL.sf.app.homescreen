@@ -85,6 +85,7 @@ SOURCE    xnspbgcleaner.cpp
 SOURCE    xnwaitdialog.cpp
 SOURCE    xnpublisherdata.cpp
 SOURCE    xnitemactivator.cpp
+SOURCE    xnviewswitcher.cpp
 
 START RESOURCE  xnuiengine.rss
 HEADER

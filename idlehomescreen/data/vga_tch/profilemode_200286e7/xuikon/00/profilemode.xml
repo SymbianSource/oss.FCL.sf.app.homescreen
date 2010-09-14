@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Localization removed until localized strings are available -->
+<!-- <!DOCTYPE xmluiml SYSTEM "profilewidget.dtd"> -->
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+	
+  <widget id="profilewidget" focusable="true">
+
+    <!-- Data plugins in this widget -->
+    <contentsource name="Profile" value="0x10275101"/>
+    <contentsource name="SAT" value="0x102078EB"/>
+    <contentsource name="DeviceStatus" value="0x102750F8"/>
+
+    <desc id="Profile/ActiveProfileGeneralIconResource" path="SKIN(270501603 8586 74)"/>
+    <desc id="Profile/ActiveProfileSilentIconResource" path="SKIN(270501603 8587 74)"/>
+    <desc id="Profile/ActiveProfileTimedIconResource" path="SKIN(270501603 8631 74)"/>        
+
+    <actions>
+      <action>
+        <trigger name="activate"/>
+        <event name="system/trydisplayinglistquerydialog">
+          <property name="id" value="profiledialog"/>
+        </event>
+      </action>
+    </actions>
+    
+    <box id="marginbox1"/>
+    
+    <box id="profileiconbox">
+    	<image id="profileicon">
+    		<property class="Profile/ActiveProfileIcon"/>
+    	</image>     	
+   	</box>
+   	
+   	<box id="marginbox2"/>
+
+    <box id="profilenamebox">
+    	<text id="profilename">
+    		<property class="Profile/ActiveProfileName"/>
+    	</text>
+    </box>
+    
+    <newsticker id="indicator" focusable="false">
+
+    	<title id="title_cug" titleindex="0">
+    		<property class="DeviceStatus/CUGIndicator"/>
+    		<property class="policy/emptyContent" name="title_cug" value="display: none;"/>
+    		<property class="policy/Content" name="title_cug" value="display: block;"/>
+    		<property class="policy/Visibility" name="indicator" value="if (title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="indicator" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox1" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox1" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>    		    		
+    	</title>    
+
+    	<title id="title_sat" titleindex="1">
+    		<property class="SAT/SatIdleModeText"/>
+    		<property class="policy/emptyContent" name="title_sat" value="display: none;"/>
+    		<property class="policy/Content" name="title_sat" value="display: block;"/>
+    		<property class="policy/Visibility" name="indicator" value="if (title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="indicator" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: none"/>    		
+    		<property class="policy/Visibility" name="marginbox1" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox1" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>        		
+    	</title>
+
+    	<title id="title_vhz" titleindex="2">
+    		<property class="DeviceStatus/VHZText"/>
+    		<property class="policy/emptyContent" name="title_vhz" value="display: none;"/>
+    		<property class="policy/Content" name="title_vhz" value="display: block;"/>
+    		<property class="policy/Visibility" name="indicator" value="if (title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="indicator" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: none"/>     		
+    		<property class="policy/Visibility" name="marginbox1" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox1" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>         		
+    	</title>
+
+    	<title id="title_mcn" titleindex="3">
+    		<property class="DeviceStatus/MCNIndicator"/>
+    		<property class="policy/emptyContent" name="title_mcn" value="display: none;"/>
+    		<property class="policy/Content" name="title_mcn" value="display: block;"/>
+    		<property class="policy/Visibility" name="indicator" value="if (title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="indicator" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: none"/>     
+    		<property class="policy/Visibility" name="marginbox1" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox1" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if (title_cug,title_sat,title_vhz,title_mcn) display: none"/>
+    		<property class="policy/Visibility" name="marginbox2" value="if !+(title_cug,title_sat,title_vhz,title_mcn) display: block"/>         				
+    	</title>	    	    	
+    	
+    </newsticker>
+    
+    <listquerydialog id="profiledialog" display="none">
+      <property class="Profile/ProfileName"/>
+      <!-- <menuitem id="profileseditactive" label="&qtn_hs_profile_edit;"> -->
+      <menuitem id="profileseditactive" label="Edit active profile">
+        <actions>
+          <action>
+            <trigger name="activate"/>
+            <event name="Profile/EditActiveProfile"/>
+          </action>
+        </actions>
+      </menuitem>
+      <dynmenuitem id="profileitem">
+        <actions>
+          <action>
+            <trigger name="activate"/>
+            <event name="Profile/SwitchProfileByIndex(#)"/>
+          </action>
+        </actions>
+      </dynmenuitem>
+    </listquerydialog>
+  </widget>
+</xmluiml>

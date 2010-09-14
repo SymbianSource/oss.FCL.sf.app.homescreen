@@ -34,6 +34,8 @@ class CAknQueryDialog;
 class CTsEventControler;
 class MTsDataChangeObserver;
 class CAknLongTapAnimation;
+class CTsFastSwapAreaExtension;
+class CAknPointerEventSuppressor;
 
 /**
  * Taskswitcher Fast Swap area UI.
@@ -180,6 +182,13 @@ private:
     void HandleListBoxEventL(CEikListBox* aListBox, TListBoxEvent aEventType);
     
 public:
+    
+    enum TsFastSwapAreaGridData {
+        EMaxItemsOnScreen = 1,
+        EGridItemWidth,
+        EGridItemGap
+    };
+    
     /**
      * Implements drag gesture handling
      * @see MTsEventControlerObserver
@@ -229,6 +238,21 @@ public:
      */
     TBool WgOnTaskList( TInt aWgId );
     
+    /**
+     * Returns full grid view size.
+     */
+    TSize GridWorldSize();
+    
+    /**
+     * Retrieves number of items in grid
+     */
+    TInt GridItemCount();
+    
+    /**
+     * Returnes value of the requested grid data
+     */
+    TInt GetGridItemData( TsFastSwapAreaGridData aDataType );
+    
 public:    
     // from CCoeControl    
     TInt CountComponentControls() const;
@@ -262,23 +286,21 @@ private:
      * Switches to another application.
      */
     void SwitchToApp( TInt aWgId, const TUid& aUid );
-    
-    /**
-     * Makes a copy of the given bitmap.
-     * Also scaled to the given size, but maintains aspect ratio,
-     * so the size of the returned bitmap may be less then aSize.
-     */
-    CFbsBitmap* CopyBitmapL( TInt aFbsHandle, TSize aSize );
 
     /**
-     * Called from HandleFswContentChanged.
+     * Update and prepare data for grid.
      */    
-    void HandleFswContentChangedL();
+    void GetContentForGrid();
     
     /**
-     * Shows the content from iArray on the screen.
+     * Obtain actual data from server.
+     */ 
+    void GetContentL();
+    
+    /**
+     * Prepare the content from iArray to be shown on the screen.
      */
-    void RenderContentL( TBool aSuppressAnimation = EFalse );
+    void RenderContentL( );
     
     /**
      * Creates the ganes grid control.
@@ -296,11 +318,6 @@ private:
      * @param  aItemCount  number of items in grid
      */
     void LayoutGridViewL( TInt aItemCount );
-    
-    /**
-     * Returns rectangles for fast swap area controls
-     */
-    void GetFastSwapAreaRects( RArray<TAknLayoutRect>& aRects );
 
     /**
      * Creates a stylus popup instance (iPopup) if not yet done.
@@ -320,22 +337,6 @@ private:
     void NotifyChange();
     
     /**
-     * Retrieves and returns size for image graphics.
-     */
-    TSize PreferredImageSize();
-    
-    /**
-     * Retrieves number of items in grid
-     */
-    TInt GridItemCount();
-    
-    /**
-     * Calculates the correct size if aspect ratio needs to be preserved.
-     */
-    TSize CalculateSizePreserveRatio(const TSize& aTargetAreaSize,
-            const TSize& aSourceSize);
-    
-    /**
      * Selects next item in grid
      */
     void SelectNextItem();
@@ -348,11 +349,6 @@ private:
      * @param aRedrawDelay - animation delay.
      */
     void CenterItem( TInt aRedrawDelay);
-    
-    /**
-     * Returns full grid view size.
-     */
-    TSize GridWorldSize();
     
     /**
      * Updates grid, called for manual grid scroll update
@@ -369,51 +365,10 @@ private:
     TSize ViewSize();
     
     /**
-     * Returns the position of the given item inside grid world rect.
-     * Returns point in the middle of the view rectangle.
-     * 
-     * @param  aItemIdx  index of the item for which calculation will be done
-     */
-    TPoint ItemViewPosition( TInt aItemIdx );
-    
-    /**
-     * Returns index of the shown item, based on the logical
-     * position of the grids view. Item that is closest to the
-     * middle of screen is returned.
-     * 
-     * @param  aViewPos  grids view position. This must be point in
-     *                   the middle of the view rectangle
-     * @return  index of the item
-     */
-    TInt ViewToVisibleItem( const TPoint aViewPos );
-    
-    /**
-     * Launches increasing pop-up feedback.
-     */
-    void LaunchPopupFeedback();
-    
-    /**
      * Show highlight when disabled and 
      * consume EEventKeyUp that follows after event that swiched on the highlight.
      */
     TKeyResponse ShowHighlightOnKeyEvent(const TKeyEvent& aKeyEvent, TEventCode aType);
-    
-    /**
-     * Returns current screen orientation:
-     * 
-     * @return  1 if landscape, 0 if portait 
-     */
-    TInt GetCurrentScreenOrientation();
-    
-    /**
-     * Retrieves variety value, based on current screen resolution.
-     * 
-     * @param  aVariety  result of the function, 0 value means portrait
-     *                   value of 1 indicates landscape
-     * @return  ETrue if screen resolution differs from vale returned by
-     *          layout meta data functions.
-     */
-    TBool GetVariety( TInt& aVariety );
     
     /**
      * Cancels long tap animation.
@@ -433,6 +388,9 @@ private: // Data
     
     // parent control
     CCoeControl& iParent;
+    
+    // utility helper class
+    CTsFastSwapAreaExtension* iFastSwapExt;
     
     // device state
     // not own 
@@ -485,6 +443,8 @@ private: // Data
     // Key event handling
     TBool iConsumeEvent;
     TBool iKeyEvent;
+    CAknPointerEventSuppressor* iEventSupressor;
+    TBool iSupressDrag;
     
     // App closing handling
     RArray<TInt> iIsClosing;
@@ -495,6 +455,9 @@ private: // Data
     CAknLongTapAnimation* iLongTapAnimation;
     CTsFastSwapTimer* iLongTapAnimationTimer;
     TBool iLongTapAnimationRunning;
+    
+    // Screenshot handling
+    RArray<TInt> iPrevScreenshots;
     };
 
 #endif // TSFASTSWAPAREA_H

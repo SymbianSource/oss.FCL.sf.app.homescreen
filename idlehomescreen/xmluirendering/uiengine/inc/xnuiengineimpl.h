@@ -147,6 +147,18 @@ public:
     void LayoutUIL( CXnNode* aNode = NULL );
 
     /**
+     * Lays out the UI
+     * 
+     * This generates full re-layout starting from the given node, 
+     * regardless of the current dirty set or the active view.
+     * I.e. this can be used to layout an inactive view.
+     * 
+     * @since Series 60 5.2
+     * @param aNode Starting point of the layout
+     */
+    void LayoutFromNodeL( CXnNode& aNode );
+
+    /**
      * Creates UI implementations for the UI, adjusts control coordinates 
      * according to the layout
      * 
@@ -154,6 +166,19 @@ public:
      * @param aNode Starting point
      */
     void RenderUIL( CXnNode* aNode = NULL );
+
+    /**
+     * Creates UI implementations for the UI, adjusts control coordinates 
+     * according to the layout
+     * 
+     * This generates full re-layout starting from the given node, 
+     * regardless of the current dirty set or the active view.
+     * I.e. this can be used to layout an inactive view.
+     * 
+     * @since Series 60 5.2
+     * @param aNode Starting point
+     */
+    void RenderFromNodeL( CXnNode& aNode );
     
     /**
      * Gets the root node of the UI
@@ -506,10 +531,10 @@ public:
      * Enables partial touch input
      * 
      * @since Series 60 5.2
-     * @param aNode Editor Node
+     * @param aNode Editor Node, can be NULL when disabling partial input
      * @param TBool Partial input is enabled      
      */      
-    void EnablePartialTouchInput( CXnNode& aNode, TBool aEnable );
+    void EnablePartialTouchInput( CXnNode* aNode, TBool aEnable );
 
     /**
      * Is partial input active
@@ -548,6 +573,7 @@ private:
      * @since Series 60 3.2
      */
     void PrepareRunLayoutL();
+    void PrepareRunLayoutL( CXnNode& aNode );
 
     /**
      * Runs the layout algorithm        
@@ -555,6 +581,7 @@ private:
      * @since Series 60 3.2
      */
     TInt RunLayoutL( CXnNode* aNode );
+    TInt RunLayoutFromNodeL( CXnNode& aNode );
 
     /**
      * Checks if layout is currently disabled
@@ -591,7 +618,7 @@ private:
       * @since Series 60 5.2
       * @param TInt aType 
       */ 
-    void HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable );
+    void HandlePartialTouchInputL( CXnNode* aNode, TBool aEnable );
 
     /**
       * Set node visible
@@ -635,6 +662,11 @@ private:
     void NotifyViewActivatedL( const CXnViewData& aViewData );
 
     /** 
+     * from MXnViewObserver 
+     */
+    void NotifyViewLoadedL( const CXnViewData& aViewData );
+
+    /** 
      * from MXnViewObserver
      */
     void NotifyViewDeactivatedL( const CXnViewData& /*aViewData*/ );
@@ -658,12 +690,12 @@ private:
     /** 
      * from MXnViewObserver 
      */
-    void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ ){};
+    void NotifyViewAdditionL( const CXnViewData& aViewData );
 
     /** 
      * from MXnViewObserver
      */
-    void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ ){};
+    void NotifyViewRemovalL( const CXnViewData& /*aViewData*/ ){};
 
     /** 
      * from MXnViewObserver

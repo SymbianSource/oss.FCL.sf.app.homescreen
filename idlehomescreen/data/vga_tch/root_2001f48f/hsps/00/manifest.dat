@@ -23,10 +23,7 @@
 
     <!-- configuration -->
     <filexml>rootconfiguration.xml</filexml>
-    
-    <!-- Name of the localization files -->
-    <!--filedtd>rootconfiguration.dtd</filedtd-->
-    
+
     <!-- Locale independent/common resources -->
     <fileresource>root.o0000</fileresource>
 

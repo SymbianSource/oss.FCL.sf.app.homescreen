@@ -1,0 +1,60 @@
+/*
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Editor for carousel widget.
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/appstripe/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/appstripe/hsps/widgetconfiguration.xml
+../xuikon/00/appstripe.dat /epoc32/data/Z/resource/homescreen/appstripe/xuikon/appstripe.dat
+../xuikon/00/appstripe.css /epoc32/data/Z/resource/homescreen/appstripe/xuikon/appstripe.css
+../xuikon/00/appstripe.xml /epoc32/data/Z/resource/homescreen/appstripe/xuikon/appstripe.xml
+//../xuikon/00/appstripe.dtd /epoc32/data/Z/resource/homescreen/appstripe/xuikon/appstripe.dtd
+
+// Support for S60 builds
+//***********************
+// export iby files
+../rom/appstripe_resources.iby LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(appstripe_resources.iby)
+../rom/appstripe_customer.iby CUSTOMER_MW_LAYER_IBY_EXPORT_PATH(appstripe_customer.iby)
+../rom/appstripe_variant.iby CUSTOMER_MW_LAYER_IBY_EXPORT_PATH(appstripe_variant.iby)
+../rom/appstripe.iby CORE_MW_LAYER_IBY_EXPORT_PATH(appstripe.iby)
+
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME appstripe
+OPTION DTD_TYPE widget
+END
+
+PRJ_MMPFILES
+
+// build icons
+
+// build application
+
+PRJ_TESTMMPFILES
+
+//#endif
+
+//  End of File  

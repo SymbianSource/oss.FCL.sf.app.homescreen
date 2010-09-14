@@ -88,6 +88,14 @@ _LIT8( KPluginNodeName, "plugin" );
 _LIT8( KWidgetNodeName, "widget" );
 _LIT8( KSliderNodeName, "slider" );
 _LIT8( KClockNodeName, "clock" );
+_LIT8( KClockAnalog, "analog" );
+_LIT8( KClockDigital, "digital" );
+_LIT8( KClockFace, "face" );
+_LIT8( KClockFace12, "face12" );
+_LIT8( KClockFace24, "face24" );
+_LIT8( KClockDate, "date" );
+_LIT8( KClockAmpm, "ampm" );
+_LIT8( KClockDay, "day" );
 _LIT8( KSoftkeyNodeName,"softkey" );
 _LIT8( KConditionalTrigger,"conditional" );
 _LIT8( KCondtionalOn, "true" );
@@ -511,6 +519,14 @@ static CXnNode* ConstructKnownBuiltinNodeL( CXnDomNode& aSource )
               name == KNewstickerNodeName ||
               name == KSliderNodeName ||
               name == KClockNodeName ||
+              name == KClockAnalog ||
+              name == KClockDigital ||
+              name == KClockFace ||
+              name == KClockFace12 ||
+              name == KClockFace24 ||
+              name == KClockDate ||
+              name == KClockAmpm ||
+              name == KClockDay ||
               name == KStylusPopupNodeName ||
               name == KPopUpNodeName ||
               name == KWidgetExtensionNodeName ||

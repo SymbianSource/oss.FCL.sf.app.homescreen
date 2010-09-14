@@ -44,6 +44,7 @@ LIBRARY         euser.lib
 LIBRARY         ecom.lib
 LIBRARY         apgrfx.lib
 LIBRARY         cone.lib
+LIBRARY         apparc.lib
 
 DEBUGLIBRARY    flogger.lib
 

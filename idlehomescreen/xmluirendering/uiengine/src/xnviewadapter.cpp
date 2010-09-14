@@ -557,7 +557,7 @@ void CXnViewAdapter::DoDeactivate()
 // -----------------------------------------------------------------------------
 //
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
-    TBool aEnterEditState, TUid aEffect )
+    TBool aEnterEditState, TUid aEffect, TBool aUpdateBg  )
     {
     // Returns if the container remains the same and activation is not forced
     // Otherwise the old container is deactivated and the new is activated
@@ -574,13 +574,15 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         }
  
     const CXnViewData& active( iAppUiAdapter.ViewManager().ActiveViewData() );
-    
+  
+    TBool started = EFalse;
     CXnEffectManager* mgr( iAppUiAdapter.EffectManager() );
-    
     CleanupStack::PushL( TCleanupItem( CleanupEffect, mgr ) );
     
-    TBool started(
-        mgr->BeginActivateViewEffect( active, aContainer, aEffect ) );
+    if( aEffect != TUid::Null() )
+        {    
+        started = mgr->BeginActivateViewEffect( active, aContainer, aEffect );
+        }    
     
     DeactivateContainerL( EFalse );
         
@@ -634,14 +636,20 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
     adapter->MakeVisible( ETrue );
            
     iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
-    
-    iBgManager->ChangeWallpaper( active, aContainer, !started );
+
+    if( aUpdateBg )
+        {
+        iBgManager->ChangeWallpaper( active, aContainer, !started );
+        }
     
     iAppUiAdapter.UiEngine().RenderUIL();
     
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC
-    
-    mgr->EndActivateViewEffect( active, aContainer, aEffect );
+
+    if( aEffect != TUid::Null() )
+        {
+        mgr->EndActivateViewEffect( active, aContainer, aEffect );
+        }
     
     CleanupStack::PopAndDestroy(); // cleanupitem
     
@@ -679,6 +687,8 @@ void CXnViewAdapter::ActivateDefaultContainerL( TBool aEnterEditState )
         // Deactivate container even though it hasn't changed to close all 
         // popups and other windows
         ActivateContainerL( *viewData, aEnterEditState );
+        
+        CloseAllPopupsL();
         }
     }
 
@@ -1023,6 +1033,8 @@ void CXnViewAdapter::CloseAllPopupsL()
         }
         
     CleanupStack::PopAndDestroy( &popups );
+    
+    iEventDispatcher->SetTextEditorActive( NULL, EFalse );
     }
 
 
