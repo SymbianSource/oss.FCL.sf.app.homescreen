@@ -182,6 +182,7 @@ namespace XnPropertyNames
         _LIT8( KDate, "date" );
         _LIT8( KDay, "day" );
         _LIT8( KAmpm, "ampm" );
+        _LIT8( KFaceAdjustmentValue, "face-adjustment-value" );
         }
     namespace volumecontrol
         {

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration name="Homescreen 3" version="1" xmlns="http://www.s60.com/xml/confml/2" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <feature name="VGA Homescreen 3 widgets" ref="VGA_HomescreenPlugins_3">
+    <setting ref="SupportQhd" name="Qhd Support" type="boolean">
+      <desc>The Qhd touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
+    <setting ref="SupportVga" name="Vga Support" type="boolean">
+      <desc>The Vga touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
     <setting name="Max Widgets" ref="MaxWidgets" type="string">
       <desc>Maximum widget amount in Homescreen 3 page. Customizable</desc>
     </setting>
@@ -25,11 +31,11 @@
   <setting name="Widgets" ref="Plugins" type="sequence">
       <desc>Widgets in the Homescreen 3</desc>
     <setting name="Widget" ref="Uid" type="string">
-      <desc>Widget name</desc>
-      <option name="Empty" value="0x2001f47f" />
+      <desc>Widget name</desc>  
+      <option name="Empty" value="0x2001F47F" />    
       <option name="ClockDate" value="0x200286E6" />
       <option name="Desktop" value="0x20018EEE" />
-      <option name="Profilemode" value="0x200286e7" />
+      <option name="Profilemode" value="0x200286E7" />
       <option name="wrtplugin_1" value="0x20022FD4"/>
       <option name="wrtplugin_2" value="0x20022FD5"/>
       <option name="wrtplugin_3" value="0x20022FD6"/>
@@ -237,6 +243,8 @@
   </feature>
 <data>
     <VGA_HomescreenPlugins_3>
+      <SupportQhd>true</SupportQhd>
+      <SupportVga>true</SupportVga>
       <MaxWidgets>6</MaxWidgets>
     <UseEmptyWidgets>true</UseEmptyWidgets>
     <ItemIdEmptyWidgets>hs_vga_tch_view</ItemIdEmptyWidgets>
@@ -245,7 +253,85 @@
     <WallpaperPropertyName>path</WallpaperPropertyName>
     <BackGroundPath />
     <Plugins extensionPolicy="replace">
-        <Uid>0x2001f47f</Uid>
+        <Uid>0x200286e6</Uid>
+      <BundleIdentifier>0</BundleIdentifier>
+      <TemplateIdentifier>0</TemplateIdentifier>
+      <LockingStatus>permanent</LockingStatus>
+      <ShortcutWidget>0</ShortcutWidget>
+      <Customize1Shortcut />
+      <Shortcut1Type />
+      <Shortcut1Uid />
+      <Shortcut1View />
+      <Shortcut1Param />
+      <Customize2Shortcut />
+      <Shortcut2Type />
+      <Shortcut2Uid />
+      <Shortcut2View />
+      <Shortcut2Param />
+      <Customize3Shortcut />
+      <Shortcut3Type />
+      <Shortcut3Uid />
+      <Shortcut3View />
+      <Shortcut3Param />
+      <Customize4Shortcut />
+      <Shortcut4Type />
+      <Shortcut4Uid />
+      <Shortcut4View />
+      <Shortcut4Param />
+      <Shortcut1ItemId>first</Shortcut1ItemId>
+      <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+      <Shortcut2ItemId>second</Shortcut2ItemId>
+      <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+      <Shortcut3ItemId>third</Shortcut3ItemId>
+      <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+      <Shortcut4ItemId>fourth</Shortcut4ItemId>
+      <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+      <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+      <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+      <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+      <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+    <Plugins>
+        <Uid>0x200286e7</Uid>
+      <BundleIdentifier>0</BundleIdentifier>
+      <TemplateIdentifier>0</TemplateIdentifier>
+      <LockingStatus>permanent</LockingStatus>
+      <ShortcutWidget>0</ShortcutWidget>
+      <Customize1Shortcut>0</Customize1Shortcut>
+      <Shortcut1Type />
+      <Shortcut1Uid />
+      <Shortcut1View />
+      <Shortcut1Param />
+      <Customize2Shortcut />
+      <Shortcut2Type />
+      <Shortcut2Uid />
+      <Shortcut2View />
+      <Shortcut2Param />
+      <Customize3Shortcut />
+      <Shortcut3Type />
+      <Shortcut3Uid />
+      <Shortcut3View />
+      <Shortcut3Param />
+      <Customize4Shortcut />
+      <Shortcut4Type />
+      <Shortcut4Uid />
+      <Shortcut4View />
+      <Shortcut4Param />
+      <Shortcut1ItemId>first</Shortcut1ItemId>
+      <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
+      <Shortcut2ItemId>second</Shortcut2ItemId>
+      <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
+      <Shortcut3ItemId>third</Shortcut3ItemId>
+      <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
+      <Shortcut4ItemId>fourth</Shortcut4ItemId>
+      <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
+      <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
+      <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
+      <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
+      <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
+      </Plugins>
+    <Plugins>
+        <Uid>0x200255b6</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
       <LockingStatus>permanent</LockingStatus>
@@ -287,7 +373,7 @@
         <Uid>0x2001f47f</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
+      <LockingStatus>none</LockingStatus>
       <ShortcutWidget>0</ShortcutWidget>
       <Customize1Shortcut>0</Customize1Shortcut>
       <Shortcut1Type />
@@ -326,7 +412,7 @@
         <Uid>0x2001f47f</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
+      <LockingStatus>none</LockingStatus>
       <ShortcutWidget>0</ShortcutWidget>
       <Customize1Shortcut>0</Customize1Shortcut>
       <Shortcut1Type />
@@ -365,85 +451,7 @@
         <Uid>0x2001f47f</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
-      <ShortcutWidget>0</ShortcutWidget>
-      <Customize1Shortcut>0</Customize1Shortcut>
-      <Shortcut1Type />
-      <Shortcut1Uid />
-      <Shortcut1View />
-      <Shortcut1Param />
-      <Customize2Shortcut />
-      <Shortcut2Type />
-      <Shortcut2Uid />
-      <Shortcut2View />
-      <Shortcut2Param />
-      <Customize3Shortcut />
-      <Shortcut3Type />
-      <Shortcut3Uid />
-      <Shortcut3View />
-      <Shortcut3Param />
-      <Customize4Shortcut />
-      <Shortcut4Type />
-      <Shortcut4Uid />
-      <Shortcut4View />
-      <Shortcut4Param />
-      <Shortcut1ItemId>first</Shortcut1ItemId>
-      <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
-      <Shortcut2ItemId>second</Shortcut2ItemId>
-      <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
-      <Shortcut3ItemId>third</Shortcut3ItemId>
-      <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
-      <Shortcut4ItemId>fourth</Shortcut4ItemId>
-      <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
-      <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
-      <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
-      <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
-      <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
-      </Plugins>
-    <Plugins>
-        <Uid>0x2001f47f</Uid>
-      <BundleIdentifier>0</BundleIdentifier>
-      <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
-      <ShortcutWidget>0</ShortcutWidget>
-      <Customize1Shortcut>0</Customize1Shortcut>
-      <Shortcut1Type />
-      <Shortcut1Uid />
-      <Shortcut1View />
-      <Shortcut1Param />
-      <Customize2Shortcut />
-      <Shortcut2Type />
-      <Shortcut2Uid />
-      <Shortcut2View />
-      <Shortcut2Param />
-      <Customize3Shortcut />
-      <Shortcut3Type />
-      <Shortcut3Uid />
-      <Shortcut3View />
-      <Shortcut3Param />
-      <Customize4Shortcut />
-      <Shortcut4Type />
-      <Shortcut4Uid />
-      <Shortcut4View />
-      <Shortcut4Param />
-      <Shortcut1ItemId>first</Shortcut1ItemId>
-      <Shortcut1ItemName>Shortcut1</Shortcut1ItemName>
-      <Shortcut2ItemId>second</Shortcut2ItemId>
-      <Shortcut2ItemName>Shortcut2</Shortcut2ItemName>
-      <Shortcut3ItemId>third</Shortcut3ItemId>
-      <Shortcut3ItemName>Shortcut3</Shortcut3ItemName>
-      <Shortcut4ItemId>fourth</Shortcut4ItemId>
-      <Shortcut4ItemName>Shortcut4</Shortcut4ItemName>
-      <ShortcutPropertyNameType>type</ShortcutPropertyNameType>
-      <ShortcutPropertyNameUid>uid</ShortcutPropertyNameUid>
-      <ShortcutPropertyNameView>view</ShortcutPropertyNameView>
-      <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
-      </Plugins>
-    <Plugins>
-        <Uid>0x2001f47f</Uid>
-      <BundleIdentifier>0</BundleIdentifier>
-      <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
+      <LockingStatus>none</LockingStatus>
       <ShortcutWidget>0</ShortcutWidget>
       <Customize1Shortcut>0</Customize1Shortcut>
       <Shortcut1Type />

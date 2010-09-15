@@ -277,4 +277,5 @@ EXPORTS
 	_ZTVN21CXnControlAdapterImpl13TIconProviderE @ 276 NONAME
 	_ZThn52_N17CXnControlAdapter19HandleControlEventLEP11CCoeControlN19MCoeControlObserver9TCoeEventE @ 277 NONAME
 	_ZThn60_N17CXnControlAdapter19HandleLongTapEventLERK6TPointS2_ @ 278 NONAME
+	_ZN8CXnUtils18ResolveSkinItemIDLERK7TDesC16R11TAknsItemID @ 279 NONAME
 

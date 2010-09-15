@@ -624,4 +624,60 @@ void CXnViewData::DestroyPublishers( TInt aReason )
     __PRINTS( "*** CXnViewData::DestroyPublishers - done" );
     }
 
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+TXnDirtyRegion* CXnViewData::DirtyRegionL( CXnNode& aNode )
+    {
+    // First make sure that the given node is "window owning"
+    CCoeControl* control( aNode.Control() );  
+    if( !control || !control->OwnsWindow() )
+        {
+        return NULL;
+        }
+
+    if( iDirtyRegion && iDirtyRegion->iControl == control )
+        {
+        return iDirtyRegion;
+        }
+
+    // in case of widget extension / popup, a widget may own window
+    for( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        TXnDirtyRegion* region( iPluginsData[i]->DirtyRegion() );
+        if( region && region->iControl == control )
+            {
+            return region;
+            }
+        }
+
+    // Region not found, create  a new one
+    CXnPluginData* pluginData( Plugin( &aNode ) );
+    if( pluginData )
+        {
+        return pluginData->CreateDirtyRegionL( aNode, *control );
+        }    
+
+    return NULL;
+    }
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void CXnViewData::GetDirtyRegions( RPointerArray<TXnDirtyRegion>& aList )
+    {
+    if( iDirtyRegion )
+        {
+        aList.Append( iDirtyRegion );
+        }
+    for( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        TXnDirtyRegion* region( iPluginsData[i]->DirtyRegion() );
+        if( region )
+            {
+            aList.Append( region );
+            }
+        }
+    }
+
 // End of file

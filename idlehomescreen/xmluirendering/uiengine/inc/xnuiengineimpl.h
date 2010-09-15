@@ -41,6 +41,7 @@ class CXnEditMode;
 class CXnViewManager;
 class CXnViewData;
 class CXnPluginData;
+class TXnDirtyRegion;
 
 // Constants
 namespace XnLayoutPhase
@@ -59,18 +60,6 @@ namespace XnLayoutControl
     const TInt EViewDirty = 0x10;
     const TInt EEffectStarted = 0x20;    
     }
-	
-NONSHARABLE_STRUCT( TXnDirtyRegion )
-    {
-    RRegion         iRegion;      
-    CCoeControl*    iControl; // Not own.
-    
-    ~TXnDirtyRegion()
-        {
-        iRegion.Close();
-        }
-    };
-
 
 NONSHARABLE_STRUCT( TXnSplitScreenState )
     {
@@ -147,18 +136,6 @@ public:
     void LayoutUIL( CXnNode* aNode = NULL );
 
     /**
-     * Lays out the UI
-     * 
-     * This generates full re-layout starting from the given node, 
-     * regardless of the current dirty set or the active view.
-     * I.e. this can be used to layout an inactive view.
-     * 
-     * @since Series 60 5.2
-     * @param aNode Starting point of the layout
-     */
-    void LayoutFromNodeL( CXnNode& aNode );
-
-    /**
      * Creates UI implementations for the UI, adjusts control coordinates 
      * according to the layout
      * 
@@ -166,19 +143,6 @@ public:
      * @param aNode Starting point
      */
     void RenderUIL( CXnNode* aNode = NULL );
-
-    /**
-     * Creates UI implementations for the UI, adjusts control coordinates 
-     * according to the layout
-     * 
-     * This generates full re-layout starting from the given node, 
-     * regardless of the current dirty set or the active view.
-     * I.e. this can be used to layout an inactive view.
-     * 
-     * @since Series 60 5.2
-     * @param aNode Starting point
-     */
-    void RenderFromNodeL( CXnNode& aNode );
     
     /**
      * Gets the root node of the UI
@@ -325,6 +289,7 @@ public:
      * @since Series 60 3.1
      */
     void RefreshMenuL();
+    void RefreshMenuL( TXnDirtyRegion* aDirtyRegion );
 
     /**
      * Returns view manager
@@ -555,7 +520,7 @@ public:
 private:
     
     IMPORT_C static void EnableRenderUi( TAny* aAny );
-        
+
 private:
     // constructors
 
@@ -566,51 +531,55 @@ private:
 
 private:
     // new functions
-    
+
+    /**
+     * Lays out the UI
+     */
+    void LayoutL( TXnDirtyRegion& aRegion );
+    void RenderL( TXnDirtyRegion& aRegion );
+
     /**
      * Prepares to the layout algorithm run
      * 
      * @since Series 60 3.2
      */
-    void PrepareRunLayoutL();
-    void PrepareRunLayoutL( CXnNode& aNode );
+    void PrepareRunLayoutL( TXnDirtyRegion& aDirtyRegion );
 
     /**
      * Runs the layout algorithm        
      * 
      * @since Series 60 3.2
      */
-    TInt RunLayoutL( CXnNode* aNode );
-    TInt RunLayoutFromNodeL( CXnNode& aNode );
+    TInt RunLayoutL( TXnDirtyRegion& aDirtyRegion, CXnNode& aNode );
 
     /**
      * Checks if layout is currently disabled
      * 
      * @since Series 60 3.2
      */
-    TBool IsLayoutDisabled();
+    TBool IsLayoutDisabled( TXnDirtyRegion& aDirtyRegion );
 
-    void AddToRedrawListL( CXnNode* aNode, TRect aRect =
-        TRect::EUninitialized );
+    void AddToRedrawListL( TXnDirtyRegion& aRegion, CXnNode& aNode, 
+        TRect aRect = TRect::EUninitialized );
 
-    void AddToDirtyListL( CXnNode* aNode );
+    void AddToDirtyListL( TXnDirtyRegion& aRegion, CXnNode& aNode );
 
     /**
      * Finds a node where to start layout
      *
      * @since Series 60 5.0
      */
-    CXnNode* StartLayoutFromL();
+    CXnNode* StartLayoutFromL( TXnDirtyRegion& aDirtyRegion );
 
     void ForceRenderUIL( TBool aLayoutOnly = EFalse );
 
-    CCoeControl* WindowOwningControl( CXnNode& aNode );
+    CXnNode* WindowOwningNode( CXnNode& aNode );
     
     TXnDirtyRegion* FindDirtyRegionL( CXnNode& aNode );
 
-    void AddRedrawRectL( TRect aRect, CXnNode& aNode );
-
     void ReportScreenDeviceChangeL();
+
+    void EnableRenderUiL();
     
     /**
       * Handle partial touch input
@@ -752,18 +721,12 @@ private:
     CXnKeyEventDispatcher* iKeyEventDispatcher;
     /** ControlAdapters, not owned */
     const RPointerArray< CXnControlAdapter >* iControlAdapterList;
-    /** Region pending redraw */
-    RPointerArray<TXnDirtyRegion> iRedrawRegions;
-    /** List of currently dirty nodes */
-    RPointerArray< CXnNode > iDirtyList;
     /** Array of nodes which can be focused */
     RPointerArray< CXnNode > iFocusCandidateList;
     /** current view */
     CXnNode* iCurrentView;
     /** current view control adapter, not owned */
     CXnControlAdapter* iCurrentViewControlAdapter;
-    /** Controls layouting */
-    TInt iLayoutControl;
     /** Layout algo phase */
     TInt iLayoutPhase;
     /** Unit in pixels (width). */

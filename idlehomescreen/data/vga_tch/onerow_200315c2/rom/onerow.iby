@@ -1,0 +1,29 @@
+/*
+* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+* Onerow widget HSPS-plugin IBY file. 
+*
+*/
+
+#ifndef __ONEROW_200315C2_IBY__
+#define __ONEROW_200315C2_IBY__
+
+#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+
+// Enabled by DTD-localization tools
+data=ZPRIVATE\200159c0\install\onerow_200315c2\hsps\00\manifest.dat \private\200159c0\install\onerow_200315c2\hsps\00\manifest.dat
+
+#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+
+#endif // __ONEROW_200315C2_IBY__

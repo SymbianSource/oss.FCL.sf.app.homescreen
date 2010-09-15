@@ -37,6 +37,7 @@
 #include "wmwidgetdata.h"
 #include "wminstaller.h"
 #include "wmlistbox.h"
+#include "wmconfiguration.h"
 
 const TInt KExecuteCommandDelay( 50000 ); // 50ms
 const TInt KMaxCmdExecutionCount( 6 );
@@ -77,6 +78,7 @@ CWmPlugin::~CWmPlugin()
     delete iEffectManager;
     delete iPostponedContent;
     delete iWmInstaller;
+    delete iConfiguration;
     }
 
 // ---------------------------------------------------------
@@ -140,10 +142,15 @@ void CWmPlugin::Activate()
                 {
                 menuBar->StopDisplayingMenuBar();
                 }
-    
+
+            // load configuration again, there might be change         
+            delete iConfiguration;
+            iConfiguration = NULL;
+            
             TRAP_IGNORE( 
+                iConfiguration = CWmConfiguration::NewL( ResourceLoader() );    
                 iEffectManager->BeginFullscreenEffectL( 
-                    KAppStartEffectStyle );
+                    KAppStartEffectStyle );                
                 iViewAppUi->ActivateLocalViewL(
                     TUid::Uid( EWmMainContainerViewId ) );
                 );
@@ -284,6 +291,10 @@ void CWmPlugin::MainViewDeactivated()
                 TCallBack( ExecuteCommand, this ) );
             }
         }
+    
+    // delete config
+    delete iConfiguration;
+    iConfiguration = NULL;
     }
 
 // ---------------------------------------------------------
@@ -445,6 +456,15 @@ void CWmPlugin::NotifyWidgetListChanged()
 CWmInstaller& CWmPlugin::WmInstaller()
     {
     return *iWmInstaller;
+    }
+
+// ----------------------------------------------------
+// CWmPlugin::Configuration
+// ----------------------------------------------------
+//
+CWmConfiguration& CWmPlugin::Configuration()
+    {
+    return *iConfiguration;
     }
 
 // ---------------------------------------------------------

@@ -35,12 +35,9 @@ const TInt KWidgetHeight = 90;
 // UI component ID's
 enum TWmUiControlIds
     {
-    EPortalOne = 0x1,
-    EPortalTwo,
-    ELastPortal,
-    EWidgetsList,
+    EWidgetsList = 0x1,
     EFindBox,
-    EMaximumWidgets = 0xC8
+    ELastCtrl
     };
 
 #endif //WMCOMMON_H

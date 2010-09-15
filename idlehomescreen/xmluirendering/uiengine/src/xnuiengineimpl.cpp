@@ -7972,7 +7972,7 @@ static CXnNode* BuildScreenDeviceChangeTriggerNodeLC( CXnUiEngine& aUiEngine )
 // -----------------------------------------------------------------------------
 //
 static void ReportScreenDeviceChangedL( const CXnPluginData& aPluginData )
-    {    
+    {   
     CXnNode* node( NULL );
     
     if ( aPluginData.Node() )
@@ -8211,13 +8211,6 @@ CXnUiEngineImpl::~CXnUiEngineImpl()
     delete iEditMode;
 
     iFocusCandidateList.Reset();
-
-    if ( iRedrawRegions.Count() )
-        {
-        iRedrawRegions.ResetAndDestroy();
-        }
-
-    iDirtyList.Reset();
     }
 
 // -----------------------------------------------------------------------------
@@ -8233,98 +8226,124 @@ CXnAppUiAdapter& CXnUiEngineImpl::AppUiAdapter() const
 // CXnUiEngineImpl::LayoutUIL()
 // -----------------------------------------------------------------------------
 //
-void CXnUiEngineImpl::LayoutUIL( CXnNode* /*aNode*/ )
+void CXnUiEngineImpl::LayoutUIL( CXnNode* aNode )
     {
-    if ( IsLayoutDisabled() )
+    if( aNode )
+        {
+        TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *aNode );
+        if( dirtyRegion )
+            {
+            LayoutL( *dirtyRegion );
+            }
+        }
+    else
+        {
+        CXnViewData* viewData = iViewManager.ActiveAppData().ViewData( *iCurrentView );
+        if( viewData )
+            {
+            RPointerArray<TXnDirtyRegion> arr;
+            CleanupClosePushL( arr );
+            viewData->GetDirtyRegions( arr );
+            for( TInt i = 0; i < arr.Count(); i++ )
+                {
+                LayoutL( *arr[i] );            
+                }
+            CleanupStack::PopAndDestroy( &arr );
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::LayoutUIL()
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::LayoutL( TXnDirtyRegion& aRegion )
+    {
+    if ( IsLayoutDisabled( aRegion ) )
         {     
-        iLayoutControl |= XnLayoutControl::ELayoutUI;
+        aRegion.iLayoutControl |= XnLayoutControl::ELayoutUI;
         return;
         }
 
-    iLayoutControl &= ~XnLayoutControl::ELayoutUI;
+    aRegion.iLayoutControl &= ~XnLayoutControl::ELayoutUI;
 
-    if ( iDirtyList.Count() == 0 )
+    if ( aRegion.iDirtyList.Count() == 0 )
         {
         // Nothing to do, layout is up-to-date
         return;
         }
 
     DisableRenderUiLC();
-    CXnNode* candidate( StartLayoutFromL() );
-    PrepareRunLayoutL();
-    iDirtyList.Reset();
+    
+    CXnNode* candidate( StartLayoutFromL( aRegion ) );
+    if( !candidate )
+        {
+        return;
+        }
+    
+    PrepareRunLayoutL( aRegion );
+    aRegion.iDirtyList.Reset();
 
     // Run layout until it is fully calculated
     do
         {
-        iLayoutPhase = RunLayoutL( candidate );
+        iLayoutPhase = RunLayoutL( aRegion, *candidate );
         }
     while ( iLayoutPhase != XnLayoutPhase::ENone );
 
-    CXnNode* focused( FocusedNode() );
-
-    if ( focused && focused->IsDropped() )
-        {
-        // The currently focused node is dropped, run losevisualization
-        CXnNode* loseVisualisation =
-            BuildTriggerNodeLC( *iUiEngine,
-                XnPropertyNames::action::trigger::name::KLoseVisualisation );
-
-        focused->ReportXuikonEventL( *loseVisualisation );
-        CleanupStack::PopAndDestroy( loseVisualisation );
-
-        if ( FocusedNode() == focused )
+    // Run these only if the current view is being layouted
+    if( iCurrentView == aRegion.iRootNode )
+        {  
+        CXnNode* focused( FocusedNode() );
+    
+        if ( focused && focused->IsDropped() )
             {
-            // Remove focus as losevisualization trigger didn't
-            // change focus from dropped node to another one
-            SetFocusedNodeL( NULL );
+            // The currently focused node is dropped, run losevisualization
+            CXnNode* loseVisualisation =
+                BuildTriggerNodeLC( *iUiEngine,
+                    XnPropertyNames::action::trigger::name::KLoseVisualisation );
+    
+            focused->ReportXuikonEventL( *loseVisualisation );
+            CleanupStack::PopAndDestroy( loseVisualisation );
+    
+            if ( FocusedNode() == focused )
+                {
+                // Remove focus as losevisualization trigger didn't
+                // change focus from dropped node to another one
+                SetFocusedNodeL( NULL );
+                }
             }
+    
+        if ( !FocusedNode() && iAppUiAdapter.FocusShown() )
+            {
+            // No focus, try if some of the focus candidates can be focused
+            RootNode()->RunFocusChangeL( iFocusCandidateList );
+            }
+            
+        iFocusCandidateList.Reset();
+    
+        iAppUiAdapter.EffectManager()->UiLayouted();
         }
-
-    if ( !FocusedNode() && iAppUiAdapter.FocusShown() )
-        {
-        // No focus, try if some of the focus candidates can be focused
-        RootNode()->RunFocusChangeL( iFocusCandidateList );
-        }
-        
-    iFocusCandidateList.Reset();
-
-    iAppUiAdapter.EffectManager()->UiLayouted();
     
     // Layout is now recalculated
     CleanupStack::PopAndDestroy(); // anonymous
     }
 
-// -----------------------------------------------------------------------------
-// CXnUiEngineImpl::LayoutFromNodeL()
-// -----------------------------------------------------------------------------
-//
-void CXnUiEngineImpl::LayoutFromNodeL( CXnNode& aNode )
-    {
-    PrepareRunLayoutL( aNode );
-
-    // Run layout until it is fully calculated
-    do
-        {
-        iLayoutPhase = RunLayoutFromNodeL( aNode );
-        }
-    while ( iLayoutPhase != XnLayoutPhase::ENone );
-    }
 
 // -----------------------------------------------------------------------------
 // PrepareRunLayoutL()
 // Set dropped flags of all nodes in the tree to ENone.
 // -----------------------------------------------------------------------------
 //
-void CXnUiEngineImpl::PrepareRunLayoutL()
+void CXnUiEngineImpl::PrepareRunLayoutL( TXnDirtyRegion& aDirtyRegion )
     {
     if ( iLayoutPhase == XnLayoutPhase::ENone )
         {
         iLayoutPhase = XnLayoutPhase::ELayout;
 
-        for ( TInt i = 0; i < iDirtyList.Count(); i++ )
+        for ( TInt i = 0; i < aDirtyRegion.iDirtyList.Count(); i++ )
             {
-            CXnNode* dirty( iDirtyList[i] );
+            CXnNode* dirty( aDirtyRegion.iDirtyList[i] );
 
             // Clear dropped flags recursively
             SetNodeDroppedL( *dirty, XnNodeLayout::ENone );
@@ -8339,135 +8358,10 @@ void CXnUiEngineImpl::PrepareRunLayoutL()
     }
 
 // -----------------------------------------------------------------------------
-// PrepareRunLayoutL()
-// Set dropped flags of all nodes in the tree to ENone.
-// -----------------------------------------------------------------------------
-//
-void CXnUiEngineImpl::PrepareRunLayoutL( CXnNode& aNode )
-    {
-    if ( iLayoutPhase == XnLayoutPhase::ENone )
-        {
-        iLayoutPhase = XnLayoutPhase::ELayout;
-
-        CXnNode* dirty( &aNode );
-        dirty->ClearRenderedAndLaidOut();
-        
-        // Clear dropped flags recursively
-        SetNodeDroppedL( *dirty, XnNodeLayout::ENone );
-
-        if ( SetAdaptivesL( *dirty ) )
-            {
-            // Adaptive node causes measure phase
-            iLayoutPhase = XnLayoutPhase::EMeasure;
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // CXnUiEngineImpl::RunLayoutL()
 // -----------------------------------------------------------------------------
 //
-TInt CXnUiEngineImpl::RunLayoutL( CXnNode* aNode )
-    {
-    TRect clientRect( ClientRect() );
-    // Move it to 0, 0
-    clientRect.Move( -clientRect.iTl.iX, -clientRect.iTl.iY );
-
-    RPointerArray< CXnNode > laidOutList;
-    CleanupClosePushL( laidOutList );
-
-    if ( IsNodeDisplayedL( *aNode ) )
-        {
-        if ( aNode->ViewNodeImpl() && !aNode ->IsLaidOut() )
-            {
-            aNode->SetMarginRect( clientRect );
-            aNode->SetBorderRect( clientRect );
-            aNode->SetNormalFlowBorderRect( clientRect );
-            aNode->SetPaddingRect( clientRect );
-            aNode->SetRect( clientRect );
-            }
-
-        // Put areas to place
-        PlaceAreasL( *aNode, laidOutList, iLayoutPhase,
-            *iCurrentGraphicsDevice, iHorizontalUnitInPixels,
-            iVerticalUnitInPixels );
-        }
-
-    TInt nextPhase;
-
-    switch ( iLayoutPhase )
-        {
-        case XnLayoutPhase::EMeasure:
-            nextPhase = XnLayoutPhase::ELayout;
-            break;
-        case XnLayoutPhase::ELayout:
-            // Layout is now calculated
-            iCurrentView->SetLaidOutL();
-            iLayoutControl &= ~XnLayoutControl::EViewDirty;
-            // Check nodes which dimensions are changed
-            for ( TInt i = 0; i < laidOutList.Count(); i++ )
-                {
-                CXnNode* node( laidOutList[i] );
-                if( IsSrollableBox( *node ) && node->ScrollableControl() )
-                    {
-                    node->ScrollableControl()->LayoutChangedL();
-                    }
-                if ( /*IsNodeTooltip( *node ) ||*/ !node->IsLaidOut() )
-                    {
-                    continue;
-                    }
-                CXnControlAdapter* adapter( node->Control() );
-                if ( adapter )
-                    {
-                    TRect rect;
-                    
-                    if ( node->ViewNodeImpl() )
-                        {
-                        rect = ClientRect();
-                        
-                        // Move it to 0, 0
-                        //rect.Move( -rect.iTl.iX, -rect.iTl.iY );                        
-                        }
-                    else
-                        {
-                        rect = node->BorderRect();
-                        }
-                    
-                    if ( adapter->Rect() != rect )
-                        {
-                        AddToRedrawListL( node, rect );
-                        
-                        adapter->SetRect( rect );                        
-
-                        CXnProperty* prop = node->GetPropertyL(
-                            XnPropertyNames::common::KSizeAware );
-                        if ( prop && prop->StringValue() ==
-                             XnPropertyNames::KTrue )
-                            {
-                            CXnNode* sizeChanged =
-                                BuildTriggerNodeLC( *iUiEngine,
-                                XnPropertyNames::action::trigger::name::
-                                KSizeChanged );
-                            node->ReportXuikonEventL( *sizeChanged );
-                            CleanupStack::PopAndDestroy( sizeChanged );
-                            }
-                        }
-                    }
-                }
-            /* flow through */
-        default:
-            nextPhase = XnLayoutPhase::ENone;
-            break;
-        }
-    CleanupStack::PopAndDestroy( &laidOutList );
-    return nextPhase;
-    }
-
-// -----------------------------------------------------------------------------
-// CXnUiEngineImpl::RunLayoutL()
-// -----------------------------------------------------------------------------
-//
-TInt CXnUiEngineImpl::RunLayoutFromNodeL( CXnNode& aNode )
+TInt CXnUiEngineImpl::RunLayoutL( TXnDirtyRegion& aDirtyRegion, CXnNode& aNode )
     {
     TRect clientRect( ClientRect() );
     // Move it to 0, 0
@@ -8502,8 +8396,8 @@ TInt CXnUiEngineImpl::RunLayoutFromNodeL( CXnNode& aNode )
             break;
         case XnLayoutPhase::ELayout:
             // Layout is now calculated
-            aNode.SetLaidOutL();
-
+            aDirtyRegion.iRootNode->SetLaidOutL();
+            aDirtyRegion.iLayoutControl &= ~XnLayoutControl::EViewDirty;
             // Check nodes which dimensions are changed
             for ( TInt i = 0; i < laidOutList.Count(); i++ )
                 {
@@ -8512,7 +8406,7 @@ TInt CXnUiEngineImpl::RunLayoutFromNodeL( CXnNode& aNode )
                     {
                     node->ScrollableControl()->LayoutChangedL();
                     }
-                if ( !node->IsLaidOut() )
+                if ( /*IsNodeTooltip( *node ) ||*/ !node->IsLaidOut() )
                     {
                     continue;
                     }
@@ -8524,14 +8418,33 @@ TInt CXnUiEngineImpl::RunLayoutFromNodeL( CXnNode& aNode )
                     if ( node->ViewNodeImpl() )
                         {
                         rect = ClientRect();
+                        
+                        // Move it to 0, 0
+                        //rect.Move( -rect.iTl.iX, -rect.iTl.iY );                        
                         }
                     else
                         {
                         rect = node->BorderRect();
                         }
+                    
                     if ( adapter->Rect() != rect )
                         {
-                        adapter->SetRect( rect );
+                        AddToRedrawListL( aDirtyRegion, *node, rect );
+                        
+                        adapter->SetRect( rect );                        
+
+                        CXnProperty* prop = node->GetPropertyL(
+                            XnPropertyNames::common::KSizeAware );
+                        if ( prop && prop->StringValue() ==
+                             XnPropertyNames::KTrue )
+                            {
+                            CXnNode* sizeChanged =
+                                BuildTriggerNodeLC( *iUiEngine,
+                                XnPropertyNames::action::trigger::name::
+                                KSizeChanged );
+                            node->ReportXuikonEventL( *sizeChanged );
+                            CleanupStack::PopAndDestroy( sizeChanged );
+                            }
                         }
                     }
                 }
@@ -8548,49 +8461,91 @@ TInt CXnUiEngineImpl::RunLayoutFromNodeL( CXnNode& aNode )
 // CXnUiEngineImpl::RenderUIL()
 // -----------------------------------------------------------------------------
 //
-void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
+void CXnUiEngineImpl::RenderUIL( CXnNode* aNode )
     {
-    if ( IsLayoutDisabled() )
+    if( aNode )
+        {
+        TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *aNode );
+        if( dirtyRegion )
+            {
+            RenderL( *dirtyRegion );
+            }
+        }
+    else
+        {
+        CXnViewData* viewData = iViewManager.ActiveAppData().ViewData( *iCurrentView );
+        if( viewData )
+            {
+            RPointerArray<TXnDirtyRegion> arr;
+            CleanupClosePushL( arr );
+            
+            viewData->GetDirtyRegions( arr );
+            for( TInt i = 0; i < arr.Count(); i++ )
+                {
+                RenderL( *arr[i] );            
+                }
+            CleanupStack::PopAndDestroy( &arr );
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::RenderUIL()
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::RenderL( TXnDirtyRegion& aRegion )
+    {
+    if ( IsLayoutDisabled( aRegion ) )
         {
         // Layout is not up-to-date
-        iLayoutControl |= XnLayoutControl::ERenderUI;
+        aRegion.iLayoutControl |= XnLayoutControl::ERenderUI;
         return;
         }
-    
+
+    TBool belongsToCurrentView( EFalse );
+    if( iCurrentView == aRegion.iRootNode )
+        {
+        belongsToCurrentView = ETrue;
+        }
+        
 #ifdef _XN3_DEBUG_
-    TraceTreeL(iCurrentView );
+    TraceTreeL( aRegion.RootNode );
 #endif                          
 
     __PRINTS("*** CXnUiEngineImpl::RenderUIL ***");
     
-    for( TInt i=0; i<iRedrawRegions.Count(); i++)
-        {
-        CCoeControl* control = iRedrawRegions[i]->iControl;
-        RRegion& redrawRegion = iRedrawRegions[i]->iRegion;
         
-        if( redrawRegion.CheckError() )
-            {                
-            // Mark tree rendered
-            iCurrentView->SetRenderedL();
-            // Error occured during dirty set, redraw whole window
-            control->DrawNow();               
-            
-            __PRINTS("* CXnUiEngineImpl::RenderUIL - redraw region error -> full redraw ***");
-            }                                        
-        else 
+    CCoeControl* control = aRegion.iControl;
+    RRegion& redrawRegion = aRegion.iRegion;
+    
+    if( redrawRegion.CheckError() )
+        {                
+        // Mark tree rendered
+        aRegion.iRootNode->SetRenderedL();
+        // Error occured during dirty set, redraw whole window
+        control->DrawNow();               
+        
+        __PRINTS("* CXnUiEngineImpl::RenderUIL - redraw region error -> full redraw ***");
+        }                                        
+    else 
+        {
+        if( !redrawRegion.IsEmpty() )                                        
             {
-            if( !redrawRegion.IsEmpty() )                                        
-                {
-                // Mark tree rendered
-                iCurrentView->SetRenderedL();
-                                
-                if ( iAppUiAdapter.EffectManager()->ControlEffectActive( control ) )
-                    {
-                    // control effect is ongoing, no need to draw control yet
-                    redrawRegion.Clear();
-                    continue;
-                    }
+            // Mark tree rendered
+            aRegion.iRootNode->SetRenderedL();
                 
+            TBool effectOngoing( EFalse );
+            if ( iAppUiAdapter.EffectManager()->ControlEffectActive( control ) &&
+                 belongsToCurrentView )
+                {
+                // control effect is ongoing, no need to draw control yet,
+                // if current view in question
+                redrawRegion.Clear();
+                effectOngoing = ETrue;
+                }
+            
+            if( !effectOngoing )
+                {
                 TInt count( redrawRegion.Count() );
                 
                 if( count > 2 )
@@ -8609,7 +8564,7 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                         {
                         // Draw every dirty area separately
                         TRect redrawRect( redrawRegion[i] );
-
+    
                         __PRINT( __DBG_FORMAT( "* CXnUiEngineImpl::RenderUIL - redrawing rect iTl.iX: %d, iTl.iY: %d, iBr.iX: %d, iBr.iY: %d" ),          
                                 redrawRect.iTl.iX, redrawRect.iTl.iY, redrawRect.iBr.iX, redrawRect.iBr.iY );                                         
                         
@@ -8617,35 +8572,25 @@ void CXnUiEngineImpl::RenderUIL( CXnNode* /*aNode*/ )
                         }
                     }  
                 }
-            else
-                {
-                __PRINTS("* CXnUiEngineImpl::RenderUIL - nothing to redraw ***");
-                }
-            }  
-        
-        redrawRegion.Clear();  
-        }
-
-    RefreshMenuL();
-
-    iLayoutControl &= ~XnLayoutControl::ERenderUI;
+            }
+        else
+            {
+            __PRINTS("* CXnUiEngineImpl::RenderUIL - nothing to redraw ***");
+            }
+        }  
     
-    iAppUiAdapter.EffectManager()->UiRendered();
+    redrawRegion.Clear();  
+
+    RefreshMenuL( &aRegion );
+
+    aRegion.iLayoutControl &= ~XnLayoutControl::ERenderUI;
+    
+    if( belongsToCurrentView )
+        {
+        iAppUiAdapter.EffectManager()->UiRendered();
+        }
     
     __PRINTS("*** CXnUiEngineImpl::RenderUIL - done ***");
-    }
-
-// -----------------------------------------------------------------------------
-// CXnUiEngineImpl::RenderFromNodeL()
-// -----------------------------------------------------------------------------
-//
-void CXnUiEngineImpl::RenderFromNodeL( CXnNode& aNode )
-    {
-#ifdef _XN3_DEBUG_
-    TraceTreeL( &aNode );
-#endif 
-    CCoeControl* control = WindowOwningControl( aNode );
-    control->DrawNow();                                              
     }
 
 // -----------------------------------------------------------------------------
@@ -8913,10 +8858,6 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
 
     iControlAdapterList = &iViewManager.Controls();
     iCurrentViewControlAdapter = iCurrentView->Control();
-    
-    iDirtyList.Reset();
-
-    iRedrawRegions.ResetAndDestroy();
        
     // Remove previous menubar and stylus popup node
     iMenuNode = NULL;
@@ -8962,7 +8903,12 @@ void CXnUiEngineImpl::NotifyViewActivatedL( const CXnViewData& /*aViewData*/ )
            
     ForceRenderUIL();
            
-    iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
+    TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
+    if( dirtyRegion )
+        {
+        dirtyRegion->iDirtyList.Reset();
+        dirtyRegion->iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -9179,16 +9125,33 @@ CXnNode* CXnUiEngineImpl::ActiveView()
 //
 void CXnUiEngineImpl::RefreshMenuL()
     {
-    if ( IsLayoutDisabled() )
+    RefreshMenuL( NULL );
+    }
+
+// -----------------------------------------------------------------------------
+// CXnUiEngineImpl::RefreshMenuL
+// Refresh current menu
+// -----------------------------------------------------------------------------
+//
+void CXnUiEngineImpl::RefreshMenuL( TXnDirtyRegion* aDirtyRegion )
+    {
+    TXnDirtyRegion* dirtyRegion = aDirtyRegion;
+    if( !dirtyRegion )
+        {
+        dirtyRegion = FindDirtyRegionL( *iCurrentView );
+        }
+    
+    if ( IsLayoutDisabled( *dirtyRegion ) )
         {
         return;
         }
-    
-    if ( iLayoutControl & XnLayoutControl::ERefreshMenu )         
+
+    if ( dirtyRegion && 
+         dirtyRegion->iLayoutControl & XnLayoutControl::ERefreshMenu )         
         {
         if ( iKeyEventDispatcher )
             {
-            iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
+            dirtyRegion->iLayoutControl &= ~XnLayoutControl::ERefreshMenu;
             iKeyEventDispatcher->RefreshMenuL();        
             }               
         }
@@ -9201,45 +9164,79 @@ void CXnUiEngineImpl::RefreshMenuL()
 //
 void CXnUiEngineImpl::AddDirtyNodeL( CXnNode* aNode, TInt aLevel )
     {
-    CXnViewData& data( iViewManager.ActiveViewData() );
+    if ( !aNode )
+        {
+        return;
+        }    
     
-    if ( !aNode || ( aNode != RootNode() && !data.Plugin( aNode->Namespace() ) ) )
+    if ( aNode == RootNode() )
         {
-        // No node, or node doesn't belong to active view namespace
-        return;
-        }
-
-    if ( aNode->Type()->Type() == KMenuBar )
-        {
-        iLayoutControl |= XnLayoutControl::ERefreshMenu;
-        return;
-        }
-
-    if ( iLayoutControl & XnLayoutControl::EViewDirty )
-        {
-        // nothing to do
-        return;
-        }
-
-    if ( aLevel == XnDirtyLevel::ERender )
-        {
-        if( aNode == RootNode() )        
+        // Force relayout and redraw from current view
+        iViewManager.ActiveAppData().PluginData();
+        if ( !iCurrentView )
             {
-            TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
-            if( dirtyRegion )
-                {
-                dirtyRegion->iRegion.Clear();                
-                }
-            aNode = iCurrentView;        
+            iCurrentView = iViewManager.ViewNode();
             }
 
-        // Add to redraw list
-        AddToRedrawListL( aNode );
+        TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
+        if( dirtyRegion )
+            {
+            dirtyRegion->iRegion.Clear();        
+            }
+        else
+            {
+            return;        
+            }
+        
+        dirtyRegion->iDirtyList.Reset();
+        dirtyRegion->iDirtyList.AppendL( iCurrentView );
+
+        dirtyRegion->iLayoutControl |= XnLayoutControl::EViewDirty;
+        iCurrentView->ClearRenderedAndLaidOut();
+
+        // Add to draw list for redraw
+        AddToRedrawListL( *dirtyRegion, *iCurrentView );
         }
     else
         {
-        // Add to dirty list for relayout and redraw
-        AddToDirtyListL( aNode );
+        TXnDirtyRegion* dirtyRegion( FindDirtyRegionL( *aNode ) );
+        if( !dirtyRegion )
+            {
+            return;
+            }
+        
+        if ( aNode->Type()->Type() == KMenuBar )
+            {
+            dirtyRegion->iLayoutControl |= XnLayoutControl::ERefreshMenu;
+            return;
+            }
+    
+        if ( dirtyRegion->iLayoutControl & XnLayoutControl::EViewDirty )
+            {
+            // nothing to do
+            return;
+            }
+    
+        if ( aLevel == XnDirtyLevel::ERender )
+            {
+            if( aNode == RootNode() )        
+                {
+                TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
+                if( dirtyRegion )
+                    {
+                    dirtyRegion->iRegion.Clear();                
+                    }
+                aNode = iCurrentView;        
+                }
+    
+            // Add to redraw list
+            AddToRedrawListL( *dirtyRegion, *aNode );
+            }
+        else
+            {
+            // Add to dirty list for relayout and redraw
+            AddToDirtyListL( *dirtyRegion, *aNode );
+            }    
         }
     }
 
@@ -9597,16 +9594,16 @@ void CXnUiEngineImpl::AddFocusCandidateL( CXnNode* aNode )
 // CXnUiEngineImpl::IsLayoutDisabled
 // -----------------------------------------------------------------------------
 //
-TBool CXnUiEngineImpl::IsLayoutDisabled()
+TBool CXnUiEngineImpl::IsLayoutDisabled( TXnDirtyRegion& aDirtyRegion )
     {
     if ( !iCurrentView )
         {
         return ETrue;
         }
-    
+
     TBool retval( EFalse );
     
-    if ( !( iLayoutControl & XnLayoutControl::EIgnoreState ) )
+    if ( !( aDirtyRegion.iLayoutControl & XnLayoutControl::EIgnoreState ) )
         {
         if ( iDisableCount > 0 )
             {
@@ -9622,9 +9619,10 @@ TBool CXnUiEngineImpl::IsLayoutDisabled()
 // Mark Control's appearance to be redrawn
 // -----------------------------------------------------------------------------    
 //
-void CXnUiEngineImpl::AddToRedrawListL( CXnNode* aNode, TRect aRect )
+void CXnUiEngineImpl::AddToRedrawListL( TXnDirtyRegion& aRegion, 
+    CXnNode& aNode, TRect aRect )
     {   
-    CXnControlAdapter* aAdapter( aNode->Control() );
+    CXnControlAdapter* aAdapter( aNode.Control() );
            
     if( !aAdapter ) 
         {
@@ -9634,7 +9632,8 @@ void CXnUiEngineImpl::AddToRedrawListL( CXnNode* aNode, TRect aRect )
     if( aRect != TRect::EUninitialized )
         {
         // This is the new rect which will be set by layout algo
-        AddRedrawRectL( aRect, *aNode );
+        aRegion.iRegion.AddRect( aRect );
+        aRegion.iRegion.Tidy();
         }
     
     TRect rect( aAdapter->Rect() );
@@ -9644,39 +9643,11 @@ void CXnUiEngineImpl::AddToRedrawListL( CXnNode* aNode, TRect aRect )
         // Don't add uninitialized rect
         return;
         }
+    
+    GrowIfNeeded( &aNode, rect );   
 
-    /*
-    if( aNode->IsStateSet( XnPropertyNames::style::common::KFocus ) )
-        {
-        const TDesC8& name( aNode->DomNode()->Name() );
-
-        if( name == KPlugin )
-            {
-            rect.Grow( KFocusGrowValue, KFocusGrowValue );
-            }
-        else
-            {
-            TRect marginRect( aNode->MarginRect() );
-            
-            CXnNode* parent( aNode->Parent() );
-            
-            for( ; parent; parent = parent->Parent() )
-                {
-                if( parent->DomNode()->Name() == KPlugin )
-                    {
-                    if( parent->Rect() == marginRect )
-                        {
-                        rect.Grow( KFocusGrowValue, KFocusGrowValue );
-                        }
-                    
-                    break;
-                    } 
-                }                
-            }
-        }
-        */
-    GrowIfNeeded(aNode, rect);    
-    AddRedrawRectL( rect, *aNode );                          
+    aRegion.iRegion.AddRect( rect );        
+    aRegion.iRegion.Tidy();
     }
 
 // -----------------------------------------------------------------------------
@@ -9684,122 +9655,94 @@ void CXnUiEngineImpl::AddToRedrawListL( CXnNode* aNode, TRect aRect )
 // Mark node to dirty list for relayout
 // -----------------------------------------------------------------------------
 //
-void CXnUiEngineImpl::AddToDirtyListL( CXnNode* aNode )
+void CXnUiEngineImpl::AddToDirtyListL( TXnDirtyRegion& aRegion, CXnNode& aNode )
     {
-    
-    if ( aNode )
+    CXnNode* nodeToRedrawList( &aNode );
+    CXnNode* nodeToDirtyList( &aNode );
+
+    if ( !IsAbsoluteL( aNode ) && !IsNodeTooltip( aNode ) )
         {
-        CXnNode* nodeToRedrawList( aNode );
-        CXnNode* nodeToDirtyList( aNode );
-    
-        if ( aNode == RootNode() )
+        // Check adaptives in normal flow
+        CXnNode* oldest( NULL );
+        CXnNode* adaptive( &aNode );
+
+        if ( !aNode.IsAdaptive( ETrue ) )
             {
-            // Force relayout and redraw from current view
-            iDirtyList.Reset();
-            if ( !iCurrentView )
-                {
-                iCurrentView = iViewManager.ViewNode();
-                }
-            iDirtyList.AppendL( iCurrentView );
-            TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
-            if( dirtyRegion )
-                {
-                dirtyRegion->iRegion.Clear();        
-                }
-            iLayoutControl |= XnLayoutControl::EViewDirty;
-            nodeToDirtyList = nodeToRedrawList = iCurrentView;
-            nodeToDirtyList->ClearRenderedAndLaidOut();
-    
-            // Add to draw list for redraw
-            AddToRedrawListL( nodeToRedrawList );
+            adaptive = aNode.Parent();
             }
-        else
+
+        for ( ; adaptive && adaptive->IsAdaptive( ETrue );
+            adaptive = adaptive->Parent() )
             {
-            if ( !IsAbsoluteL( *aNode ) && !IsNodeTooltip( *aNode ) )
-                {
-                // Check adaptives in normal flow
-                CXnNode* oldest( NULL );
-                CXnNode* adaptive( aNode );
-    
-                if ( !aNode->IsAdaptive( ETrue ) )
-                    {
-                    adaptive = aNode->Parent();
-                    }
-    
-                for ( ; adaptive && adaptive->IsAdaptive( ETrue );
-                    adaptive = adaptive->Parent() )
-                    {
-                    oldest = adaptive;
-                    }
-    
-                // Now we have found the oldest adaptive node if present
-                if ( oldest )
-                    {
-                    nodeToRedrawList = nodeToDirtyList = adaptive;
-                    }
-                }
-    
-            RPointerArray< CXnNode > dirtyList;
-            CleanupClosePushL( dirtyList );
-            TInt count( iDirtyList.Count() );
-            TBool found;
-    
-            // first, check that aNode's children are not in the dirty array
-            for ( TInt i = 0; i < count; ++i )
-                {
-                found = EFalse;
-                CXnNode* candidate( iDirtyList[i] );
-    
-                for ( CXnNode* node = candidate->Parent(); node && !found;
-                    node = node->Parent() )
-                    {
-                    if ( nodeToDirtyList == node )
-                        {
-                        found = ETrue;
-                        }
-                    }
-    
-                if ( !found )
-                    {
-                    // Put candidate back to list as child is not found
-                    dirtyList.AppendL( candidate );
-                    }
-                }
-    
-            found = EFalse;
-    
-            // second, check that aNode's parent is not in dirty array
-            for ( TInt i = 0; i < count && !found; ++i )
-                {
-                CXnNode* candidate( iDirtyList[i] );
-    
-                for ( CXnNode* node = nodeToDirtyList; node && !found;
-                    node = node->Parent() )
-                    {
-                    if ( node == candidate )
-                        {
-                        found = ETrue;
-                        }
-                    }
-                }
-    
-            if ( !found && iDirtyList.Find( nodeToDirtyList ) == KErrNotFound )
-                {
-                // Add node to dirty list as parent is neither found
-                dirtyList.AppendL( nodeToDirtyList );
-                nodeToDirtyList->ClearRenderedAndLaidOut();
-                
-                // Add to draw list for redraw
-                AddToRedrawListL( nodeToRedrawList );
-                }
-    
-            // finally update the dirty list
-            iDirtyList.Reset();
-            iDirtyList = dirtyList;
-    
-            CleanupStack::Pop( &dirtyList );
+            oldest = adaptive;
+            }
+
+        // Now we have found the oldest adaptive node if present
+        if ( oldest )
+            {
+            nodeToRedrawList = nodeToDirtyList = adaptive;
             }
         }
+
+    RPointerArray< CXnNode > dirtyList;
+    CleanupClosePushL( dirtyList );
+    TInt count( aRegion.iDirtyList.Count() );
+    TBool found;
+
+    // first, check that aNode's children are not in the dirty array
+    for ( TInt i = 0; i < count; ++i )
+        {
+        found = EFalse;
+        CXnNode* candidate( aRegion.iDirtyList[i] );
+
+        for ( CXnNode* node = candidate->Parent(); node && !found;
+            node = node->Parent() )
+            {
+            if ( nodeToDirtyList == node )
+                {
+                found = ETrue;
+                }
+            }
+
+        if ( !found )
+            {
+            // Put candidate back to list as child is not found
+            dirtyList.AppendL( candidate );
+            }
+        }
+
+    found = EFalse;
+
+    // second, check that aNode's parent is not in dirty array
+    for ( TInt i = 0; i < count && !found; ++i )
+        {
+        CXnNode* candidate( aRegion.iDirtyList[i] );
+
+        for ( CXnNode* node = nodeToDirtyList; node && !found;
+            node = node->Parent() )
+            {
+            if ( node == candidate )
+                {
+                found = ETrue;
+                }
+            }
+        }
+
+    if ( !found && aRegion.iDirtyList.Find( nodeToDirtyList ) == KErrNotFound )
+        {
+        // Add node to dirty list as parent is neither found
+        dirtyList.AppendL( nodeToDirtyList );
+        nodeToDirtyList->ClearRenderedAndLaidOut();
+        
+        // Add to draw list for redraw
+        AddToRedrawListL( aRegion, *nodeToRedrawList );
+        }
+
+    // finally update the dirty list
+    aRegion.iDirtyList.Reset();
+    aRegion.iDirtyList = dirtyList;
+
+    CleanupStack::Pop( &dirtyList );
     }
 
 // -----------------------------------------------------------------------------
@@ -9862,23 +9805,29 @@ CXnEditMode* CXnUiEngineImpl::EditMode()
 // CXnUiEngineImpl::StartLayoutFromL
 // -----------------------------------------------------------------------------
 //
-CXnNode* CXnUiEngineImpl::StartLayoutFromL()
+CXnNode* CXnUiEngineImpl::StartLayoutFromL( TXnDirtyRegion& aDirtyRegion )
     {
-    if ( iLayoutControl & XnLayoutControl::EViewDirty )
+    CXnNode* viewNode( aDirtyRegion.iRootNode );
+    if( !viewNode )
         {
-        return iCurrentView;
+        return NULL;    
+        }
+    
+    if ( aDirtyRegion.iLayoutControl & XnLayoutControl::EViewDirty )
+        {
+        return viewNode;
         }
 
     RPointerArray< CXnNode >parentArray;
     CleanupClosePushL( parentArray );
-    TInt dirtyCount = iDirtyList.Count();
+    TInt dirtyCount = aDirtyRegion.iDirtyList.Count();
     CXnNode* startNode( NULL );
 
     for ( TInt dirtyIndex = 0; dirtyIndex < dirtyCount; dirtyIndex++ )
         {
-        startNode = iDirtyList[dirtyIndex];
+        startNode = aDirtyRegion.iDirtyList[dirtyIndex];
 
-        for ( ;startNode && startNode != iCurrentView; )
+        for ( ;startNode && startNode != viewNode; )
             {
             parentArray.Append( startNode->Parent() );
             startNode = startNode->Parent();
@@ -9909,7 +9858,7 @@ CXnNode* CXnUiEngineImpl::StartLayoutFromL()
 
     CleanupStack::PopAndDestroy( &parentArray );
 
-    return iCurrentView;
+    return viewNode;
     }
 
 // -----------------------------------------------------------------------------
@@ -9927,7 +9876,14 @@ RPointerArray< CXnNode >* CXnUiEngineImpl::Plugins()
 //
 void CXnUiEngineImpl::ForceRenderUIL( TBool aLayoutOnly )
     {
-    iLayoutControl |= XnLayoutControl::EIgnoreState;
+    TXnDirtyRegion* dirtyRegion = FindDirtyRegionL( *iCurrentView );
+    if( !dirtyRegion )
+        {
+        return;
+        }
+    
+    dirtyRegion->iLayoutControl |= XnLayoutControl::EIgnoreState;
+    
     if ( aLayoutOnly )
         {
         LayoutUIL();
@@ -9937,7 +9893,8 @@ void CXnUiEngineImpl::ForceRenderUIL( TBool aLayoutOnly )
         LayoutUIL();
         RenderUIL();
         }
-    iLayoutControl &= ~XnLayoutControl::EIgnoreState;
+    
+    dirtyRegion->iLayoutControl &= ~XnLayoutControl::EIgnoreState;
     }
 
 // -----------------------------------------------------------------------------
@@ -10085,31 +10042,52 @@ EXPORT_C /* static */ void CXnUiEngineImpl::EnableRenderUi( TAny* aAny )
         
         if ( self->iDisableCount == 0 )
             {
-            TRAP_IGNORE(                    
-            // Is menu refresh pending?
-            if ( ( self->iLayoutControl & XnLayoutControl::ERefreshMenu ) &&
-                   !self->IsMenuDisplaying() )
-                {
-                // RefreshMenuL will reset the state flag
-                self->RefreshMenuL();
-                }
-
-            // Is layout pending?
-            if ( self->iLayoutControl & XnLayoutControl::ELayoutUI )
-                {
-                self->LayoutUIL();
-                }
-
-            // Is render pending?
-            if ( self->iLayoutControl & XnLayoutControl::ERenderUI )
-                {
-                self->RenderUIL();
-                }
-                );
+            TRAP_IGNORE( self->EnableRenderUiL() );            
             }
         }
     }
 
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//               
+void CXnUiEngineImpl::EnableRenderUiL()
+    {
+    CXnViewData* viewData = iViewManager.ActiveAppData().ViewData( *iCurrentView );
+    if( viewData )
+        {
+        RPointerArray<TXnDirtyRegion> arr;
+        CleanupClosePushL( arr );
+        
+        viewData->GetDirtyRegions( arr );
+
+        for( TInt i = 0; i < arr.Count(); i++ )
+            {
+            TXnDirtyRegion* dirtyRegion = arr[i];
+
+            // Is menu refresh pending?
+            if ( ( dirtyRegion->iLayoutControl & XnLayoutControl::ERefreshMenu ) &&
+                   IsMenuDisplaying() )
+                {
+                // RefreshMenuL will reset the state flag
+                RefreshMenuL( dirtyRegion );
+                }
+            
+            // Is layout pending?
+            if ( dirtyRegion->iLayoutControl & XnLayoutControl::ELayoutUI )
+                {
+                LayoutL( *dirtyRegion );
+                }
+        
+            // Is render pending?
+            if ( dirtyRegion->iLayoutControl & XnLayoutControl::ERenderUI )
+                {
+                RenderL( *dirtyRegion );
+                }
+            }
+        CleanupStack::PopAndDestroy( &arr);
+        }
+    }
+                
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 //
@@ -10122,6 +10100,15 @@ void CXnUiEngineImpl::ReportScreenDeviceChangeL()
     for( TInt i = 0; i < plugins.Count(); i++ )
         {        
         ReportScreenDeviceChangedL( *plugins[i] );
+        CXnDomNode* domNode( plugins[i]->Node() );
+        if( domNode )
+            {
+            CXnNode* node( domNode->LayoutNode() );
+            if( node )
+                {
+                node->SetDirtyL();
+                }
+            }
         }
     }
 
@@ -10235,7 +10222,7 @@ void CXnUiEngineImpl::HandlePartialTouchInputL( CXnNode* aNode, TBool aEnable )
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
-CCoeControl* CXnUiEngineImpl::WindowOwningControl( CXnNode& aNode )
+CXnNode* CXnUiEngineImpl::WindowOwningNode( CXnNode& aNode )
     {
     CXnNode* parent = &aNode;
     while( parent )
@@ -10246,13 +10233,13 @@ CCoeControl* CXnUiEngineImpl::WindowOwningControl( CXnNode& aNode )
             if( parent->ViewNodeImpl() && 
                 adapter == iCurrentViewControlAdapter )
                 {
-                return adapter;
+                return parent;
                 }
             else if( adapter->OwnsWindow() )
                 {
                 if( !IsNodeTooltip( *parent ) )
                     {
-                    return adapter;
+                    return parent;
                     }
                 else
                     {
@@ -10269,36 +10256,26 @@ CCoeControl* CXnUiEngineImpl::WindowOwningControl( CXnNode& aNode )
 // -----------------------------------------------------------------------------
 TXnDirtyRegion* CXnUiEngineImpl::FindDirtyRegionL( CXnNode& aNode )
     {
-    CCoeControl* control = WindowOwningControl( aNode );
+    CXnNode* node( WindowOwningNode( aNode ) );
+    if( !node )
+        {
+        return NULL;
+        }
+    
+    CCoeControl* control( node->Control() );  
     if( !control )
         {
         return NULL;
         }
-    for( TInt i=0; i<iRedrawRegions.Count(); i++ )
-        {
-        if( iRedrawRegions[i]->iControl == control )
-            {
-            return iRedrawRegions[i];
-            }
-        }
-    TXnDirtyRegion* region = new (ELeave) TXnDirtyRegion;
-    CleanupStack::PushL( region );
-    region->iControl = control;
-    iRedrawRegions.AppendL( region );
-    CleanupStack::Pop();
-    return region;
-    }
 
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-void CXnUiEngineImpl::AddRedrawRectL( TRect aRect, CXnNode& aNode )
-    {
-    TXnDirtyRegion* dirtyReg = FindDirtyRegionL( aNode );
-    if( dirtyReg )
+    TXnDirtyRegion* region( NULL );
+    CXnViewData* viewData = iViewManager.ActiveAppData().ViewData( *node );
+    if( viewData )
         {
-        dirtyReg->iRegion.AddRect( aRect );        
-        dirtyReg->iRegion.Tidy();
+        region = viewData->DirtyRegionL( *node );
         }
+    
+    return region;
     }
 
 // -----------------------------------------------------------------------------

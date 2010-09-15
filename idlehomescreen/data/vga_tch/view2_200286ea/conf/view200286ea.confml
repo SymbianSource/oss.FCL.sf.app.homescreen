@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration name="VGA Homescreen 2" version="1" xmlns="http://www.s60.com/xml/confml/2" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <feature name="VGA Homescreen 2 widgets" ref="VGA_HomescreenPlugins_2">
+    <setting ref="SupportQhd" name="Qhd Support" type="boolean">
+      <desc>The Qhd touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
+    <setting ref="SupportVga" name="Vga Support" type="boolean">
+      <desc>The Vga touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
     <setting name="Max Widgets" ref="MaxWidgets" type="string">
       <desc>Maximum widget amount in Homescreen 2 page. Customizable</desc>
     </setting>
@@ -237,6 +243,8 @@
   </feature>
 <data>
     <VGA_HomescreenPlugins_2>
+      <SupportQhd>true</SupportQhd>
+      <SupportVga>true</SupportVga>
       <MaxWidgets>6</MaxWidgets>
     <UseEmptyWidgets>true</UseEmptyWidgets>
     <ItemIdEmptyWidgets>hs_vga_tch_view</ItemIdEmptyWidgets>
@@ -323,7 +331,7 @@
       <ShortcutPropertyNameParam>param</ShortcutPropertyNameParam>
       </Plugins>
     <Plugins>
-        <Uid>0x2001f47f</Uid>
+        <Uid>0x200255b6</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
       <LockingStatus>permanent</LockingStatus>
@@ -365,7 +373,7 @@
         <Uid>0x2001f47f</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
+      <LockingStatus>none</LockingStatus>
       <ShortcutWidget>0</ShortcutWidget>
       <Customize1Shortcut>0</Customize1Shortcut>
       <Shortcut1Type />
@@ -404,7 +412,7 @@
         <Uid>0x2001f47f</Uid>
       <BundleIdentifier>0</BundleIdentifier>
       <TemplateIdentifier>0</TemplateIdentifier>
-      <LockingStatus>permanent</LockingStatus>
+      <LockingStatus>none</LockingStatus>
       <ShortcutWidget>0</ShortcutWidget>
       <Customize1Shortcut>0</Customize1Shortcut>
       <Shortcut1Type />

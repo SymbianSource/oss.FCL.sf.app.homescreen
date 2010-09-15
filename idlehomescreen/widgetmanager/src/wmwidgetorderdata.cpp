@@ -86,7 +86,6 @@ CWmWidgetOrderData::~CWmWidgetOrderData()
     {
     delete iPublisherId;
     delete iName;
-    //delete iPersistentWidgetOrder // TODO: is needed???
     }
 
 // ---------------------------------------------------------

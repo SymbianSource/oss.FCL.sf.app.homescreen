@@ -13,6 +13,8 @@ box#plugins_container
     direction: ltr;
     block-progression: rl;
     padding-top: 3px;
+    padding-left: 17px;
+    padding-right: 17px;
 }
 
 plugin.plugins
@@ -23,7 +25,7 @@ plugin.plugins
     margin-bottom: 4px;
     margin-right: 5px;
     margin-left: 5px;
-
+ 
     _s60-longtap: true;
 
     nav-index: appearance;
@@ -48,7 +50,7 @@ softkey#rsk
 {
     _s60-longtap: true;
     _s60-aspect-ratio: preserve;
-}  
+}
 
 softkey#msk_ltr
 {
@@ -59,3 +61,4 @@ softkey#msk_rtl
 {
     display: none;
 }
+

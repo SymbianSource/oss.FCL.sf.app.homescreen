@@ -98,7 +98,11 @@ public:
      */            
     void SizeChanged( TRect aRect );
 
-
+    /**
+     * Stop view switch
+     */            
+    void StopViewSwitchL();
+    
 private: // constructors
     
     /**

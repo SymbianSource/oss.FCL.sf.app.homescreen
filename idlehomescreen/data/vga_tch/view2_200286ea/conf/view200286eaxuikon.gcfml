@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<container xmlns="http://www.symbianfoundation.org/xml/implml/1">
+<container xmlns="http://www.symbianfoundation.org/xml/implml/1" condition="${VGAHomescreen2XuikonFolder.SupportVga}">
 	<tag name="target" value="core"/>
 	<tag name="target" value="rofs2"/>
 	<tag name="target" value="rofs3"/>

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration name="Homescreen 3" version="1" xmlns="http://www.s60.com/xml/confml/2" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <feature name="Homescreen 3 widgets" ref="HomescreenPlugins_3">
+    <setting ref="SupportQhd" name="Qhd Support" type="boolean">
+      <desc>The Qhd touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
+    <setting ref="SupportVga" name="Vga Support" type="boolean">
+      <desc>The Vga touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
     <setting name="Max Widgets" ref="MaxWidgets" type="string">
       <desc>Maximum widget amount in Homescreen 3 page. Customizable</desc>
     </setting>
@@ -26,7 +32,6 @@
       <desc>Widgets in the Homescreen 3</desc>
     <setting name="Widget" ref="Uid" type="string">
       <desc>Widget name</desc>
-      <!--<option map="DFSFeatures/HomescreenWidgets" />-->
       <option name="Empty" value="0x2001f47f" />
       <option name="PhoneSetup" value="0x20021195" />
       <option name="ContactsBar" value="0x20022eba" />
@@ -248,6 +253,8 @@
   </feature>
 <data>
     <HomescreenPlugins_3>
+      <SupportQhd>true</SupportQhd>
+      <SupportVga>true</SupportVga>
       <MaxWidgets>6</MaxWidgets>
     <UseEmptyWidgets>true</UseEmptyWidgets>
     <ItemIdEmptyWidgets>hs_qhd_tch_view</ItemIdEmptyWidgets>

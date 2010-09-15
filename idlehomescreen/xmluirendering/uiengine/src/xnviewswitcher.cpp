@@ -544,7 +544,7 @@ void CXnViewSwitcher::PrepareViewL( CXnViewSwitcher::TViewInformation& aView )
     
     iAppUi.ViewAdapter().EnterEditStateL( *aView.iViewData, EFalse );
         
-    viewNode->UiEngine()->RenderFromNodeL( *viewNode );
+    viewNode->UiEngine()->RenderUIL( viewNode );
     aView.iReadyToDraw = ETrue;
     }
 
@@ -982,5 +982,13 @@ void CXnViewSwitcher::ChangeBackground( CXnViewData& aCurrent, CXnViewData& aNex
     GfxTransEffect::SetDemarcation( &bg, bg.Position() );
     GfxTransEffect::End( &bg ); 
     }
-            
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void CXnViewSwitcher::StopViewSwitchL()
+    {
+    ViewSwitchEndedL();
+    }
+
 // End of file

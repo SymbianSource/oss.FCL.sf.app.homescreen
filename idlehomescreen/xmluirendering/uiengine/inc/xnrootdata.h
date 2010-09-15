@@ -122,6 +122,13 @@ public:
     CXnViewData& NextViewData() const;
 
     /**
+     * Gets a view data, where the given node belongs to.
+     * 
+     * @return Acquired view data. NULL if not found.
+     */                
+    CXnViewData* ViewData( CXnNode& aNode ) const;
+
+    /**
      * Sets view data to destroyal list
      *
      * @param aViewData View data to destroy      

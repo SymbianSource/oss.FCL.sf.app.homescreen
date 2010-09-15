@@ -140,6 +140,7 @@ CTsFastSwapArea::~CTsFastSwapArea()
     delete iLongTapAnimationTimer;
     delete iFastSwapExt;
     iPrevScreenshots.Close();
+    iPrevWgIds.Close();
     delete iEventSupressor;
     }
 
@@ -273,7 +274,10 @@ void CTsFastSwapArea::LayoutGridL()
 
     CleanupStack::PopAndDestroy(&rects);
     
-    iGrid->SetRect(gridAppPane.Rect());
+    TPoint position = iFastSwapExt->ItemViewPosition( SelectedIndex() );
+    iGrid->SetRect( CountCenteredGridRect( position ) );
+
+    
     
     CTsAppUi* appUi = static_cast<CTsAppUi*>(iEikonEnv->AppUi());
     
@@ -692,6 +696,8 @@ void CTsFastSwapArea::RenderContentL( )
     CleanupClosePushL(strokeItemArray);
     RArray<TInt> screenshotList;
     CleanupClosePushL(screenshotList);
+    RArray<TInt> wgIdList;
+    CleanupClosePushL(wgIdList);
     
     // Update view based on number of items
     LayoutGridViewL( iArray.Count() );
@@ -711,20 +717,15 @@ void CTsFastSwapArea::RenderContentL( )
         formAppName.Append(appName);
         textArray->AppendL(formAppName);
         CleanupStack::PopAndDestroy(&formAppName);
-        TSize sz = iFastSwapExt->PreferredImageSize();
         
         // take the screenshot or appicon+mask and make a copy and scale
-        CFbsBitmap* bitmap = 0;
         TInt h = iArray[i]->ScreenshotHandle();
         TSLOG2( TSLOG_INFO, "'%S' screenshot handle %d", &appName, h );
-        TInt maskh = 0;
-        CFbsBitmap* mask = 0;
         TBool isScreenshot( ETrue );
         if ( !h )
             {
             // No screenshot, take app icon
             h = iArray[i]->AppIconBitmapHandle();
-            maskh = iArray[i]->AppIconMaskHandle();
             isScreenshot = EFalse;
             TSLOG1( TSLOG_INFO, "using appicon, handle = %d", h );
             }
@@ -737,36 +738,13 @@ void CTsFastSwapArea::RenderContentL( )
         
         // check screenshot - if it exists already, use it
         // so there is no unnecessary scaling performed
-        screenshotList.AppendL( h );
-        TInt idx = iPrevScreenshots.Find( h );
-        if ( idx != KErrNotFound && oldIconArray && idx < oldIconArray->Count() )
-            {
-            CGulIcon* existingIcon = oldIconArray->At( idx );
-            if ( existingIcon->Bitmap() )
-                {
-                h = existingIcon->Bitmap()->Handle();
-                if ( existingIcon->Mask() )
-                    {
-                    maskh = existingIcon->Mask()->Handle();
-                    }
-                isScreenshot = EFalse;
-                }
-            }
-        
-        // create bitmap for grid item
-        bitmap = iFastSwapExt->CopyBitmapL( h, sz, isScreenshot );
-        CleanupStack::PushL( bitmap );
-        if ( maskh )
-            {
-            mask = iFastSwapExt->CopyBitmapL( maskh, sz, EFalse );
-            }
-        CleanupStack::PushL( mask );
-
-        CGulIcon* icon = CGulIcon::NewL( bitmap, mask );
-        CleanupStack::PushL(icon);
+        CGulIcon* icon = CreateItemIconLC( iArray[i], isScreenshot );
         iconArray->AppendL(icon);
-        CleanupStack::Pop( 3, bitmap ); // mask, bitmap, icon
+        CleanupStack::Pop( icon ); //icon
         
+        screenshotList.AppendL( h );
+        wgIdList.AppendL( iArray[i]->WgId() );
+                
         // Check if item can be closed
         if ( CanClose(i) && AknLayoutUtils::PenEnabled() )
             {
@@ -775,10 +753,14 @@ void CTsFastSwapArea::RenderContentL( )
         }
     // Update screenshot list
     iPrevScreenshots.Reset();
-    for ( TInt i = 0; i < screenshotList.Count(); i++ )
+    iPrevWgIds.Reset();
+    for ( TInt i = 0; 
+            i < screenshotList.Count() && i < wgIdList.Count(); i++ )
         {
         iPrevScreenshots.AppendL( screenshotList[i] );
+        iPrevWgIds.AppendL( wgIdList[i] );
         }
+    CleanupStack::PopAndDestroy( &wgIdList );
     CleanupStack::PopAndDestroy( &screenshotList );
     
     // Setup grid
@@ -812,6 +794,87 @@ void CTsFastSwapArea::RenderContentL( )
         iGrid->SetCurrentDataIndex( GridItemCount() - 1 );
         }
     TSLOG_OUT();
+    }
+
+// --------------------------------------------------------------------------
+// CTsFastSwapArea::CreateItemIconLC
+// --------------------------------------------------------------------------
+//
+CGulIcon* CTsFastSwapArea::CreateItemIconLC( CTsFswEntry* aEntry,
+                TBool aIsScreenshot )
+    {
+    TSize sz = iFastSwapExt->PreferredImageSize();
+    CArrayPtr<CGulIcon>* oldIconArray =
+            iGrid->ItemDrawer()->FormattedCellData()->IconArray();
+    
+    CFbsBitmap* bitmap = NULL;
+    CFbsBitmap* mask = NULL;
+    
+    TInt h = 0;
+    TInt maskh = 0;
+    if ( aIsScreenshot )
+        {
+        h = aEntry->ScreenshotHandle();
+        }
+    else
+        {
+        h = aEntry->AppIconBitmapHandle();
+        maskh = aEntry->AppIconMaskHandle();
+        }
+        
+    TInt idx = iPrevScreenshots.Find( h );
+    TInt wgIdIdx = iPrevWgIds.Find( aEntry->WgId() );
+        
+    if ( idx != KErrNotFound && idx == wgIdIdx 
+            && oldIconArray && idx < oldIconArray->Count() )
+        {
+        CGulIcon* existingIcon = oldIconArray->At( idx );
+        if ( existingIcon->Bitmap() )
+            {
+            bitmap = iFastSwapExt->DuplicateBitmapLC(
+                    existingIcon->Bitmap()->Handle() );
+            if ( existingIcon->Mask() )
+                {
+                maskh = existingIcon->Mask()->Handle();
+                mask = iFastSwapExt->DuplicateBitmapLC( maskh );
+                }
+            }
+        }
+    else if ( idx == KErrNotFound && wgIdIdx != KErrNotFound
+            && oldIconArray && wgIdIdx < oldIconArray->Count() )
+        {
+        CGulIcon* existingIcon = oldIconArray->At( wgIdIdx );
+        if ( existingIcon->Bitmap() 
+                && !existingIcon->Mask() )
+            {
+            bitmap = iFastSwapExt->DuplicateBitmapLC(
+                    existingIcon->Bitmap()->Handle() );
+            CFbsBitmap* source = iFastSwapExt->DuplicateBitmapLC( h );
+            iFastSwapExt->ScaleBitmapL( source, bitmap );
+            CleanupStack::Pop( source );
+            }
+        }
+    
+    // create bitmap for grid item
+    if ( !bitmap )
+        {
+        bitmap = iFastSwapExt->CopyBitmapL( h, sz, aIsScreenshot );
+        CleanupStack::PushL( bitmap );
+        }
+    if ( !mask && maskh )
+        {
+        mask = iFastSwapExt->CopyBitmapL( maskh, sz, EFalse );
+        CleanupStack::PushL( mask );
+        }
+    else if ( !mask )
+        {
+        CleanupStack::PushL( mask );
+        }
+    
+    CGulIcon* icon = CGulIcon::NewL( bitmap, mask );
+    CleanupStack::Pop( 2, bitmap );
+    CleanupStack::PushL( icon );
+    return icon;
     }
 
 
@@ -1074,12 +1137,17 @@ void CTsFastSwapArea::HandlePointerEventL( const TPointerEvent& aPointerEvent )
     else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
         {
         CancelLongTapAnimation( EFalse );
-        if( iActivateOnPointerRelease != TPoint() ||
-            iSupressDrag)
+        if( iActivateOnPointerRelease != TPoint() )
             {
             iHandlePointerCandidate = ETrue;
-            TapL(iActivateOnPointerRelease);
+            TapL( iActivateOnPointerRelease );
             iActivateOnPointerRelease = TPoint();
+            }
+        else if( iSupressDrag )
+            {
+            iSupressDrag = EFalse;
+            iHandlePointerCandidate = ETrue;
+            TapL( iTapEvent.iParentPosition );
             }
         }
     }
@@ -1525,17 +1593,7 @@ void CTsFastSwapArea::MoveOffset(const TPoint& aPoint, TBool aDrawNow)
     
     if ( aDrawNow )
         {
-        TInt currentXPos = aPoint.iX;
-        currentXPos -= Rect().Width() / 2;
-        TRect gridViewRect = Rect();
-        gridViewRect.iTl.iX = -currentXPos;
-        // Take edge offset into account
-        gridViewRect.iTl.iX += Rect().iTl.iX;
-        if(GridItemCount() && GridItemCount() <= iMaxItemsOnScreen)
-            {
-            // Center view
-            gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
-            }
+        TRect gridViewRect = CountCenteredGridRect( aPoint );
         //iParent.DrawDeferred();
         iGrid->DrawDeferred();
         iGrid->SetRect( gridViewRect );
@@ -1597,6 +1655,10 @@ void CTsFastSwapArea::LongTapL(const TPoint& aPoint)
         if ( !ShowPopupL(iSavedSelectedIndex, aPoint) )
             {
             iActivateOnPointerRelease = aPoint;
+            }
+        else
+            {
+            iSupressDrag = EFalse;
             }
         iGrid->ShowHighlight();
         DrawNow();
@@ -1759,6 +1821,26 @@ TBool CTsFastSwapArea::LongTapAnimForPos( const TPoint& aHitPoint )
             }
         }
     return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// CTsFastSwapArea::CountCenteredGridRect
+// -----------------------------------------------------------------------------
+//
+TRect CTsFastSwapArea::CountCenteredGridRect( TPoint aItemPosition)
+    {
+    TInt currentXPos = aItemPosition.iX;
+    currentXPos -= Rect().Width() / 2;
+    TRect gridViewRect = Rect();
+    gridViewRect.iTl.iX = -currentXPos;
+    // Take edge offset into account
+    gridViewRect.iTl.iX += Rect().iTl.iX;
+    if(GridItemCount() && GridItemCount() <= iMaxItemsOnScreen)
+        {
+        // Center view
+        gridViewRect.iTl.iX += ( Rect().Width() - GridItemCount() * iGridItemWidth ) / 2;
+        }
+    return gridViewRect;
     }
 
 // End of file

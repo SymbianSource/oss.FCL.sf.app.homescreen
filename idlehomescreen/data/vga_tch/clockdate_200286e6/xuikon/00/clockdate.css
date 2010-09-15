@@ -4,7 +4,6 @@ clock#clock
     height: 115px;
     _s60-font-size: 48px;
     color: "SKIN(268458534 13056 74)";
-    background-color: "SKIN(268458534 9916)";
     nav-index: appearance;
 }
 
@@ -16,6 +15,7 @@ face12
 	width: 102px;
 	height: 59px;
 	text-align: right;
+	font-family: EAknLogicalFontPrimaryFont;
 }
 
 ampm
@@ -27,6 +27,7 @@ ampm
 	left: 124px;
 	text-align: left;
 	_s60-font-size: 28px;
+	font-family: EAknLogicalFontSecondaryFont;
 }
 
 face24
@@ -35,6 +36,7 @@ face24
 	top: 14px;
 	width: auto;
 	height: 59px;
+	font-family: EAknLogicalFontPrimaryFont;
 }
 
 date
@@ -44,14 +46,26 @@ date
 	width: auto;
 	height: 28px;
 	_s60-font-size: 26px;
+	font-family: EAknLogicalFontSecondaryFont;
+}
+
+day
+{
+    position: absolute;
+    top: 44px;
+    left: 117px;
+    width: 32px;
+    height: 28px;
+    _s60-font-size: 28px;
+    font-family: EAknLogicalFontSecondaryFont;
 }
 
 face
 {
-	width: auto;
-	height: auto;
-
-	margin-left: 6px;
-	margin-right: 6px;
-	margin-bottom: 5px;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    
+    face-adjustment-value: 20;
 }

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   
+* Description:
 *
 */
 
@@ -36,10 +36,10 @@ class MHnSuiteObserver;
 /**
  * @ingroup group_hnengine
  *  Hierarchy Navigator engine - used by Multimedia Menu
- *  to fetch data models. The most commonly used exported method is TriggerHnEventL, 
+ *  to fetch data models. The most commonly used exported method is TriggerHnEventL,
  *  which offers event execution for the framework. This functionality is implemented
- *  through the MHnEventGenerator interface. The class owns the meta data model ( CHnMdModel ) 
- *  and suite container ( CHnSuiteModelContainer ) to manage them. The engine manages 
+ *  through the MHnEventGenerator interface. The class owns the meta data model ( CHnMdModel )
+ *  and suite container ( CHnSuiteModelContainer ) to manage them. The engine manages
  *  the model by processing model events ( HandleModelEventL ) or reseting the models
  *  ( ResetModelsL ).
  *
@@ -66,18 +66,18 @@ public:
      * @since S60 v5.0
      * @param aController Controller handler.
      * @return Fully constructed object.
-     */    
+     */
     IMPORT_C static CHnEngine* NewLC( MHnControllerInterface& aController );
 
     /**
      * Standard C++ destructor.
-     * 
+     *
      * @since S60 v5.0
-     */    
+     */
     ~CHnEngine();
 
     // from CHnInterface
-    
+
     /**
      * Fetches and constructs data structres, needed by Multimedia
      * Menu to display suites.
@@ -86,7 +86,7 @@ public:
      * @return Filled suite model object from the stack.
      */
     CHnSuiteModel* GetLastSuiteModelL();
-    
+
     /**
      * Fetches and constructs data structres, needed by Multimedia
      * Menu to display suites.
@@ -95,23 +95,23 @@ public:
      * @return Filled suite model object from the stack.
      */
     CHnSuiteModel* GetParentSuiteModelL();
-   
+
     /**
      * Get count of suite models on the stack.
-     * 
+     *
      * @since S60 v5.0
      * @return Count of suite models on the stack.
      */
     virtual TInt GetSuiteModelsCountL();
-    
+
     /**
      * Checks if suite model is loaded.
-     * 
+     *
      * @since S60 v5.0
      * @return ETrue if suite model is loaded, otherwise EFalse.
      */
     TBool SuiteModelLoadedL( TInt aId );
-    
+
     /**
      * Loads suite hierarchy specified in URI.
      *
@@ -122,7 +122,7 @@ public:
 
 public:
     // from MHnMdModelEventObserver
-    
+
      /**
      * Handle model event.
      *
@@ -131,9 +131,9 @@ public:
      * @param aParams Event specific parameters used to perform action.
      */
      TInt HandleModelEventL( const TDesC& aEventName, CLiwGenericParamList& aParams );
-     
+
     // from CHnInterface
-     
+
     /**
      * Handle back event.
      *
@@ -147,24 +147,24 @@ public:
 
     /**
      * Loads default root suite
-     * 
+     *
      * @since S60 v5.0
      * @param aSuiteParams Suite parameters.
      * @return Status error code.
      */
     IMPORT_C TInt InitializeL( CLiwGenericParamList& aSuiteParams );
-    
+
     // from MHnEventGenerator
-    
+
     /**
      * Triggers an event inside hierarchy navigator.
-     * 
+     *
      * Used by UI to notify hierarchy navigator of its events,
      * as well as for hierarchy navigator components to notify
      * the module of certain events (such as OnSuiteLoaded etc).
      *
      * @since S60 v5.0
-     * @param aHnEventId Internal id of an event (Event names are 
+     * @param aHnEventId Internal id of an event (Event names are
      *                    mapped to ids).
      * @param aRecipientId The id of the recipient item.
      * @param aEventParameters Event specific parameter.
@@ -172,41 +172,41 @@ public:
      */
      IMPORT_C TInt TriggerHnEventL( const TInt aHnEventId,
              const TInt aRecipientId, CLiwGenericParamList* aEventParameters = NULL );
-     
+
      /**
       * Splits the source descriptor by a separatos
-      * 
+      *
       * @since S60 v5.0
       * @param aSource Source descriptor intended to split.
       * @param aSeparator Separator used to split.
-      * @return Array of descriptors. 
+      * @return Array of descriptors.
       */
      RPointerArray< HBufC8 > SplitL( const TDesC8& aSource,
              const TDesC8& aSeparator );
-     
+
      /**
       * Generate param list according to query param.
-      * 
+      *
       * @param aUriQuery Descriptor consist of param(s) to split
       * @param aUriFragment Descriptor containing an uri fragment.
-      * @param aSuiteName The suite's name.  
+      * @param aSuiteName The suite's name.
       * @return Filled generic param list.
       */
      CLiwGenericParamList* UriQueryToLiwListLC( const TDesC8& aUriQuery,
              const TDesC8& aUriFragment, const TDesC8& aSuiteName );
-     
+
      /**
       * Resets MD Model and Suite Container.
       *
       * @since S60 v5.0
       */
      IMPORT_C void ResetModelsL();
-     
-     // from MHnEditModeInterface 
-     
+
+     // from MHnEditModeInterface
+
      /**
       * Sets edit mode.
-      * 
+      *
       * @since S60 v5.0
       * @param aEditMode Set edit mode member to false/true.
       */
@@ -214,12 +214,12 @@ public:
 
     /**
      * Enables to issue a request to Hn engine.
-     * 
+     *
      * @since S60 v5.0
      * @param aParam Input Parameters.
-     * @param aOutput Target list for output.  
+     * @param aOutput Target list for output.
      */
-     IMPORT_C void HandleRequestL( const CLiwGenericParamList& aParam, 
+     IMPORT_C void HandleRequestL( const CLiwGenericParamList& aParam,
                          CLiwGenericParamList* aOutput = NULL);
 
     //    from MHWRMLightObserver
@@ -238,19 +238,19 @@ public:
 private:
     /**
      * Default constructor.
-     * 
+     *
      * @since S60 v5.0
      * @param aController Controller handler.
      */
     CHnEngine( MHnControllerInterface& aController );
-    
+
     /**
      * Standard 2nd phase constructor.
-     * 
+     *
      * @since S60 v5.0
      */
     void ConstructL();
-         
+
     /**
      * Handle new suite loaded event.
      *
@@ -286,7 +286,7 @@ private:
      * @return Status code.
      */
     TInt HandleSetFocusEventL( const CLiwGenericParamList& aParams );
-    
+
     /**
      * Handles MoveFocusBeforeDelete event.
      *
@@ -296,7 +296,7 @@ private:
      */
     TInt HandleMoveFocusBeforeDeleteEventL(
             const CLiwGenericParamList& aParams );
-    
+
     /**
      * Handles RefreshIcons event.
      *
@@ -308,7 +308,7 @@ private:
 
     /**
      * Handles DisableActionsForItem event.
-     * 
+     *
      * @since S60 v5.0
      * @param aParams Event specific parameters - contains custom item id
      * @return Status code.
@@ -319,14 +319,14 @@ private:
       *  Store widget type to repository.
       *
       * @since S60 v5.0
-      * @param aSuiteName Suite name to that set widget type. 
+      * @param aSuiteName Suite name to that set widget type.
       * @param aType Widget type to store in repository.
       * @return Status code.
-      */    
+      */
     TInt HandleWidgetChangeL( const TDesC& aSuiteName,
             THnSuiteWidgetType aType );
-     
-         
+
+
      /**
       * Parse URI path component containing Suites to be loaded.
       *
@@ -334,10 +334,10 @@ private:
       * @param aUriPath Descriptor URI path which consist of suites' names.
       * @param aOutput Array on output containes parsed suite names.
       */
-     void ParseSuiteUriPathL( const TDesC8& aUriPath, 
+     void ParseSuiteUriPathL( const TDesC8& aUriPath,
          CDesC8ArrayFlat& aOutput );
-   
-     
+
+
      /**
       * Checks if only root configuration is loaded.
       * Used to decide if reloading models is needed.
@@ -347,29 +347,29 @@ private:
       *         otherwise EFalse.
       */
      TBool IsOnlyRootConfLoaded();
-     
+
      /**
       * Resets loaded resources.
       *
       * @since S60 5.0
       */
      void ResetLocalization();
-     
+
      /**
       * Loads suite with given suite name with parameters
-      * from uri query. 
+      * from uri query.
       *
       * @since S60 5.0
-      * @param aSuiteName Name of the suite to load. 
+      * @param aSuiteName Name of the suite to load.
       * @param aUriQuery Descriptor containig parsed part of the uri.
       * @param aUriFragment Descriptor containig parsed part (fragment) of the uri.
       * @return Error code when loading suite.
       */
-     TInt LoadSuiteFromUriL( const TDesC8& aSuiteName, 
+     TInt LoadSuiteFromUriL( const TDesC8& aSuiteName,
          const TDesC8& aUriQuery, const TDesC8& aUriFragment );
-     
+
      /**
-      * Reads highlight position from uri fragment 
+      * Reads highlight position from uri fragment
       * and sets it on the suite model.
       *
       * @since S60 5.0
@@ -387,15 +387,15 @@ private:
 
      /**
       * Handles loading suite from uri if suites names' are the same.
-      * 
+      *
       * @param aNextExists ETrue if the next suite's name exists in uri.
-      * @param aUri The URI's parameters passed to the suite. 
+      * @param aUri The URI's parameters passed to the suite.
       */
      void HandleTheSameSuitesL( TBool aNextExists, const TDesC8& aParams );
-     
+
      /**
       * Checks if suites have the same names.
-      * 
+      *
       * @param aLastSuiteName The last suite's name on the stack.
       * @param aFirstSuiteName The first suite's name in uri.
       * @return ETrue if names are equal
@@ -404,37 +404,44 @@ private:
 
      /**
       * Decides whether to hide menu depending on current state and uri parameters
-      * 
+      *
       * @param aUri The Uri to parse for exit procedure.
       * @return ETrue If exit was consumed.
       */
      TBool HandleActionL( const TDesC8& aUri );
-     
+
      /**
       * Loads suites from uri.
-      * 
+      *
       * @param aUri The uri to parse
       */
      void LoadSuitesL( const TDesC8& aUri );
-     
+
+     /**
+       * Loads item through CR.
+       *
+       * @since S60 v5.0
+       */
+      void LoadItemFromCrL( const TDesC8& aUri );
+
 private: // data
-        
+
     /**
      * Own - Meta data model.
      */
     CHnMdModel* iMetaDataModel;
-    
+
     /**
      * Own - Suite container.
      */
     CHnSuiteModelContainer* iSuiteContainer;
-       
+
     /**
      * Not own.
-     * EikonEnv for displaying popup messages. 
+     * EikonEnv for displaying popup messages.
      */
     CEikonEnv* iEEnv;
-    
+
     /**
      * Not own - Suite observer.
      */
@@ -444,7 +451,7 @@ private: // data
      * Edit mode
      */
     TBool iEditMode;
-    
+
     /**
      * Light status observer
      */

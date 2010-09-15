@@ -70,11 +70,9 @@ public:
      * Create font
      * 
      * @param aNode Node which contains info of font
-     * @param aFontName Font name
      * @param aFont On return points to a created font
      */    
     void CreateFontL( CXnNodePluginIf& aNode,
-                      const TDesC& aFontName,
                       CFont*& aFont );
     
     /*

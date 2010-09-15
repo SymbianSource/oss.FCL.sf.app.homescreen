@@ -426,6 +426,46 @@ CXnViewData& CXnRootData::NextViewData() const
     }
 
 // -----------------------------------------------------------------------------
+// CXnRootData::ViewData()
+// -----------------------------------------------------------------------------
+//
+CXnViewData* CXnRootData::ViewData( CXnNode& aNode ) const
+    {
+    CXnNode* tmp( &aNode );
+    CXnNode* viewNode( NULL );
+    while( tmp )
+        {
+        if ( tmp->ViewNodeImpl() )
+            {
+            viewNode = tmp;
+            break;
+            }
+        else
+            {
+            tmp = tmp->Parent();
+            }
+        }
+    if( !viewNode )
+        {
+        return NULL;
+        }
+
+    CXnViewData* viewData( NULL );
+    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
+        {
+        CXnViewData* tmpViewdata( static_cast< CXnViewData* >( iPluginsData[i] ) );
+        if( tmpViewdata->ViewNode() == viewNode )
+            {
+            viewData = tmpViewdata;
+            break;
+            }
+        }
+    
+    return viewData;
+    }
+
+    
+// -----------------------------------------------------------------------------
 // CXnRootData::DestroyViewData()
 // Sets view data to be destroyed
 // -----------------------------------------------------------------------------

@@ -188,4 +188,13 @@ inline RPointerArray< CXnPluginData >& CXnPluginData::PluginData() const
     return iPluginsData;
     };
 
+// ---------------------------------------------------------------------------
+// Returns dirty region
+// ---------------------------------------------------------------------------
+//
+inline TXnDirtyRegion* CXnPluginData::DirtyRegion() const
+    {
+    return iDirtyRegion;
+    };
+
 #endif // _XNPLUGINDATA_INL_

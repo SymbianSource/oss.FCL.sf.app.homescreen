@@ -30,6 +30,9 @@
 #include "xnnodepluginif.h"
 #include "xnclockadapter.h"
 #include "xntext.h"
+#include "xnproperty.h"
+#include "xndomproperty.h"
+#include "xndomlist.h"
 
 #include "xnclockface.h"
 
@@ -38,8 +41,7 @@
 _LIT( KAmPmFormat, "%B" );
 _LIT( KTimeFormat, "%J%:1%T" );
 
-_LIT( KClockFont, "EAknLogicalFontSecondaryFont" );
-_LIT( KAmpmFont, "EAknLogicalFontSecondaryFont" );
+const TInt KDefaultFaceAdjustmentValue = 0;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -167,7 +169,7 @@ const CAknLayoutFont* CXnClockFaceDigital::CreateFontL( CXnClockAdapter& aAdapte
         {
         if ( !iClockFont )
             {
-            aAdapter.CreateFontL( aNode, KClockFont, iClockFont );
+            aAdapter.CreateFontL( aNode, iClockFont );
             }
         return CAknLayoutFont::AsCAknLayoutFontOrNull( iClockFont );
         }
@@ -175,7 +177,7 @@ const CAknLayoutFont* CXnClockFaceDigital::CreateFontL( CXnClockAdapter& aAdapte
         {
         if ( !iAmpmFont )
             {
-            aAdapter.CreateFontL( aNode, KAmpmFont, iAmpmFont );
+            aAdapter.CreateFontL( aNode, iAmpmFont );
             }
         return CAknLayoutFont::AsCAknLayoutFontOrNull( iAmpmFont );
         }
@@ -228,6 +230,7 @@ void CXnClockFaceDigital::ResetFont()
 // -----------------------------------------------------------------------------
 //
 CXnClockFaceAnalog::CXnClockFaceAnalog()     
+    :   iFaceAdjustmentValue( KErrNotFound )
     {
     }
 
@@ -272,7 +275,7 @@ CXnClockFaceAnalog::~CXnClockFaceAnalog()
 void CXnClockFaceAnalog::DrawL( CXnClockAdapter& /*aAdapter*/, CWindowGc& aGc, 
         CXnNodePluginIf& aNode, const TTime& aTime, CXnNodePluginIf* /*aAmpm*/ )
     {    
-    TSize faceSize( aNode.Rect().Size() );
+    TRect faceRect( aNode.Rect() );
     
     TDateTime dateTime( aTime.DateTime() );
     
@@ -292,14 +295,19 @@ void CXnClockFaceAnalog::DrawL( CXnClockAdapter& /*aAdapter*/, CWindowGc& aGc,
         {
         return;
         }
+    
+    TInt value( FaceAdjustmentValueL( aNode ) );
+    
+    TSize growthSize( value, 0 );
+    faceRect.Grow( growthSize );
 
-    User::LeaveIfError( AknIconUtils::SetSize( skinBmp, faceSize ) );
+    User::LeaveIfError( AknIconUtils::SetSize( skinBmp, faceRect.Size() ) );
 
     if( skinMask )
         {
-        User::LeaveIfError( AknIconUtils::SetSize( skinMask, faceSize ) );
+        User::LeaveIfError( AknIconUtils::SetSize( skinMask, faceRect.Size() ) );
         
-        aGc.BitBltMasked( aNode.Rect().iTl,
+        aGc.BitBltMasked( faceRect.iTl,
                           skinBmp,
                           TRect( TPoint( 0, 0 ), skinBmp->SizeInPixels() ),
                           skinMask,
@@ -307,7 +315,7 @@ void CXnClockFaceAnalog::DrawL( CXnClockAdapter& /*aAdapter*/, CWindowGc& aGc,
         }
     else
         {
-        aGc.BitBlt( aNode.Rect().iTl, skinBmp );
+        aGc.BitBlt( faceRect.iTl, skinBmp );
         }
 
     aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
@@ -369,6 +377,34 @@ void CXnClockFaceAnalog::DrawHandsL( CWindowGc& aGc,
     }
 
 // -----------------------------------------------------------------------------
+// CXnClockFaceAnalog::FaceAdjustmentValueL
+// -----------------------------------------------------------------------------
+//
+TInt CXnClockFaceAnalog::FaceAdjustmentValueL( CXnNodePluginIf& aNode )
+    {
+    if( iFaceAdjustmentValue == KErrNotFound )
+        {
+        CXnProperty* prop( aNode.GetPropertyL( XnPropertyNames::clock::KFaceAdjustmentValue ) );
+        
+        if( prop )
+            {        
+            TInt value = static_cast<TInt>( prop->FloatValueL() );
+            
+            if( value > KErrNotFound )
+                {
+                iFaceAdjustmentValue = value;
+                }
+            }
+        
+        if( iFaceAdjustmentValue <= KErrNotFound )
+            {
+            iFaceAdjustmentValue = KDefaultFaceAdjustmentValue;
+            }
+        }
+    
+    return iFaceAdjustmentValue;
+    }
+	
 // CXnClockFaceAnalog::ResetFont
 // -----------------------------------------------------------------------------
 //

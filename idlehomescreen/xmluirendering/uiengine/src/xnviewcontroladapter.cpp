@@ -194,6 +194,11 @@ void CXnViewControlAdapter::HandlePointerEventL(
         iAppUi.ViewSwitcher() == NULL || // no swipe if VS not available
         !iAppUi.ViewSwitcher()->ProcessPointerEventL( aPointerEvent ) ) ) // no swipe if event not handled by VS
         {
+        if ( IsWidgetGestureDest() && iAppUi.ViewSwitcher() != NULL )
+            {
+            iAppUi.ViewSwitcher()->StopViewSwitchL();
+            }
+        
         iAppUi.UiEngine().DisableRenderUiLC();
             
         CXnControlAdapter::HandlePointerEventL( aPointerEvent );

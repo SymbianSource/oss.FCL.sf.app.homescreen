@@ -216,6 +216,12 @@ class CXnClockFaceAnalog : public CXnClockFace
         */                       
         void DrawHandsL( CWindowGc& aGc, const TRect& aRect,
                          const TDateTime& aDateTime );
+        
+        /**
+        * Stores clock face adjustment value
+        * @param aNode is current face.
+        */ 
+        TInt FaceAdjustmentValueL( CXnNodePluginIf& aNode );
 
     private:
 
@@ -229,7 +235,10 @@ class CXnClockFaceAnalog : public CXnClockFace
         */
         void ConstructL();
 
-    private:    // Data                
+    private:    // Data  
+        
+        // Stores face adjustment value
+        TInt iFaceAdjustmentValue;
     };
 
 #endif      // _XNCLOCKFACE_H

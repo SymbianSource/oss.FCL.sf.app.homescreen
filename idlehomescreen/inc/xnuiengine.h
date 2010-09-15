@@ -82,35 +82,12 @@ public:
     void RenderUIL( CXnNode* aNode = NULL );
 
     /**
-     * Calculates the layout of the UI and renders it. 
-     * This generates full re-layout starting from the given node, 
-     * regardless of the current dirty set or the active view.
-     * I.e. this can be used to layout an inactive view.
-     *
-     * @since Series 60 5.2
-     * @param aNode Starting point for the layout
-     * @exception KXnErrLoadLayoutFileFailed Loading the layout file failed.
-     */
-    void RenderFromNodeL( CXnNode& aNode );
-
-    /**
      * Calculates the layout of the UI.
      *
      * @since Series 60 3.1
      * @param aNode Starting point for the layout
      */
     void LayoutUIL( CXnNode* aNode = NULL );
-
-    /**
-     * Calculates the layout of the UI.
-     * This generates full re-layout starting from the given node, 
-     * regardless of the current dirty set or the active view.
-     * I.e. this can be used to layout an inactive view.
-     *
-     * @since Series 60 5.2
-     * @param aNode Starting point for the layout
-     */
-    void LayoutFromNodeL( CXnNode& aNode );
 
     /**
      * Gets the root node of the UI. Ownership is not transferred.

@@ -584,10 +584,8 @@ void CTsAppUi::MoveAppToForeground( TUint  /*aTransitionType*/ )
     TSLOG_CONTEXT( MoveAppToForeground, TSLOG_LOCAL );
     TSLOG_IN();
 
-    if ( !iUiStarted )
-        {
-        TRAP_IGNORE( iUnderAppWgId = WgIdOfUnderlyingAppL(EFalse) );
-        }
+    TRAP_IGNORE( iUnderAppWgId = WgIdOfUnderlyingAppL(EFalse) );
+    
     iUiStarted = ETrue;
     
     // Request window server to bring our application

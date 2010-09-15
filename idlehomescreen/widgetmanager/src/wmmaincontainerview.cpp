@@ -30,14 +30,17 @@
 #include <AknUtils.h>
 #include <avkon.rsg>
 #include <layoutmetadata.cdl.h>
-
+#include <widgetmanager.mbg>
 #include "wmplugin.h"
 #include "widgetmanager.hrh"
 #include "wmmaincontainerview.h"
 #include "wmresourceloader.h"
 #include "wmmaincontainer.h"
 #include "wmspbgcleaner.h"
-
+#include "wmconfiguration.h"
+#include "wmimageconverter.h"
+#include "wmstore.h"
+       
 // ---------------------------------------------------------
 // CWmMainContainerView::CWmMainContainerView()
 // ---------------------------------------------------------
@@ -55,7 +58,7 @@ CWmMainContainerView::CWmMainContainerView(
 // ---------------------------------------------------------
 //
 CWmMainContainerView::~CWmMainContainerView()
-	{
+	{    
     if ( iWmMainContainer != NULL )
         {
         AppUi()->RemoveFromStack( iWmMainContainer );
@@ -127,9 +130,7 @@ void CWmMainContainerView::HandleCommandL( TInt aCommand )
         {
         switch ( aCommand )
             {
-            case EWmMainContainerViewOpenPortalMenuItemCommand:
-                HandleOpenMenuItemSelectedL();
-                break;
+            case EAknSoftkeySelect:
             case EWmMainContainerViewAddMenuItemCommand:
                 HandleAddMenuItemSelectedL();
                 break;
@@ -162,9 +163,11 @@ void CWmMainContainerView::HandleCommandL( TInt aCommand )
             case EWmMainContainerViewWiddetDetailsMenuItemCommand:
                 HandleDetailsMenuItemSelectedL();
                 break;
-            case EAknSoftkeySelect:
+            case EWmStoreCommand:
+                {
 		        if ( iWmMainContainer )
-		            iWmMainContainer->SelectL();
+		            iWmMainContainer->HandleStoreCommandL();
+                }
 		        break;
             case EAknSoftkeyCancel: // flow through
             case EEikCmdCanceled:
@@ -188,7 +191,16 @@ void CWmMainContainerView::DoActivateL(
 		const TDesC8& /*aCustomMessage*/ )
 	{
     // setup status pane layout
-    StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );    
+    TInt layoutResourceId = ( (iWmPlugin.Configuration().StoreCount() ) ? 
+            R_AVKON_STATUS_PANE_LAYOUT_IDLE_FLAT :
+            R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
+    StatusPane()->SwitchLayoutL( layoutResourceId );
+    
+    // ToDo: Support for msk in all layout is ongoing, when available in 
+    // sdk use next line and get rid of above.
+    
+    //StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL_FLAT );
+    
     // apply changes 
     StatusPane()->ApplyCurrentSettingsL();
     // disable transparancy
@@ -208,13 +220,18 @@ void CWmMainContainerView::DoActivateL(
     StatusPane()->DrawNow();
 
     // update cba
-    if ( Layout_Meta_Data::IsMSKEnabled() )
+    if ( !AknLayoutUtils::MSKEnabled() ||
+        iWmPlugin.Configuration().StoreCount() == 0 )
         {
         CEikButtonGroupContainer* bgc( Cba() );
         CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
-        cba->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT );
+        cba->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_BACK );
         bgc->SetBoundingRect( TRect() );
         cba->DrawNow();
+        }
+    else if ( AknLayoutUtils::MSKEnabled() )
+        {
+        UpdateMSKIconL();
         }
 
     // create container
@@ -309,24 +326,9 @@ void CWmMainContainerView::DynInitMenuPaneL(
                 !iWmMainContainer->CanDoHelp() );
 		aMenuPane->SetItemDimmed( EWmMainContainerViewUninstallMenuItemCommand,
                 !iWmMainContainer->CanDoUninstall() );
-        if ( !iWmMainContainer->PortalSelected() )
-            aMenuPane->DeleteMenuItem( EWmMainContainerViewOpenPortalMenuItemCommand );
         if ( !iWmMainContainer->WidgetSelected() )
             aMenuPane->DeleteMenuItem( EWmMainContainerViewAddMenuItemCommand );
         }
-    }
-
-// ---------------------------------------------------------
-// CWmMainContainerView::HandleOpenMenuItemSelectedL
-// ---------------------------------------------------------
-//
-TBool CWmMainContainerView::HandleOpenMenuItemSelectedL()
-    {
-    if ( iWmMainContainer && iWmMainContainer->PortalSelected() )
-        {       
-        iWmMainContainer->OpenPortalL();
-        }
-    return ETrue;
     }
 
 // ---------------------------------------------------------
@@ -431,16 +433,64 @@ TBool CWmMainContainerView::HandleDeactivateFindPaneL()
     }
 
 // ---------------------------------------------------------
-// CWmMainContainerView::HandleForegroundEventL
+// CWmMainContainerView::UpdateMSKIconL
 // ---------------------------------------------------------
 //
-void CWmMainContainerView::HandleForegroundEventL( TBool aForeground )
+void CWmMainContainerView::UpdateMSKIconL()
     {
-    CAknView::HandleForegroundEventL( aForeground );
-    if ( iWmMainContainer )
+    CEikButtonGroupContainer* bgc( Cba() );
+    CEikCba* cba = static_cast< CEikCba* >( bgc->ButtonGroup() );
+    TFileName fileName( iWmPlugin.ResourceLoader().IconFilePath() );
+    TAknsItemID skinId = KAknsIIDQgnMenuOviStore;
+    TInt bitmapId( EMbmWidgetmanagerQgn_menu_ovistore );
+    TInt maskId( EMbmWidgetmanagerQgn_menu_ovistore_mask );
+
+    if ( iWmPlugin.Configuration().StoreCount() > 1 )
         {
-        iWmMainContainer->ProcessForegroundEvent( aForeground );
+        skinId = KAknsIIDQgnPropLmShopping;        
+        bitmapId = EMbmWidgetmanagerQgn_menu_shopping;
+        maskId = EMbmWidgetmanagerQgn_menu_shopping_mask;
         }
+    else
+        {
+        const RPointerArray<CWmConfItem>& storeConfArray = 
+                iWmPlugin.Configuration().StoreConfArray();
+        CWmConfItem* confItem( storeConfArray[0] );
+        
+        if ( confItem && 
+            confItem->Id() != CWmStore::EOvi && 
+            confItem->Icon().Length() )
+            {            
+            CWmImageConverter* imageConverter = CWmImageConverter::NewL();
+            CleanupStack::PushL( imageConverter );
+            
+            // parse icon str      
+            // TODO: now only mif&skin are supported. Later when API is there
+            // we can add support for rest icon types
+            TBool res = imageConverter->ParseIconString(
+                    confItem->Icon(), skinId, bitmapId, maskId, fileName );
+            
+            CleanupStack::PopAndDestroy( imageConverter );
+            
+            if ( !res )
+                {
+                // use default shopping icon
+                skinId = KAknsIIDQgnPropLmShopping;        
+                bitmapId = EMbmWidgetmanagerQgn_menu_shopping;
+                maskId = EMbmWidgetmanagerQgn_menu_shopping_mask;
+                fileName.Copy( iWmPlugin.ResourceLoader().IconFilePath() );
+                }
+            }
+        }
+    
+    cba->UpdateMSKIconL(
+                    skinId,
+                    fileName,
+                    bitmapId,
+                    maskId,
+                    ETrue );
+    bgc->SetBoundingRect( TRect() );                   
+    cba->DrawNow();
     }
 
 // End of file

@@ -38,7 +38,6 @@
 const TInt KMaxDateStringLength = 100;
 const TInt KMaxDayNumberStringLength = 10;
 
-_LIT( KDateFont, "EAknLogicalFontSecondaryFont" );
 _LIT( KTimeFormat, "%0U %1U" );
 
 
@@ -210,7 +209,7 @@ const CAknLayoutFont* CXnDateControl::CreateFontL( CXnNodePluginIf& aNode )
     {    
     if ( !iDateFont )
         {
-        iAdapter.CreateFontL( aNode, KDateFont, iDateFont );
+        iAdapter.CreateFontL( aNode, iDateFont );
         }
     return CAknLayoutFont::AsCAknLayoutFontOrNull( iDateFont );
     }

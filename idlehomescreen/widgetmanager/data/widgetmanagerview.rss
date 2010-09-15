@@ -41,7 +41,7 @@ RESOURCE RSS_SIGNATURE
 
 RESOURCE AVKON_VIEW r_wm_main_container_view
     {
-    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    cba = r_wm_softkeys_options_back__store;
     menubar = r_wm_main_container_options_menu;
     toolbar = 0;
     }
@@ -49,6 +49,28 @@ RESOURCE AVKON_VIEW r_wm_main_container_view
 RESOURCE TITLE_PANE r_wm_main_container_title_resource
     {
     txt = qtn_wm_title_text;
+    }
+
+RESOURCE CBA r_wm_softkeys_options_back__store
+    {
+    flags = EEikButtonGroupAddToStack | EEikCbaFlagAppMskIcon;    
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyBack; txt = text_softkey_back; },                
+        AVKON_CBA_BUTTON{id=EWmStoreCommand; longpressid=0; txt= ""; }
+        };
+    }
+
+RESOURCE CBA r_wm_softkeys_options_cancel__store
+    {
+    flags = EEikButtonGroupAddToStack | EEikCbaFlagAppMskIcon;
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        AVKON_CBA_BUTTON{id=EWmStoreCommand; longpressid=0; txt= ""; }
+        };
     }
 
 // ----------------------------------------------------
@@ -70,12 +92,6 @@ RESOURCE MENU_PANE r_wm_main_container_menu_pane
     {
     items =
         {
-        MENU_ITEM
-            {
-            command = EWmMainContainerViewOpenPortalMenuItemCommand;
-            txt = qtn_options_wm_open;
-            flags = EEikMenuItemAction;
-            },
         MENU_ITEM
             {
             command = EWmMainContainerViewAddMenuItemCommand;
@@ -124,25 +140,21 @@ RESOURCE MENU_PANE r_wm_main_container_menu_pane
     }
 
 // ----------------------------------------------------
-// OVI STORE BUTTON
+// Ovi store related
 // ----------------------------------------------------
-
-RESOURCE AVKON_BUTTON r_wm_portal_button
-    {
-    flags = 0;
-    states =
-        {
-        AVKON_BUTTON_STATE
-            {
-            flags = 0;
-            txt = qtn_wm_ovi_store_title;
-            }
-        };
-    }
-
-RESOURCE TBUF r_qtn_wm_go_to_ovi_store
+RESOURCE TBUF r_qtn_wm_ovi_store_title
     {
     buf = qtn_wm_ovi_store_title;
+    }
+
+RESOURCE TBUF r_qtn_wm_ovi_store_desc
+    {
+    buf = qtn_wm_ovi_store_desc;
+    }
+
+RESOURCE TBUF r_qtn_wm_storelist_title
+    {
+    buf = qtn_wm_storelist_title;
     }
 
 // ----------------------------------------------------

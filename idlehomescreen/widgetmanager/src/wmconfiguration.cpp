@@ -27,14 +27,15 @@
 #include "wmconfiguration.h"
 #include "wmresourceloader.h"
 #include "wmcrkeys.h"
+#include "wmstore.h"
 
 // some constants regarging the central repository localised section.
 // these will ensure CR localisation section compatibility even if
 // new strings are added
-const TInt KLangOffsetOperatorUrl = KOperatorButtonUrl0 - KLangId0;
-const TInt KLangOffsetOperatorText = KOperatorButtonText0 - KLangId0;
-const TInt KLangGroupSize = KLangId1 - KLangId0;
-const TUint32 KLastLangId = KLangId9;
+const TInt KLangOffsetStoreUrl = KUrl_0 - KLangId_0;
+const TInt KLangOffsetStoreText = KTitle_0 - KLangId_0;
+const TInt KLangGroupSize = KLangId_1 - KLangId_0;
+const TUint32 KLastLangId = KLangId_9;
 
 _LIT( KOpAppTypeS60, "s60" );
 _LIT( KOpAppTypeCwrt, "cwrt" );
@@ -42,7 +43,7 @@ _LIT( KOpAppTypeWrt, "wrt" );
 _LIT( KOpAppTypeJava, "java" );
 _LIT( KOpAppTypeQt, "qt" );
 _LIT( KSeparator, ":" );
-_LIT( KOperatorIcon, "uid(%d)");
+_LIT( KStoreIconFormat, "uid(%d)");
 _LIT( KHexPrefix, "0x" );
 
 // ---------------------------------------------------------
@@ -67,15 +68,7 @@ CWmConfiguration::CWmConfiguration(
         CWmResourceLoader& aResourceLoader )
     : iResourceLoader( aResourceLoader )
 	{
-
-    // ovi
-    iOviStoreUid = KNullUid;
-
-    // operator
-    iOperatorAppIdUid = KNullUid;
-    iOperatorAppType = EUnknown;
-    iOperatorButtonEnabled = EFalse;
-    iButtonsMirrored = EFalse;
+    
 	}
 
 // ---------------------------------------------------------
@@ -84,17 +77,8 @@ CWmConfiguration::CWmConfiguration(
 //
 CWmConfiguration::~CWmConfiguration()
 	{
-    delete iRepository;
-    // ovi
-    delete iOviStoreClientParam;
-    delete iOviButtonTitle;
-    delete iOviButtonIcon;
-    // operator
-    delete iOperatorButtonTitle;
-    delete iOperatorButtonIcon;
-    delete iOperatorButtonUrl;
-    delete iOperatorParam;
-    delete iOperatorAppIdStr;
+    delete iRepository;    
+    iConfItems.ResetAndDestroy();
 	}
 
 // ---------------------------------------------------------
@@ -103,24 +87,8 @@ CWmConfiguration::~CWmConfiguration()
 //
 void CWmConfiguration::ConstructL()
 	{
-	// localised ovistore button text
-    iOviButtonTitle = StringLoader::LoadL( R_QTN_WM_GO_TO_OVI_STORE );
-
-    // ovistore icon descriptor. It will look something like this:
-    // skin( 0x101f86e3 0x23f6 ):mif( z:\resource\apps\widgetmanager.mif 16388 16389 )
-    _LIT( KSkinMifIconFormat, "skin( 0x%x 0x%x ):mif( %S %d %d )");
-    const TInt KMaxIconDescriptorLength = 256;
-    TBuf<KMaxIconDescriptorLength> buf;
-    buf.Format( KSkinMifIconFormat(),
-             EAknsMajorGeneric, EAknsMinorGenericQgnMenuOviStore,
-             &iResourceLoader.IconFilePath(),
-             EMbmWidgetmanagerQgn_menu_ovistore,
-             EMbmWidgetmanagerQgn_menu_ovistore_mask );
-    iOviButtonIcon = buf.AllocL();
-
     // read data from repository
     TRAP_IGNORE( LoadConfigurationL(); );
-
 	}
 
 // ---------------------------------------------------------
@@ -130,25 +98,75 @@ void CWmConfiguration::ConstructL()
 void CWmConfiguration::LoadConfigurationL()
     {
     iRepository = CRepository::NewL( 
-            TUid::Uid( KCrWidgetManagerm ) );
+            TUid::Uid( KCrWidgetManager ) );
+    
+    TLinearOrder<CWmConfItem> order 
+        = CWmConfiguration::CompareStoreOrder;
 
     // read Ovi parameters
-    ReadInt32Parameter( KOviStoreUid, iOviStoreUid.iUid );
-    iOviStoreClientParam = ReadDescParameterL( KOviStoreClientParam ); 
-    
-    // read operator parameters if operator button enabled
-    ReadIntParameter( KOperatorButtonEnabled, iOperatorButtonEnabled );
-    if ( iOperatorButtonEnabled )
+    TInt oviEnabled;
+    ReadIntParameter( KOviStoreEnabled, oviEnabled );
+    if ( oviEnabled )
         {
-        // determine language and read localised parameters
+        CWmConfItem* ovi = CWmConfItem::NewLC();
+        ovi->iId = CWmStore::EOvi;
+        
+        // localised ovistore text
+        _LIT( KFormatStr, "%S\t%S");
+        HBufC* title = StringLoader::LoadLC( R_QTN_WM_OVI_STORE_TITLE );
+        HBufC* desc = StringLoader::LoadLC( R_QTN_WM_OVI_STORE_DESC );
+        
+        ovi->iTitle = HBufC::NewL( title->Des().Length() +
+                                   desc->Des().Length() + 
+                                   KFormatStr().Length() );
+
+        ovi->iTitle->Des().Format( KFormatStr(), title, desc );
+        
+        CleanupStack::PopAndDestroy( desc );
+        CleanupStack::PopAndDestroy( title );
+        
+        // ovistore icon descriptor. It will look something like this:
+        // skin( 0x101f86e3 0x23f6 ):mif( z:\resource\apps\widgetmanager.mif 16388 16389 )
+        _LIT( KSkinMifIconFormat, "skin( 0x%x 0x%x ):mif( %S %d %d )");
+        const TInt KMaxIconDescriptorLength = 256;
+        TBuf<KMaxIconDescriptorLength> buf;
+        buf.Format( KSkinMifIconFormat(),
+                 EAknsMajorGeneric, EAknsMinorGenericQgnMenuOviStore,
+                 &iResourceLoader.IconFilePath(),
+                 EMbmWidgetmanagerQgn_menu_ovistore,
+                 EMbmWidgetmanagerQgn_menu_ovistore_mask );
+        ovi->iIcon = buf.AllocL();
+        
+        ReadIntParameter( KOviOrder, ovi->iOrder );
+        ReadInt32Parameter( KOviUid, ovi->iAppUid.iUid );
+        ovi->iAppParam = ReadDescParameterL( KOviAppParam );
+
+        // Item to Array
+        iConfItems.InsertInOrderL( ovi, order );
+        CleanupStack::Pop( ovi );
+        }
+    
+    // read Store parameters if Store enabled
+    TInt storeEnabled = 0;
+    ReadIntParameter( KStoreEnabled, storeEnabled );
+    if ( storeEnabled )
+        {
         iLanguageIndex = FindCorrectLanguageId();
-        iOperatorButtonTitle = ReadLocalisedParameterL( KLangOffsetOperatorText );
-        iOperatorButtonUrl = ReadLocalisedParameterL( KLangOffsetOperatorUrl );
+        
+        CWmConfItem* op = CWmConfItem::NewLC();
+        op->iId = CWmStore::EStore1;
+        
+        op->iTitle = ReadLocalisedParameterL( KLangOffsetStoreText );
+        op->iUrl = ReadLocalisedParameterL( KLangOffsetStoreUrl );
         // read non-localised parameters
-        iOperatorButtonIcon = ReadDescParameterL( KOperatorButtonIcon );
-        ReadOperatorApplicationInfoL();
-        iOperatorParam = ReadDescParameterL( KOperatorParam );
-        ReadIntParameter( KOperatorButtonHigherPriority, iButtonsMirrored );
+        op->iIcon = ReadDescParameterL( KIcon );
+        ReadApplicationInfoL( KAppTypeAndId, *op );
+        op->iAppParam = ReadDescParameterL( KAppParam );        
+        ReadIntParameter( KOrder, op->iOrder );
+        
+        // Item to Array
+        iConfItems.InsertInOrderL( op, order );
+        CleanupStack::Pop( op );
         }
 
     delete iRepository;
@@ -167,7 +185,7 @@ TInt CWmConfiguration::FindCorrectLanguageId()
     TLanguage sysLang = User::Language();
     
     //read language id's from cenrep, find a match
-    for( TUint32 i=KLangId0; i<=KLastLangId && languageIndex<0; i+=KLangGroupSize )
+    for( TUint32 i=KLangId_0; i<=KLastLangId && languageIndex<0; i+=KLangGroupSize )
         {
         TInt crLang = 0;
         if ( iRepository->Get( i, crLang ) == KErrNone )
@@ -246,7 +264,7 @@ HBufC* CWmConfiguration::ReadLocalisedParameterL(
     if ( err != KErrNone || buf.Length() == 0 )
         {
         // This language is empty. Try default language (index 0)
-        err = iRepository->Get( KLangId0 + aOffset, buf );
+        err = iRepository->Get( KLangId_0 + aOffset, buf );
         }
 
     // construct string in heap
@@ -259,12 +277,13 @@ HBufC* CWmConfiguration::ReadLocalisedParameterL(
     }
 
 // ---------------------------------------------------------
-// CWmConfiguration::ReadOperatorApplicationInfoL
+// CWmConfiguration::ReadApplicationInfoL
 // ---------------------------------------------------------
 //
-void CWmConfiguration::ReadOperatorApplicationInfoL()
+void CWmConfiguration::ReadApplicationInfoL( 
+        TInt aKey, CWmConfItem& aConfItem )
     {
-    HBufC* applicationInfo = ReadDescParameterL( KOperatorAppTypeAndId );
+    HBufC* applicationInfo = ReadDescParameterL( aKey );
     if ( applicationInfo && applicationInfo->Des().Length() > 0 )
         {
         CleanupStack::PushL( applicationInfo );
@@ -280,34 +299,32 @@ void CWmConfiguration::ReadOperatorApplicationInfoL()
             
             if ( !type.Compare( KOpAppTypeS60 ) )
                 {
-                iOperatorAppType = ES60;
-                iOperatorAppIdUid = StringToUid( appId );
-                SetOperatorIconL( iOperatorAppIdUid );
+                aConfItem.iAppType = ES60;
+                aConfItem.iAppUid = StringToUid( appId );
+                SetStoreIconL( aConfItem );
                 }
             else if ( !type.Compare( KOpAppTypeCwrt ) )
                 {
-                iOperatorAppType = ECwrt;
-                iOperatorAppIdUid = FetchWidgetUidFromRegistryL( appId );
-                SetOperatorIconL( iOperatorAppIdUid );
+                aConfItem.iAppType = ECwrt;
+                aConfItem.iAppUid = FetchWidgetUidFromRegistryL( appId );
+                SetStoreIconL( aConfItem );
                 }
             else if ( !type.Compare( KOpAppTypeWrt ) )
                 {
-                iOperatorAppType = EWrt;
-                iOperatorAppIdUid = FetchWidgetUidFromRegistryL( appId );
-                SetOperatorIconL( iOperatorAppIdUid );
+                aConfItem.iAppType = EWrt;
+                aConfItem.iAppUid = FetchWidgetUidFromRegistryL( appId );
+                SetStoreIconL( aConfItem );
                 }
             else if ( !type.Compare( KOpAppTypeJava ) )
                 {
-                //TODO: java support is not fully implemented
+                // java support is not fully implemented
                 User::Leave( KErrGeneral );
-                iOperatorAppType = EJava;
-                iOperatorAppIdStr = appId.AllocL();
                 }
             else if ( !type.Compare( KOpAppTypeQt ) )
                 {
-                iOperatorAppType = EQt;
-                iOperatorAppIdUid = StringToUid( appId );
-                SetOperatorIconL( iOperatorAppIdUid );
+                aConfItem.iAppType = EQt;
+                aConfItem.iAppUid = StringToUid( appId );
+                SetStoreIconL( aConfItem );
                 }
             }
         CleanupStack::PopAndDestroy( applicationInfo );
@@ -315,20 +332,21 @@ void CWmConfiguration::ReadOperatorApplicationInfoL()
     }
 
 // ---------------------------------------------------------
-// CWmConfiguration::SetOperatorIcon
+// CWmConfiguration::SetStoreIcon
 // ---------------------------------------------------------
 //
-void CWmConfiguration::SetOperatorIconL( TUid aUid )
+void CWmConfiguration::SetStoreIconL( CWmConfItem& aConfItem )
     {
-    if ( iOperatorButtonIcon &&
-        !iOperatorButtonIcon->Des().Length() )
+    if ( aConfItem.iIcon &&
+        !aConfItem.iIcon->Des().Length() )
         {
-        delete iOperatorButtonIcon;
-        iOperatorButtonIcon = NULL;
-        iOperatorButtonIcon = HBufC::NewL(
-                KMaxUidName + KOperatorIcon().Length() );
-        iOperatorButtonIcon->Des().Format(
-                KOperatorIcon(), aUid );
+        delete aConfItem.iIcon;
+        aConfItem.iIcon = NULL;
+        
+        aConfItem.iIcon = HBufC::NewL(
+                KMaxUidName + KStoreIconFormat().Length() );
+        aConfItem.iIcon->Des().Format(
+                KStoreIconFormat(), aConfItem.iAppUid );
         }
     }
 
@@ -346,137 +364,6 @@ TUid CWmConfiguration::FetchWidgetUidFromRegistryL(
     clientSession.Disconnect();
     CleanupStack::PopAndDestroy( &clientSession );
     return TUid::Uid( ret );
-    }
-     
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonCount
-// ---------------------------------------------------------
-//
-TInt CWmConfiguration::PortalButtonCount()
-    {
-    return ( iOperatorButtonEnabled ? 2 : 1 );
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonText
-// ---------------------------------------------------------
-//
-const TDesC& CWmConfiguration::PortalButtonText( TInt aIndex )
-    {
-    if ( aIndex == 0 && iOviButtonTitle )
-        return *iOviButtonTitle;
-    if ( aIndex == 1 && iOperatorButtonTitle && iOperatorButtonEnabled )
-        return *iOperatorButtonTitle;
-    return KNullDesC;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonIcon
-// ---------------------------------------------------------
-//
-const TDesC& CWmConfiguration::PortalButtonIcon( TInt aIndex )
-    {
-    if ( aIndex == 0 && iOviButtonIcon )
-        return *iOviButtonIcon;
-    if ( aIndex == 1 && iOperatorButtonIcon && iOperatorButtonEnabled )
-        return *iOperatorButtonIcon;
-    return KNullDesC;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonBrowserUrl
-// ---------------------------------------------------------
-//
-const TDesC& CWmConfiguration::PortalButtonBrowserUrl( TInt aIndex )
-    {
-    // No support for ovi here
-    if ( aIndex == 1 && iOperatorButtonUrl && iOperatorButtonEnabled )
-        return *iOperatorButtonUrl;
-    return KNullDesC;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonClientUid
-// ---------------------------------------------------------
-//
-TUid CWmConfiguration::PortalButtonClientUid( TInt aIndex )
-    {
-    if ( aIndex == 0 )
-        {
-        return iOviStoreUid;
-        } 
-    // operator not supported. Get operator data using 
-    // PortalButtonApplicationInfoL
-    return KNullUid;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonClientParam
-// ---------------------------------------------------------
-//
-const TDesC& CWmConfiguration::PortalButtonClientParam( TInt aIndex )
-    {
-    if ( aIndex == 0 && iOviStoreClientParam )
-        {
-        return *iOviStoreClientParam;
-        }
-    if ( aIndex == 1 && iOperatorParam && iOperatorButtonEnabled )
-        {
-        return *iOperatorParam;
-        }
-    return KNullDesC;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonsMirrored
-// ---------------------------------------------------------
-//
-TBool CWmConfiguration::PortalButtonsMirrored()
-    {
-    return iButtonsMirrored;
-    } 
-   
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonApplicationType
-// ---------------------------------------------------------
-//
-CWmConfiguration::TOpAppType CWmConfiguration::PortalButtonApplicationType( 
-        TInt aIndex )
-    {
-    if ( aIndex == 1 )
-        {
-        return iOperatorAppType;
-        }
-    // no support for ovi
-    return EUnknown;
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonApplicationId
-// ---------------------------------------------------------
-//
-void CWmConfiguration::PortalButtonApplicationId( 
-        TInt aIndex, TDes& aOperatorAppId )
-    {
-    if ( aIndex == 1 )
-        {
-        aOperatorAppId.Copy( *iOperatorAppIdStr );
-        }
-    // no support for ovi
-    }
-
-// ---------------------------------------------------------
-// CWmConfiguration::PortalButtonApplicationId
-// ---------------------------------------------------------
-//
-void CWmConfiguration::PortalButtonApplicationId( 
-        TInt aIndex, TUid& aOperatorAppId )
-    {
-    if ( aIndex == 1 )
-        {
-        aOperatorAppId = iOperatorAppIdUid; 
-        }
-    // no support for ovi
     }
 
 // ---------------------------------------------------------
@@ -507,6 +394,168 @@ TUid CWmConfiguration::StringToUid( const TDesC& aStr )
     return KNullUid;
     }
 
+// ---------------------------------------------------------
+// CWmConfiguration::CompareStoreOrder
+// ---------------------------------------------------------
+//
+TInt CWmConfiguration::CompareStoreOrder( 
+        const CWmConfItem& aItemOne, const CWmConfItem& aItemTwo )
+    {
+    // 1. zero, if the two objects are equal.
+    // 2. a negative value, if the first object is less than the second.
+    // 3. a positive value, if the first object is greater than the second.
+    TInt ret = 0;
+    if ( aItemOne.iOrder < aItemTwo.iOrder )
+        {
+        ret = -1;
+        }
+    if ( aItemOne.iOrder > aItemTwo.iOrder )
+        {
+        ret = 1;
+        }
+    return ret;
+    }
+	
+// ---------------------------------------------------------
+// CWmConfiguration::StoreConfArray
+// ---------------------------------------------------------
+//
+const RPointerArray<CWmConfItem>& CWmConfiguration::StoreConfArray()
+    {
+    return iConfItems;
+    }
+
+// ---------------------------------------------------------
+// CWmConfiguration::StoreCount
+// ---------------------------------------------------------
+//
+TInt CWmConfiguration::StoreCount()
+    {
+    return iConfItems.Count();
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::NewL
+// ---------------------------------------------------------
+//
+CWmConfItem* CWmConfItem::NewL()
+    {
+    CWmConfItem* self = CWmConfItem::NewLC();
+    CleanupStack::Pop(); // self;
+    return self;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::NewLC
+// ---------------------------------------------------------
+//
+CWmConfItem* CWmConfItem::NewLC()
+    {
+    CWmConfItem* self = new ( ELeave ) CWmConfItem();
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    return self;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::~CWmConfItem
+// ---------------------------------------------------------
+//
+CWmConfItem::~CWmConfItem()
+    {
+    delete iTitle;
+    delete iIcon;
+    delete iUrl;              
+    delete iAppParam;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::CWmConfItem
+// ---------------------------------------------------------
+//
+CWmConfItem::CWmConfItem()
+    {
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::ConstructL
+// ---------------------------------------------------------
+//
+void CWmConfItem::ConstructL()
+    {
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::Id
+// ---------------------------------------------------------
+//
+CWmStore::TStoreId CWmConfItem::Id()
+    {
+    return iId;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::Title
+// ---------------------------------------------------------
+//
+const TDesC& CWmConfItem::Title()
+    {
+    return ( iTitle ? *iTitle : KNullDesC() );
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::Icon
+// ---------------------------------------------------------
+//
+const TDesC& CWmConfItem::Icon()
+    {
+    return ( iIcon ? *iIcon : KNullDesC() );
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::Order
+// ---------------------------------------------------------
+//
+TInt CWmConfItem::Order()
+    {
+    return iOrder;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::BrowserUrl
+// ---------------------------------------------------------
+//
+const TDesC& CWmConfItem::BrowserUrl() 
+    {
+    return ( iUrl ? *iUrl : KNullDesC() );
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::AppType
+// ---------------------------------------------------------
+//
+CWmConfiguration::TStoreAppType CWmConfItem::AppType()
+    {
+    return iAppType;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::AppUid
+// ---------------------------------------------------------
+//
+TUid CWmConfItem::AppUid()
+    {
+    return iAppUid;
+    }
+
+// ---------------------------------------------------------
+// CWmConfItem::AppParam
+// ---------------------------------------------------------
+//
+const TDesC& CWmConfItem::AppParam()
+    {
+    return ( iAppParam ? *iAppParam : KNullDesC() );
+    }
 
 // End of File
 

@@ -63,11 +63,11 @@ softkey#rsk
 
 softkey#msk_ltr
 {
-    display: block;
+    display: none;
 }
 
 softkey#msk_rtl
 {
-    display: none;
+    display: block;
 }
 

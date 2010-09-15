@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <!DOCTYPE xmluiml SYSTEM "AI3_Demo.dtd"> -->
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+
+    <widget id="tworows_template">
+        <!-- Data plugin in this widget -->
+        <contentsource id="tworows_plugin" name="" value="0x20019594" />
+        
+        <configuration name="service" value="Service.ContentPublishing"/>
+        <configuration name="interface" value="IContentPublishing"/>
+        <configuration name="command" value="GetList"/>
+        <configuration id="pub_id" name="publisher" value=""/>
+
+ 			  <image id="image_container" focusable="true" _s60-initial-focus="1">
+ 			    <!-- Template designer choice -->
+	 			  <actions>
+	          <action>
+	            <trigger name="activate"/>
+	            <event id="p1trigger" name=""/>
+	          </action>
+	        </actions>
+          <configuration name="content_type" value="image1"/>
+          <property id="prop1" class=""/>
+      	</image>
+      	
+      	<box id="text_container">
+	        <text id="row1" class="text_box" focusable="true" >
+	          <!-- Template designer choice -->
+		        <actions>
+		          <action>
+		            <trigger name="activate"/>
+		            <event id="p2trigger" name=""/>
+		          </action>
+		        </actions>
+		        <configuration name="content_type" value="text1"/>
+	          <property id="prop2" class=""/>
+	      	</text>
+	      	
+	      	<text id="row2" class="text_box"  focusable="true" >
+	      	  <!-- Template designer choice -->
+		      	<actions>
+		          <action>
+		            <trigger name="activate"/>
+		            <event id="p3trigger" name=""/>
+		          </action>
+		        </actions>
+		        <configuration name="content_type" value="text2"/>
+	          <property id="prop3" class=""/>
+	      	</text>
+				</box>
+				<menuextension>
+            <!-- dynmenuitems are mapped to HS view.xml menu based on target attribute.
+                 HS view.xml provides localisation for predined items: "settings" and "refresh". -->                
+            <dynmenuitem type="widgetsettings" target="hs_widget_menuitem_settings">
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="menuitem(widgetsettings)" destination="tworows_plugin"/>  
+                    </action>
+                </actions>
+            </dynmenuitem>                    
+            <dynmenuitem type="refresh" target="hs_widget_menuitem_refresh">
+                <actions>
+                    <action>
+                        <trigger name="activate"/>
+                        <event name="menuitem(refresh)" destination="tworows_plugin"/>  
+                    </action>
+                </actions>
+            </dynmenuitem>        
+        </menuextension>
+    </widget>
+</xmluiml>

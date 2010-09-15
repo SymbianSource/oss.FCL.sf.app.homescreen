@@ -57,7 +57,6 @@
 #include "xnviewdata.h"
 #include "xnwallpaperview.h"
 #include "xnbackgroundmanager.h"
-#include "xnpopupcontroladapter.h"
 
 #include "xneditor.h"
 #include "xnpanic.h"
@@ -629,18 +628,6 @@ void CXnEditor::AddWidgetL()
         }
     if( ui )
         {
-        CXnNode* popup( iViewManager.UiEngine().StylusPopupNode() );
-        if ( popup )
-            {
-            CXnPopupControlAdapter* control =
-                static_cast< CXnPopupControlAdapter* >(
-                        popup->Control() );
-           
-            if ( control )
-                {
-                control->HideMenuL();
-                }
-            }
         ui->SetContentController( this );
         ui->Activate();
         

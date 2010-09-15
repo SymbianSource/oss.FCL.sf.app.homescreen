@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration xmlns="http://www.s60.com/xml/confml/2" name="Banko Homescreen" version="1">
   <feature ref="BlankoHomescreenPlugins" name="Blanko Homescreen Widgets">
+    <setting ref="SupportQhd" name="Qhd Support" type="boolean">
+      <desc>The Qhd touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
+    <setting ref="SupportVga" name="Vga Support" type="boolean">
+      <desc>The Vga touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
     <setting ref="Plugins" name="Widgets" type="sequence">
       <desc>Widgets on Blanko Homescreen</desc>
       <setting ref="Uid" name="Widget" type="string">
@@ -84,13 +90,8 @@
     </setting>
   </feature>
   <data>
-  <!--  <BlankoHomescreenPlugins>
-      <Plugins extensionPolicy="replace"><Uid>0x2001f47f</Uid><BundleIdentifier></BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier></BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier></BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier></BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier></BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus></Plugins>
-      <Plugins><Uid>0x2001f47f</Uid><BundleIdentifier></BundleIdentifier><TemplateIdentifier>0</TemplateIdentifier><LockingStatus>none</LockingStatus></Plugins>
-    </BlankoHomescreenPlugins> -->
+      <SupportQhd>true</SupportQhd>
+      <SupportVga>true</SupportVga>
+
   </data>
 </configuration>

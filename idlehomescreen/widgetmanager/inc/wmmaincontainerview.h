@@ -79,15 +79,7 @@ public:
      * @see CAknView::DoActivateL
      */
     void DoDeactivate();
-		
-public: // from MeikMenuObserver
-	
-    /** 
-     * Foreground event handling function.  
-     * @param aForeground Indicates the required focus state of the control.
-     */ 
-    void HandleForegroundEventL( TBool aForeground );
-	    
+
 private:
     CWmMainContainerView( CWmPlugin& aWmPlugin );    
     void ConstructL();    
@@ -114,7 +106,6 @@ protected:	// From MEikMenuObserver
 private:
     
     /** menu commands */
-    TBool HandleOpenMenuItemSelectedL();
     TBool HandleAddMenuItemSelectedL();
     TBool HandleLaunchMenuItemSelectedL();
     TBool HandleSearchMenuItemSelectedL();
@@ -125,6 +116,8 @@ private:
 	TBool HandleDeactivateFindPaneL();
 	/** setup title in status pane */
 	void SetTitleL();
+	/** setup msk icon */
+	void UpdateMSKIconL();
 
 private:
     /** 
@@ -141,7 +134,6 @@ private:
 	 * the plugin root (not owned) 
 	 */
 	CWmPlugin& iWmPlugin;
-
 	};
 
 #endif // WMMAINCONTAINERVIEW_H

@@ -303,6 +303,11 @@ private:
     void RenderContentL( );
     
     /**
+     * Prepare bitmap for item.
+     */
+    CGulIcon* CreateItemIconLC( CTsFswEntry* aEntry, TBool aIsScreenshot );
+    
+    /**
      * Creates the ganes grid control.
      */
     void ReCreateGridL();
@@ -384,6 +389,11 @@ private:
      */
     TBool LongTapAnimForPos( const TPoint& aHitPoint );
     
+    /**
+     * Count grid rectangle based on given item position
+     */
+    TRect CountCenteredGridRect( TPoint aItemPosition);
+    
 private: // Data
     
     // parent control
@@ -458,6 +468,7 @@ private: // Data
     
     // Screenshot handling
     RArray<TInt> iPrevScreenshots;
+    RArray<TInt> iPrevWgIds;
     };
 
 #endif // TSFASTSWAPAREA_H

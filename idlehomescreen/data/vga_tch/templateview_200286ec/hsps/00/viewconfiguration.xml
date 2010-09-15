@@ -13,7 +13,7 @@
         <plugins>
             <plugin uid="0x200286e6" bundle_id="0" template_id="0" locking_status="permanent"/>
             <plugin uid="0x200286e7" bundle_id="0" template_id="0" locking_status="permanent"/>
-            <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="permanent"/>
+            <plugin uid="0x200255b6" bundle_id="0" template_id="0" locking_status="permanent"/>
             <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>
             <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>
             <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>

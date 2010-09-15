@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration xmlns="http://www.s60.com/xml/confml/1" name="Home screen 4 manifest" version="1">
+<configuration xmlns="http://www.s60.com/xml/confml/2" name="Home screen 4 manifest" version="1">
   <feature ref="Homescreen4manifest" name="Homescreen4 manifest">
+    <setting ref="SupportQhd" name="Qhd Support" type="boolean">
+      <desc>The Qhd touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
+    <setting ref="SupportVga" name="Vga Support" type="boolean">
+      <desc>The Vga touch is a supported display type of the xuikon homescreen</desc>
+    </setting>
     <setting ref="PackageVersion" name="Configuration package type version" type="selection">
       <option name="NotDefined" value="0"/>
       <option name="2.0" value="2.0"/>
@@ -28,6 +34,8 @@
   </feature>
 <data>
     <Homescreen4manifest>
+      <SupportQhd>true</SupportQhd>
+      <SupportVga>true</SupportVga>
       <PackageVersion>2.0</PackageVersion>
     <DeviceFamily>qhd_tch</DeviceFamily>
     <ConfigurationType>view</ConfigurationType>

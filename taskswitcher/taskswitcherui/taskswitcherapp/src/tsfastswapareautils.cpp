@@ -514,9 +514,7 @@ CFbsBitmap* CTsFastSwapAreaExtension::CopyBitmapL( TInt aFbsHandle, TSize aSize,
     CFbsBitmap* ret = new (ELeave) CFbsBitmap();
     CleanupStack::PushL( ret );
 
-    CFbsBitmap* bmp = new (ELeave) CFbsBitmap();
-    CleanupStack::PushL( bmp );
-    User::LeaveIfError( bmp->Duplicate( aFbsHandle ) );
+    CFbsBitmap* bmp = DuplicateBitmapLC( aFbsHandle );
     
     // First scale using normal method, to show "draft" screenshots.
     // Do not always use aSize, preserving the aspect ratio is quite
@@ -528,11 +526,7 @@ CFbsBitmap* CTsFastSwapAreaExtension::CopyBitmapL( TInt aFbsHandle, TSize aSize,
     // Second, if it is screenshot, perform quality improvement scaling
     if ( aIsScreenshot )
         {
-        CTsBitmapScaleTask* rotaTask = new (ELeave) CTsBitmapScaleTask( *this );
-        CleanupStack::PushL( rotaTask );
-        iScaleTasks.AppendL( rotaTask );
-        rotaTask->StartLD( bmp, ret ); // ownership of bmp transferred
-        CleanupStack::Pop( rotaTask );
+        ScaleBitmapL( bmp, ret );
         CleanupStack::Pop( bmp );
         }
     else
@@ -544,6 +538,32 @@ CFbsBitmap* CTsFastSwapAreaExtension::CopyBitmapL( TInt aFbsHandle, TSize aSize,
     return ret;
     }
 
+// --------------------------------------------------------------------------
+// CTsFastSwapAreaExtension::DuplicateBitmapL
+// --------------------------------------------------------------------------
+//
+CFbsBitmap* CTsFastSwapAreaExtension::DuplicateBitmapLC( TInt aFbsHandle  )
+    {
+    CFbsBitmap* bmp = new (ELeave) CFbsBitmap();
+    CleanupStack::PushL( bmp );
+    User::LeaveIfError( bmp->Duplicate( aFbsHandle ) );
+    return bmp;
+    }
+
+// --------------------------------------------------------------------------
+// CTsFastSwapAreaExtension::ScaleBitmapL
+// --------------------------------------------------------------------------
+//
+void CTsFastSwapAreaExtension::ScaleBitmapL( CFbsBitmap* aSourceBitmap,
+        CFbsBitmap* aTargetBitmap )
+    {
+    CTsBitmapScaleTask* rotaTask = new (ELeave) CTsBitmapScaleTask( *this );
+    CleanupStack::PushL( rotaTask );
+    iScaleTasks.AppendL( rotaTask );
+    rotaTask->StartLD( aSourceBitmap, aTargetBitmap ); 
+    // ownership of bmp transferred
+    CleanupStack::Pop( rotaTask );
+    }
 
 // --------------------------------------------------------------------------
 // CTsFastSwapAreaExtension::CancelScaleTasks

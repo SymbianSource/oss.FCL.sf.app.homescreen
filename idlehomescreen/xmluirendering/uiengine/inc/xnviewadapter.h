@@ -192,6 +192,14 @@ public:
      */
     void EnterEditStateL( CXnViewData& aView, TBool aEnter );
 
+    /**
+     * Tell if this adapter is on foreground. Returns EFalse immediately after
+	 * adapter is deactivated (Avkon IsForeground has some delay).
+     * @since S60 5.0
+     * @return ETrue if container is on foreground, EFalse otherwise
+     */
+	 TBool IsForegroundAdapter() const;
+            
 private:
     // new functions
     

@@ -38,7 +38,7 @@ class CAknViewAppUi;
 class CAknSearchField;
 class CCoeControl;
 class CAknSearchField;
-class CWmPortalButton;
+class CWmStore;
 class CWmMainContainerView;
 class CWmConfiguration;
 
@@ -92,11 +92,6 @@ public: // new functions
      * @return true, if widgets loading operation is ongoing. 
      */
     TBool IsLoadingWidgets();
-    
-    /** 
-     * @return true, if portal button is currently selected 
-     */
-    TBool PortalSelected();
     
     /** 
      * @return true, if a widget in list is currently selected 
@@ -174,14 +169,9 @@ public: // new functions
     void UninstallWidgetL();
 
     /**
-     * opens currently selected portal
+     * Store menu command.
      */
-    void OpenPortalL();
-
-    /**
-     * Selection key (middle soft key)
-     */
-    void SelectL();
+    void HandleStoreCommandL();
     
     /**
      * Show widget manager help
@@ -226,12 +216,6 @@ public:
      * @see CCoeControl::HandlePointerEventL
      */
     void HandlePointerEventL( const TPointerEvent& aPointerEvent );
-    
-    /**
-     * Moves focus to the OVI button
-     * @param aIndex 0=first button, 1=second (if it exists)
-     */
-    void SetFocusToPortalButton( TInt aIndex );
 
     /**
      * Moves focus to the widgets list, alternatively also setting the currently
@@ -252,17 +236,6 @@ public:
      * To set iClosingDown. See above.
      */
     void SetClosingDown( TBool aClosingDown );
-
-    /**
-     * access to WM configuration
-     */
-    CWmConfiguration& Configuration();
-    
-    /**
-     * Process foregound events.
-     * @param aForeground ETrue indicates foreground
-     */
-    void ProcessForegroundEvent( TBool aForeground );
     
     /**
      * access to WM list
@@ -314,28 +287,22 @@ private: // from MAdaptiveSearchTextObserver
     
 private: // New functions
     
+    void DisplayAndLaunchStoresL();
+    static void CleanupIconArray( TAny* aIconArray );
+
     void AddControlL( CCoeControl* aControl, TInt aControlId );
     void InitializeControlsL( const TRect& aRect );
     void LayoutControls();
     void StartLoadingWidgetsL();
     void RemoveCtrlsFromStack();
-    void UpdateFocusMode();
-    void ResetFocus( TDrawNow aDrawNow = ENoDrawNow );
     CCoeControl* FindChildControlByPoint( const TPoint& aPoint );
     void HandleFindSizeChanged();
-    TKeyResponse MoveFocusByKeys(
-            const TKeyEvent& aKeyEvent, 
-            TEventCode aType );
-    TKeyResponse HandleButtonKeyEventL( 
-            const TKeyEvent& aKeyEvent, 
-            TEventCode aType );
     TKeyResponse HandleListKeyEventL( 
             const TKeyEvent& aKeyEvent, 
             TEventCode aType );
     TKeyResponse HandleSearchKeyEventL( 
             const TKeyEvent& aKeyEvent, 
             TEventCode aType );
-    TInt OperatorButtonHigherPriority( TInt aIndex );
     
 public: // from MWmWidgetloaderObserver
     void LoadDoneL( TBool aWidgetListChanged );
@@ -366,54 +333,22 @@ private:
      * background
      */
     CAknsBasicBackgroundControlContext* iBgContext;
-    
-    /**
-     * portal button
-     * (if there is only one button, this is it)
-     */
-    CWmPortalButton*         iPortalButtonOne;
 
-    /**
-     * portal button
-     * (if there is only one button, this is NULL)
-     */
-    CWmPortalButton*         iPortalButtonTwo;
-
-    /** whether we are orientated in landscape */
-    TBool                   iLandscape;
-
-    /** whether we have mirrored layout */
-    TBool                   iMirrored;
-
-    /** focus modes */
-    enum TWmFocusMode
-        {
-        ENowhere,
-        EPortal,
-        EList,
-        EFind
-        };
-
-    /**
-     * current widget manager focus mode
-     */
-    TWmFocusMode            iFocusMode;
-    
     /**
      * AO for loading widgets into the list UI
      */
     CWmWidgetLoaderAo*      iWidgetLoader;
-    
+
+    /**
+     * Currectly selected store.
+     */
+    CWmStore*               iSelectedStore;
+
     /**
      * If this is set to ETrue it means wmview is closing and all user inputs
      * should be ignored.
      */
     TBool                   iClosingDown;
-    
-    /**
-     * The configuration
-     */
-    CWmConfiguration*       iConfiguration;
     
 #ifdef _WM_UNIT_TEST
     friend class CWmUnitTest;

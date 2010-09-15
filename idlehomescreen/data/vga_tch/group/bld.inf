@@ -30,6 +30,11 @@
 #include "../view3_200286eb/group/bld.inf"
 #include "../templateview_200286ec/group/bld.inf"
 #include "../wideimage_10009dff/group/bld.inf"
+#include "../onerow_200315c2/group/bld.inf"
+#include "../tworows_200315c3/group/bld.inf"
+#include "../threerows_200315c4/group/bld.inf"
+#include "../threetextrows_200315c5/group/bld.inf"
+#include "../posterwideimage_200315c6/group/bld.inf"
 
 PRJ_PLATFORMS
 DEFAULT

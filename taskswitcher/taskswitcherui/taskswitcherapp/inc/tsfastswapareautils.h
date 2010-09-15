@@ -198,6 +198,17 @@ public:
     CFbsBitmap* CopyBitmapL( TInt aFbsHandle, TSize aSize, TBool aIsScreenshot );
     
     /**
+     * Duplicates handle to bitmap.
+     */
+    CFbsBitmap* DuplicateBitmapLC( TInt aFbsHandle );
+    
+    /**
+     * Duplicates handle to bitmap.
+     */
+    void ScaleBitmapL( CFbsBitmap* aSourceBitmap,
+            CFbsBitmap* aTargetBitmap );
+    
+    /**
      * Cancels ongoing scale tasks
      */
     void CancelScaleTasks();

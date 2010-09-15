@@ -1667,7 +1667,7 @@ EXPORT_C TBool CXnUtils::HandlePowerSaveModeL(
 // Resolves skin id (major+minor) from SKIN() declaration.
 // -----------------------------------------------------------------------------
 //
-TBool CXnUtils::ResolveSkinItemIDL( const TDesC& aSkinId, TAknsItemID& aItemID )
+EXPORT_C TBool CXnUtils::ResolveSkinItemIDL( const TDesC& aSkinId, TAknsItemID& aItemID )
     {
     HBufC* str = aSkinId.AllocL();
     TPtr ptrSkin = str->Des();

@@ -499,6 +499,9 @@ void CXnPluginData::Flush()
     {
     // Don't touch to iOwner, because this plugin might be reused later
     
+    delete iDirtyRegion;
+    iDirtyRegion = NULL;
+    
     // clear all flags, except editable and removable
     TBool removable = iFlags.IsSet( EIsRemovable );
     TBool editable = iFlags.IsSet( EIsEditable );
@@ -652,4 +655,21 @@ void CXnPluginData::SetLockingStatus( const TDesC8& aStatus )
         }
     }
 
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+TXnDirtyRegion* CXnPluginData::CreateDirtyRegionL( CXnNode& aRootNode, 
+    CCoeControl& aControl )
+    {
+    delete iDirtyRegion;
+    iDirtyRegion = NULL;
+    iDirtyRegion = new (ELeave) TXnDirtyRegion;
+    iDirtyRegion->iRegion.Clear();
+    iDirtyRegion->iControl = &aControl;
+    iDirtyRegion->iRootNode = &aRootNode;
+    iDirtyRegion->iDirtyList.Reset();
+    iDirtyRegion->iLayoutControl = 0;
+    return iDirtyRegion;
+    }
+    
 // End of file

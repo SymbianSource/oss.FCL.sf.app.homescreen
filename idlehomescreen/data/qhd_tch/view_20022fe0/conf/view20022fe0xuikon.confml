@@ -1,9 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration name="Home screen 4 Xuikon Folder generation " version="1" xmlns="http://www.s60.com/xml/confml/2" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <feature name="Homescreen4 Xuikon Folder generation" ref="Homescreen4XuikonFolder">
+  <setting ref="SupportQhd" name="Qhd Support" type="boolean">
+    <desc>The Qhd touch is a supported display type of the xuikon homescreen</desc>
+  </setting>
+  <setting ref="SupportVga" name="Vga Support" type="boolean">
+    <desc>The Vga touch is a supported display type of the xuikon homescreen</desc>
+  </setting>
     <setting name="hard coded version" readOnly="true" ref="FolderCFG" type="string" />
   </feature>
-<data>
+  <data>
     <Homescreen4XuikonFolder>
+      <SupportQhd>true</SupportQhd>
+      <SupportVga>true</SupportVga>
       <FolderCFG>foo</FolderCFG>
     </Homescreen4XuikonFolder>
   </data>

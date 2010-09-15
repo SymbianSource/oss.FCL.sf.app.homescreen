@@ -292,7 +292,8 @@ _LIT(	KRscPath,                   ":\\resource\\apps\\");
 
 _LIT(   KPrefMm,                    "mm://" );
 _LIT8(  KRootWithPref,              "mm://root" );
-_LIT8(  KSetFocusWithPref,              "mm://!setfocus" );
+_LIT8(  KSetFocusWithPref,          "mm://!setfocus" );
+_LIT8(  KOpenItemWithPref,          "mm://!openitem" );
 _LIT8(   KCRepTimeFormat, "%S,%04d%02d%02d:%02d%02d%02d.%06d" );
 
 // images
@@ -512,6 +513,8 @@ static const TUid KCRUidMenu = {0x101f8847};
 const TInt KRootId = 1 ;
 
 const TUint32 KMenuShowFolder = 0x0000000c;
+
+const TUint32 KMenuOpenItem = 0x0000000e;
 
 const TInt KTimeStampBufferLength = 25;
 

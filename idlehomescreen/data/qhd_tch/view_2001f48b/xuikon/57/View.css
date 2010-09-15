@@ -13,6 +13,8 @@ box#plugins_container
     direction: rtl;
     block-progression: rl;
     padding-top: 3px;
+    padding-left: 17px;
+    padding-right: 17px;
 }
 
 plugin.plugins

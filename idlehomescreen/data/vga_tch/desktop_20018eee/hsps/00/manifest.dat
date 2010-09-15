@@ -23,7 +23,7 @@
     <filexml>widgetconfiguration.xml</filexml>
         
     <!-- Locale independent/common resources -->
-    
+    <multiinstance>unlimited</multiinstance>
     
     <!-- Locale specific resources -->
     <localization>

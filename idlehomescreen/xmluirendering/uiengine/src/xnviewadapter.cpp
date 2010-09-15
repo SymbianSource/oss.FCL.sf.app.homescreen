@@ -48,6 +48,8 @@
 #include "xneditmode.h"
 #include "xnrootdata.h"
 
+#include "xnpopupcontroladapter.h"
+
 #include "debug.h"
 
 // Constants
@@ -584,7 +586,7 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         started = mgr->BeginActivateViewEffect( active, aContainer, aEffect );
         }    
     
-    DeactivateContainerL( EFalse );
+    DeactivateContainerL();
         
     // Update  
     iContainer = &aContainer;
@@ -751,18 +753,7 @@ void CXnViewAdapter::DeactivateContainerL( TBool aHide )
     ChangeControlsStateL( EFalse );
 
     CXnNode* node( iContainer->Node()->LayoutNode() );
-    
-    CXnDomStringPool* sp( node->DomNode()->StringPool() );
-    
-    CXnProperty* prop = CXnProperty::NewL(
-        XnPropertyNames::style::common::KDisplay, 
-        XnPropertyNames::style::common::display::KNone,
-        CXnDomPropertyValue::EString, *sp );
-    CleanupStack::PushL( prop );    
-    
-    node->SetPropertyWithoutNotificationL( prop );
-    CleanupStack::Pop( prop );
-    
+
     if ( !iDeactivate )
         {
         iDeactivate = BuildDeactivateTriggerL( iAppUiAdapter.UiEngine() );
@@ -1018,7 +1009,7 @@ void CXnViewAdapter::CloseAllPopupsL()
     CleanupClosePushL( popups );
     
     iContainer->PopupNodesL( popups );
-    
+
     for ( TInt i = 0; i < popups.Count(); i++ )
         {
         CXnProperty* display = CXnProperty::NewL(
@@ -1035,7 +1026,24 @@ void CXnViewAdapter::CloseAllPopupsL()
     CleanupStack::PopAndDestroy( &popups );
     
     iEventDispatcher->SetTextEditorActive( NULL, EFalse );
+    
+    CXnNode* popup( iAppUiAdapter.UiEngine().StylusPopupNode() );
+    if ( popup )
+        {
+        CXnPopupControlAdapter* control =
+            static_cast< CXnPopupControlAdapter* >(
+                    popup->Control() );
+       
+        if ( control )
+            {
+            control->HideMenuL();
+            }
+        }
     }
 
+TBool CXnViewAdapter::IsForegroundAdapter() const
+    {
+    return ( iContainer != NULL );
+    }
 
 // End of file

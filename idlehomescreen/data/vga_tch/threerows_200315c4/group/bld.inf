@@ -1,0 +1,66 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+* The information required for building 
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+// Support for productization and Carbide.Ui customization
+//********************************************************
+../hsps/00/manifest.dat /epoc32/data/Z/resource/homescreen/threerows_200315c4/hsps/manifest.dat
+../hsps/00/widgetconfiguration.xml /epoc32/data/Z/resource/homescreen/threerows_200315c4/hsps/widgetconfiguration.xml
+../xuikon/00/threerows.dat /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/threerows_200315c4.dat
+../xuikon/00/threerows.css /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/threerows.css
+../xuikon/00/threerows.xml /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/threerows.xml
+
+// Arabic languages
+//*****************
+../xuikon/37/threerows.css /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/37/threerows.css
+../xuikon/50/threerows.css /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/50/threerows.css
+../xuikon/57/threerows.css /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/57/threerows.css
+../xuikon/94/threerows.css /epoc32/data/Z/resource/homescreen/threerows_200315c4/xuikon/94/threerows.css
+
+
+// Support for S60 builds
+//***********************
+../rom/threerows_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(threerows_200315c4_resources.iby)
+../rom/threerows_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(threerows_200315c4_customer.iby)
+../rom/threerows_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(threerows_200315c4_variant.iby)
+../rom/threerows.iby CORE_APP_LAYER_IBY_EXPORT_PATH(threerows_200315c4.iby)
+
+// Dtd-localization
+//*****************
+PRJ_EXTENSIONS
+START EXTENSION tools/dtd
+OPTION SWITCH_LOC_FILE_NAME threerows_200315c4
+OPTION DTD_TYPE widget
+OPTION LOC_FOLDERS yes
+END
+
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+//  End of File  
+
+
+
+

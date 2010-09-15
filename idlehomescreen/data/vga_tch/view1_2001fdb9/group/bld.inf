@@ -66,7 +66,7 @@ PRJ_EXPORTS
 //***********************
 ../rom/view_resources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_resources.iby)
 ../rom/view_customer.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_customer.iby)
-../rom/view_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_variant.iby)
+//../rom/view_variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9_variant.iby)
 //../rom/view.iby CORE_APP_LAYER_IBY_EXPORT_PATH(view1_2001fdb9.iby)
 
 

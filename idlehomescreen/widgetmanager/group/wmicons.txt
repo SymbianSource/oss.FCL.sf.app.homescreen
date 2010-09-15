@@ -1,2 +1,3 @@
 -c32,8 qgn_menu_hswidget
 -c32,8 qgn_menu_ovistore.svg
+-c32,8 qgn_menu_shopping.svg

@@ -96,15 +96,33 @@
 
 
 // MISC
-
-// d: Text displayed on OVI Store button 
+// d: Name of Ovi Store in storelist
 // d: 
 // d: 
-// l: wgtman_btn_pane_t1
+// l: list_double_large_graphic_pane_t1
 // w:
 // r: TB9.2
 //
 #define qtn_wm_ovi_store_title "Get more"
+
+// d: Description of Ovi Store in storelist
+// d: 
+// d: 
+// l: list_double_large_graphic_pane_t2
+// w:
+// r: TB9.2
+//
+#define qtn_wm_ovi_store_desc "Nokia"
+
+// d: Title of the popup storelist 
+// d: 
+// d: 
+// l: heading_pane_t1
+// w:
+// r: TB9.2
+//
+#define qtn_wm_storelist_title "Select"
+
 
 // d: Info popup to indicate that an item can not be added to home screen
 // d: because current view is full

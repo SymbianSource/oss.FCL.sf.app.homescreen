@@ -38,6 +38,7 @@
 _LIT8( KDisplay, "display" );
 _LIT8( KNone, "none" );
 _LIT8( KBlock, "block" );
+_LIT( KLogicalSecondaryFont, "EAknLogicalFontSecondaryFont" );
 
 // ============================ LOCAL FUNCTIONS ===============================    
 
@@ -518,7 +519,6 @@ CGraphicsContext::TTextAlign CXnClockAdapter::GetTextAlignL( CXnNodePluginIf& aN
 // -----------------------------------------------------------------------------
 //    
 void CXnClockAdapter::CreateFontL( CXnNodePluginIf& aNode,
-                                   const TDesC& aFontName,
                                    CFont*& aFont )
     {
     TFontSpec spec;
@@ -546,13 +546,41 @@ void CXnClockAdapter::CreateFontL( CXnNodePluginIf& aNode,
                 prop, iNode.Rect().Height() );
             }
         }
-                                        
-    // No need to relase avkon font
-    CXnUtils::CreateFontL( aFontName, 
-                           height,
-                           spec.iFontStyle,
-                           aFont,
-                           dummy );
+    
+    TBool fontNotSet( ETrue );
+    prop = aNode.GetPropertyL(
+            XnPropertyNames::appearance::common::KFontFamily );
+    
+    if ( prop )
+        {
+        CXnDomPropertyValue* value = static_cast< CXnDomPropertyValue* >(
+            prop->Property()->PropertyValueList().Item( 0 ) );
+        
+        if ( CXnDomPropertyValue::EIdent == value->PrimitiveValueType()
+                ||CXnDomPropertyValue::EString == value->PrimitiveValueType() )
+            {
+            const TDesC& fontName( prop->StringValueL()->Des() );
+            
+            // No need to relase avkon font
+            CXnUtils::CreateFontL( fontName, 
+                                   height,
+                                   spec.iFontStyle,
+                                   aFont,
+                                   dummy );
+            
+            fontNotSet = EFalse;
+            }
+        }
+    
+    if( fontNotSet )
+        {
+        // No need to relase avkon font
+        CXnUtils::CreateFontL( KLogicalSecondaryFont, 
+                               height,
+                               spec.iFontStyle,
+                               aFont,
+                               dummy );
+        }
     }
 
 // -----------------------------------------------------------------------------

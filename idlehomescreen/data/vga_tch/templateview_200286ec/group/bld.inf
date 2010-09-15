@@ -48,10 +48,10 @@ PRJ_EXPORTS
 //../loc/viewconfiguration.loc APP_LAYER_LOC_EXPORT_PATH(viewconfiguration.loc)
 //#endif // __VIEWCONFIGURATION_LOC__
 
-#ifndef __VIEW_LOC__
-#define __VIEW_LOC__
-../loc/view.loc APP_LAYER_LOC_EXPORT_PATH(view.loc)
-#endif // __VIEW_LOC__
+#ifndef __TEMPLATEVIEW_LOC__
+#define __TEMPLATEVIEW_LOC__
+../loc/templateview.loc APP_LAYER_LOC_EXPORT_PATH(templateview.loc)
+#endif // __TEMPLATEVIEW_LOC__
 
 // Support for S60 builds
 //***********************

@@ -354,6 +354,20 @@ void CXnBackgroundManager::HandleNotifyDisk( TInt /*aError*/,
             TRAP_IGNORE( RemovableDiskRemovedL() ); 
             }
         }
+    else if( aEvent.iType == MDiskNotifyHandlerCallback::EDiskAdded )
+        {
+        if( aEvent.iInfo.iType == EMediaHardDisk )
+            {
+            TRAP_IGNORE( RemovableDiskInsertedL() ); 
+            }
+        }
+    else if( aEvent.iType == MDiskNotifyHandlerCallback::EDiskRemoved )
+        {
+        if( aEvent.iInfo.iType == EMediaNotPresent )
+            {
+            TRAP_IGNORE( RemovableDiskRemovedL() ); 
+            }
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -1135,9 +1149,9 @@ void CXnBackgroundManager::StoreWallpaperL()
         RFs& fs( CEikonEnv::Static()->FsSession() );
         if ( path != KNullDesC && BaflUtils::FileExists( fs, path ) )
             {
+
             iIntUpdate++;
-            TInt err( AknsWallpaperUtils::SetIdleWallpaper( path, NULL ) ); 
-                  
+            TInt err( AknsWallpaperUtils::SetIdleWallpaper( path, NULL ) );
             if( err )
                 {
                 iIntUpdate--;
@@ -1160,8 +1174,16 @@ void CXnBackgroundManager::StoreWallpaperL()
             if( err )
                 {
                 iIntUpdate--;
-                }       
-            }
+                }
+
+            // If the drive was formatted or temporarily detached or the image was removed            
+            if( path.Length() )
+                {
+                iViewManager.ActiveViewData().SetWallpaperImage( NULL );
+                iSkinSrv.RemoveWallpaper( path );
+                DrawNow();
+                }                        
+            }        
         }       
     }
 

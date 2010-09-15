@@ -64,6 +64,7 @@ void CHnMdModel::ConstructL( MHnMdModelEventObserver *aModelObserver,
     iMode = EMdModeNormal;
     iRepositoryWidgetTypeObserver = CHnRepositoryWidgetTypeObserver::NewL( &iCmnPtrs, KMatrixRepositoryUid );
     iRepositoryShowFolderObserver = CHnRepositoryShowFolderObserver::NewL( &iCmnPtrs, KCRUidMenu, KMenuShowFolder );
+    iRepositoryOpenItemObserver = CHnRepositoryOpenItemObserver::NewL( &iCmnPtrs, KCRUidMenu, KMenuOpenItem );
     MMPERF(("CHnMetaDataModel::ConstructL - rep. observer ready"));
     }
 
@@ -111,6 +112,7 @@ CHnMdModel::~CHnMdModel()
     {
     delete iRepositoryWidgetTypeObserver;
     delete iRepositoryShowFolderObserver;
+    delete iRepositoryOpenItemObserver;
     iLoadedSuites.ResetAndDestroy();
     delete iXmlModelProvider;
     delete iLocalization;
