@@ -51,7 +51,9 @@ CWmEffectManager::CWmEffectManager( CCoeEnv& aCoeEnv ): iCoeEnv (aCoeEnv)
 //
 void CWmEffectManager::ConstructL()
     {
+#ifndef NO_ALF_OBSERVER
     iObserver = CAlfEffectObserver::NewL(); 
+#endif
     }
 
 // -----------------------------------------------------------------------------
@@ -160,6 +162,11 @@ TBool CWmEffectManager::DoBeginFullscreenEffect( TWmEffect& aEffect )
 //
 TBool CWmEffectManager::WaitActiveEffect( TInt aInterval )     
     {
+    if (iObserver == NULL)
+        {
+        return ETrue;
+        }
+
     TBool retval( EFalse );
     TInt loop( aInterval / KWaitInterval );
     
@@ -202,7 +209,7 @@ void CWmEffectManager::RemoveEffect( TWmEffect* aEffect )
 TBool CWmEffectManager::IsEffectActive()
     {
     TBool retVal( EFalse );
-    if ( iObserver->ActiveEffectsCount() )
+    if ( iObserver != NULL && iObserver->ActiveEffectsCount() )
         retVal = ETrue;
     return retVal;
     }

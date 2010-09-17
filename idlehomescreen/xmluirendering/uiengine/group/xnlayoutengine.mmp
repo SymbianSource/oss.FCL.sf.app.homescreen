@@ -31,6 +31,8 @@ VENDORID VID_DEFAULT
 CAPABILITY      CAP_GENERAL_DLL
 SOURCEPATH      ../src
 
+MACRO NO_ALF_OBSERVER     // disable link to ALF server
+
 SOURCE    xnapplication.cpp
 SOURCE    xnappuiadapter.cpp
 SOURCE    xnappuiadapterimpl.cpp
