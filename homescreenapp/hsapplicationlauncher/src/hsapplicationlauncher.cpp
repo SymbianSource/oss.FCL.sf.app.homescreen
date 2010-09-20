@@ -235,7 +235,7 @@ void CHsLaunch::DoCancel()
 // From CActive.
 // -----------------------------------------------------------------------------
 //
-TInt CHsLaunch::RunError( TInt aError )
+TInt CHsLaunch::RunError( TInt /*aError*/ )
     {
     /* Shutdown. This application
      * will be restarted by startup sw. */

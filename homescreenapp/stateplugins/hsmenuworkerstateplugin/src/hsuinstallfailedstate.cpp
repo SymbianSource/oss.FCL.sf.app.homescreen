@@ -19,6 +19,7 @@
 #include "hsuinstallfailedstate.h"
 #include "hsmenuevent.h"
 #include "hsapp_defs.h"
+#include "hsdialogcontroller.h"
 
 const int installerBusyError = 4;
 
@@ -27,7 +28,7 @@ const int installerBusyError = 4;
  /param parent Parent state.
  */
 HsUninstallFailedState::HsUninstallFailedState(QState *parent) :
-    QState(parent), mBox(0)
+    QState(parent)
 {
     construct();
 }
@@ -37,7 +38,10 @@ HsUninstallFailedState::HsUninstallFailedState(QState *parent) :
  */
 HsUninstallFailedState::~HsUninstallFailedState()
 {
-    cleanUp(); // in case of throw
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -49,8 +53,6 @@ void HsUninstallFailedState::construct()
     if (this->parent()) {
         setObjectName(this->parent()->objectName() + objectName());
     }
-    
-    connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
 
@@ -59,54 +61,42 @@ void HsUninstallFailedState::construct()
  \param event entry event.
  */
 void HsUninstallFailedState::onEntry(QEvent *event)
-{
-
-    
+{    
     QState::onEntry(event);
     HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
     QVariantMap data = menuEvent->data();
     int error = data.value(Hs::uninstallError).toInt();
+    QScopedPointer<HbMessageBox> dialog;
     if (error == installerBusyError) {
         // Installer is in use
-        mBox = new HbMessageBox(HbMessageBox::MessageTypeInformation);
-        mBox->setText(hbTrId("txt_applib_info_installer_is_currently_busy"));
+        dialog.reset(new HbMessageBox(HbMessageBox::MessageTypeInformation));
+        dialog->setText(hbTrId("txt_applib_info_installer_is_currently_busy"));
     } else {
         // other errors
-        mBox = new HbMessageBox(HbMessageBox::MessageTypeWarning);
-        mBox->setText(hbTrId("txt_applib_info_uninstallation_failed"));
+        dialog.reset(new HbMessageBox(HbMessageBox::MessageTypeWarning));
+        dialog->setText(hbTrId("txt_applib_info_uninstallation_failed"));
     }
 
-    mBox->setAttribute(Qt::WA_DeleteOnClose);
-    mBox->setStandardButtons(HbMessageBox::Close);
-    mBox->open(this, SLOT(stateExited()));
+
+    dialog->setStandardButtons(HbMessageBox::Close);
+
+    QScopedPointer<HsDialogController> dialogController(
+        new HsDialogController(dialog.take(),
+            HsMenuDialogFactory::acceptActionIndex(),
+            HsMenuDialogFactory::rejectActionIndex()));
+
+    connect(dialogController.data(),
+            SIGNAL(dialogCompleted()),
+            this,
+            SIGNAL(exit()));
+
+    // ensure dialog is dismissed on app key pressed
+    connect(this, SIGNAL(exited()),
+            dialogController.data(),
+            SLOT(dismissDialog()));
+
+    dialogController.take()->openDialog();
 }
 
-/*!
- Invoked on exiting state
- */
-void HsUninstallFailedState::onExit(QEvent *event)
-{
-    QState::onExit(event);
-}
 
-/*!
- State exited.
- */
-void HsUninstallFailedState::stateExited()
-{
-    mBox = NULL;
-    emit exit();
-}
 
-/*!
- Slot launched after state has exited and in destructor.
- \retval void
- */
-void HsUninstallFailedState::cleanUp()
-{
-    // Close popups if App key was pressed
-    if (mBox) {
-        mBox->close();
-        mBox = NULL;
-    }
-}

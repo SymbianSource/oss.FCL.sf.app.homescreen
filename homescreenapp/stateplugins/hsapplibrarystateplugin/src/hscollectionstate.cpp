@@ -212,16 +212,22 @@ void HsCollectionState::setMenuOptions()
                 hbTrId("txt_applib_menu_sort_by_oldest_on_top"),
                 this, SLOT(oldestOnTopMenuAction()));
 
-        if(mSortAttribute == Hs::LatestOnTopHsSortAttribute)
+        //Default is LatestOnTopHsSortAttribute
+        if(mSortAttribute == Hs::OldestOnTopHsSortAttribute)
         {
-            mLatestOnTopMenuAction->setVisible(false);
-        } else {
             mOldestOnTopMenuAction->setVisible(false);
+        } else {            
+            mLatestOnTopMenuAction->setVisible(false);
         }
-
     }
-
-
+    if (mCollectionType == Hs::collectionDownloadedTypeName) {
+        mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
+            static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
+        mViewOptions->addAction(
+            hbTrId("txt_applib_opt_view_installed_applications"),
+            static_cast<HsBaseViewState*>(this),
+            SLOT(openInstalledViewFromCollection()));
+    }
     mMenuView->view()->setMenu(mViewOptions);
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::setMenuOptions");
 }
@@ -299,25 +305,28 @@ void HsCollectionState::makeDisconnect()
  */
 void HsCollectionState::contextMenuAction(HbAction *action)
 	{
-    Hs::HsContextAction command = static_cast<Hs::HsContextAction> (action->data().toInt());
-
-    if (command == Hs::RemoveFromCollectionContextAction) {
-        const int itemId = mContextModelIndex.data(
-            CaItemModel::IdRole).toInt();
-        machine()->postEvent(
-            HsMenuEventFactory::createRemoveAppFromCollectionEvent(itemId,
-            mCollectionId));
-        HsMenuService::touch(itemId);
-    } else if (
-        command == Hs::AddToCollectionFromCollectionViewContextAction) {
-        const int itemId = mContextModelIndex.data(
-            CaItemModel::IdRole).toInt();
-        machine()->postEvent(
-            HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
-            mCollectionId, itemId));
-        HsMenuService::touch(itemId);
+    const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
+    
+    if (itemId > 0) {
+        Hs::HsContextAction command = 
+                static_cast<Hs::HsContextAction> (action->data().toInt());
+    
+        if (command == Hs::RemoveFromCollectionContextAction) {
+            machine()->postEvent(
+                HsMenuEventFactory::createRemoveAppFromCollectionEvent(itemId,
+                mCollectionId));
+            HsMenuService::touch(itemId);
+        } else if (
+            command == Hs::AddToCollectionFromCollectionViewContextAction) {
+            machine()->postEvent(
+                HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
+                mCollectionId, itemId));
+            HsMenuService::touch(itemId);
+        } else {
+            HsBaseViewState::contextMenuAction(action);
+        }
     } else {
-        HsBaseViewState::contextMenuAction(action);
+        closeContextMenu();
     }
 }
 
@@ -436,16 +445,17 @@ void HsCollectionState::setContextMenuOptions(HbAbstractViewItem *item, EntryFla
         removeAction->setData(Hs::RemoveFromCollectionContextAction);
     }
 
-    if ((flags & RemovableEntryFlag)) {
-        uninstallAction = mContextMenu->addAction(hbTrId("txt_common_menu_delete"));
-        uninstallAction->setData(Hs::UninstallContextAction);
-    }
     QSharedPointer<const CaEntry> entry = mModel->entry(item->modelIndex());
 
     if (!(entry->attribute(Hs::appSettingsPlugin).isEmpty())) {
         appSettingsAction = mContextMenu->addAction(hbTrId(
                                                 "txt_common_menu_settings"));
         appSettingsAction->setData(Hs::AppSettingContextAction);
+    }
+
+    if ((flags & RemovableEntryFlag)) {
+        uninstallAction = mContextMenu->addAction(hbTrId("txt_common_menu_delete"));
+        uninstallAction->setData(Hs::UninstallContextAction);
     }
 
     if (!(entry->attribute(Hs::componentIdAttributeName).isEmpty()) &&
@@ -507,3 +517,19 @@ void HsCollectionState::createArrangeCollection()
             topItemId,
             mCollectionId));
 }
+
+/*!
+ Triggers event so that an installed applications state is entered.
+ */
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsCollectionState::openInstalledViewFromCollection()
+{
+    machine()->postEvent(
+        HsMenuEventFactory::createOpenInstalledViewEvent(
+        mCollectionId, mCollectionType));
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

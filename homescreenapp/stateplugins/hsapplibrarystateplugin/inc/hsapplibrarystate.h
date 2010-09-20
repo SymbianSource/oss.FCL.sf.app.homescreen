@@ -70,6 +70,8 @@ public slots:
     void allAppsStateEntered();
 
     void allCollectionsStateEntered();
+    
+    void collectionStateEntered();
 
 protected:
 

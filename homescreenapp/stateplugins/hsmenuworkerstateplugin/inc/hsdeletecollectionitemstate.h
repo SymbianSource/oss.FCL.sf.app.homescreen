@@ -25,7 +25,6 @@ HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class QAction;
 class HbAction;
-class HbMessageBox;
 class HsShortcutService;
 class HsMenuService;
 
@@ -46,9 +45,7 @@ protected:
     void onEntry(QEvent *event);
 
 private slots:
-
-    void deleteMessageFinished(HbAction* finishedAction);
-
+    void removeApplicationFromCollection();
     void cleanUp();
 
 signals:
@@ -64,11 +61,6 @@ private:
     int mItemId;
 
     int mCollectionId;
-
-    HbMessageBox *mDeleteMessage; // deletes itself automatically on close
-
-    QAction *mConfirmAction; // child for mDeleteMessage
-
 };
 
 #endif //HSDELETECOLLECTIONITEMSTATE_H

@@ -54,7 +54,6 @@ protected:
 private:
     Q_DISABLE_COPY(HsStateMachine)
 
-    void startDialer();
     void registerAnimations();
     void createStatePublisher();
     void createContentServiceParts();
@@ -71,11 +70,10 @@ private slots:
 private:
     HsContentService *mContentService;	
 	
-	bool mHomeScreenActive;
-	bool mIdleStateActive;
+    bool mHomeScreenActive;
+    bool mIdleStateActive;
     bool mEndKeyCaptured;
-    bool mSendKeyCaptured;
-
+    
 	QValueSpacePublisher *mPublisher;
 	
 #ifdef Q_OS_SYMBIAN

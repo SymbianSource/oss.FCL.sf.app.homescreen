@@ -39,6 +39,8 @@ symbian {
     
     include(hsapplibrarystateplugin_exports_to_rom.pri)
     LIBS += -lxqsettingsmanager
+    
+    MMP_RULES += SMPSAFE
 }
 
 RESOURCES = $$qrcFile

@@ -35,36 +35,36 @@
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
-void HsProgressBar::paint(QPainter * painter, 
-        const QStyleOptionGraphicsItem * option, 
+void HsProgressBar::paint(QPainter * painter,
+        const QStyleOptionGraphicsItem * option,
         QWidget * widget)
 {
     Q_UNUSED(widget)
     QStyleOptionGraphicsItem pixmapOption(*option);
     foreach (QGraphicsItem *child, childItems()) {
-        painter->save();            
+        painter->save();
         painter->translate(child->pos());
         pixmapOption.exposedRect = child->boundingRect();
         child->paint(painter, &pixmapOption, 0);
-        
-        foreach (QGraphicsItem *child2, child->childItems()) {
-            if (child2->isVisible()) {
-                painter->save();            
-                painter->translate(child2->pos());
-                pixmapOption.exposedRect = child2->boundingRect();
-                child2->paint(painter, &pixmapOption, 0);
-                painter->restore(); 
+
+        foreach (QGraphicsItem *grandChild, child->childItems()) {
+            if (grandChild->isVisible()) {
+                painter->save();
+                painter->translate(grandChild->pos());
+                pixmapOption.exposedRect = grandChild->boundingRect();
+                grandChild->paint(painter, &pixmapOption);
+                painter->restore();
             }
         }
         painter->restore();
     }
-}    
+}
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
 
-
-void HsProgressBar::setTargetProgressValue(int value) {
+void HsProgressBar::setTargetProgressValue(int value)
+{
     mTargetValue = value;
     if (value > progressValue() && value <= maximum()) {
         if (!mTimerId) {
@@ -76,22 +76,23 @@ void HsProgressBar::setTargetProgressValue(int value) {
 }
 
 void HsProgressBar::timerEvent(QTimerEvent *event)
- {
-     if (mTargetValue == progressValue()) {
-         killTimer(mTimerId);
-         mTimerId = 0;
-     } else {
-         setProgressValue(progressValue()+1);
-     }
+{
+    Q_UNUSED(event);
+    if (mTargetValue == progressValue()) {
+        killTimer(mTimerId);
+        mTimerId = 0;
+    } else {
+        setProgressValue(progressValue()+1);
+    }
  }
 
-HsListViewItem::HsListViewItem(QGraphicsItem* parent) : 
+HsListViewItem::HsListViewItem(QGraphicsItem* parent) :
     HbListViewItem(parent), progress(0), isProgress(false)
-{   
+{
     setGraphicsSize(LargeIcon);
     setStretchingStyle(StretchLandscape);
     if (this == prototype()) {
-        HbStyleLoader::registerFilePath(":/layout/hslistviewitem.css");        
+        HbStyleLoader::registerFilePath(":/layout/hslistviewitem.css");
     }
 }
 
@@ -116,9 +117,9 @@ void HsListViewItem::updateChildItems()
         isProgress = true;
         if (!progress) {
             progress = new HsProgressBar(this);
-            HbStyle::setItemName(progress, "progress"); 
+            HbStyle::setItemName(progress, "progress");
             progress->setRange(0, 100);
-            HbEffect::disable(progress);  
+            HbEffect::disable(progress);
             progress->setProgressValue(progresVal);
             repolish();
             connect(progress, SIGNAL(valueChanged(int)), SLOT(updatePixmapCache()));
@@ -132,20 +133,20 @@ void HsListViewItem::updateChildItems()
                            HbParameterLengthLimiter("txt_applib_dblist_uninstalling_1")
                            .arg(text->text()));
                    break;
-               } 
+               }
            }
-    } else if (progress) {       
+    } else if (progress) {
         disconnect(progress, SIGNAL(valueChanged()));
         delete progress;
         progress = 0;
         repolish();
     }
-    // hide text-2 if we have to 
+    // hide text-2 if we have to
     foreach (QGraphicsItem * item, this->childItems()) {
         if (HbStyle::itemName(item) == "text-2") {
-            item->setVisible(!isProgress);            
+            item->setVisible(!isProgress);
             break;
-        } 
+        }
     }
 }
 
@@ -156,12 +157,12 @@ HbAbstractViewItem*  HsListViewItem::createItem()
 
 
 void HsListViewItem::polish(HbStyleParameters& params)
-{       
+{
     if (isProgress) {
         HbStyleLoader::registerFilePath(":/layout/hslistviewitem.widgetml");
     }
     HbListViewItem::setProperty("progress", isProgress);
-    HbListViewItem::polish(params);   
+    HbListViewItem::polish(params);
     if (isProgress) {
         HbStyleLoader::unregisterFilePath(":/layout/hslistviewitem.widgetml");
     }

@@ -52,7 +52,6 @@ signals:
 
 private slots:
     void addToCollection();
-    void openInstalledView();
     void ascendingMenuAction();
     void descendingMenuAction();
     void normalModeEntered();

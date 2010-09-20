@@ -34,6 +34,8 @@ INCLUDEPATH += . \
 symbian: {
     TARGET.UID3 = 0x20022F3C
     LIBS+=-lxqservice -lxqserviceutil
+    
+    MMP_RULES += SMPSAFE
 }
 
 include(hsutils.pri)

@@ -31,7 +31,7 @@
 #include "hsviewappdetailsstate.h"
 #include "hsmenuevent.h"
 #include "hsmenuitemmodel.h"
-#include "hsmenuentryremovedhandler.h"
+#include "hsdialogcontroller.h"
 
 static const char *const HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME=
         "detailsDialogForJavaApplication";
@@ -41,7 +41,7 @@ static const char *const HS_VIEWAPPDETAILS_JAVA_DIALOG_SECTION_NAME=
  /param parent Parent state.
  */
 HsViewAppDetailsState::HsViewAppDetailsState(QState *parent) :
-    QState(parent), mDialog(0)
+    QState(parent)
 {
     construct();
 }
@@ -51,7 +51,10 @@ HsViewAppDetailsState::HsViewAppDetailsState(QState *parent) :
  */
 HsViewAppDetailsState::~HsViewAppDetailsState()
 {
-    delete mDialog;
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -82,7 +85,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
     QSharedPointer<const CaEntry> entry
         = CaService::instance()->getEntry(entryId);
     if (!entry) {
-        stateExited();
+        emit exit();
         return;
     }
     const int componentId = entry->attribute(
@@ -96,7 +99,7 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
 
     //TODO: Should we display something In that case?
     if (detailMap.size() < 1){
-        stateExited();
+        emit exit();
         return;
     }
 
@@ -112,13 +115,12 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
                                   section, &loadStatusOk);
     }
 
-    mDialog = qobject_cast<HbDialog*>(
-        loader.findWidget(HS_DETAILS_DIALOG_NAME));
+    QScopedPointer<HbDialog> dialog(qobject_cast<HbDialog*>(
+        loader.findWidget(HS_DETAILS_DIALOG_NAME)));
 
-    if (mDialog != NULL) {
-        mDialog->setTimeout(HbPopup::NoTimeout);
-        mDialog->setAttribute(Qt::WA_DeleteOnClose, true);
-        mDialog->actions()[0]->setParent(mDialog);
+    if (!dialog.isNull()) {
+        dialog->setTimeout(HbPopup::NoTimeout);
+        dialog->actions()[0]->setParent(dialog.data());
 
         setFieldPresentation(CaSoftwareRegistry::componentNameKey(),
             detailMap, loader);
@@ -140,14 +142,24 @@ void HsViewAppDetailsState::onEntry(QEvent *event)
                 detailMap, loader);
         }
 
-        QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
-            new HsMenuEntryRemovedHandler(entryId, this, SIGNAL(exit())));
+        QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(dialog.take(),
+                HsMenuDialogFactory::acceptActionIndex(),
+                HsMenuDialogFactory::rejectActionIndex()));
 
-        entryObserver.take()->setParent(mDialog);
+        connect(dialogController.data(),
+                SIGNAL(dialogCompleted()),
+                this,
+                SIGNAL(exit()));
 
-        mDialog->open(this, SLOT(stateExited()));
+        // ensure dialog is dismissed on app key pressed
+        connect(this, SIGNAL(exited()),
+                dialogController.data(),
+                SLOT(dismissDialog()));
+
+        dialogController.take()->openDialog(entryId);
     } else {
-        stateExited();
+        emit exit();
     }
     HSMENUTEST_FUNC_EXIT("HsViewAppDetailsState::onEntry");
 }
@@ -179,28 +191,5 @@ void HsViewAppDetailsState::setFieldPresentation(QString key,
     }
 }
 
-/*!
- Slot invoked when a state is exited.
- */
-void HsViewAppDetailsState::stateExited()
-{
-    HSMENUTEST_FUNC_ENTRY("HsViewAppDetailsState::stateExited");
-    emit exit();
-    HSMENUTEST_FUNC_EXIT("HsViewAppDetailsState::stateExited");
-    qDebug("HsViewAppDetailsState::stateExited()");
-}
 
-/*!
- Invoked on exiting state
- */
-void HsViewAppDetailsState::onExit(QEvent *event)
-{
-    QState::onExit(event);
-    // Close popups if App key was pressed or
-    // memory card removed
-    if (mDialog != NULL) {
-        mDialog->close();
-        mDialog = NULL;
-    }
-}
 

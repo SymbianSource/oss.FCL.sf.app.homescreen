@@ -23,7 +23,7 @@
 #include "hsconfiguration.h"
 
 #ifdef Q_OS_SYMBIAN
-#include "hsimagefetcherclient.h"
+#include "hsimagehandlingclient.h"
 #else
 #include "xqaiwgetimageclient.h"
 #endif
@@ -45,7 +45,7 @@
 */
 HsWallpaperSelectionState::HsWallpaperSelectionState(QState *parent)
   : QState(parent),    
-    mImageFetcher(0),
+    mImageHandler(0),
     mWallpaper(0),    
     mWaitDialog(0)
 {
@@ -69,6 +69,7 @@ void HsWallpaperSelectionState::setupStates()
     
     QState *state_processing = new QState(this);
     QState *state_selectingImage = new QState(state_processing);
+    QState *state_editingImage = new QState(state_processing);
     QState *state_assigningImage = new QState(state_processing);
     QState *state_errorMessage = new QState(this);
     
@@ -76,9 +77,13 @@ void HsWallpaperSelectionState::setupStates()
     state_processing->setInitialState(state_selectingImage);
     
     // Transitions
-
+#if defined (Q_OS_SYMBIAN) && !defined (__WINSCW__)
+    state_selectingImage->addTransition(
+        this, SIGNAL(event_assignImage()), state_editingImage);
+#else
     state_selectingImage->addTransition(
         this, SIGNAL(event_assignImage()), state_assigningImage);
+#endif // Q_OS_SYMBIAN
     
     state_processing->addTransition(
         this, SIGNAL(event_error()), state_errorMessage);
@@ -86,7 +91,10 @@ void HsWallpaperSelectionState::setupStates()
     // Actions
 
     ENTRY_ACTION(state_selectingImage, action_selectingImage_start)
-    EXIT_ACTION(state_selectingImage, action_selectingImage_cleanup)
+    EXIT_ACTION(state_selectingImage, action_imageHandler_cleanup)
+
+    ENTRY_ACTION(state_editingImage, action_editingImage_start)
+    EXIT_ACTION(state_editingImage, action_imageHandler_cleanup)
 
     ENTRY_ACTION(state_assigningImage, action_assigningImage_showWaitDialog)
     ENTRY_ACTION(state_assigningImage, action_assigningImage_start)
@@ -102,27 +110,27 @@ void HsWallpaperSelectionState::setupStates()
 void HsWallpaperSelectionState::action_selectingImage_start()
 {
 #ifdef Q_OS_SYMBIAN
-    mImageFetcher = new HsImageFetcherClient;
+    mImageHandler = new HsImageHandlingClient;
 #else    
-    mImageFetcher = new XQAIWGetImageClient;
+    mImageHandler = new XQAIWGetImageClient;
 #endif
 
-    connect(mImageFetcher, SIGNAL(fetchCompleted(const QString&)),
+    connect(mImageHandler, SIGNAL(fetchCompleted(const QString&)),
             this, SLOT(onFetchCompleted(const QString&)));
-    connect(mImageFetcher, SIGNAL(fetchFailed(int, const QString&)),
+    connect(mImageHandler, SIGNAL(fetchFailed(int, const QString&)),
             this, SLOT(onFetchFailed(int, const QString&)));
 
-    mImageFetcher->fetch();
+    mImageHandler->fetch();
 }
  
 /*!
 
 */
-void HsWallpaperSelectionState::action_selectingImage_cleanup()
+void HsWallpaperSelectionState::action_imageHandler_cleanup()
 {
-    mImageFetcher->disconnect(this);
-    mImageFetcher->deleteLater();
-    mImageFetcher = 0;
+    mImageHandler->disconnect(this);
+    mImageHandler->deleteLater();
+    mImageHandler = 0;
 }
 
 /*!
@@ -180,6 +188,29 @@ void HsWallpaperSelectionState::action_errorMessage_show()
     emit event_waitInput();
 }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+/*!
+
+*/
+void HsWallpaperSelectionState::action_editingImage_start()
+{
+#ifdef Q_OS_SYMBIAN    
+    mImageHandler = new HsImageHandlingClient; 
+
+    connect(mImageHandler, SIGNAL(editorCompleted()),
+            this, SLOT(onEditorCompleted()));
+    connect(mImageHandler, SIGNAL(editorFailed(int, const QString&)),
+            this, SLOT(onFetchFailed(int, const QString&)));
+
+    mImageHandler->edit(mImagePath);
+#endif //Q_OS_SYMBIAN
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
 /*!
 
 */
@@ -214,3 +245,17 @@ void HsWallpaperSelectionState::onImageSetFailed()
 {
     emit event_error();
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+/*!
+
+*/
+void HsWallpaperSelectionState::onEditorCompleted()
+{    
+    emit event_waitInput();
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

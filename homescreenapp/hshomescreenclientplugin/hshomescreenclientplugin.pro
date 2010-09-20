@@ -32,6 +32,7 @@ symbian: {
     TARGET.UID3 = 0x20022F72
     LIBS += -lxqservice
     LIBS += -lxqserviceutil
+    MMP_RULES += SMPSAFE
 }
 
 win32: {

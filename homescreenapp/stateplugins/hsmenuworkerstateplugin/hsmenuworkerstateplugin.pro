@@ -44,6 +44,8 @@ symbian {
         LIBS += -lhal
     }
     for(docmlFile, docmlFiles): DOCML+=$$docmlFile
+    
+    MMP_RULES += SMPSAFE
 }
 
 RESOURCES += $$qrcFile

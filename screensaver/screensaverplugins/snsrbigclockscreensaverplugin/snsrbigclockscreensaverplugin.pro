@@ -34,6 +34,7 @@ INCLUDEPATH += ../../snsrutils/inc
 
 symbian: {
     TARGET.UID3 = 0x20027052
+    MMP_RULES += SMPSAFE
 }
 
 include(snsrbigclockscreensaverplugin.pri)

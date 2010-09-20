@@ -182,7 +182,7 @@ QString HsMenuService::getName(int entryId)
  \param actionName string with action name
  \retval int error code, 0 if no error
  */
-int HsMenuService::executeAction(int entryId, const QString &actionName, 
+int HsMenuService::executeAction(int entryId, const QString &actionName,
         QObject* receiver, const char* member)
 {
     qDebug() << "HsMenuService::executeAction entryId:" << entryId
@@ -190,6 +190,22 @@ int HsMenuService::executeAction(int entryId, const QString &actionName,
     return CaService::instance()->executeCommand(
             entryId, actionName, receiver, member);
 }
+
+/*!
+ Executes action on an item entry
+ \param entry of this item
+ \param actionName string with action name
+ \retval int error code, 0 if no error
+ */
+int HsMenuService::executeAction(const CaEntry &entry,
+        const QString &actionName, QObject* receiver, const char* member)
+{
+    qDebug() << "HsMenuService::executeAction entryId:" << entry.id()
+             << "actionName:" << actionName;
+    return CaService::instance()->executeCommand(
+        entry, actionName, receiver, member);
+}
+
 
 /*!
  Launch task switcher

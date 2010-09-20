@@ -36,6 +36,7 @@ symbian: {
     pluginstub.sources = snsrdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs
     DEPLOYMENT += pluginstub
+    MMP_RULES += SMPSAFE
 }
 
 win32: {

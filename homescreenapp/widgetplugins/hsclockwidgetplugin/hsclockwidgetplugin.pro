@@ -36,7 +36,7 @@ INCLUDEPATH += ./inc \
 symbian: {
     TARGET.UID3 = 0x20022F6C
     LIBS += -lbafl -lapgrfx -lcone
-    
+    MMP_RULES += SMPSAFE
     
 }
 
@@ -46,5 +46,3 @@ symbian:include(hsclockwidgetplugin_symbian.pri)
 RESOURCES = hsclockwidgetplugin.qrc
 
 exportResources(./resource/*.manifest, $$WIDGET_SUBDIR)
-exportResources(./resource/*.png, $$WIDGET_SUBDIR)
-exportResources(./resource/*.svg, $$WIDGET_SUBDIR)

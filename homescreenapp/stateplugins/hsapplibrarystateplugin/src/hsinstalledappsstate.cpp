@@ -32,6 +32,7 @@
 #include "hsinstalledappsstate.h"
 #include "hsaddappstocollectionstate.h"
 #include "hsmenumodetransition.h"
+#include "hsmenuevent.h"
 
 /*!
  \class HsInstalledAppsState
@@ -71,9 +72,28 @@ void HsInstalledAppsState::construct()
         parent() != 0 ? parent()->objectName() : QString("");
     setObjectName(parentName + "/installedappsstate");
 
-    connect(mBackKeyAction, SIGNAL(triggered()), SLOT(openAppLibrary()));
+    connect(mBackKeyAction,
+        SIGNAL(triggered()),
+        this,
+        SLOT(backFromInstalledView()));
 
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::construct");
+}
+
+void HsInstalledAppsState::onEntry(QEvent *event)
+{
+    qDebug("HsInstalledAppsState::onEntry()");
+    HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::onEntry");
+    QState::onEntry(event);
+
+    if (event->type() == HsMenuEvent::eventType()) {
+        HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
+        QVariantMap data = menuEvent->data();
+        mCollectionId = data.value(Hs::itemIdKey).toInt();
+        mCollectionType = data.value(Hs::entryTypeNameKey).toString();
+    }
+
+    HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::onEntry");
 }
 
 /*!
@@ -87,8 +107,6 @@ void HsInstalledAppsState::setMenuOptions()
 
     mViewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
                         this, SLOT(openTaskSwitcher()));
-    mViewOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
-                        this, SLOT(openInstallationLog()));
     if (mModel->rowCount() > 0) {
 
         mLatestOnTopMenuAction = mViewOptions->addAction(
@@ -107,6 +125,8 @@ void HsInstalledAppsState::setMenuOptions()
             mLatestOnTopMenuAction->setVisible(false);
         }
     }
+    mViewOptions->addAction(hbTrId("txt_applib_opt_installation_log"),
+                        this, SLOT(openInstallationLog()));
     mMenuView->view()->setMenu(mViewOptions);
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::setMenuOptions");
 }
@@ -227,6 +247,22 @@ void HsInstalledAppsState::setEmptyLabelVisibility(bool visibility)
     setMenuOptions();
     mMenuView->activate();
 }
+
+/*!
+ Menu softkey back action slot
+ */
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsInstalledAppsState::backFromInstalledView()
+{
+    machine()->postEvent(
+        HsMenuEventFactory::createBackFromInstalledViewEvent(
+        mCollectionId, mCollectionType));
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  Open installation log.

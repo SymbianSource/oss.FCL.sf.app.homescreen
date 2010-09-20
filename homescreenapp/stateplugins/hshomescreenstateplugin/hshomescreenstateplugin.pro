@@ -43,6 +43,7 @@ LIBS += -lhsutils \
 symbian: {
     TARGET.UID3 = 0x20022F41
     LIBS += -lxqsettingsmanager
+    MMP_RULES += SMPSAFE
 }
 
 include(hshomescreenstateplugin.pri)

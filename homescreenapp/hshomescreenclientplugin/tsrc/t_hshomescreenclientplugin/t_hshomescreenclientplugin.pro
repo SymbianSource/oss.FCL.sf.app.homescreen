@@ -51,6 +51,8 @@ symbian: {
     TARGET.EPOCHEAPSIZE = 0x20000 0x1000000 // 128kB - 16MB
     LIBS += -lxqservice
     LIBS += -lxqserviceutil
+    
+    MMP_RULES += SMPSAFE
 } else {
     error("Only Symbian supported!")
 }

@@ -23,8 +23,7 @@
 #include <hbaction.h>
 #include <hbnotificationdialog.h>
 #include <hsmenueventfactory.h>
-#include "hsmenudialogfactory.h"
-#include "hsmenuentryremovedhandler.h"
+#include "hsdialogcontroller.h"
 
 #include "hsaddtohomescreenstate.h"
 #include "hsmenuevent.h"
@@ -55,8 +54,7 @@ const char SHORTCUT_ID[] = "caEntryId";
  \retval void
  */
 HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
-    QState(parent), 
-    mCorruptedMessage(NULL), mConfirmAction(NULL),
+    QState(parent),
     mMenuMode(Hs::NormalHsMenuMode)
 {
     setObjectName("/AddToHomeScreenState");
@@ -69,11 +67,14 @@ HsAddToHomeScreenState::HsAddToHomeScreenState(QState *parent) :
 }
 
 /*!
- Destructor. Empty one.
+ Destructor.
  */
 HsAddToHomeScreenState::~HsAddToHomeScreenState()
 {
-    cleanUp();
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -124,10 +125,7 @@ void HsAddToHomeScreenState::onEntry(QEvent *event)
 /*!
  Adds a widget to active page of home screen
  \param contentService: service for adding widgets
- \param library: widget library path and file name
  \param uri: widget uri
- \param entryId: widget entry id (ignored)
- \param activePage: active page of home screen
  \retval true if successful
  */
 bool HsAddToHomeScreenState::addWidget(HsContentService &contentService, 
@@ -141,11 +139,7 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
     if (!success) {
         showMessageWidgetCorrupted();
     } else {
-        emit exit();
-        if (mMenuMode == Hs::AddHsMenuMode) {
-            machine()->postEvent(
-                HsMenuEventFactory::createOpenHomeScreenEvent());
-        }
+        openHomeScreen();
     }
     logActionResult("Adding widget", mEntryId, success);
     HSMENUTEST_FUNC_EXIT("HsAddToHomeScreenState::addWidget");
@@ -153,7 +147,7 @@ bool HsAddToHomeScreenState::addWidget(HsContentService &contentService,
 }
 
 /*!
- Shows message about corrupted widget library. Deletes widget eventually
+ Shows message about corrupted widget library. Deletes widget eventually.
  \param itemId entryId of widget (needed to delete it)
  \retval void
  */
@@ -161,39 +155,63 @@ void HsAddToHomeScreenState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
 
-    mCorruptedMessage = HsMenuDialogFactory().create(
-            hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
-    mConfirmAction = mCorruptedMessage->actions().value(0);
-    
-    QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
-        new HsMenuEntryRemovedHandler(mEntryId, 
-            mCorruptedMessage, SLOT(close())));
-    
-    entryObserver.take()->setParent(mCorruptedMessage); 
-    
-    mCorruptedMessage->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
+    QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(
+                hbTrId(
+                    "txt_applib_dialog_file_corrupted_unable_to_use_wi")));
 
+    connect(dialogController.data(),
+            SIGNAL(acceptActionTriggered(QAction*)),
+            this,
+            SLOT(removeWidget()));
+
+    connect(dialogController.data(),
+            SIGNAL(dialogCompleted()),
+            this,
+            SLOT(openHomeScreen()));
+
+    // ensure dialog is dismissed on app key pressed
+    connect(this, SIGNAL(exited()),
+            dialogController.data(),
+            SLOT(dismissDialog()));
+
+    dialogController.take()->openDialog(
+            mEntryId
+            );
+    
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
 }
 
 /*!
- Slot launched on dismissing the corrupted widget error note
+ Exits the state. When in Add Mode sends event requesting back step to
+ Home Screen.
  \retval void
  */
-void HsAddToHomeScreenState::messageWidgetCorruptedFinished
-        (HbAction* finishedAction)
+void HsAddToHomeScreenState::openHomeScreen()
 {
-    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
-        HsMenuService::executeAction(mEntryId, Hs::removeActionIdentifier);
-    }
     emit exit();
     if (mMenuMode == Hs::AddHsMenuMode) {
         machine()->postEvent(
             HsMenuEventFactory::createOpenHomeScreenEvent());
     }
-    mConfirmAction = NULL;
 }
 
+
+/*!
+ Slot. Removes entry requested that was subject of
+ current 'add to homescreen' action.
+ \retval void
+ */
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsAddToHomeScreenState::removeWidget()
+{
+    HsMenuService::executeAction(mEntryId, Hs::removeActionIdentifier);
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot launched after state has exited and in destructor.
@@ -201,22 +219,14 @@ void HsAddToHomeScreenState::messageWidgetCorruptedFinished
  */
 void HsAddToHomeScreenState::cleanUp()
 {
-    // Close popups if App key was pressed
-    if (mCorruptedMessage != NULL) {
-        mCorruptedMessage->close();
-        mCorruptedMessage = NULL;
-    }
-    
     mToken = NULL;
 }
 
 
 /*!
  Adds a shortcut to active page of home screen
- \param shortcutService: service for adding shortcuts
- \param entryId: menu entry id
- \param activePage: active page of home screen
- \retval true if successful
+ \param contentService service for adding shortcuts.
+ \retval true if successful.
  */
 bool HsAddToHomeScreenState::addShortcut(HsContentService &contentService)
 {
@@ -234,10 +244,9 @@ bool HsAddToHomeScreenState::addShortcut(HsContentService &contentService)
 }
 
 /*!
- Adds a tapplication to active page of home screen
- \param shortcutService: service for adding shortcuts
- \param entryId: menu entry id
- \param data: data from event
+ Adds a tapplication to active page of Home Screen.
+ \param contentService Service for adding shortcuts.
+ \param entry Entry being added to Home Screen.
  \retval true if successful
  */
 bool HsAddToHomeScreenState::addApplication(HsContentService &contentService,
@@ -270,11 +279,8 @@ bool HsAddToHomeScreenState::addApplication(HsContentService &contentService,
     } else {
             success = addShortcut(contentService);
     }
-    emit exit();
-    if (mMenuMode == Hs::AddHsMenuMode) {
-        machine()->postEvent(
-            HsMenuEventFactory::createOpenHomeScreenEvent());
-    }
+    openHomeScreen();
+
     return success;
 }
 

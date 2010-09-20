@@ -84,17 +84,19 @@ QPainterPath HsWidgetHostVisual::shape() const
     QPainterPath path;
 
     if (mWidget) {
-        QRectF currRect = rect();
+        QRectF visualRect = rect();
         path = mWidget->shape();
 
-        QRectF pathRect(path.boundingRect());
-
-        if (pathRect.width() > currRect.width()
-            || pathRect.height() > currRect.height()) {
-            QPainterPath newPath(currRect.topLeft());
-            newPath.addRect(currRect);
+        QRectF widgetRect(path.boundingRect());
+        if (widgetRect.width() > visualRect.width()
+            || widgetRect.height() > visualRect.height()) {
+            QPainterPath newPath;
+            newPath.addRect(visualRect);
             path = path.intersected(newPath);
+        } else if ( widgetRect.isEmpty() ) {
+            path.addRect(visualRect);
         }
+
     }
     return path;
 }

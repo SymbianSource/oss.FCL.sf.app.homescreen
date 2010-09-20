@@ -135,10 +135,31 @@ QString HsCollectionNameDialog::generateUniqueCollectionName(
 
     unsigned int numToAppend(1);
 
-    while (mOtherCollectionsNames.contains(newName)) {
-        newName = hbTrId("txt_applib_dialog_entry_collectionl1").arg(
+    bool defaultCollection = false;
+    if (newName == hbTrId("txt_applib_dialog_entry_collection")) {
+        defaultCollection = true;
+    }
+    if (defaultCollection) {
+        while (mOtherCollectionsNames.contains(newName)) {
+            newName = hbTrId("txt_applib_dialog_entry_collectionl1").arg(
                 numToAppend);
-        numToAppend++;
+            numToAppend++;
+        }
+    }
+    else {
+        QString textMap = hbTrId(
+            "txt_applib_dialog_collection_name_entry_1_l1");
+        // TODO: Temporary workaround.
+        // The "if" instruction below can be removed when
+        // a text map "txt_applib_dialog_collection_name_entry_1_l1"
+        // is available in the platform.
+        if (textMap == "txt_applib_dialog_collection_name_entry_1_l1") {
+            textMap = "%2 (%L1)";
+        }
+        while (mOtherCollectionsNames.contains(newName)) {
+            newName = textMap.arg(numToAppend).arg(name);
+            numToAppend++;
+        }
     }
 
     HSMENUTEST_FUNC_EXIT("HsInputDialog::newName");

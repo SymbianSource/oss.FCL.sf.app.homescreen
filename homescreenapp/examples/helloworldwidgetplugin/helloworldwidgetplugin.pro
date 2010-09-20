@@ -49,6 +49,8 @@ symbian: {
 
     BLD_INF_RULES.prj_exports += \
       "./rom/helloworldwidgetplugin.iby  CORE_APP_LAYER_IBY_EXPORT_PATH(helloworldwidgetplugin.iby)" 
+      
+   MMP_RULES += SMPSAFE
 }
 
 win32: {

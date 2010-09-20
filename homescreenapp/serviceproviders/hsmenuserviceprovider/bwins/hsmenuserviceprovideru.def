@@ -58,4 +58,5 @@ EXPORTS
 	?removeApplicationFromCollection@HsMenuService@@SA_NHH@Z @ 57 NONAME ; bool HsMenuService::removeApplicationFromCollection(int, int)
 	?tr@HsMenuItemModel@@SA?AVQString@@PBD0@Z @ 58 NONAME ; class QString HsMenuItemModel::tr(char const *, char const *)
 	?getStaticMetaObject@HsMenuEntryRemovedHandler@@SAABUQMetaObject@@XZ @ 59 NONAME ; struct QMetaObject const & HsMenuEntryRemovedHandler::getStaticMetaObject(void)
+	?executeAction@HsMenuService@@SAHABVCaEntry@@ABVQString@@PAVQObject@@PBD@Z @ 60 NONAME ; int HsMenuService::executeAction(class CaEntry const &, class QString const &, class QObject *, char const *)
 

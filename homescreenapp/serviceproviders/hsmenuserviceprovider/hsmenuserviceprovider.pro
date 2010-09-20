@@ -27,4 +27,5 @@ LIBS += -lcaclient \
         -lcasoftwareregistry
 
 symbian::TARGET.UID3 = 0x20026FA9
+symbian:MMP_RULES += SMPSAFE
 !symbian:exportResources(./resource/*.png, resource)

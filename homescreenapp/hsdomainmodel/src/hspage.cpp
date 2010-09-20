@@ -668,21 +668,12 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
     
     HsPageVisual *pageVisual = visual();
     HsWidgetHostVisual *visual(0);
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-    QList<HsWidgetHost*> newWidgets;
-#endif //HSWIDGETORGANIZER_ALGORITHM    
+    QList<HsWidgetHost*> newWidgets; 
     foreach (HsWidgetHost *widget, mWidgets) {
         visual = widget->visual();
         if ( pageVisual->isAncestorOf(visual)) {
             if (!widget->getPresentation(presentation)) {
-#ifndef HSWIDGETORGANIZER_ALGORITHM
-                QList<QRectF> geometries = converter->convert(
-                    from, QList<QRectF>() << visual->geometry(), to);
-                visual->setGeometry(geometries.first());
-                widget->savePresentation();
-#else //HSWIDGETORGANIZER_ALGORITHM
                 newWidgets << widget;
-#endif //HSWIDGETORGANIZER_ALGORITHM
             } else {
                 QRectF adjustWidgetPosition;
                 adjustWidgetPosition = visual->geometry();
@@ -693,16 +684,7 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
             }
         }
     }
-    
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-    // sort new widgets in order
     if (newWidgets.count()) {
-        // TODO: read from configuration? or just use height for portrait and width for landscape (currently only height is used)
-        sortOrder order(height);
-        if(orientation == Qt::Horizontal) {
-            order = width;
-        } 
-        sortWidgets(order, newWidgets);
         // get rects for new widgets
         QList<QRectF> newRects;
         foreach (HsWidgetHost *newWidget, newWidgets) {
@@ -716,7 +698,7 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
         QList<QRectF> existingRects;
         foreach (HsWidgetHost *widget, mWidgets) {
             if (!newWidgets.contains(widget)) {
-                existingRects << QRectF(widget->visual()->pos(), widget->visual()->preferredSize());
+                existingRects << QRectF(widget->visual()->geometry());
             }
         }
          
@@ -726,14 +708,12 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
         QList<QRectF> calculatedRects =
             algorithm->convert(pageRect, existingRects, newRects, QPointF());
 
-        for ( int i=0; i<newWidgets.count(); i++) {            
+        for (int i=0; i<newWidgets.count(); i++) {            
             int j = mWidgets.indexOf(newWidgets.at(i));
             mWidgets.at(j)->visual()->setGeometry(calculatedRects.at(i));
             mWidgets.at(j)->savePresentation();            
         }               
-    }    
-#endif //HSWIDGETORGANIZER_ALGORITHM
-    
+    }        
 }
 
 void HsPage::onPageMarginChanged(const QString &value)
@@ -758,45 +738,3 @@ void HsPage::onPageMarginChanged(const QString &value)
         }
     }
 }
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-// TODO: sorting should be done in algorithm class, make widget<->rect mapping here and move sortWidgets function to algorithm side
-/*!
-    Sorts widgets in height/width order
-*/
-void HsPage::sortWidgets(sortOrder order, QList<HsWidgetHost*> &widgets)
-{
-    QList<HsWidgetHost*> tmpWidgets;
-
-    for ( int i = 0; i < widgets.count(); i++) {
-        int index = 0;
-        // add first widget to sorted list
-        if (i == 0) {
-            tmpWidgets << widgets.at(i);
-        } else {
-            // go through existing widgets in the sorted list
-            for ( int j = 0; j < tmpWidgets.count(); j++) {
-                // sort widgets in height order
-                if (order == height) {
-                    /* if widgets heigth is smaller on already
-                       existing ones in the list -> increment index
-                    */
-                    if (widgets.at(i)->visual()->preferredHeight() <= tmpWidgets.at(j)->visual()->preferredHeight()) {
-                        index++;
-                    }
-                // sort widgets in width order
-                } else {
-                    /* if widgets width is smaller on already
-                       existing ones in the sorted list -> increment index
-                    */
-                    if (widgets.at(i)->visual()->preferredWidth() <= tmpWidgets.at(j)->visual()->preferredWidth()) {
-                        index++;
-                    }
-                }
-            }
-            // add widget to its correct index in sorted list
-            tmpWidgets.insert(index, widgets.at(i));
-        }
-    }
-    widgets = tmpWidgets;    
-}
-#endif //HSWIDGETORGANIZER_ALGORITHM

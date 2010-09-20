@@ -23,38 +23,45 @@
 
 #include "hsmenustates_global.h"
 
+HS_STATES_TEST_CLASS(MenuStatesTest)
+
 // TODO: this is only temporary class for show progress bar.
 // It should be remove when fix from orbit will be in official platfrom.
-class HsProgressBar: public HbProgressBar {
-public:
-    HsProgressBar(QGraphicsItem *parent=0):HbProgressBar(parent),mTargetValue(0),mTimerId(0) {}
-    void setTargetProgressValue(int value);
+class HsProgressBar: public HbProgressBar
+{
+    public:
+        HsProgressBar(QGraphicsItem *parent = 0) : HbProgressBar(parent),
+            mTargetValue(0), mTimerId(0) {}
+        void setTargetProgressValue(int value);
 
-protected:
-    void paint ( QPainter * painter, 
-            const QStyleOptionGraphicsItem * option, 
-            QWidget * widget = 0 );
-    void timerEvent(QTimerEvent *event);
-private:
-    int mTargetValue;
-    int mTimerId;
+    protected:
+        void paint(QPainter *painter,
+                const QStyleOptionGraphicsItem *option,
+                QWidget *widget = 0 );
+        void timerEvent(QTimerEvent *event);
+
+    private:
+        int mTargetValue;
+        int mTimerId;
+
+    HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 };
 
-HS_STATES_TEST_CLASS(MenuStatesTest)
+
 
 class HsListViewItem : public HbListViewItem
 {
     Q_OBJECT
     public:
-                
-        explicit HsListViewItem(QGraphicsItem* parent=0);
+
+        explicit HsListViewItem(QGraphicsItem *parent = 0);
         virtual ~HsListViewItem();
-   
+
         virtual HbAbstractViewItem* createItem();
         virtual void updateChildItems();
-    
-    protected:    
-	    virtual void polish(HbStyleParameters& params);
+
+    protected:
+	    virtual void polish(HbStyleParameters &params);
 
     private:
 	    HsProgressBar *progress;

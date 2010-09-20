@@ -64,9 +64,7 @@ public:
     QRectF contentRect();
     QRectF contentRect(Qt::Orientation orientation);
     HsPageVisual *visual() const;
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-    enum sortOrder { height, width};
-#endif //HSWIDGETORGANIZER_ALGORITHM
+
 public slots:
     void showWidgets();
     void hideWidgets();
@@ -79,9 +77,6 @@ private:
   //  void setupTouchArea();
     void connectWidget(HsWidgetHost *widget);
     void disconnectWidget(HsWidgetHost *widget);
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-    void sortWidgets(sortOrder order, QList<HsWidgetHost*> &widgets);
-#endif //HSWIDGETORGANIZER_ALGORITHM
 
 private slots:
     void onWidgetFinished();

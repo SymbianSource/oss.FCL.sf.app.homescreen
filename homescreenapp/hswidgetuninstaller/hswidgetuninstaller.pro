@@ -47,4 +47,6 @@ symbian: {
     LIBS += -lxqserviceutil
     LIBS += -lapparc
     LIBS += -lhsdomainmodel
+    
+    MMP_RULES += SMPSAFE
 }

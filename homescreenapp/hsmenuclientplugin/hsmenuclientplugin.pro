@@ -34,6 +34,8 @@ SOURCES +=  src/hsmenuclient.cpp \
 
 symbian: {
 	TARGET.UID3 = 0x20028715
+	
+	MMP_RULES += SMPSAFE
 }
 
 include(../common.pri)

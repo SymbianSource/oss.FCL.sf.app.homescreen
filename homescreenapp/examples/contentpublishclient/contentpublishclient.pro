@@ -43,6 +43,8 @@ symbian: {
     
     DEPLOYMENT += testwallpaperimages
     
+    MMP_RULES += SMPSAFE
+    
 } else {
     error("Only Symbian supported!")
 }

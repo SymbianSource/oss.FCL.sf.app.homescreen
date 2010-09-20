@@ -329,55 +329,58 @@ void HsBaseViewState::contextMenuAction(HbAction *action)
         static_cast<Hs::HsContextAction>(action->data().toInt());
 
     const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
-
-    switch (command) {
-        case Hs::AddToHomeScreenContextAction:
-            addToHomeScreen(itemId);
-            break;
-        case Hs::AddToCollectionFromApplicationsViewContextAction:
-            // Addding a specific application to
-            // an existing collection via item specific menu.
-            machine()->postEvent(
-                HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
-                    Hs::NoHsSortAttribute, itemId));
-            break;
-        case Hs::AddToCollectionFromCollectionViewContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
-                    -1, itemId));
-            break;
-        case Hs::UninstallContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createUninstallApplicationEvent(
-                    itemId));
-            break;
-        case Hs::AppSettingContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAppSettingsViewEvent(itemId));
-            break;
-        case Hs::AppDetailsContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createAppDetailsViewEvent(itemId));
-            break;
-        case Hs::OpenAppContextAction:
-            launchItem(mContextModelIndex);
-            break;
-        case Hs::RenameCollectionContextAction:
-            machine()->postEvent(
-                HsMenuEventFactory::createRenameCollectionEvent(itemId));
-            break;
-        case Hs::DeleteCollectionContextAction:
-             machine()->postEvent(
-                HsMenuEventFactory::createDeleteCollectionEvent(itemId));
-            break;
-        case Hs::OpenCollectionContextAction:
-            openCollection(mContextModelIndex);
-            break;
-        default:
-            break;
-    }
     
-    HsMenuService::touch(itemId);
+    if (itemId > 0) {
+        switch (command) {
+            case Hs::AddToHomeScreenContextAction:
+                addToHomeScreen(itemId);
+                break;
+            case Hs::AddToCollectionFromApplicationsViewContextAction:
+                // Addding a specific application to
+                // an existing collection via item specific menu.
+                machine()->postEvent(
+                    HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
+                        Hs::NoHsSortAttribute, itemId));
+                break;
+            case Hs::AddToCollectionFromCollectionViewContextAction:
+                machine()->postEvent(
+                    HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
+                        -1, itemId));
+                break;
+            case Hs::UninstallContextAction:
+                machine()->postEvent(
+                    HsMenuEventFactory::createUninstallApplicationEvent(
+                        itemId));
+                break;
+            case Hs::AppSettingContextAction:
+                machine()->postEvent(
+                    HsMenuEventFactory::createAppSettingsViewEvent(itemId));
+                break;
+            case Hs::AppDetailsContextAction:
+                machine()->postEvent(
+                    HsMenuEventFactory::createAppDetailsViewEvent(itemId));
+                break;
+            case Hs::OpenAppContextAction:
+                launchItem(mContextModelIndex);
+                break;
+            case Hs::RenameCollectionContextAction:
+                machine()->postEvent(
+                    HsMenuEventFactory::createRenameCollectionEvent(itemId));
+                break;
+            case Hs::DeleteCollectionContextAction:
+                 machine()->postEvent(
+                    HsMenuEventFactory::createDeleteCollectionEvent(itemId));
+                break;
+            case Hs::OpenCollectionContextAction:
+                openCollection(mContextModelIndex);
+                break;
+            default:
+                break;
+        }
+        HsMenuService::touch(itemId);
+    } else {
+        closeContextMenu();
+    }
 }
 
 /*!
@@ -461,3 +464,16 @@ void HsBaseViewState::defineTransitions()
             *mMenuMode, Hs::AddHsMenuMode, addModeState));
 }
 
+/*!
+ Triggers event so that an installed applications state is entered.
+ */
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsBaseViewState::openInstalledView()
+{
+    machine()->postEvent(HsMenuEventFactory::createOpenInstalledViewEvent());
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

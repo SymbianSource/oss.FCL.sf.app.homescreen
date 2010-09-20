@@ -26,8 +26,8 @@
 #include "hsmenustates_global.h"
 #include "hsmenuviewbuilder.h"
 #include "hssearchviewbuilder.h"
+#include "hssearchfilterproxymodel.h"
 
-class QSortFilterProxyModel;
 class HsMainWindow;
 class HbAbstractViewItem;
 class HbLineEdit;
@@ -94,7 +94,7 @@ private:
     QModelIndex mSearchViewInitialIndex;
     QModelIndex mIndexToScrollAfterSearchDone;
     QModelIndex mSearchViewLongPressedIndex;
-    QSortFilterProxyModel *mProxyModel; // owned
+    HsSearchFilterProxyModel *mProxyModel; // owned
     HbView *mSearchView;
     HbListView *mSearchListView;
     HbSearchPanel *mSearchPanel;
@@ -106,6 +106,8 @@ private:
     QScopedPointer<HbShrinkingVkbHost> mVkbHost;
     HsSearchViewBuilder mSearchViewBuilder;
     bool mEmptyResultText;
+    QString mCriteria;
+
 };
 
 #endif /* HSSEARCHVIEW_H_ */

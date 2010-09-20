@@ -21,7 +21,10 @@
 #include "hsmainwindow.h"
 #include "hsmenuview.h"
 #include "hsmenumodewrapper.h"
-
+#include "hsscene.h"
+#include "hspage.h"
+#include "hspagevisual.h"
+#include "hswallpaper.h"
 /*!
  Constructor
  */
@@ -66,6 +69,24 @@ void HsMainWindow::setCurrentView(HbView *view)
         hbW->addView(view);
     }
     
+    // For some reason all visible items will pe rendered even they are outside of the viewport
+    // Hide inactive pages and wallpapers to make screen shot faster
+    HsScene *scene(HsScene::instance()); 	
+    QList<HsPage *> pages(scene->pages());
+    foreach (HsPage *p, pages) {
+        if (p != scene->activePage()) {
+        		p->wallpaper()->hide();
+            p->visual()->hide();
+        } 
+    }
     bool animate  = !hbW->isObscured();       
+    // source view will be rendered to cache
     hbW->setCurrentView(view, animate, Hb::ViewSwitchCachedFullScreen);
+   	// restore previous
+   	foreach (HsPage *p, pages) {
+        if (p != scene->activePage()) {
+        		p->wallpaper()->show();
+            p->visual()->show();
+        } 
+    } 	
 }

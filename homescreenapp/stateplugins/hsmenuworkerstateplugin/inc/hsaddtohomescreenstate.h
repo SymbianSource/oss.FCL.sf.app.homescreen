@@ -19,6 +19,7 @@
 #ifndef HSADDSHORTCUTSTATE_H
 #define HSADDSHORTCUTSTATE_H
 
+#include <QScopedPointer>
 #include <QState>
 #include <QVariant>
 
@@ -33,7 +34,7 @@ class HbMessageBox;
 class CaEntry;
 class CaNotifier;
 class HsContentService;
-
+class HsDialogController;
 
 class HsAddToHomeScreenState: public  QState
 {
@@ -53,7 +54,9 @@ private slots:
 
     void cleanUp();
 
-    void messageWidgetCorruptedFinished(HbAction* finishedAction);
+    void openHomeScreen();
+
+    void removeWidget();
 
 signals:
 
@@ -78,10 +81,6 @@ private:
     QString mLibraryPath;
 
     int mEntryId;
-
-    HbMessageBox *mCorruptedMessage;
-
-    QAction *mConfirmAction;
     
     Hs::HsMenuMode mMenuMode;
     

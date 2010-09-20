@@ -35,6 +35,8 @@ public:
     virtual HbMessageBox *create(const QString &text,
                                  Options options = OkCancel) const;
     virtual ~HsMenuDialogFactory();
+    static int acceptActionIndex();
+    static int rejectActionIndex();
 private:
     void setUpActions(HbMessageBox *box,
                       const QStringList &translationIdentifiers) const;

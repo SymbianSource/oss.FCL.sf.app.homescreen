@@ -117,7 +117,9 @@
       <confml:Configuration><confml:key>isSnapEffectsEnabled</confml:key><confml:value>true</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>sceneType</confml:key><confml:value>PageWallpapers</confml:value></confml:Configuration>
       <confml:Configuration><confml:key>bounceAnimationEasingCurve</confml:key><confml:value>Linear</confml:value></confml:Configuration>
-      <confml:Configuration><confml:key>pageChangeAnimationEasingCurve</confml:key><confml:value>Linear</confml:value></confml:Configuration>      
+      <confml:Configuration><confml:key>pageChangeAnimationEasingCurve</confml:key><confml:value>Linear</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>widgetOrganizerAnchorDistance</confml:key><confml:value>5</confml:value></confml:Configuration>
+      <confml:Configuration><confml:key>widgetOrganizerSearchSequence</confml:key><confml:value>SearchRowByRow</confml:value></confml:Configuration>
     </confml:HomeScreenDbSettings>
   </confml:data>
 </confml:configuration>

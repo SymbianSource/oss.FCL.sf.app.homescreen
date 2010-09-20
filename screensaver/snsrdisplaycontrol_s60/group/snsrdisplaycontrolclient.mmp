@@ -32,3 +32,4 @@ SOURCEPATH      ../src
 SOURCE          snsrdisplaycontrolclient.cpp 
 
 LIBRARY         euser.lib
+SMPSAFE

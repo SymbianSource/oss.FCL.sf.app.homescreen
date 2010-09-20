@@ -34,7 +34,7 @@
 #include "hswidgethost.h"
 #include "hspreviewhswidgetstate.h"
 #include "hsmenuevent.h"
-#include "hsmenudialogfactory.h"
+#include "hsdialogcontroller.h"
 #include "hsapp_defs.h"
 #include "hsscene.h"
 #include "hspage.h"
@@ -63,11 +63,7 @@
  */
 HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
     QState(parent),
-    mPreviewDialog(0),
     mEntryId(0),
-    mCorruptedMessage(0),
-    mConfirmRemovalAction(0),
-    mAddToHomescreenAction(0),
     mToken(),
     mUri()
 {
@@ -83,7 +79,10 @@ HsPreviewHSWidgetState::HsPreviewHSWidgetState(QState *parent) :
  */
 HsPreviewHSWidgetState::~HsPreviewHSWidgetState()
 {
-    cleanUp(); // in case of throw
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -112,16 +111,33 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
     QSharedPointer<CaEntry> entry =
         CaService::instance()->getEntry(mEntryId);
     mUri = entry->attribute(Hs::widgetUriAttributeName);
-    mPreviewDialog = buildPreviewDialog(*entry);
-    mAddToHomescreenAction = mPreviewDialog->actions().value(0);
+    QScopedPointer<HbDialog> previewDialog(buildPreviewDialog(*entry));
     
-    if (mPreviewDialog != NULL) {
+    if (!previewDialog.isNull()) {
         // Launch popup asyncronously
-        
-        mEntryObserver.reset(
-            new HsMenuEntryRemovedHandler(mEntryId, this, SIGNAL(exit())));
-        
-        mPreviewDialog->open(this, SLOT(previewDialogFinished(HbAction*)));
+
+
+        QScopedPointer<HsDialogController> dialogController(
+                new HsDialogController(previewDialog.take(),
+                    HsMenuDialogFactory::acceptActionIndex(),
+                    HsMenuDialogFactory::rejectActionIndex()));
+
+        connect(dialogController.data(),
+                SIGNAL(acceptActionTriggered(QAction*)),
+                this,
+                SLOT(addToHomeScreen()));
+
+        connect(dialogController.data(),
+                SIGNAL(dialogCompleted()),
+                this,
+                SIGNAL(exit()));
+
+        // ensure dialog is dismissed on app key pressed
+        connect(this, SIGNAL(exited()),
+                dialogController.data(),
+                SLOT(dismissDialog()));
+
+        dialogController.take()->openDialog(mEntryId);
     }
     
     HSMENUTEST_FUNC_EXIT("HsPreviewHSWidgetState::onEntry");
@@ -132,52 +148,31 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
  \retval void
  */
 void HsPreviewHSWidgetState::cleanUp()
-{
-    if (mPreviewDialog != NULL) {
-        mPreviewDialog->disconnect();
-        mPreviewDialog ->close();
-        mPreviewDialog = NULL;
-    }
-    
-    if (mCorruptedMessage != NULL) {
-        mCorruptedMessage->disconnect();
-        mCorruptedMessage->close();
-        mCorruptedMessage = NULL;
-    }
-    
+{  
     mToken = NULL;
 }
 
 /*!
- Slot launched on dismissing the preview dialog
+ Slot. Adds the entry controlled by the state to Home Screen.
  \retval void
  */
-void HsPreviewHSWidgetState::previewDialogFinished(HbAction* finishedAction)
+void HsPreviewHSWidgetState::addToHomeScreen()
 {
-    mPreviewDialog = NULL;
+    QVariantHash widgetData;
+    widgetData[Hs::uri] = mUri;
+    widgetData[Hs::homescreenData] = mToken;
 
-    if (finishedAction == mAddToHomescreenAction) {
+    bool success = HsContentService::instance()->createWidget(widgetData);
 
-        QVariantHash widgetData;
-        widgetData[Hs::uri] = mUri;
-        widgetData[Hs::homescreenData] = mToken;
-        
-        bool success = HsContentService::instance()->createWidget(widgetData);
-        
-        if (success) {
-            HbNotificationDialog *notificationDialog = new HbNotificationDialog();
-            notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
-            notificationDialog->setTitle(hbTrId("txt_applib_dpophead_added_to_homescreen"));
-            notificationDialog->show();
-            emit exit();
-        }
-        else {
-            showMessageWidgetCorrupted();            
-        }
-    } else {
-        emit exit();
+    if (success) {
+        HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+        notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
+        notificationDialog->setTitle(hbTrId("txt_applib_dpophead_added_to_homescreen"));
+        notificationDialog->show();
     }
-    mAddToHomescreenAction = 0;
+    else {
+        showMessageWidgetCorrupted();
+    }
 }
 
 /*!
@@ -188,31 +183,46 @@ void HsPreviewHSWidgetState::showMessageWidgetCorrupted()
 {
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::showMessageWidgetCorrupted");
 
-    mCorruptedMessage = HsMenuDialogFactory().create(
-            hbTrId("txt_applib_dialog_file_corrupted_unable_to_use_wi"));
+    QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(
+                hbTrId(
+                    "txt_applib_dialog_file_corrupted_unable_to_use_wi")));
 
-    mConfirmRemovalAction = mCorruptedMessage->actions().value(0);
-    mCorruptedMessage
-        ->open(this, SLOT(messageWidgetCorruptedFinished(HbAction*)));
+    connect(dialogController.data(),
+            SIGNAL(acceptActionTriggered(QAction*)),
+            this,
+            SLOT(removeWidget()));
+
+    connect(dialogController.data(),
+            SIGNAL(dialogCompleted()),
+            this,
+            SIGNAL(exit()));
+
+    // ensure dialog is dismissed on app key pressed
+    connect(this, SIGNAL(exited()),
+            dialogController.data(),
+            SLOT(dismissDialog()));
+
+    dialogController.take()->openDialog(mEntryId);
 
     HSMENUTEST_FUNC_EXIT("HsCollectionState::showMessageWidgetCorrupted");
 }
 
 /*!
- Slot launched on dismissing the corrupted widget error note
+ Slot. Removes the entry controlled by the state from App Library.
  \retval void
  */
-void HsPreviewHSWidgetState::messageWidgetCorruptedFinished(HbAction* finishedAction)
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+
+void HsPreviewHSWidgetState::removeWidget()
 {
-    mCorruptedMessage = NULL;
-	
-    if (static_cast<QAction*>(finishedAction) == mConfirmRemovalAction) {
-        HsMenuService::executeAction(mEntryId, Hs::removeActionIdentifier);
-    }
-    emit exit();
-    
-    mConfirmRemovalAction = NULL;
+    HsMenuService::executeAction(mEntryId, Hs::removeActionIdentifier);
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  \param entry The entry which is to be presented by the preview dialog.

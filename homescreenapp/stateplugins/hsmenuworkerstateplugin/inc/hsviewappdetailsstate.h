@@ -28,7 +28,6 @@ HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class HbListWidget;
 class HsMenuItemModel;
-class HbDialog;
 class CaNotifier;
 class HbDocumentLoader;
 
@@ -48,11 +47,6 @@ public:
 protected:
 
     void onEntry(QEvent *event);
-    void onExit(QEvent *event);
-
-private slots:
-
-    void stateExited();
     
 signals:
     void exit();    
@@ -63,10 +57,6 @@ private:
     void setFieldPresentation(QString key,
             CaSoftwareRegistry::DetailMap &detailMap,
             HbDocumentLoader &loader);
-
-private:
-
-    HbDialog *mDialog;
 };
 
 #endif /* HSVIEWAPPDETAILSSTATE_H_ */

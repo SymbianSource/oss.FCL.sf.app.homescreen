@@ -27,7 +27,7 @@ class HsWallpaper;
 class HsSpinnerDialog;
 
 #ifdef Q_OS_SYMBIAN
-class HsImageFetcherClient;
+class HsImageHandlingClient;
 #else
 class XQAIWGetImageClient;
 #endif
@@ -51,7 +51,8 @@ private:
 
 private slots:    
     void action_selectingImage_start();
-    void action_selectingImage_cleanup();
+    void action_imageHandler_cleanup();
+    void action_editingImage_start();
     void action_assigningImage_showWaitDialog();
     void action_assigningImage_start();
     void action_assigningImage_cleanup();
@@ -62,12 +63,12 @@ private slots:
     void onFetchFailed(int errorCode, const QString &errorMessage);
     void onImageSet();
     void onImageSetFailed();
-
+    void onEditorCompleted();
 private:    
 #ifdef Q_OS_SYMBIAN
-    HsImageFetcherClient *mImageFetcher;
+    HsImageHandlingClient *mImageHandler;
 #else
-    XQAIWGetImageClient *mImageFetcher;
+    XQAIWGetImageClient *mImageHandler;
 #endif
     QString mImagePath;
     HsWallpaper *mWallpaper;    

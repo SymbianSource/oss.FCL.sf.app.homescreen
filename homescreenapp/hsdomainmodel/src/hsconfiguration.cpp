@@ -75,7 +75,9 @@ HsConfiguration::HsConfiguration(QObject *parent)
     mIsSnapEffectsEnabled(true),    
     mSceneType(PageWallpapers),
     mBounceAnimationEasingCurve(QEasingCurve::Linear),
-    mPageChangeAnimationEasingCurve(QEasingCurve::Linear)
+    mPageChangeAnimationEasingCurve(QEasingCurve::Linear),
+    mWidgetOrganizerAnchorDistance(5),
+    mWidgetOrganizerSearchSequence(SearchRowByRow)
 {    
 }
 

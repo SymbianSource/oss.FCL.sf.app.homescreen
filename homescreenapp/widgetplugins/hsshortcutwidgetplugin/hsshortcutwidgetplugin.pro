@@ -41,6 +41,7 @@ INCLUDEPATH += ./inc \
 
 symbian: {
     TARGET.UID3 = 0x20022F46
+    MMP_RULES += SMPSAFE
 }
 
 exportResources(./resource/*.manifest, $$WIDGET_SUBDIR)

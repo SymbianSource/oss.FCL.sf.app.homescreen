@@ -45,6 +45,7 @@ HsPageNewWidgetLayout::HsPageNewWidgetLayout(const QPointF &touchPoint,
                                              QGraphicsLayoutItem *parent)
     : QGraphicsLayout(parent),    
     mTouchPoint(touchPoint)
+    // add mWidgetRects
 {
     mSize = HsGui::instance()->layoutRect().size();
 }
@@ -104,15 +105,6 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
 {
     QGraphicsLayout::setGeometry(rect);
 
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-    // sort new widgets in order
-    if (mNewWidgets.count() > 1) {
-        // TODO: read from configuration? or just use height for portrait and width for landscape (currently only height is used)
-        sortOrder order(height);
-        mNewWidgets = sortWidgets(order);
-    }
-#endif
-
     // get rects for new widgets
     QList<QRectF> newRects;
     foreach (HsWidgetHost *newWidget, mNewWidgets) {
@@ -123,7 +115,7 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
        then there is only one widget in the list
        -> set widget center point to this touch point
     */
-    if (mTouchPoint != QPointF() && mNewWidgets.count() == 1) {
+    if (mTouchPoint != QPointF() && newRects.count() == 1) {
         QRectF widgetRect = newRects.at(0);
         widgetRect.moveCenter(mTouchPoint);
         widgetRect.moveTopLeft(HsScene::instance()->activePage()->adjustedWidgetPosition(widgetRect));
@@ -153,8 +145,8 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
             HsWidgetPositioningOnWidgetAdd::instance();
         QList<QRectF> calculatedRects =
             algorithm->convert(pageRect, existingRects, newRects, QPointF());
-
-        for ( int i=0; i<mNewWidgets.count(); i++) {
+        // set new widgets to screen and save presentation for each widget
+        for (int i=0; i<mNewWidgets.count(); i++) {
             mNewWidgets.at(i)->visual()->setGeometry(calculatedRects.at(i));
             mNewWidgets.at(i)->savePresentation();
         }
@@ -168,47 +160,3 @@ void HsPageNewWidgetLayout::addItem(HsWidgetHost *item)
 {
     mNewWidgets.append(item);
 }
-
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-// TODO: sorting should be done in algorithm class, make widget<->rect mapping here and move sortWidgets function to algorithm side
-/*!
-    Sorts widgets in height/width order
-*/
-QList<HsWidgetHost*> HsPageNewWidgetLayout::sortWidgets(sortOrder order)
-{
-    QList<HsWidgetHost*> tmpWidgets;
-
-    for ( int i = 0; i < mNewWidgets.count(); i++) {
-        int index = 0;
-        // add first widget to sorted list
-        if (i == 0) {
-            tmpWidgets << mNewWidgets.at(i);
-        } else {
-            // go through existing widgets in the sorted list
-            for ( int j = 0; j < tmpWidgets.count(); j++) {
-                // sort widgets in height order
-                if (order == height) {
-                    /* if widgets heigth is smaller on already
-                       existing ones in the list -> increment index
-                    */
-                    if (mNewWidgets.at(i)->visual()->preferredHeight() <= tmpWidgets.at(j)->visual()->preferredHeight()) {
-                        index++;
-                    }
-                // sort widgets in width order
-                } else {
-                    /* if widgets width is smaller on already
-                       existing ones in the sorted list -> increment index
-                    */
-                    if (mNewWidgets.at(i)->visual()->preferredWidth() <= tmpWidgets.at(j)->visual()->preferredWidth()) {
-                        index++;
-                    }
-                }
-            }
-            // add widget to its correct index in sorted list
-            tmpWidgets.insert(index, mNewWidgets.at(i));
-        }
-    }
-    return tmpWidgets;
-}
-#endif // HSWIDGETORGANIZER_ALGORITHM
-

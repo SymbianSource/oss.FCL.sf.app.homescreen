@@ -52,10 +52,6 @@ public:
     ~HsBaseViewState();
     void scrollToBeginning();
 
-private slots:
-
-    virtual void openAppLibrary();
-
 protected slots:
     
     virtual void stateEntered();
@@ -66,25 +62,34 @@ protected slots:
     virtual void normalModeExited();
     virtual void launchItem(const QModelIndex &index);
     virtual void openCollection(const QModelIndex &index);
-    virtual void showContextMenu(HbAbstractViewItem *item, const QPointF &coords);
+    virtual void showContextMenu(
+        HbAbstractViewItem *item, const QPointF &coords);
     virtual int checkSoftwareUpdates();
     virtual bool openTaskSwitcher();
     virtual void closeContextMenu();
     virtual void addToHomeScreen(const int entryId);
     virtual void contextMenuAction(HbAction *action);
     virtual void addActivated(const QModelIndex &index);
-    virtual void addModeShowContextMenu(HbAbstractViewItem *item,
-                                        const QPointF &coords);
+    virtual void addModeShowContextMenu(
+        HbAbstractViewItem *item,
+        const QPointF &coords);
+    virtual void openInstalledView();
     
 protected:
     
-    void initialize(HsMenuViewBuilder &menuViewBuilder, HsStateContext stateContext);
+    void initialize(
+        HsMenuViewBuilder &menuViewBuilder, HsStateContext stateContext);
     void createApplicationLaunchFailMessage(int errorCode,int itemId);
     void defineTransitions();
 
+private slots:
+
+    virtual void openAppLibrary();
+
 private:
 
-    virtual void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags) = 0;
+    virtual void setContextMenuOptions(
+        HbAbstractViewItem *item, EntryFlags flags) = 0;
     virtual void setMenuOptions() = 0;
 
 private:

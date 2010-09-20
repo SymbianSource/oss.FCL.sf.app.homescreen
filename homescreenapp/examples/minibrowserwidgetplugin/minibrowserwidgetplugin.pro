@@ -48,6 +48,8 @@ symbian: {
         
     DEPLOYMENT += plugins \
                   widgetResources
+                  
+    MMP_RULES += SMPSAFE
 }
 
 win32: {

@@ -52,11 +52,6 @@
  */
 
 /*!
- \var HsViewAppSettingsState::mActionConfirm
- Confirm action. Owned.
- */
-
-/*!
  Constructor
  \param parent Parent state.
  \retval void
@@ -118,10 +113,11 @@ void HsViewAppSettingsState::onEntry(QEvent *event)
             new HsMenuEntryRemovedHandler(entryId, this, SIGNAL(exit())));
         
         entryObserver.take()->setParent(mView);
-        
-        QObject::connect(this, SIGNAL(initialize(QString)), mView, SLOT(initialize(QString)));        
+        // remove it when JAVA will start to provide only version with two strings
+        QObject::connect(this, SIGNAL(initialize(QString, QString)), mView, SLOT(initialize(QString)));        
+        QObject::connect(this, SIGNAL(initialize(QString, QString)), mView, SLOT(initialize(QString, QString)));
         mView->setParent(this);
-        emit initialize(entry->attribute(Hs::applicationUidEntryKey));        
+        emit initialize(entry->attribute(Hs::applicationUidEntryKey), entry->text());        
         // Add View to main window
         HbMainWindow *hbMainWindow = mainWindow();
         // add confirm action

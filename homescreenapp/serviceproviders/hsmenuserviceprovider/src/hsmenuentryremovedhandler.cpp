@@ -31,7 +31,8 @@
 
 /*!
  Constructor.
- \param entryId identifies entry which removal is to be observed.
+ \param entryId identifies entry which removal is to be observed. If 0 no entry
+ will be observed.
  \param receiver object which \a callback is to be called on requested entry
  removal. If \receiver is passed 0 no action will be taken on the entry removal.
  \param callback signal or slot that will be called on entry removal. The \a callback
@@ -45,7 +46,7 @@ HsMenuEntryRemovedHandler::HsMenuEntryRemovedHandler(
     const char *callback):
     mNotifier(0)
 {
-    if (receiver != 0 && callback != 0) {
+    if (entryId != 0 && receiver != 0 && callback != 0) {
         connect(this, SIGNAL(notify()), receiver, callback);
         subscribe(entryId);
     }

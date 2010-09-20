@@ -77,8 +77,11 @@ class HSDOMAINMODEL_EXPORT HsConfiguration : public QObject
     Q_PROPERTY(SceneType sceneType READ sceneType WRITE setSceneType)
     Q_PROPERTY(QEasingCurve::Type bounceAnimationEasingCurve READ bounceAnimationEasingCurve WRITE setBounceAnimationEasingCurve)
     Q_PROPERTY(QEasingCurve::Type pageChangeAnimationEasingCurve READ pageChangeAnimationEasingCurve WRITE setPageChangeAnimationEasingCurve)
+    Q_PROPERTY(int widgetOrganizerAnchorDistance READ widgetOrganizerAnchorDistance WRITE setWidgetOrganizerAnchorDistance)        
+    Q_PROPERTY(WidgetOrganizerSearchSequence widgetOrganizerSearchSequence READ widgetOrganizerSearchSequence WRITE setWidgetOrganizerSearchSequence)        
 
     Q_ENUMS(SceneType)
+    Q_ENUMS(WidgetOrganizerSearchSequence)
 
 public:
     HsConfiguration(QObject *parent = 0);
@@ -89,6 +92,12 @@ public:
         PageWallpapers,
         SceneWallpaper
     };
+    
+    enum WidgetOrganizerSearchSequence
+    {
+        SearchRowByRow,
+        SearchColumnByColumn
+    };    
 
 #define SETVALUE(member, name) \
     if (member != value) { \
@@ -176,6 +185,10 @@ public:
     void setBounceAnimationEasingCurve(QEasingCurve::Type value) { SETVALUE(mBounceAnimationEasingCurve, "bounceAnimationEasingCurve") }
     QEasingCurve::Type pageChangeAnimationEasingCurve() const { return mPageChangeAnimationEasingCurve; }
     void setPageChangeAnimationEasingCurve(QEasingCurve::Type value) { SETVALUE(mPageChangeAnimationEasingCurve, "pageChangeAnimationEasingCurve") }
+    int widgetOrganizerAnchorDistance() const { return mWidgetOrganizerAnchorDistance; }
+    void setWidgetOrganizerAnchorDistance(int value) { SETVALUE(mWidgetOrganizerAnchorDistance, "widgetOrganizerAnchorDistance") }
+    WidgetOrganizerSearchSequence widgetOrganizerSearchSequence() const { return mWidgetOrganizerSearchSequence; }
+    void setWidgetOrganizerSearchSequence(WidgetOrganizerSearchSequence value) { SETVALUE(mWidgetOrganizerSearchSequence, "widgetOrganizerSearchSequence") }        
 
 #undef SETVALUE
 
@@ -239,6 +252,8 @@ private:
     SceneType mSceneType;
     QEasingCurve::Type mBounceAnimationEasingCurve;
     QEasingCurve::Type mPageChangeAnimationEasingCurve;
+    int mWidgetOrganizerAnchorDistance;
+    WidgetOrganizerSearchSequence mWidgetOrganizerSearchSequence;
     
     static HsConfiguration *mInstance;
 

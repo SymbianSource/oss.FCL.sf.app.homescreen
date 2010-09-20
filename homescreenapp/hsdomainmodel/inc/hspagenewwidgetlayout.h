@@ -23,7 +23,7 @@
 
 HOMESCREEN_TEST_CLASS(TestHsDomainModel)
 class HsWidgetHost;
-class HsPageNewWidgetLayout : public QGraphicsLayout 
+class HsPageNewWidgetLayout : public QGraphicsLayout
 {
 public: 
     HsPageNewWidgetLayout(const QPointF &touchPoint = QPointF(),
@@ -36,12 +36,7 @@ public:
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF &constraint = QSizeF()) const;
     void setGeometry(const QRectF &rect);
     void addItem(HsWidgetHost *item);
-    enum sortOrder { height, width};
 
-private:
-#ifdef HSWIDGETORGANIZER_ALGORITHM
-    QList<HsWidgetHost*> sortWidgets(sortOrder order);
-#endif    
 private:
     QSizeF mSize;
     QList<HsWidgetHost*> mNewWidgets;

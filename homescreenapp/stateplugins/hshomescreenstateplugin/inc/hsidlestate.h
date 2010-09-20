@@ -66,6 +66,7 @@ signals:
     void event_preRemovePage();
     void event_removePage();
     void event_toggleConnection();
+    void event_MoveWidgetDelete();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
@@ -111,7 +112,9 @@ private slots:
     void action_moveWidget_connectOrientationChangeEventHandler();
     void action_moveWidget_setWidgetSnap();
     void action_moveWidget_reparentToPage();
+    void action_moveWidgetDelete_deleteWidgetOnTrashbin();
     void action_moveWidget_startWidgetDropEffect();
+    void action_moveWidget_disableInteractive();
     void action_moveWidget_disconnectGestureHandlers();
     void action_moveWidget_disconnectOrientationChangeEventHandler();
     void action_moveWidget_preventZoneAnimation();
@@ -150,6 +153,7 @@ private slots:
 
 private:
     bool isEditor(const QPointF &point, HsWidgetHost *widget);
+    void stopPageChangeAnimations();
     
 private:
     HbAction *mNavigationAction;

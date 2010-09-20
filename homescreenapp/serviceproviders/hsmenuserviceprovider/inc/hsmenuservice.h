@@ -49,7 +49,11 @@ public:
     static QStringList getCollectionNames();
     static QString getName(int entryId);
     static int executeAction(int entryId,
-            const QString &actionName = Hs::openActionIdentifier, 
+            const QString &actionName = Hs::openActionIdentifier,
+            QObject* receiver = NULL,
+            const char* member = NULL);
+    static int executeAction(const CaEntry &entry,
+            const QString &actionName = Hs::openActionIdentifier,
             QObject* receiver = NULL,
             const char* member = NULL);
     static bool launchTaskSwitcher();
@@ -66,13 +70,13 @@ public:
     static bool organizeCollection(int groupId, QList<int> &entryIdList);
 
     static int allCollectionsId();
-    
+
     static int collectionIdByType(const QString& collectionType);
 
     static void touch(int entryId);
-    
+
     static void touch(const QList<int> &entryIdList);
-    
+
     static int launchSoftwareUpdate();
 
 private:

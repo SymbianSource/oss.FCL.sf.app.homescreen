@@ -135,7 +135,7 @@ QEvent *HsMenuEventFactory::createDeleteCollectionEvent(int aItemId)
  */
 QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(
     Hs::HsMenuMode menuMode,
-	QVariant homescreenData)
+    QVariant homescreenData)
 {
     QVariantMap params;
     params.insert(Hs::menuModeType, menuMode);
@@ -144,13 +144,31 @@ QEvent *HsMenuEventFactory::createOpenAppLibraryEvent(
 }
 
 /*!
-    Creates an HsMenuEvent::OpenApplicationLibrary event.
+    Creates an HsMenuEvent::BackFromInstalledView event.
 
-    \return Open Applications Library event.
+    \return Back from installed view event.
  */
-QEvent *HsMenuEventFactory::createOpenInstalledViewEvent()
+QEvent *HsMenuEventFactory::createBackFromInstalledViewEvent(
+    int id, QString collectionType)
 {
-	return new HsMenuEvent(HsMenuEvent::OpenInstalledView);
+    QVariantMap params;
+    params.insert(Hs::itemIdKey, id);
+    params.insert(Hs::entryTypeNameKey, collectionType);
+    return new HsMenuEvent(HsMenuEvent::BackFromInstalledView, params);
+}
+
+/*!
+    Creates an HsMenuEvent::OpenInstalledView event.
+
+    \return Open Installed View event.
+ */
+QEvent *HsMenuEventFactory::createOpenInstalledViewEvent(
+    int id, QString collectionType)
+{
+    QVariantMap params;
+    params.insert(Hs::itemIdKey, id);
+    params.insert(Hs::entryTypeNameKey, collectionType);
+	return new HsMenuEvent(HsMenuEvent::OpenInstalledView, params);
 }
 
 /*!
@@ -211,7 +229,8 @@ QEvent *HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
     Creates an HsMenuEvent::RemoveAppFromCollection event.
 
     \param aItemId Item id of the application to be removed from a collection.
-    \param aCollectionId Item id of the collection the application is to be removed from.
+    \param aCollectionId Item id of the collection the application is to be
+     removed from.
     \return RemoveAppFromCollection event.
  */
 QEvent *HsMenuEventFactory::createRemoveAppFromCollectionEvent(int aItemId,
@@ -227,7 +246,8 @@ QEvent *HsMenuEventFactory::createRemoveAppFromCollectionEvent(int aItemId,
     Creates an HsMenuEvent::UninstallApplication event.
 
     \param aItemId Item id of the application to be removed from a collection.
-    \param aCollectionId Item id of the collection the application is to be removed from.
+    \param aCollectionId Item id of the collection the application is to be
+     removed from.
     \return UninstallApplication event.
  */
 QEvent *HsMenuEventFactory::createUninstallApplicationEvent(int aItemId)

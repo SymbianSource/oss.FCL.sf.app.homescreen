@@ -488,14 +488,10 @@ void HsSnapToLines::compareRightSideOfMovingRectForSnapping()
 */
 void HsSnapToLines::createVerticalLine()
 {
-    if (mRectLieAbove) {
-        mVerticalLine.setP1(QPointF(mMinDistancePosition, mInactiveRectToCompare.top()));
-        mVerticalLine.setP2(QPointF(mMinDistancePosition, mMovingRect.bottom()));
-    }
-    else {
-        mVerticalLine.setP1(QPointF(mMinDistancePosition, mInactiveRectToCompare.bottom()));
-        mVerticalLine.setP2(QPointF(mMinDistancePosition, mMovingRect.top()));
-    }
+    qreal top = qMin( mInactiveRectToCompare.top(), mMovingRect.top());
+    qreal bottom = qMax(mInactiveRectToCompare.bottom(), mMovingRect.bottom()); 
+    mVerticalLine.setP1(QPointF(mMinDistancePosition, top));
+    mVerticalLine.setP2(QPointF(mMinDistancePosition, bottom));
 }
 
 /*!
@@ -785,16 +781,10 @@ void HsSnapToLines::compareBottomOfMovingRectForSnapping()
 */
 void HsSnapToLines::createHorizontalLine()
 {
-    if (mRectLieLeft) {
-        //save the points for the Horizontal line
-        mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.left(), mMinDistancePosition));
-        mHorizontalLine.setP2(QPointF(mMovingRect.right(), mMinDistancePosition));
-    }
-    else {
-        //save the points for the Horizontal line
-        mHorizontalLine.setP1(QPointF(mInactiveRectToCompare.right(), mMinDistancePosition));
-        mHorizontalLine.setP2(QPointF(mMovingRect.left(), mMinDistancePosition));
-    }
+    qreal left = qMin( mInactiveRectToCompare.left(), mMovingRect.left());
+    qreal right = qMax(mInactiveRectToCompare.right(), mMovingRect.right()); 
+    mHorizontalLine.setP1(QPointF(left, mMinDistancePosition));
+    mHorizontalLine.setP2(QPointF(right, mMinDistancePosition));
 }
 
 /*!

@@ -15,28 +15,35 @@
  *
  */
 
-#include <hbmessagebox.h>
-#include <hbaction.h>
-#include <hsmenuservice.h>
-#include <hsshortcutservice.h>
-#include <HbDocumentLoader>
-#include <HbLabel>
-#include <HbListView>
-#include <HbParameterLengthLimiter>
 
 #include <QScopedPointer>
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QStateMachine>
+
+#include <HbMessageBox>
+#include <HbAction>
+#include <HbDocumentLoader>
+#include <HbLabel>
+#include <HbListView>
+#include <HbParameterLengthLimiter>
+
+#include "hsmenuservice.h"
+#include "hsshortcutservice.h"
+#include "hsuninstallitemstate.h"
+#include "hsmenuevent.h"
+#include "hsmenudialogfactory.h"
+#include "hsdialogcontroller.h"
+#include "hsmenueventfactory.h"
+
 #include <casoftwareregistry.h>
 #include <caquery.h>
 #include <canotifier.h>
 
-#include "hsuninstallitemstate.h"
-#include "hsmenuevent.h"
-#include "hsmenudialogfactory.h"
-#include "hsmenuentryremovedhandler.h"
-#include "hsmenueventfactory.h"
+const char definition02 [] = "uninstallDialogDefinition02";
+const char definition03 [] = "uninstallDialogDefinition03";
+const char definition04 [] = "uninstallDialogDefinition04";
+
 
 /*!
  \class HsUninstallItemState
@@ -51,10 +58,7 @@
  */
 HsUninstallItemState::HsUninstallItemState(QState *parent) :
     QState(parent),
-    mItemId(0),
-    mUninstallMessage(NULL),
-    mUninstallJavaMessage(NULL),
-    mConfirmAction(NULL)
+    mEntry(NULL)
 {
     construct();
 }
@@ -64,7 +68,11 @@ HsUninstallItemState::HsUninstallItemState(QState *parent) :
  */
 HsUninstallItemState::~HsUninstallItemState()
 {
-    cleanUp(); // in case of throw
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+        qDebug("Exception thrown");
+    }
 }
 
 /*!
@@ -77,7 +85,6 @@ void HsUninstallItemState::construct()
         setObjectName(this->parent()->objectName() + objectName());
     }
     connect(this, SIGNAL(exited()), SLOT(cleanUp()));
-    
 }
 
 /*!
@@ -87,42 +94,43 @@ void HsUninstallItemState::construct()
 void HsUninstallItemState::onEntry(QEvent *event)
 {
     HSMENUTEST_FUNC_ENTRY("HsUninstallItemState::onEntry");
-    QState::onEntry(event);
     qDebug("HsUninstallItemState::onEntry()");
-    HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
-    QVariantMap data = menuEvent->data();
 
-    mItemId = data.value(Hs::itemIdKey).toInt();
-    QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(mItemId);
-    QString appType = entry->attribute(Hs::swTypeKey);
-    if (!appType.compare(Hs::javaSwType)) {
-        // java
-        createUninstallJavaMessage();
-    } else {
-        // other
-        createSimpleUninstallMessage();
+    QState::onEntry(event);
+
+    HsMenuEvent *menuEvent = static_cast<HsMenuEvent *>(event);
+    int itemId = menuEvent->data().value(Hs::itemIdKey).toInt();
+    mEntry = CaService::instance()->getEntry(itemId);
+
+    if (mEntry) {
+        QString appType = mEntry->attribute(Hs::swTypeKey);
+
+        if (!appType.compare(Hs::javaSwType)) {
+            // java
+            createUninstallJavaMessage();
+        } else {
+            // other
+            createSimpleUninstallMessage();
+        }
     }
-        
     HSMENUTEST_FUNC_EXIT("HsUninstallItemState::onEntry");
 }
 
 /*!
- Action after closed confirmation dialog.
- \param finishedAction chosen action.
+ Slots. Uninstalls item controlled by the state.
  \retval void
  */
-void HsUninstallItemState::uninstallMessageFinished(HbAction* finishedAction)
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
+void HsUninstallItemState::uninstallItem()
 {
-    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
-
-        HsMenuService::executeAction(mItemId, Hs::removeActionIdentifier, 
-                this, SLOT(uninstallFailed(int)));
-    }
-    mConfirmAction = NULL;
-    mUninstallMessage = NULL;
-	mUninstallJavaMessage = NULL;
-    emit exit();
+    HsMenuService::executeAction(*mEntry.data(), Hs::removeActionIdentifier,
+            this, SLOT(uninstallFailed(int)));
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  Return information about a component: component name, a list of names
@@ -139,31 +147,26 @@ bool HsUninstallItemState::getApplicationsNames(QString &componentName,
     componentName.clear();
     applicationsNames.clear();
     confirmationMessage.clear();
-    
+
     QSharedPointer<CaService> service = CaService::instance();
-    QSharedPointer<CaEntry> entry = service->getEntry(mItemId);
-    const int componentId =
-        entry->attribute(Hs::componentIdAttributeName).toInt();
-    
-    QSharedPointer<CaSoftwareRegistry> softwareRegistry =
-        CaSoftwareRegistry::create();
+    const int componentId = mEntry->attribute(
+            Hs::componentIdAttributeName).toInt();
+
     QStringList appUids;
-    bool retval = softwareRegistry->getUninstallDetails(componentId,
-        componentName,
-        appUids,
-        confirmationMessage);
+    bool retval = CaSoftwareRegistry::create()->getUninstallDetails(
+            componentId, componentName, appUids, confirmationMessage);
     if (retval) {
         CaQuery query;
         foreach (QString uid, appUids) {
             query.setAttribute(Hs::applicationUidEntryKey, uid);
             QList< QSharedPointer<CaEntry> > entries =
-                service->getEntries(query);
+                    service->getEntries(query);
             if (entries.length() > 0) {
                 applicationsNames << entries[0]->text();
             }
         }
-        if (applicationsNames.length()==1
-            && applicationsNames[0]==componentName) {
+        if (applicationsNames.length() == 1
+                && applicationsNames[0] == componentName) {
             applicationsNames.clear();
         }
     }
@@ -177,19 +180,7 @@ bool HsUninstallItemState::getApplicationsNames(QString &componentName,
  */
 void HsUninstallItemState::cleanUp()
 {
-    // Close messagebox if App key was pressed
-    if (mUninstallMessage != NULL) {
-        mUninstallMessage->close();
-        mUninstallMessage = NULL;
-    }
-    
-    if (mUninstallJavaMessage != NULL) {
-        mUninstallJavaMessage->close();
-        mUninstallJavaMessage = NULL;
-    }
-
-    mConfirmAction = NULL;
-    mItemId = 0;
+    mEntry.clear();
 }
 
 #ifdef COVERAGE_MEASUREMENT
@@ -216,35 +207,45 @@ void HsUninstallItemState::uninstallFailed(int error)
 void HsUninstallItemState::createSimpleUninstallMessage(bool isJava)
 {
     CaQuery parentsQuery;
-    parentsQuery.setChildId(mItemId);
+    parentsQuery.setChildId(mEntry->id());
     parentsQuery.setEntryTypeNames(QStringList(Hs::collectionTypeName));
-    QList<int> parentsIds = CaService::instance()->getEntryIds(
-            parentsQuery);
+    QList<int> parentsIds = CaService::instance()->getEntryIds(parentsQuery);
     QString message;
-    if (HsShortcutService::instance()->isItemShortcutWidget(mItemId) || (parentsIds.count() > 0)) {
-        message.append(
-            HbParameterLengthLimiter("txt_applib_dialog_uninstalls_1_and_deletes_all_sh").arg(
-                HsMenuService::getName(mItemId)));
+    if (HsShortcutService::instance()->isItemShortcutWidget(mEntry->id())
+            || (parentsIds.count() > 0)) {
+        message.append(HbParameterLengthLimiter(
+                "txt_applib_dialog_uninstalls_1_and_deletes_all_sh").arg(
+                        mEntry->text()));
     } else {
-        message.append(
-            HbParameterLengthLimiter("txt_applib_dialog_1_will_be_removed_from_phone_c").arg(
-                HsMenuService::getName(mItemId)));
+        message.append(HbParameterLengthLimiter(
+                "txt_applib_dialog_1_will_be_removed_from_phone_c").arg(
+                        mEntry->text()));
     }
 
     // create and show message box
-    mUninstallMessage = HsMenuDialogFactory().create(message);
-    if( isJava ){
-        QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(mItemId);
-        HbIcon icon = entry->makeIcon();
-        mUninstallMessage->setIcon(icon);
+
+    QScopedPointer<HbMessageBox> dialog(
+            HsMenuDialogFactory().create(message));
+    if (isJava){
+        dialog->setIcon(mEntry->makeIcon());
     }
-    mConfirmAction = mUninstallMessage->actions().value(0);
-    
-    QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
-        new HsMenuEntryRemovedHandler(mItemId, this, SIGNAL(exit())));
-    entryObserver.take()->setParent(mUninstallMessage);
-    
-    mUninstallMessage->open(this, SLOT(uninstallMessageFinished(HbAction*)));
+
+    QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(dialog.take(),
+                    HsMenuDialogFactory::acceptActionIndex(),
+                    HsMenuDialogFactory::rejectActionIndex()));
+
+    connect(dialogController.data(), SIGNAL(acceptActionTriggered(QAction*)),
+            this, SLOT(uninstallItem()));
+
+    connect(dialogController.data(), SIGNAL(dialogCompleted()),
+            this, SIGNAL(exit()));
+
+    // ensure dialog is dismissed on app key pressed
+    connect(this, SIGNAL(exited()),
+            dialogController.data(), SLOT(dismissDialog()));
+
+    dialogController.take()->openDialog(mEntry->id());
 }
 
 /*!
@@ -253,109 +254,133 @@ void HsUninstallItemState::createSimpleUninstallMessage(bool isJava)
  */
 void HsUninstallItemState::createUninstallJavaMessage()
 {
-    HbDocumentLoader loader;
-    bool loadStatusOk = false;
-    loader.load(HS_UNINSTALL_DIALOG_LAYOUT, &loadStatusOk);
-    
-    Q_ASSERT_X(loadStatusOk,
-            HS_UNINSTALL_DIALOG_LAYOUT,
-           "Error while loading docml file.");
-
     QString componentName;
     QStringList applicationsNames;
     QString detailsMessage;
     getApplicationsNames(componentName, applicationsNames, detailsMessage);
-    
-    QString section;
-    if (applicationsNames.isEmpty() && detailsMessage.isEmpty()) {        
+
+    if (applicationsNames.isEmpty() && detailsMessage.isEmpty()) {
         createSimpleUninstallMessage(true);
-    }
-    else {
-        if ( (!applicationsNames.isEmpty()) && (!detailsMessage.isEmpty())) {
-            mDialogType = UninstallDialogDefinition02;
-            section = QString("uninstallDialogDefinition02");
-            loader.load(
-                HS_UNINSTALL_DIALOG_LAYOUT, section, &loadStatusOk);
-        }
-        else if ( (!applicationsNames.isEmpty() && detailsMessage.isEmpty())) {
-            mDialogType = UninstallDialogDefinition03;
-            section = QString("uninstallDialogDefinition03");
-            loader.load(
-                HS_UNINSTALL_DIALOG_LAYOUT, section, &loadStatusOk);
-        }
-        else if (applicationsNames.isEmpty() && (!detailsMessage.isEmpty())) {
-            mDialogType = UninstallDialogDefinition04;
-            section = QString("uninstallDialogDefinition04");
-            loader.load(
-                HS_UNINSTALL_DIALOG_LAYOUT, section, &loadStatusOk);
-        }
+    } else {
+        HbDocumentLoader loader;
 
-        mUninstallJavaMessage = qobject_cast<HbDialog*>(
-            loader.findWidget(HS_UNINSTALL_DIALOG_NAME));
+        QString section = loadProperSection(applicationsNames,
+                detailsMessage, loader);
+        if (!section.isNull()) {
+            HbDialog *const dialog = qobject_cast<HbDialog*>(
+                    loader.findWidget(HS_UNINSTALL_DIALOG_NAME));
 
-        if (mUninstallJavaMessage) {
-            mUninstallJavaMessage->setAttribute(Qt::WA_DeleteOnClose);
-            mUninstallJavaMessage->setTimeout(HbPopup::NoTimeout);
-            mUninstallJavaMessage->actions()[0]->setParent(mUninstallJavaMessage);
-            mUninstallJavaMessage->actions()[1]->setParent(mUninstallJavaMessage);
+            if (dialog) {
+                prepareDialog(dialog);
 
-            HbLabel* iconLabel =
-            qobject_cast<HbLabel*>(
-                loader.findWidget(HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_ICON));
-            QSharedPointer<CaEntry> entry2 = CaService::instance()->getEntry(mItemId);
-            HbIcon icon = entry2->makeIcon();
-            iconLabel->setIcon(icon);
+                HbLabel* iconLabel = qobject_cast<HbLabel*>(loader.findWidget(
+                        HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_ICON));
+                iconLabel->setIcon(mEntry->makeIcon());
 
-            CaQuery parentsQuery;
-            parentsQuery.setChildId(mItemId);
-            parentsQuery.setEntryTypeNames(QStringList(Hs::collectionTypeName));
-            QList<int> parentsIds = CaService::instance()->getEntryIds(
-                    parentsQuery);
-            
-            HbLabel* textLabel =
-            qobject_cast<HbLabel*>(
-                loader.findWidget(HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_LABEL));
-            if (HsShortcutService::instance()->isItemShortcutWidget(mItemId) ||
-                (parentsIds.count() > 0)) {
-                textLabel->setPlainText(HbParameterLengthLimiter(
-                    "txt_applib_info_delete_1_all_its_shortcuts_and").arg(
-                            componentName));
-            } else {
-                textLabel->setPlainText(HbParameterLengthLimiter(
-                    "txt_applib_info_delete_1_and_associated_data").arg(
-                            componentName));
-            }
+                prepareDialogLabel(componentName, loader);
 
-            HbLabel* detailsUninstalLabel;
-            if ((mDialogType == UninstallDialogDefinition02) ||
-                (mDialogType == UninstallDialogDefinition04)) {
-                detailsUninstalLabel= qobject_cast<HbLabel*>(
-                    loader.findWidget(HS_UNINSTALL_DIALOG_DELETE_LABEL));
-                detailsUninstalLabel->setPlainText(detailsMessage);
-            }
-
-            HbLabel* listView;
-            QString applicationsList;
-            QString newLine("\n");
-            if ((mDialogType == UninstallDialogDefinition02) ||
-                (mDialogType == UninstallDialogDefinition03)) {
-                listView = qobject_cast<HbLabel*>(
-                    loader.findWidget(HS_UNINSTALL_DIALOG_LIST_VIEW_LABEL));
-
-                for (int i=0; i<applicationsNames.count(); i++) {
-                    applicationsList = applicationsList + applicationsNames[i] + newLine;
+                if ((section == definition02) || (section == definition04)) {
+                    qobject_cast<HbLabel*>( loader.findWidget(
+                            HS_UNINSTALL_DIALOG_DELETE_LABEL))->setPlainText(
+                                    detailsMessage);
                 }
-                listView->setPlainText(applicationsList);
-            }
 
-            mConfirmAction = qobject_cast<HbAction*>(loader.findObject(
-                    HS_UNINSTALL_DIALOG_CONFIRMATION_ACTION));
-        
-            QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
-                new HsMenuEntryRemovedHandler(mItemId, this, SIGNAL(exit())));
-            entryObserver.take()->setParent(mUninstallJavaMessage);
-            
-            mUninstallJavaMessage->open(this, SLOT(uninstallMessageFinished(HbAction*)));
+                if ((section == definition02) || (section == definition03)) {
+                    prepareApplicationListLabel(applicationsNames, loader);
+                }
+
+                QScopedPointer<HsDialogController> dialogController(
+                        new HsDialogController( dialog,
+                                HsMenuDialogFactory::acceptActionIndex(),
+                                HsMenuDialogFactory::rejectActionIndex()));
+                connect(dialogController.data(), SIGNAL(acceptActionTriggered(QAction*)),
+                        this, SLOT(uninstallItem()));
+                connect(dialogController.data(), SIGNAL(dialogCompleted()),
+                        this, SIGNAL(exit()));
+                connect(this, SIGNAL(exited()),
+                        dialogController.data(), SLOT(dismissDialog()));
+
+                dialogController.take()->openDialog(mEntry->id());
+            }
         }
     }
+}
+
+void HsUninstallItemState::prepareDialogLabel(
+    QString &componentName, HbDocumentLoader &loader)
+{
+    CaQuery parentsQuery;
+    parentsQuery.setChildId(mEntry->id());
+    parentsQuery.setEntryTypeNames(QStringList(Hs::collectionTypeName));
+    QList<int> parentsIds = CaService::instance()->getEntryIds(parentsQuery);
+
+    HbLabel* textLabel = qobject_cast<HbLabel*>(loader.findWidget(
+            HS_UNINSTALL_DIALOG_CONFIRMATION_DIALOG_LABEL));
+
+    QString plainText;
+    if (HsShortcutService::instance()->isItemShortcutWidget(mEntry->id())
+            || parentsIds.count()) {
+        plainText = HbParameterLengthLimiter(
+                "txt_applib_info_delete_1_all_its_shortcuts_and").arg(
+                        componentName);
+    } else {
+        plainText = HbParameterLengthLimiter(
+                "txt_applib_info_delete_1_and_associated_data").arg(
+                        componentName);
+    }
+    textLabel->setPlainText(plainText);
+}
+
+void HsUninstallItemState::prepareApplicationListLabel(
+        QStringList & applicationsNames, HbDocumentLoader & loader)
+{
+    QString applicationsList;
+    QString newLine("\n");
+    for(int i = 0;i < applicationsNames.count();i++){
+        applicationsList += applicationsNames[i] + newLine;
+    }
+
+    HbLabel *listView;
+    listView = qobject_cast<HbLabel*>(loader.findWidget(
+            HS_UNINSTALL_DIALOG_LIST_VIEW_LABEL));
+    listView->setPlainText(applicationsList);
+}
+
+QString HsUninstallItemState::loadProperSection(
+        QStringList &applicationsNames, QString &detailsMessage,
+        HbDocumentLoader &loader)
+{
+    QString section;
+    if (!applicationsNames.isEmpty() && !detailsMessage.isEmpty()) {
+        section = QString(definition02);
+    } else if (!applicationsNames.isEmpty() && detailsMessage.isEmpty()) {
+        section = QString(definition03);
+    }else if (applicationsNames.isEmpty() && !detailsMessage.isEmpty()) {
+        section = QString(definition04);
+    }
+    if(!section.isNull()){
+        bool loadStatusOk = false;
+        loader.load(HS_UNINSTALL_DIALOG_LAYOUT, &loadStatusOk);
+
+        Q_ASSERT_X(loadStatusOk,
+                HS_UNINSTALL_DIALOG_LAYOUT,
+               "Error while loading docml file.");
+
+        loader.load(
+                HS_UNINSTALL_DIALOG_LAYOUT, section, &loadStatusOk);
+        Q_ASSERT_X(loadStatusOk,
+                HS_UNINSTALL_DIALOG_LAYOUT,
+               "Error while loading docml file section.");
+    }
+    return section;
+}
+
+HsDialogController *HsUninstallItemState::prepareDialog(
+        HbDialog *dialog)
+{
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setTimeout(HbPopup::NoTimeout);
+    dialog->actions()[0]->setParent(dialog);
+    dialog->actions()[1]->setParent(dialog);
+    return NULL;
 }

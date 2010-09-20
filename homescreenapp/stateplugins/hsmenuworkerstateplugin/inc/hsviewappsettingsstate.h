@@ -44,7 +44,7 @@ public:
     virtual ~HsViewAppSettingsState();
     
 signals:
-    void initialize(const QString &aUid);      
+    void initialize(const QString &aUid, const QString &aAppName);      
     void exit();
 
 protected:

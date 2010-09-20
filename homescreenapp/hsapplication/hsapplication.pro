@@ -27,8 +27,6 @@ MOBILITY = serviceframework publishsubscribe
 
 fute:DEFINES += FUTE
 
-new_short:DEFINES += HSWIDGETORGANIZER_ALGORITHM
-
 DEPENDPATH += . \
               ./inc \
               ./src
@@ -58,9 +56,11 @@ symbian: {
     include(hsapplication_exports_to_rom.pri)    
 
     CONFIG += service
-    LIBS +=  -lxqservice -lxqserviceutil -lXQKeyCapture -lxqtelephonyservice
+    LIBS +=  -lxqservice -lxqserviceutil -lXQKeyCapture
   
     SERVICE.FILE = ipc_service_conf.xml
+    
+    MMP_RULES += SMPSAFE
 }
 
 !symbian: {

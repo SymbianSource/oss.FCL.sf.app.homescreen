@@ -19,17 +19,21 @@
 #define HSUNINSTALLITEMSTATE_H
 
 #include <QState>
+#include <QSharedPointer>
 
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
 class QAction;
+class HbDocumentLoader;
+class HsDialogController;
 class HbAction;
 class HbMessageBox;
 class HsShortcutService;
 class HsMenuService;
 class HbDialog;
 class CaNotifier;
+class CaEntry;
 
 class HsUninstallItemState: public QState
 {
@@ -38,11 +42,6 @@ class HsUninstallItemState: public QState
     HS_STATES_TEST_FRIEND_CLASS(MenuStatesTest)
 
 public:
-    enum UninstallDialogType {
-        UninstallDialogDefinition02 = 1,
-        UninstallDialogDefinition03,
-        UninstallDialogDefinition04
-    };
 
     HsUninstallItemState(QState *parent = 0);
 
@@ -54,10 +53,10 @@ protected:
 
 private slots:
 
-    void uninstallMessageFinished(HbAction* finishedAction);
+    void uninstallItem();
 
     void cleanUp();
-    
+
 public slots:
 
     void uninstallFailed(int error);
@@ -69,23 +68,25 @@ signals:
 private:
 
     void construct();
-    
+
     bool getApplicationsNames(QString &componentName,
         QStringList &applicationsNames,
         QString &confirmationMessage);
-    
+
     void createSimpleUninstallMessage(bool isJava=false);
     void createUninstallJavaMessage();
+    HsDialogController *prepareDialog(HbDialog *dialog);
+    QString loadProperSection(QStringList &applicationsNames,
+            QString &detailsMessage,
+            HbDocumentLoader &loader);
+    void prepareApplicationListLabel( QStringList & applicationsNames,
+            HbDocumentLoader & loader);
+    void prepareDialogLabel(
+            QString &componentName, HbDocumentLoader &loader);
 
 private:
 
-    int mItemId;
-    
-    HbMessageBox *mUninstallMessage; // deletes itself automatically on close
-    HbDialog *mUninstallJavaMessage;
-    UninstallDialogType mDialogType;
-
-    QAction *mConfirmAction; // child for mConfirmMessage
+    QSharedPointer<CaEntry> mEntry;
 
 };
 

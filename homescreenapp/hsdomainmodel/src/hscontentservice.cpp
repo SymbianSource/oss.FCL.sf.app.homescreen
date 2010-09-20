@@ -98,7 +98,7 @@ bool HsContentService::addWidget(const QString &uri, const QVariantHash &prefere
     }
     connect(widget,SIGNAL(event_faulted()),SLOT(widgetStartFaulted()));
     mWidgetStartFaulted = false; 
-    widget->startWidget(); // synchronous operation
+    widget->startWidget(false); // synchronous operation
     if (mWidgetStartFaulted) {
         // page will destroy widget instance
         return false;

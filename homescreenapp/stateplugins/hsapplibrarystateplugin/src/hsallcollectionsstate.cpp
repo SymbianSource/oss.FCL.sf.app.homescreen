@@ -94,6 +94,11 @@ void HsAllCollectionsState::setMenuOptions()
 
     mViewOptions->addAction(hbTrId("txt_applib_opt_arrange"),
         this, SLOT(createArrangeCollection()));
+    mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
+        static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
+    mViewOptions->addAction(
+        hbTrId("txt_applib_opt_view_installed_applications"),
+        static_cast<HsBaseViewState*>(this), SLOT(openInstalledView()));
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::setMenuOptions");
 }

@@ -144,13 +144,14 @@ CaEntry *HsOperatorHandlerPrivate::createAppEntry(
     XQSettingsManager *crManager)
 {
     QVariant variant = getVariantFromKey(
-            crManager, OperatorStoreApplication, XQSettingsManager::TypeString);
+        crManager, OperatorStoreApplication, XQSettingsManager::TypeString);
     if (!variant.isNull()) {
         CaEntry *operatorEntry = new CaEntry;
         operatorEntry->setEntryTypeName(Hs::applicationTypeName);
+        // Convert from a hexadecimal integer into a decimal one (as a string).
         operatorEntry->setAttribute(
-            Hs::applicationUidEntryKey, variant.toString());
-
+            Hs::applicationUidEntryKey,
+            QString::number(variant.toString().toInt(0, 16)));
         return operatorEntry;
     }
     return NULL;
@@ -210,7 +211,7 @@ QVariant HsOperatorHandlerPrivate::getVariantFromKey(
 
     if (presenceVariant.isValid()) {
         qDebug() << "HsOperatorHandlerPrivate::storePresent"
-                 << presenceVariant.toInt();
+                 << presenceVariant;
         return presenceVariant;
     }
     return QVariant();

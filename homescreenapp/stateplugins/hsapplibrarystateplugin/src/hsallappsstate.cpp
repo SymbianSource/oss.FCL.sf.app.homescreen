@@ -113,22 +113,20 @@ void HsAllAppsState::setMenuOptions()
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::setMenuOptions");
     mViewOptions->clearActions();
     mViewOptions->addAction(hbTrId("txt_applib_opt_task_switcher"),
-                           static_cast<HsBaseViewState*>(this), SLOT(openTaskSwitcher()));
+        static_cast<HsBaseViewState*>(this), SLOT(openTaskSwitcher()));
     mViewOptions->addAction(hbTrId("txt_applib_opt_add_to_collection"),
-                           this, SLOT(addToCollection()));
-    mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
-                           static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
-
+        this, SLOT(addToCollection()));
     mAscendingMenuAction =
         mViewOptions->addAction(hbTrId("txt_applib_menu_sort_by_ascending"),
                             this, SLOT(ascendingMenuAction()));
-
     mDescendingMenuAction =
         mViewOptions->addAction(hbTrId("txt_applib_menu_sort_by_descending"),
-                            this, SLOT(descendingMenuAction()));
-
-    mViewOptions->addAction(hbTrId("txt_applib_opt_view_installed_applications"),
-                           this, SLOT(openInstalledView()));
+            this, SLOT(descendingMenuAction()));
+    mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
+        static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
+    mViewOptions->addAction(
+        hbTrId("txt_applib_opt_view_installed_applications"),
+        static_cast<HsBaseViewState*>(this), SLOT(openInstalledView()));
 
     if (mSortAttribute == Hs::AscendingNameHsSortAttribute) {
         mAscendingMenuAction->setVisible(false);
@@ -215,21 +213,6 @@ void HsAllAppsState::addToCollection()
 }
 
 /*!
- Triggers event so that a installed applications state is entered.
- \retval void
- */
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
-void HsAllAppsState::openInstalledView()
-{
-    machine()->postEvent(HsMenuEventFactory::createOpenInstalledViewEvent());
-}
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
-
-/*!
  Method seting context menu options.
  */
 void HsAllAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
@@ -248,9 +231,6 @@ void HsAllAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags 
     addToCollectionAction->setData(
         Hs::AddToCollectionFromApplicationsViewContextAction);
 
-    HbAction *uninstallAction = mContextMenu->addAction(
-        hbTrId("txt_common_menu_delete"));
-    uninstallAction->setData(Hs::UninstallContextAction);
     HbAction *appSettingsAction(NULL);
     HbAction *appDetailsAction(NULL);
 
@@ -262,6 +242,11 @@ void HsAllAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags 
             hbTrId("txt_common_menu_settings"));
         appSettingsAction->setData(Hs::AppSettingContextAction);
     }
+
+    HbAction *uninstallAction = mContextMenu->addAction(
+        hbTrId("txt_common_menu_delete"));
+    uninstallAction->setData(Hs::UninstallContextAction);
+
     if (!(entry->attribute(Hs::componentIdAttributeName).isEmpty()) &&
             (flags & RemovableEntryFlag) ) {
         appDetailsAction = mContextMenu->addAction(

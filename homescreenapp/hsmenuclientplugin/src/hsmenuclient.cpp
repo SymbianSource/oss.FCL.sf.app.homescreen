@@ -18,15 +18,14 @@
 #include <QString>
 #include <QDebug>
 
-#include "hsapp_defs.h"
-#include "caquery.h"
-#include "caentry.h"
-#include "caicondescription.h"
-#include "caservice.h"
+#include <caquery.h>
+#include <caentry.h>
+#include <caicondescription.h>
+#include <caservice.h>
 
+#include "hsapp_defs.h"
 #include "hsmenuclient.h"
 #include "hsmenuclient_p.h"
-
 
 /*!
     \class HsMenuClient

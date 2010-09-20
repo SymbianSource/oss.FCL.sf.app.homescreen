@@ -40,6 +40,7 @@ private slots:
      void testAddWidget();
      void testAddInvalidWidget();
      void testSetWallpaper();
+     void testSetWallpaper2();
      void testOnRequestError();
 
 signals:

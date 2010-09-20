@@ -46,7 +46,7 @@ protected:
 
 private slots:
 
-    void deleteMessageFinished(HbAction* finishedAction);
+    void deleteCollection();
 
     void cleanUp();
 
@@ -60,8 +60,6 @@ private:
 
 private:
     int mItemId;
-    HbMessageBox *mDeleteMessage; // deletes itself automatically on close
-    QAction *mConfirmAction; // child for mDeleteMessage
 };
 
 #endif //HSDELETECOLLECTIONSTATE_H

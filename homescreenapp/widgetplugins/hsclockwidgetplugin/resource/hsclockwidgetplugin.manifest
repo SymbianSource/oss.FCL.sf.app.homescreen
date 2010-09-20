@@ -3,8 +3,8 @@
     <uri>hsclockwidgetplugin</uri>
     <title>Clock</title>
     <description>Themable clock widget.</description>
-    <icon>tclock.png</icon>
-    <previewimage>qtg_graf_hswidget_preview_clock.svg</previewimage>
+    <icon>qtg_large_clock</icon>
+    <previewimage>qtg_large_clock</previewimage>
     <hidden>false</hidden>
     <servicexml>hsclockwidgetplugin.xml</servicexml>
 </hswidgetmanifest>

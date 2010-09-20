@@ -24,7 +24,7 @@
 #include <hsmenueventfactory.h>
 
 #include "hsdeletecollectionstate.h"
-#include "hsmenudialogfactory.h"
+#include "hsdialogcontroller.h"
 #include "hsmenuevent.h"
 
 /*!
@@ -40,9 +40,7 @@
  */
 HsDeleteCollectionState::HsDeleteCollectionState(QState *parent) :
     QState(parent),
-    mItemId(0),
-    mDeleteMessage(NULL),
-    mConfirmAction(NULL)
+    mItemId(0)
 {
     construct();
 }
@@ -52,7 +50,10 @@ HsDeleteCollectionState::HsDeleteCollectionState(QState *parent) :
  */
 HsDeleteCollectionState::~HsDeleteCollectionState()
 {
-    cleanUp(); // in case of throw
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -91,28 +92,40 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
                            HsMenuService::getName(mItemId)));
     }
 
-    // create and show message box
-    mDeleteMessage = HsMenuDialogFactory().create(message);
-    mConfirmAction = mDeleteMessage->actions().value(0);
-    mDeleteMessage->open(this, SLOT(deleteMessageFinished(HbAction*)));
+    QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(message));
+
+    connect(dialogController.data(),
+            SIGNAL(acceptActionTriggered(QAction*)),
+            this,
+            SLOT(deleteCollection()));
+
+    connect(dialogController.data(),
+            SIGNAL(dialogCompleted()),
+            this,
+            SIGNAL(exit()));
+
+    // ensure dialog is dismissed on app key pressed
+    connect(this, SIGNAL(exited()),
+            dialogController.data(),
+            SLOT(dismissDialog()));
+
+    dialogController.take()->openDialog();
 
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionState::onEntry");
 }
 
-
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
-void HsDeleteCollectionState::deleteMessageFinished(HbAction* finishedAction)
+/*!
+ Slot. Removes collection specified by event passed on entry to the state.
+ \retval void
+ */
+void HsDeleteCollectionState::deleteCollection()
 {
-    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
-        HsMenuService::removeCollection(mItemId);
-        machine()->postEvent(
+    HsMenuService::removeCollection(mItemId);
+    machine()->postEvent(
         HsMenuEventFactory::createCollectionDeletedEvent());
-    }
-    emit exit();
-    mConfirmAction = NULL;
 }
+
 
 /*!
  Slot launched after state has exited and in destructor.
@@ -120,12 +133,5 @@ void HsDeleteCollectionState::deleteMessageFinished(HbAction* finishedAction)
  */
 void HsDeleteCollectionState::cleanUp()
 {
-    // Close messagebox if App key was pressed
-    if (mDeleteMessage) {
-        mDeleteMessage->close();
-        mDeleteMessage = NULL;
-    }
-
-    mConfirmAction = NULL;
     mItemId = 0;
 }

@@ -63,6 +63,7 @@ private slots:
     void handleEmptyChange(bool empty);
     void lockSearchButton(bool lock);
     void createArrangeCollection();
+    void openInstalledViewFromCollection();
 
 private:
     void construct();

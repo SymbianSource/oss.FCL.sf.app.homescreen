@@ -114,11 +114,12 @@ void HsAppLibraryState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::construct");
     setObjectName("homescreen.nokia.com/state/applibrarystate");
+    
+    mAllAppsState = new HsAllAppsState(
+        mMenuViewBuilder, mMenuMode, mMainWindow, this);
 
-    mAllAppsState = new HsAllAppsState(mMenuViewBuilder, mMenuMode, mMainWindow, this);
-
-    mAllCollectionsState = new HsAllCollectionsState(mMenuViewBuilder, mMenuMode,
-            mMainWindow, this);
+    mAllCollectionsState = new HsAllCollectionsState(mMenuViewBuilder,
+        mMenuMode, mMainWindow, this);
 
     QState *initialState = new QState(this);
     setInitialState(initialState);
@@ -127,13 +128,12 @@ void HsAppLibraryState::construct()
         mMenuMode, Hs::NormalHsMenuMode, mAllAppsState);
 
     initialState->addTransition(mHistoryTransaction);
-    initialState->addTransition(new HsMenuModeTransition(
-                                    mMenuMode, Hs::AddHsMenuMode, mAllAppsState));
+    initialState->addTransition(
+        new HsMenuModeTransition(
+        mMenuMode, Hs::AddHsMenuMode, mAllAppsState));
 
     mCollectionState = new HsCollectionState(mMenuViewBuilder,
-            mMenuMode,
-            mMainWindow,
-            this);
+        mMenuMode, mMainWindow, this);
 
     connect(mCollectionState, SIGNAL(entered()),SLOT(clearToolbarLatch()));
 
@@ -142,7 +142,8 @@ void HsAppLibraryState::construct()
                                   this, mCollectionState);
     this->addTransition(openCollectionFromAppLibTransition);
 
-    //It is called from: HsDefaultRuntime::activityRequested(const QString &name)
+    // It is called from:
+    // HsDefaultRuntime::activityRequested(const QString &name)
     HsMenuEventTransition *openCollectionAfterActivityRequest =
             new HsMenuEventTransition(HsMenuEvent::OpenCollection,
                                       this, mCollectionState);
@@ -156,21 +157,26 @@ void HsAppLibraryState::construct()
     //transition for returning from collection
     HsMenuEventTransition *collectionToAppLibTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenApplicationLibrary,
-                                  mCollectionState, mAllCollectionsState);
+            mCollectionState, mAllCollectionsState);
     mCollectionState->addTransition(collectionToAppLibTransition);
 
     mInstalledAppsState = new HsInstalledAppsState(
         mMenuViewBuilder, mMainWindow, this);
 
-    HsMenuEventTransition *installedToAppLibTransition =
-        new HsMenuEventTransition(HsMenuEvent::OpenApplicationLibrary,
-                                  mInstalledAppsState, mAllAppsState);
-    mInstalledAppsState->addTransition(installedToAppLibTransition);
-
     HsMenuEventTransition *allViewToInstalledTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
-                                  mAllAppsState, mInstalledAppsState);
+            mAllAppsState, mInstalledAppsState);
     mAllAppsState->addTransition(allViewToInstalledTransition);
+    
+    HsMenuEventTransition *allCollectionsToInstalledTransition =
+        new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
+            mAllCollectionsState, mInstalledAppsState);
+    mAllCollectionsState->addTransition(allCollectionsToInstalledTransition);
+
+    HsMenuEventTransition *collectionToInstalledTransition =
+        new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
+            mCollectionState, mInstalledAppsState);
+    mCollectionState->addTransition(collectionToInstalledTransition);
 
     constructToolbar();
 
@@ -184,6 +190,9 @@ void HsAppLibraryState::construct()
 
     connect(mAllCollectionsState, SIGNAL(entered()),
             this, SLOT(allCollectionsStateEntered()));
+
+    connect(mCollectionState, SIGNAL(entered()),
+            this, SLOT(collectionStateEntered()));
 
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::construct");
 }
@@ -216,7 +225,7 @@ void HsAppLibraryState::onEntry(QEvent *event)
         mAllAppsState->scrollToBeginning();
         mAllCollectionsState->scrollToBeginning();
     }
-
+    
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::onEntry");
 }
 
@@ -249,8 +258,8 @@ void HsAppLibraryState::constructToolbar()
         extensionAction->setIcon(HbIcon("qtg_mono_store"));
 
         HbAction *const operatorAction(
-                operatorHandler->prepareOperatorStoreAction(
-                        mMenuViewBuilder.operatorAction()));
+            operatorHandler->prepareOperatorStoreAction(
+            mMenuViewBuilder.operatorAction()));
         operatorAction->setText(hbTrId(operatorHandler->text().toLatin1()));
 
         mMenuViewBuilder.oviStoreAction()->setText(hbTrId("txt_applib_grid_ovi_store"));
@@ -266,12 +275,12 @@ void HsAppLibraryState::constructToolbar()
             mMenuViewBuilder.oviStoreAction());
     } else if (operatorHandler->operatorStorePresent()) {
         mMenuViewBuilder.toolBar()->addAction(
-            operatorHandler->prepareOperatorStoreAction(
-                    mMenuViewBuilder.operatorAction()));
+        operatorHandler->prepareOperatorStoreAction(
+        mMenuViewBuilder.operatorAction()));
     }
 
     HbAction *const allCollectionsAction(
-            mMenuViewBuilder.allCollectionsAction());
+        mMenuViewBuilder.allCollectionsAction());
 
     mAllAppsState->addTransition(
         allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
@@ -332,13 +341,21 @@ int HsAppLibraryState::oviStoreAction()
 }
 
 /*!
- All apps stete entered.
+ All apps state entered.
  */
 void HsAppLibraryState::allAppsStateEntered()
 {
     if (mMenuMode.getHsMenuMode() == Hs::NormalHsMenuMode) {
         mHistoryTransaction->setTargetState(mAllAppsState);
     }
+    while (!mInstalledAppsState->transitions().isEmpty()) {
+        mInstalledAppsState->removeTransition(
+            mInstalledAppsState->transitions()[0]);
+    }
+    HsMenuEventTransition *fromInstalledAppsTransition =
+        new HsMenuEventTransition(HsMenuEvent::BackFromInstalledView,
+        mInstalledAppsState, mAllAppsState);
+    mInstalledAppsState->addTransition(fromInstalledAppsTransition);
 }
 
 /*!
@@ -349,6 +366,27 @@ void HsAppLibraryState::allCollectionsStateEntered()
     if (mMenuMode.getHsMenuMode() == Hs::NormalHsMenuMode) {
         mHistoryTransaction->setTargetState(mAllCollectionsState);
     }
+    while (!mInstalledAppsState->transitions().isEmpty()) {
+        mInstalledAppsState->removeTransition(
+            mInstalledAppsState->transitions()[0]);
+    }
+    HsMenuEventTransition *fromInstalledAppsTransition =
+        new HsMenuEventTransition(HsMenuEvent::BackFromInstalledView,
+        mInstalledAppsState, mAllCollectionsState);
+    mInstalledAppsState->addTransition(fromInstalledAppsTransition);
 }
 
-
+/*!
+ Collection state entered.
+ */
+void HsAppLibraryState::collectionStateEntered()
+{
+    while (!mInstalledAppsState->transitions().isEmpty()) {
+        mInstalledAppsState->removeTransition(
+            mInstalledAppsState->transitions()[0]);
+    }
+    HsMenuEventTransition *fromInstalledAppsTransition =
+        new HsMenuEventTransition(HsMenuEvent::BackFromInstalledView,
+        mInstalledAppsState, mCollectionState);
+    mInstalledAppsState->addTransition(fromInstalledAppsTransition);
+}

@@ -18,6 +18,8 @@
 
 #include <power_save_display_mode.h>
 #include <hal.h>
+#include <coreapplicationuisdomainpskeys.h>
+#include <e32property.h>
 
 #include "snsrdisplaycontrolsession.h"
 #include "snsrdisplaycontrolcommon.h"
@@ -96,13 +98,19 @@ void CSnsrDisplayControlSession::ServiceL( const RMessage2& aMessage )
         {
         case ESnsrDispCtrlSrvDisplayOff:
             {
-            // off
-            // TODO
+            // Disable touch
+            HAL::Set( HALData::EPenState, 0 );
+            
+            // Lights off
+            err = RProperty::Set(KPSUidCoreApplicationUIs, KLightsSSForcedLightsOn, 0);
             break;
             }
         case ESnsrDispCtrlSrvDisplayLowPower:
             {
-            // low power
+            // Disable touch
+            HAL::Set( HALData::EPenState, 0 );
+            
+            // Set display mode
             TInt startRow = aMessage.Int0();
             TInt endRow = aMessage.Int1();
             // TODO: for now, we pass a zero-filled pixel buffer to power save API.
@@ -114,8 +122,14 @@ void CSnsrDisplayControlSession::ServiceL( const RMessage2& aMessage )
             }
         case ESnsrDispCtrlSrvDisplayFullPower:
             {
-            // full power
+            // Enable touch
+            HAL::Set( HALData::EPenState, 1 );
+            
+            // Set display mode
             err = iPowerSave->Exit();
+            
+            // Lights on
+            err = RProperty::Set(KPSUidCoreApplicationUIs, KLightsSSForcedLightsOn, 30) || err;
             break;
             }
         default:

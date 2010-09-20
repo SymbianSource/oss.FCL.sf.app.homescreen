@@ -53,6 +53,8 @@ symbian: {
     BLD_INF_RULES.prj_exports += \
       "./rom/localisedhellowidgetplugin.iby            CORE_APP_LAYER_IBY_EXPORT_PATH(localisedhellowidgetplugin.iby)" \
       "./rom/localisedhellowidgetpluginresources.iby   LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(localisedhellowidgetpluginresources.iby)"
+      
+      MMP_RULES += SMPSAFE
 }
 
 win32: {

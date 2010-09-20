@@ -48,12 +48,12 @@ symbian: {
     RESOURCES += hsdomainmodel.qrc
     TARGET.UID3 = 0x20022F38
     LIBS += -lxqsettingsmanager -labclient
+    
+    MMP_RULES += SMPSAFE
 }
 !symbian:{
     RESOURCES += hsdomainmodel_win.qrc
     QT += network 
 }
-
-new_short:DEFINES += HSWIDGETORGANIZER_ALGORITHM
 
 include(hsdomainmodel.pri)

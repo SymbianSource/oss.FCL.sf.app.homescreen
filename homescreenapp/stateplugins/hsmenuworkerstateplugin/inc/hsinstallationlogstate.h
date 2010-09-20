@@ -23,8 +23,6 @@
 #include "hsmenustates_global.h"
 HS_STATES_TEST_CLASS(MenuStatesTest)
 
-class HbDialog;
-
 class HsInstallationLogState: public QState
 {
     Q_OBJECT
@@ -40,13 +38,6 @@ public:
 protected:
 
     void onEntry(QEvent *event);
-    void onExit(QEvent *event);
-
-private slots:
-
-    void stateExited();
-    void cleanUp();
-
 signals:
 
     void exit();
@@ -55,11 +46,6 @@ private:
 
     void construct();
     void createInstallationLogDialog();
-
-private:
-    
-    HbDialog* mInstalationLogDialog;
-
 };
 
 #endif //HSINSTALLATIONLOGSTATE_H

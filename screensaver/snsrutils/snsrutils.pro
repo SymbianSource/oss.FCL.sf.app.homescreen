@@ -24,6 +24,7 @@ DEFINES += SNSRUTILS_LIB
 
 symbian: {
     TARGET.UID3 = 0x20027056
+    MMP_RULES += SMPSAFE
 }
 
 include(snsrutils.pri)

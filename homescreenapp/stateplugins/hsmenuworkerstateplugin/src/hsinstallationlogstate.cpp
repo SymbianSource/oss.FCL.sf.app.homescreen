@@ -23,7 +23,7 @@
 #include <casoftwareregistry.h>
 
 #include "hsinstallationlogstate.h"
-
+#include "hsdialogcontroller.h"
 /*!
  \class HsInstallationLogState
  \ingroup group_hsworkerstateplugin
@@ -36,8 +36,7 @@
  \param parent Parent state.
  */
 HsInstallationLogState::HsInstallationLogState(QState *parent) :
-    QState(parent),
-    mInstalationLogDialog(NULL)
+    QState(parent)
 {
     construct();
 }
@@ -47,7 +46,10 @@ HsInstallationLogState::HsInstallationLogState(QState *parent) :
  */
 HsInstallationLogState::~HsInstallationLogState()
 {
-    cleanUp(); // in case of throw
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -59,7 +61,6 @@ void HsInstallationLogState::construct()
     if (this->parent()) {
         setObjectName(this->parent()->objectName() + objectName());
     }
-    connect(this, SIGNAL(exited()), SLOT(cleanUp()));
 }
 
 /*!
@@ -77,13 +78,6 @@ void HsInstallationLogState::onEntry(QEvent *event)
     HSMENUTEST_FUNC_EXIT("HsInstallationLogState::onEntry");
 }
 
-/*!
- Invoked on exiting state
- */
-void HsInstallationLogState::onExit(QEvent *event)
-{
-    QState::onExit(event);
-}
 
 /*!
  Create installation log dialog.
@@ -100,13 +94,13 @@ void HsInstallationLogState::createInstallationLogDialog()
     Q_ASSERT_X(loadStatusOk, HS_INSTALLATION_LOG_DIALOG_LAYOUT,
            "Error while loading docml file.");
 
-    mInstalationLogDialog = qobject_cast<HbDialog*>(
-        loader.findWidget(HS_INSTALLATION_LOG_DIALOG_NAME));
+    QScopedPointer<HbDialog> dialog(qobject_cast<HbDialog*>(
+        loader.findWidget(HS_INSTALLATION_LOG_DIALOG_NAME)));
     
-    if (mInstalationLogDialog != NULL) {
-        mInstalationLogDialog->actions()[0]->setParent(mInstalationLogDialog);
-        mInstalationLogDialog->setTimeout(HbPopup::NoTimeout);
-        mInstalationLogDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+    if (!dialog.isNull()) {
+        dialog->actions()[0]->setParent(dialog.data());
+        dialog->setTimeout(HbPopup::NoTimeout);
+        dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     
         HbLabel* logList;
         QString applicationsList;
@@ -143,27 +137,26 @@ void HsInstallationLogState::createInstallationLogDialog()
 
         applicationsList.chop(2 * newLine.size());
         logList->setPlainText(applicationsList);
-    
-        mInstalationLogDialog->open(this, SLOT(stateExited()));
+
+
+        QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(dialog.take(),
+                HsMenuDialogFactory::acceptActionIndex(),
+                HsMenuDialogFactory::rejectActionIndex()));
+
+        connect(dialogController.data(),
+                SIGNAL(dialogCompleted()),
+                this,
+                SIGNAL(exit()));
+
+        // ensure dialog is dismissed on app key pressed
+        connect(this, SIGNAL(exited()),
+                dialogController.data(),
+                SLOT(dismissDialog()));
+
+        dialogController.take()->openDialog();
     }
 }
 
-void HsInstallationLogState::stateExited()
-{
-    mInstalationLogDialog = NULL;
-    emit exit();
-}
 
-/*!
- Slot launched after state has exited and in destructor.
- \retval void
- */
-void HsInstallationLogState::cleanUp()
-{
-    // Close popups if App key was pressed
-    if (mInstalationLogDialog) {
-        mInstalationLogDialog->close();
-        mInstalationLogDialog = NULL;
-    }
-}
 

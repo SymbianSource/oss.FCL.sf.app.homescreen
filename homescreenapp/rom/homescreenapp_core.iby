@@ -88,7 +88,5 @@ data=ZPRIVATE\20022F35\import\widgetregistry\20022F46\hsshortcutwidgetplugin.man
 file=ABI_DIR\BUILD_DIR\hsclockwidgetplugin.dll                                         SHARED_LIB_DIR\hsclockwidgetplugin.dll
 data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hsclockwidgetplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hsclockwidgetplugin.qtplugin
 data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest     private\20022f35\import\widgetregistry\20022F6C\hsclockwidgetplugin.manifest
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\tclock.png                       private\20022f35\import\widgetregistry\20022F6C\tclock.png
-data=ZPRIVATE\20022f35\import\widgetregistry\20022F6C\qtg_graf_hswidget_preview_clock.svg  private\20022f35\import\widgetregistry\20022F6C\qtg_graf_hswidget_preview_clock.svg
 
 #endif //__HOMESCREENAPP_CORE_IBY__

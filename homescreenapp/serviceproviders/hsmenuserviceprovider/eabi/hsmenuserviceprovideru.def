@@ -62,4 +62,5 @@ EXPORTS
 	_ZTV15HsMenuItemModel @ 61 NONAME
 	_ZTV25HsMenuEntryRemovedHandler @ 62 NONAME
 	_ZTV26HsMenuCollectionsItemModel @ 63 NONAME
+	_ZN13HsMenuService13executeActionERK7CaEntryRK7QStringP7QObjectPKc @ 64 NONAME
 

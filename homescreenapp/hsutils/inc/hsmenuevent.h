@@ -44,6 +44,7 @@ public:
         UninstallApplication,
         OpenApplicationLibrary,
         OpenInstalledView,
+        BackFromInstalledView,
         OpenHomeScreen,
         ArrangeCollection,
         ArrangeAllCollections,

@@ -16,7 +16,6 @@
  */
 
 #include <QApplication>
-#include <QSortFilterProxyModel>
 #include <HbGroupBox>
 #include <HbLineEdit>
 #include <HbListView>
@@ -59,7 +58,7 @@
  */
 HsSearchView::HsSearchView(HsMenuViewBuilder &builder,
         HsStateContext stateContext, HsMainWindow &mainWindow) :
-    mProxyModel(new QSortFilterProxyModel(this)), mSearchView(NULL),
+    mProxyModel(new HsSearchFilterProxyModel(this)), mSearchView(NULL),
     mSearchListView(NULL), mSearchPanel(NULL), mStateContext(stateContext),
     mBuilder(builder), mMainWindow(mainWindow), mListView(NULL),
     mVkbHost(NULL), mSearchViewBuilder(), mEmptyResultText(true)
@@ -128,8 +127,8 @@ void HsSearchView::searchBegins()
 
     mProxyModel->invalidate();
     mProxyModel->setSourceModel(mListView->model());
-    mProxyModel->setFilterRegExp(
-            QRegExp(QString(".*"), Qt::CaseInsensitive, QRegExp::RegExp));
+    mCriteria = QString("");
+    mProxyModel->setFilterString(mCriteria);
 
     mSearchView = mSearchViewBuilder.searchView();
     mSearchListView = mSearchViewBuilder.searchListView();
@@ -144,7 +143,10 @@ void HsSearchView::searchBegins()
     }
 
     mSearchView->hideItems(Hb::AllItems);
-    mSearchListView->setModel(mProxyModel, new HsListViewItem());
+    HsListViewItem *item = new HsListViewItem();
+    item->setTextFormat(Qt::RichText);
+
+    mSearchListView->setModel(mProxyModel, item);
 
     mMainWindow.setCurrentView(mSearchView);
 
@@ -279,11 +281,14 @@ void HsSearchView::findItem(QString criteriaStr)
     qDebug() << "HsSearchView::findItem: " + criteriaStr;
     HSMENUTEST_FUNC_ENTRY("HsSearchView::findItem");
 
-    mProxyModel->setFilterRegExp(
-            QRegExp("(^|\\b)" + criteriaStr, Qt::CaseInsensitive));
+    if (criteriaStr == mCriteria) 
+        return;
 
-    mSearchListView->scrollTo(
-            mProxyModel->index(0, 0), HbAbstractItemView::PositionAtTop);
+    mCriteria = criteriaStr;
+    mProxyModel->setFilterString(criteriaStr);
+    if(criteriaStr.isEmpty())
+        mSearchListView->scrollTo(
+                mProxyModel->index(0, 0), HbAbstractItemView::PositionAtTop);
 
     HSMENUTEST_FUNC_EXIT("HsSearchView::findItem");
 }

@@ -50,9 +50,9 @@ public:
 
 private slots:
 
-    void previewDialogFinished(HbAction* finishedAction);
+    void addToHomeScreen();
 
-    void messageWidgetCorruptedFinished(HbAction* finishedAction);
+    void removeWidget();
     
     void onEntry(QEvent *event);
 
@@ -62,21 +62,12 @@ signals:
     void exit();
 
 private:
-
     void showMessageWidgetCorrupted();
-    
     HbDialog* buildPreviewDialog(const CaEntry& entry) const;
 
 private:
-    
-    HbDialog *mPreviewDialog;
-    QScopedPointer<HsMenuEntryRemovedHandler> mEntryObserver;
+
     int mEntryId;
-
-    HbMessageBox *mCorruptedMessage;
-
-    QAction *mConfirmRemovalAction;
-    QAction *mAddToHomescreenAction;
     
     QVariant mToken;
     

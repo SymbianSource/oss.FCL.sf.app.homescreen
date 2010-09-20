@@ -46,9 +46,13 @@ public:
                          QState *parent = 0);
 
     ~HsInstalledAppsState();
+    
+protected:
+    void onEntry(QEvent *event);
 
 private slots:
 
+    void backFromInstalledView();
     void openInstallationLog();
     void stateEntered();
     void stateExited();
@@ -65,6 +69,8 @@ private:
     Hs::HsSortAttribute mSortAttribute;
     HbAction *mLatestOnTopMenuAction; //not own
     HbAction *mOldestOnTopMenuAction; //not own
+    int mCollectionId; // An id of a collection to which the state machine will return.
+    QString mCollectionType; // A type of a collection to which the state machine will return.
 };
 
 #endif // HSINSTALLEDAPPSSTATE_H

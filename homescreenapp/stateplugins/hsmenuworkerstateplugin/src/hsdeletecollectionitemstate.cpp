@@ -21,7 +21,7 @@
 #include <hsmenuservice.h>
 #include <hsmenueventfactory.h>
 
-#include "hsmenudialogfactory.h"
+#include "hsdialogcontroller.h"
 #include "hsdeletecollectionitemstate.h"
 #include "hsmenuevent.h"
 
@@ -39,9 +39,7 @@
 HsDeleteCollectionItemState::HsDeleteCollectionItemState(QState *parent) :
     QState(parent),
     mItemId(0),
-    mCollectionId(0),
-    mDeleteMessage(NULL),
-    mConfirmAction(NULL)
+    mCollectionId(0)
 {
     construct();
 }
@@ -51,7 +49,10 @@ HsDeleteCollectionItemState::HsDeleteCollectionItemState(QState *parent) :
  */
 HsDeleteCollectionItemState::~HsDeleteCollectionItemState()
 {
-    cleanUp(); // in case of throw
+    QT_TRY {
+        emit exit();
+    } QT_CATCH (...) {
+    }
 }
 
 /*!
@@ -83,30 +84,49 @@ void HsDeleteCollectionItemState::onEntry(QEvent *event)
 
     QString message;
     message.append(
-        HbParameterLengthLimiter("txt_applib_dialog_remove_1_from_collection").arg(
-            HsMenuService::getName(mItemId)));
+        HbParameterLengthLimiter(
+                "txt_applib_dialog_remove_1_from_collection").arg(
+                HsMenuService::getName(mItemId)));
 
-    // create and show message box
-    mDeleteMessage = HsMenuDialogFactory().create(message);
-    mConfirmAction = mDeleteMessage->actions().value(0);
-    mDeleteMessage->open(this, SLOT(deleteMessageFinished(HbAction*)));
+    QScopedPointer<HsDialogController> dialogController(
+            new HsDialogController(message));
+
+    connect(dialogController.data(),
+            SIGNAL(acceptActionTriggered(QAction*)),
+            this,
+            SLOT(removeApplicationFromCollection()));
+
+    connect(dialogController.data(),
+            SIGNAL(dialogCompleted()),
+            this,
+            SIGNAL(exit()));
+
+    // ensure dialog is dismissed on app key pressed
+    connect(this, SIGNAL(exited()),
+            dialogController.data(),
+            SLOT(dismissDialog()));
+
+    dialogController.take()->openDialog();
 
     HSMENUTEST_FUNC_EXIT("HsDeleteCollectionItemState::onEntry");
 }
 
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT
 /*!
- Action after closed confirmation dialog.
- \param finishedAction chosen action.
+ Slot. Removes application from collection, both specified by event
+ passed to the state on entry.
  \retval void
  */
-void HsDeleteCollectionItemState::deleteMessageFinished(HbAction* finishedAction)
+void HsDeleteCollectionItemState::removeApplicationFromCollection()
 {
-    if (static_cast<QAction*>(finishedAction) == mConfirmAction) {
-        HsMenuService::removeApplicationFromCollection(mItemId, mCollectionId);
-    }
-    emit exit();
-    mConfirmAction = NULL;
+    HsMenuService::removeApplicationFromCollection(mItemId, mCollectionId);
 }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 /*!
  Slot launched after state has exited and in destructor.
@@ -114,14 +134,6 @@ void HsDeleteCollectionItemState::deleteMessageFinished(HbAction* finishedAction
  */
 void HsDeleteCollectionItemState::cleanUp()
 {
-    // Close messagebox if App key was pressed
-    if (mDeleteMessage) {
-		disconnect(mDeleteMessage, SIGNAL(finished(HbAction*)), this, SLOT(deleteMessageFinished(HbAction*)));
-        mDeleteMessage->close();
-		mDeleteMessage = NULL;
-    }
-	
-    mConfirmAction = NULL;
     mItemId = 0;
     mCollectionId = 0;
 }

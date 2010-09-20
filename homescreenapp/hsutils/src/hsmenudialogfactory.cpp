@@ -108,3 +108,14 @@ void HsMenuDialogFactory::setUpActions(HbMessageBox *box,
         box->addAction(action.take());
     }
 }
+
+int HsMenuDialogFactory::acceptActionIndex()
+{
+    return 0;
+}
+
+int HsMenuDialogFactory::rejectActionIndex()
+{
+    return 1;
+}
+
