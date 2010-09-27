@@ -79,10 +79,11 @@ void HsImageHandlingClient::fetch()
         mReq = 0;
     }
 
-    mReq = mAppMgr.create(XQI_IMAGE_FETCH, XQOP_IMAGE_FETCH, false);
+    mReq = mAppMgr.create(XQI_IMAGE_FETCH, XQOP_IMAGE_FETCH, true);
     if (mReq) {        
         connect(mReq, SIGNAL(requestOk(const QVariant&)), this, SLOT(handleOk(const QVariant&)));
         connect(mReq, SIGNAL(requestError(int,const QString&)), this, SLOT(handleError(int,const QString&)));
+        mReq->setSynchronous(false);
     } else {
         qCritical() << "HsImageHandlingClient::fetch -> Create request failed";
         return;
@@ -109,19 +110,19 @@ void HsImageHandlingClient::edit(const QString &imagePath)
     const QString operation = QLatin1String("view(QString,int)");
 
    //Connect to service provider
-    if(mReq == NULL){
-        mReq = mAppMgr.create(service, interface, operation, true);
-        mReq->setEmbedded(true);
-        mReq->setSynchronous(false);
+    if (mReq) {
+        delete mReq;
+        mReq = 0;
     }
-    
-    if(mReq == NULL){
-        return;
-    } 
 
-    if (mReq) {        
+   //Connect to service provider
+   mReq = mAppMgr.create(service, interface, operation, true);
+
+   if (mReq) {        
         connect(mReq, SIGNAL(requestOk(const QVariant&)), this, SLOT(handleEditorOk(const QVariant&)));
         connect(mReq, SIGNAL(requestError(int,const QString&)), this, SLOT(handleEditorError(int,const QString&)));
+        mReq->setSynchronous(false);
+
     } else {
         qCritical() << "HsImageHandlingClient::edit -> Create request failed";
         return;
@@ -130,7 +131,7 @@ void HsImageHandlingClient::edit(const QString &imagePath)
     args << imagePath;
     args << EEditorHighwayWallpaperCrop;
     mReq->setArguments(args);
-    if (!(mReq)->send()) {
+    if (!mReq->send()) {
         qCritical() << "HsImageHandlingClient::edit -> Send failed" << mReq->lastErrorMessage();;
     }
 

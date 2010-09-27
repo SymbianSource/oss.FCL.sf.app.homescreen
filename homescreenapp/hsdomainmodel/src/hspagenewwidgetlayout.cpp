@@ -109,6 +109,11 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
     QList<QRectF> newRects;
     foreach (HsWidgetHost *newWidget, mNewWidgets) {
         newRects << QRectF(QPointF(), newWidget->visual()->preferredSize());
+        // temp fix for double setGeometry call
+        QRectF defaultRect = QRectF(0,0,58.625, 58.625);
+        if (QRectF(QPointF(), newWidget->visual()->preferredSize()) == defaultRect) {
+            return;
+        }
     }
 
     /* if there is touch point defined (widget added from context menu)
@@ -139,16 +144,24 @@ void HsPageNewWidgetLayout::setGeometry(const QRectF &rect)
                 existingRects << QRectF(widget->visual()->pos(), widget->visual()->preferredSize());
             }
         }
-         
+        
         // calculate new widget positions with "stuck 'em all"-algorithm
         HsWidgetPositioningOnWidgetAdd *algorithm =
             HsWidgetPositioningOnWidgetAdd::instance();
-        QList<QRectF> calculatedRects =
-            algorithm->convert(pageRect, existingRects, newRects, QPointF());
-        // set new widgets to screen and save presentation for each widget
-        for (int i=0; i<mNewWidgets.count(); i++) {
-            mNewWidgets.at(i)->visual()->setGeometry(calculatedRects.at(i));
-            mNewWidgets.at(i)->savePresentation();
+        HsWidgetPositioningOnWidgetAdd::Result result;
+        result = algorithm->convert(pageRect, existingRects, newRects, QPointF());
+        if (result.rectOrder != QList<int>()) {
+            // set new widgets to screen in sorted order and save presentation for each widget
+            for (int i = 0; i < mNewWidgets.count(); i++) {
+                int id = result.rectOrder.at(i);
+                // take visual
+                HsWidgetHostVisual *visual(mNewWidgets.at(id)->visual());
+                visual->setGeometry(result.calculatedRects.at(id));
+                // update z value
+                int zValue = visual->zValue();
+                visual->setZValue(zValue - id + i);
+                mNewWidgets.at(id)->savePresentation();
+            }
         }
     }
 }

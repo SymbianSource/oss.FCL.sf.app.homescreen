@@ -77,7 +77,7 @@ void HsMessageBoxWrapper::show()
     mBox->setAttribute(Qt::WA_DeleteOnClose);
     mBox->setHeadingWidget(new HbLabel(mImpl->mHeader));
     mBox->setText(mImpl->mQueryText);
-    mBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
+    mBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::Cancel);
 
     mBox->open(this,SLOT(onDialogClosed(int)));
 }

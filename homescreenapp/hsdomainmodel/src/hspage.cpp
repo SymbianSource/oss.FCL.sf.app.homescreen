@@ -656,9 +656,6 @@ void HsPage::onWidgetUnavailable()
 */
 void HsPage::onOrientationChanged(Qt::Orientation orientation)
 {
-    HsWidgetPositioningOnOrientationChange *converter =
-        HsWidgetPositioningOnOrientationChange::instance();
-
     Qt::Orientation orientationFrom = orientation == Qt::Vertical ? Qt::Horizontal : Qt::Vertical;
     QRectF from = contentGeometry(orientationFrom);
     QRectF to = contentGeometry(orientation);
@@ -680,7 +677,6 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
                 adjustWidgetPosition.moveTopLeft(presentation.pos());
                 visual->setPos(adjustedWidgetPosition(adjustWidgetPosition));
                 visual->setZValue(presentation.zValue);
-                widget->savePresentation(); //Needed to follow pageMargin dynamic change
             }
         }
     }
@@ -705,14 +701,32 @@ void HsPage::onOrientationChanged(Qt::Orientation orientation)
         // calculate new widget positions with "stuck 'em all"-algorithm
         HsWidgetPositioningOnWidgetAdd *algorithm =
             HsWidgetPositioningOnWidgetAdd::instance();
-        QList<QRectF> calculatedRects =
-            algorithm->convert(pageRect, existingRects, newRects, QPointF());
 
-        for (int i=0; i<newWidgets.count(); i++) {            
-            int j = mWidgets.indexOf(newWidgets.at(i));
-            mWidgets.at(j)->visual()->setGeometry(calculatedRects.at(i));
-            mWidgets.at(j)->savePresentation();            
-        }               
+        HsWidgetPositioningOnWidgetAdd::Result result;
+        result = algorithm->convert(pageRect, existingRects, newRects, QPointF());
+        
+        QList<HsWidgetPresentationData> widgetPresentationList;
+
+        if (result.rectOrder != QList<int>()) {
+            for (int i=0; i<newWidgets.count(); i++) {
+                int rectId = result.rectOrder.at(i);
+                int widgetId = mWidgets.indexOf(newWidgets.at(rectId));
+                mWidgets.at(widgetId)->visual()->setGeometry(result.calculatedRects.at(rectId));
+                // update z value
+                int zValue = mWidgets.at(widgetId)->visual()->zValue();
+                mWidgets.at(widgetId)->visual()->setZValue(zValue - rectId + i);
+                HsWidgetPresentationData data;
+                data.zValue = zValue - rectId + i;
+                data.widgetId = mWidgets.at(widgetId)->databaseId();
+                data.setPos(mWidgets.at(widgetId)->visual()->pos());
+                widgetPresentationList.append(data);
+            }
+        }
+        if (!widgetPresentationList.isEmpty()) {
+            HsDatabase::instance()->updateWidgetPresentations(
+                widgetPresentationList, HsGui::instance()->orientation());
+        }
+        
     }        
 }
 

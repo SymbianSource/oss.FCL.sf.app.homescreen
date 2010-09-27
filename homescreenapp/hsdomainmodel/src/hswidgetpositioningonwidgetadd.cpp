@@ -73,7 +73,7 @@ HsWidgetPositioningOnWidgetAdd *HsWidgetPositioningOnWidgetAdd::mInstance = 0;
     Sets widget's lower right corner to follow content area's diagonal.
     Widgets are positioned to certain offset to each other.
 */
-QList<QRectF> HsAnchorPointInBottomRight::convert(
+HsWidgetPositioningOnWidgetAdd::Result HsAnchorPointInBottomRight::convert(
     const QRectF &contentArea,
     const QList<QRectF> &existingRects,
     const QList<QRectF> &newRects,
@@ -81,6 +81,7 @@ QList<QRectF> HsAnchorPointInBottomRight::convert(
 {
     Q_UNUSED(existingRects);
 
+    HsWidgetPositioningOnWidgetAdd::Result result;
     QList<QRectF> toGeometries;
 
     //Offset for widgets' bottom right position to each other
@@ -103,10 +104,11 @@ QList<QRectF> HsAnchorPointInBottomRight::convert(
         // for the first rect
         if(QLineF::BoundedIntersection != 
             diagonal.intersect(widgetRightSide, &anchorPoint)) {
-            return newRects; //Return original since undefined error.
+            result.calculatedRects = newRects;
+            return result; //Return original since undefined error.
                             //In this case widget's must be wider than the content area.
         }
-    }else{
+    } else {
         anchorPoint = startPoint - offsetPoint;
     }
 
@@ -128,7 +130,8 @@ QList<QRectF> HsAnchorPointInBottomRight::convert(
         anchorPoint -= offsetPoint;
         
     }
-    return toGeometries;
+    result.calculatedRects = toGeometries;
+    return result;
 }
 
 /*!
@@ -141,7 +144,7 @@ QList<QRectF> HsAnchorPointInBottomRight::convert(
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT
-QList<QRectF> HsAnchorPointInCenter::convert(
+HsWidgetPositioningOnWidgetAdd::Result HsAnchorPointInCenter::convert(
     const QRectF &contentArea,
     const QList<QRectF> &existingRects,
     const QList<QRectF> &newRects,
@@ -150,6 +153,7 @@ QList<QRectF> HsAnchorPointInCenter::convert(
     Q_UNUSED(existingRects);
     Q_UNUSED(startPoint)
 
+    HsWidgetPositioningOnWidgetAdd::Result result;
     QList<QRectF> toGeometries;
 
     //Offset for widgets' centers position to each other
@@ -168,7 +172,8 @@ QList<QRectF> HsAnchorPointInCenter::convert(
             anchorPoint = contentArea.bottomRight();
         }
     }
-    return toGeometries;
+    result.calculatedRects = toGeometries;
+    return result;
 }
 
 HsWidgetOrganizer::HsWidgetOrganizer(int anchorDistance,
@@ -191,7 +196,7 @@ HsWidgetOrganizer::~HsWidgetOrganizer()
     Organizes widget's starting from upper left corner towards right,
     and then continues the on the next line.
 */
-QList<QRectF> HsWidgetOrganizer::convert(
+HsWidgetPositioningOnWidgetAdd::Result HsWidgetOrganizer::convert(
     const QRectF &contentArea,
     const QList<QRectF> &existingRects,
     const QList<QRectF> &newRects,
@@ -199,10 +204,12 @@ QList<QRectF> HsWidgetOrganizer::convert(
 {
     Q_UNUSED(startPoint)
 
+    HsWidgetPositioningOnWidgetAdd::Result result;
+
     // mandatory check ups
     if (mAnchorDistance <= 0 || contentArea == QRectF() ||
         newRects == QList<QRectF>()) {
-        return QList<QRectF>();
+            return result;
     }
 
     // calculate anchor limits based on anchor distance
@@ -214,7 +221,7 @@ QList<QRectF> HsWidgetOrganizer::convert(
     QMap<int, QRectF> newRectsMap;
     for (int id = 0; id < newRects.count(); id++) {
         newRectsMap.insert(id, newRects.at(id));
-    } 
+    }
 
     // get orientation
     Qt::Orientation orientation(HsGui::instance()->orientation());
@@ -237,10 +244,11 @@ QList<QRectF> HsWidgetOrganizer::convert(
     // go through existing rects
     bool ok = checkExistingRects(existingRects);
     if (!ok) {
-        return QList<QRectF>();
+            return result;
     }
 
     QList<int> newRectsNotCalculated;
+    QList<int> newRectsCalculated;
     QList<QRectF> newExistingRects;
     newExistingRects += existingRects;
 
@@ -258,10 +266,11 @@ QList<QRectF> HsWidgetOrganizer::convert(
             newRectsMap.insert(newRectsSorted.at(i), calculatedGeometry);
             // update existing rects
             newExistingRects << calculatedGeometry;
+            newRectsCalculated << newRectsSorted.at(i);
             // mark new rect reserved
             bool marked = markAnchors(QRectF(position, newRect.size()));
             if (!marked) {
-                return QList<QRectF>();
+                return result;
             }
 
         } else {
@@ -277,22 +286,20 @@ QList<QRectF> HsWidgetOrganizer::convert(
         for (int i = 0; i < newRectsNotCalculated.count(); i++) {
             undoneRects << newRectsMap.value(newRectsNotCalculated.at(i));
         }
-        QList<QRectF> calculatedRects =
-            mCenterAlgorithm->convert(mContentArea, newExistingRects, undoneRects, QPointF());
+
+        HsWidgetPositioningOnWidgetAdd::Result centerResult;
+        centerResult = mCenterAlgorithm->convert(mContentArea, newExistingRects,
+                                           undoneRects, QPointF());
         // update the rest rects instead of old ones
-        for (int i = 0; i < calculatedRects.count(); i++) {
-            newRectsMap.insert(newRectsNotCalculated.at(i), calculatedRects.at(i));
-            /* take rect out of list and add it to the end of the list
-               rect that do not fit are added in the end in users add order */
-            // we need to map z values to correct widgets to enable this
-           /*
-            newRectsMap.take(newRectsNotCalculated.at(i));
-            newRectsMap.insert(newRectsMap.count() + i + 1, calculatedRects.at(i));
-           */
+        for (int i = 0; i < centerResult.calculatedRects.count(); i++) {
+            newRectsMap.insert(newRectsNotCalculated.at(i), centerResult.calculatedRects.at(i));
         }
     }
 
-    return newRectsMap.values();
+    result.calculatedRects = newRectsMap.values();
+    result.rectOrder = newRectsCalculated + newRectsNotCalculated;
+
+    return result;
 }
 
 /*!    

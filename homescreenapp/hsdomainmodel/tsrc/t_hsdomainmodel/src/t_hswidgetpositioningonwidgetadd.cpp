@@ -85,15 +85,15 @@ void TestHsDomainModel::testHsAnchorPointInBottomRight()
     HsWidgetPositioningOnWidgetAdd *converter =
         new HsAnchorPointInBottomRight;
 
-    QList<QRectF> convertedWidgets =
-        converter->convert(contentArea, QList<QRectF>(),
-                           widgets, QPointF());
+    HsWidgetPositioningOnWidgetAdd::Result result;
+    result = converter->convert(contentArea, QList<QRectF>(),
+                                widgets, QPointF());
 
-    QCOMPARE(convertedWidgets.count(),
+    QCOMPARE(result.calculatedRects.count(),
              expectedWidgets.count());
 
     for (int i = 0; i < expectedWidgets.count(); ++i) {
-        QVERIFY(hsRectCompare(convertedWidgets.at(i),expectedWidgets.at(i)));
+        QVERIFY(hsRectCompare(result.calculatedRects.at(i),expectedWidgets.at(i)));
     }
 
     delete converter;
@@ -113,16 +113,16 @@ void TestHsDomainModel::testHsWidgetOrganizerCase1_data()
 
     // invalid parameters
     QTest::newRow("case1.2")
-        << QRectF(0, 0, 100, 100) << QList<QRectF>()
-        << (QList<QRectF>() << QRectF(0, 0, 10, 10) << QRectF(0, 0, 10, 10) << QRectF(0, 0, 10, 10))
-        << (QList<QRectF>() << QRectF(0, 0, 10, 10) << QRectF(15, 0, 10, 10) << QRectF(30, 0, 10, 10));
-
-    // basic set of similar size rects to simple content area's first row
-    QTest::newRow("case1.3")
         << QRectF(54, 763, 24, 5434)
         << (QList<QRectF>() << QRectF(343, 321, 1034, 102) << QRectF(3320, 3420, 1430, 1043) << QRectF(0, 43, 10, 997))
         << (QList<QRectF>() << QRectF(322, 12, 835, 623) << QRectF(624, 56, 536, 895) << QRectF(31, 423, 32, 9823))
         << QList<QRectF>();
+
+    // basic set of similar size rects to simple content area's first row
+    QTest::newRow("case1.3")
+        << QRectF(0, 0, 100, 100) << QList<QRectF>()
+        << (QList<QRectF>() << QRectF(0, 0, 10, 10) << QRectF(0, 0, 10, 10) << QRectF(0, 0, 10, 10))
+        << (QList<QRectF>() << QRectF(0, 0, 10, 10) << QRectF(15, 0, 10, 10) << QRectF(30, 0, 10, 10));
 
     // set of similar height rects to simple content area on multiple rows
     QTest::newRow("case1.4")
@@ -155,13 +155,14 @@ void TestHsDomainModel::testHsWidgetOrganizerCase1()
     HsWidgetOrganizer *widgetOrganizer =
         new HsWidgetOrganizer(5, HsConfiguration::SearchRowByRow);
 
-    QList<QRectF> convertedWidgets = widgetOrganizer->convert(contentArea, existingWidgets,
-                                                               widgets, QPointF());
+    HsWidgetPositioningOnWidgetAdd::Result result;
+    result = widgetOrganizer->convert(contentArea, existingWidgets,
+                                      widgets, QPointF());
     // Verify amount
-    QCOMPARE(convertedWidgets.count(), expectedWidgets.count());
+    QCOMPARE(result.calculatedRects.count(), expectedWidgets.count());
     // Compare calculated and expected values
     for (int i = 0; i < expectedWidgets.count(); ++i) {
-        QVERIFY(hsRectCompare(convertedWidgets.at(i), expectedWidgets.at(i)));
+        QVERIFY(hsRectCompare(result.calculatedRects.at(i), expectedWidgets.at(i)));
     }
 
     delete widgetOrganizer;
@@ -199,11 +200,13 @@ void TestHsDomainModel::testHsWidgetOrganizerCase2()
     mainWindow.setOrientation(Qt::Horizontal);
     HsWidgetOrganizer *widgetOrganizer =
         new HsWidgetOrganizer(5, HsConfiguration::SearchColumnByColumn);
-    QList<QRectF> convertedWidgets = widgetOrganizer->convert(contentArea, existingWidgets,
-                                                widgets, QPointF());
-    QCOMPARE(convertedWidgets.count(), expectedWidgets.count());
+
+    HsWidgetPositioningOnWidgetAdd::Result result;
+    result = widgetOrganizer->convert(contentArea, existingWidgets,
+                                      widgets, QPointF());
+    QCOMPARE(result.calculatedRects.count(), expectedWidgets.count());
     for (int i = 0; i < expectedWidgets.count(); ++i) {
-        QVERIFY(hsRectCompare(convertedWidgets.at(i), expectedWidgets.at(i)));
+        QVERIFY(hsRectCompare(result.calculatedRects.at(i), expectedWidgets.at(i)));
     }
 
     delete widgetOrganizer;
@@ -243,11 +246,13 @@ void TestHsDomainModel::testHsWidgetOrganizerCase3()
 
     HsWidgetOrganizer *widgetOrganizer =
         new HsWidgetOrganizer(1, HsConfiguration::SearchRowByRow);
-    QList<QRectF> convertedWidgets = widgetOrganizer->convert(contentArea, existingWidgets,
+
+    HsWidgetPositioningOnWidgetAdd::Result result;
+    result = widgetOrganizer->convert(contentArea, existingWidgets,
                                                 widgets, QPointF());
-    QCOMPARE(convertedWidgets.count(), expectedWidgets.count());
+    QCOMPARE(result.calculatedRects.count(), expectedWidgets.count());
     for (int i = 0; i < expectedWidgets.count(); ++i) {
-        QVERIFY(hsRectCompare(convertedWidgets.at(i), expectedWidgets.at(i)));
+        QVERIFY(hsRectCompare(result.calculatedRects.at(i), expectedWidgets.at(i)));
     }
 
     delete widgetOrganizer;

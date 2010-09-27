@@ -426,6 +426,7 @@ void HsStateMachine::onIdleStateExited()
 */
 void HsStateMachine::activityRequested(const QString &name) 
 {
+    HSTEST_FUNC_ENTRY("HS::HsStateMachine::activityRequested");
     if (name == Hs::groupAppLibRecentView) {
         if (mHomeScreenActive) {
             this->postEvent(
@@ -442,4 +443,5 @@ void HsStateMachine::activityRequested(const QString &name)
     } else if (name == Hs::activityAppLibMainView) {
         emit event_toAppLib();
     }
+    HSTEST_FUNC_EXIT("HS::HsStateMachine::activityRequested");
 }

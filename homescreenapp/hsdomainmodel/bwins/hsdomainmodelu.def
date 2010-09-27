@@ -2,93 +2,93 @@ EXPORTS
 	?trUtf8@HsScene@@SA?AVQString@@PBD0H@Z @ 1 NONAME ; class QString HsScene::trUtf8(char const *, char const *, int)
 	?staticMetaObject@HsPageVisual@@2UQMetaObject@@B @ 2 NONAME ; struct QMetaObject const HsPageVisual::staticMetaObject
 	?instance@HsWidgetPositioningOnWidgetAdd@@SAPAV1@XZ @ 3 NONAME ; class HsWidgetPositioningOnWidgetAdd * HsWidgetPositioningOnWidgetAdd::instance(void)
-	?convert@HsAnchorPointInBottomRight@@UAE?AV?$QList@VQRectF@@@@ABVQRectF@@ABV2@1ABVQPointF@@@Z @ 4 NONAME ; class QList<class QRectF> HsAnchorPointInBottomRight::convert(class QRectF const &, class QList<class QRectF> const &, class QList<class QRectF> const &, class QPointF const &)
-	?metaObject@HsConfiguration@@UBEPBUQMetaObject@@XZ @ 5 NONAME ; struct QMetaObject const * HsConfiguration::metaObject(void) const
-	?aboutToUninstall@HsWidgetComponent@@IAEXXZ @ 6 NONAME ; void HsWidgetComponent::aboutToUninstall(void)
-	??_EHsWidgetData@@QAE@I@Z @ 7 NONAME ; HsWidgetData::~HsWidgetData(unsigned int)
-	?metaObject@HsHostedWidgetFactory@@UBEPBUQMetaObject@@XZ @ 8 NONAME ; struct QMetaObject const * HsHostedWidgetFactory::metaObject(void) const
-	?pageChangeZoneAnimationDuration@HsConfiguration@@QBEHXZ @ 9 NONAME ; int HsConfiguration::pageChangeZoneAnimationDuration(void) const
-	?takeInstance@HsHostedWidgetFactory@@SAPAV1@XZ @ 10 NONAME ; class HsHostedWidgetFactory * HsHostedWidgetFactory::takeInstance(void)
-	?convertToAnchors@HsWidgetOrganizer@@AAEHH@Z @ 11 NONAME ; int HsWidgetOrganizer::convertToAnchors(int)
-	?widgetDropEffectDuration@HsConfiguration@@QBEHXZ @ 12 NONAME ; int HsConfiguration::widgetDropEffectDuration(void) const
-	?setMaximumPageCount@HsConfiguration@@QAEXH@Z @ 13 NONAME ; void HsConfiguration::setMaximumPageCount(int)
-	?qt_metacast@HsShortcutService@@UAEPAXPBD@Z @ 14 NONAME ; void * HsShortcutService::qt_metacast(char const *)
-	?propertyChanged@HsConfiguration@@IAEXABVQString@@@Z @ 15 NONAME ; void HsConfiguration::propertyChanged(class QString const &)
-	?showWidget@HsWidgetHost@@QAEXXZ @ 16 NONAME ; void HsWidgetHost::showWidget(void)
-	?setInstance@HsConfiguration@@SAXPAV1@@Z @ 17 NONAME ; void HsConfiguration::setInstance(class HsConfiguration *)
-	?isActivePage@HsPage@@QBE_NXZ @ 18 NONAME ; bool HsPage::isActivePage(void) const
-	?hidden@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 19 NONAME ; class QString HsWidgetComponentDescriptor::hidden(void) const
-	?cancel@HsWallpaperLoader@@QAEXXZ @ 20 NONAME ; void HsWallpaperLoader::cancel(void)
-	?metaObject@HsShortcutService@@UBEPBUQMetaObject@@XZ @ 21 NONAME ; struct QMetaObject const * HsShortcutService::metaObject(void) const
-	?instance@HsBackupRestoreObserver@@SAPAV1@XZ @ 22 NONAME ; class HsBackupRestoreObserver * HsBackupRestoreObserver::instance(void)
-	??1HsWidgetHostVisual@@UAE@XZ @ 23 NONAME ; HsWidgetHostVisual::~HsWidgetHostVisual(void)
-	?load@HsPage@@QAE_NXZ @ 24 NONAME ; bool HsPage::load(void)
-	?setSnapEnabled@HsConfiguration@@QAEX_N@Z @ 25 NONAME ; void HsConfiguration::setSnapEnabled(bool)
-	?clockWidgetTapFeedbackEffect@HsConfiguration@@QBE?AW4InstantEffect@HbFeedback@@XZ @ 26 NONAME ; enum HbFeedback::InstantEffect HsConfiguration::clockWidgetTapFeedbackEffect(void) const
-	?readyForBUR@HsBackupRestoreObserver@@QAEXXZ @ 27 NONAME ; void HsBackupRestoreObserver::readyForBUR(void)
-	?handleEntryUpdated@HsWidgetComponentRegistry@@AAEXABVCaEntry@@ABVQString@@@Z @ 28 NONAME ; void HsWidgetComponentRegistry::handleEntryUpdated(class CaEntry const &, class QString const &)
-	?instance@HsShortcutService@@SAPAV1@PAVQStateMachine@@@Z @ 29 NONAME ; class HsShortcutService * HsShortcutService::instance(class QStateMachine *)
-	?staticMetaObject@HsDatabase@@2UQMetaObject@@B @ 30 NONAME ; struct QMetaObject const HsDatabase::staticMetaObject
-	??1HsSceneWallpaper@@UAE@XZ @ 31 NONAME ; HsSceneWallpaper::~HsSceneWallpaper(void)
-	?setActivePageIndex@HsScene@@QAE_NH@Z @ 32 NONAME ; bool HsScene::setActivePageIndex(int)
-	??1HsContentService@@UAE@XZ @ 33 NONAME ; HsContentService::~HsContentService(void)
-	?widgetPreference@HsDatabase@@QAE_NHABVQString@@AAVQVariant@@@Z @ 34 NONAME ; bool HsDatabase::widgetPreference(int, class QString const &, class QVariant &)
-	?tr@HsBackupRestoreObserver@@SA?AVQString@@PBD0H@Z @ 35 NONAME ; class QString HsBackupRestoreObserver::tr(char const *, char const *, int)
-	?setOnline@HsScene@@QAEX_N@Z @ 36 NONAME ; void HsScene::setOnline(bool)
-	?updateIconItem@HsWallpaper@@AAEXW4Orientation@Qt@@@Z @ 37 NONAME ; void HsWallpaper::updateIconItem(enum Qt::Orientation)
-	?getStaticMetaObject@HsWidgetComponentRegistry@@SAABUQMetaObject@@XZ @ 38 NONAME ; struct QMetaObject const & HsWidgetComponentRegistry::getStaticMetaObject(void)
-	?trUtf8@HsPageWallpaper@@SA?AVQString@@PBD0@Z @ 39 NONAME ; class QString HsPageWallpaper::trUtf8(char const *, char const *)
-	??0HsWidgetComponentRegistry@@AAE@PAVQObject@@@Z @ 40 NONAME ; HsWidgetComponentRegistry::HsWidgetComponentRegistry(class QObject *)
-	?action_unload@HsWidgetHost@@AAEXXZ @ 41 NONAME ; void HsWidgetHost::action_unload(void)
-	?visualModel@HsWidgetHostVisual@@QBEPAVHsWidgetHost@@XZ @ 42 NONAME ; class HsWidgetHost * HsWidgetHostVisual::visualModel(void) const
-	?tr@HsBackupRestoreObserver@@SA?AVQString@@PBD0@Z @ 43 NONAME ; class QString HsBackupRestoreObserver::tr(char const *, char const *)
-	?setMinimumWidgetWidth@HsConfiguration@@QAEXM@Z @ 44 NONAME ; void HsConfiguration::setMinimumWidgetWidth(float)
-	?event_show@HsWidgetHost@@IAEXXZ @ 45 NONAME ; void HsWidgetHost::event_show(void)
-	?setBounceAnimationEasingCurve@HsConfiguration@@QAEXW4Type@QEasingCurve@@@Z @ 46 NONAME ; void HsConfiguration::setBounceAnimationEasingCurve(enum QEasingCurve::Type)
-	?wallpaperDirectory@HsSceneWallpaper@@MBE?AVQString@@XZ @ 47 NONAME ; class QString HsSceneWallpaper::wallpaperDirectory(void) const
-	?setWidgetMoveBlockedFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 48 NONAME ; void HsConfiguration::setWidgetMoveBlockedFeedbackEffect(enum HbFeedback::InstantEffect)
-	?imageSetFailed@HsWallpaper@@IAEXXZ @ 49 NONAME ; void HsWallpaper::imageSetFailed(void)
-	?trUtf8@HsWidgetHostVisual@@SA?AVQString@@PBD0@Z @ 50 NONAME ; class QString HsWidgetHostVisual::trUtf8(char const *, char const *)
-	?setSnapForce@HsConfiguration@@QAEXM@Z @ 51 NONAME ; void HsConfiguration::setSnapForce(float)
-	??0HsWidgetData@@QAE@XZ @ 52 NONAME ; HsWidgetData::HsWidgetData(void)
-	?event_backupRestoreCompleted@HsBackupRestoreObserver@@IAEXXZ @ 53 NONAME ; void HsBackupRestoreObserver::event_backupRestoreCompleted(void)
-	?staticMetaObject@HsWidgetHostVisual@@2UQMetaObject@@B @ 54 NONAME ; struct QMetaObject const HsWidgetHostVisual::staticMetaObject
-	?setActivePage@HsScene@@QAE_NPAVHsPage@@@Z @ 55 NONAME ; bool HsScene::setActivePage(class HsPage *)
-	?setSceneX@HsIdleWidget@@QAEXM@Z @ 56 NONAME ; void HsIdleWidget::setSceneX(float)
-	??_EHsWidgetOrganizer@@UAE@I@Z @ 57 NONAME ; HsWidgetOrganizer::~HsWidgetOrganizer(unsigned int)
-	?qt_metacast@HsContentService@@UAEPAXPBD@Z @ 58 NONAME ; void * HsContentService::qt_metacast(char const *)
-	?qt_metacall@HsContentService@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 59 NONAME ; int HsContentService::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?qt_metacall@HsSceneWallpaper@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 60 NONAME ; int HsSceneWallpaper::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?widgets@HsContentService@@QAE_NABVQString@@ABV?$QHash@VQString@@VQVariant@@@@AAH@Z @ 61 NONAME ; bool HsContentService::widgets(class QString const &, class QHash<class QString, class QVariant> const &, int &)
-	?createWidget@HsHostedWidgetFactory@@QAEPAVQObject@@ABVQString@@@Z @ 62 NONAME ; class QObject * HsHostedWidgetFactory::createWidget(class QString const &)
-	?metaObject@HsDatabase@@UBEPBUQMetaObject@@XZ @ 63 NONAME ; struct QMetaObject const * HsDatabase::metaObject(void) const
-	?contentGeometry@HsPage@@QAE?AVQRectF@@W4Orientation@Qt@@@Z @ 64 NONAME ; class QRectF HsPage::contentGeometry(enum Qt::Orientation)
-	?exportToFile@HsConfiguration@@QAE_NABVQString@@@Z @ 65 NONAME ; bool HsConfiguration::exportToFile(class QString const &)
-	?widgetStartFaulted@HsContentService@@AAEXXZ @ 66 NONAME ; void HsContentService::widgetStartFaulted(void)
-	??_EHsWidgetHostVisual@@UAE@I@Z @ 67 NONAME ; HsWidgetHostVisual::~HsWidgetHostVisual(unsigned int)
-	?setPageChangePanDistance@HsConfiguration@@QAEXM@Z @ 68 NONAME ; void HsConfiguration::setPageChangePanDistance(float)
-	?qt_metacast@HsSceneWallpaper@@UAEPAXPBD@Z @ 69 NONAME ; void * HsSceneWallpaper::qt_metacast(char const *)
-	?metaObject@HsWallpaperLoader@@UBEPBUQMetaObject@@XZ @ 70 NONAME ; struct QMetaObject const * HsWallpaperLoader::metaObject(void) const
-	?action_finished@HsWidgetHost@@AAEXXZ @ 71 NONAME ; void HsWidgetHost::action_finished(void)
-	?widget@HsWidgetHostVisual@@QAEPAVQObject@@XZ @ 72 NONAME ; class QObject * HsWidgetHostVisual::widget(void)
-	?visual@HsWidgetHost@@QBEPAVHsWidgetHostVisual@@XZ @ 73 NONAME ; class HsWidgetHostVisual * HsWidgetHost::visual(void) const
-	?pageChangeFeedbackEffect@HsConfiguration@@QBE?AW4InstantEffect@HbFeedback@@XZ @ 74 NONAME ; enum HbFeedback::InstantEffect HsConfiguration::pageChangeFeedbackEffect(void) const
-	??0HsWallpaperLoader@@QAE@PAVQObject@@@Z @ 75 NONAME ; HsWallpaperLoader::HsWallpaperLoader(class QObject *)
-	?trUtf8@HsShortcutService@@SA?AVQString@@PBD0H@Z @ 76 NONAME ; class QString HsShortcutService::trUtf8(char const *, char const *, int)
-	?maximumWidgetWidth@HsConfiguration@@QBEMXZ @ 77 NONAME ; float HsConfiguration::maximumWidgetWidth(void) const
-	?metaObject@HsContentService@@UBEPBUQMetaObject@@XZ @ 78 NONAME ; struct QMetaObject const * HsContentService::metaObject(void) const
-	?setScene@HsSceneWallpaper@@QAEXPAVHsScene@@@Z @ 79 NONAME ; void HsSceneWallpaper::setScene(class HsScene *)
-	?onPageMarginChanged@HsPage@@AAEXABVQString@@@Z @ 80 NONAME ; void HsPage::onPageMarginChanged(class QString const &)
-	?finished@HsWidgetHost@@IAEXXZ @ 81 NONAME ; void HsWidgetHost::finished(void)
-	?pagePanStarted@HsScene@@IAEXPAVQGestureEvent@@@Z @ 82 NONAME ; void HsScene::pagePanStarted(class QGestureEvent *)
-	?checkExistingRects@HsWidgetOrganizer@@AAE_NABV?$QList@VQRectF@@@@@Z @ 83 NONAME ; bool HsWidgetOrganizer::checkExistingRects(class QList<class QRectF> const &)
-	?addPage@HsScene@@QAE_NPAVHsPage@@@Z @ 84 NONAME ; bool HsScene::addPage(class HsPage *)
-	?controlLayer@HsIdleWidget@@QBEPAVHbWidget@@XZ @ 85 NONAME ; class HbWidget * HsIdleWidget::controlLayer(void) const
-	?qt_metacall@HsWidgetHost@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 86 NONAME ; int HsWidgetHost::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?configuration@HsDatabase@@QAE_NAAV?$QHash@VQString@@VQVariant@@@@@Z @ 87 NONAME ; bool HsDatabase::configuration(class QHash<class QString, class QVariant> &)
-	?tr@HsContentService@@SA?AVQString@@PBD0@Z @ 88 NONAME ; class QString HsContentService::tr(char const *, char const *)
-	?searchPositionRowByRow@HsWidgetOrganizer@@AAE?AVQPointF@@V2@HH@Z @ 89 NONAME ; class QPointF HsWidgetOrganizer::searchPositionRowByRow(class QPointF, int, int)
-	?mInstance@HsHostedWidgetFactory@@0PAV1@A @ 90 NONAME ; class HsHostedWidgetFactory * HsHostedWidgetFactory::mInstance
+	?metaObject@HsConfiguration@@UBEPBUQMetaObject@@XZ @ 4 NONAME ; struct QMetaObject const * HsConfiguration::metaObject(void) const
+	?aboutToUninstall@HsWidgetComponent@@IAEXXZ @ 5 NONAME ; void HsWidgetComponent::aboutToUninstall(void)
+	??_EHsWidgetData@@QAE@I@Z @ 6 NONAME ; HsWidgetData::~HsWidgetData(unsigned int)
+	?metaObject@HsHostedWidgetFactory@@UBEPBUQMetaObject@@XZ @ 7 NONAME ; struct QMetaObject const * HsHostedWidgetFactory::metaObject(void) const
+	?pageChangeZoneAnimationDuration@HsConfiguration@@QBEHXZ @ 8 NONAME ; int HsConfiguration::pageChangeZoneAnimationDuration(void) const
+	?takeInstance@HsHostedWidgetFactory@@SAPAV1@XZ @ 9 NONAME ; class HsHostedWidgetFactory * HsHostedWidgetFactory::takeInstance(void)
+	?convertToAnchors@HsWidgetOrganizer@@AAEHH@Z @ 10 NONAME ; int HsWidgetOrganizer::convertToAnchors(int)
+	?widgetDropEffectDuration@HsConfiguration@@QBEHXZ @ 11 NONAME ; int HsConfiguration::widgetDropEffectDuration(void) const
+	?setMaximumPageCount@HsConfiguration@@QAEXH@Z @ 12 NONAME ; void HsConfiguration::setMaximumPageCount(int)
+	?qt_metacast@HsShortcutService@@UAEPAXPBD@Z @ 13 NONAME ; void * HsShortcutService::qt_metacast(char const *)
+	?propertyChanged@HsConfiguration@@IAEXABVQString@@@Z @ 14 NONAME ; void HsConfiguration::propertyChanged(class QString const &)
+	?showWidget@HsWidgetHost@@QAEXXZ @ 15 NONAME ; void HsWidgetHost::showWidget(void)
+	?setInstance@HsConfiguration@@SAXPAV1@@Z @ 16 NONAME ; void HsConfiguration::setInstance(class HsConfiguration *)
+	?isActivePage@HsPage@@QBE_NXZ @ 17 NONAME ; bool HsPage::isActivePage(void) const
+	?hidden@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 18 NONAME ; class QString HsWidgetComponentDescriptor::hidden(void) const
+	?cancel@HsWallpaperLoader@@QAEXXZ @ 19 NONAME ; void HsWallpaperLoader::cancel(void)
+	?metaObject@HsShortcutService@@UBEPBUQMetaObject@@XZ @ 20 NONAME ; struct QMetaObject const * HsShortcutService::metaObject(void) const
+	?instance@HsBackupRestoreObserver@@SAPAV1@XZ @ 21 NONAME ; class HsBackupRestoreObserver * HsBackupRestoreObserver::instance(void)
+	??1HsWidgetHostVisual@@UAE@XZ @ 22 NONAME ; HsWidgetHostVisual::~HsWidgetHostVisual(void)
+	?load@HsPage@@QAE_NXZ @ 23 NONAME ; bool HsPage::load(void)
+	?setSnapEnabled@HsConfiguration@@QAEX_N@Z @ 24 NONAME ; void HsConfiguration::setSnapEnabled(bool)
+	?clockWidgetTapFeedbackEffect@HsConfiguration@@QBE?AW4InstantEffect@HbFeedback@@XZ @ 25 NONAME ; enum HbFeedback::InstantEffect HsConfiguration::clockWidgetTapFeedbackEffect(void) const
+	?readyForBUR@HsBackupRestoreObserver@@QAEXXZ @ 26 NONAME ; void HsBackupRestoreObserver::readyForBUR(void)
+	?handleEntryUpdated@HsWidgetComponentRegistry@@AAEXABVCaEntry@@ABVQString@@@Z @ 27 NONAME ; void HsWidgetComponentRegistry::handleEntryUpdated(class CaEntry const &, class QString const &)
+	?instance@HsShortcutService@@SAPAV1@PAVQStateMachine@@@Z @ 28 NONAME ; class HsShortcutService * HsShortcutService::instance(class QStateMachine *)
+	?staticMetaObject@HsDatabase@@2UQMetaObject@@B @ 29 NONAME ; struct QMetaObject const HsDatabase::staticMetaObject
+	??1HsSceneWallpaper@@UAE@XZ @ 30 NONAME ; HsSceneWallpaper::~HsSceneWallpaper(void)
+	?setActivePageIndex@HsScene@@QAE_NH@Z @ 31 NONAME ; bool HsScene::setActivePageIndex(int)
+	??1HsContentService@@UAE@XZ @ 32 NONAME ; HsContentService::~HsContentService(void)
+	?widgetPreference@HsDatabase@@QAE_NHABVQString@@AAVQVariant@@@Z @ 33 NONAME ; bool HsDatabase::widgetPreference(int, class QString const &, class QVariant &)
+	?tr@HsBackupRestoreObserver@@SA?AVQString@@PBD0H@Z @ 34 NONAME ; class QString HsBackupRestoreObserver::tr(char const *, char const *, int)
+	?setOnline@HsScene@@QAEX_N@Z @ 35 NONAME ; void HsScene::setOnline(bool)
+	?updateIconItem@HsWallpaper@@AAEXW4Orientation@Qt@@@Z @ 36 NONAME ; void HsWallpaper::updateIconItem(enum Qt::Orientation)
+	?getStaticMetaObject@HsWidgetComponentRegistry@@SAABUQMetaObject@@XZ @ 37 NONAME ; struct QMetaObject const & HsWidgetComponentRegistry::getStaticMetaObject(void)
+	?trUtf8@HsPageWallpaper@@SA?AVQString@@PBD0@Z @ 38 NONAME ; class QString HsPageWallpaper::trUtf8(char const *, char const *)
+	??0HsWidgetComponentRegistry@@AAE@PAVQObject@@@Z @ 39 NONAME ; HsWidgetComponentRegistry::HsWidgetComponentRegistry(class QObject *)
+	?action_unload@HsWidgetHost@@AAEXXZ @ 40 NONAME ; void HsWidgetHost::action_unload(void)
+	?visualModel@HsWidgetHostVisual@@QBEPAVHsWidgetHost@@XZ @ 41 NONAME ; class HsWidgetHost * HsWidgetHostVisual::visualModel(void) const
+	?tr@HsBackupRestoreObserver@@SA?AVQString@@PBD0@Z @ 42 NONAME ; class QString HsBackupRestoreObserver::tr(char const *, char const *)
+	?setMinimumWidgetWidth@HsConfiguration@@QAEXM@Z @ 43 NONAME ; void HsConfiguration::setMinimumWidgetWidth(float)
+	?event_show@HsWidgetHost@@IAEXXZ @ 44 NONAME ; void HsWidgetHost::event_show(void)
+	?setBounceAnimationEasingCurve@HsConfiguration@@QAEXW4Type@QEasingCurve@@@Z @ 45 NONAME ; void HsConfiguration::setBounceAnimationEasingCurve(enum QEasingCurve::Type)
+	?wallpaperDirectory@HsSceneWallpaper@@MBE?AVQString@@XZ @ 46 NONAME ; class QString HsSceneWallpaper::wallpaperDirectory(void) const
+	?setWidgetMoveBlockedFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 47 NONAME ; void HsConfiguration::setWidgetMoveBlockedFeedbackEffect(enum HbFeedback::InstantEffect)
+	?imageSetFailed@HsWallpaper@@IAEXXZ @ 48 NONAME ; void HsWallpaper::imageSetFailed(void)
+	?trUtf8@HsWidgetHostVisual@@SA?AVQString@@PBD0@Z @ 49 NONAME ; class QString HsWidgetHostVisual::trUtf8(char const *, char const *)
+	?setSnapForce@HsConfiguration@@QAEXM@Z @ 50 NONAME ; void HsConfiguration::setSnapForce(float)
+	??0HsWidgetData@@QAE@XZ @ 51 NONAME ; HsWidgetData::HsWidgetData(void)
+	?event_backupRestoreCompleted@HsBackupRestoreObserver@@IAEXXZ @ 52 NONAME ; void HsBackupRestoreObserver::event_backupRestoreCompleted(void)
+	?staticMetaObject@HsWidgetHostVisual@@2UQMetaObject@@B @ 53 NONAME ; struct QMetaObject const HsWidgetHostVisual::staticMetaObject
+	?setActivePage@HsScene@@QAE_NPAVHsPage@@@Z @ 54 NONAME ; bool HsScene::setActivePage(class HsPage *)
+	?setSceneX@HsIdleWidget@@QAEXM@Z @ 55 NONAME ; void HsIdleWidget::setSceneX(float)
+	??_EHsWidgetOrganizer@@UAE@I@Z @ 56 NONAME ; HsWidgetOrganizer::~HsWidgetOrganizer(unsigned int)
+	?qt_metacast@HsContentService@@UAEPAXPBD@Z @ 57 NONAME ; void * HsContentService::qt_metacast(char const *)
+	?qt_metacall@HsContentService@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 58 NONAME ; int HsContentService::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?qt_metacall@HsSceneWallpaper@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 59 NONAME ; int HsSceneWallpaper::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?widgets@HsContentService@@QAE_NABVQString@@ABV?$QHash@VQString@@VQVariant@@@@AAH@Z @ 60 NONAME ; bool HsContentService::widgets(class QString const &, class QHash<class QString, class QVariant> const &, int &)
+	?createWidget@HsHostedWidgetFactory@@QAEPAVQObject@@ABVQString@@@Z @ 61 NONAME ; class QObject * HsHostedWidgetFactory::createWidget(class QString const &)
+	?metaObject@HsDatabase@@UBEPBUQMetaObject@@XZ @ 62 NONAME ; struct QMetaObject const * HsDatabase::metaObject(void) const
+	?contentGeometry@HsPage@@QAE?AVQRectF@@W4Orientation@Qt@@@Z @ 63 NONAME ; class QRectF HsPage::contentGeometry(enum Qt::Orientation)
+	?exportToFile@HsConfiguration@@QAE_NABVQString@@@Z @ 64 NONAME ; bool HsConfiguration::exportToFile(class QString const &)
+	?widgetStartFaulted@HsContentService@@AAEXXZ @ 65 NONAME ; void HsContentService::widgetStartFaulted(void)
+	??_EHsWidgetHostVisual@@UAE@I@Z @ 66 NONAME ; HsWidgetHostVisual::~HsWidgetHostVisual(unsigned int)
+	?setPageChangePanDistance@HsConfiguration@@QAEXM@Z @ 67 NONAME ; void HsConfiguration::setPageChangePanDistance(float)
+	?qt_metacast@HsSceneWallpaper@@UAEPAXPBD@Z @ 68 NONAME ; void * HsSceneWallpaper::qt_metacast(char const *)
+	?metaObject@HsWallpaperLoader@@UBEPBUQMetaObject@@XZ @ 69 NONAME ; struct QMetaObject const * HsWallpaperLoader::metaObject(void) const
+	?action_finished@HsWidgetHost@@AAEXXZ @ 70 NONAME ; void HsWidgetHost::action_finished(void)
+	?widget@HsWidgetHostVisual@@QAEPAVQObject@@XZ @ 71 NONAME ; class QObject * HsWidgetHostVisual::widget(void)
+	?visual@HsWidgetHost@@QBEPAVHsWidgetHostVisual@@XZ @ 72 NONAME ; class HsWidgetHostVisual * HsWidgetHost::visual(void) const
+	?pageChangeFeedbackEffect@HsConfiguration@@QBE?AW4InstantEffect@HbFeedback@@XZ @ 73 NONAME ; enum HbFeedback::InstantEffect HsConfiguration::pageChangeFeedbackEffect(void) const
+	??0HsWallpaperLoader@@QAE@PAVQObject@@@Z @ 74 NONAME ; HsWallpaperLoader::HsWallpaperLoader(class QObject *)
+	?trUtf8@HsShortcutService@@SA?AVQString@@PBD0H@Z @ 75 NONAME ; class QString HsShortcutService::trUtf8(char const *, char const *, int)
+	?maximumWidgetWidth@HsConfiguration@@QBEMXZ @ 76 NONAME ; float HsConfiguration::maximumWidgetWidth(void) const
+	?metaObject@HsContentService@@UBEPBUQMetaObject@@XZ @ 77 NONAME ; struct QMetaObject const * HsContentService::metaObject(void) const
+	?setScene@HsSceneWallpaper@@QAEXPAVHsScene@@@Z @ 78 NONAME ; void HsSceneWallpaper::setScene(class HsScene *)
+	?onPageMarginChanged@HsPage@@AAEXABVQString@@@Z @ 79 NONAME ; void HsPage::onPageMarginChanged(class QString const &)
+	?finished@HsWidgetHost@@IAEXXZ @ 80 NONAME ; void HsWidgetHost::finished(void)
+	?pagePanStarted@HsScene@@IAEXPAVQGestureEvent@@@Z @ 81 NONAME ; void HsScene::pagePanStarted(class QGestureEvent *)
+	?checkExistingRects@HsWidgetOrganizer@@AAE_NABV?$QList@VQRectF@@@@@Z @ 82 NONAME ; bool HsWidgetOrganizer::checkExistingRects(class QList<class QRectF> const &)
+	?addPage@HsScene@@QAE_NPAVHsPage@@@Z @ 83 NONAME ; bool HsScene::addPage(class HsPage *)
+	?controlLayer@HsIdleWidget@@QBEPAVHbWidget@@XZ @ 84 NONAME ; class HbWidget * HsIdleWidget::controlLayer(void) const
+	?qt_metacall@HsWidgetHost@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 85 NONAME ; int HsWidgetHost::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?configuration@HsDatabase@@QAE_NAAV?$QHash@VQString@@VQVariant@@@@@Z @ 86 NONAME ; bool HsDatabase::configuration(class QHash<class QString, class QVariant> &)
+	?tr@HsContentService@@SA?AVQString@@PBD0@Z @ 87 NONAME ; class QString HsContentService::tr(char const *, char const *)
+	?searchPositionRowByRow@HsWidgetOrganizer@@AAE?AVQPointF@@V2@HH@Z @ 88 NONAME ; class QPointF HsWidgetOrganizer::searchPositionRowByRow(class QPointF, int, int)
+	?mInstance@HsHostedWidgetFactory@@0PAV1@A @ 89 NONAME ; class HsHostedWidgetFactory * HsHostedWidgetFactory::mInstance
+	?convert@HsWidgetOrganizer@@UAE?AVResult@HsWidgetPositioningOnWidgetAdd@@ABVQRectF@@ABV?$QList@VQRectF@@@@1ABVQPointF@@@Z @ 90 NONAME ; class HsWidgetPositioningOnWidgetAdd::Result HsWidgetOrganizer::convert(class QRectF const &, class QList<class QRectF> const &, class QList<class QRectF> const &, class QPointF const &)
 	??1HsAnchorPointInCenter@@UAE@XZ @ 91 NONAME ; HsAnchorPointInCenter::~HsAnchorPointInCenter(void)
 	?setInstance@HsHostedWidgetFactory@@SAPAV1@PAV1@@Z @ 92 NONAME ; class HsHostedWidgetFactory * HsHostedWidgetFactory::setInstance(class HsHostedWidgetFactory *)
 	?staticMetaObject@HsScene@@2UQMetaObject@@B @ 93 NONAME ; struct QMetaObject const HsScene::staticMetaObject
@@ -382,309 +382,307 @@ EXPORTS
 	??1HsScene@@UAE@XZ @ 381 NONAME ; HsScene::~HsScene(void)
 	?pageWallpaperLayer@HsIdleWidget@@QBEPAVHbWidget@@XZ @ 382 NONAME ; class HbWidget * HsIdleWidget::pageWallpaperLayer(void) const
 	?deleteWidgetPresentation@HsDatabase@@QAE_NHW4Orientation@Qt@@@Z @ 383 NONAME ; bool HsDatabase::deleteWidgetPresentation(int, enum Qt::Orientation)
-	?setWidgetOrganizerAnchorDistance@HsConfiguration@@QAEXH@Z @ 384 NONAME ; void HsConfiguration::setWidgetOrganizerAnchorDistance(int)
-	?getStaticMetaObject@HsWidgetComponent@@SAABUQMetaObject@@XZ @ 385 NONAME ; struct QMetaObject const & HsWidgetComponent::getStaticMetaObject(void)
-	?addExistingWidget@HsPage@@QAE_NPAVHsWidgetHost@@@Z @ 386 NONAME ; bool HsPage::addExistingWidget(class HsWidgetHost *)
-	?qt_metacast@HsWidgetComponentRegistry@@UAEPAXPBD@Z @ 387 NONAME ; void * HsWidgetComponentRegistry::qt_metacast(char const *)
-	?close@HsWidgetHost@@QAEXXZ @ 388 NONAME ; void HsWidgetHost::close(void)
-	?action_remove@HsWidgetHost@@AAEXXZ @ 389 NONAME ; void HsWidgetHost::action_remove(void)
-	?trUtf8@HsWallpaper@@SA?AVQString@@PBD0H@Z @ 390 NONAME ; class QString HsWallpaper::trUtf8(char const *, char const *, int)
-	?activePage@HsScene@@QBEPAVHsPage@@XZ @ 391 NONAME ; class HsPage * HsScene::activePage(void) const
-	?bounceEffect@HsConfiguration@@QBEHXZ @ 392 NONAME ; int HsConfiguration::bounceEffect(void) const
-	?setupIdleUi@HsGui@@QAEXXZ @ 393 NONAME ; void HsGui::setupIdleUi(void)
-	?pages@HsDatabase@@QAE_NAAV?$QList@VHsPageData@@@@@Z @ 394 NONAME ; bool HsDatabase::pages(class QList<class HsPageData> &)
-	?savePresentation@HsWidgetHost@@QAE_NXZ @ 395 NONAME ; bool HsWidgetHost::savePresentation(void)
-	?pageChangeAnimation@HsGui@@QAEPAVHsPropertyAnimationWrapper@@XZ @ 396 NONAME ; class HsPropertyAnimationWrapper * HsGui::pageChangeAnimation(void)
-	?takeInstance@HsScene@@SAPAV1@XZ @ 397 NONAME ; class HsScene * HsScene::takeInstance(void)
-	?rootPath@HsWidgetComponent@@QBE?AVQString@@XZ @ 398 NONAME ; class QString HsWidgetComponent::rootPath(void) const
-	?startDragEffect@HsWidgetHost@@QAEXXZ @ 399 NONAME ; void HsWidgetHost::startDragEffect(void)
-	?event_startAndHide@HsWidgetHost@@IAEXXZ @ 400 NONAME ; void HsWidgetHost::event_startAndHide(void)
-	?qt_metacast@HsWallpaperLoader@@UAEPAXPBD@Z @ 401 NONAME ; void * HsWallpaperLoader::qt_metacast(char const *)
-	??1HsDatabase@@UAE@XZ @ 402 NONAME ; HsDatabase::~HsDatabase(void)
-	??0HsWidgetOrganizer@@QAE@HW4WidgetOrganizerSearchSequence@HsConfiguration@@@Z @ 403 NONAME ; HsWidgetOrganizer::HsWidgetOrganizer(int, enum HsConfiguration::WidgetOrganizerSearchSequence)
-	?getPosition@HsWidgetOrganizer@@AAE?AVQPointF@@ABVQSizeF@@@Z @ 404 NONAME ; class QPointF HsWidgetOrganizer::getPosition(class QSizeF const &)
-	??1HsWidgetComponent@@UAE@XZ @ 405 NONAME ; HsWidgetComponent::~HsWidgetComponent(void)
-	?metaObject@HsSceneWallpaper@@UBEPBUQMetaObject@@XZ @ 406 NONAME ; struct QMetaObject const * HsSceneWallpaper::metaObject(void) const
-	?createInstance@HsWidgetHost@@SAPAV1@AAVHsWidgetData@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 407 NONAME ; class HsWidgetHost * HsWidgetHost::createInstance(class HsWidgetData &, class QHash<class QString, class QVariant> const &)
-	?setupEffects@HsWidgetHostVisual@@AAEXXZ @ 408 NONAME ; void HsWidgetHostVisual::setupEffects(void)
-	?trUtf8@HsGui@@SA?AVQString@@PBD0@Z @ 409 NONAME ; class QString HsGui::trUtf8(char const *, char const *)
-	?setPage@HsPageWallpaper@@QAEXPAVHsPage@@@Z @ 410 NONAME ; void HsPageWallpaper::setPage(class HsPage *)
-	?shape@HsWidgetHostVisual@@UBE?AVQPainterPath@@XZ @ 411 NONAME ; class QPainterPath HsWidgetHostVisual::shape(void) const
-	?deletePage@HsDatabase@@QAE_NH@Z @ 412 NONAME ; bool HsDatabase::deletePage(int)
-	?savePresentation@HsWidgetHost@@QAE_NAAVHsWidgetPresentationData@@@Z @ 413 NONAME ; bool HsWidgetHost::savePresentation(class HsWidgetPresentationData &)
-	?tr@HsWallpaperLoaderThread@@SA?AVQString@@PBD0H@Z @ 414 NONAME ; class QString HsWallpaperLoaderThread::tr(char const *, char const *, int)
-	?resized@HsWidgetHostVisual@@IAEXXZ @ 415 NONAME ; void HsWidgetHostVisual::resized(void)
-	?page@HsWidgetHost@@QBEPAVHsPage@@XZ @ 416 NONAME ; class HsPage * HsWidgetHost::page(void) const
-	?qt_metacast@HsWallpaper@@UAEPAXPBD@Z @ 417 NONAME ; void * HsWallpaper::qt_metacast(char const *)
-	?staticMetaObject@HsWidgetComponent@@2UQMetaObject@@B @ 418 NONAME ; struct QMetaObject const HsWidgetComponent::staticMetaObject
-	?setRemovable@HsPage@@QAEX_N@Z @ 419 NONAME ; void HsPage::setRemovable(bool)
-	?staticMetaObject@HsIdleWidget@@2UQMetaObject@@B @ 420 NONAME ; struct QMetaObject const HsIdleWidget::staticMetaObject
-	?showVerticalSnapLine@HsIdleWidget@@QAEXABVQLineF@@@Z @ 421 NONAME ; void HsIdleWidget::showVerticalSnapLine(class QLineF const &)
-	?widgetRemoved@HsContentService@@IAEXABVQString@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 422 NONAME ; void HsContentService::widgetRemoved(class QString const &, class QHash<class QString, class QVariant> const &)
-	?widgetMoveUpdated@HsScene@@IAEXABVQPointF@@PAVHsWidgetHost@@@Z @ 423 NONAME ; void HsScene::widgetMoveUpdated(class QPointF const &, class HsWidgetHost *)
-	?qt_metacall@HsWallpaperLoaderThread@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 424 NONAME ; int HsWallpaperLoaderThread::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?loadPresentation@HsWidgetHost@@QAE_NXZ @ 425 NONAME ; bool HsWidgetHost::loadPresentation(void)
-	?setupStates@HsWidgetHost@@AAEXXZ @ 426 NONAME ; void HsWidgetHost::setupStates(void)
-	?getStaticMetaObject@HsContentService@@SAABUQMetaObject@@XZ @ 427 NONAME ; struct QMetaObject const & HsContentService::getStaticMetaObject(void)
-	?wallpaper@HsScene@@QBEPAVHsWallpaper@@XZ @ 428 NONAME ; class HsWallpaper * HsScene::wallpaper(void) const
-	?isItemShortcutWidget@HsShortcutService@@QAE_NH@Z @ 429 NONAME ; bool HsShortcutService::isItemShortcutWidget(int)
-	?setGeometry@HsPageVisual@@UAEXABVQRectF@@@Z @ 430 NONAME ; void HsPageVisual::setGeometry(class QRectF const &)
-	?tr@HsIdleWidget@@SA?AVQString@@PBD0H@Z @ 431 NONAME ; class QString HsIdleWidget::tr(char const *, char const *, int)
-	?setDatabaseName@HsDatabase@@QAEXABVQString@@@Z @ 432 NONAME ; void HsDatabase::setDatabaseName(class QString const &)
-	?updateWidget@HsDatabase@@QAE_NABVHsWidgetData@@@Z @ 433 NONAME ; bool HsDatabase::updateWidget(class HsWidgetData const &)
-	?trUtf8@HsBackupRestoreObserver@@SA?AVQString@@PBD0H@Z @ 434 NONAME ; class QString HsBackupRestoreObserver::trUtf8(char const *, char const *, int)
-	?loadPresentation@HsWidgetHost@@QAE_NW4Orientation@Qt@@@Z @ 435 NONAME ; bool HsWidgetHost::loadPresentation(enum Qt::Orientation)
-	?createWidgetForPreview@HsContentService@@QAEPAVHsWidgetHost@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 436 NONAME ; class HsWidgetHost * HsContentService::createWidgetForPreview(class QHash<class QString, class QVariant> const &)
-	?available@HsWidgetHost@@IAEXXZ @ 437 NONAME ; void HsWidgetHost::available(void)
-	?setPageChangeZoneWidth@HsConfiguration@@QAEXM@Z @ 438 NONAME ; void HsConfiguration::setPageChangeZoneWidth(float)
-	?emitAboutToUninstall@HsWidgetComponent@@AAEXXZ @ 439 NONAME ; void HsWidgetComponent::emitAboutToUninstall(void)
-	?iconUri@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 440 NONAME ; class QString HsWidgetComponentDescriptor::iconUri(void) const
-	?event_faulted@HsWidgetHost@@IAEXXZ @ 441 NONAME ; void HsWidgetHost::event_faulted(void)
-	?emitUnavailable@HsWidgetComponent@@AAEXXZ @ 442 NONAME ; void HsWidgetComponent::emitUnavailable(void)
-	?snapTimeout@HsConfiguration@@QBEHXZ @ 443 NONAME ; int HsConfiguration::snapTimeout(void) const
-	??1HsWidgetData@@QAE@XZ @ 444 NONAME ; HsWidgetData::~HsWidgetData(void)
-	?faulted@HsWidgetHost@@IAEXXZ @ 445 NONAME ; void HsWidgetHost::faulted(void)
-	??0HsIdleWidget@@QAE@PAVQGraphicsItem@@@Z @ 446 NONAME ; HsIdleWidget::HsIdleWidget(class QGraphicsItem *)
-	?event_unload@HsWidgetHost@@IAEXXZ @ 447 NONAME ; void HsWidgetHost::event_unload(void)
-	?handleEntryRemoved@HsWidgetComponentRegistry@@AAEXABVCaEntry@@ABVQString@@@Z @ 448 NONAME ; void HsWidgetComponentRegistry::handleEntryRemoved(class CaEntry const &, class QString const &)
-	?metaObject@HsWidgetComponentRegistry@@UBEPBUQMetaObject@@XZ @ 449 NONAME ; struct QMetaObject const * HsWidgetComponentRegistry::metaObject(void) const
-	?updated@HsWidgetComponent@@IAEXXZ @ 450 NONAME ; void HsWidgetComponent::updated(void)
-	?takeInstance@HsConfiguration@@SAPAV1@XZ @ 451 NONAME ; class HsConfiguration * HsConfiguration::takeInstance(void)
-	?pageIndex@HsPage@@QAEHXZ @ 452 NONAME ; int HsPage::pageIndex(void)
-	?setTargets@HsWallpaperLoader@@QAEXABV?$QHash@VQString@@VQVariant@@@@@Z @ 453 NONAME ; void HsWallpaperLoader::setTargets(class QHash<class QString, class QVariant> const &)
-	??1HsIdleWidget@@UAE@XZ @ 454 NONAME ; HsIdleWidget::~HsIdleWidget(void)
-	??_EHsHostedWidgetFactory@@UAE@I@Z @ 455 NONAME ; HsHostedWidgetFactory::~HsHostedWidgetFactory(unsigned int)
-	?staticMetaObject@HsGui@@2UQMetaObject@@B @ 456 NONAME ; struct QMetaObject const HsGui::staticMetaObject
-	??0HsWallpaperLoaderThread@@QAE@PAVQObject@@@Z @ 457 NONAME ; HsWallpaperLoaderThread::HsWallpaperLoaderThread(class QObject *)
-	?start@HsWallpaperLoader@@QAEXXZ @ 458 NONAME ; void HsWallpaperLoader::start(void)
-	?component@HsWidgetComponentRegistry@@QAEPAVHsWidgetComponent@@ABVQString@@@Z @ 459 NONAME ; class HsWidgetComponent * HsWidgetComponentRegistry::component(class QString const &)
-	??_EHsWidgetComponent@@UAE@I@Z @ 460 NONAME ; HsWidgetComponent::~HsWidgetComponent(unsigned int)
-	?mInstance@HsScene@@0PAV1@A @ 461 NONAME ; class HsScene * HsScene::mInstance
-	?getStaticMetaObject@HsGui@@SAABUQMetaObject@@XZ @ 462 NONAME ; struct QMetaObject const & HsGui::getStaticMetaObject(void)
-	?trUtf8@HsSceneWallpaper@@SA?AVQString@@PBD0@Z @ 463 NONAME ; class QString HsSceneWallpaper::trUtf8(char const *, char const *)
-	??_EHsWidgetHost@@UAE@I@Z @ 464 NONAME ; HsWidgetHost::~HsWidgetHost(unsigned int)
-	?minimumWidgetHeight@HsConfiguration@@QBEMXZ @ 465 NONAME ; float HsConfiguration::minimumWidgetHeight(void) const
-	?setVisualModel@HsWidgetHostVisual@@QAEXPAVHsWidgetHost@@@Z @ 466 NONAME ; void HsWidgetHostVisual::setVisualModel(class HsWidgetHost *)
-	?staticMetaObject@HsShortcutService@@2UQMetaObject@@B @ 467 NONAME ; struct QMetaObject const HsShortcutService::staticMetaObject
-	??0HsPageWallpaper@@QAE@PAVHsPage@@PAVQGraphicsItem@@@Z @ 468 NONAME ; HsPageWallpaper::HsPageWallpaper(class HsPage *, class QGraphicsItem *)
-	?onSetPreferences@HsWidgetHost@@AAEXABVQStringList@@@Z @ 469 NONAME ; void HsWidgetHost::onSetPreferences(class QStringList const &)
-	??1HsWidgetComponentDescriptor@@QAE@XZ @ 470 NONAME ; HsWidgetComponentDescriptor::~HsWidgetComponentDescriptor(void)
-	?showPageIndicator@HsIdleWidget@@QAEXXZ @ 471 NONAME ; void HsIdleWidget::showPageIndicator(void)
-	??1HsBackupRestoreObserver@@UAE@XZ @ 472 NONAME ; HsBackupRestoreObserver::~HsBackupRestoreObserver(void)
-	?insertPage@HsDatabase@@QAE_NAAVHsPageData@@@Z @ 473 NONAME ; bool HsDatabase::insertPage(class HsPageData &)
-	??_EHsWidgetComponentRegistry@@UAE@I@Z @ 474 NONAME ; HsWidgetComponentRegistry::~HsWidgetComponentRegistry(unsigned int)
-	?metaObject@HsIdleWidget@@UBEPBUQMetaObject@@XZ @ 475 NONAME ; struct QMetaObject const * HsIdleWidget::metaObject(void) const
-	?qt_metacast@HsHostedWidgetFactory@@UAEPAXPBD@Z @ 476 NONAME ; void * HsHostedWidgetFactory::qt_metacast(char const *)
-	?setUri@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 477 NONAME ; void HsWidgetComponentDescriptor::setUri(class QString const &)
-	??1HsWallpaperLoaderThread@@UAE@XZ @ 478 NONAME ; HsWallpaperLoaderThread::~HsWallpaperLoaderThread(void)
-	?staticMetaObject@HsWidgetComponentRegistry@@2UQMetaObject@@B @ 479 NONAME ; struct QMetaObject const HsWidgetComponentRegistry::staticMetaObject
-	??1HsWallpaper@@UAE@XZ @ 480 NONAME ; HsWallpaper::~HsWallpaper(void)
-	?qt_metacall@HsPage@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 481 NONAME ; int HsPage::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?onWidgetAvailable@HsPage@@AAEXXZ @ 482 NONAME ; void HsPage::onWidgetAvailable(void)
-	?convert@HsWidgetOrganizer@@UAE?AV?$QList@VQRectF@@@@ABVQRectF@@ABV2@1ABVQPointF@@@Z @ 483 NONAME ; class QList<class QRectF> HsWidgetOrganizer::convert(class QRectF const &, class QList<class QRectF> const &, class QList<class QRectF> const &, class QPointF const &)
-	?qt_metacast@HsPage@@UAEPAXPBD@Z @ 484 NONAME ; void * HsPage::qt_metacast(char const *)
-	?result@HsWallpaperLoaderThread@@QBE_NXZ @ 485 NONAME ; bool HsWallpaperLoaderThread::result(void) const
-	?setPageIndicatorSpacing@HsConfiguration@@QAEXM@Z @ 486 NONAME ; void HsConfiguration::setPageIndicatorSpacing(float)
-	?setSnapLineFadeInDuration@HsConfiguration@@QAEXH@Z @ 487 NONAME ; void HsConfiguration::setSnapLineFadeInDuration(int)
-	??1HsGui@@UAE@XZ @ 488 NONAME ; HsGui::~HsGui(void)
-	?isValid@HsWidgetComponentDescriptor@@QAE_NXZ @ 489 NONAME ; bool HsWidgetComponentDescriptor::isValid(void)
-	?uri@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 490 NONAME ; class QString HsWidgetComponentDescriptor::uri(void) const
-	?setOrientation@HsGui@@QAEXW4Orientation@Qt@@@Z @ 491 NONAME ; void HsGui::setOrientation(enum Qt::Orientation)
-	?tr@HsWidgetComponentRegistry@@SA?AVQString@@PBD0@Z @ 492 NONAME ; class QString HsWidgetComponentRegistry::tr(char const *, char const *)
-	?getStaticMetaObject@HsPage@@SAABUQMetaObject@@XZ @ 493 NONAME ; struct QMetaObject const & HsPage::getStaticMetaObject(void)
-	?onWidgetFaulted@HsPage@@AAEXXZ @ 494 NONAME ; void HsPage::onWidgetFaulted(void)
-	?page@HsPageWallpaper@@QBEPAVHsPage@@XZ @ 495 NONAME ; class HsPage * HsPageWallpaper::page(void) const
-	?qt_metacast@HsBackupRestoreObserver@@UAEPAXPBD@Z @ 496 NONAME ; void * HsBackupRestoreObserver::qt_metacast(char const *)
-	?setTargetPath@HsWallpaperLoaderThread@@QAEXABVQString@@@Z @ 497 NONAME ; void HsWallpaperLoaderThread::setTargetPath(class QString const &)
-	??1HsWidgetPositioningOnWidgetAdd@@UAE@XZ @ 498 NONAME ; HsWidgetPositioningOnWidgetAdd::~HsWidgetPositioningOnWidgetAdd(void)
-	?setSnapTimeout@HsConfiguration@@QAEXH@Z @ 499 NONAME ; void HsConfiguration::setSnapTimeout(int)
-	?createTargets@HsSceneWallpaper@@MAE?AV?$QHash@VQString@@VQVariant@@@@ABVQString@@@Z @ 500 NONAME ; class QHash<class QString, class QVariant> HsSceneWallpaper::createTargets(class QString const &)
-	?onWidgetResized@HsPage@@AAEXXZ @ 501 NONAME ; void HsPage::onWidgetResized(void)
-	?showWidgets@HsPage@@QAEXXZ @ 502 NONAME ; void HsPage::showWidgets(void)
-	?checkBUR@HsBackupRestoreObserver@@QAE_NXZ @ 503 NONAME ; bool HsBackupRestoreObserver::checkBUR(void)
-	?startWidget@HsWidgetHost@@QAEX_N@Z @ 504 NONAME ; void HsWidgetHost::startWidget(bool)
-	??_EHsShortcutService@@UAE@I@Z @ 505 NONAME ; HsShortcutService::~HsShortcutService(unsigned int)
-	?bounceFeedbackEffectDistance@HsConfiguration@@QBEMXZ @ 506 NONAME ; float HsConfiguration::bounceFeedbackEffectDistance(void) const
-	?unavailable@HsWidgetHost@@IAEXXZ @ 507 NONAME ; void HsWidgetHost::unavailable(void)
-	?qt_metacall@HsDatabase@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 508 NONAME ; int HsDatabase::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?searchPositionColumnByColumn@HsWidgetOrganizer@@AAE?AVQPointF@@V2@HH@Z @ 509 NONAME ; class QPointF HsWidgetOrganizer::searchPositionColumnByColumn(class QPointF, int, int)
-	?contentRect@HsPage@@QAE?AVQRectF@@W4Orientation@Qt@@@Z @ 510 NONAME ; class QRectF HsPage::contentRect(enum Qt::Orientation)
-	?contentGeometry@HsPage@@QAE?AVQRectF@@XZ @ 511 NONAME ; class QRectF HsPage::contentGeometry(void)
-	?setHidden@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 512 NONAME ; void HsWidgetComponentDescriptor::setHidden(class QString const &)
-	?widgets@HsDatabase@@QAE_NHAAV?$QList@VHsWidgetData@@@@@Z @ 513 NONAME ; bool HsDatabase::widgets(int, class QList<class HsWidgetData> &)
-	??_EHsPageWallpaper@@UAE@I@Z @ 514 NONAME ; HsPageWallpaper::~HsPageWallpaper(unsigned int)
-	?databaseId@HsPage@@QBEHXZ @ 515 NONAME ; int HsPage::databaseId(void) const
-	?tr@HsWallpaperLoader@@SA?AVQString@@PBD0@Z @ 516 NONAME ; class QString HsWallpaperLoader::tr(char const *, char const *)
-	?show@HsGui@@QAEXXZ @ 517 NONAME ; void HsGui::show(void)
-	??0HsGui@@AAE@PAVQObject@@@Z @ 518 NONAME ; HsGui::HsGui(class QObject *)
-	?qt_metacall@HsBackupRestoreObserver@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 519 NONAME ; int HsBackupRestoreObserver::qt_metacall(enum QMetaObject::Call, int, void * *)
-	??_EHsWallpaperLoaderThread@@UAE@I@Z @ 520 NONAME ; HsWallpaperLoaderThread::~HsWallpaperLoaderThread(unsigned int)
-	?resolveRootPathAndTranslationFilename@HsWidgetComponent@@AAEXXZ @ 521 NONAME ; void HsWidgetComponent::resolveRootPathAndTranslationFilename(void)
-	?isSnapEnabled@HsConfiguration@@QBE_NXZ @ 522 NONAME ; bool HsConfiguration::isSnapEnabled(void) const
-	?maximumWidgetHeight@HsConfiguration@@QBEMXZ @ 523 NONAME ; float HsConfiguration::maximumWidgetHeight(void) const
-	?backupRestoreCompleted@HsBackupRestoreObserver@@QAEXXZ @ 524 NONAME ; void HsBackupRestoreObserver::backupRestoreCompleted(void)
-	?setPageRemovedAnimationDuration@HsConfiguration@@QAEXH@Z @ 525 NONAME ; void HsConfiguration::setPageRemovedAnimationDuration(int)
-	?insertWidget@HsDatabase@@QAE_NAAVHsWidgetData@@@Z @ 526 NONAME ; bool HsDatabase::insertWidget(class HsWidgetData &)
-	??1HsShortcutService@@UAE@XZ @ 527 NONAME ; HsShortcutService::~HsShortcutService(void)
-	?setupTouchArea@HsWidgetHostVisual@@AAEXXZ @ 528 NONAME ; void HsWidgetHostVisual::setupTouchArea(void)
-	?setBounceFeedbackEffectDistance@HsConfiguration@@QAEXM@Z @ 529 NONAME ; void HsConfiguration::setBounceFeedbackEffectDistance(float)
-	?onEntryChanged@HsWidgetComponentRegistry@@AAEXABVCaEntry@@W4ChangeType@@@Z @ 530 NONAME ; void HsWidgetComponentRegistry::onEntryChanged(class CaEntry const &, enum ChangeType)
-	?getPresentation@HsWidgetHost@@QAE_NAAVHsWidgetPresentationData@@@Z @ 531 NONAME ; bool HsWidgetHost::getPresentation(class HsWidgetPresentationData &)
-	?getStaticMetaObject@HsSceneWallpaper@@SAABUQMetaObject@@XZ @ 532 NONAME ; struct QMetaObject const & HsSceneWallpaper::getStaticMetaObject(void)
-	?tr@HsScene@@SA?AVQString@@PBD0H@Z @ 533 NONAME ; class QString HsScene::tr(char const *, char const *, int)
-	?uri@HsWidgetComponent@@QBE?AVQString@@XZ @ 534 NONAME ; class QString HsWidgetComponent::uri(void) const
-	?instance@HsContentService@@SAPAV1@XZ @ 535 NONAME ; class HsContentService * HsContentService::instance(void)
-	?snapGap@HsConfiguration@@QBEMXZ @ 536 NONAME ; float HsConfiguration::snapGap(void) const
-	?widgetOrganizerAnchorDistance@HsConfiguration@@QBEHXZ @ 537 NONAME ; int HsConfiguration::widgetOrganizerAnchorDistance(void) const
-	?savePresentation@HsWidgetHost@@QAE_NW4Orientation@Qt@@@Z @ 538 NONAME ; bool HsWidgetHost::savePresentation(enum Qt::Orientation)
-	?setWidgetDropToTrashbinFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 539 NONAME ; void HsConfiguration::setWidgetDropToTrashbinFeedbackEffect(enum HbFeedback::InstantEffect)
-	?tr@HsIdleWidget@@SA?AVQString@@PBD0@Z @ 540 NONAME ; class QString HsIdleWidget::tr(char const *, char const *)
-	?title@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 541 NONAME ; class QString HsWidgetComponentDescriptor::title(void) const
-	?convert@HsAnchorPointInCenter@@UAE?AV?$QList@VQRectF@@@@ABVQRectF@@ABV2@1ABVQPointF@@@Z @ 542 NONAME ; class QList<class QRectF> HsAnchorPointInCenter::convert(class QRectF const &, class QList<class QRectF> const &, class QList<class QRectF> const &, class QPointF const &)
-	?event_hide@HsWidgetHost@@IAEXXZ @ 543 NONAME ; void HsWidgetHost::event_hide(void)
-	?databaseId@HsScene@@QBEHXZ @ 544 NONAME ; int HsScene::databaseId(void) const
-	?setWidgetDropFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 545 NONAME ; void HsConfiguration::setWidgetDropFeedbackEffect(enum HbFeedback::InstantEffect)
-	??1HsWidgetComponentRegistry@@UAE@XZ @ 546 NONAME ; HsWidgetComponentRegistry::~HsWidgetComponentRegistry(void)
-	?setDescription@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 547 NONAME ; void HsWidgetComponentDescriptor::setDescription(class QString const &)
-	?getStaticMetaObject@HsConfiguration@@SAABUQMetaObject@@XZ @ 548 NONAME ; struct QMetaObject const & HsConfiguration::getStaticMetaObject(void)
-	?staticMetaObject@HsSceneWallpaper@@2UQMetaObject@@B @ 549 NONAME ; struct QMetaObject const HsSceneWallpaper::staticMetaObject
-	?isRunning@HsWallpaperLoader@@QBE_NXZ @ 550 NONAME ; bool HsWallpaperLoader::isRunning(void) const
-	?activePageChanged@HsScene@@IAEXXZ @ 551 NONAME ; void HsScene::activePageChanged(void)
-	?uninstalled@HsWidgetComponent@@IAEXXZ @ 552 NONAME ; void HsWidgetComponent::uninstalled(void)
-	??1HsHostedWidgetFactory@@UAE@XZ @ 553 NONAME ; HsHostedWidgetFactory::~HsHostedWidgetFactory(void)
-	?trUtf8@HsShortcutService@@SA?AVQString@@PBD0@Z @ 554 NONAME ; class QString HsShortcutService::trUtf8(char const *, char const *)
-	?setPage@HsWidgetHost@@QAE_NPAVHsPage@@@Z @ 555 NONAME ; bool HsWidgetHost::setPage(class HsPage *)
-	??_EHsScene@@UAE@I@Z @ 556 NONAME ; HsScene::~HsScene(unsigned int)
-	?metaObject@HsScene@@UBEPBUQMetaObject@@XZ @ 557 NONAME ; struct QMetaObject const * HsScene::metaObject(void) const
-	?pageTapAndHoldFinished@HsScene@@IAEXPAVQGestureEvent@@@Z @ 558 NONAME ; void HsScene::pageTapAndHoldFinished(class QGestureEvent *)
-	?remove@HsWidgetHost@@QAEXXZ @ 559 NONAME ; void HsWidgetHost::remove(void)
-	?run@HsWallpaperLoaderThread@@MAEXXZ @ 560 NONAME ; void HsWallpaperLoaderThread::run(void)
-	?maximumWidgetSizeInUnits@HsConfiguration@@QBE?AVQSizeF@@XZ @ 561 NONAME ; class QSizeF HsConfiguration::maximumWidgetSizeInUnits(void) const
-	?getStaticMetaObject@HsScene@@SAABUQMetaObject@@XZ @ 562 NONAME ; struct QMetaObject const & HsScene::getStaticMetaObject(void)
-	?finished@HsWallpaperLoader@@IAEXXZ @ 563 NONAME ; void HsWallpaperLoader::finished(void)
-	?visual@HsPage@@QBEPAVHsPageVisual@@XZ @ 564 NONAME ; class HsPageVisual * HsPage::visual(void) const
-	?snapLineFadeOutDuration@HsConfiguration@@QBEHXZ @ 565 NONAME ; int HsConfiguration::snapLineFadeOutDuration(void) const
-	?trUtf8@HsPageWallpaper@@SA?AVQString@@PBD0H@Z @ 566 NONAME ; class QString HsPageWallpaper::trUtf8(char const *, char const *, int)
-	?setNewSize@HsWidgetHostVisual@@AAEXABVQSizeF@@@Z @ 567 NONAME ; void HsWidgetHostVisual::setNewSize(class QSizeF const &)
-	?imageSet@HsWallpaper@@IAEXXZ @ 568 NONAME ; void HsWallpaper::imageSet(void)
-	?tr@HsWidgetHostVisual@@SA?AVQString@@PBD0H@Z @ 569 NONAME ; class QString HsWidgetHostVisual::tr(char const *, char const *, int)
-	?sceneType@HsConfiguration@@QBE?AW4SceneType@1@XZ @ 570 NONAME ; enum HsConfiguration::SceneType HsConfiguration::sceneType(void) const
-	?tr@HsPage@@SA?AVQString@@PBD0H@Z @ 571 NONAME ; class QString HsPage::tr(char const *, char const *, int)
-	?setNewPageAddedAnimationDuration@HsConfiguration@@QAEXH@Z @ 572 NONAME ; void HsConfiguration::setNewPageAddedAnimationDuration(int)
-	??_EHsGui@@UAE@I@Z @ 573 NONAME ; HsGui::~HsGui(unsigned int)
-	?isAvailable@HsWidgetComponent@@QBE_NXZ @ 574 NONAME ; bool HsWidgetComponent::isAvailable(void) const
-	?updateWidgetZValues@HsDatabase@@QAE_NABV?$QHash@HM@@W4Orientation@Qt@@@Z @ 575 NONAME ; bool HsDatabase::updateWidgetZValues(class QHash<int, float> const &, enum Qt::Orientation)
-	?staticMetaObject@HsConfiguration@@2UQMetaObject@@B @ 576 NONAME ; struct QMetaObject const HsConfiguration::staticMetaObject
-	?checkConnection@HsDatabase@@ABE_NXZ @ 577 NONAME ; bool HsDatabase::checkConnection(void) const
-	?takeInstance@HsDatabase@@SAPAV1@XZ @ 578 NONAME ; class HsDatabase * HsDatabase::takeInstance(void)
-	?tr@HsWallpaper@@SA?AVQString@@PBD0@Z @ 579 NONAME ; class QString HsWallpaper::tr(char const *, char const *)
-	?deleteWidgets@HsDatabase@@QAE_NABVQString@@@Z @ 580 NONAME ; bool HsDatabase::deleteWidgets(class QString const &)
-	?searchSpace@HsWidgetOrganizer@@AAE?AVQPointF@@W4SearchMode@1@V2@H@Z @ 581 NONAME ; class QPointF HsWidgetOrganizer::searchSpace(enum HsWidgetOrganizer::SearchMode, class QPointF, int)
-	??0HsPageData@@QAE@XZ @ 582 NONAME ; HsPageData::HsPageData(void)
-	?tr@HsSceneWallpaper@@SA?AVQString@@PBD0H@Z @ 583 NONAME ; class QString HsSceneWallpaper::tr(char const *, char const *, int)
-	?pageIndicatorSpacing@HsConfiguration@@QBEMXZ @ 584 NONAME ; float HsConfiguration::pageIndicatorSpacing(void) const
-	?getStaticMetaObject@HsShortcutService@@SAABUQMetaObject@@XZ @ 585 NONAME ; struct QMetaObject const & HsShortcutService::getStaticMetaObject(void)
-	?isRemovable@HsPage@@QBE_NXZ @ 586 NONAME ; bool HsPage::isRemovable(void) const
-	?setDatabaseId@HsPage@@QAEXH@Z @ 587 NONAME ; void HsPage::setDatabaseId(int)
-	?trUtf8@HsIdleWidget@@SA?AVQString@@PBD0@Z @ 588 NONAME ; class QString HsIdleWidget::trUtf8(char const *, char const *)
-	?staticMetaObject@HsBackupRestoreObserver@@2UQMetaObject@@B @ 589 NONAME ; struct QMetaObject const HsBackupRestoreObserver::staticMetaObject
-	?pageChangeAnimationDuration@HsConfiguration@@QBEHXZ @ 590 NONAME ; int HsConfiguration::pageChangeAnimationDuration(void) const
-	?widgetTapAndHoldFinished@HsScene@@IAEXPAVQGestureEvent@@PAVHsWidgetHost@@@Z @ 591 NONAME ; void HsScene::widgetTapAndHoldFinished(class QGestureEvent *, class HsWidgetHost *)
-	?metaObject@HsPageWallpaper@@UBEPBUQMetaObject@@XZ @ 592 NONAME ; struct QMetaObject const * HsPageWallpaper::metaObject(void) const
-	?tr@HsGui@@SA?AVQString@@PBD0H@Z @ 593 NONAME ; class QString HsGui::tr(char const *, char const *, int)
-	?updatePage@HsDatabase@@QAE_NABVHsPageData@@@Z @ 594 NONAME ; bool HsDatabase::updatePage(class HsPageData const &)
-	?action_uninitialize@HsWidgetHost@@AAEXXZ @ 595 NONAME ; void HsWidgetHost::action_uninitialize(void)
-	??_EHsWallpaperLoader@@UAE@I@Z @ 596 NONAME ; HsWallpaperLoader::~HsWallpaperLoader(unsigned int)
-	??_EHsWallpaper@@UAE@I@Z @ 597 NONAME ; HsWallpaper::~HsWallpaper(unsigned int)
-	?action_connectComponent@HsWidgetHost@@AAEXXZ @ 598 NONAME ; void HsWidgetHost::action_connectComponent(void)
-	?setImage@HsWallpaper@@QAEXABVQString@@@Z @ 599 NONAME ; void HsWallpaper::setImage(class QString const &)
-	?setPageChangeAnimationDuration@HsConfiguration@@QAEXH@Z @ 600 NONAME ; void HsConfiguration::setPageChangeAnimationDuration(int)
-	??0HsSceneData@@QAE@XZ @ 601 NONAME ; HsSceneData::HsSceneData(void)
-	?hasSignal@HsWidgetHost@@AAE_NPBD@Z @ 602 NONAME ; bool HsWidgetHost::hasSignal(char const *)
-	?getStaticMetaObject@HsWidgetHostVisual@@SAABUQMetaObject@@XZ @ 603 NONAME ; struct QMetaObject const & HsWidgetHostVisual::getStaticMetaObject(void)
-	?getStaticMetaObject@HsWallpaper@@SAABUQMetaObject@@XZ @ 604 NONAME ; struct QMetaObject const & HsWallpaper::getStaticMetaObject(void)
-	?trUtf8@HsWallpaper@@SA?AVQString@@PBD0@Z @ 605 NONAME ; class QString HsWallpaper::trUtf8(char const *, char const *)
-	??0HsWidgetHost@@QAE@HPAVQObject@@@Z @ 606 NONAME ; HsWidgetHost::HsWidgetHost(int, class QObject *)
-	?emitWidgetRemoved@HsContentService@@QAEXABVQString@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 607 NONAME ; void HsContentService::emitWidgetRemoved(class QString const &, class QHash<class QString, class QVariant> const &)
-	?pages@HsScene@@QBE?AV?$QList@PAVHsPage@@@@XZ @ 608 NONAME ; class QList<class HsPage *> HsScene::pages(void) const
-	??1HsConfiguration@@UAE@XZ @ 609 NONAME ; HsConfiguration::~HsConfiguration(void)
-	?trashBin@HsIdleWidget@@QBEPAVHsTrashBinWidget@@XZ @ 610 NONAME ; class HsTrashBinWidget * HsIdleWidget::trashBin(void) const
-	?translationFilename@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 611 NONAME ; class QString HsWidgetComponentDescriptor::translationFilename(void) const
-	?trUtf8@HsConfiguration@@SA?AVQString@@PBD0@Z @ 612 NONAME ; class QString HsConfiguration::trUtf8(char const *, char const *)
-	?instance@HsScene@@SAPAV1@XZ @ 613 NONAME ; class HsScene * HsScene::instance(void)
-	?eventFilter@HsScene@@MAE_NPAVQObject@@PAVQEvent@@@Z @ 614 NONAME ; bool HsScene::eventFilter(class QObject *, class QEvent *)
-	?trUtf8@HsPage@@SA?AVQString@@PBD0H@Z @ 615 NONAME ; class QString HsPage::trUtf8(char const *, char const *, int)
-	?isDefaultPage@HsPage@@QBE_NXZ @ 616 NONAME ; bool HsPage::isDefaultPage(void) const
-	??_EHsDatabase@@UAE@I@Z @ 617 NONAME ; HsDatabase::~HsDatabase(unsigned int)
-	?event_startAndShow@HsWidgetHost@@IAEXXZ @ 618 NONAME ; void HsWidgetHost::event_startAndShow(void)
-	?layoutRect@HsGui@@QBE?AVQRectF@@XZ @ 619 NONAME ; class QRectF HsGui::layoutRect(void) const
-	?trUtf8@HsContentService@@SA?AVQString@@PBD0H@Z @ 620 NONAME ; class QString HsContentService::trUtf8(char const *, char const *, int)
-	?setMinimumWidgetHeight@HsConfiguration@@QAEXM@Z @ 621 NONAME ; void HsConfiguration::setMinimumWidgetHeight(float)
-	?pageTapFinished@HsScene@@IAEXPAVQGestureEvent@@@Z @ 622 NONAME ; void HsScene::pageTapFinished(class QGestureEvent *)
-	?unavailable@HsWidgetComponent@@IAEXXZ @ 623 NONAME ; void HsWidgetComponent::unavailable(void)
-	?isShortcutLabelVisible@HsConfiguration@@QBE_NXZ @ 624 NONAME ; bool HsConfiguration::isShortcutLabelVisible(void) const
-	?setPageChangeZoneReverseAnimationDuration@HsConfiguration@@QAEXH@Z @ 625 NONAME ; void HsConfiguration::setPageChangeZoneReverseAnimationDuration(int)
-	?getStaticMetaObject@HsIdleWidget@@SAABUQMetaObject@@XZ @ 626 NONAME ; struct QMetaObject const & HsIdleWidget::getStaticMetaObject(void)
-	?qt_metacall@HsWidgetHostVisual@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 627 NONAME ; int HsWidgetHostVisual::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?tr@HsDatabase@@SA?AVQString@@PBD0H@Z @ 628 NONAME ; class QString HsDatabase::tr(char const *, char const *, int)
-	?instance@HsWidgetComponentRegistry@@SAPAV1@XZ @ 629 NONAME ; class HsWidgetComponentRegistry * HsWidgetComponentRegistry::instance(void)
-	?serviceXml@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 630 NONAME ; class QString HsWidgetComponentDescriptor::serviceXml(void) const
-	?qt_metacall@HsWallpaperLoader@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 631 NONAME ; int HsWallpaperLoader::qt_metacall(enum QMetaObject::Call, int, void * *)
-	??_EHsSceneWallpaper@@UAE@I@Z @ 632 NONAME ; HsSceneWallpaper::~HsSceneWallpaper(unsigned int)
-	?instance@HsDatabase@@SAPAV1@XZ @ 633 NONAME ; class HsDatabase * HsDatabase::instance(void)
-	?setTranslationFilename@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 634 NONAME ; void HsWidgetComponentDescriptor::setTranslationFilename(class QString const &)
-	?onLoaderFinished@HsWallpaper@@AAEXXZ @ 635 NONAME ; void HsWallpaper::onLoaderFinished(void)
-	?qt_metacall@HsIdleWidget@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 636 NONAME ; int HsIdleWidget::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?addWidget@HsContentService@@QAE_NABVQString@@ABV?$QHash@VQString@@VQVariant@@@@ABVQVariant@@@Z @ 637 NONAME ; bool HsContentService::addWidget(class QString const &, class QHash<class QString, class QVariant> const &, class QVariant const &)
-	?shortcutWidgetTapFeedbackEffect@HsConfiguration@@QBE?AW4InstantEffect@HbFeedback@@XZ @ 638 NONAME ; enum HbFeedback::InstantEffect HsConfiguration::shortcutWidgetTapFeedbackEffect(void) const
-	?widgetMoveFinished@HsScene@@IAEXABVQPointF@@PAVHsWidgetHost@@@Z @ 639 NONAME ; void HsScene::widgetMoveFinished(class QPointF const &, class HsWidgetHost *)
-	?setInstance@HsScene@@SAXPAV1@@Z @ 640 NONAME ; void HsScene::setInstance(class HsScene *)
-	?tr@HsPageVisual@@SA?AVQString@@PBD0H@Z @ 641 NONAME ; class QString HsPageVisual::tr(char const *, char const *, int)
-	??_EHsContentService@@UAE@I@Z @ 642 NONAME ; HsContentService::~HsContentService(unsigned int)
-	?trUtf8@HsDatabase@@SA?AVQString@@PBD0H@Z @ 643 NONAME ; class QString HsDatabase::trUtf8(char const *, char const *, int)
-	?action_hide@HsWidgetHost@@AAEXXZ @ 644 NONAME ; void HsWidgetHost::action_hide(void)
-	?addNewWidget@HsPage@@QAE_NPAVHsWidgetHost@@ABVQPointF@@@Z @ 645 NONAME ; bool HsPage::addNewWidget(class HsWidgetHost *, class QPointF const &)
-	?removePresentation@HsWidgetHost@@QAE_NW4Orientation@Qt@@@Z @ 646 NONAME ; bool HsWidgetHost::removePresentation(enum Qt::Orientation)
-	?staticMetaObject@HsContentService@@2UQMetaObject@@B @ 647 NONAME ; struct QMetaObject const HsContentService::staticMetaObject
-	?tr@HsWidgetHost@@SA?AVQString@@PBD0H@Z @ 648 NONAME ; class QString HsWidgetHost::tr(char const *, char const *, int)
-	?setWidgetRepositionFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 649 NONAME ; void HsConfiguration::setWidgetRepositionFeedbackEffect(enum HbFeedback::InstantEffect)
-	?gestureEvent@HsWidgetHostVisual@@MAEXPAVQGestureEvent@@@Z @ 650 NONAME ; void HsWidgetHostVisual::gestureEvent(class QGestureEvent *)
-	??1HsWidgetOrganizer@@UAE@XZ @ 651 NONAME ; HsWidgetOrganizer::~HsWidgetOrganizer(void)
-	?metaObject@HsBackupRestoreObserver@@UBEPBUQMetaObject@@XZ @ 652 NONAME ; struct QMetaObject const * HsBackupRestoreObserver::metaObject(void) const
-	?instance@HsGui@@SAPAV1@XZ @ 653 NONAME ; class HsGui * HsGui::instance(void)
-	?getStaticMetaObject@HsHostedWidgetFactory@@SAABUQMetaObject@@XZ @ 654 NONAME ; struct QMetaObject const & HsHostedWidgetFactory::getStaticMetaObject(void)
-	?pageIndex@HsPageVisual@@QBEHXZ @ 655 NONAME ; int HsPageVisual::pageIndex(void) const
-	?qt_metacall@HsScene@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 656 NONAME ; int HsScene::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?setExistingImage@HsWallpaper@@IAE_NXZ @ 657 NONAME ; bool HsWallpaper::setExistingImage(void)
-	?setPageChangeFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 658 NONAME ; void HsConfiguration::setPageChangeFeedbackEffect(enum HbFeedback::InstantEffect)
-	?trUtf8@HsHostedWidgetFactory@@SA?AVQString@@PBD0H@Z @ 659 NONAME ; class QString HsHostedWidgetFactory::trUtf8(char const *, char const *, int)
-	?trUtf8@HsConfiguration@@SA?AVQString@@PBD0H@Z @ 660 NONAME ; class QString HsConfiguration::trUtf8(char const *, char const *, int)
-	?minimumWidgetSizeInPixels@HsConfiguration@@QBE?AVQSizeF@@XZ @ 661 NONAME ; class QSizeF HsConfiguration::minimumWidgetSizeInPixels(void) const
-	?sourcePath@HsWallpaperLoaderThread@@QBE?AVQString@@XZ @ 662 NONAME ; class QString HsWallpaperLoaderThread::sourcePath(void) const
-	?event_finished@HsWidgetHost@@IAEXXZ @ 663 NONAME ; void HsWidgetHost::event_finished(void)
-	?widgets@HsPage@@QBE?AV?$QList@PAVHsWidgetHost@@@@XZ @ 664 NONAME ; class QList<class HsWidgetHost *> HsPage::widgets(void) const
-	?setPageMargin@HsConfiguration@@QAEXM@Z @ 665 NONAME ; void HsConfiguration::setPageMargin(float)
-	?parallaxFactor@HsIdleWidget@@QBEMXZ @ 666 NONAME ; float HsIdleWidget::parallaxFactor(void) const
-	?setOnline@HsWidgetHost@@QAEX_N@Z @ 667 NONAME ; void HsWidgetHost::setOnline(bool)
-	?setPreferencesToWidget@HsWidgetHost@@AAE_NXZ @ 668 NONAME ; bool HsWidgetHost::setPreferencesToWidget(void)
-	?setWidgetPickFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 669 NONAME ; void HsConfiguration::setWidgetPickFeedbackEffect(enum HbFeedback::InstantEffect)
-	?getStaticMetaObject@HsPageWallpaper@@SAABUQMetaObject@@XZ @ 670 NONAME ; struct QMetaObject const & HsPageWallpaper::getStaticMetaObject(void)
-	??0HsWidgetHostVisual@@QAE@PAVQGraphicsItem@@@Z @ 671 NONAME ; HsWidgetHostVisual::HsWidgetHostVisual(class QGraphicsItem *)
-	?trUtf8@HsIdleWidget@@SA?AVQString@@PBD0H@Z @ 672 NONAME ; class QString HsIdleWidget::trUtf8(char const *, char const *, int)
-	??0HsContentService@@QAE@PAVQObject@@@Z @ 673 NONAME ; HsContentService::HsContentService(class QObject *)
-	?trUtf8@HsWidgetComponentRegistry@@SA?AVQString@@PBD0H@Z @ 674 NONAME ; class QString HsWidgetComponentRegistry::trUtf8(char const *, char const *, int)
-	?targetPath@HsWallpaperLoaderThread@@QBE?AVQString@@XZ @ 675 NONAME ; class QString HsWallpaperLoaderThread::targetPath(void) const
-	?staticMetaObject@HsWallpaper@@2UQMetaObject@@B @ 676 NONAME ; struct QMetaObject const HsWallpaper::staticMetaObject
-	??_EHsAnchorPointInCenter@@UAE@I@Z @ 677 NONAME ; HsAnchorPointInCenter::~HsAnchorPointInCenter(unsigned int)
-	?trUtf8@HsGui@@SA?AVQString@@PBD0H@Z @ 678 NONAME ; class QString HsGui::trUtf8(char const *, char const *, int)
-	?metaObject@HsPageVisual@@UBEPBUQMetaObject@@XZ @ 679 NONAME ; struct QMetaObject const * HsPageVisual::metaObject(void) const
-	?tr@HsWidgetComponent@@SA?AVQString@@PBD0@Z @ 680 NONAME ; class QString HsWidgetComponent::tr(char const *, char const *)
-	?tr@HsHostedWidgetFactory@@SA?AVQString@@PBD0@Z @ 681 NONAME ; class QString HsHostedWidgetFactory::tr(char const *, char const *)
-	?setBounceEffect@HsConfiguration@@QAEXH@Z @ 682 NONAME ; void HsConfiguration::setBounceEffect(int)
-	??0HsPage@@QAE@PAVQObject@@@Z @ 683 NONAME ; HsPage::HsPage(class QObject *)
-	?qt_metacast@HsDatabase@@UAEPAXPBD@Z @ 684 NONAME ; void * HsDatabase::qt_metacast(char const *)
-	?registerService@HsWidgetComponentRegistry@@AAEXABVCaEntry@@ABVQString@@_N@Z @ 685 NONAME ; void HsWidgetComponentRegistry::registerService(class CaEntry const &, class QString const &, bool)
-	?trUtf8@HsBackupRestoreObserver@@SA?AVQString@@PBD0@Z @ 686 NONAME ; class QString HsBackupRestoreObserver::trUtf8(char const *, char const *)
-	?metaObject@HsWidgetHost@@UBEPBUQMetaObject@@XZ @ 687 NONAME ; struct QMetaObject const * HsWidgetHost::metaObject(void) const
-	?qt_metacast@HsConfiguration@@UAEPAXPBD@Z @ 688 NONAME ; void * HsConfiguration::qt_metacast(char const *)
+	?getStaticMetaObject@HsWidgetComponent@@SAABUQMetaObject@@XZ @ 384 NONAME ; struct QMetaObject const & HsWidgetComponent::getStaticMetaObject(void)
+	?addExistingWidget@HsPage@@QAE_NPAVHsWidgetHost@@@Z @ 385 NONAME ; bool HsPage::addExistingWidget(class HsWidgetHost *)
+	?qt_metacast@HsWidgetComponentRegistry@@UAEPAXPBD@Z @ 386 NONAME ; void * HsWidgetComponentRegistry::qt_metacast(char const *)
+	?close@HsWidgetHost@@QAEXXZ @ 387 NONAME ; void HsWidgetHost::close(void)
+	?action_remove@HsWidgetHost@@AAEXXZ @ 388 NONAME ; void HsWidgetHost::action_remove(void)
+	?trUtf8@HsWallpaper@@SA?AVQString@@PBD0H@Z @ 389 NONAME ; class QString HsWallpaper::trUtf8(char const *, char const *, int)
+	?activePage@HsScene@@QBEPAVHsPage@@XZ @ 390 NONAME ; class HsPage * HsScene::activePage(void) const
+	?bounceEffect@HsConfiguration@@QBEHXZ @ 391 NONAME ; int HsConfiguration::bounceEffect(void) const
+	?setupIdleUi@HsGui@@QAEXXZ @ 392 NONAME ; void HsGui::setupIdleUi(void)
+	?pages@HsDatabase@@QAE_NAAV?$QList@VHsPageData@@@@@Z @ 393 NONAME ; bool HsDatabase::pages(class QList<class HsPageData> &)
+	?savePresentation@HsWidgetHost@@QAE_NXZ @ 394 NONAME ; bool HsWidgetHost::savePresentation(void)
+	?pageChangeAnimation@HsGui@@QAEPAVHsPropertyAnimationWrapper@@XZ @ 395 NONAME ; class HsPropertyAnimationWrapper * HsGui::pageChangeAnimation(void)
+	?takeInstance@HsScene@@SAPAV1@XZ @ 396 NONAME ; class HsScene * HsScene::takeInstance(void)
+	?rootPath@HsWidgetComponent@@QBE?AVQString@@XZ @ 397 NONAME ; class QString HsWidgetComponent::rootPath(void) const
+	?startDragEffect@HsWidgetHost@@QAEXXZ @ 398 NONAME ; void HsWidgetHost::startDragEffect(void)
+	?event_startAndHide@HsWidgetHost@@IAEXXZ @ 399 NONAME ; void HsWidgetHost::event_startAndHide(void)
+	?qt_metacast@HsWallpaperLoader@@UAEPAXPBD@Z @ 400 NONAME ; void * HsWallpaperLoader::qt_metacast(char const *)
+	??1HsDatabase@@UAE@XZ @ 401 NONAME ; HsDatabase::~HsDatabase(void)
+	??0HsWidgetOrganizer@@QAE@HW4WidgetOrganizerSearchSequence@HsConfiguration@@@Z @ 402 NONAME ; HsWidgetOrganizer::HsWidgetOrganizer(int, enum HsConfiguration::WidgetOrganizerSearchSequence)
+	?getPosition@HsWidgetOrganizer@@AAE?AVQPointF@@ABVQSizeF@@@Z @ 403 NONAME ; class QPointF HsWidgetOrganizer::getPosition(class QSizeF const &)
+	??1HsWidgetComponent@@UAE@XZ @ 404 NONAME ; HsWidgetComponent::~HsWidgetComponent(void)
+	?metaObject@HsSceneWallpaper@@UBEPBUQMetaObject@@XZ @ 405 NONAME ; struct QMetaObject const * HsSceneWallpaper::metaObject(void) const
+	?createInstance@HsWidgetHost@@SAPAV1@AAVHsWidgetData@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 406 NONAME ; class HsWidgetHost * HsWidgetHost::createInstance(class HsWidgetData &, class QHash<class QString, class QVariant> const &)
+	?setupEffects@HsWidgetHostVisual@@AAEXXZ @ 407 NONAME ; void HsWidgetHostVisual::setupEffects(void)
+	?trUtf8@HsGui@@SA?AVQString@@PBD0@Z @ 408 NONAME ; class QString HsGui::trUtf8(char const *, char const *)
+	?setPage@HsPageWallpaper@@QAEXPAVHsPage@@@Z @ 409 NONAME ; void HsPageWallpaper::setPage(class HsPage *)
+	?shape@HsWidgetHostVisual@@UBE?AVQPainterPath@@XZ @ 410 NONAME ; class QPainterPath HsWidgetHostVisual::shape(void) const
+	?deletePage@HsDatabase@@QAE_NH@Z @ 411 NONAME ; bool HsDatabase::deletePage(int)
+	?savePresentation@HsWidgetHost@@QAE_NAAVHsWidgetPresentationData@@@Z @ 412 NONAME ; bool HsWidgetHost::savePresentation(class HsWidgetPresentationData &)
+	?tr@HsWallpaperLoaderThread@@SA?AVQString@@PBD0H@Z @ 413 NONAME ; class QString HsWallpaperLoaderThread::tr(char const *, char const *, int)
+	?resized@HsWidgetHostVisual@@IAEXXZ @ 414 NONAME ; void HsWidgetHostVisual::resized(void)
+	?page@HsWidgetHost@@QBEPAVHsPage@@XZ @ 415 NONAME ; class HsPage * HsWidgetHost::page(void) const
+	?qt_metacast@HsWallpaper@@UAEPAXPBD@Z @ 416 NONAME ; void * HsWallpaper::qt_metacast(char const *)
+	?staticMetaObject@HsWidgetComponent@@2UQMetaObject@@B @ 417 NONAME ; struct QMetaObject const HsWidgetComponent::staticMetaObject
+	?setRemovable@HsPage@@QAEX_N@Z @ 418 NONAME ; void HsPage::setRemovable(bool)
+	?staticMetaObject@HsIdleWidget@@2UQMetaObject@@B @ 419 NONAME ; struct QMetaObject const HsIdleWidget::staticMetaObject
+	?showVerticalSnapLine@HsIdleWidget@@QAEXABVQLineF@@@Z @ 420 NONAME ; void HsIdleWidget::showVerticalSnapLine(class QLineF const &)
+	?widgetRemoved@HsContentService@@IAEXABVQString@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 421 NONAME ; void HsContentService::widgetRemoved(class QString const &, class QHash<class QString, class QVariant> const &)
+	?widgetMoveUpdated@HsScene@@IAEXABVQPointF@@PAVHsWidgetHost@@@Z @ 422 NONAME ; void HsScene::widgetMoveUpdated(class QPointF const &, class HsWidgetHost *)
+	?qt_metacall@HsWallpaperLoaderThread@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 423 NONAME ; int HsWallpaperLoaderThread::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?loadPresentation@HsWidgetHost@@QAE_NXZ @ 424 NONAME ; bool HsWidgetHost::loadPresentation(void)
+	?setupStates@HsWidgetHost@@AAEXXZ @ 425 NONAME ; void HsWidgetHost::setupStates(void)
+	?getStaticMetaObject@HsContentService@@SAABUQMetaObject@@XZ @ 426 NONAME ; struct QMetaObject const & HsContentService::getStaticMetaObject(void)
+	?wallpaper@HsScene@@QBEPAVHsWallpaper@@XZ @ 427 NONAME ; class HsWallpaper * HsScene::wallpaper(void) const
+	?isItemShortcutWidget@HsShortcutService@@QAE_NH@Z @ 428 NONAME ; bool HsShortcutService::isItemShortcutWidget(int)
+	?setGeometry@HsPageVisual@@UAEXABVQRectF@@@Z @ 429 NONAME ; void HsPageVisual::setGeometry(class QRectF const &)
+	?tr@HsIdleWidget@@SA?AVQString@@PBD0H@Z @ 430 NONAME ; class QString HsIdleWidget::tr(char const *, char const *, int)
+	?setDatabaseName@HsDatabase@@QAEXABVQString@@@Z @ 431 NONAME ; void HsDatabase::setDatabaseName(class QString const &)
+	?updateWidget@HsDatabase@@QAE_NABVHsWidgetData@@@Z @ 432 NONAME ; bool HsDatabase::updateWidget(class HsWidgetData const &)
+	?trUtf8@HsBackupRestoreObserver@@SA?AVQString@@PBD0H@Z @ 433 NONAME ; class QString HsBackupRestoreObserver::trUtf8(char const *, char const *, int)
+	?loadPresentation@HsWidgetHost@@QAE_NW4Orientation@Qt@@@Z @ 434 NONAME ; bool HsWidgetHost::loadPresentation(enum Qt::Orientation)
+	?createWidgetForPreview@HsContentService@@QAEPAVHsWidgetHost@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 435 NONAME ; class HsWidgetHost * HsContentService::createWidgetForPreview(class QHash<class QString, class QVariant> const &)
+	?available@HsWidgetHost@@IAEXXZ @ 436 NONAME ; void HsWidgetHost::available(void)
+	?setPageChangeZoneWidth@HsConfiguration@@QAEXM@Z @ 437 NONAME ; void HsConfiguration::setPageChangeZoneWidth(float)
+	?emitAboutToUninstall@HsWidgetComponent@@AAEXXZ @ 438 NONAME ; void HsWidgetComponent::emitAboutToUninstall(void)
+	?iconUri@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 439 NONAME ; class QString HsWidgetComponentDescriptor::iconUri(void) const
+	?event_faulted@HsWidgetHost@@IAEXXZ @ 440 NONAME ; void HsWidgetHost::event_faulted(void)
+	?emitUnavailable@HsWidgetComponent@@AAEXXZ @ 441 NONAME ; void HsWidgetComponent::emitUnavailable(void)
+	?snapTimeout@HsConfiguration@@QBEHXZ @ 442 NONAME ; int HsConfiguration::snapTimeout(void) const
+	??1HsWidgetData@@QAE@XZ @ 443 NONAME ; HsWidgetData::~HsWidgetData(void)
+	?faulted@HsWidgetHost@@IAEXXZ @ 444 NONAME ; void HsWidgetHost::faulted(void)
+	??0HsIdleWidget@@QAE@PAVQGraphicsItem@@@Z @ 445 NONAME ; HsIdleWidget::HsIdleWidget(class QGraphicsItem *)
+	?event_unload@HsWidgetHost@@IAEXXZ @ 446 NONAME ; void HsWidgetHost::event_unload(void)
+	?handleEntryRemoved@HsWidgetComponentRegistry@@AAEXABVCaEntry@@ABVQString@@@Z @ 447 NONAME ; void HsWidgetComponentRegistry::handleEntryRemoved(class CaEntry const &, class QString const &)
+	?metaObject@HsWidgetComponentRegistry@@UBEPBUQMetaObject@@XZ @ 448 NONAME ; struct QMetaObject const * HsWidgetComponentRegistry::metaObject(void) const
+	?updated@HsWidgetComponent@@IAEXXZ @ 449 NONAME ; void HsWidgetComponent::updated(void)
+	?takeInstance@HsConfiguration@@SAPAV1@XZ @ 450 NONAME ; class HsConfiguration * HsConfiguration::takeInstance(void)
+	?pageIndex@HsPage@@QAEHXZ @ 451 NONAME ; int HsPage::pageIndex(void)
+	?setTargets@HsWallpaperLoader@@QAEXABV?$QHash@VQString@@VQVariant@@@@@Z @ 452 NONAME ; void HsWallpaperLoader::setTargets(class QHash<class QString, class QVariant> const &)
+	??1HsIdleWidget@@UAE@XZ @ 453 NONAME ; HsIdleWidget::~HsIdleWidget(void)
+	??_EHsHostedWidgetFactory@@UAE@I@Z @ 454 NONAME ; HsHostedWidgetFactory::~HsHostedWidgetFactory(unsigned int)
+	?staticMetaObject@HsGui@@2UQMetaObject@@B @ 455 NONAME ; struct QMetaObject const HsGui::staticMetaObject
+	??0HsWallpaperLoaderThread@@QAE@PAVQObject@@@Z @ 456 NONAME ; HsWallpaperLoaderThread::HsWallpaperLoaderThread(class QObject *)
+	?start@HsWallpaperLoader@@QAEXXZ @ 457 NONAME ; void HsWallpaperLoader::start(void)
+	?component@HsWidgetComponentRegistry@@QAEPAVHsWidgetComponent@@ABVQString@@@Z @ 458 NONAME ; class HsWidgetComponent * HsWidgetComponentRegistry::component(class QString const &)
+	??_EHsWidgetComponent@@UAE@I@Z @ 459 NONAME ; HsWidgetComponent::~HsWidgetComponent(unsigned int)
+	?mInstance@HsScene@@0PAV1@A @ 460 NONAME ; class HsScene * HsScene::mInstance
+	?getStaticMetaObject@HsGui@@SAABUQMetaObject@@XZ @ 461 NONAME ; struct QMetaObject const & HsGui::getStaticMetaObject(void)
+	?trUtf8@HsSceneWallpaper@@SA?AVQString@@PBD0@Z @ 462 NONAME ; class QString HsSceneWallpaper::trUtf8(char const *, char const *)
+	??_EHsWidgetHost@@UAE@I@Z @ 463 NONAME ; HsWidgetHost::~HsWidgetHost(unsigned int)
+	?minimumWidgetHeight@HsConfiguration@@QBEMXZ @ 464 NONAME ; float HsConfiguration::minimumWidgetHeight(void) const
+	?setVisualModel@HsWidgetHostVisual@@QAEXPAVHsWidgetHost@@@Z @ 465 NONAME ; void HsWidgetHostVisual::setVisualModel(class HsWidgetHost *)
+	?staticMetaObject@HsShortcutService@@2UQMetaObject@@B @ 466 NONAME ; struct QMetaObject const HsShortcutService::staticMetaObject
+	??0HsPageWallpaper@@QAE@PAVHsPage@@PAVQGraphicsItem@@@Z @ 467 NONAME ; HsPageWallpaper::HsPageWallpaper(class HsPage *, class QGraphicsItem *)
+	?onSetPreferences@HsWidgetHost@@AAEXABVQStringList@@@Z @ 468 NONAME ; void HsWidgetHost::onSetPreferences(class QStringList const &)
+	??1HsWidgetComponentDescriptor@@QAE@XZ @ 469 NONAME ; HsWidgetComponentDescriptor::~HsWidgetComponentDescriptor(void)
+	?showPageIndicator@HsIdleWidget@@QAEXXZ @ 470 NONAME ; void HsIdleWidget::showPageIndicator(void)
+	??1HsBackupRestoreObserver@@UAE@XZ @ 471 NONAME ; HsBackupRestoreObserver::~HsBackupRestoreObserver(void)
+	?insertPage@HsDatabase@@QAE_NAAVHsPageData@@@Z @ 472 NONAME ; bool HsDatabase::insertPage(class HsPageData &)
+	??_EHsWidgetComponentRegistry@@UAE@I@Z @ 473 NONAME ; HsWidgetComponentRegistry::~HsWidgetComponentRegistry(unsigned int)
+	?metaObject@HsIdleWidget@@UBEPBUQMetaObject@@XZ @ 474 NONAME ; struct QMetaObject const * HsIdleWidget::metaObject(void) const
+	?qt_metacast@HsHostedWidgetFactory@@UAEPAXPBD@Z @ 475 NONAME ; void * HsHostedWidgetFactory::qt_metacast(char const *)
+	?setUri@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 476 NONAME ; void HsWidgetComponentDescriptor::setUri(class QString const &)
+	??1HsWallpaperLoaderThread@@UAE@XZ @ 477 NONAME ; HsWallpaperLoaderThread::~HsWallpaperLoaderThread(void)
+	?staticMetaObject@HsWidgetComponentRegistry@@2UQMetaObject@@B @ 478 NONAME ; struct QMetaObject const HsWidgetComponentRegistry::staticMetaObject
+	??1HsWallpaper@@UAE@XZ @ 479 NONAME ; HsWallpaper::~HsWallpaper(void)
+	?qt_metacall@HsPage@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 480 NONAME ; int HsPage::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?onWidgetAvailable@HsPage@@AAEXXZ @ 481 NONAME ; void HsPage::onWidgetAvailable(void)
+	?qt_metacast@HsPage@@UAEPAXPBD@Z @ 482 NONAME ; void * HsPage::qt_metacast(char const *)
+	?result@HsWallpaperLoaderThread@@QBE_NXZ @ 483 NONAME ; bool HsWallpaperLoaderThread::result(void) const
+	?setPageIndicatorSpacing@HsConfiguration@@QAEXM@Z @ 484 NONAME ; void HsConfiguration::setPageIndicatorSpacing(float)
+	?setSnapLineFadeInDuration@HsConfiguration@@QAEXH@Z @ 485 NONAME ; void HsConfiguration::setSnapLineFadeInDuration(int)
+	??1HsGui@@UAE@XZ @ 486 NONAME ; HsGui::~HsGui(void)
+	?isValid@HsWidgetComponentDescriptor@@QAE_NXZ @ 487 NONAME ; bool HsWidgetComponentDescriptor::isValid(void)
+	?uri@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 488 NONAME ; class QString HsWidgetComponentDescriptor::uri(void) const
+	?setOrientation@HsGui@@QAEXW4Orientation@Qt@@@Z @ 489 NONAME ; void HsGui::setOrientation(enum Qt::Orientation)
+	?tr@HsWidgetComponentRegistry@@SA?AVQString@@PBD0@Z @ 490 NONAME ; class QString HsWidgetComponentRegistry::tr(char const *, char const *)
+	?getStaticMetaObject@HsPage@@SAABUQMetaObject@@XZ @ 491 NONAME ; struct QMetaObject const & HsPage::getStaticMetaObject(void)
+	?onWidgetFaulted@HsPage@@AAEXXZ @ 492 NONAME ; void HsPage::onWidgetFaulted(void)
+	?page@HsPageWallpaper@@QBEPAVHsPage@@XZ @ 493 NONAME ; class HsPage * HsPageWallpaper::page(void) const
+	?qt_metacast@HsBackupRestoreObserver@@UAEPAXPBD@Z @ 494 NONAME ; void * HsBackupRestoreObserver::qt_metacast(char const *)
+	?setTargetPath@HsWallpaperLoaderThread@@QAEXABVQString@@@Z @ 495 NONAME ; void HsWallpaperLoaderThread::setTargetPath(class QString const &)
+	??1HsWidgetPositioningOnWidgetAdd@@UAE@XZ @ 496 NONAME ; HsWidgetPositioningOnWidgetAdd::~HsWidgetPositioningOnWidgetAdd(void)
+	?setSnapTimeout@HsConfiguration@@QAEXH@Z @ 497 NONAME ; void HsConfiguration::setSnapTimeout(int)
+	?createTargets@HsSceneWallpaper@@MAE?AV?$QHash@VQString@@VQVariant@@@@ABVQString@@@Z @ 498 NONAME ; class QHash<class QString, class QVariant> HsSceneWallpaper::createTargets(class QString const &)
+	?onWidgetResized@HsPage@@AAEXXZ @ 499 NONAME ; void HsPage::onWidgetResized(void)
+	?checkBUR@HsBackupRestoreObserver@@QAE_NXZ @ 500 NONAME ; bool HsBackupRestoreObserver::checkBUR(void)
+	?showWidgets@HsPage@@QAEXXZ @ 501 NONAME ; void HsPage::showWidgets(void)
+	?startWidget@HsWidgetHost@@QAEX_N@Z @ 502 NONAME ; void HsWidgetHost::startWidget(bool)
+	??_EHsShortcutService@@UAE@I@Z @ 503 NONAME ; HsShortcutService::~HsShortcutService(unsigned int)
+	?bounceFeedbackEffectDistance@HsConfiguration@@QBEMXZ @ 504 NONAME ; float HsConfiguration::bounceFeedbackEffectDistance(void) const
+	?unavailable@HsWidgetHost@@IAEXXZ @ 505 NONAME ; void HsWidgetHost::unavailable(void)
+	?qt_metacall@HsDatabase@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 506 NONAME ; int HsDatabase::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?searchPositionColumnByColumn@HsWidgetOrganizer@@AAE?AVQPointF@@V2@HH@Z @ 507 NONAME ; class QPointF HsWidgetOrganizer::searchPositionColumnByColumn(class QPointF, int, int)
+	?contentRect@HsPage@@QAE?AVQRectF@@W4Orientation@Qt@@@Z @ 508 NONAME ; class QRectF HsPage::contentRect(enum Qt::Orientation)
+	?contentGeometry@HsPage@@QAE?AVQRectF@@XZ @ 509 NONAME ; class QRectF HsPage::contentGeometry(void)
+	?setHidden@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 510 NONAME ; void HsWidgetComponentDescriptor::setHidden(class QString const &)
+	?widgets@HsDatabase@@QAE_NHAAV?$QList@VHsWidgetData@@@@@Z @ 511 NONAME ; bool HsDatabase::widgets(int, class QList<class HsWidgetData> &)
+	??_EHsPageWallpaper@@UAE@I@Z @ 512 NONAME ; HsPageWallpaper::~HsPageWallpaper(unsigned int)
+	?databaseId@HsPage@@QBEHXZ @ 513 NONAME ; int HsPage::databaseId(void) const
+	?tr@HsWallpaperLoader@@SA?AVQString@@PBD0@Z @ 514 NONAME ; class QString HsWallpaperLoader::tr(char const *, char const *)
+	?show@HsGui@@QAEXXZ @ 515 NONAME ; void HsGui::show(void)
+	??0HsGui@@AAE@PAVQObject@@@Z @ 516 NONAME ; HsGui::HsGui(class QObject *)
+	?qt_metacall@HsBackupRestoreObserver@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 517 NONAME ; int HsBackupRestoreObserver::qt_metacall(enum QMetaObject::Call, int, void * *)
+	??_EHsWallpaperLoaderThread@@UAE@I@Z @ 518 NONAME ; HsWallpaperLoaderThread::~HsWallpaperLoaderThread(unsigned int)
+	?resolveRootPathAndTranslationFilename@HsWidgetComponent@@AAEXXZ @ 519 NONAME ; void HsWidgetComponent::resolveRootPathAndTranslationFilename(void)
+	?isSnapEnabled@HsConfiguration@@QBE_NXZ @ 520 NONAME ; bool HsConfiguration::isSnapEnabled(void) const
+	?maximumWidgetHeight@HsConfiguration@@QBEMXZ @ 521 NONAME ; float HsConfiguration::maximumWidgetHeight(void) const
+	?backupRestoreCompleted@HsBackupRestoreObserver@@QAEXXZ @ 522 NONAME ; void HsBackupRestoreObserver::backupRestoreCompleted(void)
+	?setPageRemovedAnimationDuration@HsConfiguration@@QAEXH@Z @ 523 NONAME ; void HsConfiguration::setPageRemovedAnimationDuration(int)
+	?insertWidget@HsDatabase@@QAE_NAAVHsWidgetData@@@Z @ 524 NONAME ; bool HsDatabase::insertWidget(class HsWidgetData &)
+	??1HsShortcutService@@UAE@XZ @ 525 NONAME ; HsShortcutService::~HsShortcutService(void)
+	?setupTouchArea@HsWidgetHostVisual@@AAEXXZ @ 526 NONAME ; void HsWidgetHostVisual::setupTouchArea(void)
+	?setBounceFeedbackEffectDistance@HsConfiguration@@QAEXM@Z @ 527 NONAME ; void HsConfiguration::setBounceFeedbackEffectDistance(float)
+	?onEntryChanged@HsWidgetComponentRegistry@@AAEXABVCaEntry@@W4ChangeType@@@Z @ 528 NONAME ; void HsWidgetComponentRegistry::onEntryChanged(class CaEntry const &, enum ChangeType)
+	?getPresentation@HsWidgetHost@@QAE_NAAVHsWidgetPresentationData@@@Z @ 529 NONAME ; bool HsWidgetHost::getPresentation(class HsWidgetPresentationData &)
+	?getStaticMetaObject@HsSceneWallpaper@@SAABUQMetaObject@@XZ @ 530 NONAME ; struct QMetaObject const & HsSceneWallpaper::getStaticMetaObject(void)
+	?tr@HsScene@@SA?AVQString@@PBD0H@Z @ 531 NONAME ; class QString HsScene::tr(char const *, char const *, int)
+	?uri@HsWidgetComponent@@QBE?AVQString@@XZ @ 532 NONAME ; class QString HsWidgetComponent::uri(void) const
+	?instance@HsContentService@@SAPAV1@XZ @ 533 NONAME ; class HsContentService * HsContentService::instance(void)
+	?snapGap@HsConfiguration@@QBEMXZ @ 534 NONAME ; float HsConfiguration::snapGap(void) const
+	?savePresentation@HsWidgetHost@@QAE_NW4Orientation@Qt@@@Z @ 535 NONAME ; bool HsWidgetHost::savePresentation(enum Qt::Orientation)
+	?setWidgetDropToTrashbinFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 536 NONAME ; void HsConfiguration::setWidgetDropToTrashbinFeedbackEffect(enum HbFeedback::InstantEffect)
+	?tr@HsIdleWidget@@SA?AVQString@@PBD0@Z @ 537 NONAME ; class QString HsIdleWidget::tr(char const *, char const *)
+	?title@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 538 NONAME ; class QString HsWidgetComponentDescriptor::title(void) const
+	?event_hide@HsWidgetHost@@IAEXXZ @ 539 NONAME ; void HsWidgetHost::event_hide(void)
+	?databaseId@HsScene@@QBEHXZ @ 540 NONAME ; int HsScene::databaseId(void) const
+	?setWidgetDropFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 541 NONAME ; void HsConfiguration::setWidgetDropFeedbackEffect(enum HbFeedback::InstantEffect)
+	??1HsWidgetComponentRegistry@@UAE@XZ @ 542 NONAME ; HsWidgetComponentRegistry::~HsWidgetComponentRegistry(void)
+	?setDescription@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 543 NONAME ; void HsWidgetComponentDescriptor::setDescription(class QString const &)
+	?getStaticMetaObject@HsConfiguration@@SAABUQMetaObject@@XZ @ 544 NONAME ; struct QMetaObject const & HsConfiguration::getStaticMetaObject(void)
+	?staticMetaObject@HsSceneWallpaper@@2UQMetaObject@@B @ 545 NONAME ; struct QMetaObject const HsSceneWallpaper::staticMetaObject
+	?isRunning@HsWallpaperLoader@@QBE_NXZ @ 546 NONAME ; bool HsWallpaperLoader::isRunning(void) const
+	?activePageChanged@HsScene@@IAEXXZ @ 547 NONAME ; void HsScene::activePageChanged(void)
+	?uninstalled@HsWidgetComponent@@IAEXXZ @ 548 NONAME ; void HsWidgetComponent::uninstalled(void)
+	??1HsHostedWidgetFactory@@UAE@XZ @ 549 NONAME ; HsHostedWidgetFactory::~HsHostedWidgetFactory(void)
+	?trUtf8@HsShortcutService@@SA?AVQString@@PBD0@Z @ 550 NONAME ; class QString HsShortcutService::trUtf8(char const *, char const *)
+	?setPage@HsWidgetHost@@QAE_NPAVHsPage@@@Z @ 551 NONAME ; bool HsWidgetHost::setPage(class HsPage *)
+	??_EHsScene@@UAE@I@Z @ 552 NONAME ; HsScene::~HsScene(unsigned int)
+	?metaObject@HsScene@@UBEPBUQMetaObject@@XZ @ 553 NONAME ; struct QMetaObject const * HsScene::metaObject(void) const
+	?pageTapAndHoldFinished@HsScene@@IAEXPAVQGestureEvent@@@Z @ 554 NONAME ; void HsScene::pageTapAndHoldFinished(class QGestureEvent *)
+	?remove@HsWidgetHost@@QAEXXZ @ 555 NONAME ; void HsWidgetHost::remove(void)
+	?run@HsWallpaperLoaderThread@@MAEXXZ @ 556 NONAME ; void HsWallpaperLoaderThread::run(void)
+	?maximumWidgetSizeInUnits@HsConfiguration@@QBE?AVQSizeF@@XZ @ 557 NONAME ; class QSizeF HsConfiguration::maximumWidgetSizeInUnits(void) const
+	?getStaticMetaObject@HsScene@@SAABUQMetaObject@@XZ @ 558 NONAME ; struct QMetaObject const & HsScene::getStaticMetaObject(void)
+	?finished@HsWallpaperLoader@@IAEXXZ @ 559 NONAME ; void HsWallpaperLoader::finished(void)
+	?visual@HsPage@@QBEPAVHsPageVisual@@XZ @ 560 NONAME ; class HsPageVisual * HsPage::visual(void) const
+	?snapLineFadeOutDuration@HsConfiguration@@QBEHXZ @ 561 NONAME ; int HsConfiguration::snapLineFadeOutDuration(void) const
+	?trUtf8@HsPageWallpaper@@SA?AVQString@@PBD0H@Z @ 562 NONAME ; class QString HsPageWallpaper::trUtf8(char const *, char const *, int)
+	?setNewSize@HsWidgetHostVisual@@AAEXABVQSizeF@@@Z @ 563 NONAME ; void HsWidgetHostVisual::setNewSize(class QSizeF const &)
+	?imageSet@HsWallpaper@@IAEXXZ @ 564 NONAME ; void HsWallpaper::imageSet(void)
+	?tr@HsWidgetHostVisual@@SA?AVQString@@PBD0H@Z @ 565 NONAME ; class QString HsWidgetHostVisual::tr(char const *, char const *, int)
+	?convert@HsAnchorPointInCenter@@UAE?AVResult@HsWidgetPositioningOnWidgetAdd@@ABVQRectF@@ABV?$QList@VQRectF@@@@1ABVQPointF@@@Z @ 566 NONAME ; class HsWidgetPositioningOnWidgetAdd::Result HsAnchorPointInCenter::convert(class QRectF const &, class QList<class QRectF> const &, class QList<class QRectF> const &, class QPointF const &)
+	?sceneType@HsConfiguration@@QBE?AW4SceneType@1@XZ @ 567 NONAME ; enum HsConfiguration::SceneType HsConfiguration::sceneType(void) const
+	?tr@HsPage@@SA?AVQString@@PBD0H@Z @ 568 NONAME ; class QString HsPage::tr(char const *, char const *, int)
+	?setNewPageAddedAnimationDuration@HsConfiguration@@QAEXH@Z @ 569 NONAME ; void HsConfiguration::setNewPageAddedAnimationDuration(int)
+	??_EHsGui@@UAE@I@Z @ 570 NONAME ; HsGui::~HsGui(unsigned int)
+	?isAvailable@HsWidgetComponent@@QBE_NXZ @ 571 NONAME ; bool HsWidgetComponent::isAvailable(void) const
+	?updateWidgetZValues@HsDatabase@@QAE_NABV?$QHash@HM@@W4Orientation@Qt@@@Z @ 572 NONAME ; bool HsDatabase::updateWidgetZValues(class QHash<int, float> const &, enum Qt::Orientation)
+	?staticMetaObject@HsConfiguration@@2UQMetaObject@@B @ 573 NONAME ; struct QMetaObject const HsConfiguration::staticMetaObject
+	?checkConnection@HsDatabase@@ABE_NXZ @ 574 NONAME ; bool HsDatabase::checkConnection(void) const
+	?takeInstance@HsDatabase@@SAPAV1@XZ @ 575 NONAME ; class HsDatabase * HsDatabase::takeInstance(void)
+	?tr@HsWallpaper@@SA?AVQString@@PBD0@Z @ 576 NONAME ; class QString HsWallpaper::tr(char const *, char const *)
+	?deleteWidgets@HsDatabase@@QAE_NABVQString@@@Z @ 577 NONAME ; bool HsDatabase::deleteWidgets(class QString const &)
+	?searchSpace@HsWidgetOrganizer@@AAE?AVQPointF@@W4SearchMode@1@V2@H@Z @ 578 NONAME ; class QPointF HsWidgetOrganizer::searchSpace(enum HsWidgetOrganizer::SearchMode, class QPointF, int)
+	??0HsPageData@@QAE@XZ @ 579 NONAME ; HsPageData::HsPageData(void)
+	?tr@HsSceneWallpaper@@SA?AVQString@@PBD0H@Z @ 580 NONAME ; class QString HsSceneWallpaper::tr(char const *, char const *, int)
+	?pageIndicatorSpacing@HsConfiguration@@QBEMXZ @ 581 NONAME ; float HsConfiguration::pageIndicatorSpacing(void) const
+	?getStaticMetaObject@HsShortcutService@@SAABUQMetaObject@@XZ @ 582 NONAME ; struct QMetaObject const & HsShortcutService::getStaticMetaObject(void)
+	?isRemovable@HsPage@@QBE_NXZ @ 583 NONAME ; bool HsPage::isRemovable(void) const
+	?setDatabaseId@HsPage@@QAEXH@Z @ 584 NONAME ; void HsPage::setDatabaseId(int)
+	?trUtf8@HsIdleWidget@@SA?AVQString@@PBD0@Z @ 585 NONAME ; class QString HsIdleWidget::trUtf8(char const *, char const *)
+	?staticMetaObject@HsBackupRestoreObserver@@2UQMetaObject@@B @ 586 NONAME ; struct QMetaObject const HsBackupRestoreObserver::staticMetaObject
+	?pageChangeAnimationDuration@HsConfiguration@@QBEHXZ @ 587 NONAME ; int HsConfiguration::pageChangeAnimationDuration(void) const
+	?widgetTapAndHoldFinished@HsScene@@IAEXPAVQGestureEvent@@PAVHsWidgetHost@@@Z @ 588 NONAME ; void HsScene::widgetTapAndHoldFinished(class QGestureEvent *, class HsWidgetHost *)
+	?metaObject@HsPageWallpaper@@UBEPBUQMetaObject@@XZ @ 589 NONAME ; struct QMetaObject const * HsPageWallpaper::metaObject(void) const
+	?tr@HsGui@@SA?AVQString@@PBD0H@Z @ 590 NONAME ; class QString HsGui::tr(char const *, char const *, int)
+	?updatePage@HsDatabase@@QAE_NABVHsPageData@@@Z @ 591 NONAME ; bool HsDatabase::updatePage(class HsPageData const &)
+	?action_uninitialize@HsWidgetHost@@AAEXXZ @ 592 NONAME ; void HsWidgetHost::action_uninitialize(void)
+	??_EHsWallpaperLoader@@UAE@I@Z @ 593 NONAME ; HsWallpaperLoader::~HsWallpaperLoader(unsigned int)
+	??_EHsWallpaper@@UAE@I@Z @ 594 NONAME ; HsWallpaper::~HsWallpaper(unsigned int)
+	?action_connectComponent@HsWidgetHost@@AAEXXZ @ 595 NONAME ; void HsWidgetHost::action_connectComponent(void)
+	?setImage@HsWallpaper@@QAEXABVQString@@@Z @ 596 NONAME ; void HsWallpaper::setImage(class QString const &)
+	?setPageChangeAnimationDuration@HsConfiguration@@QAEXH@Z @ 597 NONAME ; void HsConfiguration::setPageChangeAnimationDuration(int)
+	??0HsSceneData@@QAE@XZ @ 598 NONAME ; HsSceneData::HsSceneData(void)
+	?hasSignal@HsWidgetHost@@AAE_NPBD@Z @ 599 NONAME ; bool HsWidgetHost::hasSignal(char const *)
+	?getStaticMetaObject@HsWidgetHostVisual@@SAABUQMetaObject@@XZ @ 600 NONAME ; struct QMetaObject const & HsWidgetHostVisual::getStaticMetaObject(void)
+	?getStaticMetaObject@HsWallpaper@@SAABUQMetaObject@@XZ @ 601 NONAME ; struct QMetaObject const & HsWallpaper::getStaticMetaObject(void)
+	?trUtf8@HsWallpaper@@SA?AVQString@@PBD0@Z @ 602 NONAME ; class QString HsWallpaper::trUtf8(char const *, char const *)
+	??0HsWidgetHost@@QAE@HPAVQObject@@@Z @ 603 NONAME ; HsWidgetHost::HsWidgetHost(int, class QObject *)
+	?emitWidgetRemoved@HsContentService@@QAEXABVQString@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 604 NONAME ; void HsContentService::emitWidgetRemoved(class QString const &, class QHash<class QString, class QVariant> const &)
+	?pages@HsScene@@QBE?AV?$QList@PAVHsPage@@@@XZ @ 605 NONAME ; class QList<class HsPage *> HsScene::pages(void) const
+	??1HsConfiguration@@UAE@XZ @ 606 NONAME ; HsConfiguration::~HsConfiguration(void)
+	?trashBin@HsIdleWidget@@QBEPAVHsTrashBinWidget@@XZ @ 607 NONAME ; class HsTrashBinWidget * HsIdleWidget::trashBin(void) const
+	?translationFilename@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 608 NONAME ; class QString HsWidgetComponentDescriptor::translationFilename(void) const
+	?trUtf8@HsConfiguration@@SA?AVQString@@PBD0@Z @ 609 NONAME ; class QString HsConfiguration::trUtf8(char const *, char const *)
+	?instance@HsScene@@SAPAV1@XZ @ 610 NONAME ; class HsScene * HsScene::instance(void)
+	?convert@HsAnchorPointInBottomRight@@UAE?AVResult@HsWidgetPositioningOnWidgetAdd@@ABVQRectF@@ABV?$QList@VQRectF@@@@1ABVQPointF@@@Z @ 611 NONAME ; class HsWidgetPositioningOnWidgetAdd::Result HsAnchorPointInBottomRight::convert(class QRectF const &, class QList<class QRectF> const &, class QList<class QRectF> const &, class QPointF const &)
+	?eventFilter@HsScene@@MAE_NPAVQObject@@PAVQEvent@@@Z @ 612 NONAME ; bool HsScene::eventFilter(class QObject *, class QEvent *)
+	?trUtf8@HsPage@@SA?AVQString@@PBD0H@Z @ 613 NONAME ; class QString HsPage::trUtf8(char const *, char const *, int)
+	?isDefaultPage@HsPage@@QBE_NXZ @ 614 NONAME ; bool HsPage::isDefaultPage(void) const
+	??_EHsDatabase@@UAE@I@Z @ 615 NONAME ; HsDatabase::~HsDatabase(unsigned int)
+	?event_startAndShow@HsWidgetHost@@IAEXXZ @ 616 NONAME ; void HsWidgetHost::event_startAndShow(void)
+	?layoutRect@HsGui@@QBE?AVQRectF@@XZ @ 617 NONAME ; class QRectF HsGui::layoutRect(void) const
+	?trUtf8@HsContentService@@SA?AVQString@@PBD0H@Z @ 618 NONAME ; class QString HsContentService::trUtf8(char const *, char const *, int)
+	?setMinimumWidgetHeight@HsConfiguration@@QAEXM@Z @ 619 NONAME ; void HsConfiguration::setMinimumWidgetHeight(float)
+	?pageTapFinished@HsScene@@IAEXPAVQGestureEvent@@@Z @ 620 NONAME ; void HsScene::pageTapFinished(class QGestureEvent *)
+	?unavailable@HsWidgetComponent@@IAEXXZ @ 621 NONAME ; void HsWidgetComponent::unavailable(void)
+	?isShortcutLabelVisible@HsConfiguration@@QBE_NXZ @ 622 NONAME ; bool HsConfiguration::isShortcutLabelVisible(void) const
+	?setPageChangeZoneReverseAnimationDuration@HsConfiguration@@QAEXH@Z @ 623 NONAME ; void HsConfiguration::setPageChangeZoneReverseAnimationDuration(int)
+	?getStaticMetaObject@HsIdleWidget@@SAABUQMetaObject@@XZ @ 624 NONAME ; struct QMetaObject const & HsIdleWidget::getStaticMetaObject(void)
+	?qt_metacall@HsWidgetHostVisual@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 625 NONAME ; int HsWidgetHostVisual::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?tr@HsDatabase@@SA?AVQString@@PBD0H@Z @ 626 NONAME ; class QString HsDatabase::tr(char const *, char const *, int)
+	?instance@HsWidgetComponentRegistry@@SAPAV1@XZ @ 627 NONAME ; class HsWidgetComponentRegistry * HsWidgetComponentRegistry::instance(void)
+	?serviceXml@HsWidgetComponentDescriptor@@QBE?AVQString@@XZ @ 628 NONAME ; class QString HsWidgetComponentDescriptor::serviceXml(void) const
+	?qt_metacall@HsWallpaperLoader@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 629 NONAME ; int HsWallpaperLoader::qt_metacall(enum QMetaObject::Call, int, void * *)
+	??_EHsSceneWallpaper@@UAE@I@Z @ 630 NONAME ; HsSceneWallpaper::~HsSceneWallpaper(unsigned int)
+	?instance@HsDatabase@@SAPAV1@XZ @ 631 NONAME ; class HsDatabase * HsDatabase::instance(void)
+	?setTranslationFilename@HsWidgetComponentDescriptor@@QAEXABVQString@@@Z @ 632 NONAME ; void HsWidgetComponentDescriptor::setTranslationFilename(class QString const &)
+	?onLoaderFinished@HsWallpaper@@AAEXXZ @ 633 NONAME ; void HsWallpaper::onLoaderFinished(void)
+	?qt_metacall@HsIdleWidget@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 634 NONAME ; int HsIdleWidget::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?addWidget@HsContentService@@QAE_NABVQString@@ABV?$QHash@VQString@@VQVariant@@@@ABVQVariant@@@Z @ 635 NONAME ; bool HsContentService::addWidget(class QString const &, class QHash<class QString, class QVariant> const &, class QVariant const &)
+	?shortcutWidgetTapFeedbackEffect@HsConfiguration@@QBE?AW4InstantEffect@HbFeedback@@XZ @ 636 NONAME ; enum HbFeedback::InstantEffect HsConfiguration::shortcutWidgetTapFeedbackEffect(void) const
+	?widgetMoveFinished@HsScene@@IAEXABVQPointF@@PAVHsWidgetHost@@@Z @ 637 NONAME ; void HsScene::widgetMoveFinished(class QPointF const &, class HsWidgetHost *)
+	?setInstance@HsScene@@SAXPAV1@@Z @ 638 NONAME ; void HsScene::setInstance(class HsScene *)
+	?tr@HsPageVisual@@SA?AVQString@@PBD0H@Z @ 639 NONAME ; class QString HsPageVisual::tr(char const *, char const *, int)
+	??_EHsContentService@@UAE@I@Z @ 640 NONAME ; HsContentService::~HsContentService(unsigned int)
+	?trUtf8@HsDatabase@@SA?AVQString@@PBD0H@Z @ 641 NONAME ; class QString HsDatabase::trUtf8(char const *, char const *, int)
+	?action_hide@HsWidgetHost@@AAEXXZ @ 642 NONAME ; void HsWidgetHost::action_hide(void)
+	?addNewWidget@HsPage@@QAE_NPAVHsWidgetHost@@ABVQPointF@@@Z @ 643 NONAME ; bool HsPage::addNewWidget(class HsWidgetHost *, class QPointF const &)
+	?removePresentation@HsWidgetHost@@QAE_NW4Orientation@Qt@@@Z @ 644 NONAME ; bool HsWidgetHost::removePresentation(enum Qt::Orientation)
+	?staticMetaObject@HsContentService@@2UQMetaObject@@B @ 645 NONAME ; struct QMetaObject const HsContentService::staticMetaObject
+	?tr@HsWidgetHost@@SA?AVQString@@PBD0H@Z @ 646 NONAME ; class QString HsWidgetHost::tr(char const *, char const *, int)
+	?setWidgetRepositionFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 647 NONAME ; void HsConfiguration::setWidgetRepositionFeedbackEffect(enum HbFeedback::InstantEffect)
+	?gestureEvent@HsWidgetHostVisual@@MAEXPAVQGestureEvent@@@Z @ 648 NONAME ; void HsWidgetHostVisual::gestureEvent(class QGestureEvent *)
+	??1HsWidgetOrganizer@@UAE@XZ @ 649 NONAME ; HsWidgetOrganizer::~HsWidgetOrganizer(void)
+	?metaObject@HsBackupRestoreObserver@@UBEPBUQMetaObject@@XZ @ 650 NONAME ; struct QMetaObject const * HsBackupRestoreObserver::metaObject(void) const
+	?instance@HsGui@@SAPAV1@XZ @ 651 NONAME ; class HsGui * HsGui::instance(void)
+	?getStaticMetaObject@HsHostedWidgetFactory@@SAABUQMetaObject@@XZ @ 652 NONAME ; struct QMetaObject const & HsHostedWidgetFactory::getStaticMetaObject(void)
+	?pageIndex@HsPageVisual@@QBEHXZ @ 653 NONAME ; int HsPageVisual::pageIndex(void) const
+	?qt_metacall@HsScene@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 654 NONAME ; int HsScene::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?setExistingImage@HsWallpaper@@IAE_NXZ @ 655 NONAME ; bool HsWallpaper::setExistingImage(void)
+	?setPageChangeFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 656 NONAME ; void HsConfiguration::setPageChangeFeedbackEffect(enum HbFeedback::InstantEffect)
+	?trUtf8@HsHostedWidgetFactory@@SA?AVQString@@PBD0H@Z @ 657 NONAME ; class QString HsHostedWidgetFactory::trUtf8(char const *, char const *, int)
+	?trUtf8@HsConfiguration@@SA?AVQString@@PBD0H@Z @ 658 NONAME ; class QString HsConfiguration::trUtf8(char const *, char const *, int)
+	?minimumWidgetSizeInPixels@HsConfiguration@@QBE?AVQSizeF@@XZ @ 659 NONAME ; class QSizeF HsConfiguration::minimumWidgetSizeInPixels(void) const
+	?sourcePath@HsWallpaperLoaderThread@@QBE?AVQString@@XZ @ 660 NONAME ; class QString HsWallpaperLoaderThread::sourcePath(void) const
+	?event_finished@HsWidgetHost@@IAEXXZ @ 661 NONAME ; void HsWidgetHost::event_finished(void)
+	?widgets@HsPage@@QBE?AV?$QList@PAVHsWidgetHost@@@@XZ @ 662 NONAME ; class QList<class HsWidgetHost *> HsPage::widgets(void) const
+	?setPageMargin@HsConfiguration@@QAEXM@Z @ 663 NONAME ; void HsConfiguration::setPageMargin(float)
+	?parallaxFactor@HsIdleWidget@@QBEMXZ @ 664 NONAME ; float HsIdleWidget::parallaxFactor(void) const
+	?setOnline@HsWidgetHost@@QAEX_N@Z @ 665 NONAME ; void HsWidgetHost::setOnline(bool)
+	?setPreferencesToWidget@HsWidgetHost@@AAE_NXZ @ 666 NONAME ; bool HsWidgetHost::setPreferencesToWidget(void)
+	?setWidgetPickFeedbackEffect@HsConfiguration@@QAEXW4InstantEffect@HbFeedback@@@Z @ 667 NONAME ; void HsConfiguration::setWidgetPickFeedbackEffect(enum HbFeedback::InstantEffect)
+	?getStaticMetaObject@HsPageWallpaper@@SAABUQMetaObject@@XZ @ 668 NONAME ; struct QMetaObject const & HsPageWallpaper::getStaticMetaObject(void)
+	??0HsWidgetHostVisual@@QAE@PAVQGraphicsItem@@@Z @ 669 NONAME ; HsWidgetHostVisual::HsWidgetHostVisual(class QGraphicsItem *)
+	?trUtf8@HsIdleWidget@@SA?AVQString@@PBD0H@Z @ 670 NONAME ; class QString HsIdleWidget::trUtf8(char const *, char const *, int)
+	??0HsContentService@@QAE@PAVQObject@@@Z @ 671 NONAME ; HsContentService::HsContentService(class QObject *)
+	?trUtf8@HsWidgetComponentRegistry@@SA?AVQString@@PBD0H@Z @ 672 NONAME ; class QString HsWidgetComponentRegistry::trUtf8(char const *, char const *, int)
+	?targetPath@HsWallpaperLoaderThread@@QBE?AVQString@@XZ @ 673 NONAME ; class QString HsWallpaperLoaderThread::targetPath(void) const
+	?staticMetaObject@HsWallpaper@@2UQMetaObject@@B @ 674 NONAME ; struct QMetaObject const HsWallpaper::staticMetaObject
+	??_EHsAnchorPointInCenter@@UAE@I@Z @ 675 NONAME ; HsAnchorPointInCenter::~HsAnchorPointInCenter(unsigned int)
+	?trUtf8@HsGui@@SA?AVQString@@PBD0H@Z @ 676 NONAME ; class QString HsGui::trUtf8(char const *, char const *, int)
+	?metaObject@HsPageVisual@@UBEPBUQMetaObject@@XZ @ 677 NONAME ; struct QMetaObject const * HsPageVisual::metaObject(void) const
+	?tr@HsWidgetComponent@@SA?AVQString@@PBD0@Z @ 678 NONAME ; class QString HsWidgetComponent::tr(char const *, char const *)
+	?tr@HsHostedWidgetFactory@@SA?AVQString@@PBD0@Z @ 679 NONAME ; class QString HsHostedWidgetFactory::tr(char const *, char const *)
+	?setBounceEffect@HsConfiguration@@QAEXH@Z @ 680 NONAME ; void HsConfiguration::setBounceEffect(int)
+	??0HsPage@@QAE@PAVQObject@@@Z @ 681 NONAME ; HsPage::HsPage(class QObject *)
+	?qt_metacast@HsDatabase@@UAEPAXPBD@Z @ 682 NONAME ; void * HsDatabase::qt_metacast(char const *)
+	?registerService@HsWidgetComponentRegistry@@AAEXABVCaEntry@@ABVQString@@_N@Z @ 683 NONAME ; void HsWidgetComponentRegistry::registerService(class CaEntry const &, class QString const &, bool)
+	?trUtf8@HsBackupRestoreObserver@@SA?AVQString@@PBD0@Z @ 684 NONAME ; class QString HsBackupRestoreObserver::trUtf8(char const *, char const *)
+	?metaObject@HsWidgetHost@@UBEPBUQMetaObject@@XZ @ 685 NONAME ; struct QMetaObject const * HsWidgetHost::metaObject(void) const
+	?qt_metacast@HsConfiguration@@UAEPAXPBD@Z @ 686 NONAME ; void * HsConfiguration::qt_metacast(char const *)
 

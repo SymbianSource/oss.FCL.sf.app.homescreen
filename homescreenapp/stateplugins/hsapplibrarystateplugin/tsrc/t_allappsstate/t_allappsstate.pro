@@ -47,7 +47,8 @@ INCLUDEPATH += .\
                ../../inc \
                ../../../hsmenuworkerstateplugin/inc \
                ../../../../serviceproviders/hsmenuserviceprovider/inc \               
-               ../../../../hsutils/inc
+               ../../../../hsutils/inc \
+               ../../../../hsdomainmodel/inc
                
 symbian {
     for(docmlFile, docmlFiles): DOCML+=../../$$docmlFile

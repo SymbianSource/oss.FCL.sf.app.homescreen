@@ -843,6 +843,51 @@ bool HsDatabase::updateWidgetZValues(const QHash<int, qreal> &data, Qt::Orientat
     return true;
 }
 
+bool HsDatabase::updateWidgetPresentations(const QList<HsWidgetPresentationData> &data, Qt::Orientation orientation)
+{
+    if (!checkConnection()) {
+        return false;
+    }
+
+    QString key = orientation == Qt::Vertical ?
+        QLatin1String("portrait") : QLatin1String("landscape");
+
+    QSqlQuery query(QSqlDatabase::database(mConnectionName));
+    
+    QString statement =
+        "REPLACE INTO WidgetPresentations "
+        "(key, x, y, zValue, widgetId) "
+        "VALUES (?, ?, ?, ?, ?)";
+        
+    QVariantList xList;
+    QVariantList yList;
+    QVariantList zList;
+    QVariantList widgetIdList;
+    
+    foreach (HsWidgetPresentationData widgetData, data) {
+        xList.append(widgetData.x);
+        yList.append(widgetData.y);
+        zList.append(widgetData.zValue);
+        widgetIdList.append(widgetData.widgetId);
+    }
+    
+    if (query.prepare(statement)) {
+        query.addBindValue(toVariantList(key, data.count()));
+        query.addBindValue(xList);
+        query.addBindValue(yList);
+        query.addBindValue(zList);
+        query.addBindValue(widgetIdList);
+        if (!query.execBatch()) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+
 /*!
     Sets the database instance. The existing instance
     will be deleted.

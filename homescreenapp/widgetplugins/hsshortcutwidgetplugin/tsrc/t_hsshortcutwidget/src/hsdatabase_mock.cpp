@@ -218,6 +218,13 @@ bool HsDatabase::updateWidgetZValues(const QHash<int, qreal> &data, Qt::Orientat
     return true;
 }
 
+bool HsDatabase::updateWidgetPresentations(const QList<HsWidgetPresentationData> &data, Qt::Orientation orientation)
+{
+    Q_UNUSED(data)
+    Q_UNUSED(orientation)
+    return true;
+}
+
 bool HsDatabase::matchWidgetPreferences(const QVariantHash &preferences, const QMultiMap<QString, QString>& storedPreferences)
 {
     Q_UNUSED(preferences)

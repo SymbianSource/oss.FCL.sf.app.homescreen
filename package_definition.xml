@@ -45,7 +45,10 @@
 	<!-- break collection into components, or move down a dir and make it a component -->
     <component id="screensaver_build" name="Screen Saver Build" filter="s60">
       <unit bldFile="screensaver" qt:proFile="screensaver.pro" qt:qmakeArgs="-r -config rom"/>
-     </component>
-    </collection>
+    </component>
+    <component id="homescreen_plat" name="Screen Saver API" filter="s60">
+      <unit bldFile="homescreen_plat" qt:proFile="homescreen_plat.pro" qt:qmakeArgs="-r -config rom"/>
+    </component>
+  </collection>
  </package>
 </SystemDefinition>

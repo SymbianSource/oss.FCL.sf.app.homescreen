@@ -33,13 +33,21 @@ class HsWidgetHost;
 class HSDOMAINMODEL_EXPORT HsWidgetPositioningOnWidgetAdd
 {
 public:
+    class Result
+    {
+    public:
+        Result() { }
+        QList<QRectF> calculatedRects;
+        QList<int> rectOrder;
+    };
+
     virtual ~HsWidgetPositioningOnWidgetAdd() {}
     
-    virtual QList<QRectF> convert(const QRectF &contentArea,
+    virtual Result convert(const QRectF &contentArea,
                                   const QList<QRectF> &existingRects,
                                   const QList<QRectF> &newRects,
                                   const QPointF &startPoint) = 0;
-   
+  
     static void setInstance(HsWidgetPositioningOnWidgetAdd *instance);
     static HsWidgetPositioningOnWidgetAdd *instance();
 
@@ -50,7 +58,7 @@ private:
 class HSDOMAINMODEL_EXPORT HsAnchorPointInBottomRight : public HsWidgetPositioningOnWidgetAdd
 {
 public:
-    QList<QRectF> convert(const QRectF &contentArea,
+    Result convert(const QRectF &contentArea,
                           const QList<QRectF> &existingRects,
                           const QList<QRectF> &newRects,
                           const QPointF &startPoint);
@@ -60,7 +68,7 @@ public:
 class HSDOMAINMODEL_EXPORT HsAnchorPointInCenter : public HsWidgetPositioningOnWidgetAdd
 {
 public:
-    QList<QRectF> convert(const QRectF &contentArea,
+    Result convert(const QRectF &contentArea,
                           const QList<QRectF> &existingRects,
                           const QList<QRectF> &newRects,
                           const QPointF &startPoint);
@@ -73,7 +81,7 @@ public:
     ~HsWidgetOrganizer();
 
 public:
-    QList<QRectF> convert(const QRectF &contentArea,
+    Result convert(const QRectF &contentArea,
                           const QList<QRectF> &existingRects,
                           const QList<QRectF> &newRects,
                           const QPointF &startPoint);

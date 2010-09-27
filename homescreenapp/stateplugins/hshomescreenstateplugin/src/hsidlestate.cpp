@@ -124,6 +124,8 @@ HsIdleState::HsIdleState(QState *parent)
     mContinuousFeedback(0),
     mTrashBinFeedbackAlreadyPlayed(false),
     mDeltaX(0),
+    mWidgetX(0),
+    mWidgetY(0),
     mSceneMenu(0)
 #ifdef Q_OS_SYMBIAN
     ,mSettingsMgr(0)
@@ -261,8 +263,7 @@ void HsIdleState::setupStates()
         this, SIGNAL(event_waitInput()), state_waitInput);
     state_moveWidgetMoving->addTransition(
         this, SIGNAL(event_MoveWidgetDelete()), state_moveWidgetDelete);
-    state_moveWidgetDelete->addTransition(
-        this, SIGNAL(event_waitInput()), state_waitInput);
+    state_moveWidgetDelete->addTransition(state_waitInput);
 
     state_moveScene->addTransition(
         this, SIGNAL(event_waitInput()), state_waitInput);
@@ -606,7 +607,13 @@ void HsIdleState::onPagePanUpdated(QGestureEvent *event)
     HbPanGesture *gesture = qobject_cast<HbPanGesture *>(
         event->gesture(Qt::PanGesture));
 
-    mDeltaX = gesture->sceneOffset().x();
+    qreal temp = gesture->sceneOffset().x();
+    // for small movement take into consideration also previous delta to remove "shaking" effect
+    if (abs(mDeltaX - temp) < 10) {
+        mDeltaX = 0.9 * temp + 0.1 * mDeltaX;
+    } else {
+        mDeltaX = temp;
+    }
 
     HsScene *scene = HsScene::instance();
     int bounceEffect = HSCONFIGURATION_GET(bounceEffect);
@@ -673,9 +680,18 @@ void HsIdleState::onWidgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *wid
     qreal widgetX = qBound(lowerBoundX, widgetRect.x(), upperBoundX);
     qreal widgetY = qBound(lowerBoundY, widgetRect.y(), upperBoundY);
 
+    // for small movement take into consideration also previous value to remove "shaking" effect
+    if ((abs(mWidgetX - widgetX) < 10) && (abs(mWidgetY - widgetY) < 10)) {
+        mWidgetX = 0.9 * widgetX + 0.1 * mWidgetX;
+        mWidgetY = 0.9 * widgetY + 0.1 * mWidgetY;
+    } else {
+        mWidgetX = widgetX;
+        mWidgetY = widgetY;
+    }
+
     // If using ItemClipsChildrenToShape-flag in widgethost then
     // setPos does not update position here, however setGeometry does it, QT bug?
-    widget->visual()->setGeometry(widgetX, widgetY, widgetRect.width(), widgetRect.height());
+    widget->visual()->setGeometry(mWidgetX, mWidgetY, widgetRect.width(), widgetRect.height());
     
     if (HSCONFIGURATION_GET(isSnapEnabled)) {
         mSnapResult = HsWidgetPositioningOnWidgetMove::instance()->run(widget->visual()->sceneBoundingRect());
@@ -1110,7 +1126,6 @@ void HsIdleState::action_moveWidgetDelete_deleteWidgetOnTrashbin()
         widget->remove();
         scene->setActiveWidget(0);
     }
-    emit event_waitInput();
 }
 
 /*!

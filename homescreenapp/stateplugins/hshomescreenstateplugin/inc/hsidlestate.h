@@ -168,6 +168,8 @@ private:
     QPointF mWidgetHotSpot;
     QPointF mWidgetHotSpotOffset;
     qreal mDeltaX;
+    qreal mWidgetX;
+    qreal mWidgetY;
     QPointer<HbMenu> mSceneMenu;
     HsWidgetPositioningOnWidgetMove::Result mSnapResult;
     HsWidgetPositioningOnWidgetMove::Result mPreviousSnapResult;
