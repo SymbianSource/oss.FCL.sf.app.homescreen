@@ -20,5 +20,5 @@ HEADERS += ./inc/*.h \
 
 #Source files
 SOURCES += ./src/*.cpp \
-		   ../src/*.cpp \
+	   ../src/*.cpp \
            ../../src/*.cpp

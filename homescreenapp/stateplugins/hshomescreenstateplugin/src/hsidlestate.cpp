@@ -82,7 +82,7 @@ namespace
     const char hsLocTextId_ContextMenu_ChangeWallpaper[] = "txt_homescreen_list_change_wallpaper";
 
     //Home screen canvas menu item for opening Application library
-    const char hsLocTextId_ContextMenu_AddContent[] = "txt_homescreen_list_add_content";
+    const char hsLocTextId_ContextMenu_AddContent[] = "txt_homescreen_opt_add_content";
 
     //Home screen options menu item for opening Task switcher
     const char hsLocTextId_OptionsMenu_TaskSwitcher[] = "txt_homescreen_opt_task_switcher";
@@ -657,6 +657,12 @@ void HsIdleState::onWidgetTapAndHoldFinished(QGestureEvent *event, HsWidgetHost 
  
 void HsIdleState::onWidgetMoveUpdated(const QPointF &scenePos, HsWidgetHost *widget)
 {
+    /* If move was interrupted by a popup and and we plan to move second widget.
+     * Then the erroneous first widget instance is received here, as there is no cancel gesture
+       -> we need to use active widget that was saved during TapAndHold.
+    */
+    widget = HsScene::instance()->activeWidget();
+
     QRectF widgetRect = widget->visual()->geometry();
 
     // Move widget to updated position.

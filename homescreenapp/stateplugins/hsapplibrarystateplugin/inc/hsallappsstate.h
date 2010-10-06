@@ -56,6 +56,8 @@ private slots:
     void descendingMenuAction();
     void normalModeEntered();
     void stateExited();
+    void updateLabel();
+    
 private:
     void construct();
     void setMenuOptions();

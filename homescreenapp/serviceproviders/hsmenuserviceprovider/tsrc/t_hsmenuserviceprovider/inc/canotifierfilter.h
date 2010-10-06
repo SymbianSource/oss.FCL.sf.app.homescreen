@@ -19,10 +19,7 @@
 #define CANOTIFIERFILTER_H
 
 #include <QList>
-
 #include <cadefs.h>
-
-
 
 class CaQuery;
 

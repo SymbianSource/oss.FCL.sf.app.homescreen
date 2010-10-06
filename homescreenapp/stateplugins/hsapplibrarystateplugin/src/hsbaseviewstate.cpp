@@ -114,7 +114,7 @@ void HsBaseViewState::createApplicationLaunchFailMessage(int errorCode,
             message, HsMenuDialogFactory::Close);
 
     QScopedPointer<HsMenuEntryRemovedHandler> entryObserver(
-            new HsMenuEntryRemovedHandler(itemId, 
+            new HsMenuEntryRemovedHandler(itemId,
                     mApplicationLaunchFailMessage.data(), SLOT(close())));
 
     entryObserver.take()->setParent(mApplicationLaunchFailMessage.data());
@@ -159,6 +159,7 @@ void HsBaseViewState::stateExited()
 void HsBaseViewState::addModeEntered()
 {
     mViewOptions = mMenuView->view()->takeMenu();
+    mMenuView->disableOviStore(true);
     connect(mMenuView.data(),
             SIGNAL(activated(QModelIndex)),
             SLOT(addActivated(QModelIndex)));
@@ -181,6 +182,7 @@ void HsBaseViewState::addModeExited()
 void HsBaseViewState::normalModeEntered()
 {
     setMenuOptions();
+    mMenuView->disableOviStore(false);
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
@@ -210,10 +212,9 @@ void HsBaseViewState::launchItem(const QModelIndex &index)
             machine()->postEvent(HsMenuEventFactory::createPreviewHSWidgetEvent(entry->id(),
                 entry->entryTypeName(), entry->attribute(Hs::widgetUriAttributeName),
                 entry->attribute(Hs::widgetLibraryAttributeName)));
-            HsMenuService::touch(entry->id());
-        }
-        else {
-            int errCode = HsMenuService::executeAction(entry->id());
+            HsMenuService::touch(*entry);
+        } else {
+            int errCode = HsMenuService::executeAction(*entry);
             if (errCode != 0) {
                 createApplicationLaunchFailMessage(errCode, entry->id());
             }
@@ -233,7 +234,7 @@ void HsBaseViewState::openCollection(const QModelIndex &index)
     int id = data.toInt();
     QString collectionType = mModel->data(
             index, CaItemModel::TypeRole).toString();
-    qDebug("HsBaseViewState::openCollection - MCS ID: %d", data.toInt());
+    qDebug("HsBaseViewState::openCollection - ID: %d", data.toInt());
 
     machine()->postEvent(
             HsMenuEventFactory::createOpenCollectionFromAppLibraryEvent(
@@ -253,7 +254,7 @@ void HsBaseViewState::showContextMenu(
     EntryFlags flags = item->modelIndex().data(
             CaItemModel::FlagsRole).value<EntryFlags> ();
 
-    if (!(flags & UninstallEntryFlag)) {
+    if ((!(flags & UninstallEntryFlag)) && (flags & VisibleEntryFlag)) {
         mContextMenu = new HbMenu;
         setContextMenuOptions(item,flags);
         mContextModelIndex = item->modelIndex();
@@ -316,7 +317,7 @@ void HsBaseViewState::closeContextMenu()
 {
     if (mContextMenu) {
         mContextMenu->close();
-    }    
+    }
 }
 
 /*!
@@ -329,7 +330,7 @@ void HsBaseViewState::contextMenuAction(HbAction *action)
         static_cast<Hs::HsContextAction>(action->data().toInt());
 
     const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
-    
+
     if (itemId > 0) {
         switch (command) {
             case Hs::AddToHomeScreenContextAction:

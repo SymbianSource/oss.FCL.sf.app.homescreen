@@ -65,7 +65,7 @@ void HsWallpaperLoaderThread::run()
         imageReader.setScaledSize(sourceSize);
 
         //Crop center part of the scaled image as a target image
-        clipRect.moveCenter(QPoint(sourceSize.width() / 2, sourceSize.height() / 2));
+        clipRect.moveCenter(QPoint(sourceSize.width() / 2 - 1, sourceSize.height() / 2 - 1));
         imageReader.setScaledClipRect(clipRect);
 
         mResult = imageReader.read().save(mTargetPath);

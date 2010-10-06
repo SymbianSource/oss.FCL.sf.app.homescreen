@@ -37,6 +37,7 @@
 
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddToHomeScreenState_construction()
@@ -64,8 +65,8 @@ void MenuStatesTest::AddToHomeScreenState_construction()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddToHomeScreenState_onEntry()
@@ -103,7 +104,7 @@ void MenuStatesTest::AddToHomeScreenState_onEntry()
                         CaItemModel::IdRole).toInt();
             }
         }
-		QVERIFY(clockId != 0);
+        QVERIFY(clockId != 0);
         const QString clockWidgetUri("hsclockwidgetplugin");
 
         QVariantMap eventAttributes;
@@ -149,6 +150,7 @@ void MenuStatesTest::AddToHomeScreenState_onEntry()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddToHomeScreenState_onEntry_2()
@@ -203,6 +205,7 @@ void MenuStatesTest::AddToHomeScreenState_onEntry_2()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddToHomeScreenState_onEntry_3()
@@ -263,6 +266,7 @@ void MenuStatesTest::AddToHomeScreenState_onEntry_3()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddToHomeScreenState_onEntry_4()
@@ -324,9 +328,9 @@ void MenuStatesTest::AddToHomeScreenState_onEntry_4()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
-
 void MenuStatesTest::AddToHomeScreenState_showMessageWidgetCorrupted()
 {
 #ifdef Q_OS_SYMBIAN
@@ -366,9 +370,4 @@ void MenuStatesTest::AddToHomeScreenState_openHomeScreen()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
-
-
-
-
-
 

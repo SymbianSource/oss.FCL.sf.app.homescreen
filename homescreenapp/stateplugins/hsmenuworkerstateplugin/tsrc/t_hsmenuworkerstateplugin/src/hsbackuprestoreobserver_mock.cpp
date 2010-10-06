@@ -15,7 +15,6 @@
 *
 */
 
-
 #include "hsdatabase.h"
 #include "hsbackuprestoreobserver.h"
 
@@ -52,8 +51,8 @@ HsBackupRestoreObserver::~HsBackupRestoreObserver()
 */
 void HsBackupRestoreObserver::backupRestoreStarted()
 {
-	mBUROngoing = true;
-	emit event_backupRestoreStarted();
+    mBUROngoing = true;
+    emit event_backupRestoreStarted();
 }
 
 /*!
@@ -61,8 +60,8 @@ void HsBackupRestoreObserver::backupRestoreStarted()
 */
 void HsBackupRestoreObserver::backupRestoreCompleted()
 {
-	mBUROngoing = false;
-	emit event_backupRestoreCompleted();
+    mBUROngoing = false;
+    emit event_backupRestoreCompleted();
 }
 
 /*!
@@ -77,9 +76,9 @@ void HsBackupRestoreObserver::readyForBUR()
 */
 bool HsBackupRestoreObserver::checkBUR()
 {
-	if (mBUROngoing) {
-		return true;
-	}
+    if (mBUROngoing) {
+        return true;
+    }
     return false;
 }
 /*!

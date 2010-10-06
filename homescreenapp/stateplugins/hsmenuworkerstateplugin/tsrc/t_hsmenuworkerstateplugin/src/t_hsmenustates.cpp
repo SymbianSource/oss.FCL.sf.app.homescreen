@@ -27,6 +27,10 @@
 #include "hsshortcutservice.h"
 #include "hsdialogcontroller.h"
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::initTestCase()
 {
 #ifdef Q_OS_SYMBIAN
@@ -38,7 +42,9 @@ void MenuStatesTest::initTestCase()
                        (HsShortcutService::instance(mStateMachine/*,0*/));
     mWindow = new HbMainWindow();
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::cleanupTestCase()
@@ -47,18 +53,25 @@ void MenuStatesTest::cleanupTestCase()
     stopThread();
 #endif //Q_OS_SYMBIAN
     delete mStateMachine;
-    delete mWindow;
-    mWindow = NULL;
+    //QWARN ( "Due to bug in hb wk36 we are we have to avoid deleting "
+    //        "HbMainWindow, remove comment when fixed" )    
+/*    delete mWindow;
+    mWindow = NULL;*/
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
+//
 int threadFunction(void *params)
 {
     Q_UNUSED(params);
@@ -72,6 +85,7 @@ int threadFunction(void *params)
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::startThread()
@@ -87,7 +101,9 @@ void MenuStatesTest::startThread()
     iThread.Resume();
 #endif //Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::stopThread()
@@ -99,6 +115,7 @@ void MenuStatesTest::stopThread()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::testSlot(HbAction* finished)
@@ -108,6 +125,7 @@ void MenuStatesTest::testSlot(HbAction* finished)
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 int MenuStatesTest::testExitSlot()
@@ -116,6 +134,10 @@ int MenuStatesTest::testExitSlot()
     return 0;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::checkDialogController()
 {
 

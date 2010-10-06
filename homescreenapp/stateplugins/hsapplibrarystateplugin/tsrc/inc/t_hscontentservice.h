@@ -14,6 +14,7 @@
 * Description:
 *
 */
+
 #ifndef T_HSCONTENTSERVICE_H
 #define T_HSCONTENTSERVICE_H
 
@@ -30,7 +31,7 @@ public:
     HsContentService(QObject *parent = 0);
     ~HsContentService();
 
-	bool widgets(const QString &uri, const QVariantHash &preferences, int &count);
+    bool widgets(const QString &uri, const QVariantHash &preferences, int &count);
     static HsContentService *instance();
 signals:
     bool widgetAdded(const QString &, const QVariantHash &);

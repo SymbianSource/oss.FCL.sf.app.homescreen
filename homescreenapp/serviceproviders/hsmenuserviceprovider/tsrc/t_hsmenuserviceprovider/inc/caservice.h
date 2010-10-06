@@ -25,7 +25,6 @@
 #include <QString>
 #include <QDebug>
 
-
 #include "caservice.h"
 #include "caquery.h"
 #include "caentry.h"
@@ -166,10 +165,6 @@ private:
     friend class QtSharedPointer::ExternalRefCount<CaService>;
 };
 
-
-
-
-
 inline CaService::CaService(QObject *parent) :
         QObject(parent),
         mGetEntryId(0),
@@ -190,7 +185,6 @@ inline CaService::CaService(QObject *parent) :
         mCustomSortGroupId(0),
         mCustomSortResult(false),
         mCreateNotifierResult(0)
-
 {
 }
 

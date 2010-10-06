@@ -25,6 +25,7 @@ void AddToHomeScreenMockState::onEntry(QEvent *e)
     Q_UNUSED(e);
     mEntered = true;
 }
+
 bool AddToHomeScreenMockState::enteredValue() const
 {
     return mEntered;

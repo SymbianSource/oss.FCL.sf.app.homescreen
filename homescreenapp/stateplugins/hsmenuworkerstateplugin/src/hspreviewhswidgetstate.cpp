@@ -128,7 +128,7 @@ void HsPreviewHSWidgetState::onEntry(QEvent *event)
                 SLOT(addToHomeScreen()));
 
         connect(dialogController.data(),
-                SIGNAL(dialogCompleted()),
+                SIGNAL(rejectActionTriggered(QAction*)),
                 this,
                 SIGNAL(exit()));
 
@@ -169,6 +169,7 @@ void HsPreviewHSWidgetState::addToHomeScreen()
         notificationDialog->setAttribute(Qt::WA_DeleteOnClose);
         notificationDialog->setTitle(hbTrId("txt_applib_dpophead_added_to_homescreen"));
         notificationDialog->show();
+        emit exit();
     }
     else {
         showMessageWidgetCorrupted();

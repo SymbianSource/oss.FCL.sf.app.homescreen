@@ -30,7 +30,7 @@ class HbMessageBox;
 class HSUTILS_EXPORT HsMenuDialogFactory
 {
 public:
-    enum Options { OkCancel, Close };
+    enum Options { OkCancel, Close, DeleteCancel };
 
     virtual HbMessageBox *create(const QString &text,
                                  Options options = OkCancel) const;

@@ -19,9 +19,8 @@ docmlFiles+= \
     resource/common_objects.docml \
     resource/emptylabeledview.docml \
     resource/labeledlistview.docml \
-    resource/listview.docml \
     resource/searchview.docml
-    
+
     qrcFile = hsapplibrarystateplugin.qrc
 } else {
     qrcFile = hsapplibrarystateplugin_non_symbian.qrc

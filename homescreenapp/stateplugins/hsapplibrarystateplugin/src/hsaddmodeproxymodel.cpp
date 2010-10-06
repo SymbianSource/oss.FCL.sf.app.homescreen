@@ -133,8 +133,7 @@ int HsAddModeProxyModel::findCwrtWidgetEntryId(const QVariantHash &preferences)
     }
     QList< QSharedPointer<CaEntry> > entries =
         CaService::instance()->getEntries(query);
-    if( entries.count() > 0 )
-    {
+    if (entries.count() > 0) {
         result = entries[0]->id();
     }
     return result;
@@ -147,7 +146,8 @@ int HsAddModeProxyModel::findCwrtWidgetEntryId(const QVariantHash &preferences)
  \param preferences widget preferences.
  */
 void HsAddModeProxyModel::updateCacheOnAddWidget(const QString &uri,
-    const QVariantHash &preferences){
+    const QVariantHash &preferences)
+{
 	if (uri == Hs::HS_WIDGET_URI_ATTRIBUTE_CWRT_VALUE) {
         int entryId = findCwrtWidgetEntryId(preferences);
         if (!mCwrtWidgetCache.value(entryId) ) {
@@ -202,5 +202,6 @@ void HsAddModeProxyModel::updateEntryStatus(const CaEntry &entry, ChangeType cha
         mCwrtWidgetCache.insert(entry.id(),
             HsAppLibStateUtils::isCWRTWidgetOnHomeScreen(&entry));
     }
+    invalidateFilter();
 }
 

@@ -93,8 +93,6 @@ symbian {
 
     CONFIG += symbian_test	
     coverage: CONFIG -= symbian_test
-    
-    MMP_RULES += SMPSAFE
     }
 
     
@@ -105,3 +103,6 @@ include(t_hsmenuworkerstateplugin.pri)
 
 
 
+
+
+symbian:MMP_RULES += SMPSAFE

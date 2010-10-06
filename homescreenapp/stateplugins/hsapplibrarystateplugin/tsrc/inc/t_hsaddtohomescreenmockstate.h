@@ -23,7 +23,6 @@
 #include "caentry.h"
 #include "caitemmodel.h"
 
-
 class AddToHomeScreenMockState: public QState
 {
     Q_OBJECT

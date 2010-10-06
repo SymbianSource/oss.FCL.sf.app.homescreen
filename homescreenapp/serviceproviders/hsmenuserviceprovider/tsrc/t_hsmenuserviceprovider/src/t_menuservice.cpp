@@ -34,6 +34,7 @@
 QTM_USE_NAMESPACE
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_getAllApplicationsModel()
@@ -96,6 +97,7 @@ void MenuServiceTest::MenuService_getAllApplicationsModel()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_getAllCollectionsModel()
@@ -134,6 +136,7 @@ void MenuServiceTest::MenuService_getAllCollectionsModel()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_getInstalledModel()
@@ -190,6 +193,7 @@ void MenuServiceTest::MenuService_getInstalledModel()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_getCollectionModel()
@@ -231,8 +235,6 @@ void MenuServiceTest::MenuService_getCollectionModel()
         expectedQuery.setSort(
             HsMenuServiceUtils::sortBy(Hs::NoHsSortAttribute),
             HsMenuServiceUtils::sortOrder(Hs::NoHsSortAttribute));
-
-
     }
 #ifdef Q_OS_SYMBIAN
 #ifdef UT_MEMORY_CHECK
@@ -242,6 +244,7 @@ void MenuServiceTest::MenuService_getCollectionModel()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_getCollectionNames()
@@ -252,9 +255,6 @@ void MenuServiceTest::MenuService_getCollectionNames()
 #endif
 #endif
     {
-
-
-
         QSharedPointer<CaEntry> collectionA(new CaEntry);
         collectionA->mTextResult = "A";
         QSharedPointer<CaEntry> collectionB(new CaEntry);
@@ -290,6 +290,7 @@ void MenuServiceTest::MenuService_getCollectionNames()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_getName()
@@ -325,6 +326,7 @@ void MenuServiceTest::MenuService_getName()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_executeAction()
@@ -361,6 +363,7 @@ void MenuServiceTest::MenuService_executeAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_executeActionEntry()
@@ -396,6 +399,7 @@ void MenuServiceTest::MenuService_executeActionEntry()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 #ifdef Q_OS_SYMBIAN
@@ -413,6 +417,10 @@ void MenuServiceTest::MenuService_launchTS()
 }
 #endif//Q_OS_SYMBIAN
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::MenuService_createCollection()
 {
 #ifdef Q_OS_SYMBIAN
@@ -463,6 +471,10 @@ void MenuServiceTest::MenuService_createCollection()
 #endif
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::MenuService_renameCollection()
 {
 #ifdef Q_OS_SYMBIAN
@@ -499,6 +511,10 @@ void MenuServiceTest::MenuService_renameCollection()
 #endif
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::MenuService_removeCollection()
 {
 #ifdef Q_OS_SYMBIAN
@@ -526,7 +542,10 @@ void MenuServiceTest::MenuService_removeCollection()
 #endif
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::MenuService_addApplicationsToCollection()
 {
 #ifdef Q_OS_SYMBIAN
@@ -559,6 +578,10 @@ void MenuServiceTest::MenuService_addApplicationsToCollection()
 #endif
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::MenuService_removeApplicationFromCollection()
 {
 #ifdef Q_OS_SYMBIAN
@@ -591,8 +614,8 @@ void MenuServiceTest::MenuService_removeApplicationFromCollection()
 #endif
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_organizeCollection()
@@ -629,8 +652,8 @@ void MenuServiceTest::MenuService_organizeCollection()
 
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_touchAction()
@@ -679,8 +702,56 @@ void MenuServiceTest::MenuService_touchAction()
 
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void MenuServiceTest::MenuService_touchAction_ByEntry()
+{
+#ifdef Q_OS_SYMBIAN
+#ifdef UT_MEMORY_CHECK
+    __UHEAP_MARK;
+#endif
+#endif
+    {
+        QSharedPointer<CaService> service = CaService::instance();
+
+        ////touch on unused entry
+        const int touchedEntryId = 5;
+        QSharedPointer<CaEntry> touchedEntry(new CaEntry);
+        touchedEntry->mIdResult = touchedEntryId;
+        touchedEntry->setText("GHI");
+        touchedEntry->setFlags(RemovableEntryFlag | VisibleEntryFlag);
+        service->mGetEntryResult = touchedEntry;
+        service->mTouchResult = true;
+
+        HsMenuService::touch(*touchedEntry);
+        QCOMPARE(service->mTouchEntry.id(), touchedEntryId);
+        QCOMPARE(service->mTouchEntry.text(), touchedEntry->text());
+
+        ////touch on already used entry
+        const int unTouchedEntryId = 5;
+        QSharedPointer<CaEntry> unTouchedEntry(new CaEntry);
+        unTouchedEntry->mIdResult = unTouchedEntryId;
+        unTouchedEntry->setText("GHI_UT");
+        unTouchedEntry->setFlags(0);
+        service->mGetEntryResult = unTouchedEntry;
+        service->mTouchResult = true;
+
+        HsMenuService::touch(*touchedEntry);
+        QCOMPARE(service->mTouchEntry.id(), touchedEntryId);
+        QCOMPARE(service->mTouchEntry.text(), touchedEntry->text());
+    }
+#ifdef Q_OS_SYMBIAN
+#ifdef UT_MEMORY_CHECK
+    __UHEAP_MARKEND;
+#endif
+#endif
+
+}
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_touchListOfIdsAction()
@@ -730,8 +801,8 @@ void MenuServiceTest::MenuService_touchListOfIdsAction()
 #endif
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_launchSoftwareUpdate()
@@ -763,6 +834,7 @@ void MenuServiceTest::MenuService_launchSoftwareUpdate()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::MenuService_collectionIdByType()
@@ -789,8 +861,8 @@ void MenuServiceTest::MenuService_collectionIdByType()
 #endif
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::initTestCase()
@@ -806,7 +878,9 @@ void MenuServiceTest::cleanup()
 {
     CaService::instance()->clear();
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::cleanupTestCase()
@@ -816,9 +890,10 @@ void MenuServiceTest::cleanupTestCase()
 #endif //Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
+//
 int threadFunction(void *params)
 {
     Q_UNUSED(params)
@@ -834,6 +909,7 @@ int threadFunction(void *params)
 #ifdef Q_OS_SYMBIAN
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::startThread()
@@ -852,7 +928,9 @@ void MenuServiceTest::startThread()
 
 #ifdef Q_OS_SYMBIAN
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuServiceTest::stopThread()

@@ -39,10 +39,10 @@ symbian {
     
     include(hsapplibrarystateplugin_exports_to_rom.pri)
     LIBS += -lxqsettingsmanager
-    
-    MMP_RULES += SMPSAFE
 }
 
 RESOURCES = $$qrcFile
     
 exportResources(./*.qm, resource/qt/translations)
+
+symbian:MMP_RULES += SMPSAFE

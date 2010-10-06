@@ -158,7 +158,7 @@ void t_hsUtils::testMenuEventFactoryCreatePreviewHSWidgetEvent()
 //
 void t_hsUtils::testMenuEventFactoryCreateAppSettingsViewEvent()
 {
-	int dummyId = 12345;
+    int dummyId = 12345;
     QEvent *menuEvent(NULL);
     menuEvent = HsMenuEventFactory::createAppSettingsViewEvent(dummyId);
     QCOMPARE(static_cast<HsMenuEvent *>(menuEvent)->operation(),
@@ -175,7 +175,7 @@ void t_hsUtils::testMenuEventFactoryCreateAppSettingsViewEvent()
 //
 void t_hsUtils::testMenuEventFactoryCreateAppDetailsViewEvent()
 {
-	int dummyId = 12345;
+    int dummyId = 12345;
     QEvent *menuEvent(NULL);
     menuEvent = HsMenuEventFactory::createAppDetailsViewEvent(dummyId);
     QCOMPARE(static_cast<HsMenuEvent *>(menuEvent)->operation(),
@@ -492,6 +492,9 @@ void t_hsUtils::testMenuEventTransitionTestCondition()
     QCOMPARE(wrongResult, false);
 }
 
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
 void t_hsUtils::testMenuEventFactoryCreateArrangeCollectionEvent()
 {
     const int topItemId = 12345;
@@ -510,6 +513,9 @@ void t_hsUtils::testMenuEventFactoryCreateArrangeCollectionEvent()
     delete menuEvent;
 }
 
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
 void t_hsUtils::testMenuEventFactorycreateArrangeAllCollectionsEvent()
 {
     const int topItemId = 12345;

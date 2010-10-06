@@ -23,12 +23,16 @@
 #include <QServiceFilter>
 #include <QServiceInterfaceDescriptor>
 #include <QTimer>
+#ifdef Q_OS_SYMBIAN
 #include <XQSettingsManager>
+#include <screensaverdomaincrkeys.h>
+#endif //Q_OS_SYMBIAN
 #include <HbMainWindow>
 #include <HbIndicatorInterface>
+#include <HbEffect>
 
 #include <screensaver.h>
-#include <screensaverdomaincrkeys.h>
+
 #include "snsrdevicedialog.h"
 #include "snsrdevicedialogdisplaycontrol.h"
 
@@ -93,7 +97,15 @@ SnsrDeviceDialog::SnsrDeviceDialog(const QVariantMap &parameters, QGraphicsItem 
     setDismissPolicy(HbPopup::NoDismiss);
     setTimeout(HbPopup::NoTimeout);
     
-    mainWindow()->setAutomaticOrientationEffectEnabled(false);
+    // Disable all the effects for the screensaver dialog. Otherwise, the
+    // automatic fade effect would be applied to the screensaver when screen
+    // orientation changes, revealing the UI beneath (because device dialog
+    // application server has a transparent background). This both looks ugly 
+    // and poses a potential security risk, as in the device locked case 
+    // screensaver is used as a layer to hide any confidential information.
+    // Screensaver containers can still implement custom effects for orientation
+    // swithc etc.
+    HbEffect::disable(this);
 
     setDeviceDialogParameters( parameters );
     
@@ -141,7 +153,8 @@ bool SnsrDeviceDialog::setDeviceDialogParameters(const QVariantMap &parameters)
             return false;
         }
     }
-        
+    
+#ifdef Q_OS_SYMBIAN
     // Check initial view from repository
     if (viewType == ViewTypeInitial ) {
         XQSettingsManager::Error error;
@@ -155,7 +168,12 @@ bool SnsrDeviceDialog::setDeviceDialogParameters(const QVariantMap &parameters)
             viewType = startupView;
         }
     }
-
+#else
+    if (viewType == ViewTypeInitial ) {
+        viewType = ViewTypeStandby;
+	}
+#endif //Q_OS_SYMBIAN
+    
     switch (viewType) {
     case SnsrDeviceDialog::ViewTypeActive:
         mScreensaver->foreground();

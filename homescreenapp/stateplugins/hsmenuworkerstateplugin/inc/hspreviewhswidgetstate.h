@@ -74,6 +74,4 @@ private:
     QString mUri;
 };
 
-
-
 #endif //HSPREVIEWHSWIDGETSTATE_H

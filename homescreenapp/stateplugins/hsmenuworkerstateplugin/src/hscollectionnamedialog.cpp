@@ -20,6 +20,7 @@
 #include <hblineedit.h>
 #include <hbvalidator.h>
 #include <hsmenuservice.h>
+#include <HbParameterLengthLimiter>
 #include <QDebug>
 
 #include "hscollectionnamedialog.h"
@@ -133,31 +134,26 @@ QString HsCollectionNameDialog::generateUniqueCollectionName(
 
     QString newName(name);
 
+    QChar leadingCharacter('0');
+    static const int fieldWidth(2);
+    static const int base(10);
     unsigned int numToAppend(1);
 
-    bool defaultCollection = false;
-    if (newName == hbTrId("txt_applib_dialog_entry_collection")) {
-        defaultCollection = true;
-    }
-    if (defaultCollection) {
+    
+    if (newName == HbParameterLengthLimiter(
+        "txt_applib_dialog_entry_collection")) {
         while (mOtherCollectionsNames.contains(newName)) {
-            newName = hbTrId("txt_applib_dialog_entry_collectionl1").arg(
-                numToAppend);
+            newName = HbParameterLengthLimiter(
+                    "txt_applib_dialog_entry_collectionl1").arg(
+                numToAppend, fieldWidth, base, leadingCharacter);
             numToAppend++;
         }
     }
     else {
-        QString textMap = hbTrId(
-            "txt_applib_dialog_collection_name_entry_1_l1");
-        // TODO: Temporary workaround.
-        // The "if" instruction below can be removed when
-        // a text map "txt_applib_dialog_collection_name_entry_1_l1"
-        // is available in the platform.
-        if (textMap == "txt_applib_dialog_collection_name_entry_1_l1") {
-            textMap = "%2 (%L1)";
-        }
         while (mOtherCollectionsNames.contains(newName)) {
-            newName = textMap.arg(numToAppend).arg(name);
+            newName = HbParameterLengthLimiter(
+                    "txt_applib_dialog_collection_name_entry_1_l1").arg(
+                numToAppend, fieldWidth, base, leadingCharacter).arg(name);
             numToAppend++;
         }
     }

@@ -23,6 +23,7 @@
 #include "t_hsmenuworkerstateplugin.h"
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ViewAppSettings_construction()
@@ -48,6 +49,7 @@ void MenuStatesTest::ViewAppSettings_construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ViewAppSettings_onEntry()
@@ -92,8 +94,8 @@ void MenuStatesTest::ViewAppSettings_onEntry()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ViewAppSettings_onExit()

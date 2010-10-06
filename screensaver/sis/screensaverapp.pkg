@@ -1,5 +1,5 @@
 ;
-; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 ; All rights reserved.
 ; This component and the accompanying materials are made available
 ; under the terms of "Eclipse Public License v1.0"
@@ -30,17 +30,17 @@
 [0x1028315F], 0, 0, 0, {"S60ProductID"}
 
 
-// ---- devicedialogplugin --------------------------------------------
+; ---- devicedialogplugin --------------------------------------------
 "/epoc32/release/armv5/urel/snsrdevicedialogplugin.dll"                            - "c:/sys/bin/snsrdevicedialogplugin.dll"
-"/epoc32/data/z/resource/plugins/devicedialogs/snsrdevicedialogplugin.qtplugin" - "c:/resource/plugins/devicedialogs/snsrdevicedialogplugin.qtplugin
+"/epoc32/data/z/resource/plugins/devicedialogs/snsrdevicedialogplugin.qtplugin"    - "c:/resource/plugins/devicedialogs/snsrdevicedialogplugin.qtplugin"
 
 ; ---- screensaverplugins --------------------------------------------
 
 ; -------- snsrbigclockscreensaverplugin
 "/epoc32/release/armv5/urel/snsrbigclockscreensaverplugin.dll"                                   - "c:/sys/bin/snsrbigclockscreensaverplugin.dll"
 "/epoc32/data/z/resource/qt/translations/snsrbigclockscreensaverplugin.qm"                       - "c:/resource/qt/translations/snsrbigclockscreensaverplugin.qm"
-"/epoc32/data/z/snsrresources/plugins/screensaverplugins/snsrbigclockscreensaverplugin.qtplugin" - "c:/snsrresources/plugins/screensaverplugins/snsrbigclockscreensaverplugin.qtplugin"
-"/epoc32/data/z/snsrresources/plugins/screensaverplugins/snsrbigclockscreensaverplugin.xml"      - "c:/snsrresources/plugins/screensaverplugins/snsrbigclockscreensaverplugin.xml"
+"/epoc32/data/z/snsrresources/plugins/snsrplugins/snsrbigclockscreensaverplugin.qtplugin"        - "c:/snsrresources/plugins/snsrplugins/snsrbigclockscreensaverplugin.qtplugin"
+"/epoc32/data/z/snsrresources/plugins/snsrplugins/snsrbigclockscreensaverplugin.xml"             - "c:/snsrresources/plugins/snsrplugins/snsrbigclockscreensaverplugin.xml"
 
 ; ---- snsrutils --------------------------------------------
 

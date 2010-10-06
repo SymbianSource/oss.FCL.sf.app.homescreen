@@ -152,7 +152,7 @@ void HsCollectionState::stateEntered()
                 mCollectionId, mSortAttribute, mCollectionType);
     }
 
-    handleEmptyChange(mModel->rowCount() == 0);
+    reconnectViewComponents(mModel->rowCount() == 0);
 
     makeConnect();
 
@@ -267,6 +267,7 @@ void HsCollectionState::makeConnect()
             static_cast<HsBaseViewState*>(this),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
     connect(mModel, SIGNAL(modelReset()), SLOT(updateLabel()));
+    connect(mModel, SIGNAL(countChange()), SLOT(updateLabel()));
     connect(mModel, SIGNAL(empty(bool)),this,
             SLOT(handleEmptyChange(bool)));
     connect(mModel, SIGNAL(empty(bool)),this,
@@ -292,11 +293,11 @@ void HsCollectionState::makeDisconnect()
     disconnect(mModel, SIGNAL(empty(bool)),this,
                SLOT(handleEmptyChange(bool)));
 
-    disconnect(mModel, SIGNAL(empty(bool)),this,
+    disconnect(mModel, SIGNAL(empty(bool)), this,
                SLOT(lockSearchButton(bool)));
 
-    disconnect(mModel, SIGNAL(modelReset()),
-                   this, SLOT(updateLabel()));
+    disconnect(mModel, SIGNAL(modelReset()), this, SLOT(updateLabel()));
+    disconnect(mModel, SIGNAL(countChange()), this, SLOT(updateLabel()));
 }
 
 /*!
@@ -304,7 +305,7 @@ void HsCollectionState::makeDisconnect()
  \param action action taken in context menu
  */
 void HsCollectionState::contextMenuAction(HbAction *action)
-	{
+{
     const int itemId = mContextModelIndex.data(CaItemModel::IdRole).toInt();
     
     if (itemId > 0) {
@@ -336,9 +337,16 @@ void HsCollectionState::contextMenuAction(HbAction *action)
  */
 void HsCollectionState::handleEmptyChange(bool empty)
 {
-    EntryFlags flags = mModel->root().data(
-            CaItemModel::FlagsRole).value<EntryFlags> ();
+    reconnectViewComponents(empty);
+    mMenuView->activate();
+}
 
+/*!
+ Reconnects view componets beetwen empty/not empty view.
+ \param empty \a true when model becomes empty \a false otherwise.
+ */
+void HsCollectionState::reconnectViewComponents(bool empty)
+{
     if (empty){
         mMenuView->reset(HsEmptyLabelContext);
     } else {
@@ -348,10 +356,8 @@ void HsCollectionState::handleEmptyChange(bool empty)
             mModel->index(0), HbAbstractItemView::PositionAtTop);
     }
     mMenuView->disableSearch(empty);
-    mMenuView->activate();
     setMenuOptions();
 }
-
 
 /*!
  Handles lock search button
@@ -410,7 +416,7 @@ void HsCollectionState::updateLabel()
     HSMENUTEST_FUNC_ENTRY("HsCollectionState::updateLabel");
     if (mModel) {
         mMenuView->viewLabel()->setHeading(
-            mModel->root().data(Qt::DisplayRole).toString());
+            mModel->root().data(CaItemModel::CollectionTitleRole).toString());
     }
     HSMENUTEST_FUNC_EXIT("HsCollectionState::updateLabel");
 }

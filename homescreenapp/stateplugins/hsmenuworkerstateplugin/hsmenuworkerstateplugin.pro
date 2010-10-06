@@ -44,8 +44,6 @@ symbian {
         LIBS += -lhal
     }
     for(docmlFile, docmlFiles): DOCML+=$$docmlFile
-    
-    MMP_RULES += SMPSAFE
 }
 
 RESOURCES += $$qrcFile
@@ -55,3 +53,6 @@ include(hsmenuworkerstateplugin.pri)
 
 
 
+
+
+symbian:MMP_RULES += SMPSAFE

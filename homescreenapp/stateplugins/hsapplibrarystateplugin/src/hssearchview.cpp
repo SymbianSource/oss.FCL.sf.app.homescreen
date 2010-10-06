@@ -22,6 +22,8 @@
 #include <HbAbstractViewItem>
 #include <HbView>
 #include <HbSearchPanel>
+#include <HbScrollBar>
+#include <HbIndexFeedback>
 
 #include <caitemmodel.h>
 
@@ -139,15 +141,25 @@ void HsSearchView::searchBegins()
     if (mBuilder.currentViewLabel()) {
         mSearchViewBuilder.searchViewLabel()->setHeading(
                 mBuilder.currentViewLabel()->heading());
-        mSearchViewBuilder.setSearchLabledContext();
     }
-
+    
+    if (mStateContext == HsCollectionContext){
+    	mSearchViewBuilder.setSearchLabledContext();
+    }
+    
     mSearchView->hideItems(Hb::AllItems);
     HsListViewItem *item = new HsListViewItem();
     item->setTextFormat(Qt::RichText);
 
     mSearchListView->setModel(mProxyModel, item);
-
+    mSearchListView->verticalScrollBar()->setInteractive(true);
+    if (mStateContext == HsAllAppsContext) {
+        HbIndexFeedback *indexFeedback = new HbIndexFeedback(mSearchListView);
+        indexFeedback->setIndexFeedbackPolicy(
+                HbIndexFeedback::IndexFeedbackSingleCharacter);
+        indexFeedback->setItemView(mSearchListView);
+    }
+    
     mMainWindow.setCurrentView(mSearchView);
 
     openVkb();
@@ -413,4 +425,5 @@ void HsSearchView::sendEvent(const QEvent::Type eventType)
     }
 
 }
+
 

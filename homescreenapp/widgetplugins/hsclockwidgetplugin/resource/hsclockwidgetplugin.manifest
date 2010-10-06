@@ -4,7 +4,7 @@
     <title>Clock</title>
     <description>Themable clock widget.</description>
     <icon>qtg_large_clock</icon>
-    <previewimage>qtg_large_clock</previewimage>
+    <previewimage>qtg_graf_hswidget_preview_clock.svg</previewimage>
     <hidden>false</hidden>
     <servicexml>hsclockwidgetplugin.xml</servicexml>
 </hswidgetmanifest>

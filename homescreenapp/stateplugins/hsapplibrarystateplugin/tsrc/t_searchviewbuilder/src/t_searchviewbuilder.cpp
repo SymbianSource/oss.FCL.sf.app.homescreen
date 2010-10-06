@@ -39,23 +39,38 @@ class MockViewItem : public HbAbstractViewItem
     }
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::testSlot()
 {
     mSlotActivated = true;
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_construction()
 {
     HsSearchViewBuilder builder;
     QVERIFY(builder.mLoadedObjects.count());
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_uiObjects()
 {
     HsSearchViewBuilder builder;
@@ -65,6 +80,10 @@ void MenuStatesTest::HsSearchViewBuilder_uiObjects()
     QVERIFY(builder.searchViewLabel());
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_setSearchLabledContext()
 {
     HsSearchViewBuilder builder;
@@ -72,6 +91,10 @@ void MenuStatesTest::HsSearchViewBuilder_setSearchLabledContext()
     QVERIFY(builder.mLabledContext);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_loadViewEmptySection()
 {
     HsSearchViewBuilder builder;
@@ -80,6 +103,10 @@ void MenuStatesTest::HsSearchViewBuilder_loadViewEmptySection()
     QCOMPARE(firstCount, builder.mLoadedObjects.count());
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_loadViewListSection()
 {
     HsSearchViewBuilder builder;
@@ -88,6 +115,10 @@ void MenuStatesTest::HsSearchViewBuilder_loadViewListSection()
     QCOMPARE(firstCount, builder.mLoadedObjects.count());
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_searchViewConstruction()
 {
     HsMenuViewBuilder builder;
@@ -100,6 +131,10 @@ void MenuStatesTest::HsSearchViewBuilder_searchViewConstruction()
     QCOMPARE(search.mProxyModel->sortRole(), int(CaItemModel::TextRole));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_activatedProxySlot()
 {
     HsMenuViewBuilder builder;
@@ -115,6 +150,10 @@ void MenuStatesTest::HsSearchViewBuilder_activatedProxySlot()
     QCOMPARE(mSlotActivated, true);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_longPressedProxySlot()
 {
     HsMenuViewBuilder builder;
@@ -132,6 +171,10 @@ void MenuStatesTest::HsSearchViewBuilder_longPressedProxySlot()
     QCOMPARE(mSlotActivated, true);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_showHide()
 {
     HsMenuViewBuilder builder;
@@ -146,17 +189,20 @@ void MenuStatesTest::HsSearchViewBuilder_showHide()
 
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class MockInputContext: public QInputContext
 {
 public:
     QEvent::Type mEventType;
     MockInputContext(): mEventType(QEvent::None) {}
-    QString 	identifierName() { return qApp->inputContext()->identifierName();}
-    bool 	isComposing() const { return qApp->inputContext()->isComposing();}
-    QString 	language() { return qApp->inputContext()->language();}
-    void 	reset() {;}
-    void        setFocusWidget(QWidget* widget) {QInputContext::setFocusWidget(widget);}
+    QString identifierName() { return qApp->inputContext()->identifierName();}
+    bool isComposing() const { return qApp->inputContext()->isComposing();}
+    QString language() { return qApp->inputContext()->language();}
+    void reset() {;}
+    void setFocusWidget(QWidget* widget) {QInputContext::setFocusWidget(widget);}
     bool filterEvent(const QEvent* event)
     {
         mEventType = event->type();
@@ -164,6 +210,10 @@ public:
     }
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsSearchViewBuilder_hideVkb()
 {
     HsMenuViewBuilder builder;

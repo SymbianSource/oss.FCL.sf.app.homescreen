@@ -168,6 +168,9 @@ CHsLaunch::~CHsLaunch()
     
     delete iShutdownMonitor;
     iShutdownMonitor = NULL;
+
+    delete iCenRepNotifyHandler;
+    iCenRepNotifyHandler = NULL;        
     }
 
 // -----------------------------------------------------------------------------

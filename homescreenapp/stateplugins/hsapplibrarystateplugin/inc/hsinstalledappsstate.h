@@ -57,6 +57,7 @@ private slots:
     void stateEntered();
     void stateExited();
     void setEmptyLabelVisibility(bool visibility);
+    void updateLabel();
     void latestOnTopMenuAction();
     void oldestOnTopMenuAction();
     void launchDetails(const QModelIndex &index);

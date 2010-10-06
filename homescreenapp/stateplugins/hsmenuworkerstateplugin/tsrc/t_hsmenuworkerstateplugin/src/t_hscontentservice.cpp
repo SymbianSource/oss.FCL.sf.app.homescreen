@@ -14,22 +14,48 @@
 * Description:
 *
 */
+
 #include "t_hscontentservice.h"
 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsContentService::HsContentService(QObject *parent): QObject(parent) {}
 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsContentService::~HsContentService() {}
 
-HsContentService *HsContentService::instance() {
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+HsContentService *HsContentService::instance()
+{
     static HsContentService service;
     return &service;
 }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsContentService::createWidget(const QVariantHash &params)
 {
     mParams = params;
     return true;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsWidgetHost *HsContentService::createWidgetForPreview(const QVariantHash &params)
 {
     Q_UNUSED(params);

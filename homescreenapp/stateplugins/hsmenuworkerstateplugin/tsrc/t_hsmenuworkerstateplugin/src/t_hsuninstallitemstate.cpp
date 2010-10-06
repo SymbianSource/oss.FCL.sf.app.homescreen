@@ -32,6 +32,7 @@
 #include "hsmenuitemmodel.h"
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsUninstallItemState_construction()
@@ -56,7 +57,10 @@ void MenuStatesTest::HsUninstallItemState_construction()
 #endif//Q_OS_SYMBIAN
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsUninstallItemState_onEntry()
 {
 #ifdef Q_OS_SYMBIAN
@@ -97,6 +101,11 @@ void MenuStatesTest::HsUninstallItemState_onEntry()
 }
 
 #ifdef Q_OS_SYMBIAN
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsUninstallItemState_getApplicationsNames()
 {
 #ifdef UT_MEMORY_CHECK

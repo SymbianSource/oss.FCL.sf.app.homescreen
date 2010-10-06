@@ -23,21 +23,21 @@ PLUGIN_SUBDIR = /resource/qt/plugins
 
 LIBS += -lcaclient
 
-INCLUDEPATH +=  inc \
-				../../homescreen_plat/homescreenclient_api
+INCLUDEPATH +=  inc
 
-HEADERS +=  ../../homescreen_plat/homescreenclient_api/hsmenuclient.h \
-            inc/hsmenuclientplugin.h
+HEADERS +=  inc/hsmenuclientplugin.h \
+    ../../homescreen_plat/homescreenclient_api/inc/hsmenuclient.h
 
 SOURCES +=  src/hsmenuclient.cpp \
             src/hsmenuclientplugin.cpp
 
 symbian: {
-	TARGET.UID3 = 0x20028715
-	
-	MMP_RULES += SMPSAFE
+    TARGET.UID3 = 0x20028715
+}
+!symbian: {
+    INCLUDEPATH += ../../homescreen_plat/homescreenclient_api/inc
 }
 
 include(../common.pri)
 
-
+symbian:MMP_RULES += SMPSAFE

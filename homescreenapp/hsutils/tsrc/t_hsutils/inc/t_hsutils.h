@@ -45,7 +45,7 @@ private slots:
     void testAdvancedWidgetPositioningOnOrientationChange_data();
     void testAdvancedWidgetPositioningOnOrientationChange();
 
-	/**
+    /**
      * t_hswidgetpositioningonwidgetmove.cpp
      */
     void testWidgetPositioningOnWidgetMoveInstance();

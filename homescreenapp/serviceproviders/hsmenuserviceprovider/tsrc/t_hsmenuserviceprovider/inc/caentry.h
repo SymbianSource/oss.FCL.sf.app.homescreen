@@ -66,10 +66,12 @@ public:
     {
         mSetCaIconDescription = iconDescription;
     }
+    
     EntryFlags flags() const
     {
         return mFlagsResult;
     }
+    
     void setFlags(EntryFlags flags)
     {
         mFlagsResult = flags;
@@ -89,6 +91,13 @@ public:
     {
         mAttributes.insert(name, value);
     }
+    
+        
+    void removeAttribute(const QString &name)
+    {
+        mAttributes.remove(name);
+    }
+    
     QString attribute(const QString &name) const
     {
         return mAttributes[name];
@@ -102,7 +111,7 @@ public:
     
     EntryRole role() const
     {
-    	return mCaEntryRole;
+        return mCaEntryRole;
     }
     
     // test helper, not belonging to ContentStorage CaEntry

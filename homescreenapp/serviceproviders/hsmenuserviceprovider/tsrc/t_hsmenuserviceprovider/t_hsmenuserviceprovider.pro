@@ -75,9 +75,10 @@ symbian: {
         - \
         16MB
     INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE
-    
-    MMP_RULES += SMPSAFE
 }
 include(t_hsmenuserviceprovider.pri)
 win32:include(installs_win32.pri)
 !symbian:unix:include(installs_unix.pri)
+
+
+symbian:MMP_RULES += SMPSAFE

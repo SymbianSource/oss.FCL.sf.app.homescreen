@@ -25,7 +25,9 @@
 #include <casoftwareregistry.h>
 #include "t_hsmenuworkerstateplugin.h"
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ViewAppDetails_construction()
@@ -51,6 +53,7 @@ void MenuStatesTest::ViewAppDetails_construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ViewAppDetails_onEntry()
@@ -98,6 +101,4 @@ void MenuStatesTest::ViewAppDetails_onEntry()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
-
-
 

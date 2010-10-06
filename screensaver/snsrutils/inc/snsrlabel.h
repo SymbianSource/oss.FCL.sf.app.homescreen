@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -32,9 +32,21 @@ class SNSRUTILS_EXPORT SnsrLabel : public HbLabel
     
 public:
     
+    enum TextColorType
+    {
+        ThemedColorForActiveMode,
+        FixedColorForPowerSaveMode // = Qt::white
+    };
+    
+public:
+    
     SnsrLabel(QGraphicsItem *parent = 0);
     SnsrLabel(const QString &displayText, QGraphicsItem *parent = 0);
     ~SnsrLabel();
+    
+public:
+    
+    void setTextColorType(const TextColorType &colorType);
     
 protected:
 
@@ -43,6 +55,10 @@ protected:
 private:
 
     void setThemedTextColor();
+ 
+private:
+    
+    TextColorType mTextColorType;
 
     SCREENSAVER_TEST_FRIEND_CLASS(T_SnsrUtils)
 

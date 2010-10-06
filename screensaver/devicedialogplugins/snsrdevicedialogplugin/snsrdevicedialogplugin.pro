@@ -21,17 +21,16 @@ MOBILITY = serviceframework
 include (../../common.pri)
 include (snsrdevicedialogplugin.pri)
 
-LIBS += -lxqsettingsmanager
 LIBS += -lscreensavermodel
 
 symbian: {
     LIBS += -lsnsrdisplaycontrolclient
+    LIBS += -lxqsettingsmanager
 
     TARGET.UID3 = 0x2002704E
     TARGET.CAPABILITY = CAP_ECOM_PLUGIN
     
     include(snsrdevicedialogplugin_exports_to_rom.pri)
-    LIBS += -lxqsettingsmanager
 
     pluginstub.sources = snsrdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs

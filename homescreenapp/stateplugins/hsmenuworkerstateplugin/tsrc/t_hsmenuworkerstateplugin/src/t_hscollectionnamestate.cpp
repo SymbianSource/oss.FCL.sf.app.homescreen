@@ -18,11 +18,12 @@
 #include <hbaction>
 #include "hscollectionnamedialog.h"
 #include "hscollectionnamestate.h"
-
 #include "hsmenuevent.h"
 #include "t_hsmenuworkerstateplugin.h"
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::CollectionNameState_construction1()
@@ -48,8 +49,8 @@ void MenuStatesTest::CollectionNameState_construction1()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::CollectionNameState_onEntry()
@@ -89,8 +90,8 @@ void MenuStatesTest::CollectionNameState_onEntry()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::CollectionNameState_dialogFinished()

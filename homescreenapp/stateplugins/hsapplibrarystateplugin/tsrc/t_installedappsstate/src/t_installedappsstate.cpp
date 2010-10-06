@@ -36,32 +36,44 @@
 #include "hsinstalledappsstate.h"
 #include "hsmainwindow.h"
 #include "hsmenuitemmodel.h"
+#include "hsscene.h"
 
 #include "hsmenueventtransition.h"
-
 #include "t_installedappsstate.h"
-
 #include "t_hsaddtohomescreenmockstate.h"
 
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class HsMainWindowMock : public HsMainWindow
 {
     virtual void setCurrentView(HbView *view);
 
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsMainWindowMock::setCurrentView(HbView *view)
 {
     Q_UNUSED(view);
     // do nothing    
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::construction()
@@ -92,6 +104,7 @@ void MenuStatesTest::construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 #ifdef Q_OS_SYMBIAN
@@ -122,8 +135,8 @@ void MenuStatesTest::openTaskSwitcher()
 }
 #endif//Q_OS_SYMBIAN
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 #ifdef Q_OS_SYMBIAN
@@ -175,8 +188,8 @@ void MenuStatesTest::openInstallationLog()
 }
 #endif//Q_OS_SYMBIAN
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::stateEnteredExited()
@@ -229,7 +242,9 @@ void MenuStatesTest::stateEnteredExited()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::emptyLabelVisibility()
@@ -274,6 +289,7 @@ void MenuStatesTest::emptyLabelVisibility()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::listItemLongPressed()
@@ -285,9 +301,11 @@ void MenuStatesTest::listItemLongPressed()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //HsScene::setInstance( new HsScene(window.data()) );
+
         HsMenuViewBuilder builder;
-        HsMainWindow mainWindow;
+        HsMainWindowMock mainWindow;
 
         QScopedPointer<QState> parent(new QState);
 
@@ -337,7 +355,6 @@ void MenuStatesTest::listItemLongPressed()
 
         installedAppsState->stateExited();
 
-        window->removeView(builder.currentView());
         qApp->processEvents();
     
     }
@@ -349,6 +366,7 @@ void MenuStatesTest::listItemLongPressed()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::latestOldestOnTopMenuAction()

@@ -33,33 +33,54 @@
 #include "hsallcollectionsstate.h"
 #include "hsmenueventtransition.h"
 #include "hsmainwindow.h"
+#include "hsscene.h"
 
 #include "t_hsaddtohomescreenmockstate.h"
 #include "t_hsmockmodel.h"
 #include "t_allcollectionsstate.h"
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class HsMainWindowMock : public HsMainWindow
 {
     virtual void setCurrentView(HbView *view);
 
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsMainWindowMock::setCurrentView(HbView *view)
 {
     Q_UNUSED(view);
     // do nothing    
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::initTestCase()
 {
 //    mWindow = NULL;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::init()
 {
 //    mWindow = new HbMainWindow;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
@@ -68,6 +89,7 @@ void MenuStatesTest::cleanup()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::construction()
@@ -105,9 +127,9 @@ void MenuStatesTest::construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
-
 void MenuStatesTest::addModeEnteredExited()
 {
 #ifdef Q_OS_SYMBIAN
@@ -140,9 +162,9 @@ void MenuStatesTest::addModeEnteredExited()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
-
 void MenuStatesTest::normalModeEnteredExited()
 {
 #ifdef Q_OS_SYMBIAN
@@ -176,6 +198,7 @@ void MenuStatesTest::normalModeEnteredExited()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::createNewCollection()
@@ -226,8 +249,8 @@ void MenuStatesTest::createNewCollection()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::createArrangeCollection()
@@ -279,6 +302,7 @@ void MenuStatesTest::createArrangeCollection()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::listItemActivated()
@@ -321,8 +345,9 @@ void MenuStatesTest::listItemActivated()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
-
+//
 void MenuStatesTest::listItemLongPressed()
 {
 #ifdef Q_OS_SYMBIAN
@@ -332,8 +357,6 @@ void MenuStatesTest::listItemLongPressed()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-        QScopedPointer<HbMainWindow> wind(new HbMainWindow);
-
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
         HsMainWindowMock mainWindow;
@@ -382,6 +405,7 @@ void MenuStatesTest::listItemLongPressed()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::contextMenuAction()
@@ -395,11 +419,12 @@ void MenuStatesTest::contextMenuAction()
     {
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
 
-        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //HsScene::setInstance( new HsScene(window.data()) );
 
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
-        HsMainWindow mainWindow;
+        HsMainWindowMock mainWindow;
 
         QScopedPointer<HsAllCollectionsState> allCollectionsState (new HsAllCollectionsState(
             builder, menuMode, mainWindow, machine.data()));
@@ -456,8 +481,9 @@ void MenuStatesTest::contextMenuAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
-
+//
 void MenuStatesTest::addModeSlots()
 {
 #ifdef Q_OS_SYMBIAN
@@ -496,10 +522,9 @@ void MenuStatesTest::addModeSlots()
             allCollectionsState->scrollToBeginning();
             allCollectionsState->stateEntered();
 
-
             machine->start();
             qApp->sendPostedEvents();
-			
+
             allCollectionsState->addActivated(allCollectionsState->mModel->index(0,0));
             
             qApp->sendPostedEvents();
@@ -517,6 +542,7 @@ void MenuStatesTest::addModeSlots()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 #ifdef Q_OS_SYMBIAN

@@ -93,7 +93,7 @@ void HsDeleteCollectionState::onEntry(QEvent *event)
     }
 
     QScopedPointer<HsDialogController> dialogController(
-            new HsDialogController(message));
+            new HsDialogController(message, HsMenuDialogFactory::DeleteCancel));
 
     connect(dialogController.data(),
             SIGNAL(acceptActionTriggered(QAction*)),

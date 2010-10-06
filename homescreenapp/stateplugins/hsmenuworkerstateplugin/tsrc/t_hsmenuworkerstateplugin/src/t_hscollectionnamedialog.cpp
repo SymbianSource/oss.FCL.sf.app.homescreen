@@ -22,7 +22,9 @@
 #include "hscollectionnamedialog.h"
 #include "t_hsmenuworkerstateplugin.h"
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsCollectionNameDialog_ConstructWithNoParams()
@@ -67,6 +69,10 @@ void MenuStatesTest::HsCollectionNameDialog_ConstructWithNoParams()
 #endif//Q_OS_SYMBIAN
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsCollectionNameDialog_ConstructWithId()
 {
 #ifdef Q_OS_SYMBIAN
@@ -95,6 +101,7 @@ void MenuStatesTest::HsCollectionNameDialog_ConstructWithId()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsCollectionNameDialog_uniqueCollectionName()
@@ -135,8 +142,8 @@ void MenuStatesTest::HsCollectionNameDialog_uniqueCollectionName()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsCollectionNameDialog_closeEvent()

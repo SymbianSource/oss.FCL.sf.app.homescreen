@@ -69,6 +69,7 @@ public:
     HbToolBar *toolBar() const;
     QActionGroup *toolBarActionGroup() const;
     HbToolBarExtension *toolBarExtension() const;
+    HbAction *toolBarExtensionAction() const;
 
     // mandatory context dependent widgets accessors
     HbView *currentView();

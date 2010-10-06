@@ -17,8 +17,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS = screensavermodel \
-          screensaverplugins \
           snsrutils \
+          snsrplugins \
           devicedialogplugins
 
 CONFIG += ordered

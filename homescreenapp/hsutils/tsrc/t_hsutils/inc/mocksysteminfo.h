@@ -15,9 +15,6 @@
 *
 */
 
-
-
-
 #ifndef QSYSTEMINFO_H
 #define QSYSTEMINFO_H
 
@@ -32,7 +29,6 @@ class  QSystemNetworkInfo : public QObject
     Q_OBJECT
     Q_ENUMS(NetworkStatus)
     Q_ENUMS(NetworkMode)
-
 
 public:
 
@@ -105,7 +101,7 @@ public:
         SingleSimAvailable,
         DualSimAvailable,
         SimLocked
-	};
+    };
 
     QSystemDeviceInfo::SimStatus simStatus();
     QSystemDeviceInfo::Profile currentProfile();

@@ -76,6 +76,7 @@ public slots:
     void hideSearchPanel();
 
     void disableSearch(bool disable);
+    void disableOviStore(bool disable);
 
 private slots:
     void scrollToRow(int row,

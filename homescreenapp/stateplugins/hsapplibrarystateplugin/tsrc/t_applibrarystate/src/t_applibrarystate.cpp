@@ -37,6 +37,7 @@
 #include "hsoperatorhandler_p.h"
 #include "hsoperatorhandler.h"
 #include "hsmenuservice.h"
+#include "hsscene.h"
 
 #include "t_hsaddtohomescreenmockstate.h"
 #include "t_hsmockmodel.h"
@@ -52,6 +53,11 @@ const int RemoveOviStore            = 0x00000008;
 //const char *operatorStoreIconPath
 //        = "z:/private/20022F35/customsvg/operatorstore.svg";
 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::OperatorHandler_storesPresent()
 {
     HsOperatorHandler oviHandler;
@@ -67,6 +73,10 @@ void MenuStatesTest::OperatorHandler_storesPresent()
 
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::OperatorHandler_first()
 {
     HsOperatorHandler oviHandler;
@@ -77,6 +87,10 @@ void MenuStatesTest::OperatorHandler_first()
     QCOMPARE(oviHandler.operatorStoreFirst(), value);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::OperatorHandler_type()
 {
     HsOperatorHandler oviHandler;
@@ -89,6 +103,10 @@ void MenuStatesTest::OperatorHandler_type()
             || value == HsOperatorHandlerPrivate::NoneType);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::OperatorHandler_createAction()
 {
     HsOperatorHandler oviHandler;
@@ -102,24 +120,37 @@ void MenuStatesTest::OperatorHandler_createAction()
 
 
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class HsMainWindowMock : public HsMainWindow
 {
     virtual void setCurrentView(HbView *view);
 
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsMainWindowMock::setCurrentView(HbView *view)
 {
     Q_UNUSED(view);
     // do nothing
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ApplicationLibraryState_construction()
@@ -148,6 +179,7 @@ void MenuStatesTest::ApplicationLibraryState_construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ApplicationLibraryState_historySlots()
@@ -194,8 +226,8 @@ void MenuStatesTest::ApplicationLibraryState_historySlots()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ApplicationLibraryState_backSteppingAction()
@@ -207,7 +239,11 @@ void MenuStatesTest::ApplicationLibraryState_backSteppingAction()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
+
+        QFAIL("! Due to bug in hb wk36 we are forced to skip this test !");
+        
         QScopedPointer<HbMainWindow> wind(new HbMainWindow);
+        HsScene::setInstance( new HsScene(wind.data()) );
         //create statemachine to perform transitions
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
 
@@ -238,6 +274,7 @@ void MenuStatesTest::ApplicationLibraryState_backSteppingAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ApplicationLibraryState_clearToolbarLatch()
@@ -263,6 +300,7 @@ void MenuStatesTest::ApplicationLibraryState_clearToolbarLatch()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 #ifdef QT_EXTENSIONS
@@ -282,6 +320,7 @@ void MenuStatesTest::ApplicationLibraryState_oviStoreAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::OperatorHandler_icon()
@@ -303,6 +342,7 @@ void MenuStatesTest::OperatorHandler_icon()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::OperatorHandler_text()
@@ -325,6 +365,7 @@ void MenuStatesTest::OperatorHandler_text()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::OperatorHandler_action()
@@ -348,6 +389,7 @@ void MenuStatesTest::OperatorHandler_action()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::OperatorHandler_entry()
@@ -380,6 +422,7 @@ void MenuStatesTest::OperatorHandler_entry()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::OperatorHandler_noCrWriteAccess()
@@ -403,8 +446,8 @@ void MenuStatesTest::OperatorHandler_noCrWriteAccess()
 }
 #endif//QT_EXTENSIONS
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsBaseViewState_createApplicationLaunchFailMessage()

@@ -20,6 +20,7 @@
 #define SNSRDISPLAYCONTROLCOMMON_H
 
 #include <e32def.h>
+#include <e32debug.h>
 
 
 _LIT( KSnsrDispCtrlSrvName, "SnsrDisplayControlServer" ); 
@@ -34,5 +35,13 @@ enum TSnsrDispCtrlSrvCmd
 const TInt KSnsrDispCtrlSrvVerMajor = 1;
 const TInt KSnsrDispCtrlSrvVerMinor = 0;
 const TInt KSnsrDispCtrlSrvVerBuild = 0;
+
+#if defined(_DEBUG)
+#define RDEBUG( x ) RDebug::Printf( "%s %s (%u) %s", __FILE__, __PRETTY_FUNCTION__, __LINE__, x );
+#define RDEBUG1( x, y ) RDebug::Printf( "%s %s (%u) %s=%d", __FILE__, __PRETTY_FUNCTION__, __LINE__, x, y );
+#else
+#define RDEBUG( x )
+#define RDEBUG1( x, y )
+#endif
 
 #endif /* SNSRDISPLAYCONTROLCOMMON_H */

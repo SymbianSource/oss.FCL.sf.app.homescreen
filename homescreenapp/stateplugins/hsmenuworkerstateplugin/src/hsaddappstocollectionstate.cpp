@@ -18,6 +18,7 @@
 #include <HbDocumentLoader>
 #include <HbDialog>
 #include <HbListView>
+#include <HbScrollBar>
 #include <QStandardItemModel>
 #include <qfinalstate.h>
 #include <QDebug>
@@ -447,6 +448,7 @@ void HsAddAppsToCollectionState::selectCollection()
         mModel = standardItemModel(mCollectionId);
         mModel->setParent(mListDialog);
         listView->setModel(mModel);
+        listView->verticalScrollBar()->setInteractive(true);
         
         connect(listView, SIGNAL(activated(const QModelIndex &)),
                 this, SLOT(collectionSelected(const QModelIndex &)));

@@ -31,6 +31,7 @@
 #include "hsallappsstate.h"
 #include "hsmenueventtransition.h"
 #include "hsmainwindow.h"
+#include "hsscene.h"
 
 #include "t_hsaddtohomescreenmockstate.h"
 #include "t_hsmockmodel.h"
@@ -260,8 +261,6 @@ void MenuStatesTest::listItemLongPressed()
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
         QState *parent = new QState(machine.data());
 
-        QScopedPointer<HbMainWindow> window(new HbMainWindow);
-
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
         HsMainWindowMock mainWindow;
@@ -318,11 +317,12 @@ void MenuStatesTest::contextMenuAction()
     {
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
 
-        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //HsScene::setInstance( new HsScene(window.data()) );
 
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
-        HsMainWindow mainWindow;
+        HsMainWindowMock mainWindow;
 
         QScopedPointer<HsAllAppsState> allAppsState(new HsAllAppsState(
             builder, menuMode, mainWindow, machine.data()));

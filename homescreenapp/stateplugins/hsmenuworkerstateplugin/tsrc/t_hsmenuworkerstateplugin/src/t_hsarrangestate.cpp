@@ -27,7 +27,9 @@
 #include "hsarrangestate.h"
 #include "hsmenuitemmodel.h"
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ArrangeState_FulfillEntriesList()
@@ -64,6 +66,7 @@ void MenuStatesTest::ArrangeState_FulfillEntriesList()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ArrangeState_Save()
@@ -125,6 +128,7 @@ void MenuStatesTest::ArrangeState_Save()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ArrangeState_onEntry()
@@ -166,6 +170,7 @@ void MenuStatesTest::ArrangeState_onEntry()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::ArrangeState_arrangeDialogFinished()

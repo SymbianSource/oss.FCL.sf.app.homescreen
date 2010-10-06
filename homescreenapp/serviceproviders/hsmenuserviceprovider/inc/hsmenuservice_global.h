@@ -20,6 +20,7 @@
 
 // System includes
 #include <qglobal.h>
+#include <QDebug>
 
 #ifdef MENUSERVICE_LIB
 #define MENUSERVICE_EXPORT Q_DECL_EXPORT
@@ -104,25 +105,9 @@
 
 #endif
 
-#define HSMENUTESTTIME_ENTRY(function) \
-    TInt64 HSMENUTEST_ENTRY_TIME(0); \
-    { \
-        TTime t; \
-        t.UniversalTime(); \
-        qDebug("\n" function "      entry:%20lld", t.Int64()); \
-        HSMENUTEST_ENTRY_TIME = t.Int64(); \
-    }
-
-#define HSMENUTESTTIME_EXIT(function) { \
-        TTime t; \
-        t.UniversalTime(); \
-        qDebug("\n" function "      entry:%20lld\n" function " difference:%20lld", t.Int64(), \
-               t.Int64()-HSMENUTEST_ENTRY_TIME); \
-    }
-
 #define HSMENUTEST_FUNC_ENTRY(function)   HSMENUTEST_FREERAM_ENTRY(function) \
-    HSMENUTESTTIME_ENTRY(function)
-#define HSMENUTEST_FUNC_EXIT(function)    HSMENUTESTTIME_EXIT(function) \
+    qDebug()<< function << " entry";
+#define HSMENUTEST_FUNC_EXIT(function)     qDebug()<< function << " exit"; \
     HSMENUTEST_FREERAM_EXIT(function)
 
 #else //Q_OS_SYMBIAN
@@ -132,6 +117,7 @@
 #else //NFT
 #define HSMENUTEST_FUNC_ENTRY(function)
 #define HSMENUTEST_FUNC_EXIT(function)
+#define HSMENUTEST(aText) 
 #endif //NFT
 
 

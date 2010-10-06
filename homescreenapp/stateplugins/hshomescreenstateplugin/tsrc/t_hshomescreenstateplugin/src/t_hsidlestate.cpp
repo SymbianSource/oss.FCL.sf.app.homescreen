@@ -519,7 +519,7 @@ void HomeScreenStatePluginTest::testIdleStateDeleteWidget()
     QSignalSpy waitInputSpy(is, SIGNAL(event_waitInput()));
     scene->setActiveWidget(0);
     is->onWidgetMoveFinished(QPointF(150, 150), widget);
-    QCOMPARE(waitInputSpy.count(), 2);
+    QCOMPARE(waitInputSpy.count(), 1);
     QCOMPARE(waitDeleteSpy.count(), 1);
     
     is->pageChangeAnimationFinished();

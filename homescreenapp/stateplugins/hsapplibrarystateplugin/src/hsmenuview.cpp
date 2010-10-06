@@ -28,6 +28,7 @@
 #include <HbView>
 #include <HbToolBarExtension>
 #include <HbShrinkingVkbHost>
+#include <HbScrollBar>
 
 #include "hsallappsstate.h"
 #include "hsallcollectionsstate.h"
@@ -132,7 +133,7 @@ void HsMenuView::setModel(QAbstractItemModel *model)
 
         mListView->setItemPixmapCacheEnabled(true); // TODO: remove when enabled from default
         mListView->setModel(model, new HsListViewItem());
-
+        mListView->verticalScrollBar()->setInteractive(true);
         if (mListView->model()) {
             connect(mListView->model(),
                     SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
@@ -219,6 +220,23 @@ void HsMenuView::hideSearchPanel()
 void HsMenuView::disableSearch(bool disable)
 {
     mBuilder.searchAction()->setDisabled(disable);
+}
+
+/*!
+ Disable or enable ovi store action button.
+ \param disable If true action gets disabled.
+ */
+void HsMenuView::disableOviStore(bool disable)
+{
+    if (mBuilder.oviStoreAction()) {
+        mBuilder.oviStoreAction()->setDisabled(disable);
+    }
+    if (mBuilder.operatorAction()) {
+        mBuilder.operatorAction()->setDisabled(disable);
+    }
+    if (mBuilder.toolBarExtensionAction()) {
+        mBuilder.toolBarExtensionAction()->setDisabled(disable);
+    }
 }
 
 /*!

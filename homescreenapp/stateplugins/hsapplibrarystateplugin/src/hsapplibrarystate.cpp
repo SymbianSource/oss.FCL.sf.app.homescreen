@@ -89,7 +89,7 @@
  */
 HsAppLibraryState::HsAppLibraryState(QState *parent) :
     QState(parent), mAllAppsState(0),
-    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0), 
+    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0),
     mMenuMode(),mMainWindow(&mMenuMode)
 {
     construct();
@@ -114,7 +114,7 @@ void HsAppLibraryState::construct()
 {
     HSMENUTEST_FUNC_ENTRY("HsAppLibraryState::construct");
     setObjectName("homescreen.nokia.com/state/applibrarystate");
-    
+
     mAllAppsState = new HsAllAppsState(
         mMenuViewBuilder, mMenuMode, mMainWindow, this);
 
@@ -167,7 +167,7 @@ void HsAppLibraryState::construct()
         new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
             mAllAppsState, mInstalledAppsState);
     mAllAppsState->addTransition(allViewToInstalledTransition);
-    
+
     HsMenuEventTransition *allCollectionsToInstalledTransition =
         new HsMenuEventTransition(HsMenuEvent::OpenInstalledView,
             mAllCollectionsState, mInstalledAppsState);
@@ -225,7 +225,7 @@ void HsAppLibraryState::onEntry(QEvent *event)
         mAllAppsState->scrollToBeginning();
         mAllCollectionsState->scrollToBeginning();
     }
-    
+
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::onEntry");
 }
 
@@ -244,25 +244,23 @@ void HsAppLibraryState::constructToolbar()
     if (operatorHandler->oviStorePresent()
             && operatorHandler->operatorStorePresent()) {
 
-        //TODO HbToolBarExtension is not supported in docml currently
-        //should be changed in future
+        mMenuViewBuilder.toolBarExtensionAction()->setVisible(true);
         bool loaded = HbStyleLoader::registerFilePath(
                      ":/css/hsapplibrarystateplugin.css");
         Q_ASSERT(loaded);
 
+        //TODO HbToolBarExtension is not supported in docml currently
+        //should be changed in future
         HbToolBarExtension *const extension(
-            mMenuViewBuilder.toolBarExtension());
-        HbAction *const extensionAction(
-            mMenuViewBuilder.toolBar()->addExtension(extension));
-
-        extensionAction->setIcon(HbIcon("qtg_mono_store"));
+                mMenuViewBuilder.toolBarExtension());
 
         HbAction *const operatorAction(
-            operatorHandler->prepareOperatorStoreAction(
-            mMenuViewBuilder.operatorAction()));
+                operatorHandler->prepareOperatorStoreAction(
+                        mMenuViewBuilder.operatorAction()));
         operatorAction->setText(hbTrId(operatorHandler->text().toLatin1()));
 
-        mMenuViewBuilder.oviStoreAction()->setText(hbTrId("txt_applib_grid_ovi_store"));
+        mMenuViewBuilder.oviStoreAction()->setText(
+                hbTrId("txt_applib_grid_ovi_store"));
         if (operatorHandler->operatorStoreFirst()) {
             extension->addAction(operatorAction);
             extension->addAction(mMenuViewBuilder.oviStoreAction());
@@ -272,31 +270,31 @@ void HsAppLibraryState::constructToolbar()
         }
     } else if (operatorHandler->oviStorePresent()) {
         mMenuViewBuilder.toolBar()->addAction(
-            mMenuViewBuilder.oviStoreAction());
+                mMenuViewBuilder.oviStoreAction());
     } else if (operatorHandler->operatorStorePresent()) {
         mMenuViewBuilder.toolBar()->addAction(
-        operatorHandler->prepareOperatorStoreAction(
-        mMenuViewBuilder.operatorAction()));
+                operatorHandler->prepareOperatorStoreAction(
+                        mMenuViewBuilder.operatorAction()));
     }
 
     HbAction *const allCollectionsAction(
-        mMenuViewBuilder.allCollectionsAction());
+            mMenuViewBuilder.allCollectionsAction());
 
     mAllAppsState->addTransition(
-        allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
+            allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
     mCollectionState->addTransition(
-        allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
+            allCollectionsAction, SIGNAL(triggered()), mAllCollectionsState);
 
     HbAction *const allAppsAction(mMenuViewBuilder.allAppsAction());
 
     mAllCollectionsState->addTransition(
-        allAppsAction, SIGNAL(triggered()), mAllAppsState);
+            allAppsAction, SIGNAL(triggered()), mAllAppsState);
     mCollectionState->addTransition(
-        allAppsAction, SIGNAL(triggered()), mAllAppsState);
+            allAppsAction, SIGNAL(triggered()), mAllAppsState);
 
     mAllAppsState->assignProperty(allAppsAction, "checked", true);
     mAllCollectionsState->assignProperty(
-        allCollectionsAction, "checked", true);
+            allCollectionsAction, "checked", true);
     HSMENUTEST_FUNC_EXIT("HsAppLibraryState::constructToolbar");
 }
 

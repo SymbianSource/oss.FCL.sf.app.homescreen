@@ -49,8 +49,6 @@ struct HsGuiImpl
     HsPropertyAnimationWrapper *mPageCrawlingAnimation;
 };
 
-
-
 HsGui::~HsGui()
 {
     if (mImpl->mNavigationAction) {

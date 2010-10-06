@@ -67,8 +67,6 @@ symbian {
     coverage: CONFIG -= symbian_test
     exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager) {
         LIBS += -lxqsettingsmanager
-        
-    MMP_RULES += SMPSAFE
     }    
 }
 
@@ -76,3 +74,5 @@ RESOURCES += ../../$$qrcFile
 
 include(t_collectionsstate.pri)
                       
+
+symbian:MMP_RULES += SMPSAFE

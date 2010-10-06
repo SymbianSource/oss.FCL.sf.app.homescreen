@@ -136,21 +136,18 @@ void HsInstalledAppsState::setMenuOptions()
  \param item the context menu is built for.
  \param flags of the \item.
  */
-void HsInstalledAppsState::setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags)
+void HsInstalledAppsState::setContextMenuOptions(
+        HbAbstractViewItem *item, EntryFlags flags)
 {
+    Q_UNUSED(item)
+    Q_UNUSED(flags)
     HbAction *uninstallAction = mContextMenu->addAction(
-                                hbTrId("txt_common_menu_delete"));
-    HbAction *appDetailsAction(NULL);
+            hbTrId("txt_common_menu_delete"));
     uninstallAction->setData(Hs::UninstallContextAction);
 
-    QSharedPointer<const CaEntry> entry = mModel->entry(item->modelIndex());
-
-    if (!(entry->attribute(Hs::componentIdAttributeName).isEmpty()) &&
-            (flags & RemovableEntryFlag) ) {
-        appDetailsAction = mContextMenu->addAction(hbTrId(
-                                                "txt_common_menu_details"));
-        appDetailsAction->setData(Hs::AppDetailsContextAction);
-    }
+    HbAction *appDetailsAction = mContextMenu->addAction(
+            hbTrId("txt_common_menu_details"));
+    appDetailsAction->setData(Hs::AppDetailsContextAction);
 }
 
 
@@ -172,14 +169,13 @@ void HsInstalledAppsState::stateEntered()
     qDebug("AllAppsState::stateEntered()");
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::stateEntered");
 
-    mMenuView->viewLabel()->setHeading(
-            hbTrId("txt_applib_subtitle_installed"));
-
     if (!mModel) {
         mModel
             = HsMenuService::getInstalledModel(mSortAttribute);
     }
-
+    
+    updateLabel();
+    
     if (mModel->rowCount() == 0) {
         mMenuView->reset(HsEmptyLabelContext);
     }
@@ -189,20 +185,24 @@ void HsInstalledAppsState::stateEntered()
         mMenuView->listView()->scrollTo(
             mModel->index(0));
     }
-    
+
     setMenuOptions();
 
     connect(mMenuView.data(),
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             SLOT(showContextMenu(HbAbstractViewItem *, QPointF)));
-    
+
     connect(mMenuView.data(),
                 SIGNAL(activated(QModelIndex)),
                 SLOT(launchDetails(QModelIndex)));
 
     connect(mModel, SIGNAL(empty(bool)),this,
             SLOT(setEmptyLabelVisibility(bool)));
-
+    
+    connect(mModel, SIGNAL(countChange()),this,
+            SLOT(updateLabel()));
+    
+    
     HsBaseViewState::stateEntered();
 
     HSMENUTEST_FUNC_EXIT("HsInstalledAppsState::stateEntered");
@@ -215,9 +215,12 @@ void HsInstalledAppsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsInstalledAppsState::stateExited");
 
+    disconnect(mModel, SIGNAL(countChange()),this,
+            SLOT(updateLabel()));
+    
     disconnect(mModel, SIGNAL(empty(bool)),this,
                SLOT(setEmptyLabelVisibility(bool)));
-    
+
     disconnect(mMenuView.data(),
                 SIGNAL(activated(QModelIndex)), this,
                 SLOT(launchDetails(QModelIndex)));
@@ -246,6 +249,16 @@ void HsInstalledAppsState::setEmptyLabelVisibility(bool visibility)
     }
     setMenuOptions();
     mMenuView->activate();
+}
+
+/*!
+ Slot update label.
+ */
+void HsInstalledAppsState::updateLabel()
+{
+    mMenuView->viewLabel()->setHeading(
+            hbTrId("txt_applib_subtitle_installed").arg(
+                    mModel->rowCount()));    
 }
 
 /*!
@@ -284,8 +297,12 @@ void HsInstalledAppsState::openInstallationLog()
  */
 void HsInstalledAppsState::launchDetails(const QModelIndex &index)
 {
-	machine()->postEvent(HsMenuEventFactory::createAppDetailsViewEvent(
-			index.data(CaItemModel::IdRole).toInt()));	
+    QSharedPointer<const CaEntry> entry = mModel->entry(index);
+    if (!entry.isNull() && !(entry->flags() & UninstallEntryFlag)) {
+
+        machine()->postEvent(HsMenuEventFactory::createAppDetailsViewEvent(
+                index.data(CaItemModel::IdRole).toInt()));
+    }
 }
 
 #ifdef COVERAGE_MEASUREMENT

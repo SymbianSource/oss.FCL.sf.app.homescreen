@@ -108,14 +108,17 @@ public:
         mDataRole = role;
         return mDataResult;
     }
+
     void setAutoUpdate(bool autoUpdate)
     {
         mIsAutoUpdateResult = autoUpdate;
     }
+
     void setSecondLineVisibility(bool secondLineVisible)
     {
         mSecondLineVisibilityResult = secondLineVisible;
     }
+
     bool secondLineVisibility() const
     {
         return mSecondLineVisibilityResult;
@@ -142,24 +145,30 @@ public:
     {
         return mGetIconSizeResult;
     }
+    
     void updateModel(){}
+    
     void setParentId(int parentId)
     {
         Q_UNUSED(parentId);
     }
+    
     void setFlagsOn(const EntryFlags &onFlags) 
     {
         Q_UNUSED(onFlags);
     }
+    
     void setFlagsOff(const EntryFlags &offFlags) 
     {
         Q_UNUSED(offFlags);
     }
+    
     QSharedPointer<CaEntry> entry(const QModelIndex &index) const 
     {
         Q_UNUSED(index);
         return mEntryResult;
     }
+    
     QList<int> getUninstallingEntriesIds(int componentId)
     {
         Q_UNUSED(componentId);
@@ -168,6 +177,7 @@ public:
         ids.append(4);
         return ids;
     }
+    
     void updateProgress(int id, int valueOfProgress)
     {
         if (id == mEntryResult->id()) {

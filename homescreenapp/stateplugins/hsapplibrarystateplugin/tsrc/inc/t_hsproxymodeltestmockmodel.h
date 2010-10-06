@@ -32,13 +32,13 @@ public:
 
     virtual QModelIndex index(int, int,
         const QModelIndex &parent = QModelIndex()) const {
-    	Q_UNUSED(parent);
+        Q_UNUSED(parent);
         return QModelIndex();
     }
     virtual QVariant data(const QModelIndex &,
                               int role = Qt::DisplayRole) const {
-    	Q_UNUSED(role);
-    	return QVariant(mEntryId);
+        Q_UNUSED(role);
+        return QVariant(mEntryId);
     }
 
     const CaEntry *entry(const QModelIndex &index) const;
@@ -47,6 +47,5 @@ private:
     
     int mEntryId;
 };
-
 
 #endif

@@ -87,12 +87,20 @@ void HsBackupRestoreObserverPrivate::handleKeyChange(XQSettingsKey key, const QV
     {
         if ( !mCallBack )
         {
-            mCallBack = CHsBURActiveCallback::NewL(mQ);
+            TRAPD(err, mCallBack = CHsBURActiveCallback::NewL(mQ));
+            if ( err )
+            {
+                qDebug() << "HsBackupRestoreObserverPrivate::handleKeyChange - BUR active callback creation failed with error " << err;
+            }
         }
 
         if ( !mActiveBackupClient )
         {
-            mActiveBackupClient = conn::CActiveBackupClient::NewL( mCallBack );
+            TRAPD(err, mActiveBackupClient = conn::CActiveBackupClient::NewL( mCallBack ));
+            if ( err )
+            {
+                qDebug() << "HsBackupRestoreObserverPrivate::handleKeyChange - Active backup client creation failed with error " << err;
+            }
 
             if ( ( type == conn::EBURBackupPartial || 
                    type == conn::EBURRestorePartial ) &&

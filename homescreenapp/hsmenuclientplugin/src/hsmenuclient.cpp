@@ -22,9 +22,9 @@
 #include <caentry.h>
 #include <caicondescription.h>
 #include <caservice.h>
+#include <hsmenuclient.h>
 
 #include "hsapp_defs.h"
-#include "hsmenuclient.h"
 #include "hsmenuclient_p.h"
 
 /*!

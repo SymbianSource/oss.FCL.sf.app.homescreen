@@ -14,6 +14,7 @@
  * Description:
  *
  */
+ 
 #ifndef HS_DIALOG_CONTROLLER_H
 #define HS_DIALOG_CONTROLLER_H
 
@@ -21,12 +22,12 @@
 #include <QPair>
 #include <QMap>
 
+#include "hsmenudialogfactory.h"
+#include "hsmenuentryremovedhandler.h"
+
 class QAction;
 class QString;
 class HbDialog;
-
-#include "hsmenudialogfactory.h"
-#include "hsmenuentryremovedhandler.h"
 
 class HsDialogController: public QObject
 {

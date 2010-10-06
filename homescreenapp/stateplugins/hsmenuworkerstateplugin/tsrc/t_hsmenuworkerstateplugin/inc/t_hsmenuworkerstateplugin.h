@@ -24,6 +24,7 @@
 #include <QScopedPointer>
 #include <hsmenuservice.h>
 #include <caitemmodel.h>
+
 #include "t_hsshortcutservice.h"
 
 #ifdef Q_OS_SYMBIAN
@@ -91,7 +92,7 @@ private slots:
     void HsUninstallItemState_construction();
     void HsUninstallItemState_onEntry();
 #ifdef Q_OS_SYMBIAN
-	void HsUninstallItemState_getApplicationsNames();
+    void HsUninstallItemState_getApplicationsNames();
 #endif // Q_OS_SYMBIAN
 
     // HsAddAppsToCollectionState
@@ -106,8 +107,8 @@ private slots:
     void AddAppsToCollectionState_listDialogFinished();
     void AddAppsToCollectionState_newCollection();
     void AddAppsToCollectionState_editorDialogFinished();
-	void AddAppsToCollectionState_appsCheckListState();
-	void AddAppsToCollectionState_selectApplicationsDone();
+    void AddAppsToCollectionState_appsCheckListState();
+    void AddAppsToCollectionState_selectApplicationsDone();
     void AddAppsToCollectionState_collectionSelected();
 
     void AppsCheckList_showAppsCheckboxList();
@@ -173,10 +174,10 @@ private slots:
      */
     void testCommitSlot(const QList<int> &appList);
 
-	/**
+    /**
      * test slot for AddAppsToCollectionState_appsCheckListState test
      */
-	void testTransitToStateSlot();
+    void testTransitToStateSlot();
 
 private:
     void checkDialogController();

@@ -46,3 +46,4 @@ symbian:include(hsclockwidgetplugin_symbian.pri)
 RESOURCES = hsclockwidgetplugin.qrc
 
 exportResources(./resource/*.manifest, $$WIDGET_SUBDIR)
+exportResources(./resource/*.svg, $$WIDGET_SUBDIR)

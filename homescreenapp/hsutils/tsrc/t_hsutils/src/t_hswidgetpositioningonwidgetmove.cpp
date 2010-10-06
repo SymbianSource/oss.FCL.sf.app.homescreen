@@ -20,10 +20,6 @@
 #include "t_hsutils.h"
 #include "hsapp_defs.h"
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-//
-
 #define SNAP_GAP_VALUE 6
 #define SNAP_FORCE_VALUE 30
 #define SNAP_ENABLED_VALUE true

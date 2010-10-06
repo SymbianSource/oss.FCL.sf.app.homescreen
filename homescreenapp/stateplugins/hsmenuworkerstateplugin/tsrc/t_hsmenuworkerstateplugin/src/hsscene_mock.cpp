@@ -23,17 +23,30 @@
 #include "hswallpaper.h"
 #include "hsconfiguration.h"
 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsScene::~HsScene()
 {
     delete mWallpaper;
     qDeleteAll(mPages);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 int HsScene::databaseId() const
 {
     return mDatabaseId;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsScene::load()
 {
     int pageCount = property("pageCount").toInt();
@@ -58,16 +71,28 @@ bool HsScene::load()
     return true;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsWallpaper *HsScene::wallpaper() const
 {
     return mWallpaper;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 QList<HsPage *> HsScene::pages() const
 {
     return mPages;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsScene::addPage(HsPage *page)
 {
     if (!page) {
@@ -82,6 +107,10 @@ bool HsScene::addPage(HsPage *page)
     return true;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsScene::removePage(HsPage *page)
 {
     if (!page) {
@@ -90,6 +119,10 @@ bool HsScene::removePage(HsPage *page)
     return mPages.removeOne(page);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsScene::setActivePage(HsPage *page)
 {
     if (!page) {
@@ -104,6 +137,10 @@ bool HsScene::setActivePage(HsPage *page)
     return true;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsScene::setActivePageIndex(int index)
 {
     if (index < 0 || mPages.count() <= index) {
@@ -112,26 +149,46 @@ bool HsScene::setActivePageIndex(int index)
     return setActivePage(mPages[index]);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsPage *HsScene::activePage() const
 {
     return mActivePage;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 int HsScene::activePageIndex() const
 {
     return mPages.indexOf(mActivePage);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsScene::setActiveWidget(HsWidgetHost *widget)
 {
     mActiveWidget = widget;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsWidgetHost *HsScene::activeWidget() const
 {
     return mActiveWidget;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsScene::setOnline(bool online)
 {
     mIsOnline = online;
@@ -140,14 +197,19 @@ void HsScene::setOnline(bool online)
     }
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsScene::isOnline()const
 {
     return mIsOnline;
 }
 
-/*!
-    Singleton.
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsScene *HsScene::instance()
 {
     if (!mInstance) {
@@ -156,13 +218,21 @@ HsScene *HsScene::instance()
     return mInstance;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsScene *HsScene::takeInstance()
 {
     HsScene *instance = mInstance;
     mInstance = 0;
     return instance;
 }
- 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsScene::setInstance(HsScene *instance)
 {
     if (mInstance != instance) {
@@ -171,24 +241,29 @@ void HsScene::setInstance(HsScene *instance)
     }    
 }
 
-/*!
-    Listens for application background/foreground changes.
-*/
+// ---------------------------------------------------------------------------
+// Listens for application background/foreground changes.
+// ---------------------------------------------------------------------------
+//
 bool HsScene::eventFilter(QObject *watched, QEvent *event)
 {
-	switch (event->type()) {
+    switch (event->type()) {
         case QEvent::ApplicationActivate:
             mActivePage->showWidgets();
             break;
-		case QEvent::ApplicationDeactivate:
+        case QEvent::ApplicationDeactivate:
             mActivePage->hideWidgets();
             break;
         default:
             break;
-	}
+    }
     return QObject::eventFilter(watched, event);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsScene::HsScene(QObject *parent)
   : QObject(parent),
     mDatabaseId(-1),

@@ -19,7 +19,6 @@
 #include <QFile>
 #include <QVariantHash>
 #include <QGraphicsLinearLayout>
-
 #include <HbMainWindow>
 #include <HbIconItem>
 
@@ -29,13 +28,11 @@
 #include "hswallpaperloader.h"
 #include "hsconfiguration.h"
 #include "hsgui.h"
-/*!
 
-*/
-
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsWallpaper::HsWallpaper(QGraphicsItem *parent)
   : HbWidget(parent),
     mIsDefaultImage(false),
@@ -62,21 +59,27 @@ HsWallpaper::HsWallpaper(QGraphicsItem *parent)
         SLOT(updateIconItem(Qt::Orientation)));
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsWallpaper::~HsWallpaper()
 {
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::setImage(const QString &path)
 {
     Q_UNUSED(path);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::setImages(const QString &portraitFileName, const QString &landscapeFileName)
 {
     Q_UNUSED(portraitFileName)
@@ -84,9 +87,10 @@ void HsWallpaper::setImages(const QString &portraitFileName, const QString &land
     emit imageSet();
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::setDefaultImage()
 {
     if (mIsDefaultImage) {
@@ -109,9 +113,10 @@ void HsWallpaper::setDefaultImage()
     updateIconItem(HsGui::instance()->orientation());
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::remove()
 {
     if (mIsDefaultImage) {
@@ -124,9 +129,10 @@ void HsWallpaper::remove()
     mLandscapeImagePath.clear();
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 bool HsWallpaper::setExistingImage()
 {
     QDir dir(wallpaperDirectory());
@@ -164,9 +170,10 @@ QString HsWallpaper::rootDirectory() const
     return directory;
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::onLoaderFinished()
 {
     if (mIsDefaultImage) {
@@ -183,9 +190,10 @@ void HsWallpaper::onLoaderFinished()
     emit imageSet();
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::onLoaderFailed()
 {
     foreach (QString path, mLoader->targets().keys()) {
@@ -194,9 +202,10 @@ void HsWallpaper::onLoaderFailed()
     emit imageSetFailed();
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsWallpaper::updateIconItem(Qt::Orientation orientation)
 {
     if (orientation == Qt::Vertical) {
@@ -206,9 +215,10 @@ void HsWallpaper::updateIconItem(Qt::Orientation orientation)
     }
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsSceneWallpaper::HsSceneWallpaper(HsScene *scene, QGraphicsItem *parent)
   : HsWallpaper(parent),
     mScene(0)
@@ -216,16 +226,18 @@ HsSceneWallpaper::HsSceneWallpaper(HsScene *scene, QGraphicsItem *parent)
     setScene(scene);
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsSceneWallpaper::~HsSceneWallpaper()
 {
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsSceneWallpaper::setScene(HsScene *scene)
 {
     if (!scene) {
@@ -239,17 +251,19 @@ void HsSceneWallpaper::setScene(HsScene *scene)
     }
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 QString HsSceneWallpaper::wallpaperDirectory() const
 {
     return QDir::toNativeSeparators(rootDirectory() + "scene/");
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 QVariantHash HsSceneWallpaper::createTargets(const QString &sourcePath)
 {
     QVariantHash targets;
@@ -264,9 +278,10 @@ QVariantHash HsSceneWallpaper::createTargets(const QString &sourcePath)
     return targets;
 }
 
-/*!
- PAGE
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsPageWallpaper::HsPageWallpaper(HsPage *page, QGraphicsItem *parent)
   : HsWallpaper(parent),
     mPage(0)
@@ -274,16 +289,18 @@ HsPageWallpaper::HsPageWallpaper(HsPage *page, QGraphicsItem *parent)
     setPage(page);
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 HsPageWallpaper::~HsPageWallpaper()
 {
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsPageWallpaper::setPage(HsPage *page)
 {
     if (!page) {
@@ -297,17 +314,19 @@ void HsPageWallpaper::setPage(HsPage *page)
     }
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 QString HsPageWallpaper::wallpaperDirectory() const
 {
     return QDir::toNativeSeparators(rootDirectory() + "page/");
 }
 
-/*!
-
-*/
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 QVariantHash HsPageWallpaper::createTargets(const QString &sourcePath)
 {
     QVariantHash targets;

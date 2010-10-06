@@ -72,6 +72,7 @@ private:
     void makeDisconnect();
     void setContextMenuOptions(HbAbstractViewItem *item, EntryFlags flags);
     void setMenuOptions();
+    void reconnectViewComponents(bool empty);
 
 private:
     Hs::HsSortAttribute mSortAttribute;

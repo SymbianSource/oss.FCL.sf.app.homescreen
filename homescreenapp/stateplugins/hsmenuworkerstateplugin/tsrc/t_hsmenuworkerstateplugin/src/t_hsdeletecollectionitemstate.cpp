@@ -28,7 +28,9 @@
 #include "hsmenuitemmodel.h"
 #include "hsdialogcontroller.h"
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::DeleteCollectionItemState_construction()
@@ -54,8 +56,10 @@ void MenuStatesTest::DeleteCollectionItemState_construction()
 #endif//Q_OS_SYMBIAN
 }
 
-
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::DeleteCollectionItemState_onEntry()
 {
 #ifdef Q_OS_SYMBIAN

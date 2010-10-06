@@ -16,9 +16,7 @@
 */
 
 #include "t_hsmenuworkerstateplugin.h"
-
 #include "hsaddtohomescreenstate.h"
-
 #include "hsmenuworkerstate.h"
 #include "hsmenuevent.h"
 #include "hsmenueventfactory.h"
@@ -26,6 +24,7 @@
 
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::MenuWorkerState_construction()

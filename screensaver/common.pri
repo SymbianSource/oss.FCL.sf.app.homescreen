@@ -129,8 +129,8 @@ win32 {
 }
 }
 
-!symbian {
-    DEFINES += NO_QT_EXTENSIONS
+symbian {
+    DEFINES += QT_EXTENSIONS
 }
 
 # support for NFT

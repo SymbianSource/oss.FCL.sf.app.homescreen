@@ -15,4 +15,4 @@
 #
 
 PLATFORM_HEADERS += \
-                      homescreenclient_api/hsmenuclient.h
+                      homescreenclient_api/inc/hsmenuclient.h

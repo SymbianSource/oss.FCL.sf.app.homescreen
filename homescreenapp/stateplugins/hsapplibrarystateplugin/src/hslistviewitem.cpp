@@ -18,7 +18,8 @@
 #include <hbnamespace.h>
 #include <HbAbstractItemView>
 #include <HbStyleLoader>
-#include <HbTextItem>
+#include <HbTextItem> 
+#include <HbRichTextItem>
 #include <HbParameterLengthLimiter>
 #include <QPainter>
 #include <caitemmodel.h>
@@ -106,6 +107,7 @@ HsListViewItem::~HsListViewItem()
 
 void HsListViewItem::updateChildItems()
 {
+    HSMENUTEST_FUNC_ENTRY("HsListViewItem::updateChildItems");
     HbListViewItem::updateChildItems();
 
     EntryFlags flags = modelIndex().data(
@@ -128,10 +130,18 @@ void HsListViewItem::updateChildItems()
         // TODO, consider moving this logic to model
         foreach (QGraphicsItem * item, this->childItems()) {
                if (HbStyle::itemName(item) == "text-1") {
-                   HbTextItem* text = (HbTextItem*)item;
-                   text->setText(
-                           HbParameterLengthLimiter("txt_applib_dblist_uninstalling_1")
-                           .arg(text->text()));
+                   if (textFormat() == Qt::RichText) {
+                       HbRichTextItem * text = (HbRichTextItem *)item;
+                       text->setText(
+                               HbParameterLengthLimiter("txt_applib_dblist_uninstalling_1")
+                               .arg(text->text()));
+                   }
+                   else {
+                       HbTextItem* text = (HbTextItem*)item;
+                       text->setText(
+                               HbParameterLengthLimiter("txt_applib_dblist_uninstalling_1")
+                               .arg(text->text()));
+                   }
                    break;
                }
            }
@@ -148,6 +158,7 @@ void HsListViewItem::updateChildItems()
             break;
         }
     }
+    HSMENUTEST_FUNC_EXIT("HsListViewItem::updateChildItems");
 }
 
 HbAbstractViewItem*  HsListViewItem::createItem()
@@ -158,6 +169,7 @@ HbAbstractViewItem*  HsListViewItem::createItem()
 
 void HsListViewItem::polish(HbStyleParameters& params)
 {
+    HSMENUTEST_FUNC_ENTRY("HsListViewItem::polish");
     if (isProgress) {
         HbStyleLoader::registerFilePath(":/layout/hslistviewitem.widgetml");
     }
@@ -166,5 +178,6 @@ void HsListViewItem::polish(HbStyleParameters& params)
     if (isProgress) {
         HbStyleLoader::unregisterFilePath(":/layout/hslistviewitem.widgetml");
     }
+    HSMENUTEST_FUNC_EXIT("HsListViewItem::polish");
 }
 

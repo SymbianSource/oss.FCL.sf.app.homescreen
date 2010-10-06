@@ -74,6 +74,8 @@ public:
     static int collectionIdByType(const QString& collectionType);
 
     static void touch(int entryId);
+    
+    static void touch(const CaEntry &entry);
 
     static void touch(const QList<int> &entryIdList);
 

@@ -18,9 +18,9 @@
 #include <qserviceinterfacedescriptor.h>
 #include <qabstractsecuritysession.h>
 #include <qservicecontext.h>
+#include <hsmenuclient.h>
 
 #include "hsmenuclientplugin.h"
-#include "hsmenuclient.h"
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP

@@ -15,7 +15,6 @@
 *
 */
 
-
 #include "t_hsmenuworkerstateplugin.h"
 
 #include <QStateMachine>
@@ -39,6 +38,7 @@
 #include "HsWidgetHost.h"
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsPreviewHSWidgetState_construction()
@@ -66,8 +66,8 @@ void MenuStatesTest::HsPreviewHSWidgetState_construction()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsPreviewHSWidgetState_showMessageWidgetCorrupted()
@@ -92,8 +92,8 @@ void MenuStatesTest::HsPreviewHSWidgetState_showMessageWidgetCorrupted()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsPreviewHSWidgetState_onEntry()
@@ -139,6 +139,7 @@ void MenuStatesTest::HsPreviewHSWidgetState_onEntry()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsPreviewHSWidgetState_buildPreviewDialog()
@@ -174,6 +175,7 @@ void MenuStatesTest::HsPreviewHSWidgetState_buildPreviewDialog()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsPreviewHSWidgetState_addToHomeScreen()

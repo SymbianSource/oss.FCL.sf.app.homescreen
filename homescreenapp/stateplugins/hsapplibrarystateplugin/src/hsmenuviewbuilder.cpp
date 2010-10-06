@@ -33,13 +33,10 @@
 #include "hsmenustates_global.h"
 
 static const char* DOCUMENT_BASE_NAME_MAP
-        [InvalidStateContext][InvalidOperationalContext] =
+        [InvalidOperationalContext] =
                             /*HsItemViewContext,    HsEmptyLabelContext*/
 {
-/*HsAllAppsContext*/        {"listview",             "listview"},
-/*HsAllCollectionsContext*/ {"listview",             "listview"},
-/*HsInstalledAppsContext*/  {"labeledlistview",     "emptylabeledview"},
-/*HsCollectionContext*/     {"labeledlistview",     "emptylabeledview"}
+     "labeledlistview",     "emptylabeledview"
 };
 
 static const QString DOCUMENT_NAME_PREFIX(QLatin1String(":/xml/"));
@@ -187,6 +184,16 @@ HbToolBarExtension *HsMenuViewBuilder::toolBarExtension() const
 }
 
 /*!
+ \return Pointer to the toolbar extension action.
+ The pointer is valid until the HsMenuViewBuilder instance is destroyed.
+ Memory ownership is not changed.
+ */
+HbAction *HsMenuViewBuilder::toolBarExtensionAction() const
+{
+    return mToolBarExtensionAction;
+}
+
+/*!
  \return Action group for \a allAppsState and \a allCollectionsState action.
  */
 QActionGroup *HsMenuViewBuilder::toolBarActionGroup() const
@@ -229,6 +236,9 @@ HsMenuViewBuilder::HsMenuViewBuilder():
     mToolBar->addAction(allAppsAction());
     mToolBar->addAction(allCollectionsAction());
     mToolBar->addAction(searchAction());
+    mToolBarExtensionAction = mToolBar->addExtension(mToolBarExtension);
+    mToolBarExtensionAction->setIcon(HbIcon("qtg_mono_store"));
+    mToolBarExtensionAction->setVisible(false);
 
     mToolBarActionGroup = new QActionGroup(allAppsAction());
 
@@ -306,7 +316,7 @@ void HsMenuViewBuilder::setOperationalContext(
 QSharedPointer<HbDocumentLoader> HsMenuViewBuilder::readContextConfiguration()
 {
     const QLatin1String documentName(
-            DOCUMENT_BASE_NAME_MAP[mStateContext][mOperationalContext]);
+            DOCUMENT_BASE_NAME_MAP[mOperationalContext]);
 
     QSharedPointer<HbDocumentLoader> loader =
             parseDocument(QString(documentName));

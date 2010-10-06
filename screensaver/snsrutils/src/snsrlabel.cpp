@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -16,11 +16,11 @@
 */
 
 #include "snsrlabel.h"
+#include "snsrcolors.h"
 
 #include <hbevent.h>
 #include <hbcolorscheme.h>
 
-const QString snsrForegroundColorRole("qtc_screensaver");
 
 /*!
     \class SnsrLabel
@@ -33,7 +33,7 @@ const QString snsrForegroundColorRole("qtc_screensaver");
     \param parent Graphics parent item.
  */
 SnsrLabel::SnsrLabel(QGraphicsItem *parent)
-    : HbLabel(parent)
+    : HbLabel(parent), mTextColorType(ThemedColorForActiveMode)
 {
     setThemedTextColor();
 }
@@ -44,7 +44,8 @@ SnsrLabel::SnsrLabel(QGraphicsItem *parent)
     \param parent Graphics parent item.
  */
 SnsrLabel::SnsrLabel(const QString &displayText, QGraphicsItem *parent)
-    : HbLabel(displayText, parent)
+    : HbLabel(displayText, parent), 
+      mTextColorType(ThemedColorForActiveMode)
 {
     setThemedTextColor();
 }
@@ -57,11 +58,27 @@ SnsrLabel::~SnsrLabel()
 }
 
 /*!
+    Set the coloring scheme to be used: fixed color for power save mode (white) or 
+    themed color for active mode.
+ */
+void SnsrLabel::setTextColorType(const TextColorType &colorType)
+{
+    mTextColorType = colorType;
+    if (mTextColorType==FixedColorForPowerSaveMode) {
+        setTextColor(SnsrColors::PowerSaveModeWidgetColor);
+    }
+    else {
+        setThemedTextColor();
+    }   
+}
+
+/*!
     \reimp
  */
 void SnsrLabel::changeEvent(QEvent * event)
 {
-    if (event->type() == HbEvent::ThemeChanged) {
+    if (event->type() == HbEvent::ThemeChanged &&
+        mTextColorType == ThemedColorForActiveMode) {
         setThemedTextColor();
     }
     return HbLabel::changeEvent(event);
@@ -72,7 +89,7 @@ void SnsrLabel::changeEvent(QEvent * event)
  */
 void SnsrLabel::setThemedTextColor()
 {
-    QColor textColor(HbColorScheme::color(snsrForegroundColorRole));
+    QColor textColor(HbColorScheme::color(SnsrColors::WidgetColorRole.latin1()));
     if (textColor.isValid()) {
         setTextColor(textColor);
     } else {

@@ -24,6 +24,7 @@
 QSystemNetworkInfo::QSystemNetworkInfo(QObject *parent) : QObject(parent)
 {
 }
+
 QSystemNetworkInfo::~QSystemNetworkInfo()
 {
 }
@@ -57,6 +58,7 @@ QString QSystemNetworkInfo::networkName(QSystemNetworkInfo::NetworkMode mode)
 QSystemDeviceInfo::QSystemDeviceInfo(QObject *parent) : QObject(parent)
 {
 }
+
 QSystemDeviceInfo::~QSystemDeviceInfo()
 {
 }

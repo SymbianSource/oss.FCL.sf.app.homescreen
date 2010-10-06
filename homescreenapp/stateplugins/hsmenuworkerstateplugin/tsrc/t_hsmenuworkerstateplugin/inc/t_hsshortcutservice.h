@@ -14,8 +14,10 @@
 * Description:
 *
 */
+
 #ifndef T_HSSHORTCUTSERVICE_H
 #define T_HSSHORTCUTSERVICE_H
+
 #include <QObject>
 #include <QIcon>
 #include <QSharedPointer>

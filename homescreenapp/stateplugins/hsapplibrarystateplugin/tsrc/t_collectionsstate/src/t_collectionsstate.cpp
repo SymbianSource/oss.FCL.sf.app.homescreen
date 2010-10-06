@@ -35,6 +35,7 @@
 #include "hsmenueventtransition.h"
 #include "hscollectionstate.h"
 #include "hsmainwindow.h"
+#include "hsscene.h"
 
 #include "t_hsaddtohomescreenmockstate.h"
 #include "t_hsmockmodel.h"
@@ -43,29 +44,45 @@
 Q_DECLARE_METATYPE(Hs::HsSortAttribute)
 
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class HsMainWindowMock : public HsMainWindow
 {
     virtual void setCurrentView(HbView *view);
 
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsMainWindowMock::setCurrentView(HbView *view)
 {
     Q_UNUSED(view);
     // do nothing
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::init()
 {
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::construction()
@@ -102,6 +119,7 @@ void MenuStatesTest::construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::listItemActivated()
@@ -165,6 +183,7 @@ void MenuStatesTest::listItemActivated()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::listItemLongPressed()
@@ -176,11 +195,9 @@ void MenuStatesTest::listItemLongPressed()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-        QScopedPointer<HbMainWindow> wind(new HbMainWindow);
-
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
-        HsMainWindow mainWindow;
+        HsMainWindowMock mainWindow;
 
 
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
@@ -192,6 +209,7 @@ void MenuStatesTest::listItemLongPressed()
         const int collectionId = HsMenuService::createCollection(collectionName);
 
         HsMenuItemModel *appsModel = HsMenuService::getAllApplicationsModel();
+        QVERIFY(appsModel!=NULL);
         QList<int> list;
         list << appsModel->data(appsModel->index(0),CaItemModel::IdRole).toInt();
         HsMenuService::addApplicationsToCollection(list,collectionId);
@@ -199,6 +217,7 @@ void MenuStatesTest::listItemLongPressed()
 
         HsCollectionState *collectionState = new HsCollectionState(builder, menuMode,
                 mainWindow, parent);
+        QVERIFY(collectionState!=NULL);
         collectionState->mCollectionId = collectionId;
         collectionState->mCollectionType = "collection";
 
@@ -244,8 +263,6 @@ void MenuStatesTest::listItemLongPressed()
             }
         }
         HsMenuService::removeCollection(collectionId);
-        wind->removeView(builder.currentView());
-
     }
 #ifdef Q_OS_SYMBIAN
 #ifdef UT_MEMORY_CHECK
@@ -254,8 +271,8 @@ void MenuStatesTest::listItemLongPressed()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::contextMenuAction()
@@ -267,6 +284,9 @@ void MenuStatesTest::contextMenuAction()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
+        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        //HsScene::setInstance( new HsScene(window.data()) );
+
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
         HsMainWindowMock mainWindow;
@@ -336,9 +356,8 @@ void MenuStatesTest::contextMenuAction()
 #endif//Q_OS_SYMBIAN
 }
 
-
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::contextMenuConstruct()
@@ -386,8 +405,8 @@ void MenuStatesTest::contextMenuConstruct()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::contextMenuConstructNonEmptyCollection()
@@ -437,7 +456,10 @@ void MenuStatesTest::contextMenuConstructNonEmptyCollection()
 #endif//Q_OS_SYMBIAN
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::addAppsAction()
 {
 #ifdef Q_OS_SYMBIAN
@@ -498,6 +520,10 @@ void MenuStatesTest::addAppsAction()
 #endif//Q_OS_SYMBIAN
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::renameAction()
 {
 #ifdef Q_OS_SYMBIAN
@@ -557,7 +583,10 @@ void MenuStatesTest::renameAction()
 #endif//Q_OS_SYMBIAN
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::deleteAppsAction()
 {
 #ifdef Q_OS_SYMBIAN
@@ -616,6 +645,10 @@ void MenuStatesTest::deleteAppsAction()
 #endif//Q_OS_SYMBIAN
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::updateLabel()
 {
 #ifdef Q_OS_SYMBIAN
@@ -650,10 +683,7 @@ void MenuStatesTest::updateLabel()
                 HsMenuService::getCollectionModel(collectionState->mCollectionId,
                         collectionState->mSortAttribute));
 
-        const QString label1 = collectionState->mModel->root().data(
-                                   Qt::DisplayRole).toString();
-
-        const QString newName(label1 +
+        const QString newName(collectionName +
                               QDateTime::currentDateTime().
                               toString("ddmmyyyy_hh_mm_ss_zzz"));
 
@@ -666,11 +696,12 @@ void MenuStatesTest::updateLabel()
 
         collectionState->updateLabel();
 
-        const QString label2 = builder.currentViewLabel()->heading();
+        const QString label = builder.currentViewLabel()->heading();
 
-        QCOMPARE(label2, newName);
+        //now label is different than collection name but should contain this name
+        QVERIFY(label.contains(newName));
 
-        QVERIFY(HsMenuService::renameCollection(collectionState->mCollectionId, label1));
+        QVERIFY(HsMenuService::renameCollection(collectionState->mCollectionId, collectionName));
 
         // cleanup
         HsMenuService::removeCollection(collectionId);
@@ -681,6 +712,7 @@ void MenuStatesTest::updateLabel()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::addElementToHomeScreen()
@@ -760,6 +792,7 @@ void MenuStatesTest::addElementToHomeScreen()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::addCollectionShortcutToHomeScreenAction()
@@ -822,6 +855,7 @@ void MenuStatesTest::addCollectionShortcutToHomeScreenAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::latestOnTopMenuAction()
@@ -878,6 +912,7 @@ void MenuStatesTest::latestOnTopMenuAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::oldestOnTopMenuAction()
@@ -937,6 +972,7 @@ void MenuStatesTest::oldestOnTopMenuAction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::createArrangeCollection()
@@ -992,6 +1028,7 @@ void MenuStatesTest::createArrangeCollection()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 #ifdef Q_OS_SYMBIAN
@@ -1021,8 +1058,8 @@ void MenuStatesTest::openTaskSwitcher()
 }
 #endif//Q_OS_SYMBIAN
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::disableSearchAction()

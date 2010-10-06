@@ -26,6 +26,7 @@
 #include "hsmenuitemmodel.h"
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsUninstallFailedState_construction()
@@ -51,6 +52,7 @@ void MenuStatesTest::HsUninstallFailedState_construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsUninstallFailedState_onEntry()

@@ -75,7 +75,5 @@ private:
 
     QModelIndex mIndex;
     QPointF mPoint;
-
-
 };
 #endif // T_MENUVIEWBUILDER_H

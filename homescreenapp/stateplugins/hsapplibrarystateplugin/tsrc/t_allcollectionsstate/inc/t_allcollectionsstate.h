@@ -20,7 +20,6 @@
 
 #include <QtTest/QtTest>
 
-
 class HbMainWindow;
 class HbAbstractViewItem;
 class QStateMachine;

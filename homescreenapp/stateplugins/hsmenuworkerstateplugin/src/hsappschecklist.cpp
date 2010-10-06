@@ -15,11 +15,13 @@
  *
  */
 
-#include <hbaction.h>
-#include <hbinstance.h>
-#include <hbdialog.h>
-#include <hblistview.h>
-#include <hbdocumentloader.h>
+#include <HbAction>
+#include <HbInstance>
+#include <HbDialog>
+#include <HbIndexFeedback>
+#include <HbListView>
+#include <HbScrollBar>
+#include <HbDocumentLoader>
 #include <hsmenuservice.h>
 #include <hsmenuitemmodel.h>
 
@@ -166,7 +168,12 @@ void HsAppsCheckList::constructControls()
             LIST_VIEW_WIDGET));
         mModel->setParent(mAppsSelectDialog);
         mListView->setModel(mModel);
-
+        mListView->verticalScrollBar()->setInteractive(true);
+        HbIndexFeedback *indexFeedback = new HbIndexFeedback(mListView);
+        indexFeedback->setIndexFeedbackPolicy(
+                HbIndexFeedback::IndexFeedbackSingleCharacter);
+        indexFeedback->setItemView(mListView);
+        
         connect(mListView,SIGNAL(activated(const QModelIndex&) ),this
                 ,SLOT(selectedItemsChanged()));
         connect(mModel,SIGNAL(rowsRemoved(const QModelIndex&, int,int)),

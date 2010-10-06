@@ -85,14 +85,16 @@ QVariant HsMenuItemModel::data(const QModelIndex &index,
     HSMENUTEST_FUNC_ENTRY("HsMenuItemModel::data");
     QVariant variant;
 
-    if (role == Qt::DecorationRole && secondLineVisibility()
-            && newIconNeeded(index)) {
+    if (role == Qt::DecorationRole && newIconNeeded(index)) {
         QList<QVariant> icons;
+        
+        QVariant iconVariant = CaItemModel::data(index, role);
+        HbIcon icon = iconVariant.value<HbIcon>();
+        icon.addProportionalBadge(Qt::AlignTop | Qt::AlignRight,
+            HbIcon(Hs::newIconId), QSizeF(0.5, 0.5));
+        icons << HbIcon(icon);
 
-        icons << CaItemModel::data(index, role);
-        icons << HbIcon(Hs::newIconId);
-
-        variant = QVariant(icons);
+        variant = QVariant(icons);      
     } else if (role == Hb::IndexFeedbackRole){
         QVariant display = CaItemModel::data(index, Qt::DisplayRole);
         if (display.type() == QVariant::String){
@@ -100,9 +102,20 @@ QVariant HsMenuItemModel::data(const QModelIndex &index,
         } else {
             variant = QVariant(display.toList().at(0).toString().at(0).toUpper());
         }
+    } else if (role == Qt::DecorationRole && secondLineVisibility()
+                && !(entry(index)->flags() & MissingEntryFlag)
+                && entry(index)->entryTypeName() == Hs::packageTypeName) {
+            QList<QVariant> icons;
+
+            icons << CaItemModel::data(index, role);
+            icons << HbIcon(entry(index)->attribute(Hs::drivesIconIdsAttributeName));
+
+            variant = QVariant(icons);
     } else {
+        
         variant = CaItemModel::data(index, role);
     }
+    HSMENUTEST(QString("role: %1, value: %2").arg(role).arg(variant.toString()));
     HSMENUTEST_FUNC_EXIT("HsMenuItemModel::data");
     return variant;
 
@@ -157,3 +170,4 @@ void HsMenuItemModel::preloadIcons()
 {
     mIconsIdleLoader = new HsIconsIdleLoader(this, this);
 }
+

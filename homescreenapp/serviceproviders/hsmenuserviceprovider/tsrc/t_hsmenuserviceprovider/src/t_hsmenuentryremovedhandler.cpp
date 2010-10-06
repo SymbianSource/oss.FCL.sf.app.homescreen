@@ -26,8 +26,10 @@
 #include "canotifier.h"
 #include "canotifierfilter.h"
 
-
-     
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuEntryRemovedHandlerTest_data()
 {
     // define testing data table
@@ -48,6 +50,10 @@ void MenuServiceTest::HsMenuEntryRemovedHandlerTest_data()
     QTest::newRow("no_notification") << 1 << static_cast<int>(RemoveChangeType) << 0 << 0;
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuEntryRemovedHandlerTest()
 {
     QFETCH(int, subscribedId);

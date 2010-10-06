@@ -27,6 +27,7 @@
 #include "hsmenuevent.h"
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::DeleteCollectionState_construction1()
@@ -52,7 +53,10 @@ void MenuStatesTest::DeleteCollectionState_construction1()
 #endif//Q_OS_SYMBIAN
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::DeleteCollectionState_onEntry()
 {
 #ifdef Q_OS_SYMBIAN
@@ -83,6 +87,10 @@ void MenuStatesTest::DeleteCollectionState_onEntry()
 #endif//Q_OS_SYMBIAN
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::DeleteCollectionState_deleteCollection()
 {
 #ifdef Q_OS_SYMBIAN

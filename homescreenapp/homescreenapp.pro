@@ -19,10 +19,10 @@ TEMPLATE = subdirs
 SUBDIRS  += hsutils \
             hsdomainmodel \
             serviceproviders \
+            hsmenuclientplugin \
             stateplugins \
             widgetplugins \
-            hsapplication \
-            hsmenuclientplugin 
+            hsapplication
 
 symbian: {
 SUBDIRS  += hshomescreenclientplugin \

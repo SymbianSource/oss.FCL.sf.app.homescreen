@@ -52,7 +52,6 @@ private:
 
     void construct();
 
-
 };
 
 #endif /* HSUINSTALLFAILEDSTATE_H_ */

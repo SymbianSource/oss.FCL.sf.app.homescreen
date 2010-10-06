@@ -28,6 +28,7 @@
 #include "hsmenuevent.h"
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsInstallationLogState_construction()
@@ -52,7 +53,10 @@ void MenuStatesTest::HsInstallationLogState_construction()
 #endif//Q_OS_SYMBIAN
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsInstallationLogState_onEntry()
 {
 #ifdef Q_OS_SYMBIAN

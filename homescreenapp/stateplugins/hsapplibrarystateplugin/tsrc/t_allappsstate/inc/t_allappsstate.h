@@ -67,6 +67,4 @@ private:
     static const char TEST_PARAM_VALUE[17];
 };
 
-
-
 #endif // T_ALLAPPSSTATE_H

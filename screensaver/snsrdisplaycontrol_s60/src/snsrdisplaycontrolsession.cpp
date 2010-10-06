@@ -18,14 +18,9 @@
 
 #include <power_save_display_mode.h>
 #include <hal.h>
-#include <coreapplicationuisdomainpskeys.h>
-#include <e32property.h>
 
 #include "snsrdisplaycontrolsession.h"
 #include "snsrdisplaycontrolcommon.h"
-
-
-// ======== LOCAL FUNCTIONS ========
 
 
 // ======== MEMBER FUNCTIONS ========
@@ -91,6 +86,8 @@ CSnsrDisplayControlSession::~CSnsrDisplayControlSession()
 void CSnsrDisplayControlSession::ServiceL( const RMessage2& aMessage )
     {
     TInt func = aMessage.Function();
+    RDEBUG1( "func", func )
+    
     
     TInt err( KErrNone );
     
@@ -98,38 +95,64 @@ void CSnsrDisplayControlSession::ServiceL( const RMessage2& aMessage )
         {
         case ESnsrDispCtrlSrvDisplayOff:
             {
-            // Disable touch
-            HAL::Set( HALData::EPenState, 0 );
+            RDEBUG( "Switching display off" )
             
-            // Lights off
-            err = RProperty::Set(KPSUidCoreApplicationUIs, KLightsSSForcedLightsOn, 0);
+            // Disable touch
+            TInt err1 = HAL::Set( HALData::EPenState, 0 );
+            RDEBUG1( "disable touch err", err1 )
+            
+            // Display off
+            TInt err2 = HAL::Set( HALData::EDisplayState, 0 );
+            RDEBUG1( "display off err", err2 )
+            
+            err = err1 || err2;
             break;
             }
         case ESnsrDispCtrlSrvDisplayLowPower:
             {
-            // Disable touch
-            HAL::Set( HALData::EPenState, 0 );
+            RDEBUG( "Switching display to low power mode" )
             
-            // Set display mode
+            // Disable touch
+            TInt err1 = HAL::Set( HALData::EPenState, 0 );
+            RDEBUG1( "disable touch err", err1 )
+            
+            // Enable low power mode
             TInt startRow = aMessage.Int0();
             TInt endRow = aMessage.Int1();
+            RDEBUG1( "first active row", startRow )
+            RDEBUG1( "last active row", endRow )
+            
             // TODO: for now, we pass a zero-filled pixel buffer to power save API.
             // This works fine with our reference hardware but some types of displays
             // might require passing the actual screen contents in this buffer.
             TUint16* ptr = const_cast<TUint16*>( iPowerSavePixelBuffer->Ptr() );
-            err = iPowerSave->Set(startRow, endRow, ptr);
+            TInt err2 = iPowerSave->Set(startRow, endRow, ptr);
+            RDEBUG1( "enable low power err", err2 )
+            
+            // Display on
+            TInt err3 = HAL::Set( HALData::EDisplayState, 1 );
+            RDEBUG1( "display on err", err3 );
+            
+            err = err1 || err2 || err3;
             break;
             }
         case ESnsrDispCtrlSrvDisplayFullPower:
             {
+            RDEBUG( "Switching display to full power mode" )
+            
             // Enable touch
-            HAL::Set( HALData::EPenState, 1 );
+            TInt err1 = HAL::Set( HALData::EPenState, 1 );
+            RDEBUG1( "enable touch err", err1 )
             
-            // Set display mode
-            err = iPowerSave->Exit();
+            // Low power off
+            TInt err2 = iPowerSave->Exit();
+            RDEBUG1( "disable low power err", err2 );
             
-            // Lights on
-            err = RProperty::Set(KPSUidCoreApplicationUIs, KLightsSSForcedLightsOn, 30) || err;
+            // Display on
+            TInt err3 = HAL::Set( HALData::EDisplayState, 1 );
+            RDEBUG1( "display on err", err3 )
+            
+            err = err1 || err2 || err3;
             break;
             }
         default:

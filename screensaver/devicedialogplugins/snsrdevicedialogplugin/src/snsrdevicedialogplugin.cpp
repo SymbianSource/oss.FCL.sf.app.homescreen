@@ -43,9 +43,9 @@ static const struct
 
 const char *lBigClockSnsrPluginUri = 
 #ifdef Q_OS_SYMBIAN
-    "z:/snsrresources/plugins/screensaverplugins/snsrbigclockscreensaverplugin.xml";
+    "z:/snsrresources/plugins/snsrplugins/snsrbigclockscreensaverplugin.xml";
 #else
-    "snsrresources/plugins/screensaverplugins/snsrbigclockscreensaverplugin.xml";
+    "snsrresources/plugins/snsrplugins/snsrbigclockscreensaverplugin.xml";
 #endif
 
 const char *lViewType("view_type");

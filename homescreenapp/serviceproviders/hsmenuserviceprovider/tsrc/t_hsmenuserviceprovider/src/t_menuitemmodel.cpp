@@ -14,6 +14,7 @@
 * Description:
 *
 */
+
 #include <qcoreapplication.h>
 #include <qstandarditemmodel.h>
 #include "caquery.h"
@@ -25,6 +26,11 @@
 #include "t_hsmenuserviceprovider.h"
 #include "hsiconsidleloader.h"
 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuItemModel_construction()
 {
     QScopedPointer<QObject> parent(new QObject);
@@ -36,6 +42,10 @@ void MenuServiceTest::HsMenuItemModel_construction()
     QVERIFY(model.getIconSize().isValid());
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuItemModel_setSort()
 {
     HsMenuItemModel model(CaQuery(), this);
@@ -56,34 +66,39 @@ void MenuServiceTest::HsMenuItemModel_setSort()
     }
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuItemModel_getData()
 {
     HsMenuItemModel model(CaQuery(), this);
     
     Qt::ItemDataRole role = Qt::DecorationRole;
     const QModelIndex index = model.index(0, 0);
-    const QVariant expectedDecoration(QString("entryText"));
-    QList<QVariant> expectedResult;
-    expectedResult << expectedDecoration;
-    expectedResult << HbIcon(Hs::newIconId);
+    const QVariant expectedDecoration = QVariant(HbIcon(Hs::newIconId));
     
     model.mRootResult = index;
     model.mEntryResult->mFlagsResult = 0;
     model.mEntryResult->mEntryTypeNameResult = Hs::collectionDownloadedTypeName;
     model.setSecondLineVisibility(true);
-    model.mDataResult = QVariant(expectedDecoration);
+    model.mDataResult = expectedDecoration;
 
     QList<QVariant> actualResult = model.data(index, role).toList();
-    
-    QCOMPARE(actualResult.at(0).toString(), 
-        expectedDecoration.toString());
-    QCOMPARE(actualResult.at(1).value<HbIcon>().iconName(), 
+
+    QCOMPARE(model.mDataIndex,index);
+    QCOMPARE(model.mDataRole,(int)role);
+    QCOMPARE(actualResult.empty(),false);
+    QCOMPARE(actualResult.at(0).value<HbIcon>().iconName(), 
         QString(Hs::newIconId));
-    
+
     QCOMPARE(model.data(index), model.mDataResult);
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuItemModel_newIconNeeded()
 {
     HsMenuItemModel model(CaQuery(), this);
@@ -111,7 +126,10 @@ void MenuServiceTest::HsMenuItemModel_newIconNeeded()
     
 }
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuItemModel_uninstallChange()
 {
     HsMenuItemModel model(CaQuery(), this);
@@ -132,6 +150,10 @@ void MenuServiceTest::HsMenuItemModel_uninstallChange()
                 QString("uninstall_progress")), QString("20"));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuCollectionsItemModel_construction()
 {
     QScopedPointer<QObject> parent(new QObject);
@@ -143,8 +165,10 @@ void MenuServiceTest::HsMenuCollectionsItemModel_construction()
     QVERIFY(model.getIconSize().isValid());
 }
 
-
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuCollectionsItemModel_getData()
 {
     HsMenuCollectionsItemModel model(CaQuery(), this);
@@ -175,8 +199,11 @@ void MenuServiceTest::HsMenuCollectionsItemModel_getData()
     model.setSecondLineVisibility(false);
     QCOMPARE(model.data(index), expectedData);
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
+//
 void MenuServiceTest::HsMenuCollectionsItemModel_getSecondLine()
 {    
     HsMenuCollectionsItemModel model(CaQuery(), this);
@@ -243,10 +270,7 @@ void MenuServiceTest::HsMenuItemModel_preloadIcons()
     // set up mock data
     Qt::ItemDataRole role = Qt::DecorationRole;
     const QModelIndex index = model.index(0, 0);
-    const QVariant expectedDecoration(QString("entryText"));
-    QList<QVariant> expectedResult;
-    expectedResult << expectedDecoration;
-    expectedResult << HbIcon(Hs::newIconId);
+    const QVariant expectedDecoration = QVariant(HbIcon(Hs::newIconId));
     model.mRootResult = index;
     model.mEntryResult->mFlagsResult = 0;
     model.mEntryResult->mEntryTypeNameResult = Hs::collectionDownloadedTypeName;
@@ -257,9 +281,10 @@ void MenuServiceTest::HsMenuItemModel_preloadIcons()
     model.mEntryResult->mMakeIconResult = HbIcon(Hs::newIconId);
     
     // verify mock setup
-    QCOMPARE(actualResult.at(0).toString(), 
-        expectedDecoration.toString());
-    QCOMPARE(actualResult.at(1).value<HbIcon>().iconName(), 
+    QCOMPARE(model.mDataIndex,index);
+    QCOMPARE(model.mDataRole,(int)role);
+    QCOMPARE(actualResult.empty(),false);
+    QCOMPARE(actualResult.at(0).value<HbIcon>().iconName(), 
         QString(Hs::newIconId));
     QCOMPARE(model.data(index), model.mDataResult);
     
@@ -289,10 +314,7 @@ void MenuServiceTest::HsIconsIdleLoader_construction()
     // set up mock data
     Qt::ItemDataRole role = Qt::DecorationRole;
     const QModelIndex index = model.index(0, 0);
-    const QVariant expectedDecoration(QString("entryText"));
-    QList<QVariant> expectedResult;
-    expectedResult << expectedDecoration;
-    expectedResult << HbIcon(Hs::newIconId);
+    const QVariant expectedDecoration = QVariant(HbIcon(Hs::newIconId));
     model.mRootResult = index;
     model.mEntryResult->mFlagsResult = 0;
     model.mEntryResult->mEntryTypeNameResult = Hs::collectionDownloadedTypeName;
@@ -301,10 +323,11 @@ void MenuServiceTest::HsIconsIdleLoader_construction()
     model.mRowCountResult = 1; // i.e. how many rows the mock model pretends to have
     QList<QVariant> actualResult = model.data(index, role).toList();
     model.mEntryResult->mMakeIconResult = HbIcon(Hs::newIconId);
-    
-    QCOMPARE(actualResult.at(0).toString(), 
-        expectedDecoration.toString());
-    QCOMPARE(actualResult.at(1).value<HbIcon>().iconName(), 
+
+    QCOMPARE(model.mDataIndex,index);
+    QCOMPARE(model.mDataRole,(int)role);
+    QCOMPARE(actualResult.empty(),false);
+    QCOMPARE(actualResult.at(0).value<HbIcon>().iconName(), 
         QString(Hs::newIconId));
     
     QCOMPARE(model.data(index), model.mDataResult);
@@ -322,7 +345,9 @@ void MenuServiceTest::HsIconsIdleLoader_construction()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
+//
 int MenuServiceTest::getId(HsMenuItemModel *model , int idx)
 {
     return model->data(model->index(idx), CaItemModel::IdRole).toInt();

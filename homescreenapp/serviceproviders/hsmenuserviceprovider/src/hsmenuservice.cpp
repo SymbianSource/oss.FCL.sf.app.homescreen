@@ -266,8 +266,8 @@ bool HsMenuService::renameCollection(int collectionId,
                  << collection;
 
         collection->setText(newCollectionName);
-        collection->setAttribute(COLLECTION_TITLE_NAME, newCollectionName);
         collection->setAttribute(COLLECTION_SHORT_NAME, newCollectionName);
+        collection->removeAttribute(COLLECTION_TITLE_NAME);
         result = CaService::instance()->updateEntry(*collection);
     }
     HSMENUTEST_FUNC_EXIT("HsMenuService::renameCollection");
@@ -393,8 +393,7 @@ int HsMenuService::collectionIdByType(const QString& collectionType)
 /*!
  Touch action on an entry.
  \param entryId of this entry.
- \retval boolean error code.
- */
+*/
 void HsMenuService::touch(int entryId)
 {
     QSharedPointer<CaEntry> entry = CaService::instance()->getEntry(entryId);
@@ -402,9 +401,17 @@ void HsMenuService::touch(int entryId)
 }
 
 /*!
+ Touch action on an entry.
+ \param entry of this item.
+ */
+void HsMenuService::touch(const CaEntry &entry)
+{
+    CaService::instance()->touch(entry);
+}
+
+/*!
  Touch action on an lists of entries.
  \param entryIdList of this entry.
- \retval boolean error code.
  */
 void HsMenuService::touch(const QList<int> &entryIdList)
 {

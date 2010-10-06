@@ -77,6 +77,8 @@ namespace Hs {
 
     const int softwareUpdateApplicationUid  = 0x2001FE2F;
     const int oviLauncherApplicationUid  = 0x2002D07F;
+    
+    const char drivesIconIdsAttributeName[] = "drivesIconIds";
 
     // Sort attribute
     enum HsSortAttribute {

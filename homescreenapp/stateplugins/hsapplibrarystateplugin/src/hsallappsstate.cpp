@@ -21,8 +21,8 @@
 #include <HbAbstractViewItem>
 #include <HbIndexFeedback>
 #include <HbListView>
-#include <HbScrollBar>
 #include <HbView>
+#include <HbGroupBox>
 
 #include <cadefs.h>
 #include <caentry.h>
@@ -93,10 +93,11 @@ void HsAllAppsState::construct()
 
     mModel = HsMenuService::getAllApplicationsModel(mSortAttribute);
     mMenuView->setModel(mModel);
-
+    updateLabel();
+    connect(mModel, SIGNAL(countChange()), SLOT(updateLabel()));
+    
     mModel->preloadIcons();
 
-    mMenuView->listView()->verticalScrollBar()->setInteractive(true);
     HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView->view());
     indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
     indexFeedback->setItemView(mMenuView->listView());
@@ -200,6 +201,15 @@ void HsAllAppsState::stateExited()
     qDebug("AllAppsState::stateExited()");
 }
 
+/*!
+ Slot invoked label has to be changed.
+ */
+void HsAllAppsState::updateLabel()
+{
+    mMenuView->viewLabel()->setHeading(
+            hbTrId("txt_applib_subtitle_applications_widgets_l1").arg(
+                    mModel->rowCount()));    
+}
 /*!
   Slot called when application is adding to collection.
  */

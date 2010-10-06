@@ -56,6 +56,7 @@ HsMainWindow::~HsMainWindow()
 */
 void HsMainWindow::setCurrentView(HbView *view)
 {
+    HSMENUTEST_FUNC_ENTRY("HsMainWindow::setCurrentView");
     HbMainWindow *const hbW(
         HbInstance::instance()->allMainWindows().value(0));
     
@@ -88,5 +89,6 @@ void HsMainWindow::setCurrentView(HbView *view)
         		p->wallpaper()->show();
             p->visual()->show();
         } 
-    } 	
+    }
+    HSMENUTEST_FUNC_EXIT("HsMainWindow::setCurrentView");
 }

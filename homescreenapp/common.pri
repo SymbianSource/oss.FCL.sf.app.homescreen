@@ -72,8 +72,9 @@ symbian {
 } else {
     # add platfrom API for windows
     INCLUDEPATH += \                
-                $$PWD/../../homescreensrv/homescreensrv_plat/contentstorage_api \                
-                $$PWD/../../homescreensrv/homescreensrv_plat/homescreen_information_api/inc
+                $$PWD/../../homescreensrv/homescreensrv_plat/contentstorage_api/inc \                
+                $$PWD/../../homescreensrv/homescreensrv_plat/homescreen_information_api/inc \
+                $$PWD/../homescreen_plat/homescreenclient_api/inc
 }
 
 plugin: !isEmpty(PLUGIN_SUBDIR): DESTDIR = $$OUTPUT_DIR/$$PLUGIN_SUBDIR

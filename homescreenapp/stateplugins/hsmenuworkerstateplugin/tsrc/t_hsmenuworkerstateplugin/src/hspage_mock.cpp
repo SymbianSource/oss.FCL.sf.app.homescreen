@@ -228,7 +228,7 @@ void HsPage::resetNewWidgets()
 */
 bool HsPage::deleteFromDatabase()
 {
-	//Not used in mock
+    //Not used in mock
     return true;
 }
 
@@ -551,5 +551,5 @@ void HsPage::onPageMarginChanged(const QString &value)
 
 HsPageVisual *HsPage::visual()const
 {
-	return 0;	
+    return 0;
 }

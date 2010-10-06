@@ -39,30 +39,46 @@
 #include "hsapplibrarystate.h"
 #include "hsallappsstate.h"
 #include "hslistviewitem.h"
+#include "hsscene.h"
 
 #include "t_hsaddtohomescreenmockstate.h"
 #include "t_hsmockmodel.h"
 #include "t_menuviewbuilder.h"
 
 
-
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::cleanup()
 {
     qApp->processEvents();
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class HsMainWindowMock : public HsMainWindow
 {
     virtual void setCurrentView(HbView *view);
 
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void HsMainWindowMock::setCurrentView(HbView *view)
 {
     Q_UNUSED(view);
     // do nothing
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 class HsMainWindowSpy: public HsMainWindow
 {
 public:
@@ -76,6 +92,10 @@ public:
     HsMainWindowSpy(): mSwitchedToView(NULL) {};
 };
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_construction()
 {
     const HsMenuViewBuilder builder;
@@ -83,6 +103,7 @@ void MenuStatesTest::HsMenuViewBuilder_construction()
     expectedActionList << builder.allAppsAction();
     expectedActionList << builder.allCollectionsAction();
     expectedActionList << builder.searchAction();
+    expectedActionList << builder.toolBarExtensionAction();
 
     QList<QAction *> actualActionList(builder.toolBar()->actions());
 
@@ -90,6 +111,10 @@ void MenuStatesTest::HsMenuViewBuilder_construction()
 
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_view()
 {
     HsMenuViewBuilder builder;
@@ -114,6 +139,10 @@ void MenuStatesTest::HsMenuViewBuilder_view()
     QCOMPARE(title, hbTrId("txt_applib_title_applications"));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_listView()
 {
     HsMenuViewBuilder builder;
@@ -129,13 +158,17 @@ void MenuStatesTest::HsMenuViewBuilder_listView()
     QVERIFY(visible);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_label()
 {
     HsMenuViewBuilder builder;
 
     const HbGroupBox *const allAppsLabel = builder.currentViewLabel();
 
-    QVERIFY(allAppsLabel == NULL || !allAppsLabel->isVisible());
+    QVERIFY(allAppsLabel != NULL);
 
     builder.setStateContext(HsInstalledAppsContext);
 
@@ -147,6 +180,10 @@ void MenuStatesTest::HsMenuViewBuilder_label()
     QCOMPARE(collectionLabel->marqueeHeading(), true);
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_allAppsAction()
 {
     const HsMenuViewBuilder builder;
@@ -158,6 +195,10 @@ void MenuStatesTest::HsMenuViewBuilder_allAppsAction()
 
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_allCollectionsAction()
 {
     const HsMenuViewBuilder builder;
@@ -168,6 +209,10 @@ void MenuStatesTest::HsMenuViewBuilder_allCollectionsAction()
              QString("qtg_mono_applications_collections"));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_searchAction()
 {
     const HsMenuViewBuilder builder;
@@ -178,6 +223,10 @@ void MenuStatesTest::HsMenuViewBuilder_searchAction()
              QString("qtg_mono_search"));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_oviStoreAction()
 {
     const HsMenuViewBuilder builder;
@@ -188,6 +237,10 @@ void MenuStatesTest::HsMenuViewBuilder_oviStoreAction()
              QString("qtg_mono_ovistore"));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_operatorAction()
 {
     const HsMenuViewBuilder builder;
@@ -199,6 +252,10 @@ void MenuStatesTest::HsMenuViewBuilder_operatorAction()
     //             QString("qtg_mono_store"));
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_toolBar()
 {
     HsMenuViewBuilder builder;
@@ -209,7 +266,7 @@ void MenuStatesTest::HsMenuViewBuilder_toolBar()
 
     const QList<QAction *> actions = toolBar->actions();
 
-    QCOMPARE(actions.count(), 3);
+    QCOMPARE(actions.count(), 4);
     QCOMPARE(actions.at(0),
              static_cast<QAction *>(builder.allAppsAction()));
     QCOMPARE(actions.at(1),
@@ -219,6 +276,10 @@ void MenuStatesTest::HsMenuViewBuilder_toolBar()
     QCOMPARE(toolBar, builder.currentView()->toolBar());
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::HsMenuViewBuilder_toolBarExtension()
 {
     HsMenuViewBuilder builder;
@@ -227,10 +288,8 @@ void MenuStatesTest::HsMenuViewBuilder_toolBarExtension()
     QVERIFY(toolBarExtension);
 }
 
-
-
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::MenuView_slots()
@@ -282,8 +341,8 @@ void MenuStatesTest::MenuView_slots()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsMenuView_scrolling()
@@ -294,7 +353,10 @@ void MenuStatesTest::HsMenuView_scrolling()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-        QScopedPointer<HbMainWindow> wind(new HbMainWindow);
+    QFAIL("! Due to bug in hb wk36 we are forced to skip this test !");
+        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        HsScene::setInstance( new HsScene(window.data()) );
+
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
         HsMainWindow mainWindow;
@@ -305,7 +367,7 @@ void MenuStatesTest::HsMenuView_scrolling()
         HsAllAppsState *allAppsState = new HsAllAppsState(builder,
                 menuMode, mainWindow, parent.data());
 
-        wind->addView(builder.currentView());
+        window->addView(builder.currentView());
 
 
         QVERIFY(allAppsState->mModel != 0);
@@ -342,7 +404,7 @@ void MenuStatesTest::HsMenuView_scrolling()
         QCOMPARE(actualRow, expectedRow);
         qApp->processEvents();
 
-       allAppsState->stateExited();
+        allAppsState->stateExited();
 
         qApp->processEvents();
     }
@@ -353,8 +415,8 @@ void MenuStatesTest::HsMenuView_scrolling()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::MenuView_toolBarExtension()
@@ -378,6 +440,7 @@ void MenuStatesTest::MenuView_toolBarExtension()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::MenuView_reset()
@@ -422,13 +485,16 @@ void MenuStatesTest::MenuView_reset()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::testslot_activated(const QModelIndex &aIndex)
 {
     mIndex = aIndex;
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::testslot_longpressed(HbAbstractViewItem *item,
@@ -439,6 +505,7 @@ void MenuStatesTest::testslot_longpressed(HbAbstractViewItem *item,
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsListViewItem_updateChildItems()
@@ -456,7 +523,7 @@ void MenuStatesTest::HsListViewItem_updateChildItems()
         QScopedPointer<HsAllAppsState> allAppsState(new HsAllAppsState(
             builder, menuMode, mainWindow, 0));
 
-	    HsMenuItemModel *model = allAppsState->mModel;
+        HsMenuItemModel *model = allAppsState->mModel;
 
         QVERIFY(model != static_cast<HsMenuItemModel *>(0));
         QVERIFY(model->rowCount() > 0);
@@ -479,7 +546,9 @@ void MenuStatesTest::HsListViewItem_updateChildItems()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsListViewItem_createItem()
@@ -504,7 +573,9 @@ void MenuStatesTest::HsListViewItem_createItem()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsListViewItem_polish()
@@ -543,6 +614,7 @@ void MenuStatesTest::HsListViewItem_polish()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsProgressBar_timerEvent()
@@ -571,6 +643,7 @@ void MenuStatesTest::HsProgressBar_timerEvent()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::HsProgressBar_setTargetProgressValue()
@@ -596,6 +669,10 @@ void MenuStatesTest::HsProgressBar_setTargetProgressValue()
 #endif//Q_OS_SYMBIAN
 }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void MenuStatesTest::MenuView_showHideSearchPanel()
 {
     HsMenuViewBuilder builder;
@@ -607,7 +684,6 @@ void MenuStatesTest::MenuView_showHideSearchPanel()
     QVERIFY(window.mSwitchedToView != originatingView);
     menuView.hideSearchPanel();
     QVERIFY(window.mSwitchedToView == originatingView);
-
 }
 
 

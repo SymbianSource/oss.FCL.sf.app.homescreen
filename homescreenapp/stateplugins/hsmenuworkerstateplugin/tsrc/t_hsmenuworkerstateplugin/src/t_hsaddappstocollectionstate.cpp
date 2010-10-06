@@ -26,12 +26,11 @@
 #include "hsmenuworkerstate.h"
 #include "hsaddtohomescreenstate.h"
 #include "hsappschecklist.h"
-
 #include "hscollectionnamedialog.h"
 #include "hsapp_defs.h"
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_construction()
@@ -56,7 +55,9 @@ void MenuStatesTest::AddAppsToCollectionState_construction()
 #endif//Q_OS_SYMBIAN
 }
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_save()
@@ -83,7 +84,9 @@ void MenuStatesTest::AddAppsToCollectionState_save()
 #endif//Q_OS_SYMBIAN
 }
 
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_cleanData()
@@ -111,6 +114,7 @@ void MenuStatesTest::AddAppsToCollectionState_cleanData()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_setCollectionName()
@@ -137,6 +141,7 @@ void MenuStatesTest::AddAppsToCollectionState_setCollectionName()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_setCollectionId()
@@ -163,6 +168,7 @@ void MenuStatesTest::AddAppsToCollectionState_setCollectionId()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_setAppList()
@@ -191,6 +197,7 @@ void MenuStatesTest::AddAppsToCollectionState_setAppList()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_showMessageAppsAdded()
@@ -218,6 +225,7 @@ void MenuStatesTest::AddAppsToCollectionState_showMessageAppsAdded()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_selectCollection()
@@ -252,8 +260,8 @@ void MenuStatesTest::AddAppsToCollectionState_selectCollection()
 #endif//Q_OS_SYMBIAN
 }
 
-
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_listDialogFinished()
@@ -285,6 +293,7 @@ void MenuStatesTest::AddAppsToCollectionState_listDialogFinished()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_newCollection()
@@ -321,6 +330,7 @@ void MenuStatesTest::AddAppsToCollectionState_newCollection()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_editorDialogFinished()
@@ -348,6 +358,7 @@ void MenuStatesTest::AddAppsToCollectionState_editorDialogFinished()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_collectionSelected()
@@ -382,6 +393,7 @@ void MenuStatesTest::AddAppsToCollectionState_collectionSelected()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_appsCheckListState()
@@ -413,6 +425,7 @@ void MenuStatesTest::AddAppsToCollectionState_appsCheckListState()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AddAppsToCollectionState_selectApplicationsDone()
@@ -454,6 +467,7 @@ void MenuStatesTest::AddAppsToCollectionState_selectApplicationsDone()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AppsCheckList_showAppsCheckboxList()
@@ -486,7 +500,9 @@ void MenuStatesTest::AppsCheckList_showAppsCheckboxList()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::testCommitSlot(const QList<int> &appList)
@@ -499,6 +515,7 @@ void MenuStatesTest::testCommitSlot(const QList<int> &appList)
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AppsCheckList_getItemsList()
@@ -548,7 +565,9 @@ void MenuStatesTest::AppsCheckList_getItemsList()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AppsCheckList_setSortOrder()
@@ -570,7 +589,9 @@ void MenuStatesTest::AppsCheckList_setSortOrder()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
 }
+
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::AppsCheckList_selectedItemsChanged()
@@ -604,6 +625,7 @@ void MenuStatesTest::AppsCheckList_selectedItemsChanged()
 }
 
 // ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 void MenuStatesTest::testTransitToStateSlot()

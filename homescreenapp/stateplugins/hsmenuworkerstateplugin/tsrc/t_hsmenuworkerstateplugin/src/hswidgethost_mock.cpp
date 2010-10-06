@@ -26,11 +26,9 @@
 #include <QGraphicsSceneResizeEvent>
 #include <QGesture>
 #include <QGraphicsScene>
-
 #include <qservicemanager.h>
 #include <qservicefilter.h>
 #include <qserviceinterfacedescriptor.h>
-
 #include <HbInstantFeedback>
 
 #include "hsdatabase.h"
@@ -145,8 +143,6 @@ bool HsWidgetHost::removePresentation(Qt::Orientation orientation)
     Q_UNUSED(orientation)
     return true;
 }
-
-
 
 void HsWidgetHost::startWidget(bool show)
 {
@@ -366,7 +362,7 @@ bool HsWidgetHost::setPreferencesToWidget()
 }
 
 void HsWidgetHost::action_connectComponent()
-{    
+{
 }
 
 void HsWidgetHost::action_disconnectComponent()
@@ -389,7 +385,7 @@ void HsWidgetHost::action_load()
     setMethod("onUninitialize()", mOnUninitializeMethod);
     
     setProperty("isOnline", mIsOnlineProperty);
-	setProperty("rootPath", mRootPathProperty);
+    setProperty("rootPath", mRootPathProperty);
     
     if (hasSignal("setPreferences(const QStringList&)")) {
         connect(mWidget, SIGNAL(setPreferences(QStringList)),
@@ -428,7 +424,7 @@ void HsWidgetHost::action_unload()
     mOnHideMethod = QMetaMethod();
     mOnUninitializeMethod = QMetaMethod();
     mIsOnlineProperty = QMetaProperty();
-	mRootPathProperty = QMetaProperty();    
+    mRootPathProperty = QMetaProperty();    
 }
 
 void HsWidgetHost::action_initialize()

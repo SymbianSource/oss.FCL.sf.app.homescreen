@@ -59,18 +59,22 @@ HbMessageBox *HsMenuDialogFactory::create(const QString &text,
     switch (options) {
 
     case OkCancel:
-
         actionIdentifiers << hbTrId("txt_common_button_ok");
         actionIdentifiers << hbTrId("txt_common_button_cancel");
         type = HbMessageBox::MessageTypeQuestion;
         break;
 
     case Close:
-
         actionIdentifiers << hbTrId("txt_common_button_close");
         type = HbMessageBox::MessageTypeInformation;
         break;
 
+    case DeleteCancel:
+        actionIdentifiers << hbTrId("txt_common_button_delete");
+        actionIdentifiers << hbTrId("txt_common_button_cancel");
+        type = HbMessageBox::MessageTypeQuestion;
+        break;
+        
     default:
         break;
     }

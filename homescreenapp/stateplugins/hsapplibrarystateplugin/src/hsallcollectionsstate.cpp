@@ -22,6 +22,7 @@
 #include <HbMenu>
 #include <HbAction>
 #include <HbAbstractViewItem>
+#include <HbGroupBox>
 
 #include <cadefs.h>
 
@@ -74,6 +75,9 @@ void HsAllCollectionsState::construct()
 
     mModel = HsMenuService::getAllCollectionsModel();
     mMenuView->setModel(mModel);
+    
+    updateLabel();
+    connect(mModel, SIGNAL(countChange()), SLOT(updateLabel()));
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::construct");
 }
@@ -171,6 +175,16 @@ void HsAllCollectionsState::stateExited()
 
     HSMENUTEST_FUNC_EXIT("HsAllCollectionsState::stateExited");
     qDebug("AllCollectionsState::stateExited()");
+}
+
+/*!
+ Slot invoked label has to be changed.
+ */
+void HsAllCollectionsState::updateLabel()
+{
+    mMenuView->viewLabel()->setHeading(
+            hbTrId("txt_applib_subtitle_collections_l1").arg(
+                    mModel->rowCount()));    
 }
 
 /*!

@@ -30,8 +30,8 @@ file=ABI_DIR\BUILD_DIR\screensavermodel.dll                                     
 // -------- snsrbigclockscreensaverplugin
 file=ABI_DIR\BUILD_DIR\snsrbigclockscreensaverplugin.dll                                                SHARED_LIB_DIR\snsrbigclockscreensaverplugin.dll
 data=DATAZ_\QT_TRANSLATIONS_DIR\snsrbigclockscreensaverplugin.qm                                        QT_TRANSLATIONS_DIR\snsrbigclockscreensaverplugin.qm
-data=\epoc32\data\z\snsrresources\plugins\screensaverplugins\snsrbigclockscreensaverplugin.qtplugin     snsrresources\plugins\screensaverplugins\snsrbigclockscreensaverplugin.qtplugin
-data=\epoc32\data\z\snsrresources\plugins\screensaverplugins\snsrbigclockscreensaverplugin.xml          snsrresources\plugins\screensaverplugins\snsrbigclockscreensaverplugin.xml
+data=\epoc32\data\z\snsrresources\plugins\snsrplugins\snsrbigclockscreensaverplugin.qtplugin            snsrresources\plugins\snsrplugins\snsrbigclockscreensaverplugin.qtplugin
+data=\epoc32\data\z\snsrresources\plugins\snsrplugins\snsrbigclockscreensaverplugin.xml                 snsrresources\plugins\snsrplugins\snsrbigclockscreensaverplugin.xml
 
 // ---- snsrutils --------------------------------------------
 
