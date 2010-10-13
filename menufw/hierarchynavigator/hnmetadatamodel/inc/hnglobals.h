@@ -110,12 +110,7 @@ namespace HnLogicalRelations
     /**
      * Has not.
      */
-    _LIT8( KLogicalHasNot8,         "HASNOT" );
-
-    /**
-     * Uid param for uri.
-     */
-    _LIT8( KParamUid8,              "&uid=" );
+	_LIT8( KLogicalHasNot8,         "HASNOT" );
     }
 
 /**
@@ -292,8 +287,7 @@ _LIT(	KRscPath,                   ":\\resource\\apps\\");
 
 _LIT(   KPrefMm,                    "mm://" );
 _LIT8(  KRootWithPref,              "mm://root" );
-_LIT8(  KSetFocusWithPref,          "mm://!setfocus" );
-_LIT8(  KOpenItemWithPref,          "mm://!openitem" );
+_LIT8(  KSetFocusWithPref,              "mm://!setfocus" );
 _LIT8(   KCRepTimeFormat, "%S,%04d%02d%02d:%02d%02d%02d.%06d" );
 
 // images
@@ -433,11 +427,11 @@ _LIT( 	KSuiteLoadingLogFile, 		"c:\\logs\\menu" );
 
 // info notes for notifying lack of configuration files
 _LIT( KDebugNoteDirNotFound,
-  "Directory containing suite configuration not found!" );
+	"Directory containing suite configuration not found!" );
 _LIT( KDebugNoteFileNotFound,
-  "File containing suite configuration not found!" );
+	"File containing suite configuration not found!" );
 _LIT( KDebugNoteOtherError,
-  "Loading suite configuration returned error: %d" );
+	"Loading suite configuration returned error: %d" );
 
 _LIT8( KStar8, "*" );
 
@@ -514,8 +508,6 @@ const TInt KRootId = 1 ;
 
 const TUint32 KMenuShowFolder = 0x0000000c;
 
-const TUint32 KMenuOpenItem = 0x0000000e;
-
 const TInt KTimeStampBufferLength = 25;
 
 const TInt KUidStringLength = 10;
@@ -526,9 +518,9 @@ const TInt KTimeStampCutOff = 5;
  * Order in which drives are searched for suites.
  */
 const TInt KDriveSearchOrder[] = { EDriveY, EDriveX, EDriveW, EDriveV, EDriveU,
-    EDriveT, EDriveS, EDriveR, EDriveQ, EDriveP, EDriveO, EDriveN, EDriveM,
-    EDriveL, EDriveK, EDriveJ, EDriveI, EDriveH, EDriveG, EDriveF, EDriveE,
-    EDriveD, EDriveC, EDriveB, EDriveA,	EDriveZ	};
+		EDriveT, EDriveS, EDriveR, EDriveQ, EDriveP, EDriveO, EDriveN, EDriveM,
+		EDriveL, EDriveK, EDriveJ, EDriveI, EDriveH, EDriveG, EDriveF, EDriveE,
+		EDriveD, EDriveC, EDriveB, EDriveA,	EDriveZ	};
 
 /**
  * Type of the widget which displays Suite data
@@ -570,10 +562,10 @@ enum TImageSource
  * Custom item ids.
  */
 enum TCustomId
-  {
-  ECustomIdFirstItem = -2,
-  ECustomIdLastItem = -3
-  };
+	{
+	ECustomIdFirstItem = -2,
+	ECustomIdLastItem = -3
+	};
 
 /**
  * Suite's exit mode
@@ -588,8 +580,8 @@ enum TExitMode
  * Type of change in items number
  */
 enum TItemsChangeType {
-  EItemsAdded = 0,
-  EItemsRemoved
+	EItemsAdded = 0,
+	EItemsRemoved
 };
 
 _LIT8( KExitModeParams,  "params:exit" );

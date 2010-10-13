@@ -13,8 +13,6 @@ box#plugins_container
     direction: ltr;
     block-progression: rl;
     padding-top: 3px;
-    padding-left: 17px;
-    padding-right: 17px;
 }
 
 plugin.plugins
@@ -29,6 +27,11 @@ plugin.plugins
     _s60-longtap: true;
 
     nav-index: appearance;
+}
+
+plugin:edit
+{
+    background-color:"SKIN(270501603 8582)";
 }
 
 trigger#hs_popup_open_hold:edit

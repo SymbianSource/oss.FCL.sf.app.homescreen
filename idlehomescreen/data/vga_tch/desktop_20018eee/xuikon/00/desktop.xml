@@ -2,14 +2,23 @@
 <xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
 
   <widget id="desktop_widget" class="desktop_widget">
-    
+
+    <!-- Launch service aPI plugin and fetch data from CPS -->
     <contentsource name="DesktopWidget" value="0x2001CB58"/>
 
     <!-- Shortcut #1 -->
     <button id="button1" class="button" focusable="true" _s60-initial-focus="1">
       <actions>
         <action>
-          <trigger name="activate"/>          
+          <trigger name="stylus">
+            <property name="eventtype" value="downup" />
+          </trigger>
+          <trigger name="activate"/>
+          <trigger name="keyevent">
+            <!-- EStdKeyEnter (enum from e32keys.h) -->
+            <property name="scancode" value="3"/>
+            <property name="eventtype" value="1"/>
+          </trigger>
           <event name="DesktopWidget/LaunchByIndex(0x1)"/>
         </action>
       </actions>
@@ -25,11 +34,21 @@
         </text>
       </tooltip>
     </button>
+
+
     <!-- Shortcut #2 -->
     <button id="button2" class="button" focusable="true">
       <actions>
         <action>
+          <trigger name="stylus">
+            <property name="eventtype" value="downup" />
+          </trigger>
           <trigger name="activate"/>
+          <trigger name="keyevent">
+            <!-- EStdKeyEnter (enum from e32keys.h) -->
+            <property name="scancode" value="3"/>
+            <property name="eventtype" value="1"/>
+          </trigger>
           <event name="DesktopWidget/LaunchByIndex(0x2)"/>
         </action>
       </actions>
@@ -45,11 +64,20 @@
         </text>
       </tooltip>
     </button>
+
     <!-- Shortcut #3 -->
     <button id="button3" class="button" focusable="true">
       <actions>
         <action>
+          <trigger name="stylus">
+            <property name="eventtype" value="downup" />
+          </trigger>
           <trigger name="activate"/>
+          <trigger name="keyevent">
+            <!-- EStdKeyEnter (enum from e32keys.h) -->
+            <property name="scancode" value="3"/>
+            <property name="eventtype" value="1"/>
+          </trigger>
           <event name="DesktopWidget/LaunchByIndex(0x3)"/>
         </action>
       </actions>
@@ -65,11 +93,20 @@
         </text>
       </tooltip>
     </button>
+
     <!-- Shortcut #4 -->
     <button id="button4" class="button" focusable="true">
       <actions>
         <action>
+          <trigger name="stylus">
+            <property name="eventtype" value="downup" />
+          </trigger>
           <trigger name="activate"/>
+          <trigger name="keyevent">
+            <!-- EStdKeyEnter (enum from e32keys.h) -->
+            <property name="scancode" value="3"/>
+            <property name="eventtype" value="1"/>
+          </trigger>
           <event name="DesktopWidget/LaunchByIndex(0x4)"/>
         </action>
       </actions>
@@ -86,7 +123,73 @@
       </tooltip>
     </button>
 
+    <!-- Shortcut #5 -->
+    <button id="button5" class="button" focusable="true">
+      <actions>
+        <action>
+          <trigger name="stylus">
+            <property name="eventtype" value="downup" />
+          </trigger>
+          <trigger name="activate"/>
+          <trigger name="keyevent">
+            <!-- EStdKeyEnter (enum from e32keys.h) -->
+            <property name="scancode" value="3"/>
+            <property name="eventtype" value="1"/>
+          </trigger>
+          <event name="DesktopWidget/LaunchByIndex(0x5)"/>
+        </action>
+      </actions>
+      <image id="icon5" class="icon">
+        <property class="DesktopWidget/icon" name="ordinal" value="0x5"/>
+      </image>
+      <image id="presenceicon5" class="second_icon">
+        <property class="DesktopWidget/presenceicon" name="ordinal" value="0x5"/>
+      </image>
+      <tooltip id="tooltip5" class="tooltip" >
+        <text id="tooltiptext5" class="tooltiptext" >
+          <property class="DesktopWidget/long_name" name="ordinal" value="0x5"/>
+        </text>
+      </tooltip>
+    </button>
+
+    <button id="button6" class="button" focusable="true">
+      <actions>
+        <action>
+          <trigger name="stylus">
+            <property name="eventtype" value="downup" />
+          </trigger>
+          <trigger name="activate"/>
+          <trigger name="keyevent">
+            <!-- EStdKeyEnter (enum from e32keys.h) -->
+            <property name="scancode" value="3"/>
+            <property name="eventtype" value="1"/>
+          </trigger>
+          <event name="DesktopWidget/LaunchByIndex(0x6)"/>
+        </action>
+      </actions>
+      <image id="icon6" class="icon">
+        <property class="DesktopWidget/icon" name="ordinal" value="0x6"/>
+      </image>
+      <image id="presenceicon6" class="second_icon">
+        <property class="DesktopWidget/presenceicon" name="ordinal" value="0x6"/>
+      </image>
+      <tooltip id="tooltip6" class="tooltip" >
+        <text id="tooltiptext6" class="tooltiptext" >
+          <property class="DesktopWidget/long_name" name="ordinal" value="0x6"/>
+        </text>
+      </tooltip>
+    </button>
+
     <menuextension>
+      <softkey type="middle" target="hs_widget_msk_open"/>
+      <menuitem target="hs_widget_menuitem_open">
+        <actions>
+          <action>
+            <trigger name="activate"/>
+            <event name="system/activateselecteditem"/>
+          </action>
+        </actions>
+      </menuitem>
       <menuitem target="hs_widget_menuitem_settings">
         <actions>
           <action>
@@ -96,5 +199,6 @@
         </actions>
       </menuitem>
     </menuextension>
+
   </widget>
 </xmluiml>

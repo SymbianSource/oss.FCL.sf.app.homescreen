@@ -155,7 +155,6 @@ void CTsAppUi::ConstructL()
     iApplicationTask.SetWgId( iWg.Identifier() );
 
     // And finally, go to background.
-    iForeground = ETrue;
     MoveAppToBackground( ENoneTransition );
     
     iEikonEnv->RootWin().SetOrdinalPosition(-1, ECoeWinPriorityNeverAtFront);
@@ -179,7 +178,7 @@ void CTsAppUi::ConstructL()
 // Perform the first phase of two phase construction
 // -----------------------------------------------------------------------------
 //
-CTsAppUi::CTsAppUi(): iForeground( EFalse ),
+CTsAppUi::CTsAppUi(): iForeground( ETrue ),
                                       iApplicationTask( iCoeEnv->WsSession() )
     {
     // no implementation required
@@ -192,7 +191,7 @@ CTsAppUi::CTsAppUi(): iForeground( EFalse ),
 //
 CTsAppUi::~CTsAppUi()
     {
-    if( iAppView && GfxTransEffect::IsRegistered( iAppView ) )
+    if( GfxTransEffect::IsRegistered( iAppView ) )
         {
         GfxTransEffect::Deregister(iAppView);
         
@@ -266,7 +265,6 @@ void CTsAppUi::StartTransition( TUint aTranstionId,
                                 TUint aSubCom )
     {
     const TDesC8* ptr = reinterpret_cast<const TDesC8*>(iAppView);
-    GfxTransEffect::AbortFullScreen();
     GfxTransEffect::Abort(iAppView);
     GfxTransEffect::Begin( iAppView, aTranstionId );
     GfxTransEffect::SetDemarcation( iAppView, iAppView->Rect() );
@@ -298,7 +296,6 @@ void CTsAppUi::StartAppActivateTransition( TUid aNextAppUid, TInt aWgId )
         {
         // App start animation
         const TDesC8* ptr = reinterpret_cast<const TDesC8*>(iAppView);
-        GfxTransEffect::AbortFullScreen();
         GfxTransEffect::Abort(iAppView);
         TInt groupId = GfxTransEffect::BeginGroup();
         GfxTransEffect::BeginFullScreen(
@@ -536,8 +533,6 @@ void CTsAppUi::CenrepChanged( TUint32 /*aKey*/, TInt aNewValue )
 //
 TInt CTsAppUi::GoToBackgroundTimerCallback( TAny* aParam )
     {
-    TSLOG_STATIC_CONTEXT( GoToBackgroundTimerCallback, TSLOG_LOCAL, RThread().Id() );
-    TSLOG_IN();
     CTsAppUi* self = static_cast<CTsAppUi*>( aParam );
     if ( self->iGoToBackgroundTimer )
         {
@@ -550,7 +545,7 @@ TInt CTsAppUi::GoToBackgroundTimerCallback( TAny* aParam )
 
     // Notify
     self->HandleSwitchToBackgroundEvent();
-    TSLOG_OUT();
+
     return 0;
     }
 
@@ -584,8 +579,6 @@ void CTsAppUi::MoveAppToForeground( TUint  /*aTransitionType*/ )
     TSLOG_CONTEXT( MoveAppToForeground, TSLOG_LOCAL );
     TSLOG_IN();
 
-    TRAP_IGNORE( iUnderAppWgId = WgIdOfUnderlyingAppL(EFalse) );
-    
     iUiStarted = ETrue;
     
     // Request window server to bring our application
@@ -628,8 +621,7 @@ void CTsAppUi::HandleSwitchToBackgroundEvent()
         {
         iForeground = EFalse;
         SetTaskswitcherStateProperty( KTaskswitcherBackgroundValue );
-        
-        iAppView->MakeVisible( EFalse );
+
         // notify view
         iAppView->HandleSwitchToBackgroundEvent();
         
@@ -803,16 +795,12 @@ TBool CTsAppUi::LayoutChangeAllowed()
 void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
         CCoeControl* aDestination)
     {
-    TSLOG_CONTEXT( CTsAppUi::HandleWsEventL, TSLOG_LOCAL );
     CAknAppUi::HandleWsEventL(aEvent, aDestination);
     TInt eventType = aEvent.Type();
     if ( eventType == EEventWindowGroupListChanged )
         {
         TInt wgId = WgIdOfUnderlyingAppL(EFalse); 
-        TSLOG2( TSLOG_INFO, "WgIdOfUnderlyingAppL: %d appId: %d",
-                wgId, GetAppIdL( wgId ).iUid );
         if ( iForeground &&
-             wgId &&
              wgId != iUnderAppWgId &&
              !iAppView->AppCloseInProgress(iUnderAppWgId) &&
              !iAppView->WgOnTaskList(wgId) )
@@ -825,7 +813,6 @@ void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
             }
         iUnderAppWgId = wgId;
         }
-    TSLOG_OUT();
     }
 
 
@@ -835,19 +822,12 @@ void CTsAppUi::HandleWsEventL(const TWsEvent& aEvent,
 //
 TInt CTsAppUi::WgIdOfUnderlyingAppL( TBool aIgnoreParentChild )
     {
-    TSLOG_CONTEXT( CTsAppUi::WgIdOfUnderlyingAppL, TSLOG_LOCAL );
     TInt retVal(0);
     TInt underlyingWg = CheckForUnderlyingHiddenAppsL();
     if ( !underlyingWg )
         {
-        TApaTaskList taskList(iEikonEnv->WsSession());
+        TApaTaskList taskList( iEikonEnv->WsSession() );
         underlyingWg = taskList.FindByPos(0).WgId();
-        if ( !(GetAppIdL(underlyingWg).iUid) )
-            {
-            TSLOG1 (TSLOG_INFO, "Incorrect  underlying window group: %d.", underlyingWg );
-            TSLOG0 (TSLOG_INFO, "No association to appId, nor special handling for underlying hidden apps.Change return value into 0.");
-            underlyingWg = 0;
-            }
         }
     
     if ( aIgnoreParentChild )
@@ -859,7 +839,6 @@ TInt CTsAppUi::WgIdOfUnderlyingAppL( TBool aIgnoreParentChild )
         TInt parentWg = GetTopParentWg( underlyingWg );
         retVal = parentWg ? parentWg : underlyingWg;
         }
-    TSLOG_OUT();
     return retVal;
     }
 
@@ -930,7 +909,10 @@ TInt CTsAppUi::CheckForUnderlyingHiddenAppsL()
     TInt underlyingWg(allWgIds[0].iId);
     CleanupStack::PopAndDestroy(&allWgIds);
     
-    TUid appUid = GetAppIdL( underlyingWg );
+    CApaWindowGroupName* windowName =
+        CApaWindowGroupName::NewLC( iEikonEnv->WsSession(), underlyingWg );
+    TUid appUid = windowName->AppUid();
+    CleanupStack::PopAndDestroy( windowName );
     if( appUid == KTsCameraUid ||
         appUid == KTsTelephoneUid )
         {
@@ -950,7 +932,10 @@ TBool CTsAppUi::IsUnderlyingAppMultimediaL()
     TApaTaskList taskList( iEikonEnv->WsSession() );
     TInt underlyingWg = taskList.FindByPos(0).WgId();
     
-    TUid appUid = GetAppIdL( underlyingWg );
+    CApaWindowGroupName* windowName =
+        CApaWindowGroupName::NewLC( iEikonEnv->WsSession(), underlyingWg );
+    TUid appUid = windowName->AppUid();
+    CleanupStack::PopAndDestroy( windowName );
     if ( appUid == KTsCameraUid )
         {
         retVal = ETrue;
@@ -967,20 +952,6 @@ TBool CTsAppUi::IsUnderlyingAppMultimediaL()
 TBool CTsAppUi::DelayedForegroundLaunched()
     {
     return iDelayedForegroundInProgress;
-    }
-
-// -----------------------------------------------------------------------------
-// CTsAppUi::GetAppIdL
-// -----------------------------------------------------------------------------
-//
-TUid CTsAppUi::GetAppIdL( TInt aWgId )
-    {
-    TUid retVal;
-    CApaWindowGroupName* windowName =
-        CApaWindowGroupName::NewLC( iEikonEnv->WsSession(), aWgId );
-    retVal = windowName->AppUid();
-    CleanupStack::PopAndDestroy( windowName );
-    return retVal;
     }
 
 // End of file

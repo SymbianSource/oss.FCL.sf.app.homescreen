@@ -1,53 +1,45 @@
-widget#wideimage_template
+widget{
+    width:auto;
+    height:60px;
+    }
+
+box#image_container:focus {
+    background-image: "SKIN(268458534 24576)";
+    background-color: "SKIN(268458534 5120 9)";
+}
+
+box#image_container:hold
 {
-    nav-index: appearance;
-    block-progression:rl;
-    direction: ltr;
+    background-color: "SKIN(268458534 5120 9)";
 }
 
 box#image_container
 {
-    /* Will be updated by content policy */
-    display: none;
-}
-box#default_container
-{
-    /* Will be updated by content policy */
-   display: block;
-}
-
-image#w_default_image
-{
-    padding-top:9px;
-    padding-bottom:9px;
-    padding-left:9px;
-    padding-right:9px;
-    height: 105px;
-    width: 105px;
-}
-
-text#w_default_text
-{
-    padding-left:9px;
-    padding-right:9px;
-    height : 10u;
-    font-line-space: 15;
+    padding-top   : 2px;
+    padding-bottom: 2px;
+    padding-left  : 10px;
+    padding-right : 10px;
     direction: ltr;
-    text-align:left;
-    text-overflow-mode: wrap;
-    font-family: EAknLogicalFontSecondaryFont;
-    font-size: 4u;
-    color: "SKIN(268458534 13056 74)";
+    nav-index:appearance;
 }
 
-animation#loading
+image#wide_image
 {
-	position: absolute;
-	top: 9px;
-	left: 401px;
-	right:9px;
-	width:30px;
-	height:30px;
-	/* Will be updated by dataplugin */
-	display: none;
+    display: none;
+    width:auto;
+    height:auto;
+    /*_s60-aspect-ratio:preserve;*/
 }
+
+text#wide_text
+{
+    display: block;
+    width:auto;
+    height:auto;
+    padding-left: 5px;
+    font-family: EAknLogicalFontSecondaryFont;
+	  font-size:18px;
+    color:white;
+}
+
+

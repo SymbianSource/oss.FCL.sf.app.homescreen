@@ -171,30 +171,12 @@ inline TBool CXnPluginData::Removable() const
     };
 
 // ---------------------------------------------------------------------------
-// Returns editable
-// ---------------------------------------------------------------------------
-//
-inline TBool CXnPluginData::Editable() const
-    {
-    return( iFlags.IsSet( EIsEditable ) ? ETrue : EFalse );
-    }
-
-// ---------------------------------------------------------------------------
 // Returns list of plugindata
 // ---------------------------------------------------------------------------
 //
 inline RPointerArray< CXnPluginData >& CXnPluginData::PluginData() const
     {
     return iPluginsData;
-    };
-
-// ---------------------------------------------------------------------------
-// Returns dirty region
-// ---------------------------------------------------------------------------
-//
-inline TXnDirtyRegion* CXnPluginData::DirtyRegion() const
-    {
-    return iDirtyRegion;
     };
 
 #endif // _XNPLUGINDATA_INL_

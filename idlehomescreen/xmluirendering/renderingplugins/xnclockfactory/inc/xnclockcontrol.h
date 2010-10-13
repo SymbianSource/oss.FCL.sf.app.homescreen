@@ -28,7 +28,6 @@
 class CWindowGc;
 class CXnClockAdapter;
 class CXnClockFace;
-class CXnNodePluginIf;
 
 // Class declaration
 /**
@@ -45,15 +44,17 @@ public: // Constructors and destructor
     *
     * @since S60 5.1
     *
-    * @param aAdapter Reference to clockadapter.
+    * @param  aContainerWindow   Container window for the clock component.
+    *
     * @param  aFormatFromLocale  Boolean flag to indicate whether the clock
     *                            format should be updated from the locale.
-    * @param  aFormat Boolean flag that indicates whether the
-    *                            clock is digital or analog.
+    *
+    * @param  aContextPaneClock  Boolean flag that indicates whether the
+    *                            clock is in the context pane.
     *
     * @return Newly constructed object.
     */
-    static CXnClockControl* NewL( CXnClockAdapter& aAdapter,
+    static CXnClockControl* NewL( CXnClockAdapter* aAdapter,
                                   const TBool aFormatFromLocale,
                                   const TClockFormat aFormat );
                                               
@@ -90,10 +91,9 @@ public: // New functions
     * Draws the clock
     *
     * @param aGc Context where to draw
-    * @param aNode Node to draw
-    * @param aAmpm Possible am/pm text to draw 
+    * @param aRect Rect Clock rect 
     */
-    void Draw( CWindowGc& aGc, CXnNodePluginIf* aNode, CXnNodePluginIf* aAmpm );
+    void Draw( CWindowGc& aGc, const TRect& aRect );
     
     /**
     * Starts the clock timer.
@@ -106,16 +106,6 @@ public: // New functions
     * Used when the clock loses visibility.
     */
     void StopTimer();
-    
-    /**
-    * Checks if clock format has changed 
-    */
-    void CheckClockFormatL();
-    
-    /**
-    * Reset font and color 
-    */
-    void ResetFont();
 
 private: // New functions
 
@@ -133,7 +123,7 @@ private:
     /**
     * C++ default constructor.
     */
-    CXnClockControl( CXnClockAdapter& aAdapter,
+    CXnClockControl( CXnClockAdapter* aAdapter,
                      const TBool aFormatFromLocale,
                      const TClockFormat aFormat );
                         
@@ -149,13 +139,11 @@ private: // data
     // Clock face, owned
     CXnClockFace*           iFace;
     // Clock adapter, not owned
-    CXnClockAdapter&        iAdapter;            
+    CXnClockAdapter*        iAdapter;            
     // Clock format
-    TClockFormat            iClockFormat;
-    // Time format
-    TTimeFormat             iTimeFormat;
-    // Flag indicating whether format clock from locale
-    TBool                   iFormatFromLocale;
+    TClockFormat            iClockFormat;    
+    // Flag indicating whetger format clock from locale
+    TBool                   iFormatFromLocale;    
     };
 
 #endif // _XNCLOCKCONTROL_H

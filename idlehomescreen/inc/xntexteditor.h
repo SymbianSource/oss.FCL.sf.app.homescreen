@@ -43,16 +43,26 @@ namespace XnTextEditorInterface
         public: // New functions
 
         /**
-         * Sets the new text to the underlying CEikEdwin
+         * Sets the new text to the underlying CEikEdvin
          * @param aText The new content
          */
         virtual void SetTextL(const TDesC& aText) = 0;
         
         /**
-         * Returns the text contained in the underlying CEikEdwin
+         * Returns the text contained in the underlying CEikEdvin
          * @return HBufC* The text
          */
         virtual const HBufC* Text() = 0;
+
+        /**
+         * Handles editor events
+         * 
+         * @since S60 5.2
+         * @param aReason, editor event       
+         */
+        virtual void HandleEditorEvent( TInt aReason ) = 0;
+
+        private:
         };
     }   
 
@@ -63,6 +73,18 @@ namespace XnTextEditorInterface
 */
 class CXnTextEditor : public CXnComponent, public XnTextEditorInterface::MXnTextEditorInterface
     {
+public:
+
+/**
+ * Editor events
+ */
+    enum TEditorEvent
+                {
+                KActivateTextEditor,
+                KDeactivateTextEditor,
+                KRemoveSplitInputFromStack,
+                KKeepSplitInputInStack
+                };
 public:
 
 	/**
@@ -78,16 +100,24 @@ public:
 public: // New functions
 
     /**
-     * Sets the new content to the underlying CEikEdwin
+     * Sets the new content to the underlying CEikEdvin
      * @param aText The new content
      */
     void SetTextL(const TDesC& aText);
     
     /**
-     * Returns the text contained in the underlying CEikEdwin
+     * Returns the text contained in the underlying CEikEdvin
      * @return HBufC* The text
      */
     const HBufC* Text();
+
+    /**
+     * Handles editor events
+     * 
+     * @since S60 5.2
+     * @param aReason, editor event       
+     */
+    void HandleEditorEvent( TInt aReason );
 
 public: // from CCoeControl
 

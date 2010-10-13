@@ -50,7 +50,7 @@ SOURCE          wmimageconverter.cpp
 SOURCE          wmpersistentwidgetorder.cpp
 SOURCE          wmeffectmanager.cpp
 SOURCE          wmdetailsdlg.cpp
-SOURCE          wmstore.cpp
+SOURCE          wmportalbutton.cpp
 SOURCE          wmwidgetloaderao.cpp
 SOURCE          wmconfiguration.cpp
 SOURCE          wminstaller.cpp

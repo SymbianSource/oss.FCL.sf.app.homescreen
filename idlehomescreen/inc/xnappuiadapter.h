@@ -40,7 +40,6 @@ class MHsContentControlUi;
 class CXnEffectManager;
 class MHsContentControl;
 class CXnItemActivator;
-class CXnViewSwitcher;
 
 // Class declaration
 /**
@@ -318,13 +317,6 @@ public:
      */
     void ShowFocus();
 
-    /**
-     * View switcher helper.
-     *
-     * @since S60 5.0     
-     */
-    CXnViewSwitcher* ViewSwitcher();
-    
 private:
     // Data
 
@@ -349,12 +341,6 @@ private:
      * Own.
      */
     TXnUiEngineAppIf* iUiEngineAppIf;
-    
-    /**
-     * View switcher scrolls view when finger follow is used.
-     * Own.
-     */    
-    CXnViewSwitcher* iViewSwitcher;    
     };
 
 #endif

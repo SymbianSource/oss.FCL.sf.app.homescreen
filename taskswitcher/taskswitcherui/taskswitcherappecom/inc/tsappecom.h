@@ -21,7 +21,6 @@
 
 #include <e32base.h>
 #include <akncapserveralternatefsplugin.h>
-#include <apgcli.h>
 
 /**
  * Taskswitcher ecom plugin which is loaded by AknCapServer as an alternate Fast 
@@ -103,28 +102,7 @@ private:
      * Defines the P&S property.
      */
     void DefineTaskswitcherStateProperty();
-    
-    /**
-     * Checks if Task Switcher is running.
-     */
-    TBool IsTaskSwitcherStarted();
-    
-    /**
-     * Starts Task Switche app by calling StartTaskSwitcherL.
-     * 
-     * @return KErrNone if succesful or error code.
-     */
-    TInt StartTaskSwitcher();
-    
-    /**
-     * Starts Task Switche app.
-     * 
-     * @return KErrNone if succesful or error code.
-     */
-    TInt StartTaskSwitcherL();
-    
-private:
-    RApaLsSession iApaLsSession;
+
     };
     
 #endif // TSAPPECOM_H

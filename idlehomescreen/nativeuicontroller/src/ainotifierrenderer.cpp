@@ -22,7 +22,7 @@
 #include <hscontentpublisher.h>
 #include <hspublisherinfo.h>
 #include <activeidle2domainpskeys.h>
-#include <ainativeui.rsg>
+#include <AiNativeUi.rsg>
 #include "ainotifierrenderer.h"
 #include "ainativeuiplugins.h"
 

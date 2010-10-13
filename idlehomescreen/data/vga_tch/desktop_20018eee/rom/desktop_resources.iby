@@ -12,30 +12,36 @@
 * Contributors:
 *
 * Description:
-* Desktop widget HSPS-plugin language specific IBY file.
+* Top Contacts  widget HSPS-plugin language specific IBY file.
 *
 */
+
+#ifdef FF_TOPCONTACTSWIDGET_COMPONENT
 
 #ifndef __DESKTOP_20018EEE_RESOURCES_IBY__
 #define __DESKTOP_20018EEE_RESOURCES_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)   
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools, language specific
 #if defined (__LOCALES_37_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20018eee\xuikon\37\Desktop.o0037 \private\200159c0\install\desktop_20018eee\xuikon\37\Desktop.o0037
+data=ZPRIVATE\200159c0\install\topcontacts\xuikon\37\topcontacts.o0037 \private\200159c0\install\topcontacts\xuikon\37\topcontacts.o0037
 #endif
 #if defined  (__LOCALES_50_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20018eee\xuikon\50\Desktop.o0050 \private\200159c0\install\desktop_20018eee\xuikon\50\Desktop.o0050
+data=ZPRIVATE\200159c0\install\topcontacts\xuikon\50\topcontacts.o0050 \private\200159c0\install\topcontacts\xuikon\50\topcontacts.o0050
 #endif
 #if defined  (__LOCALES_57_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20018eee\xuikon\57\Desktop.o0057 \private\200159c0\install\desktop_20018eee\xuikon\57\Desktop.o0057
+data=ZPRIVATE\200159c0\install\topcontacts\xuikon\57\topcontacts.o0057 \private\200159c0\install\topcontacts\xuikon\57\topcontacts.o0057
 #endif
 #if defined  (__LOCALES_94_IBY__)
-data=ZPRIVATE\200159c0\install\desktop_20018eee\xuikon\94\Desktop.o0094 \private\200159c0\install\desktop_20018eee\xuikon\94\Desktop.o0094
+data=ZPRIVATE\200159c0\install\topcontacts\xuikon\94\topcontacts.o0094 \private\200159c0\install\topcontacts\xuikon\94\topcontacts.o0094
 #endif
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+
+data=ZPRIVATE\200159c0\install\topcontacts\hsps\00\topcontact_hs_widget.dtd \private\200159c0\install\topcontacts\hsps\00\topcontact_hs_widget.dtd
+
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif  // __DESKTOP_20018EEE_RESOURCES_IBY__
 
+#endif // FF_TOPCONTACTSWIDGET_COMPONENT

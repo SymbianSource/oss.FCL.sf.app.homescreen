@@ -342,7 +342,7 @@ void CMmListBoxItemDrawer::DrawFloatingItems( TRect currentlyDrawnRect )
                 iZoomIconIndex = tempZoomIconIndex;
                 }
             }
-        else if( type != EPostDragRefreshItem )
+        else
             {
             iFloatingItems.Remove( i );
             }

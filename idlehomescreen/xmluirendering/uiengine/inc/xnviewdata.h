@@ -26,6 +26,8 @@
 class CXnViewManager;
 class CFbsBitmap;
 
+// Constants
+
 // Class declaration
 
 /**
@@ -210,28 +212,14 @@ public:
      * Loads publishers to this view           
      */
     void LoadPublishers( TInt aReason );    
-
+                   
     /**
      * Destroys all publishers in this view
      * 
      * @param aReason Destroy reason
      */
     void DestroyPublishers( TInt aReason );
-
-    /**
-     * Gets dirty region of a given node. 
-     * 
-     * @return Dirty region if found, otherwise NULL.
-     */
-    TXnDirtyRegion* DirtyRegionL( CXnNode& aNode );
-
-    /**
-     * Gets an array of dirty regions. 
-     * 
-     * @param aList An array for dirty regions.
-     */
-    void GetDirtyRegions( RPointerArray<TXnDirtyRegion>& aList );
-    
+            
 private:
     // data                              
     

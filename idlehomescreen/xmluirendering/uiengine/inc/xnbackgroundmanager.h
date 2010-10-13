@@ -326,23 +326,6 @@ private: // data
      * to be stored to AknsWallpaperUtils
      */
     TBool iStoreWallpaper;
-    
-    /** 
-     * Pointer to wallpaper image. 
-     * Usually wallpaper is read from active view data, but in case of 
-     * finger follow swipe, wallpaper is changed during the page switch. 
-     * Therefore this is used only during finger follow. 
-     * 
-     * Not own. 
-     */   
-    mutable CFbsBitmap* iWallpaper;
-
-    /*
-     * Flag to indicate to use bitmap stored in iWallpaper 
-     * instead of reading it from CXnViewData. 
-     * This is used when page is being changed with finger follow swipe.
-     */
-    mutable TBool iImageChanged;
     };
 
 #endif      // CXNBACKGROUNDMANAGER_H

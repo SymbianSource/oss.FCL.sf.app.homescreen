@@ -893,6 +893,10 @@ public:
     /**
      * Find next node located aDirection from aNode.
      */
+    CXnNode* FindNextNodeL(
+        RPointerArray< CXnNode >& aArray,
+        CXnNode& aNode,
+        TInt aDirection );
 
     /**
      * Gets namespace of node

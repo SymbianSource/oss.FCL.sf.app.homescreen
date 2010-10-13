@@ -30,9 +30,6 @@
 #include "xnnodepluginif.h"
 #include "xnclockadapter.h"
 #include "xntext.h"
-#include "xnproperty.h"
-#include "xndomproperty.h"
-#include "xndomlist.h"
 
 #include "xnclockface.h"
 
@@ -40,8 +37,6 @@
 // LOCAL CONSTANTS AND MACROS
 _LIT( KAmPmFormat, "%B" );
 _LIT( KTimeFormat, "%J%:1%T" );
-
-const TInt KDefaultFaceAdjustmentValue = 0;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -91,134 +86,123 @@ CXnClockFaceDigital::~CXnClockFaceDigital()
 
 // -----------------------------------------------------------------------------
 // CXnClockFaceDigital::DrawL
+// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockFaceDigital::DrawL( CXnClockAdapter& aAdapter, CWindowGc& aGc, 
-        CXnNodePluginIf& aNode, const TTime& aTime, CXnNodePluginIf* aAmpm )
-    {    
+    const TRect& aRect, const TTime& aTime )
+    {
     TBuf< KMaxTimeFormatSpec > time;
     aTime.FormatL( time, KTimeFormat() );
 
-    AknTextUtils::LanguageSpecificNumberConversion( time );
-
-    const CAknLayoutFont* clockFont( CreateFontL( aAdapter, aNode, EClock ) );
-    if ( !clockFont )
-        {
-        return;
-        }
-
-    const TRgb& color( CreateColorL( aAdapter, aNode, EClock) );
-
-    const TInt deltaHeight( aNode.Rect().Height() - clockFont->TextPaneHeight() );
-    TInt offset( clockFont->TextPaneTopToBaseline() + deltaHeight / 2 );
-    
-    CGraphicsContext::TTextAlign align = aAdapter.GetTextAlignL( aNode );
-
-    aGc.SetPenColor( color );
-    aGc.UseFont( clockFont );
-    aGc.DrawText( time, aNode.Rect(), offset, align );
-    aGc.DiscardFont();
-
-    if( TLocale().TimeFormat() == ETime12 && aAmpm )
-        {
-        DrawAmpmL( aAdapter, aGc, aTime, *aAmpm );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CXnClockFaceDigital::DrawAmpmL
-// -----------------------------------------------------------------------------
-//
-void CXnClockFaceDigital::DrawAmpmL( CXnClockAdapter& aAdapter,
-                                     CWindowGc& aGc,
-                                     const TTime& aTime,
-                                     CXnNodePluginIf& aAmpm )
-    {
     TBuf< KMaxTimeFormatSpec > ampm;
     aTime.FormatL( ampm, KAmPmFormat() );
-    ampm.Trim();
-    
-    const CAknLayoutFont* ampmFont( CreateFontL( aAdapter, aAmpm, EAmpm ) );
-    if ( !ampmFont )
+
+    AknTextUtils::LanguageSpecificNumberConversion( time );
+
+    const CAknLayoutFont* clockFont( 
+            aAdapter.FontL( CXnClockAdapter::EDigitalFont ) );
+
+    const CAknLayoutFont* ampmFont( 
+            aAdapter.FontL( CXnClockAdapter::EAmPmFont ) );
+
+    const CAknLayoutFont* dateFont( 
+            aAdapter.FontL( CXnClockAdapter::EDateFont ) );
+
+    const TRgb& color( aAdapter.TextColorL() );
+
+    CXnNodePluginIf* date( aAdapter.Date() );
+
+    const TInt deltaHeight( aRect.Height() - clockFont->TextPaneHeight() );
+    TInt offset( clockFont->TextPaneTopToBaseline() + deltaHeight / 2 );
+
+    if( date )
         {
-        return;
+        // When date string is shown, time string must be lifted up
+        offset -= ( dateFont->TextPaneHeight() / 2 );
         }
-    
-    const TRgb& color( CreateColorL( aAdapter, aAmpm, EAmpm) );
-    
-    const TInt deltaHeight( aAmpm.Rect().Height() - ampmFont->TextPaneHeight() );
-    TInt offset( ampmFont->TextPaneTopToBaseline() + deltaHeight / 2 );
-    
-    CGraphicsContext::TTextAlign align = aAdapter.GetTextAlignL( aAmpm );
+
+    // Measure the full width of the time string 
+    TInt textWidth( AknBidiTextUtils::MeasureTextBoundsWidth( *clockFont, time, 
+        CFont::TMeasureTextInput::EFVisualOrder ) );
+
+    TInt extraWidth( aRect.Width() - textWidth );
+
+    TInt margin( extraWidth / 2 );
 
     aGc.SetPenColor( color );
-    aGc.UseFont( ampmFont );
-    aGc.DrawText( ampm, aAmpm.Rect(), offset, align );
+
+    aGc.UseFont( clockFont );
+
+    CGraphicsContext::TTextAlign align;
+
+    TBool mirrored( AknLayoutUtils::LayoutMirrored() );
+
+    if( mirrored )
+        {
+        align = CGraphicsContext::ERight;
+        }
+    else
+        {
+        align = CGraphicsContext::ELeft;
+        }
+
+    aGc.DrawText( time, aRect, offset, align, margin );
+
     aGc.DiscardFont();
-    }
 
-// -----------------------------------------------------------------------------
-// CXnClockFaceDigital::CreateFontL
-// -----------------------------------------------------------------------------
-//
-const CAknLayoutFont* CXnClockFaceDigital::CreateFontL( CXnClockAdapter& aAdapter,
-        CXnNodePluginIf& aNode,
-        TXnClockFontType aFontType)
-    {    
-    if ( aFontType == EClock )
+    if( TLocale().TimeFormat() == ETime12 )
         {
-        if ( !iClockFont )
-            {
-            aAdapter.CreateFontL( aNode, iClockFont );
-            }
-        return CAknLayoutFont::AsCAknLayoutFontOrNull( iClockFont );
-        }
-    else
-        {
-        if ( !iAmpmFont )
-            {
-            aAdapter.CreateFontL( aNode, iAmpmFont );
-            }
-        return CAknLayoutFont::AsCAknLayoutFontOrNull( iAmpmFont );
-        }
-    }
+        TRect ampmRect( aRect );
+        TInt ampmHeight( ampmFont->TextPaneHeight() );
 
-// -----------------------------------------------------------------------------
-// CXnClockFaceDigital::CreateColorL
-// -----------------------------------------------------------------------------
-//
-const TRgb& CXnClockFaceDigital::CreateColorL( CXnClockAdapter& aAdapter,
-        CXnNodePluginIf& aNode,
-        TXnClockFontType aFontType )
-    {
-    if ( aFontType == EClock )
-        {
-        if ( !iIsFaceColorSet )
+        if( mirrored )
             {
-            aAdapter.CreateColorL( aNode, iFaceColor );
-            iIsFaceColorSet = ETrue;
+            align = CGraphicsContext::ELeft;
             }
-        return iFaceColor;
-        }
-    else
-        {
-        if ( !iIsAmpmColorSet )
+        else
             {
-            aAdapter.CreateColorL( aNode, iAmpmColor );
-            iIsAmpmColorSet = ETrue;
+            align = CGraphicsContext::ERight;
             }
-        return iAmpmColor;
-        }
-    }
 
-// -----------------------------------------------------------------------------
-// CXnClockFaceDigital::ResetFont
-// -----------------------------------------------------------------------------
-//
-void CXnClockFaceDigital::ResetFont()
-    {
-    iClockFont = iAmpmFont = NULL;
-    iIsFaceColorSet = iIsAmpmColorSet = EFalse;
+        ampmRect.iTl.iY += ampmHeight;
+
+        aGc.UseFont( ampmFont );
+
+        aGc.DrawText( ampm, ampmRect, offset, align, margin );
+
+        aGc.DiscardFont();
+        }
+
+    if( date )
+        {
+        const TDesC* dateStr( &KNullDesC() );
+
+        CXnText* textIf( NULL );
+
+        XnComponentInterface::MakeInterfaceL( textIf, date->AppIfL() );
+
+        if( textIf )
+            {
+            dateStr = textIf->Text();
+            }
+
+        // Measure the full width of the time string 
+        TInt dateWidth( AknBidiTextUtils::MeasureTextBoundsWidth( *dateFont, *dateStr, 
+            CFont::TMeasureTextInput::EFVisualOrder ) );
+
+        TInt width( aRect.Width() - dateWidth );
+        TInt margin( width / 2 );
+
+        // Move date string down by text pane height and 5% of rect height
+        offset += dateFont->TextPaneHeight() + ( aRect.Height() / 20 );
+
+        aGc.UseFont( dateFont );
+
+        aGc.DrawText( *dateStr, aRect, offset, align, margin );
+
+        aGc.DiscardFont();
+        }
     }
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -230,7 +214,6 @@ void CXnClockFaceDigital::ResetFont()
 // -----------------------------------------------------------------------------
 //
 CXnClockFaceAnalog::CXnClockFaceAnalog()     
-    :   iFaceAdjustmentValue( KErrNotFound )
     {
     }
 
@@ -270,12 +253,13 @@ CXnClockFaceAnalog::~CXnClockFaceAnalog()
 
 // -----------------------------------------------------------------------------
 // CXnClockFaceAnalog::DrawL
+// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockFaceAnalog::DrawL( CXnClockAdapter& /*aAdapter*/, CWindowGc& aGc, 
-        CXnNodePluginIf& aNode, const TTime& aTime, CXnNodePluginIf* /*aAmpm*/ )
-    {    
-    TRect faceRect( aNode.Rect() );
+    const TRect& aRect, const TTime& aTime )
+    {
+    TSize faceSize( aRect.Size() );
     
     TDateTime dateTime( aTime.DateTime() );
     
@@ -295,19 +279,14 @@ void CXnClockFaceAnalog::DrawL( CXnClockAdapter& /*aAdapter*/, CWindowGc& aGc,
         {
         return;
         }
-    
-    TInt value( FaceAdjustmentValueL( aNode ) );
-    
-    TSize growthSize( value, 0 );
-    faceRect.Grow( growthSize );
 
-    User::LeaveIfError( AknIconUtils::SetSize( skinBmp, faceRect.Size() ) );
+    User::LeaveIfError( AknIconUtils::SetSize( skinBmp, faceSize ) );
 
     if( skinMask )
         {
-        User::LeaveIfError( AknIconUtils::SetSize( skinMask, faceRect.Size() ) );
+        User::LeaveIfError( AknIconUtils::SetSize( skinMask, faceSize ) );
         
-        aGc.BitBltMasked( faceRect.iTl,
+        aGc.BitBltMasked( aRect.iTl,
                           skinBmp,
                           TRect( TPoint( 0, 0 ), skinBmp->SizeInPixels() ),
                           skinMask,
@@ -315,17 +294,18 @@ void CXnClockFaceAnalog::DrawL( CXnClockAdapter& /*aAdapter*/, CWindowGc& aGc,
         }
     else
         {
-        aGc.BitBlt( faceRect.iTl, skinBmp );
+        aGc.BitBlt( aRect.iTl, skinBmp );
         }
 
     aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
     aGc.SetPenStyle( CGraphicsContext::ESolidPen );
   
-    DrawHandsL( aGc, aNode.Rect(), dateTime );
+    DrawHandsL( aGc, aRect, dateTime );
     }
             
 // -----------------------------------------------------------------------------
 // CXnClockFaceAnalog::DrawHands
+// (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
 void CXnClockFaceAnalog::DrawHandsL( CWindowGc& aGc,
@@ -374,42 +354,6 @@ void CXnClockFaceAnalog::DrawHandsL( CWindowGc& aGc,
                       TRect( TPoint( 0, 0 ), minbitmap->SizeInPixels() ),
                       minmask,
                       EFalse );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnClockFaceAnalog::FaceAdjustmentValueL
-// -----------------------------------------------------------------------------
-//
-TInt CXnClockFaceAnalog::FaceAdjustmentValueL( CXnNodePluginIf& aNode )
-    {
-    if( iFaceAdjustmentValue == KErrNotFound )
-        {
-        CXnProperty* prop( aNode.GetPropertyL( XnPropertyNames::clock::KFaceAdjustmentValue ) );
-        
-        if( prop )
-            {        
-            TInt value = static_cast<TInt>( prop->FloatValueL() );
-            
-            if( value > KErrNotFound )
-                {
-                iFaceAdjustmentValue = value;
-                }
-            }
-        
-        if( iFaceAdjustmentValue <= KErrNotFound )
-            {
-            iFaceAdjustmentValue = KDefaultFaceAdjustmentValue;
-            }
-        }
-    
-    return iFaceAdjustmentValue;
-    }
-	
-// CXnClockFaceAnalog::ResetFont
-// -----------------------------------------------------------------------------
-//
-void CXnClockFaceAnalog::ResetFont()
-    {
     }
     
 //  End of File

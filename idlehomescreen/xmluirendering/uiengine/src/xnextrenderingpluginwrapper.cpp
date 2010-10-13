@@ -224,7 +224,8 @@ void CXnExtRenderingPluginWrapper::DoExitPowerSaveModeL(
 void CXnExtRenderingPluginWrapper::HandleEventL( const TDesC& aEvent, const TDesC8& aDestination )
     {
     
-    CXnNode* node = iNode->Node().UiEngine()->FindNodeByIdL( aDestination );
+    CXnNode* node = iNode->Node().UiEngine()->FindNodeByIdL( aDestination, iNode->Namespace() );
+    
     CXnAppUiAdapter* appui = static_cast<CXnAppUiAdapter*>(iAvkonAppUi);
     if ( !appui || !node )
         {

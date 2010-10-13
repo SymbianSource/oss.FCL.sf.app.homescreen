@@ -148,11 +148,11 @@ public:
      * @return parent wg id or KErrNotFound if there is no parent
      */
     TInt FindMostTopParentWgId( TInt aWgId );
-    
+
     /**
-     * Remove all screenshots from hidden apps, they are not used.
+     * Checks whether window group id was used by contained data.
      */
-    void RemoveHiddenAppsScrenshotsL();
+    TBool CheckForWgIdUsage( TInt aWgId );
     
 private:
     /**

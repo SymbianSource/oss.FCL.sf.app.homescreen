@@ -166,23 +166,16 @@ namespace XnPropertyNames
         }
     namespace clock
         {
-        _LIT8( KS60Format, "_s60-format" );
+        _LIT8(KS60Format, "_s60-format");
         namespace format
             {
-            _LIT8( KDigital, "digital" );
-            _LIT8( KAnalog, "analog" );
+            _LIT8(KDigital, "digital");
+            _LIT8(KAnalog, "analog");
             }
-        _LIT8( KS60AmPmFontSize, "_s60-ampm-font-size" );  
-        _LIT8( KS60DigitalFontSize, "_s60-digital-font-size" );                 
+            
+        _LIT8(KS60AmPmFontSize, "_s60-ampm-font-size" );  
+        _LIT8(KS60DigitalFontSize, "_s60-digital-font-size");                 
         _LIT8( KS60DateFontSize, "_s60-date-font-size" );
-        _LIT8( KS60FontSize, "_s60-font-size" );
-        _LIT8( KFace, "face" );
-        _LIT8( KFace12, "face12" );
-        _LIT8( KFace24, "face24" );
-        _LIT8( KDate, "date" );
-        _LIT8( KDay, "day" );
-        _LIT8( KAmpm, "ampm" );
-        _LIT8( KFaceAdjustmentValue, "face-adjustment-value" );
         }
     namespace volumecontrol
         {

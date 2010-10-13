@@ -26,7 +26,6 @@
 
 // Uder includes
 #include "xnviewmanager.h"
-#include "xnuistatelistener.h"
 
 // Forward declarations
 class CXnNode;
@@ -46,7 +45,6 @@ class CXnPluginData;
  */
 NONSHARABLE_CLASS( CXnKeyEventDispatcher ) : public CCoeControl,   
     public MCoeMessageMonitorObserver,
-    public MXnUiResourceChangeObserver,
     public MXnViewObserver
     {
 public:
@@ -79,19 +77,6 @@ private:
     */
     void MonitorWsMessage( const TWsEvent& aEvent );
         
-private:
-    // from MXnUiResourceChangeObserver
-    
-    /**
-     * @see MXnUiResourceChangeObserver
-     */
-    void NotifyStatusPaneSizeChanged();
-
-    /**
-     * @see MXnUiResourceChangeObserver
-     */
-    void NotifyResourceChanged( TInt aType );    
-    
 public:
     // New functions
    
@@ -189,24 +174,7 @@ public:
      * @return Last pointer event
      */
     const TPointerEvent& PointerEvent() const;
-       
-    /**
-     * Sets activate text editor
-     * 
-     * @since S60 5.2
-     * @param aNode Editor Node
-     * @param TBool True if text editor should be activated
-     */          
-    void SetTextEditorActive( CXnNode* aNode, TBool aActivate );
-    
-    /**
-     * Queries whether a text editor is active
-     * 
-     * @since S60 5.2
-     * @return ETrue if text editor is active, EFalse otherwise
-     */
-    TBool IsTextEditorActive() const;
-    
+            
 private:
     // new functions
     
@@ -232,7 +200,6 @@ private:
     // from MXnViewObserver
     
     void NotifyViewActivatedL( const CXnViewData& aViewData );
-    void NotifyViewLoadedL( const CXnViewData& /*aViewData*/ ) {};
 
     void NotifyViewDeactivatedL( const CXnViewData& aViewData );
 
@@ -241,8 +208,8 @@ private:
 
     void NotifyWidgetAdditionL( const CXnPluginData& aPluginData );
     void NotifyWidgetRemovalL( const CXnPluginData& aPluginData );
-    void NotifyViewAdditionL( const CXnViewData& /*aViewData*/ ){};
-    void NotifyViewRemovalL( const CXnViewData& /*aViewData*/ ){};
+    void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ ){};
+    void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ ){};
     void NotifyAllViewsLoadedL(){};
     void NotifyContainerActivatedL( const CXnViewData& /*aViewData*/ ){};
 
@@ -273,8 +240,6 @@ private:
     RPointerArray< CXnNode > iPassiveFocusedNodes;
     /** Last pointer event */
     TPointerEvent iPointerEvent;
-    /** Active text editor node, not owned */
-    CXnNode* iActiveTextEditor;
     };
 
 #endif //__XNKEYEVENTDISPATCHER_H__

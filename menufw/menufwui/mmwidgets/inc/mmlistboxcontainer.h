@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmListBoxContainer
-*  Version     : %version: MM_21.1.11 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_21.1.10 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -166,13 +166,6 @@ public: // from base class CMmWidgetContainer
      */
     THnSuiteWidgetType WidgetType();
 
-    /**
-     * Sets a proper flag if the widget is brought to foreground.
-     * 
-     * @param  aCommingFromBackground indicates whether the widget is brought to foreground.
-     */
-    virtual void SetWidgetCommingFromBackground( TBool aCommingFromBackground );
-	
 public:
     /**
       * Draws the widget view.
@@ -196,7 +189,7 @@ public:
      * @return The current widget vertical item offset.
      */
     virtual TInt VerticalItemOffset() const;
-        
+    
 protected: // from CMmWidgetContainer
     
     /**

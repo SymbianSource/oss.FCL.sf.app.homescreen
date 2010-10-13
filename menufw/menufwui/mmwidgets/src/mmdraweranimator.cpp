@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:
- *  Version     : %version: MM_45 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_44 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -140,10 +140,6 @@ void CMmDrawerAnimator::RunL()
                 refreshRect = (refreshRect == TRect() ) ? beforeRect : refreshRect;
                 refreshRect.BoundingRect( beforeRect );
                 refreshRect.BoundingRect( afterRect );
-                }
-            if( current.GetFloatingItemType() == EPostDragRefreshItem )
-                {
-                iDrawer.RemoveFloatingItem( i-- );
                 }
             }
         const TInt highlightedItemIndex = iDrawer.Widget()->View()->CurrentItemIndex();

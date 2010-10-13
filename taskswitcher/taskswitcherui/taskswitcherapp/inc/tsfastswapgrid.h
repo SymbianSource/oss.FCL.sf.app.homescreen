@@ -22,9 +22,9 @@
 #include <AknGrid.h>
 #include <aknconsts.h>
 #include "tsdevicestate.h"
-#include "tsfastswapareautils.h"
 
 class CAknsFrameBackgroundControlContext;
+class CTsFastSwapTimer;
 
 /**
  * Observer for handling fast swap grid events
@@ -39,6 +39,16 @@ public:
      *                   has been tapped
      */
     virtual void HandleCloseEventL( TInt aItemIdx ) = 0;
+    };
+
+
+class MTsFastSwapTimerObserver
+    {
+public:
+    /**
+     * Called when timer is completed
+     */
+    virtual void TimerCompletedL( CTsFastSwapTimer* aSource ) = 0;
     };
 
 
@@ -364,5 +374,26 @@ private: // Data
     TRect iStrokeRect;
     };
 
+
+
+/**
+ * Timer class for handling highlight bevaiour
+ */
+class CTsFastSwapTimer : public CTimer
+    {
+public:
+    // Constructor
+    CTsFastSwapTimer( MTsFastSwapTimerObserver& aObserver );
+    // Destructor
+    ~CTsFastSwapTimer();
+    // 2nd phase constructor
+    void ConstructL();
+    
+private: // From CTimer
+    void RunL();
+    
+private: // Data
+    MTsFastSwapTimerObserver* iObserver; // not own
+    };
 
 #endif /* TSFASTSWAPGRID_H_ */

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *  Version     : %version: MM_56 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: MM_55 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
@@ -81,7 +81,6 @@ CMmListBoxView* CMmListBoxView::NewL ()
 void CMmListBoxView::ConstructL ()
   {
   iPreviouslyDrawnCurrentItemIndex = KErrNotFound;
-  iListCommingFromBackground = EFalse;
   }
 
 // -----------------------------------------------------------------------------
@@ -248,9 +247,8 @@ void CMmListBoxView::DoDraw(const TRect* aClipRect) const
     view->UpdateAverageItemHeight ();
 
     CMmListBoxModel* model = static_cast< CMmListBoxModel* > ( iModel );
-    if( model && model->GetSuiteModel()
-            && !model->GetSuiteModel()->GetItemsOrder()->IsSuiteReadyToShow()
-            && !GetListCommingFromBackground() )
+    if ( model && model->GetSuiteModel()
+            && !model->GetSuiteModel()->GetItemsOrder()->IsSuiteReadyToShow() )
         {
         return;
         }
@@ -630,25 +628,6 @@ TBool CMmListBoxView::ScrollToMakeItemVisible(TInt aItemIndex)
 void CMmListBoxView::DisableScrollToItem( TBool aDisable )
     {
     iScrollToItemDisabled = aDisable;
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-TBool CMmListBoxView::GetListCommingFromBackground() const
-    {
-    return iListCommingFromBackground;
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CMmListBoxView::SetListCommingFromBackground(
-        TBool aCommingFromBackground )
-    {
-    iListCommingFromBackground = aCommingFromBackground;
     }
 
 // End of file

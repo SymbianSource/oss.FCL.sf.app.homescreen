@@ -133,7 +133,6 @@
                     <property name="hs_widget_general_2"/>
                     <property name="hs_add_view"/>
                     <property name="hs_remove_view"/>
-                    <property name="hs_change_wallpaper"/>
                 </menuitemgroup>
                 <menuitemgroup id="ContextMenu/EditMode">
                     <property name="hs_remove_widget"/>
@@ -143,6 +142,7 @@
                 </menuitemgroup>
                 <!-- These items are always shown, if not otherwise changed in the declaration -->
                 <menuitemgroup id="Menu/AlwaysShown">
+                    <property name="hs_change_wallpaper"/>
                     <property name="hs_show_help"/>
                 </menuitemgroup>
             </menuitemgrouping>
@@ -286,3 +286,4 @@
         </menubar>
     </view>
 </xmluiml>
+

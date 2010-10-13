@@ -34,40 +34,8 @@ class CXnViewData;
 class CXnODT;
 class CXnViewManager;
 class CXnPublisherData;
-class CCoeControl;
 
 // Constants
-
-NONSHARABLE_STRUCT( TXnDirtyRegion )
-    {
-    /** Area that needs to be redrawn */
-    RRegion         iRegion;      
-
-    /** Window owning control 
-     *  Not own.
-     */
-    CCoeControl*    iControl;
-
-    /** Window owning node
-     *  Not own.
-     */
-    CXnNode*        iRootNode; 
-
-    /** List of currently dirty nodes */
-    RPointerArray< CXnNode > iDirtyList;
-
-    /** Controls layouting */
-    TInt iLayoutControl;
-
-    TXnDirtyRegion() : iControl( NULL ), iRootNode( NULL ), 
-        iLayoutControl( 0 ) {}
-
-    ~TXnDirtyRegion()
-        {
-        iRegion.Close();
-        iDirtyList.Reset();
-        }
-    };
 
 // Class declaration
 
@@ -90,8 +58,7 @@ public:
         EIsEmpty,
         EIsRemovable,
         EIsActive,             
-        EIsInitial,
-        EIsEditable
+        EIsInitial        
         };
         
 public:    
@@ -406,13 +373,6 @@ public:
     inline TBool Removable() const;
     
     /*
-     * Checks whether editable
-     * 
-     * @return ETrue when editable EFalse when not
-     */      
-    inline TBool Editable() const;
-    
-    /*
      * Queries whether this plugin is holding "empty" widget
      * 
      * @return ETrue if empty, EFalse otherwise     
@@ -480,26 +440,12 @@ public:
     void ShowOutOfMemError();
     
     /**
-     * Sets locking_status attribute (none/locked/permanent) 
+     * Sets locking_status attribute (locked/none) 
      * 
-     * @param aStatus "none" / "locked" / "permanent"
+     * @param aStatus "locked" / "none"
      */
     void SetLockingStatus( const TDesC8& aStatus );    
         
-    /**
-     * Creates dirty region.
-     * 
-     * @return Created dirty region.
-     */
-    TXnDirtyRegion* CreateDirtyRegionL( CXnNode& aRootNode, CCoeControl& aControl);
-
-    /**
-     * Get dirty region.
-     * 
-     * @return dirty region.
-     */
-    inline TXnDirtyRegion* DirtyRegion() const;
-
 protected:
     // data
         
@@ -539,8 +485,6 @@ protected:
     HBufC* iPublisherName;
     /** Flags to define this plugin's state */
     TBitFlags32 iFlags;
-    /** Region pending redraw, Owned */
-    TXnDirtyRegion* iDirtyRegion;
     };
 
 // Inline functions

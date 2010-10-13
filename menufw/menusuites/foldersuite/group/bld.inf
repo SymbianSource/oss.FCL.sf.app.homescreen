@@ -42,11 +42,7 @@ PRJ_EXPORTS
 #ifdef _MATRIX_MENU_INCLUDE_TEST_CONTENT
 ../data/matrixmenudatatestcontent.xml Z:/private/200113DD/content/matrixmenudata.xml
 #else
-// #if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
-// ../data/matrixmenudata_vga.xml Z:/private/200113DD/content/matrixmenudata.xml
-// #else
 ../data/matrixmenudata.xml Z:/private/200113DD/content/matrixmenudata.xml
-// #endif
 #endif
 ../data/matrixmenudata.dtd Z:/private/200113DD/content/01/matrixmenudata.dtd
 

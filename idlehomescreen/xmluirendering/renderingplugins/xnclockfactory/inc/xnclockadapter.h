@@ -30,7 +30,6 @@
 // Forward declarations
 class CXnNodePluginIf;
 class CXnClockControl;
-class CXnDateControl;
 class CAknLayoutFont;
 class CFont;
 class TRgb;
@@ -43,20 +42,22 @@ class TRgb;
 */
 NONSHARABLE_CLASS( CXnClockAdapter ) : public CXnControlAdapter, 
     public MCoeMessageMonitorObserver, public MHWRMLightObserver
-    {    
+    {
+public:
+    enum TClockFont
+        {
+        EDigitalFont,
+        EAmPmFont,
+        EDateFont
+        };
+    
 public: 
     // constructor and destructor
     
 	/**
 	 * 2 phase construction.
-	 * 
-	 * @param aParent Parent control
-	 * @param aNode clock node
-	 * 
-	 * @return Newly constructed object
 	 */
-	static CXnClockAdapter* NewL( CXnControlAdapter* aParent,
-                                  CXnNodePluginIf& aNode );
+	static CXnClockAdapter* NewL( CXnControlAdapter* aParent, CXnNodePluginIf& aNode );
 
 	/**
 	 * Destructor.
@@ -65,44 +66,39 @@ public:
 
 public: 
 	// New functions
-    
-    /*
-     * Create font
-     * 
-     * @param aNode Node which contains info of font
-     * @param aFont On return points to a created font
-     */    
-    void CreateFontL( CXnNodePluginIf& aNode,
-                      CFont*& aFont );
-    
-    /*
-     * Create color
-     * 
-     * @param aNode Node which contains color info
-     * @param aColor On return points to a created color
-     */        
-    void CreateColorL( CXnNodePluginIf& aNode, TRgb& aColor );
+
+    /** 
+    * Gets font based on type
+    * 
+    * @return Font based on aType, NULL if not found
+    */    
+    const CAknLayoutFont* FontL( const TInt aType );
+        
+    /**
+    * Gets text color
+    * 
+    * @return Text color
+    */
+    const TRgb& TextColorL();
+
+    /**
+    * Gets date information
+    * 
+    * @return A node which holds date information
+    */    
+    CXnNodePluginIf* Date() const;
+
+    /**
+    * Gets day information
+    * 
+    * @return A node which holds day information
+    */    
+    CXnNodePluginIf* Day() const;
 
     /**
     * Calls DrawNow, if node is laidout
     */        
     void UpdateDisplay() const;
-    
-    /**
-    * Sets clock format
-    * 
-    * @param aFormat format of clock to set
-    */
-    void SetClockFormatL( TClockFormat aFormat );
-    
-    /**
-    * Gets text align from text-align property
-    * 
-    * @param aNode Node which contains property
-    * 
-    * @return Text align or CGraphicsContext::ECenter if property is not set
-    */
-    CGraphicsContext::TTextAlign GetTextAlignL( CXnNodePluginIf& aNode );
 
 public: 
     // from base classes
@@ -168,6 +164,16 @@ private:
 	void ConstructL();
 
 private: // New functions
+
+    /*
+     * Create font
+     */    
+    void CreateFontL( const TInt aType );
+
+    /*
+     * Create color
+     */        
+    void CreateColorL();
         
     /**
      * Starts clock
@@ -179,47 +185,29 @@ private: // New functions
      */
     void StopClock();
     
-    /**
-    * Sets display property of node to block or none
-    * 
-    * @param aNode Node which display property is set
-    * @param aBlock Value of display property to set
-    */
-    void SetDisplayToBlockL( CXnNodePluginIf& aNode, TBool aBlock );
-    
 private:
     // Parent control, not owned
     CXnControlAdapter*  		iParent;        
     // UI node, not owned
     CXnNodePluginIf&    		iNode;
-    // Digital clock element, not owned    
-    CXnNodePluginIf*            iDigital;
-    // Analog clock element, not owned
-    CXnNodePluginIf*            iAnalog;
-    // Day number element, not owned
-    CXnNodePluginIf*            iDay;
-    // Am\Pm element, not owned
-    CXnNodePluginIf*            iAmpm;
-    // Digital face 12h element, not owned
-    CXnNodePluginIf*            iDigitalFace12;
-    // Digital face 24h element, not owned
-    CXnNodePluginIf*            iDigitalFace24;
-    // Analog face element, not owned
-    CXnNodePluginIf*            iAnalogFace;
-    // Date element, not owned
+    // Digital clock date information, not owned
     CXnNodePluginIf*            iDate;
-    // Digital clock date element, not owned
-    CXnNodePluginIf*            iDigitalDate;
-    // Analog clock date element, not owned
-    CXnNodePluginIf*            iAnalogDate;    
+    // Analog clock day information, not owned
+    CXnNodePluginIf*            iDay;
     // Light observer, owned
     CHWRMLight*                 iLightObserver;
-    // Clock control, owned
-    CXnClockControl*            iClockControl;
-    // Date control, owned
-    CXnDateControl*             iDateControl;
-    // Day number control, owned
-    CXnDateControl*             iDayControl;
+    // Clock control, owned    
+    CXnClockControl*            iClockControl;  
+    // Digital clock font, not owned
+    CFont*                      iDigitalFont;   
+    // AmPm font, not owned
+    CFont*                      iAmPmFont;      
+    // Date font, not owned
+    CFont*                      iDateFont;      
+    // Font color
+    TRgb                        iColor;
+    // Flag for initializing font color
+    TBool                       iColorSet;
     // Flag indicating foreground state
     TBool                       iForeground;
     // Flag indicating lights status

@@ -41,11 +41,11 @@ public: // New functions
     /**
      * Commits the publish operation and actually updates the UI control/element.
      *
+     * @param [out] aLayoutChanged true if UI layout changes 
      * @see UpdateDataL()
      * @see ApplyPublishingPolicy()
      */
-    void CommitL( RAiPolicyElementArray& aPolicyArray, 
-                  RPropertyHashMap& aPropertyHashMap );
+    void CommitL( TBool& aLayoutChanged, RPropertyHashMap& aPropertyHashMap );
 
     /**
      * Resets the transaction element and clears the references to content
@@ -53,6 +53,12 @@ public: // New functions
      *
      */
     virtual void Reset() = 0;
+    
+    /**
+     * Returns the array of associated content policy elements.
+     *
+     */
+    virtual RAiPolicyElementArray& PolicyArray() = 0;
     
     /**
      * Return the target UI element for this transaction element
@@ -73,7 +79,7 @@ protected:  // New functions
      *
      * @param [out] aLayoutChanged true if UI layout changes
      */
-    virtual void ApplyPublishingPolicy( RAiPolicyElementArray& aPolicyArray,
+    virtual void ApplyPublishingPolicy( TBool& aLayoutChanged,
                                         RPropertyHashMap& aPropertyHashMap ) = 0;
     
 protected:  // Constructors and destructor

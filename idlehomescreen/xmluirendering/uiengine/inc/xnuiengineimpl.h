@@ -41,7 +41,6 @@ class CXnEditMode;
 class CXnViewManager;
 class CXnViewData;
 class CXnPluginData;
-class TXnDirtyRegion;
 
 // Constants
 namespace XnLayoutPhase
@@ -60,6 +59,18 @@ namespace XnLayoutControl
     const TInt EViewDirty = 0x10;
     const TInt EEffectStarted = 0x20;    
     }
+	
+NONSHARABLE_STRUCT( TXnDirtyRegion )
+    {
+    RRegion         iRegion;      
+    CCoeControl*    iControl; // Not own.
+    
+    ~TXnDirtyRegion()
+        {
+        iRegion.Close();
+        }
+    };
+
 
 NONSHARABLE_STRUCT( TXnSplitScreenState )
     {
@@ -289,7 +300,6 @@ public:
      * @since Series 60 3.1
      */
     void RefreshMenuL();
-    void RefreshMenuL( TXnDirtyRegion* aDirtyRegion );
 
     /**
      * Returns view manager
@@ -496,10 +506,10 @@ public:
      * Enables partial touch input
      * 
      * @since Series 60 5.2
-     * @param aNode Editor Node, can be NULL when disabling partial input
+     * @param aNode Editor Node
      * @param TBool Partial input is enabled      
      */      
-    void EnablePartialTouchInput( CXnNode* aNode, TBool aEnable );
+    void EnablePartialTouchInput( CXnNode& aNode, TBool aEnable );
 
     /**
      * Is partial input active
@@ -520,7 +530,7 @@ public:
 private:
     
     IMPORT_C static void EnableRenderUi( TAny* aAny );
-
+        
 private:
     // constructors
 
@@ -531,55 +541,49 @@ private:
 
 private:
     // new functions
-
-    /**
-     * Lays out the UI
-     */
-    void LayoutL( TXnDirtyRegion& aRegion );
-    void RenderL( TXnDirtyRegion& aRegion );
-
+    
     /**
      * Prepares to the layout algorithm run
      * 
      * @since Series 60 3.2
      */
-    void PrepareRunLayoutL( TXnDirtyRegion& aDirtyRegion );
+    void PrepareRunLayoutL();
 
     /**
      * Runs the layout algorithm        
      * 
      * @since Series 60 3.2
      */
-    TInt RunLayoutL( TXnDirtyRegion& aDirtyRegion, CXnNode& aNode );
+    TInt RunLayoutL( CXnNode* aNode );
 
     /**
      * Checks if layout is currently disabled
      * 
      * @since Series 60 3.2
      */
-    TBool IsLayoutDisabled( TXnDirtyRegion& aDirtyRegion );
+    TBool IsLayoutDisabled();
 
-    void AddToRedrawListL( TXnDirtyRegion& aRegion, CXnNode& aNode, 
-        TRect aRect = TRect::EUninitialized );
+    void AddToRedrawListL( CXnNode* aNode, TRect aRect =
+        TRect::EUninitialized );
 
-    void AddToDirtyListL( TXnDirtyRegion& aRegion, CXnNode& aNode );
+    void AddToDirtyListL( CXnNode* aNode );
 
     /**
      * Finds a node where to start layout
      *
      * @since Series 60 5.0
      */
-    CXnNode* StartLayoutFromL( TXnDirtyRegion& aDirtyRegion );
+    CXnNode* StartLayoutFromL();
 
     void ForceRenderUIL( TBool aLayoutOnly = EFalse );
 
-    CXnNode* WindowOwningNode( CXnNode& aNode );
+    CCoeControl* WindowOwningControl( CXnNode& aNode );
     
     TXnDirtyRegion* FindDirtyRegionL( CXnNode& aNode );
 
-    void ReportScreenDeviceChangeL();
+    void AddRedrawRectL( TRect aRect, CXnNode& aNode );
 
-    void EnableRenderUiL();
+    void ReportScreenDeviceChangeL();
     
     /**
       * Handle partial touch input
@@ -587,7 +591,7 @@ private:
       * @since Series 60 5.2
       * @param TInt aType 
       */ 
-    void HandlePartialTouchInputL( CXnNode* aNode, TBool aEnable );
+    void HandlePartialTouchInputL( CXnNode& aNode, TBool aEnable );
 
     /**
       * Set node visible
@@ -631,11 +635,6 @@ private:
     void NotifyViewActivatedL( const CXnViewData& aViewData );
 
     /** 
-     * from MXnViewObserver 
-     */
-    void NotifyViewLoadedL( const CXnViewData& aViewData );
-
-    /** 
      * from MXnViewObserver
      */
     void NotifyViewDeactivatedL( const CXnViewData& /*aViewData*/ );
@@ -659,12 +658,12 @@ private:
     /** 
      * from MXnViewObserver 
      */
-    void NotifyViewAdditionL( const CXnViewData& aViewData );
+    void NotifyViewAdditionL( const CXnPluginData& /*aPluginData*/ ){};
 
     /** 
      * from MXnViewObserver
      */
-    void NotifyViewRemovalL( const CXnViewData& /*aViewData*/ ){};
+    void NotifyViewRemovalL( const CXnPluginData& /*aPluginData*/ ){};
 
     /** 
      * from MXnViewObserver
@@ -721,12 +720,18 @@ private:
     CXnKeyEventDispatcher* iKeyEventDispatcher;
     /** ControlAdapters, not owned */
     const RPointerArray< CXnControlAdapter >* iControlAdapterList;
+    /** Region pending redraw */
+    RPointerArray<TXnDirtyRegion> iRedrawRegions;
+    /** List of currently dirty nodes */
+    RPointerArray< CXnNode > iDirtyList;
     /** Array of nodes which can be focused */
     RPointerArray< CXnNode > iFocusCandidateList;
     /** current view */
     CXnNode* iCurrentView;
     /** current view control adapter, not owned */
     CXnControlAdapter* iCurrentViewControlAdapter;
+    /** Controls layouting */
+    TInt iLayoutControl;
     /** Layout algo phase */
     TInt iLayoutPhase;
     /** Unit in pixels (width). */

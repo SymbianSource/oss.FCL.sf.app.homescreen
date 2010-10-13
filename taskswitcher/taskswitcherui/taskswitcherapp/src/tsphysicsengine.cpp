@@ -72,7 +72,7 @@ CTsPhysicsEngine* CTsPhysicsEngine::NewL(
 void CTsPhysicsEngine::ConstructL(MAknPhysicsObserver& aPhysicObserver,
         CCoeControl& aViewControl)
     {
-    iPhysics = CAknPhysics::NewL(aPhysicObserver, &aViewControl);
+    iPhysics = CAknPhysics::NewL(aPhysicObserver, &aViewControl);//TODO:
     iTaskswitcherPhysics = CTsPhysics::NewL(aPhysicObserver);
     }
 

@@ -22,7 +22,6 @@
 
 #include <e32base.h>
 #include "transactionfactory.h"
-#include "aipolicyelement.h"
 
 namespace AiUtility
     {
@@ -86,10 +85,6 @@ public:  // Constructors and destructor
     void ReleaseTransactionElement( MTransactionElement* aElement );
 
     TBool IsSupported( CXnNodeAppIf& aTarget, const TDesC8& aContentType );
-    
-    RAiPolicyElementArray& CTransactionFactoryImpl::PolicyArray();
-
-    void CTransactionFactoryImpl::ResetPolicyArray();
 
 private: // Construction
 
@@ -138,11 +133,6 @@ private: // Data
      * UI controller's CSS property map. Not own.
      */
     CCssPropertyMap& iPropertyMap;
-
-    /**
-     * Array of policy elements
-     */
-    RAiPolicyElementArray iPolicyArray;
     };
 
 } // namespace AiXmlUiController

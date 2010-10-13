@@ -16,7 +16,6 @@
 */
 
 
-#include "../common/group/bld.inf"       
 #include "../vga_tch/group/bld.inf"         // Buzzidle
 #include "../qhd_tch/group/bld.inf"     // Flashidle
 

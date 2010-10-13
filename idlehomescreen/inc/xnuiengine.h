@@ -444,7 +444,7 @@ public:
       * @param aNode Editor Node
       * @param TBool True if partial input is open      
       */ 
-    void EnablePartialTouchInput( CXnNode* aNode, TBool aEnable );
+    void EnablePartialTouchInput( CXnNode& aNode, TBool aEnable );
     
     /**
       * Is partial input active

@@ -24,7 +24,6 @@
 
 // FORWARD DECLARATIONS
 class CXnClockAdapter;
-class CXnNodePluginIf;
 class CWindowGc;
 
 // CLASS DECLARATIONS
@@ -50,35 +49,22 @@ class CXnClockFace : public CBase
         * @since S60 5.1
         *
         * @param aAdapter Clock adapter
+        *   
         * @param aGc Graphics context that can be used to draw to
-        *                     the clock
-        * @param aNode Node which contains drawing info
+        *   the clock
+        *
+        * @param aRect Rect where to scale the clock
+        *                   
         * @param aTime Time to be used for drawing.
-        * @param aAmpm Possible am\pm text to draw
         */
         virtual void DrawL( CXnClockAdapter& aAdapter,
                             CWindowGc& aGc, 
-                            CXnNodePluginIf& aNode, 
-                            const TTime& aTime,
-                            CXnNodePluginIf* aAmpm ) = 0;
-        
-        /**
-        * Reset font
-        */
-        virtual void ResetFont() = 0;
+                            const TRect& aRect, 
+                            const TTime& aTime ) = 0;                                    
     };
 
 class CXnClockFaceDigital : public CXnClockFace
     {
-    public:
-        /**
-        * Type of font, digital or for am/pm text
-        */
-        enum TXnClockFontType {
-                              EClock,
-                              EAmpm
-                              };
-
     public:  // Constructors and destructor
         
         /**
@@ -98,14 +84,8 @@ class CXnClockFaceDigital : public CXnClockFace
         */
         void DrawL( CXnClockAdapter& aAdapter,
                     CWindowGc& aGc, 
-                    CXnNodePluginIf& aNode, 
-                    const TTime& aTime,
-                    CXnNodePluginIf* aAmpm );
-        
-        /**
-        * @see CXnClockFace::ResetFont
-        */
-        void ResetFont();
+                    const TRect& aRect, 
+                    const TTime& aTime );
 
     private:
 
@@ -118,60 +98,8 @@ class CXnClockFaceDigital : public CXnClockFace
         * By default Symbian 2nd phase constructor is private.
         */
         void ConstructL();
-        
-        /**
-        * Draws am/pm text
-        * 
-        * @param aAdapter Clock adapter
-        * @param aGc Graphics context that can be used to draw to
-        *                     the clock
-        * @param aTime Time to be used for drawing.
-        * @param aAmpm Contains info for drawing
-        */
-        void DrawAmpmL( CXnClockAdapter& aAdapter,
-                        CWindowGc& aGc,
-                        const TTime& aTime,
-                        CXnNodePluginIf& aAmpm );
-        
-        /**
-        * Creates font
-        * 
-        * @param aAdapter Clock adapter
-        * @param aNode Contains info to create font
-        * @param aFontType Digital clock font or am/pm font
-        * 
-        * @return CAknLayoutFont
-        */
-        const CAknLayoutFont* CreateFontL( CXnClockAdapter& aAdapter,
-                                           CXnNodePluginIf& aNode,
-                                           TXnClockFontType aFontType );
-        
-        /**
-        * Creates font color
-        * 
-        * @param aAdapter Clock adapter
-        * @param aNode Contains info to create color
-        * @param aFontType Digital clock font color or am/pm font color
-        * 
-        * @return Color
-        */
-        const TRgb& CreateColorL( CXnClockAdapter& aAdapter,
-                                  CXnNodePluginIf& aNode,
-                                  TXnClockFontType aFontType);
 
     private:    // Data
-        // Date font, not owned
-        CFont*  iClockFont;
-        // Date font, not owned
-        CFont*  iAmpmFont;
-        // Digital clock font color
-        TRgb    iFaceColor;
-        // Indicates whether digital clock color should be created
-        TBool   iIsFaceColorSet;
-        // Am/pm text font color
-        TRgb    iAmpmColor;
-        // Indicates whether am/pm font color should be created
-        TBool   iIsAmpmColorSet;
     };
 
 class CXnClockFaceAnalog : public CXnClockFace
@@ -195,14 +123,8 @@ class CXnClockFaceAnalog : public CXnClockFace
         */           
         void DrawL( CXnClockAdapter& aAdapter,
                     CWindowGc& aGc, 
-                    CXnNodePluginIf& aNode, 
-                    const TTime& aTime,
-                    CXnNodePluginIf* aAmpm );
-        
-        /**
-        * @see CXnClockFace::ResetFont
-        */
-        void ResetFont();
+                    const TRect& aRect, 
+                    const TTime& aTime ); 
 
     private: // New functions
 
@@ -210,18 +132,14 @@ class CXnClockFaceAnalog : public CXnClockFace
         * Draws the hands of the clock.
         *
         * @param aGc Graphics context that can be used to draw to the
-        *                     clock
+        *   clock
+        *
         * @param aRect Rectangle defining the size of the clock.
+        *
         * @param aDateTime Time to be used for drawing.
         */                       
         void DrawHandsL( CWindowGc& aGc, const TRect& aRect,
                          const TDateTime& aDateTime );
-        
-        /**
-        * Stores clock face adjustment value
-        * @param aNode is current face.
-        */ 
-        TInt FaceAdjustmentValueL( CXnNodePluginIf& aNode );
 
     private:
 
@@ -235,10 +153,7 @@ class CXnClockFaceAnalog : public CXnClockFace
         */
         void ConstructL();
 
-    private:    // Data  
-        
-        // Stores face adjustment value
-        TInt iFaceAdjustmentValue;
+    private:    // Data                
     };
 
 #endif      // _XNCLOCKFACE_H

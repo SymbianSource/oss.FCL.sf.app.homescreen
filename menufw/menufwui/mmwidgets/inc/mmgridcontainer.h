@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  CMmGridContainer declaration
-*  Version     : %version: MM_29.1.15 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_29.1.14 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -212,11 +212,6 @@ public: // from base class CMmWidgetContainer
      * @return ETrue if visible, EFalse otherwise.
      */
     TBool ItemIsVisible( TInt aItemIndex ) const;
-    
-    /**
-     * Sets a proper flag if the widget is brought to foreground.
-     */
-    virtual void SetWidgetCommingFromBackground( TBool /*aCommingFromBackground*/ );
 
 private:
     /**

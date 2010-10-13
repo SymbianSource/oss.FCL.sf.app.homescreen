@@ -40,5 +40,4 @@ EXPORTS
 	?AllowMove@CMmWidgetContainer@@QBEHXZ @ 39 NONAME ; int CMmWidgetContainer::AllowMove(void) const
 	?SetTriggerMoveItemL@CMmWidgetContainer@@QAEXHPAVCLiwGenericParamList@@@Z @ 40 NONAME ; void CMmWidgetContainer::SetTriggerMoveItemL(int, class CLiwGenericParamList *)
 	?SetExDialogOpened@CMmWidgetContainer@@QAEXH@Z @ 41 NONAME ; void CMmWidgetContainer::SetExDialogOpened(int)
-	?SetWidgetCommingFromBackground@CMmWidgetContainer@@UAEXH@Z @ 42 NONAME ; void CMmWidgetContainer::SetWidgetCommingFromBackground(int)
 

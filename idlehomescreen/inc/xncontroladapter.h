@@ -352,13 +352,6 @@ protected:
      */
     IMPORT_C void DrawContentImage() const;
 
-    /*
-     * Checks if widget is Gesture destination node.
-     * 
-     * @return ETrue if widget is Gesture destination. 
-     */
-    TBool IsWidgetGestureDest();
-
 protected:
     /**
      * From CCoeControl.
@@ -437,6 +430,11 @@ public:
      * Get child adapter list i.e which are not window owning controls
      */
     RPointerArray< CXnControlAdapter >& ChildAdapters();
+
+    /**
+     * Determines wheter control refuses focus loss
+     */            
+    virtual TBool RefusesFocusLoss() const { return EFalse; };
     
     /**
      * Routes the data stream for the external rendering plugin.

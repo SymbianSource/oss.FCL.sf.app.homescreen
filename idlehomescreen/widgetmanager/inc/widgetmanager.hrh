@@ -32,9 +32,9 @@ enum TWmMainContainerViewCommands
     EWmMainContainerViewSortAlphaMenuItemCommand,
     EWmMainContainerViewUninstallMenuItemCommand,
     EWmMainContainerViewHelpMenuItemCommand,
+    EWmMainContainerViewOpenPortalMenuItemCommand,
     EWmMainContainerViewBackMenuItemCommand,
-    EWmMainContainerViewWiddetDetailsMenuItemCommand,
-    EWmStoreCommand
+    EWmMainContainerViewWiddetDetailsMenuItemCommand
     };
 
 enum TWmMenuCmdIDs

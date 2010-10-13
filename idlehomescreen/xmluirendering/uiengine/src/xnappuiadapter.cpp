@@ -30,7 +30,6 @@
 #include "hscontentcontrolfactory.h"
 #include "xnviewadapter.h"
 #include "xnnode.h"
-#include "xnviewswitcher.h"
 
 #include "xuikon_builds_cfg.hrh"
 #include "debug.h"
@@ -88,9 +87,7 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
     
     iImpl = CXnAppUiAdapterImpl::NewL( iApplicationUid, *this );
     iImpl->ConstructL();
-
-    iViewSwitcher = CXnViewSwitcher::NewL(); 
-    
+     
     __TIME_ENDMARK( "CXnAppUiAdapter::ConstructL, done", time );
     }
 
@@ -101,8 +98,6 @@ EXPORT_C void CXnAppUiAdapter::ConstructL()
 //
 EXPORT_C CXnAppUiAdapter::~CXnAppUiAdapter()
     {       
-    delete iViewSwitcher;
-
     delete iUiEngineAppIf;
     
     delete iImpl;    
@@ -474,16 +469,6 @@ void CXnAppUiAdapter::HideFocus()
 void CXnAppUiAdapter::ShowFocus()
     {
     return iImpl->ViewAdapter().FocusControl().MakeVisible( ETrue );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnAppUiAdapter::ViewSwitcher
-//
-// -----------------------------------------------------------------------------
-//
-CXnViewSwitcher* CXnAppUiAdapter::ViewSwitcher()
-    {
-    return iViewSwitcher;
     }
 
 // End of file

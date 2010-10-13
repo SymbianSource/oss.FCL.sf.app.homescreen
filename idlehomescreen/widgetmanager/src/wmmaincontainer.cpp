@@ -40,8 +40,6 @@
 #include <AknsDrawUtils.h>
 #include <aknenv.h>
 #include <aknlists.h>
-#include <aknpopup.h> 
-#include <badesca.h> 
 #include <eikclbd.h>
 #include <aknsfld.h>
 #include <AknsBasicBackgroundControlContext.h>
@@ -65,7 +63,7 @@
 #include "wmlistbox.h"
 #include "wmpersistentwidgetorder.h"
 #include "wmdetailsdlg.h"
-#include "wmstore.h"
+#include "wmportalbutton.h"
 #include "wmwidgetloaderao.h"
 #include "wmconfiguration.h"
 #include "wminstaller.h"
@@ -76,31 +74,6 @@
 // CONSTANTS
 const TInt KTextLimit = 40; // Text-limit for find-field
 const TInt KMinWidgets = 1; // minimum number of widgets to show findpane
-
-// ======== LOCAL FUNCTIONS ========
-
-// ----------------------------------------------------------------------------
-// CleanupResetAndDestroy()
-// ----------------------------------------------------------------------------
-//
-template<class T>
-static void CleanupResetAndDestroy( TAny* aObj )
-    {
-    if( aObj )
-        {
-        static_cast<T*>( aObj )->ResetAndDestroy();
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CleanupResetAndDestroyPushL
-// ----------------------------------------------------------------------------
-//
-template<class T>
-static void CleanupResetAndDestroyPushL(T& aArray)
-    {
-    CleanupStack::PushL( TCleanupItem( &CleanupResetAndDestroy<T>, &aArray ) );
-    }
 
 // ---------------------------------------------------------
 // CWmMainContainer::CWmMainContainer()
@@ -113,6 +86,7 @@ CWmMainContainer::CWmMainContainer( CWmPlugin& aWmPlugin ) :
     iFindbox = NULL;
     iFindPaneIsVisible = EFalse;
     iBgContext = NULL;
+    iFocusMode = ENowhere;
     iClosingDown = ETrue;
     }
 
@@ -122,11 +96,6 @@ CWmMainContainer::CWmMainContainer( CWmPlugin& aWmPlugin ) :
 //
 CWmMainContainer::~CWmMainContainer()
     {
-    if ( iSelectedStore )
-        {
-        delete iSelectedStore;
-        iSelectedStore = NULL;
-        }
     TRAP_IGNORE(DeactivateFindPaneL(EFalse));
     
     if ( iWidgetLoader )
@@ -139,8 +108,11 @@ CWmMainContainer::~CWmMainContainer()
     Components().ResetAndDestroy();
     
     iWidgetsList = NULL;
+    iPortalButtonOne = NULL;
+    iPortalButtonTwo = NULL;
     iFindbox = NULL;
     delete iBgContext;
+    delete iConfiguration;
     }
 
 // ---------------------------------------------------------
@@ -207,6 +179,9 @@ void CWmMainContainer::ConstructL(
     // background context
     iBgContext = CAknsBasicBackgroundControlContext::NewL( 
             KAknsIIDQsnBgScreen, ScreenRect() , ETrue);
+
+    // load configuration
+    iConfiguration = CWmConfiguration::NewL( iWmPlugin.ResourceLoader() );
     
     // set up controls
     InitializeControlsL( aRect );
@@ -236,21 +211,52 @@ void CWmMainContainer::LayoutControls()
     {
     TRect rect( Rect() );
 
+    // determine layout type
+    iLandscape = Layout_Meta_Data::IsLandscapeOrientation();
+    iMirrored = Layout_Meta_Data::IsMirrored();
+    
+    // layout iPortalButtons
+    if ( iConfiguration->PortalButtonCount() == 1 )
+        {
+        // one button
+        TAknWindowLineLayout btnPane = AknLayoutScalable_Apps
+           ::wgtman_btn_pane( iLandscape ? 1 : 0 ).LayoutLine();
+        AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, btnPane );
+        }
+    else
+        {
+        // two buttons
+        TInt variety = (iLandscape ? 3 : 2);
+        TAknWindowLineLayout oviBtnLayout = AknLayoutScalable_Apps
+                ::wgtman_btn_pane( variety ).LayoutLine();
+        TAknWindowLineLayout operatorBtnLayout = AknLayoutScalable_Apps
+                ::wgtman_btn_pane_cp_01( variety ).LayoutLine();
+        
+        // button placement
+        if ( iConfiguration->PortalButtonsMirrored() )
+            {
+            AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, operatorBtnLayout );
+            AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, oviBtnLayout );
+            }
+        else
+            {
+            AknLayoutUtils::LayoutControl( iPortalButtonOne, rect, oviBtnLayout );
+            AknLayoutUtils::LayoutControl( iPortalButtonTwo, rect, operatorBtnLayout );
+            }
+        }
+    
     // layout iWidgetsList
+    TAknWindowLineLayout listPane = AknLayoutScalable_Apps
+        ::listscroll_wgtman_pane( iLandscape ? 1 : 0 ).LayoutLine();
     if( iFindbox && iFindPaneIsVisible )
         {
-        iWidgetsList->SetRect( rect );
+        TAknLayoutRect layoutRect;
+        layoutRect.LayoutRect( rect, listPane );
+        iWidgetsList->SetRect( layoutRect.Rect() );
         HandleFindSizeChanged();
         }
     else
         {
-        TAknWindowLineLayout listPane;
-        listPane.il = rect.iTl.iX;
-        listPane.it = rect.iTl.iY;
-        listPane.ib = 0;
-        listPane.iH = rect.Height();
-        listPane.iW = rect.Width();
-        listPane.ir = ELayoutEmpty;
         AknLayoutUtils::LayoutControl( iWidgetsList, rect, listPane );
         }
 
@@ -281,14 +287,26 @@ TKeyResponse CWmMainContainer::OfferKeyEventL(
         {
         return EKeyWasConsumed;
         }
-
+    
     // Handle search keyevent
     keyResponse = HandleSearchKeyEventL( aKeyEvent, aType );
-   
+    
+    // Move focus between controls
+    if ( keyResponse == EKeyWasNotConsumed )
+        {
+        keyResponse = MoveFocusByKeys( aKeyEvent, aType );
+        }
+    
     // Handle list keyevent
     if ( keyResponse == EKeyWasNotConsumed )
         {
         keyResponse = HandleListKeyEventL( aKeyEvent, aType );
+        }
+    
+    // Handle buttons keyevent
+    if ( keyResponse == EKeyWasNotConsumed )
+        {
+        keyResponse = HandleButtonKeyEventL( aKeyEvent, aType );
         }
     
     // Update ui if needed 
@@ -368,30 +386,426 @@ TKeyResponse CWmMainContainer::HandleListKeyEventL(
     TKeyResponse keyResponse( EKeyWasNotConsumed );
     
     // pass key event except backpace or delete key event to widgets list if focused
-    if ( ( aType == EEventKey ) && ( aKeyEvent.iCode == EKeyBackspace 
-            || aKeyEvent.iCode == EKeyDelete ) )
+    if ( iWidgetsList->IsFocused() )
         {
-        if( CanDoUninstall() )
+        if ( ( aType == EEventKey ) && ( aKeyEvent.iCode == EKeyBackspace 
+                || aKeyEvent.iCode == EKeyDelete ) )
             {
-            UninstallWidgetL();
+            if( CanDoUninstall() )
+                {
+                UninstallWidgetL();
+                }
+            else
+                {
+                CWmWidgetData* data = iWidgetsList->WidgetData();
+                if( data != NULL )
+                    iWmPlugin.ResourceLoader().InfoPopupL(
+                         R_QTN_WM_UNINST_NOT_ALLOWED, data->Name() );
+                }
+            keyResponse = EKeyWasConsumed;
             }
-        else
+        else 
             {
-            CWmWidgetData* data = iWidgetsList->WidgetData();
-            if( data != NULL )
-                iWmPlugin.ResourceLoader().InfoPopupL(
-                     R_QTN_WM_UNINST_NOT_ALLOWED, data->Name() );
+            //passing to listbox handler
+            keyResponse = iWidgetsList->OfferKeyEventL( 
+                    aKeyEvent, aType );
             }
-        keyResponse = EKeyWasConsumed;
-        }
-    else 
-        {
-        //passing to listbox handler
-        keyResponse = iWidgetsList->OfferKeyEventL( 
-                aKeyEvent, aType );
         }
     
     return keyResponse;
+    }
+
+// ---------------------------------------------------------
+// CWmMainContainer::HandleButtonKeyEventL
+// ---------------------------------------------------------
+//
+TKeyResponse CWmMainContainer::HandleButtonKeyEventL( 
+        const TKeyEvent& aKeyEvent, 
+        TEventCode aType )
+    {
+    TKeyResponse keyResponse( EKeyWasNotConsumed );
+    
+    // pass key event to portal button if focused
+    if ( iPortalButtonOne->IsFocused() )
+        {
+        keyResponse = iPortalButtonOne->OfferKeyEventL(
+                            aKeyEvent, aType );
+        }
+
+    // pass key event to the other portal button if exists and focused
+    if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+        {
+        keyResponse = iPortalButtonTwo->OfferKeyEventL(
+                            aKeyEvent, aType );
+        }
+    
+    return keyResponse;
+    }
+
+// ---------------------------------------------------------
+// CWmMainContainer::MoveFocusByKeys
+// ---------------------------------------------------------
+//
+TKeyResponse CWmMainContainer::MoveFocusByKeys(
+                        const TKeyEvent& aKeyEvent, 
+                        TEventCode aType )
+    {
+    TKeyResponse keyResponse( EKeyWasNotConsumed );
+
+    if ( iWidgetsList->IsFocused() )
+        {
+        // ------------------------------------
+        // focus is in the WIDGETS LIST
+        // ------------------------------------
+        if ( !iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow &&
+                iWidgetsList->CurrentItemIndex() == 0 )
+            {
+            // widget list top -> up -> ovi button (portrait)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow &&
+                iWidgetsList->CurrentItemIndex() ==
+                   iWidgetsList->Model()->NumberOfItems() - 1 )
+            {
+            // widget list bottom -> down -> ovi button (portrait)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow )
+            {
+            // widget list -> right -> ovi button (landscape normal)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow )
+            {
+            // widget list -> left -> ovi button (landscape mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( OperatorButtonHigherPriority ( 0 ) );
+            keyResponse = EKeyWasConsumed;
+            }
+        }
+    else if ( iPortalButtonOne->IsFocused() )
+        {
+        // ------------------------------------
+        // focus is in the FIRST PORTAL BUTTON
+        // ------------------------------------
+        if ( !iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow )
+            {
+            // left portal -> down -> widget list top (portrait)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow )
+            {
+            // left portal -> up -> widget list bottom (portrait)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList( iWidgetsList->Model()->NumberOfItems()-1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // right portal -> left -> left portal
+            // (portrait, operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                !iConfiguration->PortalButtonsMirrored() )
+            {
+            // left portal -> right -> right portal (portrait normal)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 &&
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // right portal -> left -> left portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }      
+        else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1 &&
+                !iConfiguration->PortalButtonsMirrored() )
+            {
+            // right portal -> left -> left portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow )
+            {
+            // upper portal -> left -> widget list (landscape normal)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow )
+            {
+            // upper portal -> right -> widget list (landscape mirrored)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow &&
+                iConfiguration->PortalButtonCount() > 1 &&
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // lower portal -> up -> upper portal 
+            // (landscape, operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                !iConfiguration->PortalButtonsMirrored() )
+            {
+            // upper portal -> down -> lower portal (landscape)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        }
+    else if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+        {
+        // ------------------------------------
+        // focus is in the SECOND PORTAL BUTTON
+        // ------------------------------------
+        if ( !iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow )
+            {
+            // right portal -> down -> widget list top (portrait)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow )
+            {
+            // right portal -> up -> widget list bottom (portrait)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList( iWidgetsList->Model()->NumberOfItems()-1 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1  && 
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // left portal -> right -> right portal
+            // (portrait, operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1  && 
+                !iConfiguration->PortalButtonsMirrored() )
+            {
+            // right portal -> left -> left portal (portrait normal)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // left portal -> right -> right portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( !iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow &&
+                iConfiguration->PortalButtonCount() > 1 && 
+                !iConfiguration->PortalButtonsMirrored() )
+            {
+            // left portal -> right -> right portal (portrait mirrored)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && !iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyLeftArrow )
+            {
+            // lower portal -> left -> widget list (landscape normal)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape && iMirrored &&
+                aKeyEvent.iScanCode == EStdKeyRightArrow )
+            {
+            // lower portal -> right -> widget list (landscape mirrored)
+            if ( aType == EEventKey )
+                SetFocusToWidgetList();
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyDownArrow &&
+                iConfiguration->PortalButtonsMirrored() )
+            {
+            // upper portal -> down -> lower portal 
+            // ( landscape operator button higher priority )
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        else if ( iLandscape &&
+                aKeyEvent.iScanCode == EStdKeyUpArrow &&
+                !iConfiguration->PortalButtonsMirrored() )
+            {
+            // lower portal -> up -> upper portal (landscape)
+            if ( aType == EEventKey )
+                SetFocusToPortalButton( 0 );
+            keyResponse = EKeyWasConsumed;
+            }
+        }
+    else
+        {
+        // ------------------------------------
+        // focus is NOWHERE
+        // ------------------------------------
+        if ( aKeyEvent.iScanCode == EStdKeyUpArrow ||
+            aKeyEvent.iScanCode == EStdKeyDownArrow )
+            {
+            // no focus -> key hit -> focus list
+            if ( aType == EEventKey )
+                {
+                SetFocusToWidgetList();
+                keyResponse = EKeyWasNotConsumed;
+                }
+            }
+        }
+
+    return keyResponse;
+    }
+
+
+// ---------------------------------------------------------
+// CWmMainContainer::OperatorButtonHigherPriority
+// ---------------------------------------------------------
+//
+TInt CWmMainContainer::OperatorButtonHigherPriority( TInt aIndex )
+    {
+    TInt ret = aIndex;
+    if ( iConfiguration->PortalButtonsMirrored() )
+        {
+        if ( aIndex == 0 )
+            {
+            ret = 1;
+            }
+        else if ( aIndex == 1 )
+            {
+            ret = 0;
+            }
+        }
+    return ret;
+    }
+
+// ---------------------------------------------------------
+// CWmMainContainer::SetFocusToPortalButton
+// ---------------------------------------------------------
+//
+void CWmMainContainer::SetFocusToPortalButton( TInt aIndex )
+    {
+    if ( aIndex != 0 && iPortalButtonTwo )
+        {
+        iWidgetsList->SetFocus(EFalse);
+        iPortalButtonOne->SetFocus(EFalse);
+        iPortalButtonTwo->SetFocus(ETrue);
+        }
+    else
+        {
+        iWidgetsList->SetFocus(EFalse);
+        if ( iPortalButtonTwo )
+            iPortalButtonTwo->SetFocus(EFalse);
+        iPortalButtonOne->SetFocus(ETrue);
+        }
+    DrawDeferred();
+    UpdateFocusMode();
+    }
+
+// ---------------------------------------------------------
+// CWmMainContainer::SetFocusToWidgetList
+// ---------------------------------------------------------
+//
+void CWmMainContainer::SetFocusToWidgetList( TInt aIndex )
+    {
+    iPortalButtonOne->SetFocus(EFalse);
+    if ( iPortalButtonTwo )
+        iPortalButtonTwo->SetFocus(EFalse);
+    if ( aIndex >= 0 && aIndex < iWidgetsList->Model()->NumberOfItems() )
+        {
+        iWidgetsList->SetCurrentItemIndex( aIndex );
+        }
+    iWidgetsList->SetFocus(ETrue);
+    DrawDeferred();
+    UpdateFocusMode();
+    }
+
+// ---------------------------------------------------------
+// CWmMainContainer::UpdateFocusMode
+// ---------------------------------------------------------
+//
+void CWmMainContainer::UpdateFocusMode()
+    {
+    if ( iPortalButtonOne->IsFocused() )
+        {
+        // PORTAL BUTTON is focused
+        iFocusMode = EPortal;
+        }
+    else if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+        {
+        // SECOND PORTAL BUTTON is focused
+        iFocusMode = EPortal;
+        }
+    else if( ( iFindPaneIsVisible ) && 
+        ( iFindbox->IsFocused() || iWidgetsList->IsFocused() ) )
+        {
+        // FIND MODE
+        iFocusMode = EFind;
+        }
+    else if ( iWidgetsList->IsFocused() )
+        {
+        // WIDGETS LIST is focused 
+        iFocusMode = EList;
+        }
+    else
+        {
+        // NO focus
+        iFocusMode = ENowhere;
+        }
     }
 
 // ---------------------------------------------------------
@@ -444,6 +858,8 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
                 // Set focus to the control that was clicked
                 control->SetFocus( ETrue );
                                 
+                // update focus mode accordingly
+                UpdateFocusMode();
                 // repaint
                 DrawDeferred();
                 }
@@ -487,6 +903,17 @@ void CWmMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 //
 void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
     {
+    // Create portal buttons
+    iPortalButtonOne = CWmPortalButton::NewL( this, 0 );
+    iPortalButtonOne->SetMopParent( this );    
+    AddControlL( iPortalButtonOne, EPortalOne );
+    if ( iConfiguration->PortalButtonCount() > 1 )
+        {
+        iPortalButtonTwo = CWmPortalButton::NewL( this, 1 );
+        iPortalButtonTwo->SetMopParent( this );    
+        AddControlL( iPortalButtonTwo, EPortalTwo );
+        }
+    
     // Create widget list box
     iWidgetsList = CWmListBox::NewL(
             iWmPlugin,
@@ -509,7 +936,8 @@ void CWmMainContainer::InitializeControlsL( const TRect& /*aRect*/ )
                         0, KTextLimit );
     AddControlL( iFindbox, EFindBox );
     iFindbox->AddAdaptiveSearchTextObserverL(this);
-   
+    
+    UpdateFocusMode();
     StartLoadingWidgetsL();
     }
 
@@ -618,13 +1046,21 @@ TBool CWmMainContainer::IsLoadingWidgets()
     }
 
 // ---------------------------------------------------------
+// CWmMainContainer::PortalSelected
+// ---------------------------------------------------------
+//
+TBool CWmMainContainer::PortalSelected()
+    {    
+    return ( iFocusMode == EPortal );
+    }
+
+// ---------------------------------------------------------
 // CWmMainContainer::WidgetSelected
 // ---------------------------------------------------------
 //
 TBool CWmMainContainer::WidgetSelected() 
     {
-    return (( iWidgetsList->IsFocused() || iWidgetsList->IsHighlightEnabled())? 
-            ETrue : EFalse );
+    return ( iFocusMode == EList ) || ( iFocusMode == EFind );
     }
 
 // ---------------------------------------------------------
@@ -782,6 +1218,18 @@ void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdaptive )
     if ( iFindbox && !iFindPaneIsVisible &&
             iWidgetsList->Model()->NumberOfItems() > KMinWidgets )
         {
+        // set focus
+        if ( iWidgetsList->ItemDrawer()->Flags() 
+                & CListItemDrawer::ESingleClickDisabledHighlight )
+            {
+            ResetFocus();
+            }
+        else
+            {
+            iWidgetsList->SetFocus( ETrue, EDrawNow );                
+            }
+        
+        
         // set column filter flag
         TBitFlags32 bitFlag;
         bitFlag.ClearAll(); // clear all columns
@@ -816,18 +1264,14 @@ void CWmMainContainer::ActivateFindPaneL( TBool aActivateAdaptive )
             }
         iFindbox->SetFocus( ETrue );
         iWidgetsList->SetFindPaneIsVisible( ETrue );
-        
-        if ( AknLayoutUtils::MSKEnabled() )
-            {
-            // set soft key set
-            CEikButtonGroupContainer* cbaGroup =
-                CEikButtonGroupContainer::Current();            
-            TInt cbaResourceId = ( ( iWmPlugin.Configuration().StoreCount() > 0 )?
-                                        R_WM_SOFTKEYS_OPTIONS_CANCEL__STORE :
-                                        R_AVKON_SOFTKEYS_OPTIONS_CANCEL__SELECT );            
-            cbaGroup->SetCommandSetL( cbaResourceId );            
-            cbaGroup->DrawNow();
-            }
+
+        // set soft key set
+        CEikButtonGroupContainer* cbaGroup =
+            CEikButtonGroupContainer::Current();
+        cbaGroup->SetCommandSetL( R_AVKON_SOFTKEYS_OPTIONS_CANCEL__SELECT );
+        cbaGroup->DrawNow();
+
+        UpdateFocusMode();
         }
     }
 
@@ -855,6 +1299,17 @@ void CWmMainContainer::DeactivateFindPaneL(TBool aLayout)
             m->RemoveFilter();
             }
         
+        //set focus
+        if ( iWidgetsList->ItemDrawer()->Flags() 
+                & CListItemDrawer::ESingleClickDisabledHighlight )
+            {
+            ResetFocus();
+            }
+        else
+            {
+            iWidgetsList->SetFocus( ETrue, EDrawNow );                
+            }
+
         iFindbox->MakeVisible( EFalse );        
         iFindPaneIsVisible = EFalse;        
         iWidgetsList->SetFindPaneIsVisible( EFalse );       
@@ -863,9 +1318,8 @@ void CWmMainContainer::DeactivateFindPaneL(TBool aLayout)
         // set soft key set
         CEikButtonGroupContainer* cbaGroup =
             CEikButtonGroupContainer::Current();
-        TInt cbaResourceId = ( ( AknLayoutUtils::MSKEnabled() && 
-                                 iWmPlugin.Configuration().StoreCount() > 0 )?
-                                    R_WM_SOFTKEYS_OPTIONS_BACK__STORE :
+        TInt cbaResourceId = ( AknLayoutUtils::MSKEnabled() ?
+                                    R_AVKON_SOFTKEYS_OPTIONS_BACK__SELECT : 
                                     R_AVKON_SOFTKEYS_OPTIONS_BACK );
         cbaGroup->SetCommandSetL( cbaResourceId );
         
@@ -874,6 +1328,7 @@ void CWmMainContainer::DeactivateFindPaneL(TBool aLayout)
             LayoutControls();
             cbaGroup->DrawNow();
     
+            UpdateFocusMode();
             DrawNow();
             }
         }
@@ -927,32 +1382,35 @@ void CWmMainContainer::UninstallWidgetL()
     }
 
 // ---------------------------------------------------------------------------
-// CWmMainContainer::HandleStoreCommandL
+// CWmMainContainer::OpenPortalL
 // ---------------------------------------------------------------------------
 //
-void CWmMainContainer::HandleStoreCommandL()
+void CWmMainContainer::OpenPortalL()
     {
-    delete iSelectedStore;
-    iSelectedStore = NULL;
-    
-    const RPointerArray<CWmConfItem>& storeConfArray = 
-            iWmPlugin.Configuration().StoreConfArray();
-    
-    if ( storeConfArray.Count() == 1 )
-        {   
-        iSelectedStore = CWmStore::NewL( *storeConfArray[0], 
-                iWmPlugin.ResourceLoader() );
-        
-        iSelectedStore->ExecuteL();
-        }
-    else if ( storeConfArray.Count() > 1 )
+    if ( !iClosingDown )
         {
-        DisplayAndLaunchStoresL();
+        // execute whichever of the portal buttons happens to be active
+        if ( iPortalButtonOne->IsFocused() )
+            iPortalButtonOne->ExecuteL();
+        else if ( iPortalButtonTwo && iPortalButtonTwo->IsFocused() )
+            iPortalButtonTwo->ExecuteL();
+        else if ( !iPortalButtonTwo )
+            iPortalButtonOne->ExecuteL();
         }
+    }
+
+// ---------------------------------------------------------------------------
+// CWmMainContainer::SelectL
+// ---------------------------------------------------------------------------
+//
+void CWmMainContainer::SelectL()
+    {
+    if ( WidgetSelected() )
+        AddWidgetToHomeScreenL();
+    else if ( PortalSelected() )
+        OpenPortalL();
     else
-        {
-        // do nothing
-        }
+        SetFocusToWidgetList();
     }
 
 // ---------------------------------------------------------------------------
@@ -1042,6 +1500,19 @@ void CWmMainContainer::LaunchDetailsDialogL()
             {
             AddWidgetToHomeScreenL();
             }
+        else
+            {
+            if ( iWidgetsList->ItemDrawer()->Flags() 
+                    & CListItemDrawer::ESingleClickDisabledHighlight )
+                {
+                ResetFocus();
+                }
+            else
+                {
+                iWidgetsList->SetFocus( ETrue, EDrawNow );
+                UpdateFocusMode();
+                }
+            }
         }
     }
 
@@ -1061,6 +1532,15 @@ void CWmMainContainer::SetClosingDown( TBool aClosingDown )
 TBool CWmMainContainer::ClosingDown()
     {
     return iClosingDown;
+    }
+
+// ----------------------------------------------------
+// CWmMainContainer::Configuration
+// ----------------------------------------------------
+//
+CWmConfiguration& CWmMainContainer::Configuration()
+    {
+    return *iConfiguration;
     }
 
 // ----------------------------------------------------
@@ -1093,6 +1573,44 @@ void CWmMainContainer::HandleFindSizeChanged()
     }
 
 // ----------------------------------------------------
+// CWmMainContainer::ProcessForegroundEvent
+// ----------------------------------------------------
+//
+void CWmMainContainer::ProcessForegroundEvent( TBool aForeground )
+    {
+    if ( iFindbox && iFindPaneIsVisible && 
+        iFindbox->IsFocused() )
+        {
+        // keep focus & do nothing 
+        }
+    else if ( aForeground )
+        {
+        // set init state when wm comes to foreground.
+        // remove focus from all controls when activating view.
+        ResetFocus( EDrawNow );
+        }
+    }
+
+// ----------------------------------------------------
+// CWmMainContainer::ResetFocus
+// ----------------------------------------------------
+//
+void CWmMainContainer::ResetFocus( TDrawNow aDrawNow )
+    {
+    CCoeControl* control = NULL;
+    CCoeControlArray::TCursor cursor = Components().Begin();
+    while( ( control = cursor.Control<CCoeControl>() ) != NULL )
+        {
+        if( control->IsVisible() && control->IsFocused() )
+            {
+            control->SetFocus( EFalse, aDrawNow );
+            }
+        cursor.Next();
+        }
+    UpdateFocusMode();
+    }
+
+// ----------------------------------------------------
 // CWmMainContainer::WmListBox
 // ----------------------------------------------------
 //
@@ -1112,8 +1630,10 @@ void CWmMainContainer::FocusChanged( TDrawNow aDrawNow )
     if ( iFindbox && iFindPaneIsVisible && 
         !iFindbox->IsFocused() && IsFocused() )
         {
-        // set focus to find pane if its lost ( ou1cimx1#308019 )
+        // reset focus to find pane if its lost ( ou1cimx1#308019 )
+        ResetFocus();
         iFindbox->SetFocus( ETrue );
+        UpdateFocusMode();
         }
     }
 
@@ -1144,114 +1664,6 @@ void CWmMainContainer::LoadDoneL( TBool aWidgetListChanged )
             m->Filter()->HandleItemArrayChangeL();
             }
         }
-    }
-
-// ----------------------------------------------------------
-// CWmMainContainer::CleanupIconArray
-// ----------------------------------------------------------
-//  
-void CWmMainContainer::CleanupIconArray( TAny* aIconArray )
-    {
-    CArrayPtrFlat<CGulIcon>* icons = (CArrayPtrFlat<CGulIcon>*)aIconArray;
-    icons->ResetAndDestroy();
-    delete icons;
-    }
-
-// ----------------------------------------------------
-// CWmMainContainer::DisplayAndLaunchStoresL
-// ----------------------------------------------------
-// 
-void CWmMainContainer::DisplayAndLaunchStoresL()
-    {
-    // prepare stores
-    RPointerArray<CWmStore> storesArray;
-    CleanupResetAndDestroyPushL( storesArray );
-        
-    const RPointerArray<CWmConfItem>& storeConfArray = 
-            iWmPlugin.Configuration().StoreConfArray();
-    
-    for( TInt i = 0; i < storeConfArray.Count(); i++ )
-        {
-        CWmStore* store = CWmStore::NewL( *storeConfArray[i], 
-                iWmPlugin.ResourceLoader() );
-        CleanupStack::PushL( store );
-        storesArray.AppendL( store );
-        CleanupStack::Pop( store );
-        }
-    
-    CEikFormattedCellListBox* listBox = 
-                new (ELeave) CAknDoubleLargeGraphicPopupMenuStyleListBox();
-    CleanupStack::PushL( listBox );
-    
-    CAknPopupList* popupList = CAknPopupList::NewL( 
-            listBox, R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT, 
-            AknPopupLayouts::EMenuDoubleLargeGraphicWindow );
-
-    CleanupStack::PushL( popupList );
-    
-    listBox->ConstructL( popupList, EAknListBoxMenuList );
-    listBox->CreateScrollBarFrameL(ETrue);
-    listBox->ScrollBarFrame()->SetScrollBarVisibilityL(
-            CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
-    
-    // set title
-    HBufC* title = StringLoader::LoadLC( R_QTN_WM_STORELIST_TITLE );
-    popupList->SetTitleL( *title );
-    CleanupStack::PopAndDestroy(); // title
-   
-    // format str
-    _LIT( KFormatStr , "%d\t%S" );
-    
-    // items array
-    CDesCArray* itemArray = 
-            static_cast<CDesCArray*>( listBox->Model()->ItemTextArray( ) );
-
-    // create icons array
-    CArrayPtr<CGulIcon>* iconarray = new (ELeave) CArrayPtrFlat<CGulIcon>( 2 );
-    CleanupStack::PushL( TCleanupItem( CleanupIconArray, iconarray) );
-    
-    for ( TInt i=0; i < storesArray.Count(); i++ )
-        {
-        // prepare icon
-        CGulIcon* icon = CGulIcon::NewL( storesArray[i]->StoreIcon(),  
-                                         storesArray[i]->StoreMask() );
-        CleanupStack::PushL( icon );
-        icon->SetBitmapsOwnedExternally( ETrue );
-        iconarray->AppendL( icon );
-        CleanupStack::Pop( icon );
-        
-        // add store to items array
-        HBufC* buf = HBufC::NewLC( 
-                storesArray[i]->Heading().Length() + 
-                KFormatStr().Length() );
-
-        TPtr ptr = buf->Des();
-        ptr.Format( KFormatStr(), i, &storesArray[i]->Heading() );
-        itemArray->AppendL( ptr );
-        CleanupStack::PopAndDestroy( buf );
-        }
-
-    CleanupStack::Pop(); // iconarray
-    listBox->ItemDrawer()->ColumnData()->SetIconArrayL( iconarray );
-    
-    TBool result = popupList->ExecuteLD();
-    CleanupStack::Pop(); // popupList ( deleted in ExecuteLD)
-    
-    TInt selection = listBox->CurrentItemIndex();
-    CleanupStack::PopAndDestroy(); // listBox
-    
-    if ( result && selection >= 0 && 
-        selection < storesArray.Count() )
-        {        
-        iSelectedStore = storesArray[selection];
-        if ( iSelectedStore )
-            {
-            storesArray.Remove( selection );
-            iSelectedStore->ExecuteL();
-            }
-        }
-
-    CleanupStack::PopAndDestroy(); //storesArray
     }
 
 // End of File

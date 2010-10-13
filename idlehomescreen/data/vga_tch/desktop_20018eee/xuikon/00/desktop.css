@@ -1,31 +1,59 @@
 widget#desktop_widget
 {
+    width: auto;
+    height: 70px;
+
     block-progression: rl;
     direction: ltr;
-    color: "SKIN(268458534 13056 74)";
-    background-color: "SKIN(268458534 9916)";
 }
 
 button.button
 {
+    width: 70px;
+    height: auto;
+
     nav-index: appearance;
-    width: 105px;
-    height: 105px;
-    margin-top: 5px;
+
+    margin-left: 4px;
+    margin-right: 4px;
+
+    background-color: "SKIN(268458534 9906)";
 }
 
 button#button1
 {
-    margin-left: 10px;
+    margin-left: 0px;
+}
+
+button#button6
+{
+    margin-right: 0px;
+}
+
+button.button:focus
+{
+    focus-background: "SKIN(268458534 5120 9)";
 }
 
 image.icon
 {
+    width: auto;
+    height: auto;
+
     _s60-aspect-ratio: preserve;
-    padding-left: 5px;
-    padding-top: 5px;
-    width: 95px;
-    height: 95px;
+}
+
+/* For presence */
+image.second_icon
+{
+    margin-top:0%;
+    width: 25%;
+    height: 25%;
+    position: absolute;
+    bottom: 0%;
+    left: 70%;
+    top: 3%;
+    _s60-aspect-ratio:preserve;
 }
 
 tooltip.tooltip
@@ -47,14 +75,12 @@ tooltip.tooltip
     padding-right: 6px;
 }
 
-
 text.tooltiptext
-{   
+{
     font-family: EAknLogicalFontSecondaryFont;
     font-size: 23px;
     width: adaptive;
     color: "SKIN(268458534 13056 19)";
-    overflow: visible;
 }
 
 /*********************

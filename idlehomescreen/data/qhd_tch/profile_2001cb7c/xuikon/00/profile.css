@@ -9,28 +9,18 @@ box#clock_profile_container
     block-progression: lr;
 }
 
-clock#clock
+clock
 {
     width: 152px;
     margin-right: 3px;
     padding-top: 2px;
     padding-bottom: 2px;
     _s60-format: locale;
-    _s60-font-size: 56px;
+    _s60-ampm-font-size: 16px;
+    _s60-digital-font-size: 56px;
     color: "SKIN(268458534 13056 74)";
     background-color: "SKIN(268458534 9916)";
     nav-index: appearance;
-}
-
-ampm
-{
-	position: absolute;
-	width: 46px;
-	height: 20px;
-	left: 88px;
-	top: 60px;
-	text-align: right;
-	_s60-font-size: 16px;
 }
 
 box.clock_profile
@@ -46,22 +36,34 @@ box#date_profiles_container
     block-progression: tb;
 }
 
-clock#date_content
+box#date_container
 {
     width: auto;
     height: 26px;
-    margin-left: auto;
-    margin-right: auto;
+    block-progression: lr;
     margin-bottom: 3px;
     padding-bottom: 2px;
-    color:"SKIN(268458534 13056 74)";
-    background-color: "SKIN(268458534 9916)";
-    nav-index: appearance;
 }
 
-date
+box#date_content
 {
-	  _s60-font-size: 3.5u;
+    width: adaptive;
+    height: adaptive;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+text#date_text
+{
+    text-align: center;
+    margin-left: 2px;
+    margin-right: 2px;
+    width: adaptive;
+    height: adaptive;
+    font-family: EAknLogicalFontSecondaryFont;
+    font-size: 3.5u;
+    _s60-text-valign: top;
+    color:"SKIN(268458534 13056 74)";
 }
 
 box#profile_softindicator

@@ -1,17 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
 
-<configuration max_child="5">
+	<!-- name = localized name e.g. "classic theme" -->
 	<control>
 		<plugins>
-			<plugin uid="0x2001fdb9" locking_status="locked" />
-			<plugin uid="0x200286ea" locking_status="none" />
-			<plugin uid="0x200286eb" locking_status="none" />	
+			<!-- portrait view -->
+			<plugin uid="0x2001fdb9"/>
+			<plugin uid="0x2001fdb9"/>
+			<plugin uid="0x2001fdb9"/>	
+			<plugin uid="0x2001fdb9"/>
+      <plugin uid="0x2001fdb9"/>  		
 		</plugins>
-        <settings>
-            <item id="templateView">
-                <property name="uid" value="0x200286ec" />
-            </item>
-        </settings>
-    </control>
+		<settings/>
+	</control>
 
 </configuration>

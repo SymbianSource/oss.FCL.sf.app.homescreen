@@ -12,18 +12,22 @@
 * Contributors:
 *
 * Description:
-* Desktop widget HSPS-plugin variant specific IBY file.
+* Top Contacts widget HSPS-plugin variant specific IBY file.
 *
 */
+
+#ifdef FF_TOPCONTACTSWIDGET_COMPONENT
 
 #ifndef __DESKTOP_20018EEE_VARIANT_IBY__
 #define __DESKTOP_20018EEE_VARIANT_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by variation tools, variant specific
-data=ZPRIVATE\200159c0\install\desktop_20018eee\hsps\00\widgetconfiguration.xml \private\200159c0\install\desktop_20018eee\hsps\00\widgetconfiguration.xml
+data=ZPRIVATE\200159c0\install\topcontacts\hsps\00\widgetconfiguration.xml \private\200159c0\install\topcontacts\hsps\00\widgetconfiguration.xml
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif  // __DESKTOP_20018EEE_VARIANT_IBY__
+
+#endif // FF_TOPCONTACTSWIDGET_COMPONENT

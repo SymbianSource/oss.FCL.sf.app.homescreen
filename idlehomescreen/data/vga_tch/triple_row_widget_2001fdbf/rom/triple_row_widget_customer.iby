@@ -18,11 +18,11 @@
 #ifndef __TRIPLE_ROW_WIDGET_2001FDBF_CUSTOMER_IBY__
 #define __TRIPLE_ROW_WIDGET_2001FDBF_CUSTOMER_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools, language specific
-data=ZPRIVATE\200159c0\install\triple_row_widget_2001fdbf\xuikon\00\triple_row_widget.o0000 \private\200159c0\install\triple_row_widget_2001fdbf\xuikon\00\triple_row_widget.o0000
+data=ZPRIVATE\200159c0\install\triple_row_widget_2001fdbf\xuikon\00\triple_row_widget_2001fdbf.o0000 \private\200159c0\install\triple_row_widget_2001fdbf\xuikon\00\triple_row_widget.o0000
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif // __TRIPLE_ROW_WIDGET_2001FDBF_CUSTOMER_IBY__

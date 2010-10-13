@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_108 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_106 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -51,6 +51,7 @@ CMmGrid::CMmGrid()
 //
 CMmGrid::~CMmGrid()
     {
+    delete iRedrawTimer;
     }
 
 // -----------------------------------------------------------------------------
@@ -215,18 +216,35 @@ void CMmGrid::CreateItemDrawerL( CMmTemplateLibrary* aTemplateLibrary )
 void CMmGrid::HandleScrollEventL( CEikScrollBar* aScrollBar,
         TEikScrollEvent aEventType )
     {
-    if ( aEventType == EEikScrollThumbDragVert )
+    if ( aEventType == EEikScrollThumbDragVert && !iScrollbarThumbIsBeingDragged )
         {
+        iScrollbarThumbIsBeingDragged = ETrue;
         static_cast<CMmListBoxItemDrawer*>(
                 View()->ItemDrawer() )->EnableCachedDataUse( ETrue );
+        iRedrawTimer->Start( KScrollingRedrawInterval, KScrollingRedrawInterval,
+                TCallBack( &CMmGrid::RedrawTimerCallback, static_cast<TAny*>( this ) ) );
         }
     else if ( aEventType == EEikScrollThumbReleaseVert )
         {
+        iScrollbarThumbIsBeingDragged = EFalse;
         static_cast<CMmListBoxItemDrawer*>(
                 View()->ItemDrawer() )->EnableCachedDataUse( EFalse );
+        // The view will be redrawn with cache disabled when ProcessScrollEventL
+        // calls the base class's HandleScrollEventL method -- no need to
+        // explicitly redraw the view.
+        iRedrawTimer->Cancel();
         }
+
+    if ( !iScrollbarThumbIsBeingDragged )
+        {
         ProcessScrollEventL( aScrollBar, aEventType );
         }
+    else
+        {
+        __ASSERT_DEBUG( aEventType == EEikScrollThumbDragVert, User::Invariant() );
+        ++iSkippedScrollbarEventsCount;
+        }
+    }
 
 // -----------------------------------------------------------------------------
 // Clearing ELeftDownInViewRect flag before invoking the base class
@@ -361,12 +379,12 @@ TBool CMmGrid::IsPointerInBottomScrollingThreshold(
 //
 void CMmGrid::ScrollWithoutRedraw( TInt distanceInPixels )
     {
-    CAknGridView* view = static_cast<CAknGridView*> ( iView );
+    CAknGridView* view = static_cast<CAknGridView*>( iView );
     const TInt rowHeight = ItemHeight();
     const TInt numOfCols = view->NumberOfColsInView();
     const TInt itemCount = iModel->NumberOfItems();
     TInt totalNumberOfRows = itemCount / numOfCols;
-    if( itemCount % numOfCols )
+    if ( itemCount % numOfCols )
         {
         ++totalNumberOfRows;
         }
@@ -378,8 +396,8 @@ void CMmGrid::ScrollWithoutRedraw( TInt distanceInPixels )
     desiredViewPosition += distanceInPixels;
 
     const TInt viewPositionMin = 0;
-    const TInt viewPositionMax = Max( 0, ( totalNumberOfRows * rowHeight )
-            - view->ViewRect().Height() );
+    const TInt viewPositionMax =
+    Max( 0, ( totalNumberOfRows * rowHeight ) - view->ViewRect().Height() );
 
     desiredViewPosition = Min( desiredViewPosition, viewPositionMax );
     desiredViewPosition = Max( desiredViewPosition, viewPositionMin );
@@ -398,45 +416,47 @@ void CMmGrid::ScrollWithoutRedraw( TInt distanceInPixels )
 //
 TInt CMmGrid::ScrollIfNeeded( const TPointerEvent& aPointerEvent )
     {
+    CAknGridView* view = static_cast<CAknGridView*>( View() );
     TInt nextScrollDelay = 0;
 
     TBool readyForScrolling = iMmDrawer->GetAnimator()->IsReadyForNewAnimation()
-            && iMmDrawer->GetFloatingItemCount() != 0;
+    && iMmDrawer->GetFloatingItemCount() != 0;
 
-    if( IsPointerInTopScrollingThreshold( aPointerEvent ) )
-        {
-        // scroll up
-        TInt startPos = MmGrid::KFocusScrollingThreshold * TReal(
-                View()->ItemSize().iHeight );
-        TInt diff = Max( 1, Min( aPointerEvent.iPosition.iY
-                - Rect().iTl.iY, startPos ) );
-        nextScrollDelay = ( (TReal) diff / (TReal) startPos )
-                * ( MmGrid::KEditModeScrollingGridMaxDelay
-                        - MmGrid::KEditModeScrollingGridMinDelay )
-                + MmGrid::KEditModeScrollingGridMinDelay;
-
-        if( readyForScrolling )
+  if ( IsPointerInTopScrollingThreshold( aPointerEvent ) )
+    {
+    // scroll up by one row
+    TInt newCurrentItemIndex = CurrentItemIndex() - view->NumberOfColsInView();
+        if ( newCurrentItemIndex < 0 )
             {
-            ScrollWithoutRedraw( -MmGrid::KScrollingStep );
+            newCurrentItemIndex = CurrentItemIndex();
             }
-        }
-    else if( IsPointerInBottomScrollingThreshold( aPointerEvent ) )
-        {
-        // scroll down
-        TInt startPos = MmGrid::KFocusScrollingThreshold * TReal(
-                View()->ItemSize().iHeight );
-        TInt diff = Max( 1, Min( Rect().iBr.iY
-                - aPointerEvent.iPosition.iY, startPos ) );
-        nextScrollDelay = ( (TReal) diff / (TReal) startPos )
-                * ( MmGrid::KEditModeScrollingGridMaxDelay
-                        - MmGrid::KEditModeScrollingGridMinDelay )
-                + MmGrid::KEditModeScrollingGridMinDelay;
 
-        if( readyForScrolling )
-            {
-            ScrollWithoutRedraw( MmGrid::KScrollingStep );
-            }
-        }
+       nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+       Max( 1, aPointerEvent.iPosition.iY - Rect().iTl.iY );
+
+    if ( readyForScrolling )
+      {
+      ScrollWithoutRedraw( -iItemHeight );
+      View()->SetCurrentItemIndex( newCurrentItemIndex );
+      }
+    }
+  else if ( IsPointerInBottomScrollingThreshold( aPointerEvent) )
+    {
+    TInt newCurrentItemIndex = CurrentItemIndex() + view->NumberOfColsInView();
+    if ( newCurrentItemIndex > iModel->NumberOfItems() - 1 )
+      {
+      newCurrentItemIndex = CurrentItemIndex();
+      }
+
+    nextScrollDelay = MmEffects::KEditModeScrollingDelayFactor *
+      Max( 1, Rect().iBr.iY - aPointerEvent.iPosition.iY );
+
+    if ( readyForScrolling )
+      {
+      ScrollWithoutRedraw( iItemHeight );
+      View()->SetCurrentItemIndex( newCurrentItemIndex );
+      }
+    }
 
     return nextScrollDelay;
     }
@@ -581,6 +601,7 @@ void CMmGrid::ConstructL( const CCoeControl* aParent, TInt aFlags,
         }
 
     DoSetupLayoutL();
+    iRedrawTimer = CPeriodic::NewL( EPriorityRealTime );
     }
 
 // -----------------------------------------------------------------------------
@@ -934,6 +955,33 @@ void CMmGrid::ProcessScrollEventL( CEikScrollBar* aScrollBar,
 #endif
 
          }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CMmGrid::HandleRedrawTimerEventL()
+    {
+    if ( iSkippedScrollbarEventsCount )
+        {
+        ProcessScrollEventL( ScrollBarFrame()->VerticalScrollBar(),
+                EEikScrollThumbDragVert );
+        }
+    iSkippedScrollbarEventsCount = 0;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TInt CMmGrid::RedrawTimerCallback( TAny* aPtr )
+    {
+    CMmGrid* self = static_cast<CMmGrid*>( aPtr );
+    TRAP_IGNORE( self->HandleRedrawTimerEventL() );
+    // Do not bother returning a meaningful error code, CPeriodic will ignore it
+    // anyway.
+    return 0;
     }
 
 // -----------------------------------------------------------------------------

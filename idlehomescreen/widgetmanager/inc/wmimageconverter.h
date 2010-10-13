@@ -57,7 +57,6 @@ public: // interface methods
      * @param aIconStr str containing logo icon
 	 * @param aBitmap bitmap to create. Empty if fails
 	 * @param aMask mask to create. Empty if fails
-	 * @param aForceScale force scaling for non-scalable icons.
      * Supported values:
      * - skin(<major id> <minor id>):mif(<path> <bitmapid> <maskid>)
      * - mif(<path> <bitmapid> <maskid>)
@@ -70,8 +69,7 @@ public: // interface methods
             const TSize& aIconSize,
             const TDesC& aIconStr,
             CFbsBitmap*& aBitmap,
-            CFbsBitmap*& aMask,
-            TBool aForceScale = EFalse );
+            CFbsBitmap*& aMask  );
     
 	/**
      * Parses icon string and resizes given bitmaps if needed.
@@ -87,25 +85,6 @@ public: // interface methods
             const TDesC& aIconStr, 
             CFbsBitmap& aBitmap, 
             CFbsBitmap& aMask );
-
-    /**
-     * Parses icon string. 
-     * 
-     * @param aIconStr icon string to be parsed
-     * @param aItemId fetched skin id
-     * @param aBitmapId fetched bitmap id
-     * @param aMaskId fetched mask id 
-     * @param aFileName fetched file name 
-     * 
-     * @return ETrue if success with parsing.   
-     */
-    
-    TBool ParseIconString( 
-            const TDesC& aIconStr, 
-            TAknsItemID& aItemId,
-            TInt& aBitmapId, 
-            TInt& aMaskId, 
-            TDes& aFileName );
     
 private:
     CWmImageConverter(); 
@@ -113,23 +92,20 @@ private:
 
 private:
     void CheckSvgErrorL( MSvgError* aError );
-    void HandleIconStringL( 
-            const TSize& aIconSize, 
-            const TDesC& aIconStr, 
-            TBool aForceScale );
+    void HandleIconStringL( const TSize& aIconSize, const TDesC& aIconStr );
     
-    void CreateIconFromUidL( const TUid& aUid, TBool aForceScale );
+    void CreateIconFromUidL( const TUid& aUid );
     void CreateIconFromSvgL( const TDesC& aFileName );
-    void CreateIconFromOtherL( const TDesC& aFileName, TBool aForceScale );
+    void CreateIconFromOtherL( const TDesC& aFileName );
     void CreateSkinOrMifIconL( 
                     const TAknsItemID& aItemId, TInt aBitmapId, 
                     TInt aMaskId, const TDesC& aFileName );
     // resolvers
-    TBool ResolveUid( const TDesC& aStr, TUid& aUid );
-    TBool ResolveSkinId( const TDesC& aStr, TAknsItemID& aItemId );
-    TBool ResolveMifId( const TDesC& aStr, TInt& aBitmapId, 
+    TBool ResolveUid( const TDesC& aPath, TUid& aUid );
+    TBool ResolveSkinId( const TDesC& aPath, TAknsItemID& aItemId );
+    TBool ResolveMifId( const TDesC& aPath, TInt& aBitmapId, 
                         TInt& aMaskId, TDes& aFileName );
-    TBool ResolveSkinIdAndMifId( const TDesC& aStr, TAknsItemID& aItemId,
+    TBool ResolveSkinIdAndMifId( const TDesC& aPath, TAknsItemID& aItemId,
                         TInt& aBitmapId, TInt& aMaskId, TDes& aFileName );
     TBool EndsWith( const TDesC& aString, const TDesC& aPattern );
 

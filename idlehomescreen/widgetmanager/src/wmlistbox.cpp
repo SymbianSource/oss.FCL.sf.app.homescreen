@@ -184,13 +184,14 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     CWindowGc& gc = *Gc();
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
     TBool highlightEnabled = !( iListBox->ItemDrawer()->Flags() & 
-            CListItemDrawer::ESingleClickDisabledHighlight );    
+            CListItemDrawer::ESingleClickDisabledHighlight );
+    TBool listFocused = ((iListBox->IsFocused() && !aViewIsDimmed) ? ETrue : EFalse);
     TRect itemRect = TRect( aItemRectPos, cellSize );
     
     CFormattedCellListBoxItemDrawer::DrawEmptyItem( 
                             aItemIndex, aItemRectPos, aViewIsDimmed );
     
-    if ( aItemIsCurrent && !aViewIsDimmed && highlightEnabled )
+    if ( aItemIsCurrent && listFocused && highlightEnabled )
         {
         TRect innerRect( itemRect );
         const TInt highlightOffset = 5;
@@ -240,7 +241,7 @@ void CWmListItemDrawer::DrawItem( TInt aItemIndex, TPoint aItemRectPos,
     // DRAW NAME
     TRgb textColor;
     TAknsQsnTextColorsIndex index =
-        ( aItemIsCurrent && aViewIsDimmed && highlightEnabled )? 
+        ( aItemIsCurrent && listFocused && highlightEnabled )? 
                 EAknsCIQsnTextColorsCG10 : EAknsCIQsnTextColorsCG6;
 
     AknsUtils::GetCachedColor( 

@@ -66,16 +66,6 @@ RESOURCE TBUF r_qtn_hs_too_big_image_note
     }
 
 // ----------------------------------------------------
-// r_qtn_hs_wallpaper_out_of_ram
-//
-// ----------------------------------------------------
-//
-RESOURCE TBUF r_qtn_hs_wallpaper_out_of_ram 
-    {
-    buf = qtn_memlo_ram_out_of_mem;
-    }
-
-// ----------------------------------------------------
 // r_qtn_hs_drm_protected_image_note
 //
 // ----------------------------------------------------

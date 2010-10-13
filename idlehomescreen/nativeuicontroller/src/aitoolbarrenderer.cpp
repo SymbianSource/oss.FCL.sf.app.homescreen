@@ -36,7 +36,7 @@
 
 #include "ainativeuiplugins.h"
 
-#include <ainativeui.rsg>
+#include <AiNativeUi.rsg>
 #include "debug.h"
 
 using namespace AiNativeUiController;
@@ -337,10 +337,8 @@ CAiToolbarButton* CAiToolbarRenderer::ButtonL( TInt aShortcutId )
     if ( index >= iButtons.Count() )
         {
         button = CAiToolbarButton::NewL();
-        CleanupStack::PushL( button );
         button->SetShortcutId( aShortcutId );
-        iButtons.AppendL( button );
-        CleanupStatck::Pop( button );
+        iButtons.Append( button );
         }
 
     // Use the old button

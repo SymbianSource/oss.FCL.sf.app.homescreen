@@ -48,8 +48,6 @@
 #include "xneditmode.h"
 #include "xnrootdata.h"
 
-#include "xnpopupcontroladapter.h"
-
 #include "debug.h"
 
 // Constants
@@ -559,7 +557,7 @@ void CXnViewAdapter::DoDeactivate()
 // -----------------------------------------------------------------------------
 //
 void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer, 
-    TBool aEnterEditState, TUid aEffect, TBool aUpdateBg  )
+    TBool aEnterEditState, TUid aEffect )
     {
     // Returns if the container remains the same and activation is not forced
     // Otherwise the old container is deactivated and the new is activated
@@ -576,17 +574,15 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
         }
  
     const CXnViewData& active( iAppUiAdapter.ViewManager().ActiveViewData() );
-  
-    TBool started = EFalse;
+    
     CXnEffectManager* mgr( iAppUiAdapter.EffectManager() );
+    
     CleanupStack::PushL( TCleanupItem( CleanupEffect, mgr ) );
     
-    if( aEffect != TUid::Null() )
-        {    
-        started = mgr->BeginActivateViewEffect( active, aContainer, aEffect );
-        }    
+    TBool started(
+        mgr->BeginActivateViewEffect( active, aContainer, aEffect ) );
     
-    DeactivateContainerL();
+    DeactivateContainerL( EFalse );
         
     // Update  
     iContainer = &aContainer;
@@ -638,20 +634,14 @@ void CXnViewAdapter::ActivateContainerL( CXnViewData& aContainer,
     adapter->MakeVisible( ETrue );
            
     iAppUiAdapter.ViewManager().NotifyContainerChangedL( aContainer );
-
-    if( aUpdateBg )
-        {
-        iBgManager->ChangeWallpaper( active, aContainer, !started );
-        }
+    
+    iBgManager->ChangeWallpaper( active, aContainer, !started );
     
     iAppUiAdapter.UiEngine().RenderUIL();
     
     CleanupStack::PopAndDestroy(); // DisableRenderUiLC
-
-    if( aEffect != TUid::Null() )
-        {
-        mgr->EndActivateViewEffect( active, aContainer, aEffect );
-        }
+    
+    mgr->EndActivateViewEffect( active, aContainer, aEffect );
     
     CleanupStack::PopAndDestroy(); // cleanupitem
     
@@ -689,8 +679,6 @@ void CXnViewAdapter::ActivateDefaultContainerL( TBool aEnterEditState )
         // Deactivate container even though it hasn't changed to close all 
         // popups and other windows
         ActivateContainerL( *viewData, aEnterEditState );
-        
-        CloseAllPopupsL();
         }
     }
 
@@ -753,7 +741,18 @@ void CXnViewAdapter::DeactivateContainerL( TBool aHide )
     ChangeControlsStateL( EFalse );
 
     CXnNode* node( iContainer->Node()->LayoutNode() );
-
+    
+    CXnDomStringPool* sp( node->DomNode()->StringPool() );
+    
+    CXnProperty* prop = CXnProperty::NewL(
+        XnPropertyNames::style::common::KDisplay, 
+        XnPropertyNames::style::common::display::KNone,
+        CXnDomPropertyValue::EString, *sp );
+    CleanupStack::PushL( prop );    
+    
+    node->SetPropertyWithoutNotificationL( prop );
+    CleanupStack::Pop( prop );
+    
     if ( !iDeactivate )
         {
         iDeactivate = BuildDeactivateTriggerL( iAppUiAdapter.UiEngine() );
@@ -1009,7 +1008,7 @@ void CXnViewAdapter::CloseAllPopupsL()
     CleanupClosePushL( popups );
     
     iContainer->PopupNodesL( popups );
-
+    
     for ( TInt i = 0; i < popups.Count(); i++ )
         {
         CXnProperty* display = CXnProperty::NewL(
@@ -1024,26 +1023,7 @@ void CXnViewAdapter::CloseAllPopupsL()
         }
         
     CleanupStack::PopAndDestroy( &popups );
-    
-    iEventDispatcher->SetTextEditorActive( NULL, EFalse );
-    
-    CXnNode* popup( iAppUiAdapter.UiEngine().StylusPopupNode() );
-    if ( popup )
-        {
-        CXnPopupControlAdapter* control =
-            static_cast< CXnPopupControlAdapter* >(
-                    popup->Control() );
-       
-        if ( control )
-            {
-            control->HideMenuL();
-            }
-        }
     }
 
-TBool CXnViewAdapter::IsForegroundAdapter() const
-    {
-    return ( iContainer != NULL );
-    }
 
 // End of file

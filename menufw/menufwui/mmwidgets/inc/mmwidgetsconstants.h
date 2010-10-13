@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Constants for the matrixmenu
-*  Version     : %version: 33.1.16 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 33.1.14 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -27,138 +27,121 @@
  * Grid constants' namespace.
  */
 namespace MmGrid
-    {
-    /**
-     * X component of the 4x3 layout.
-     */
-    const TInt K4By3LayoutX = 4;
+  {
+  /**
+   * X component of the 4x3 layout.
+   */
+  const TInt K4By3LayoutX = 4;
 
-    /**
-     * Y component of the 4x3 layout.
-     */
-    const TInt K4By3LayoutY = 3;
+  /**
+   * Y component of the 4x3 layout.
+   */
+  const TInt K4By3LayoutY = 3;
 
-    /**
-     * X component of the 3x4 layout.
-     */
+  /**
+   * X component of the 3x4 layout.
+   */
 
-    const TInt K3By4LayoutX = 3;
+  const TInt K3By4LayoutX = 3;
 
-    /**
-     * Y component of the 3x4 layout.
-     */
-    const TInt K3By4LayoutY = 4;
+  /**
+   * Y component of the 3x4 layout.
+   */
+  const TInt K3By4LayoutY = 4;
 
-    /**
-     * X component of the 4x5 layout.
-     */
-    const TInt K4By5LayoutX = 4;
+  /**
+   * X component of the 4x5 layout.
+   */
+  const TInt K4By5LayoutX = 4;
 
-    /**
-     * Y component of the 5x4 layout.
-     */
-    const TInt K4By5LayoutY = 5;
+  /**
+   * Y component of the 5x4 layout.
+   */
+  const TInt K4By5LayoutY = 5;
 
-    /**
-     * X component of the 5x4 layout.
-     */
-    const TInt K5By4LayoutX = 5;
+  /**
+   * X component of the 5x4 layout.
+   */
+  const TInt K5By4LayoutX = 5;
 
-    /**
-     * Y component of the 5x4 layout.
-     */
-    const TInt K5By4LayoutY = 4;
+  /**
+   * Y component of the 5x4 layout.
+   */
+  const TInt K5By4LayoutY = 4;
 
-    /**
-     * Below this value, default highlight in 3x4 grid
-     * is set up on the first item. Otherwize, on the default
-     * highlight.
-     */
-    const TInt K3By4Threshold( 5 );
+  /**
+   * Below this value, default highlight in 3x4 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K3By4Threshold(5);
 
-    /**
-     * Below this value, default highlight in 4x3 grid
-     * is set up on the first item. Otherwize, on the default
-     * highlight.
-     */
-    const TInt K4By3Threshold( 6 );
+  /**
+   * Below this value, default highlight in 4x3 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K4By3Threshold(6);
 
-    /**
-     * Below this value, default highlight in 5x4 grid
-     * is set up on the first item. Otherwize, on the default
-     * highlight.
-     */
-    const TInt K5By4Threshold( 8 );
+  /**
+   * Below this value, default highlight in 5x4 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K5By4Threshold(8);
 
-    /**
-     * Below this value, default highlight in 4x5 grid
-     * is set up on the first item. Otherwize, on the default
-     * highlight.
-     */
-    const TInt K4By5Threshold( 10 );
+  /**
+   * Below this value, default highlight in 4x5 grid
+   * is set up on the first item. Otherwize, on the default
+   * highlight.
+   */
+  const TInt K4By5Threshold(10);
 
-    /**
-     * Default highlight in 3x4 grid.
-     */
-    const TInt K3By4DefaultHighlight( 4 );
+  /**
+   * Default highlight in 3x4 grid.
+   */
+  const TInt K3By4DefaultHighlight(4);
 
-    /**
-     * Default highlight in 4x3 grid.
-     */
-    const TInt K4By3DefaultHighlight( 5 );
+  /**
+   * Default highlight in 4x3 grid.
+   */
+  const TInt K4By3DefaultHighlight(5);
 
-    /**
-     * Default highlight in 5x4 grid.
-     */
-    const TInt K5By4DefaultHighlight( 7 );
+  /**
+   * Default highlight in 5x4 grid.
+   */
+  const TInt K5By4DefaultHighlight(7);
 
-    /**
-     * Default highlight in 4x5 grid.
-     */
-    const TInt K4By5DefaultHighlight( 8 );
+  /**
+   * Default highlight in 4x5 grid.
+   */
+  const TInt K4By5DefaultHighlight(8);
 
-    /**
-     * Number of rows in portrait/non-zoom mode;
-     */
-    const TInt KRowsPortraitZoomNormal( 4 );
+  /**
+   * Number of rows in portrait/non-zoom mode;
+   */
+  const TInt KRowsPortraitZoomNormal(4);
 
-    /**
-     * Number of columns in landscape/non-zoom mode;
-     */
-    const TInt KColsPortraitZoomNormal( 3 );
+  /**
+   * Number of columns in landscape/non-zoom mode;
+   */
+  const TInt KColsPortraitZoomNormal(3);
 
-    /**
-     * Number of rows in portrait/non-zoom mode;
-     */
-    const TInt KRowsLandscapeZoomNormal( 3 );
+  /**
+   * Number of rows in portrait/non-zoom mode;
+   */
+  const TInt KRowsLandscapeZoomNormal(3);
 
-    /**
-     * Number of columns in landscape/non-zoom mode;
-     */
-    const TInt KColsLandscapeZoomNormal( 4 );
+  /**
+   * Number of columns in landscape/non-zoom mode;
+   */
+  const TInt KColsLandscapeZoomNormal(4);
 
     /**
      * Focus based scrolling item threshold for grid.
      */
     const TReal KFocusScrollingThreshold( 0.27 );
-
-    /**
-     * Scrolling step (in pixels) for grid.
-     */
-    const TInt KScrollingStep( 10 );
-
-    /**
-     * Determines the speed of focus-based scrolling in edit mode.
-     * Minimal delay of scrolling in the grid layout.
-     */
-    const TInt KEditModeScrollingGridMinDelay( 2000 );
-
-    /**
-     * Determines the speed of focus-based scrolling in edit mode.
-     * Maximal delay of scrolling in the grid layout.
-     */
-    const TInt KEditModeScrollingGridMaxDelay( 30000 );
-    }
+  }
 
 /**
  * Listbox constants' namespace.
@@ -180,30 +163,13 @@ namespace MmListBox
      * Focus based scrolling item threshold for list.
      */
     const TReal KFocusScrollingThreshold( 0.55 );
-    
-    /**
-     * Scrolling step (in pixels) for listbox.
-     */
-    const TInt KScrollingStep( 10 );
-    
-    /**
-     * Determines the speed of focus-based scrolling in edit mode.
-     * Minimal delay of scrolling in the listbox layout.
-     */
-    const TInt KEditModeScrollingListBoxMinDelay( 4000 );
-
-    /**
-     * Determines the speed of focus-based scrolling in edit mode.
-     * Maximal delay of scrolling in the listbox layout.
-     */
-    const TInt KEditModeScrollingListBoxMaxDelay( 30000 );
     }
 
 /**
  * Drag and drop related constants.
  */
 namespace MmEffects
-    {
+  {
     /**
      * Threshold for items shift.
      */
@@ -253,27 +219,33 @@ namespace MmEffects
      * Time between two butto repeat events.
      */
     const TInt KDragRepeatRespawn( 2 );
+
+    /**
+     * Determines the speed of focus-based scrolling in edit mode.
+     */
+    const TInt KEditModeScrollingDelayFactor = 4000;
     }
 
 /**
  * Templates' related constants.
  */
 namespace MmTemplateContants
-    {
-    /**
-     * If a custom (non LCT) template is used, this is
-     * its default scrollbar width.
-     */
-    const TInt KCustomTemplateScrolbarWidth( 25 );
+  {
+  /**
+   * If a custom (non LCT) template is used, this is
+   * its default scrollbar width.
+   */
+  const TInt KCustomTemplateScrolbarWidth (25);
 
-    const TInt KTemplateChildTextLength( 64 );
+  const TInt KTemplateChildTextLength (64);
 
-    const TInt KSubCellsCount( 6 );
+  const TInt KSubCellsCount (6);
 
-    const TInt KItemSubCellsText( 300 );
+  const TInt KItemSubCellsText (300);
 
-    const TInt KMoveIndicatorStartingPos( 32 );
-    }
+  const TInt KMoveIndicatorStartingPos ( 32 );
+
+  }
 
 /**
  * Shortcut constants.
@@ -298,13 +270,13 @@ namespace MmShortcutConstants
   }
 
 namespace MmMarqueeConstants
-    {
-    const TInt KTextTrimmingThreshold( 80 );
-    const TInt KClippingBufLength( 80 );
-    const TInt KLoops( 1 );
-    const TInt KScrollAmount( 6 );
-    const TInt KScrollDelay( 1000000 );
-    }
+  {
+  const TInt KTextTrimmingThreshold (80);
+  const TInt KClippingBufLength (80);
+  const TInt KLoops (1);
+  const TInt KScrollAmount (6);
+  const TInt KScrollDelay (1000000);
+  }
 /**
  * Matrix Template Library panic notice.
  */
@@ -475,5 +447,11 @@ enum TManualAlign
  * but it is sufficient for our purposes.
  */
 const TInt KDragTreshold = 18;
+
+/**
+ * The interval between redraws when scrolling using the scrollbar.
+ * This will give us nice ~30 fps.
+ */
+const TInt KScrollingRedrawInterval = 33333;
 
 #endif // MMWIDGETSCONSTANTS_H

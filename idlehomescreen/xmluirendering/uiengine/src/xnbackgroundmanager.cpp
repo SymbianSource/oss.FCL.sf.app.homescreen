@@ -83,13 +83,9 @@ void ShowInfoNoteL( TInt aResourceId )
 void HandleErrorL( TInt aErr )
     {
     TInt resourceId( NULL );
-    if ( aErr == KErrTooBig )
+    if ( aErr == KErrTooBig || aErr == KErrNoMemory )
         {
         resourceId = R_QTN_HS_TOO_BIG_IMAGE_NOTE;
-        }
-    else if( aErr == KErrNoMemory )
-        {
-        resourceId = R_QTN_HS_WALLPAPER_OUT_OF_RAM;
         }
     else if ( aErr == KErrCancel || aErr == KErrCouldNotConnect || 
         aErr == KErrCANoRights )
@@ -143,8 +139,7 @@ static CFbsBitmap* CreateBitmapFromColorL( TSize aSize, TRgb aColor )
 CXnBackgroundManager::CXnBackgroundManager( CXnViewManager& aViewManager, CHspsWrapper& aWrapper )
     : iViewManager( aViewManager ), 
       iHspsWrapper( aWrapper ),
-      iStoreWallpaper( ETrue ),
-      iImageChanged( EFalse )
+      iStoreWallpaper( ETrue )
     {
     }
 
@@ -231,13 +226,7 @@ void CXnBackgroundManager::Draw(const TRect& aRect) const
     {
     CFbsBitmap* wallpaper( NULL );
     
-    if( iImageChanged )
-        {
-        iImageChanged = EFalse;
-        wallpaper = iWallpaper;
-        iWallpaper = NULL;
-        }
-    else if( iType == EPageSpecific )
+    if( iType == EPageSpecific )
         {
         CXnViewData& viewData( iViewManager.ActiveViewData() );
         wallpaper = viewData.WallpaperImage();
@@ -354,20 +343,6 @@ void CXnBackgroundManager::HandleNotifyDisk( TInt /*aError*/,
             TRAP_IGNORE( RemovableDiskRemovedL() ); 
             }
         }
-    else if( aEvent.iType == MDiskNotifyHandlerCallback::EDiskAdded )
-        {
-        if( aEvent.iInfo.iType == EMediaHardDisk )
-            {
-            TRAP_IGNORE( RemovableDiskInsertedL() ); 
-            }
-        }
-    else if( aEvent.iType == MDiskNotifyHandlerCallback::EDiskRemoved )
-        {
-        if( aEvent.iInfo.iType == EMediaNotPresent )
-            {
-            TRAP_IGNORE( RemovableDiskRemovedL() ); 
-            }
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -427,7 +402,7 @@ void CXnBackgroundManager::SetWallpaperL()
         else
             {
             // Potentially not enough memory
-            HandleErrorL( KErrNoMemory );        
+            iViewManager.OomSysHandler().HandlePotentialOomL();        
             }
         }        
     }
@@ -502,8 +477,7 @@ void CXnBackgroundManager::ChangeWallpaper( const CXnViewData& aOldView,
         if ( oldwp.Compare( newwp ) ) 
             {
             iStoreWallpaper = ETrue;                    
-            iImageChanged = ETrue;                    
-            iWallpaper = aNewView.WallpaperImage();
+            
             if ( aDrawNow )
                 {
                 DrawNow();
@@ -766,10 +740,15 @@ void CXnBackgroundManager::UpdateWallpapersL()
         const TDesC& path = viewData->WallpaperImagePath();
         if( path != KNullDesC )
             {
-            CFbsBitmap* bitmap = iSkinSrv.WallpaperImageL( path );
-            if( bitmap )
+            CFbsBitmap* bitmap = NULL;
+            TRAPD( err,  bitmap = iSkinSrv.WallpaperImageL( path ) );
+            if( err == KErrNone && bitmap )
                 {
                 viewData->SetWallpaperImage( bitmap );
+                }
+            else
+                {
+                viewData->SetWallpaperImage( NULL );
                 }
             }
         }
@@ -799,9 +778,9 @@ void CXnBackgroundManager::RemovableDiskRemovedL()
             CFbsBitmap* bitmap = viewData->WallpaperImage();
             if( path != KNullDesC && bitmap )
                 {
-                if ( !BaflUtils::FileExists( fs, path ) && path.Compare( KNullDesC ) != KErrNone )
+                if ( !BaflUtils::FileExists( fs, path ) )
                     {
-                    iSkinSrv.RemoveWallpaper( path ); 
+                    RemoveWallpaperFromCache( path, viewData );
                     viewData->SetWallpaperImage( NULL );
                     if( viewData == &iViewManager.ActiveViewData() )
                         {
@@ -815,9 +794,9 @@ void CXnBackgroundManager::RemovableDiskRemovedL()
         {
         if( iBgImagePath && iBgImage )
             {
-            if ( !BaflUtils::FileExists( fs, *iBgImagePath ) && iBgImagePath->Compare( KNullDesC ) != KErrNone )
+            if ( !BaflUtils::FileExists( fs, *iBgImagePath ) )
                 {
-                iSkinSrv.RemoveWallpaper( *iBgImagePath );
+                RemoveWallpaperFromCache( *iBgImagePath );
                 delete iBgImage;
                 iBgImage = NULL;
                 drawingNeeded = ETrue;
@@ -944,23 +923,14 @@ void CXnBackgroundManager::SetPageSpecificWallpaperL( const TDesC& aFileName )
 
     if(  aFileName == KNullDesC )
         {
-        if( viewData.WallpaperImagePath() == KNullDesC )
-            {
-            // Default already set as background.
-            err = KErrCancel;
-            }
-        else
-            {
-            err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
-            }
+        err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, NULL );
         }
     else
         {
         // Wallpaper is also added into the cache if it is not there already.
-        err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, CCoeEnv::Static()/*,
-            R_QTN_HS_PROCESSING_NOTE, R_CHANGE_WALLPAPER_WAIT_DIALOG */ );    
+        err = AknsWallpaperUtils::SetIdleWallpaper( aFileName, CCoeEnv::Static(),
+            R_QTN_HS_PROCESSING_NOTE, R_CHANGE_WALLPAPER_WAIT_DIALOG );    
         }
-    
     if( err == KErrNone )
         {
         // Remove old wallpaper from the cache
@@ -1149,9 +1119,9 @@ void CXnBackgroundManager::StoreWallpaperL()
         RFs& fs( CEikonEnv::Static()->FsSession() );
         if ( path != KNullDesC && BaflUtils::FileExists( fs, path ) )
             {
-
             iIntUpdate++;
-            TInt err( AknsWallpaperUtils::SetIdleWallpaper( path, NULL ) );
+            TInt err( AknsWallpaperUtils::SetIdleWallpaper( path, NULL ) ); 
+                  
             if( err )
                 {
                 iIntUpdate--;
@@ -1174,16 +1144,8 @@ void CXnBackgroundManager::StoreWallpaperL()
             if( err )
                 {
                 iIntUpdate--;
-                }
-
-            // If the drive was formatted or temporarily detached or the image was removed            
-            if( path.Length() )
-                {
-                iViewManager.ActiveViewData().SetWallpaperImage( NULL );
-                iSkinSrv.RemoveWallpaper( path );
-                DrawNow();
-                }                        
-            }        
+                }       
+            }
         }       
     }
 

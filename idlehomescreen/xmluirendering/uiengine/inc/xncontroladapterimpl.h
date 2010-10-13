@@ -451,13 +451,6 @@ public:
      */
     RPointerArray< CXnControlAdapter >& ChildAdapters();
 
-    /*
-     * Checks if widget is Gesture destination node.
-     * 
-     * @return ETrue if widget is Gesture destination. 
-     */
-    TBool IsWidgetGestureDest();
-
 private: // from MAknTouchGestureFwObserver
     /**
      * Implements gesture handling

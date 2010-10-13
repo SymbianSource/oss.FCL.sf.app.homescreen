@@ -12,44 +12,12 @@
         </settings>
         <plugins>
             <plugin uid="0x2001cb7c" bundle_id="0" template_id="0" locking_status="locked"/>
-	    <plugin uid="0x20026f4f" bundle_id="0" template_id="0" locking_status="none">
-		<initial_settings>
-	            <settings>
-	             <!-- Shortcut #1, Phonebook -->
-	             <item id="first" name="Shortcut1" >
-	                <property  name="type" value="application"/>
-	                <property  name="uid" value="0x101F4CCE"/>
-	                <property  name="view" value=""/>
-	                <property  name="param" value=""/>
-	             </item>
-	           <!-- Shortcut #2, New Message -->
-	             <item id="second" name="Shortcut2" >
-	                 <property  name="type" value="shortcut"/>
-	                 <property  name="uid" value="0x99999999"/>
-	                 <property  name="view" value=""/>
-	                 <property  name="param" value="messaging:msg"/>
-	             </item>
-	           <!-- Shortcut #3, Browser -->
-	             <item id="third" name="Shortcut3" >
-	                 <property  name="type" value="application"/>
-	                 <property  name="uid" value="0x10008D39"/>
-	                 <property  name="view" value=""/>
-	                 <property  name="param" value=""/>
-	             </item>
-	           <!-- Shortcut #4, Calendar -->
-	             <item id="fourth" name="Shortcut4" >
-	                 <property  name="type" value="application"/>
-	                 <property  name="uid" value="0x10005901"/>
-	                 <property  name="view" value=""/>
-	                 <property  name="param" value=""/>
-	             </item>
-	           </settings>
-		</initial_settings>
-	    </plugin>       
+            <plugin uid="0x20026f4f" bundle_id="0" template_id="0" locking_status="none"/>
             <plugin uid="0x10207c18" bundle_id="0" template_id="0" locking_status="none"/>
             <plugin uid="0x2001f481" bundle_id="0" template_id="0" locking_status="none"/>
             <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>
             <plugin uid="0x2001f47f" bundle_id="0" template_id="0" locking_status="none"/>
         </plugins>
+        <settings/>
     </control>
 </configuration>

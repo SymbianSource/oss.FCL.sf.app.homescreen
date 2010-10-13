@@ -87,6 +87,16 @@ const HBufC* CXnTextEditor::Text()
     }
   
 // ---------------------------------------------------------
+// CXnTextEditor::HandleEditorEvent
+// ---------------------------------------------------------
+//
+void CXnTextEditor::HandleEditorEvent( TInt aReason )
+    {
+    static_cast<CXnTextEditorAdapter*>(ControlAdapter())->
+            HandleEditorEvent( aReason );
+    }
+
+// ---------------------------------------------------------
 // ---------------------------------------------------------
 XnComponentInterface::MXnComponentInterface* CXnTextEditor::MakeInterfaceL(const TDesC8& aType)
     {

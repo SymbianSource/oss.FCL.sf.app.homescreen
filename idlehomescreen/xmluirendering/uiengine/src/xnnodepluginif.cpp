@@ -26,9 +26,6 @@
 #include "xndomdocument.h"
 #include "xnodt.h"
 
-_LIT8( KFocus, "focus" );
-_LIT8( KEdit, "edit" );
-
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -210,16 +207,7 @@ EXPORT_C void CXnNodePluginIf::UnsetStateL( const TDesC8& aState )
 //
 EXPORT_C TBool CXnNodePluginIf::IsFocusedState()
     {
-    return iNode->IsStateSet( KFocus );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnNodePluginIf::IsEditState
-// -----------------------------------------------------------------------------
-//
-EXPORT_C TBool CXnNodePluginIf::IsEditState()
-    {
-    return iNode->IsStateSet( KEdit );
+    return iNode->IsStateSet( _L8( "focus" ) );
     }
 
 // -----------------------------------------------------------------------------

@@ -101,14 +101,13 @@ TInt CWmImageConverter::HandleIconString(
                             const TSize& aIconSize, 
                             const TDesC& aIconStr,
                             CFbsBitmap*& aBitmap,
-                            CFbsBitmap*& aMask,
-                            TBool aForceScale )
+                            CFbsBitmap*& aMask )
     {
     delete aBitmap; aBitmap = NULL;
     delete aMask; aMask = NULL;
 
     TInt err( KErrNone );
-    TRAP( err, HandleIconStringL( aIconSize, aIconStr, aForceScale ); );
+    TRAP( err, HandleIconStringL( aIconSize, aIconStr ); );
     if ( err == KErrNone && iBitmap && iMask )
         {
         // ownership transferred
@@ -140,8 +139,7 @@ TInt CWmImageConverter::HandleIconString(
 //
 void CWmImageConverter::HandleIconStringL( 
                             const TSize& aIconSize, 
-                            const TDesC& aIconStr,
-                            TBool aForceScale )
+                            const TDesC& aIconStr )
     {
     if ( aIconStr.Length() )
         {
@@ -162,7 +160,7 @@ void CWmImageConverter::HandleIconStringL(
             }
         else if ( ResolveUid( aIconStr, appUid ) )
             {
-            CreateIconFromUidL( appUid, aForceScale );
+            CreateIconFromUidL( appUid );
             }
         else if ( EndsWith( aIconStr, KSvgExt ) )
             {
@@ -172,7 +170,7 @@ void CWmImageConverter::HandleIconStringL(
         else if ( BaflUtils::FileExists( iFs, aIconStr ) )
             {
             // filename_with_full_path.png/jpg
-            CreateIconFromOtherL( aIconStr, aForceScale );
+            CreateIconFromOtherL( aIconStr );
             }
         else
             {
@@ -189,8 +187,7 @@ void CWmImageConverter::HandleIconStringL(
 // CWmImageConverter::CreateIconFromUidL
 // ---------------------------------------------------------
 //
-void CWmImageConverter::CreateIconFromUidL( 
-        const TUid& aUid, TBool aForceScale )
+void CWmImageConverter::CreateIconFromUidL( const TUid& aUid )
     {
     CFbsBitmap* bitmap = NULL;
     CFbsBitmap* mask = NULL;
@@ -223,54 +220,21 @@ void CWmImageConverter::CreateIconFromUidL(
 
         CApaMaskedBitmap* maskedBmp = CApaMaskedBitmap::NewLC();
         User::LeaveIfError( lsSession.GetAppIcon( aUid, size, *maskedBmp ) );
-
+        
         // handle bitmap
-        iBitmap = new ( ELeave ) CFbsBitmap;
-        if ( aForceScale )
-            {
-            // copy and scale
-            TRect scaledRect = TRect( iSize );
-            iBitmap->Create( scaledRect.Size(), maskedBmp->DisplayMode() );
-            CFbsBitmapDevice* bitmapDevice = CFbsBitmapDevice::NewL( iBitmap );
-            CleanupStack::PushL( bitmapDevice );
-            CFbsBitGc* bitmapGc = CFbsBitGc::NewL();
-            CleanupStack::PushL( bitmapGc );
-            bitmapGc->Activate( bitmapDevice );
-            bitmapGc->DrawBitmap( scaledRect, maskedBmp );
-            CleanupStack::PopAndDestroy( bitmapGc );
-            CleanupStack::PopAndDestroy( bitmapDevice );
-            }
-        else
-            {
-            CopyBitmapL( *iBitmap, *maskedBmp );
-            }
+        iBitmap = new ( ELeave ) CFbsBitmap;       
+        CopyBitmapL( *iBitmap, *maskedBmp );
         
         // handle mask
         if ( maskedBmp->Mask() )
             {
             iMask = new ( ELeave ) CFbsBitmap;
-            if ( aForceScale )
-                {
-                TRect scaledRect = TRect( iSize );
-                iMask->Create( scaledRect.Size(), maskedBmp->Mask()->DisplayMode() );
-                CFbsBitmapDevice* bitmapDevice = CFbsBitmapDevice::NewL( iMask );
-                CleanupStack::PushL( bitmapDevice );
-                CFbsBitGc* bitmapGc = CFbsBitGc::NewL();
-                CleanupStack::PushL( bitmapGc );
-                bitmapGc->Activate( bitmapDevice );
-                bitmapGc->DrawBitmap( scaledRect, maskedBmp->Mask() );
-                CleanupStack::PopAndDestroy( bitmapGc );
-                CleanupStack::PopAndDestroy( bitmapDevice );
-                }
-            else
-                {
-                CopyBitmapL( *iMask, *maskedBmp->Mask() );
-                }
+            CopyBitmapL( *iMask, *maskedBmp->Mask() );
             }
         
         // cleanup
         CleanupStack::PopAndDestroy( maskedBmp );
-        CleanupStack::PopAndDestroy( sizeArray );
+        CleanupStack::PopAndDestroy( sizeArray ); 
         CleanupStack::PopAndDestroy( &lsSession );
         }
     else if ( aUid.iUid != KNullUid.iUid )
@@ -375,8 +339,7 @@ void CWmImageConverter::CreateIconFromSvgL( const TDesC& aFileName )
 // CWmImageConverter::CreateIconFromOtherL
 // ---------------------------------------------------------
 //
-void CWmImageConverter::CreateIconFromOtherL( 
-        const TDesC& aFileName, TBool aForceScale )
+void CWmImageConverter::CreateIconFromOtherL( const TDesC& aFileName )
     {
     if (iBitmap) {delete iBitmap; iBitmap = NULL;}
     if (iMask) {delete iMask; iMask = NULL;}
@@ -409,47 +372,6 @@ void CWmImageConverter::CreateIconFromOtherL(
         }
     User::LeaveIfError( status.Int() );    
     CleanupStack::PopAndDestroy( imageDecoder );
-    
-    // do scaling
-    if ( aForceScale )
-        {
-        // scale bitmap
-        TRect scaledRect = TRect( iSize );
-        CFbsBitmap* scaledBitmap = new (ELeave) CFbsBitmap();
-        CleanupStack::PushL( scaledBitmap );
-        User::LeaveIfError( 
-                scaledBitmap->Create( scaledRect.Size(), iBitmap->DisplayMode() ) );
-        CFbsBitmapDevice* bitmapDevice = CFbsBitmapDevice::NewL( scaledBitmap );
-        CleanupStack::PushL( bitmapDevice );
-        CFbsBitGc* bitmapGc = CFbsBitGc::NewL();
-        CleanupStack::PushL( bitmapGc );
-        bitmapGc->Activate( bitmapDevice );
-        bitmapGc->DrawBitmap( scaledRect, iBitmap );
-        CleanupStack::PopAndDestroy( bitmapGc );
-        CleanupStack::PopAndDestroy( bitmapDevice );
-        CleanupStack::Pop( scaledBitmap );
-        // take ownership of scaled bitmap
-        delete iBitmap; iBitmap = NULL;
-        iBitmap = scaledBitmap; scaledBitmap = NULL;
-        
-        // scale mask
-        CFbsBitmap* scaledMask = new (ELeave) CFbsBitmap();
-        CleanupStack::PushL( scaledMask );
-        User::LeaveIfError( 
-                scaledMask->Create( scaledRect.Size(), iMask->DisplayMode() ) );
-        bitmapDevice = CFbsBitmapDevice::NewL( scaledMask );
-        CleanupStack::PushL( bitmapDevice );
-        bitmapGc = CFbsBitGc::NewL();
-        CleanupStack::PushL( bitmapGc );
-        bitmapGc->Activate( bitmapDevice );
-        bitmapGc->DrawBitmap( scaledRect, iMask );
-        CleanupStack::PopAndDestroy( bitmapGc );
-        CleanupStack::PopAndDestroy( bitmapDevice );
-        CleanupStack::Pop( scaledMask );
-        // take ownership of scaled bitmap
-        delete iMask; iMask = NULL;
-        iMask = scaledMask; scaledMask = NULL;        
-        }    
     }
 
 // ---------------------------------------------------------------------------
@@ -586,18 +508,18 @@ TBool CWmImageConverter::EndsWith( const TDesC& aString,
 // ---------------------------------------------------------------------------
 //
 TBool CWmImageConverter::ResolveUid( 
-                const TDesC& aStr, TUid& aUid )
+                const TDesC& aPath, TUid& aUid )
     {
     // Syntax: uid(0x12345678)
     TInt error = KErrNotFound;
-    TInt pos = aStr.FindF( KUid );
+    TInt pos = aPath.FindF( KUid );
     if( pos == 0 )
         {
         // Skip uid token
         pos += KUid().Length();
 
         // Initialize lexer
-        TLex lex( aStr.Mid( pos ) );
+        TLex lex( aPath.Mid( pos ) );
         lex.SkipSpaceAndMark();
         
         // Check left parenthesis
@@ -615,19 +537,18 @@ TBool CWmImageConverter::ResolveUid(
 // ---------------------------------------------------------------------------
 //
 TBool CWmImageConverter::ResolveSkinId( 
-                const TDesC& aStr, TAknsItemID& aItemId )
+                const TDesC& aPath, TAknsItemID& aItemId )
     {
     // Syntax: skin(major minor)
-    aItemId = KAknsIIDNone;
     TInt error = KErrNotFound;
-    TInt pos = aStr.FindF( KSkin );
+    TInt pos = aPath.FindF( KSkin );
     if( pos == 0 )
         {
         // Skip skin token
         pos += KSkin().Length();
 
         // Initialize lexer
-        TLex lex( aStr.Mid( pos ) );
+        TLex lex( aPath.Mid( pos ) );
         lex.SkipSpaceAndMark();
         
         // Check left parenthesis
@@ -649,22 +570,18 @@ TBool CWmImageConverter::ResolveSkinId(
 // ---------------------------------------------------------------------------
 //
 TBool CWmImageConverter::ResolveMifId( 
-                const TDesC& aStr, TInt& aBitmapId,
+                const TDesC& aPath, TInt& aBitmapId,
                 TInt& aMaskId, TDes& aFileName )
     {
     // Syntax: mif(filename bimapId maskId)
-   aBitmapId = KErrNotFound;
-   aMaskId = KErrNotFound;
-   aFileName.Copy( KNullDesC );
-   
    TInt error = KErrNotFound;
-   TInt pos = aStr.FindF( KMif );
+   TInt pos = aPath.FindF( KMif );
    if( pos == 0 )
         {
         // Skip mif token
         pos += KMif().Length();
         // Initialize lexer
-        TLex lex( aStr.Mid( pos ) );
+        TLex lex( aPath.Mid( pos ) );
         lex.SkipSpaceAndMark();
         
         // Check left parenthesis
@@ -692,23 +609,23 @@ TBool CWmImageConverter::ResolveMifId(
 // ---------------------------------------------------------------------------
 //
 TBool CWmImageConverter::ResolveSkinIdAndMifId( 
-                const TDesC& aStr, TAknsItemID& aItemId,
+                const TDesC& aPath, TAknsItemID& aItemId,
                 TInt& aBitmapId, TInt& aMaskId, TDes& aFileName )
    {
    // Syntax: skin(major minor):mif(filename bimapId maskId) 
-   TBool result = ResolveSkinId( aStr, aItemId );
+   TBool result = ResolveSkinId( aPath, aItemId );
    if ( result )
 	   {
-	   TInt pos = aStr.FindF( KColon );
+	   TInt pos = aPath.FindF( KColon );
 	   if ( pos != KErrNotFound )
 	       {
-	       TPtrC ptr = aStr.Mid( pos+1 );
+	       TPtrC ptr = aPath.Mid( pos+1 );
 	       result = ResolveMifId( ptr, aBitmapId, aMaskId, aFileName );
 	       }
 	   }
    else
        {
-       result = ResolveMifId( aStr, aBitmapId, aMaskId, aFileName );
+       result = ResolveMifId( aPath, aBitmapId, aMaskId, aFileName );
        }
    return result;
    }
@@ -829,21 +746,6 @@ void CWmImageConverter::UpdateImageSize(
                 }            
             }
         }
-    }
-
-// ---------------------------------------------------------------------------
-// CWmImageConverter::ParseIconString
-// ---------------------------------------------------------------------------
-//
-TBool CWmImageConverter::ParseIconString( 
-        const TDesC& aIconStr, 
-        TAknsItemID& aItemId,
-        TInt& aBitmapId, 
-        TInt& aMaskId, 
-        TDes& aFileName )
-    {
-    return ResolveSkinIdAndMifId( 
-            aIconStr, aItemId, aBitmapId, aMaskId, aFileName );
     }
 
 // End of file

@@ -19,11 +19,11 @@
 #ifndef __ROOT_2001F48F_VARIANT_IBY__
 #define __ROOT_2001F48F_VARIANT_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by variation tools, variant specific
 data=ZPRIVATE\200159c0\install\root_2001f48f\hsps\00\rootconfiguration.xml \private\200159c0\install\root_2001f48f\hsps\00\rootconfiguration.xml
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif  // __ROOT_2001F48F_VARIANT_IBY__

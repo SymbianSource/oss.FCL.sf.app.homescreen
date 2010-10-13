@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_48.1.46 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_48.1.43 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -697,11 +697,6 @@ public:
      * Widget position cache.
      */
     TMmWidgetPosition WidgetPositionCache() const;
-    
-    /**
-     * Sets a proper flag if the widget is brought to foreground.
-     */
-    IMPORT_C virtual void SetWidgetCommingFromBackground( TBool /*aCommingFromBackground*/ );
 
 public: // from MMmVisibilityObserver
 
@@ -1081,10 +1076,6 @@ private:
      */
     TBool iHighlightVisibleBeforeLongTap;
 
-    /**
-     * ETrue if widget highlight must be reset. 
-     */
-    TBool iResetHighlight;
   };
 
 #endif // MMMWIDGETCONTAINER_H

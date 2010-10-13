@@ -27,7 +27,6 @@
 #include "xnproperty.h"
 #include "xnuiengine.h"
 #include "xnappuiadapter.h"
-#include "xnkeyeventdispatcher.h"
 #include "xncontroladapter.h"
 #include "xnpopupcontroladapter.h"
 #include "xnmenuadapter.h"
@@ -52,6 +51,7 @@
 #include "xneffectmanager.h"
 #include "xnviewadapter.h"
 #include "xnbackgroundmanager.h"
+#include "xntexteditor.h"
 #include "xnitemactivator.h"
 
 // Local constants
@@ -337,11 +337,10 @@ static CXnNode* FindNextNodeFromRightL(
 static CXnNode* FindNextNodeFromLeftL(
     RPointerArray< CXnNode >& aArray, CXnNode& aNode, TBool stayInNamespace = EFalse, CXnUiEngine* aEngine = NULL );
 static CXnNode* FindNextNodeFromBelowL(
-    RPointerArray< CXnNode >& aArray, CXnNode& aNode, TBool stayInNamespace = EFalse, CXnUiEngine* aEngine = NULL );
+    RPointerArray< CXnNode >& aArray, CXnNode& aNode, TBool stayInNamespace = EFalse );
 static CXnNode* FindNextNodeFromAboveL(
-    RPointerArray< CXnNode >& aArray, CXnNode& aNode, TBool stayInNamespace = EFalse, CXnUiEngine* aEngine = NULL );
+    RPointerArray< CXnNode >& aArray, CXnNode& aNode, TBool stayInNamespace = EFalse );
 static CXnNode* FindPluginNode( CXnNode& aNode );
-static TBool IsPluginNode( CXnNode& aNode );
 static TBool DoInternalFocusChangeL(
     CXnUiEngine& aEngine, CXnNode& aNode, const TKeyEvent& aKeyEvent,
     TEventCode aType );
@@ -2936,22 +2935,22 @@ static void RunActivateEditorL(
         editorNode = &aLayoutNode;
         }
     
-    if ( editorNode )
-        {             
-        CXnKeyEventDispatcher* eventDispatcher( 
-            aEngine.AppUiAdapter().ViewAdapter().EventDispatcher() );
+    if( editorNode )
+        {
+        XnTextEditorInterface::MXnTextEditorInterface* editorControl = NULL;
         
-        if ( eventDispatcher )
+        XnComponentInterface::MakeInterfaceL( editorControl, editorNode->AppIfL() );
+        if( editorControl )
             {
-            if ( aActivate )
+            if( aActivate )
                 {
-                eventDispatcher->SetTextEditorActive( editorNode, ETrue );        
+                editorControl->HandleEditorEvent(CXnTextEditor::KActivateTextEditor);
                 }
             else
                 {
-                eventDispatcher->SetTextEditorActive( NULL, EFalse );
-                }        
-            }        
+                editorControl->HandleEditorEvent(CXnTextEditor::KDeactivateTextEditor);
+                }
+            }    
         }
     }
 
@@ -3057,21 +3056,17 @@ static void RunEditL(
     
     for ( TInt i = 0; i < plugins.Count(); i++ )
         {
-        CXnNode* node( plugins[i]->Owner()->LayoutNode() );       
-        TBool editable = plugins[i]->Editable();
-
-        if( editable )
-            {
-            node->SetStateL( XnPropertyNames::style::common::KEdit );
-            }
+        CXnNode* node( plugins[i]->Owner()->LayoutNode() );
         
+        node->SetStateL( XnPropertyNames::style::common::KEdit );
+                               
         if ( !plugins[i]->Occupied() && useEmpty )
             {                               
             // Make empty space visible
             SetStringPropertyToNodeL( *sp, *node,
                 XnPropertyNames::style::common::KVisibility,
                 XnPropertyNames::style::common::visibility::KVisible );                    
-            }  
+            }                                              
         }
     
     aEngine.EditMode()->SetEditModeL( CXnEditMode::EDragAndDrop );        
@@ -3739,7 +3734,7 @@ static void RunSetInitialFocusL( CXnUiEngine& aEngine )
                 }
             }
         
-        plugins.AppendL( &viewData );
+        plugins.Append( &viewData );
             
         RPointerArray< CXnNode > list;
         CleanupClosePushL( list );
@@ -4785,6 +4780,7 @@ static CXnNode* FindNextNodeFromRightL(
     TBool stayInNamespace,
     CXnUiEngine* aEngine )
     {
+    
     CXnNode* nextNode = NULL;
     TRect rect = aNode.PaddingRect();
 
@@ -4803,14 +4799,6 @@ static CXnNode* FindNextNodeFromRightL(
             {
             // do not shift focus to another view
             continue;
-            }
-        if( aEngine->IsEditMode() )
-            {
-            if( !IsPluginNode( *tmpNode ) )
-                {
-                // move only between "plugin" nodes in edit mode
-                continue;
-                }
             }
         
         const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
@@ -4935,14 +4923,6 @@ static CXnNode* FindNextNodeFromRightL(
                 // do not shift focus to another view
                 continue;
                 }
-            if( aEngine->IsEditMode() )
-                {
-                if( !IsPluginNode( *tmpNode ) )
-                    {
-                    // move only between "plugin" nodes in edit mode
-                    continue;
-                    }
-                }          
             
             const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
             const TDesC8& nodeNamespace = aNode.Impl()->Namespace();
@@ -5057,7 +5037,6 @@ static CXnNode* FindNextNodeFromRightL(
         for ( TInt i = 0; i < aArray.Count(); ++i )
             {
             CXnNode* tmpNode = aArray[i];
-            
             if ( !IsNodeNavigableL( *tmpNode ) )
                 {
                 continue;
@@ -5067,14 +5046,6 @@ static CXnNode* FindNextNodeFromRightL(
                 // do not shift focus to another view
                 continue;
                 }
-            if( aEngine->IsEditMode() )
-                {
-                if( !IsPluginNode( *tmpNode ) )
-                    {
-                    // move only between "plugin" nodes in edit mode
-                    continue;
-                    }
-                }            
             
             const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
             const TDesC8& nodeNamespace = aNode.Impl()->Namespace();
@@ -5260,14 +5231,6 @@ static CXnNode* FindNextNodeFromLeftL(
             // do not shift focus to another view
             continue;
             }
-        if( aEngine->IsEditMode() )
-            {
-            if( !IsPluginNode( *tmpNode ) )
-                {
-                // move only between "plugin" nodes in edit mode
-                continue;
-                }
-            }
         
         const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
         const TDesC8& nodeNamespace = aNode.Impl()->Namespace();
@@ -5390,14 +5353,6 @@ static CXnNode* FindNextNodeFromLeftL(
                 // do not shift focus to another view
                 continue;
                 }
-            if( aEngine->IsEditMode() )
-                {
-                if( !IsPluginNode( *tmpNode ) )
-                    {
-                    // move only between "plugin" nodes in edit mode
-                    continue;
-                    }
-                }
             
             const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
             const TDesC8& nodeNamespace = aNode.Impl()->Namespace();       
@@ -5515,7 +5470,12 @@ static CXnNode* FindNextNodeFromLeftL(
         for ( TInt i = 0; i < aArray.Count(); ++i )
             {
             CXnNode* tmpNode = aArray[i];
-
+            /*
+            if ( tmpNode == &aNode )
+                {
+                continue;
+                }
+            */
             if ( !IsNodeNavigableL( *tmpNode ) )
                 {
                 continue;
@@ -5525,14 +5485,6 @@ static CXnNode* FindNextNodeFromLeftL(
                 // do not shift focus to another view
                 continue;
                 }
-            if( aEngine->IsEditMode() )
-                {
-                if( !IsPluginNode( *tmpNode ) )
-                    {
-                    // move only between "plugin" nodes in edit mode
-                    continue;
-                    }
-                }            
             
             const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
             const TDesC8& nodeNamespace = aNode.Impl()->Namespace();
@@ -5697,8 +5649,7 @@ static CXnNode* FindNextNodeFromLeftL(
 //
 static CXnNode* FindNextNodeFromBelowL(
     RPointerArray< CXnNode >& aArray,
-    CXnNode& aNode, TBool stayInNamespace,
-    CXnUiEngine* aEngine )
+    CXnNode& aNode, TBool stayInNamespace )
     {
     CXnNode* nextNode = NULL;
     TRect rect = aNode.PaddingRect();
@@ -5718,14 +5669,6 @@ static CXnNode* FindNextNodeFromBelowL(
             {
             // do not shift focus to another view
             continue;
-            }
-        if( aEngine->IsEditMode() )
-            {
-            if( !IsPluginNode( *tmpNode ) )
-                {
-                // move only between "plugin" nodes in edit mode
-                continue;
-                }
             }        
         
         const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
@@ -5811,14 +5754,6 @@ static CXnNode* FindNextNodeFromBelowL(
                 // do not shift focus to another view
                 continue;
                 }
-            if( aEngine->IsEditMode() )
-                {
-                if( !IsPluginNode( *tmpNode ) )
-                    {
-                    // move only between "plugin" nodes in edit mode
-                    continue;
-                    }
-                }            
             
             const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
             const TDesC8& nodeNamespace = aNode.Impl()->Namespace();
@@ -5890,8 +5825,7 @@ static CXnNode* FindNextNodeFromBelowL(
 //
 static CXnNode* FindNextNodeFromAboveL(
     RPointerArray< CXnNode >& aArray,
-    CXnNode& aNode, TBool stayInNamespace,
-    CXnUiEngine* aEngine )
+    CXnNode& aNode, TBool stayInNamespace )
     {
     CXnNode* nextNode = NULL;
     TRect rect = aNode.PaddingRect();
@@ -5912,14 +5846,6 @@ static CXnNode* FindNextNodeFromAboveL(
             // do not shift focus to another view
             continue;
             }
-        if( aEngine->IsEditMode() )
-            {
-            if( !IsPluginNode( *tmpNode ) )
-                {
-                // move only between "plugin" nodes in edit mode
-                continue;
-                }
-            }        
         
         const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
         const TDesC8& nodeNamespace = aNode.Impl()->Namespace();       
@@ -6003,14 +5929,6 @@ static CXnNode* FindNextNodeFromAboveL(
                 // do not shift focus to another view
                 continue;
                 }
-            if( aEngine->IsEditMode() )
-                {
-                if( !IsPluginNode( *tmpNode ) )
-                    {
-                    // move only between "plugin" nodes in edit mode
-                    continue;
-                    }
-                }            
             
             const TDesC8& tmpNamespace = tmpNode->Impl()->Namespace();
             const TDesC8& nodeNamespace = aNode.Impl()->Namespace();       
@@ -6101,23 +6019,6 @@ static CXnNode* FindPluginNode( CXnNode& aNode )
     }
 
 // -----------------------------------------------------------------------------
-// IsPluginNode
-// -----------------------------------------------------------------------------
-//
-static TBool IsPluginNode( CXnNode& aNode )
-    {
-    TBool ret = EFalse;
-    
-    const TDesC8& nodeType = aNode.DomNode()->Name();
-    if( nodeType == KPlugin )
-        {
-        ret = ETrue;
-        }
-    
-    return ret;
-    }
-
-// -----------------------------------------------------------------------------
 // DoInternalFocusChangeL
 // -----------------------------------------------------------------------------
 //
@@ -6149,11 +6050,12 @@ static TBool DoInternalFocusChangeL( CXnUiEngine& aEngine,
     // "nav-index: appearance"...
     CXnProperty* navind = aNode.NavIndexL();
     if ( navind && navind->StringValue() == XnPropertyNames::style::common::KAppearance )
-        {        
-        CXnAppUiAdapter& appui( aEngine.AppUiAdapter() );
+        {
         
-        CXnPluginData* plugin( appui.ViewManager().ActiveViewData().Plugin( &aNode ) ); 
-                    
+        CXnAppUiAdapter& appui = static_cast< CXnAppUiAdapter& >( *iAvkonAppUi );
+        CXnPluginData* plugin( 
+                    appui.ViewManager().ActiveViewData().Plugin( &aNode ) );
+        
         // find if node is in a widget that contatins some opened popup window       
         TBool containsPopUp = ( plugin ? plugin->IsDisplayingPopup() : EFalse );
 
@@ -6161,11 +6063,11 @@ static TBool DoInternalFocusChangeL( CXnUiEngine& aEngine,
         RPointerArray< CXnNode >& array = aEngine.ViewManager()->AppearanceNodes();
         if ( aKeyEvent.iScanCode == EStdKeyDownArrow )
             {
-            nextNode = FindNextNodeFromBelowL( array, aNode, containsPopUp, &aEngine );
+            nextNode = FindNextNodeFromBelowL( array, aNode, containsPopUp );
             }
         else if ( aKeyEvent.iScanCode == EStdKeyUpArrow )
             {
-            nextNode = FindNextNodeFromAboveL( array, aNode, containsPopUp, &aEngine );
+            nextNode = FindNextNodeFromAboveL( array, aNode, containsPopUp );
             }
         else if ( aKeyEvent.iScanCode == EStdKeyRightArrow )
             {
@@ -6176,12 +6078,24 @@ static TBool DoInternalFocusChangeL( CXnUiEngine& aEngine,
             nextNode = FindNextNodeFromLeftL( array, aNode, containsPopUp, &aEngine );
             }
         if ( nextNode )
-            {   
+            {
+            // focus plugin node if in edit mode
+            if( aEngine.IsEditMode() )
+                {
+                if( nextNode->Type()->Type() != KPlugin )
+                    {
+                    CXnNode* pluginNode = FindPluginNode( *nextNode );
+                    if( pluginNode )
+                        {
+                        nextNode = pluginNode;
+                        }
+                    }
+                }
+
             if( nextNode && nextNode->ScrollableControl() )
                 {
                 nextNode->ScrollableControl()->ShowItem( *nextNode );
                 }
-            
             nextNode->SetStateL( XnPropertyNames::style::common::KFocus );
             return ETrue;
             }
@@ -7978,10 +7892,13 @@ void CXnNodeImpl::SetRenderedL()
         if ( iDropped || !displayed )
             {
             // Need to check blank here
-            CXnProperty* prop( VisibilityL() );
-
-            if ( prop && prop->StringValue() ==
-                 XnPropertyNames::style::common::visibility::KBlank )
+            CXnProperty* visibility( VisibilityL() );
+            CXnProperty* display( DisplayL() );
+            
+            if ( visibility && visibility->StringValue() ==
+                 XnPropertyNames::style::common::visibility::KBlank && 
+                 ( !display || display->StringValue() 
+                         == XnPropertyNames::style::common::display::KBlock ) )
                 {
                 control->SetBlank( ETrue );
                 control->MakeVisible( EFalse );
@@ -8042,15 +7959,18 @@ void CXnNodeImpl::SetRenderedL()
 // -----------------------------------------------------------------------------
 //
 void CXnNodeImpl::SetLaidOutL()
-    {       
-    if ( !iLayoutCapable || iDropped || !IsNodeDisplayedL( *iNode ) )
+    {
+    if ( !iLayoutCapable )
         {
-        iLaidOut = EFalse;
+        return;
         }
-    else
+
+    if ( iDropped || !IsNodeDisplayedL( *iNode ) )
         {
-        iLaidOut = ETrue;
+        return;
         }
+
+    iLaidOut = ETrue;
 
     for ( TInt i = 0; i < iChildren.Count(); i++ )
         {
@@ -9217,7 +9137,6 @@ void CXnNodeImpl::ReorderNodesL( CXnNode* aSource, CXnNode* aTarget )
     CleanupStack::PopAndDestroy( 2 ); // lockedNodes, lockedNodeIndex
     }
 
-/*
 // -----------------------------------------------------------------------------
 // CXnNodeImpl::FindNextNodeL
 // -----------------------------------------------------------------------------
@@ -9246,7 +9165,6 @@ CXnNode* CXnNodeImpl::FindNextNodeL(
         }
     return node;
     }
-*/    
 
 // -----------------------------------------------------------------------------
 // CXnNodeImpl::Namespace

@@ -20,7 +20,6 @@
 
 //  System includes
 #include <e32base.h>
-#include <babitflags.h>
 
 // User includes
 #include "xncontroladapter.h"
@@ -84,8 +83,15 @@ public:
      */
     HBufC* Text() const;
 
-public: 
-    // from base classes
+    /**
+     * Handles editor events
+     * 
+     * @since S60 5.2
+     * @param aReason, editor event        
+     */
+    void HandleEditorEvent( TInt aReason );
+
+public: // from base classes
 
     /**
     * See CCoeControl documentation
@@ -106,7 +112,12 @@ public:
     * See CCoeControl documentation
     */    	
     TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType);    
-        
+    
+    /**
+    * See CXnControlAdapter documentation
+    */          
+    TBool RefusesFocusLoss() const;
+    
     /**
     * See CCoeControl documentation
     */    	
@@ -119,8 +130,18 @@ public:
 
     /**
     * See CCoeControl documentation
+    */          
+    void HandleResourceChange( TInt aType );
+    
+    /**
+    * See CCoeControl documentation
     */  
     void HandlePointerEventL(const TPointerEvent& aPointerEvent);
+
+    /**
+     * See CCoeAppUiBase.
+     */
+    void HandleScreenDeviceChangedL();
 
 private: 
     // from MCoeControlBackground 
@@ -171,9 +192,13 @@ private:
     /** Flag to indicate whether the font needs to be released or not */
     TBool                   iReleaseFont;
     /** Max line amount */
-    TInt                    iMaxLines;
-    /** Flags */
-    TBitFlags32             iFlags;
+    TInt                    iMaxLines; 
+    /** Flag to indicate whether focus loss is refused */
+    TBool                   iRefusesFocusLoss;
+    /** Split input states*/
+    TInt                    iSplitInputFlags;
+    /** Flag to indicate if SetTextL is called */
+    TBool                   iIsSetText;
     };
 
 #endif      // _XNTEXTEDITORADAPTER_H

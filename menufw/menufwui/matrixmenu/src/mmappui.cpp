@@ -12,8 +12,8 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_176.1.28.1.87 % << Don't touch! Updated by Synergy at check-out.
-*  Version     : %version: MM_176.1.28.1.87 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.83 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_176.1.28.1.83 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -106,8 +106,8 @@ void CMmAppUi::ConstructL()
     iIsKastorEffectStarted = EFalse;
     StartLayoutSwitchFullScreen( AknTransEffect::EApplicationStart );
 
+    RefreshUiPanesL( ETrue );
     Cba()->MakeVisible( EFalse );
-    StatusPane()->MakeVisible( EFalse );
     StatusPane()->SwitchLayoutL( R_AVKON_STATUS_PANE_LAYOUT_USUAL );
 
     iDummyTemplateLib = CMmTemplateLibrary::NewL();
@@ -340,7 +340,7 @@ void CMmAppUi::ProcessMessageL( TUid /*aUid*/, const TDesC8& aParams )
                 iCurrentContainer->MakeVisible( EFalse );
                 iDummyContainer->DrawNow();
                 }
-            CleanupForExitL( ECommingFromBackground );
+            CleanupForExitL( EExitKeyApplication );
             User::LeaveIfError( iCoeEnv->WsSession().SetWindowGroupOrdinalPosition(
             CEikonEnv::Static()->RootWin().Identifier(), 0 ) );
             iAppkeyHandler->StartL();
@@ -493,6 +493,11 @@ void CMmAppUi::HandleBackCommandL()
     DEBUG(("_Mm_:CMmAppUi::HandleBackCommandL IN"));
     MMPERF(("CMmAppUi::HandleBackCommandL - START"));
     DEBUG16(("\t_Mm_:current genre: %S",&iCurrentSuiteModel->SuiteName()));
+
+    iDummyContainer->MakeVisible( ETrue );
+    RefreshUiPanesL( ETrue );
+    iCurrentContainer->MakeVisible( EFalse );
+    iDummyContainer->DrawNow();
 
     iHNInterface->HandleBackEventL( iCurrentSuiteModel->SuiteName() );
 
@@ -1018,6 +1023,7 @@ void CMmAppUi::HandleDragStartL( TInt aModelItemIndex )
 
     if ( IsEditMode() )
         {
+
         TInt modelId = iCurrentSuiteModel->IdByIndex( aModelItemIndex );
         if (modelId != KErrNotFound)
             {
@@ -1817,11 +1823,6 @@ void CMmAppUi::HandlePresentationChangeL(
                 aWidgetContainer &&
                 iCurrentContainer->IsHighlightVisible() &&
                 iCurrentContainer->WidgetType() != aWidgetContainer->WidgetType();
-        
-        if( iCurrentContainer && !highlightVisibleBefore )
-            {
-            iCurrentContainer->SetHighlightVisibilityL( EFalse );
-            }
 
         HandleWidgetChangeRefreshL( aWidgetContainer );
 
@@ -2376,6 +2377,7 @@ void CMmAppUi::ResetToInitialStateL()
 //
 void CMmAppUi::HandleSuiteModelInitializedL( CHnSuiteModel* aModel )
     {
+
     StatusPane()->MakeVisible( ETrue );
     Cba()->MakeVisible( ETrue );
     if ( aModel == iHNInterface->GetLastSuiteModelL() )
@@ -2494,47 +2496,27 @@ void CMmAppUi::CleanupForExitL( TExitKeyType aExitKey )
         iCurrentContainer->CancelDragL( EFalse );
         SetEditModeL( EFalse );
         }
-    
-    THnSuiteWidgetType widgetType = iCurrentContainer
-            ? iCurrentContainer->WidgetType() : EUnspecified;
-    
+
     // reset model - revert to root if current view is not a suite view
     CHnSuiteModel* model = iHNInterface->GetLastSuiteModelL();
-    
-    TBool commingFromBackground( aExitKey == ECommingFromBackground ); 
-    
-    if( model && ( aExitKey == EExitKeyApplication || commingFromBackground ) )
+    if ( model && aExitKey == EExitKeyApplication )
         {
         TBool topSuiteIsBeingEvaluated =
             !model->GetItemsOrder()->IsSuiteReadyToShow();
         TBool topSuiteChanged = ResetToRootL();
         model = NULL; // ResetToRootL might have deleted the model
         TBool presentationChangeExpected = topSuiteChanged || topSuiteIsBeingEvaluated;
-        
-       
-        TBool mustDrawImmediately = !presentationChangeExpected
-                || !iDummyContainer->IsVisible() || commingFromBackground;
 
-        if( iCurrentContainer )
+        TBool mustDrawImmediately =
+            !presentationChangeExpected || !iDummyContainer->IsVisible();
+
+        if ( iCurrentContainer && mustDrawImmediately )
             {
-            if( commingFromBackground )
-                {
-				//do not draw the widget if the previous widget type is diffenernt than the current one 
-                mustDrawImmediately &= ( widgetType
-                        == iCurrentContainer->WidgetType() );
-
-                iCurrentContainer->SetWidgetCommingFromBackground( ETrue );
-                }
-
-            if( mustDrawImmediately )
-                {
-                DEBUG(("\t_Mm_:Top item index reset"));
-                iCurrentContainer->ResetWidgetPosition();
-                iCurrentContainer->Widget()->UpdateScrollBarsL();
-                iCurrentContainer->MakeVisible( ETrue );
-                iCurrentContainer->DrawNow();
-                iCurrentContainer->SetWidgetCommingFromBackground( EFalse );
-                }
+            DEBUG(("\t_Mm_:Top item index reset"));
+            iCurrentContainer->ResetWidgetPosition();
+            iCurrentContainer->Widget()->UpdateScrollBarsL();
+            iCurrentContainer->MakeVisible( ETrue );
+            iCurrentContainer->DrawNow();
             }
         }
 
@@ -2621,7 +2603,6 @@ void CMmAppUi::PrepareHomescreenForMatrixExitL()
 
     if( !succeeded )
         {
-        StartLayoutSwitchFullScreen( AknTransEffect::EApplicationExit );
         ShowHomescreenL( EExitReally );
         }
     }
@@ -2823,11 +2804,7 @@ TBool CMmAppUi::ResetToRootL()
         ResetContainerMapToRootL();
         if( iCurrentContainer )
             {
-            const TInt FirstItemIndex = 0; 
-            iCurrentContainer->GetSuiteModelL()->SetSuiteHighlightL( FirstItemIndex );
-            iMakeHightlightedItemFullyVisible = ETrue;
             iCurrentContainer->ResetWidgetPosition();
-            iCurrentContainer->SetEditModeL( EFalse );
             AddToStackL( iCurrentContainer );
             }
         RefreshUiPanesL( ETrue );
@@ -3058,22 +3035,23 @@ void CMmAppUi::HandleFullOrPartialForegroundGainedL()
         isHiddenFromFS = EFalse;
         }
 
-    if( iCurrentContainer && iCurrentSuiteModel )
-        {
-        iCurrentContainer->HandleForegroundGainedL();
-        iDummyContainer->MakeVisible( EFalse );
-        iCurrentContainer->MakeVisible( ETrue );
-        RefreshUiPanesL();
-        }
-    if( iSkinChangeNeeded && !iSkinChangeInProgress )
-        {
-        MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-        if( skinInstance && !skinInstance->IsUpdateInProgress() )
-            {
-            RefreshIconsL();
-            }
-        }
+  if (iCurrentContainer && iCurrentSuiteModel )
+    {
+    iCurrentContainer->HandleForegroundGainedL();
+    iDummyContainer->MakeVisible( EFalse );
+    iCurrentContainer->MakeVisible( ETrue );
+    RefreshUiPanesL();
     }
+  if (iSkinChangeNeeded && !iSkinChangeInProgress)
+    {
+    MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
+    if (skinInstance && !skinInstance->IsUpdateInProgress())
+      {
+      RefreshIconsL();
+
+      }
+    }
+  }
 
 // ---------------------------------------------------------------------------
 //

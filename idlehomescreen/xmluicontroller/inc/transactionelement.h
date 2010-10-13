@@ -59,6 +59,8 @@ namespace AiXmlUiController
             
             void Reset();
             
+            RAiPolicyElementArray& PolicyArray();
+            
             /**
              * Sets current content priority value.
              *
@@ -104,10 +106,10 @@ namespace AiXmlUiController
              * The policy is applied by modifying CSS property defined
              * by non-empty content.
              */
-            void ApplyPublishingPolicy( RAiPolicyElementArray& aPolicyArray,
+            void ApplyPublishingPolicy( TBool& aLayoutChanged,
                                         RPropertyHashMap& aPropertyHashMap );
             
-            void DoApplyPublishingPolicyL( RAiPolicyElementArray& aPolicyArray,
+            void DoApplyPublishingPolicyL( TBool& aLayoutChanged,
                                            RPropertyHashMap& aPropertyHashMap );
             
             /**
@@ -123,6 +125,11 @@ namespace AiXmlUiController
             MXnComponentInterface& ComponentInterfaceL() const;
             
         private:
+            
+            /**
+             * Array of policy elements
+             */
+            RAiPolicyElementArray iPolicyArray;
             
             /**
              * Content priority map

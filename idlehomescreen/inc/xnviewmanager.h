@@ -62,8 +62,6 @@ public:
     // new functions
     virtual void NotifyViewActivatedL( const CXnViewData& aViewData ) = 0;
 
-    virtual void NotifyViewLoadedL( const CXnViewData& aViewData ) = 0;
-
     virtual void NotifyViewDeactivatedL( const CXnViewData& aViewData ) = 0;
 
     virtual void NotifyConfigureWidgetL(
@@ -74,9 +72,9 @@ public:
 
     virtual void NotifyWidgetRemovalL( const CXnPluginData& aPluginData ) = 0;
     
-    virtual void NotifyViewAdditionL( const CXnViewData& aViewData ) = 0;
+    virtual void NotifyViewAdditionL( const CXnPluginData& aPluginData ) = 0;
 
-    virtual void NotifyViewRemovalL( const CXnViewData& aViewData ) = 0;
+    virtual void NotifyViewRemovalL( const CXnPluginData& aPluginData ) = 0;
     
     virtual void NotifyAllViewsLoadedL() = 0;
     
@@ -175,12 +173,10 @@ public:
         const CHsContentInfo& aContentInfo,
         CXnPluginData& aPluginData );
 
-    void ActivateNextViewL();
+    void ActivateNextViewL( TInt aEffectId = 0 );
 
-    void ActivatePreviousViewL();
+    void ActivatePreviousViewL( TInt aEffectId = 0 );
 
-    void ActivateViewL( CXnViewData& aViewData, TUid aEffect, TBool aUpdateBg = ETrue );
-    
     TInt AddViewL( const CHsContentInfo& aInfo );
     
     void AddViewL( TInt aEffectId = 0 );
@@ -217,9 +213,7 @@ public:
     void HandleErrorNotes( const TInt aError ) const;
     
     void PublishersReadyL( CXnViewData& aViewData, TInt aResult );
-
-    void NotifyViewLoadedL( const CXnViewData& aViewData );
-
+        
     void NotifyAllViewsLoadedL();
         
 private:
@@ -247,11 +241,10 @@ private:
 
     CXnViewData* ViewData( CXnNode& aNode ) const;
 
-public:
     CXnViewData& PreviousViewData() const;
+
     CXnViewData& NextViewData() const;
-    
-private:
+
     void UpdateCachesL();
           
     void ReportWidgetAmountL( const CXnViewData& aViewData );

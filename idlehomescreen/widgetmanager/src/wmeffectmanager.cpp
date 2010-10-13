@@ -89,7 +89,7 @@ void CWmEffectManager::BeginFullscreenEffectL( TInt aId )
     effect->iId = aId;
     effect->iType = KEffectTypeFullscreen;
     effect->iState = KWaitForLayout;
-    iEffects.AppendL( effect );
+    iEffects.Append( effect );
     
     CleanupStack::Pop( effect );
 

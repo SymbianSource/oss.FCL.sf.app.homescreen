@@ -45,7 +45,6 @@
 
 // Constants
 const TInt KScheduleInterval( 2000000 );
-_LIT8( KTemplateViewUID, "0x20026f50" );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -95,9 +94,6 @@ CXnRootData::CXnRootData( CXnViewManager& aManager, TUid aApplicationUid )
 //
 CXnRootData::~CXnRootData()
     {
-    delete iTemplateViewUid;
-    iTemplateViewUid = NULL;
-    
     if ( iLoadTimer )
         {
         iLoadTimer->Cancel();
@@ -254,7 +250,7 @@ void CXnRootData::Destroy()
 // 
 // -----------------------------------------------------------------------------
 //
-void CXnRootData::LoadRemainingViewsL()
+void CXnRootData::LoadRemainingViews()
     {
     if ( iFlags.IsClear( EIsDispose ) )
         {
@@ -426,46 +422,6 @@ CXnViewData& CXnRootData::NextViewData() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnRootData::ViewData()
-// -----------------------------------------------------------------------------
-//
-CXnViewData* CXnRootData::ViewData( CXnNode& aNode ) const
-    {
-    CXnNode* tmp( &aNode );
-    CXnNode* viewNode( NULL );
-    while( tmp )
-        {
-        if ( tmp->ViewNodeImpl() )
-            {
-            viewNode = tmp;
-            break;
-            }
-        else
-            {
-            tmp = tmp->Parent();
-            }
-        }
-    if( !viewNode )
-        {
-        return NULL;
-        }
-
-    CXnViewData* viewData( NULL );
-    for ( TInt i = 0; i < iPluginsData.Count(); i++ )
-        {
-        CXnViewData* tmpViewdata( static_cast< CXnViewData* >( iPluginsData[i] ) );
-        if( tmpViewdata->ViewNode() == viewNode )
-            {
-            viewData = tmpViewdata;
-            break;
-            }
-        }
-    
-    return viewData;
-    }
-
-    
-// -----------------------------------------------------------------------------
 // CXnRootData::DestroyViewData()
 // Sets view data to be destroyed
 // -----------------------------------------------------------------------------
@@ -478,9 +434,10 @@ void CXnRootData::DestroyViewData( CXnViewData* aViewData )
         {
         iPluginsData.Remove( index );
                 
-        if ( iViewsToDestroy.Find( aViewData ) == KErrNotFound && 
-           iViewsToDestroy.Append( aViewData ) == KErrNone )
+        if ( iViewsToDestroy.Find( aViewData ) == KErrNotFound )
             {
+            iViewsToDestroy.Append( aViewData );
+            
             iDestroyTimer->Cancel();
             
             iDestroyTimer->Start( TTimeIntervalMicroSeconds32( 0 ),
@@ -642,28 +599,6 @@ TInt32 CXnRootData::MaxPages()
     {
     return iMaxPages;
     }
-
-// ---------------------------------------------------------------------------
-// Returns TemplateViewUid
-// ---------------------------------------------------------------------------
-//
-const TDesC8& CXnRootData::TemplateViewUid() const
-    {
-    const TDesC8& templateViewUid = KTemplateViewUID;
-    return iTemplateViewUid ? *iTemplateViewUid : templateViewUid; // qhd uid
-    };
-
-// ---------------------------------------------------------------------------
-// Sets TemplateViewUid
-// ---------------------------------------------------------------------------
-//
-void CXnRootData::SetTemplateViewUidL( const TDesC8& aTemplateViewUid )
-    {
-    delete iTemplateViewUid;
-    iTemplateViewUid = NULL;
-
-    iTemplateViewUid = aTemplateViewUid.AllocL();
-    };
 
 // -----------------------------------------------------------------------------
 // CXnRootData::RunDestroyL()

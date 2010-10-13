@@ -39,7 +39,7 @@
 NONSHARABLE_CLASS( CHnRepositoryObserver ):
     public CBase,
     public MCenRepNotifyHandlerCallback
-  {
+	{
 public:
 
     /**
@@ -98,7 +98,7 @@ protected:
      */
     CCenRepNotifyHandler* iNotifyHandler;
 
-  };
+	};
 
 /**
  * Widget Type Repository Observer.
@@ -110,7 +110,7 @@ protected:
  * @ingroup group_hnmetadatamodel
  */
 NONSHARABLE_CLASS( CHnRepositoryWidgetTypeObserver ): public CHnRepositoryObserver
-  {
+	{
 public:
 
     /**
@@ -164,7 +164,7 @@ private:
      * @param aCmnPtrs Common pointers.
      * @since S60 v5.0
      */
-  CHnRepositoryWidgetTypeObserver( THnMdCommonPointers* aCmnPtrs );
+	CHnRepositoryWidgetTypeObserver( THnMdCommonPointers* aCmnPtrs );
 
 private:
 
@@ -173,23 +173,24 @@ private:
      *
      * @since S60 v5.0
      */
-  void ConstructL( const TUid aRepositoryUid );
+	void ConstructL( const TUid aRepositoryUid );
 
 private:
 
-  /**
-   * Array holding ids of widgets being switched.
-   * It is used to eliminate double refresh for such suites.
-   */
-  RArray<TUint32> iWidgetSwitches;
+	/**
+	 * Array holding ids of widgets being switched.
+	 * It is used to eliminate double refresh for such suites.
+	 */
+	RArray<TUint32> iWidgetSwitches;
 
-  };
+	};
 
 
 
 NONSHARABLE_CLASS( CHnRepositoryShowFolderObserver ): 	public CHnRepositoryObserver,
-                            public MLiwNotifyCallback
-  {
+														public MLiwNotifyCallback,
+														public MHnSuiteObserver
+	{
 public:
 
     /**
@@ -200,26 +201,26 @@ public:
     virtual ~CHnRepositoryShowFolderObserver();
 
     /**
-   * Factory function.
-   *
-   * @param aCmnPtrs Common pointers.
-   * @return Repository Observer.
-   * @since S60 v5.0
-   */
-  static CHnRepositoryShowFolderObserver* NewL(
-      THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid,
-      const TUint32 aId);
+	 * Factory function.
+	 *
+	 * @param aCmnPtrs Common pointers.
+	 * @return Repository Observer.
+	 * @since S60 v5.0
+	 */
+	static CHnRepositoryShowFolderObserver* NewL(
+			THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid,
+			const TUint32 aId);
 
-  /**
-   * Factory function.
-   *
-   * @param aCmnPtrs Common pointers.
-   * @return Repository Observer.
-   * @since S60 v5.0
-   */
-  static CHnRepositoryShowFolderObserver* NewLC(
-      THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid,
-      const TUint32 aId);
+	/**
+	 * Factory function.
+	 *
+	 * @param aCmnPtrs Common pointers.
+	 * @return Repository Observer.
+	 * @since S60 v5.0
+	 */
+	static CHnRepositoryShowFolderObserver* NewLC(
+			THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid,
+			const TUint32 aId);
 
     /**
      * Change handler method.
@@ -249,6 +250,14 @@ public:
         CLiwGenericParamList& aEventParamList,
         const CLiwGenericParamList& aInParamList);
 
+    /**
+     * From MHnSuiteObserver
+     */
+    virtual void HandleSuiteEventL ( THnCustomSuiteEvent aCustomSuiteEvent,
+            CHnSuiteModel *aModel );
+
+
+
 private:
 
     /**
@@ -257,7 +266,7 @@ private:
      * @param aCmnPtrs Common pointers.
      * @since S60 v5.0
      */
-  CHnRepositoryShowFolderObserver( THnMdCommonPointers* aCmnPtrs, TUint32 iId  );
+	CHnRepositoryShowFolderObserver( THnMdCommonPointers* aCmnPtrs, TUint32 iId  );
 
     /**
      * Extracts the folder name from the CR key.
@@ -265,14 +274,14 @@ private:
      * @param aNewValue The CR key.
      * @since S60 v5.0
      */
-  void ExtractCRKeyShowFolderName( const TDesC& aNewValue );
+	void ExtractCRKeyShowFolderName( const TDesC& aNewValue );
 
-  /**
-   * Request get list for parent folder of an application.
-   *
-   * @param aFolderId A parent folder id
-   * @since S60 v5.0
-   */
+	/**
+	 * Request get list for parent folder of an application.
+	 *
+	 * @param aFolderId A parent folder id
+	 * @since S60 v5.0
+	 */
     void GetShowFolderL( TUint32 aFolderId );
 
     /**
@@ -299,21 +308,21 @@ private:
      *
      * @since S60 v5.0
      */
-  void ConstructL( const TUid aRepositoryUid );
+	void ConstructL( const TUid aRepositoryUid );
 
 private:
 
-  /**
+	/**
      * Folder application group name.
      */
-  TBuf8< KApaMaxAppGroupName > iCRKeyFolderName;
+	TBuf8<KApaMaxAppGroupName> iCRKeyFolderName;
 
     /**
      * Mcs id for an application item in a folder with a given app group name.
      */
-  TBuf8<KUidStringLength> iCRKeyFolderItemUid;
+	TBuf8<KUidStringLength> iCRKeyFolderItemUid;
 
-  /**
+	/**
      * Own.
      * Intance of the service handler.
      */
@@ -323,124 +332,7 @@ private:
        * Flag describing the type of notification.
      */
     TInt iNotifyType;
-  };
-
-/**
- * Open item Repository Observer.
- *
- * It is used to inform hierarchy navigator of changes in the suites repository.
- *
- * @lib hnmetadatamodel
- * @since S60 5.0
- * @ingroup group_hnmetadatamodel
- */
-NONSHARABLE_CLASS( CHnRepositoryOpenItemObserver ):
-    public CHnRepositoryObserver,
-    public MLiwNotifyCallback
-    {
-public:
-
-    /**
-     * Default C++ Destructor.
-     *
-     * @since S60 v5.0
-     */
-    virtual ~CHnRepositoryOpenItemObserver();
-
-    /**
-     * Factory function.
-     *
-     * @param aCmnPtrs Common pointers.
-     * @return Repository Observer.
-     * @since S60 v5.0
-     */
-    static CHnRepositoryOpenItemObserver* NewL(
-            THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid,
-            const TUint32 aId );
-
-    /**
-     * Factory function.
-     *
-     * @param aCmnPtrs Common pointers.
-     * @return Repository Observer.
-     * @since S60 v5.0
-     */
-    static CHnRepositoryOpenItemObserver* NewLC(
-            THnMdCommonPointers* aCmnPtrs, const TUid aRepositoryUid,
-            const TUint32 aId );
-
-    /**
-     * Change handler method.
-     * It is invoked whenever notifier detects a change in the CR.
-     *
-     * @param aId Id of the entry in CR.
-     * @since S60 v5.0
-     */
-    void HandleNotifyString( TUint32 aId, const TDesC16& aNewValue );
-
-    /**
-     * Change handler method.
-     * It is invoked whenever notifier detects a change in the CR.
-     *
-     * @param aId Id of the entry in CR.
-     * @since S60 v5.0
-     */
-    void HandleNotifyStringL( TUint32 aId, const TDesC16& aNewValue );
-
-    /**
-     * Handles notifications caused by an asynchronous Execute*CmdL call
-     * or an event.
-     *
-     * @param aCmdId The service command associated to the event.
-     * @param aEventId Occured event, see LiwCommon.hrh.
-     * @param aEventParamList Event parameters, if any, as defined per
-     *        each event.
-     * @param aInParamList Input parameters, if any, given in the
-     *        related HandleCommmandL.
-     * @return Error code for the callback.
-     */
-    virtual TInt HandleNotifyL(
-                TInt aCmdId,
-                TInt aEventId,
-                CLiwGenericParamList& aEventParamList,
-                const CLiwGenericParamList& aInParamList);
-
-private:
-
-    /**
-     * Defautlt C++ Constructor.
-     *
-     * @param aCmnPtrs Common pointers.
-     * @since S60 v5.0
-     */
-    CHnRepositoryOpenItemObserver( THnMdCommonPointers* aCmnPtrs, TUint32 iId );
-
-    /**
-     * Second stage constructor.
-     *
-     * @since S60 v5.0
-     */
-    void ConstructL( const TUid aRepositoryUid );
-
-private:
-
-    /**
-     * Request get list for an folder.
-     *
-     * @param aFolderId A parent folder id
-     * @since S60 v5.0
-     */
-    void ShowFolderL( const TDesC16& aFolderId );
-
-private:
-
-    /**
-     * Own.
-     * Intance of the service handler.
-     */
-    CHnServiceHandler* iServiceHandler;
-
-    };
+	};
 
 #endif /*HNREPOSITORYOBSERVER_H_*/
 

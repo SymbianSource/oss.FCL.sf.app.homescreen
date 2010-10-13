@@ -21,7 +21,6 @@
 
 // INCLUDE FILES
 #include <e32base.h>
-#include "wmstore.h"
 
 // FORWARD DECLARATIONS
 class CRepository;
@@ -37,11 +36,10 @@ NONSHARABLE_CLASS( CWmConfiguration ) : public CBase
 	
 public: // constructors and destructor
 
-    /** Store's Application type */
-    enum TStoreAppType
+    /** Operator Application type */
+    enum TOpAppType
         {
         EUnknown,
-        EOviCwrt,
         ES60,
         ECwrt,
         EWrt,
@@ -66,22 +64,70 @@ private:
     void ConstructL();
 
 public: // API
-        
-    /**
-     * Number of Stores
-     */
-    TInt StoreCount();
     
     /**
-     * Returns Store configuration array ref
+     * Number of portal buttons (1 or more)
      */
-    const RPointerArray<CWmConfItem>& StoreConfArray();
+    TInt PortalButtonCount();
+
+    /**
+     * Label text to be displayed on a portal button
+     * @param aIndex index of the button, starting at 0
+     */
+    const TDesC& PortalButtonText( TInt aIndex );
     
     /**
-	 * To compare orders
-	 */
-    static TInt CompareStoreOrder( 
-            const CWmConfItem& aItemOne, const CWmConfItem& aItemTwo );
+     * Icon to be displayed on a portal button
+     * Logo syntax follows the widget icon syntax in CWmImageConverter
+     * @param aIndex index of the button, starting at 0
+     */
+    const TDesC& PortalButtonIcon( TInt aIndex );
+    
+    /**
+     * Returns url to for browser by button index
+     * @param aIndex index of the button, starting at 0
+     */
+    const TDesC& PortalButtonBrowserUrl( TInt aIndex );
+    
+    /**
+     * Returns client uid by button index 
+     * @param aIndex index of the button, starting at 0
+     */
+    TUid PortalButtonClientUid( TInt aIndex );
+    
+    /**
+     * Returns client parameter by button index 
+     * @param aIndex index of the button, starting at 0
+     */
+    const TDesC& PortalButtonClientParam( TInt aIndex );
+    
+    /**
+     * Returns bool if buttons are mirrored.
+     * @return true when operator button on left on portraid and 
+     * on top on landscape.
+     */
+    TBool PortalButtonsMirrored();
+    
+    /**
+     * Returns application type by button index
+     * @param aIndex button index
+     * @return application type
+     */
+    TOpAppType PortalButtonApplicationType( TInt aIndex );
+    
+    /**
+     * Returns application id as string
+     * @param aIndex button index
+     * @param aOperatorAppId string to get app id
+     */
+    void PortalButtonApplicationId( TInt aIndex, TDes& aOperatorAppId );
+    
+    /**
+     * Returns application id as uid
+     * @param aIndex button index
+     * @param aOperatorAppId uid to get app id
+     */
+    void PortalButtonApplicationId( TInt aIndex, TUid& aOperatorAppId );
     
 private: // New functions
     
@@ -91,15 +137,15 @@ private: // New functions
     void ReadInt32Parameter( TInt aKey, TInt32& aValue );
     void ReadIntParameter( TInt aKey, TInt& aValue );
     HBufC* ReadLocalisedParameterL( TInt aOffset );
-    void ReadApplicationInfoL( TInt aKey, CWmConfItem& aConfItem );
+    void ReadOperatorApplicationInfoL();
     TUid StringToUid( const TDesC& aStr );
     
     /** Returns uid of the widget with a particular bundle identifier. */
     TUid FetchWidgetUidFromRegistryL( const TDesC& aBundleId );
     
-    /** sets Store icon to  if not already defined */
-    void SetStoreIconL( CWmConfItem& aConfItem );
-
+    /** sets operator icon to button if not already defined */
+    void SetOperatorIconL( TUid aUid );
+	
 private:
 
     /**
@@ -117,123 +163,73 @@ private:
      * system language
      */
     TInt                    iLanguageIndex;
+
+    /**
+     * OVI store button text
+     */
+    HBufC*                  iOviButtonTitle;
     
     /**
-     * Array of configuration items. Array is in order as they should appear in UI
-     */    
-    RPointerArray<CWmConfItem> iConfItems;
+     * OVI store button icon
+     */
+    HBufC*                  iOviButtonIcon;
+    
+    /**
+     * OVI store button widget client param
+     */
+    HBufC*                  iOviStoreClientParam;
+    
+    /**
+     * OVI store laucher uid
+     */
+    TUid                    iOviStoreUid;
+    
+    /**
+     * OPERATOR button text
+     */
+    HBufC*                  iOperatorButtonTitle;
+    
+    /**
+     * OPERATOR store icon
+     */
+    HBufC*                  iOperatorButtonIcon;
+    
+    /**
+     * OPERATOR store button browser Url
+     */
+    HBufC*                  iOperatorButtonUrl;
+    
+    /**
+     * OPERATOR store button application parameter
+     */
+    HBufC*                  iOperatorParam;
+    
+    /**
+     * OPERATOR store application id as string. Used for java
+     */
+    HBufC*                  iOperatorAppIdStr;
+    
+    /**
+     * OPERATOR store application id as uid.
+     */
+    TUid                    iOperatorAppIdUid;
+        
+    /**
+     * OPERATOR store application type
+     */
+    TOpAppType              iOperatorAppType;
+        
+    /**
+     * Tells if operator button is enabled. 
+     */
+    TBool                   iOperatorButtonEnabled;
+        
+    /**
+     * Tells if buttons need to be mirrored for operator. 
+     */
+    TBool                   iButtonsMirrored;
 	};
 
-
-/**
- * Configuration item class for Widget Manager
- * 
- * @class CWmConfiguration
- */
-NONSHARABLE_CLASS( CWmConfItem ) : public CBase
-    {
-    public: // constructors and destructor
-
-        /** Two-phased constructors. */
-        static CWmConfItem* NewL();
-
-        static CWmConfItem* NewLC();
-        
-        /** Destructor */
-        ~CWmConfItem();
-        
-    private:
-        /** constructor */
-        CWmConfItem();
-        
-        /** 2nd phase constructor */
-        void ConstructL();
-        
-public: // API
-    /**
-     * Returns Store id
-     */
-    CWmStore::TStoreId Id();
-    
-    /**
-     * Returns Label text to be displayed on a Store 
-     */
-    const TDesC& Title();
-    
-    /**
-     * Returns Icon to be displayed on a Store 
-     * Logo syntax follows the widget icon syntax in CWmImageConverter
-     */
-    const TDesC& Icon();  
-
-    /**
-     * Returns Order of Store
-     */
-    TInt Order();
-    
-    /**
-     * Returns url to for browser
-     */
-    const TDesC& BrowserUrl();   
-   
-    /**
-     * Returns application type
-     */
-    CWmConfiguration::TStoreAppType AppType();
-    
-    /**
-     * Returns application uid 
-     */
-    TUid AppUid();
-    
-    /**
-     * Returns application parameter by index 
-     */
-    const TDesC& AppParam();
-    
-private:    
-    /**
-     * Store Id
-     */
-    CWmStore::TStoreId      iId;
-    
-    /**
-     * Store text
-     */
-    HBufC*                  iTitle;
-    
-    /**
-     * Store icon
-     */
-    HBufC*                  iIcon;
-    
-    /**
-     * Store order
-     */
-    TInt                    iOrder;
-            
-    /**
-     * Store browser Url
-     */
-    HBufC*                  iUrl;              
-  
-    /**
-     * Application type
-     */
-    CWmConfiguration::TStoreAppType           iAppType;
-    
-    /**
-     * Application uid
-     */
-    TUid                    iAppUid;
-    
-    /**
-     * Application parameter
-     */
-    HBufC*                  iAppParam;
-    
-    friend class CWmConfiguration;
-    };
 #endif // WMCONFIGURATION_H
 
 // End of File

@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   
-*  Version     : %version: MM_67 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_66 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -35,7 +35,6 @@
 #include "mmtemplatelibrary.h"
 #include "mmpostevaluationprocessor.h"
 #include "mmdraweranimator.h"
-#include "mmlistboxview.h"
 
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -328,16 +327,4 @@ void CMmListBoxContainer::UpdateViewScrollBarThumbs()
 	{
 	iListBox->UpdateScrollBarThumbs();
 	}
-
-//----------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CMmListBoxContainer::SetWidgetCommingFromBackground(
-        TBool aCommingFromBackground )
-    {         
-    CMmListBoxView* view = static_cast<CMmListBoxView*> ( Widget()->View() );
-    view->SetListCommingFromBackground( aCommingFromBackground );
-    }
-
 // End of File

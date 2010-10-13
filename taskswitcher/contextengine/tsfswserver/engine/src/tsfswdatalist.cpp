@@ -836,28 +836,28 @@ TBool CTsFswDataList::RemoveScreenshotFromParent( TInt aBmpHandle )
     }
 
 // --------------------------------------------------------------------------
-// CTsFswDataList::RemoveScreenshotFromParent
+// CTsFswDataList::CheckForWgIdUsage
 // --------------------------------------------------------------------------
 //
-void CTsFswDataList::RemoveHiddenAppsScrenshotsL()
+TBool CTsFswDataList::CheckForWgIdUsage( TInt aWgId )
     {
-    RArray<TInt> hiddenWgIds;
-    THashMapIter<TInt, CFbsBitmap*> iter( iScreenshots );
-    while ( const TInt* wgIdkey = iter.NextKey() )
+    // check the dirty flag and refresh if needed
+    if ( iTaskListDirty )
         {
-        TInt wgId = *wgIdkey;
-        TBool hidden = HiddenApps()->IsHiddenL( AppUidForWgIdL( wgId),
-                iWsSession, wgId );
-        if( hidden )
+        TRAP_IGNORE ( CollectTasksL(); );
+        // clear dirty flag
+        SetDirty(EFalse);
+        }
+    TBool used( EFalse );
+    TInt count = iData.Count();
+    for (TInt i = 0; i < count; i++ )
+        {
+        if( iData[i]->WgId() == aWgId )
             {
-            hiddenWgIds.Append( wgId );
+            used =  ETrue;
+            break;
             }
         }
-    for ( TInt i = 0; i < hiddenWgIds.Count(); i++)
-        {
-        RemoveScreenshot( hiddenWgIds[i] );
-        }
-    hiddenWgIds.Reset();
+    return used;
     }
-
 // end of file

@@ -21,51 +21,45 @@
 
 #include <data_caging_paths_for_iby.hrh>
 
-file=ABI_DIR\BUILD_DIR\mmwidgets.dll                                         SHARED_LIB_DIR\mmwidgets.dll
+file=ABI_DIR\BUILD_DIR\mmwidgets.dll	                                 SHARED_LIB_DIR\mmwidgets.dll
 
-data=\epoc32\data\z\resource\list\custom\akn_single_large_graphic_pane.xml   resource\list\custom\akn_single_large_graphic_pane.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_1.xml          resource\list\custom\akn_logical_template_1.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_2.xml          resource\list\custom\akn_logical_template_2.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_3.xml          resource\list\custom\akn_logical_template_3.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_4.xml          resource\list\custom\akn_logical_template_4.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_5.xml          resource\list\custom\akn_logical_template_5.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_6.xml          resource\list\custom\akn_logical_template_6.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_7.xml          resource\list\custom\akn_logical_template_7.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_8.xml          resource\list\custom\akn_logical_template_8.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_10.xml         resource\list\custom\akn_logical_template_10.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_11.xml         resource\list\custom\akn_logical_template_11.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_12.xml         resource\list\custom\akn_logical_template_12.xml
-data=\epoc32\data\z\resource\list\custom\akn_logical_template_13.xml         resource\list\custom\akn_logical_template_13.xml
+data=\epoc32\data\z\resource\list\custom\akn_single_large_graphic_pane.xml      resource\list\custom\akn_single_large_graphic_pane.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_1.xml      	resource\list\custom\akn_logical_template_1.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_2.xml      	resource\list\custom\akn_logical_template_2.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_3.xml             resource\list\custom\akn_logical_template_3.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_4.xml      	resource\list\custom\akn_logical_template_4.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_5.xml      	 resource\list\custom\akn_logical_template_5.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_6.xml      	 resource\list\custom\akn_logical_template_6.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_7.xml      	 resource\list\custom\akn_logical_template_7.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_8.xml      	 resource\list\custom\akn_logical_template_8.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_10.xml      	 resource\list\custom\akn_logical_template_10.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_11.xml      	 resource\list\custom\akn_logical_template_11.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_12.xml      	 resource\list\custom\akn_logical_template_12.xml
+data=\epoc32\data\z\resource\list\custom\akn_logical_template_13.xml      	 resource\list\custom\akn_logical_template_13.xml
 
 
-data=\epoc32\data\z\resource\grid\custom\akn_single_large_graphic_pane.xml   resource\grid\custom\akn_single_large_graphic_pane.xml
-data=\epoc32\data\z\resource\grid\custom\akn_logical_template_1.xml          resource\grid\custom\akn_logical_template_1.xml
-data=\epoc32\data\z\resource\grid\custom\akn_logical_template_2.xml          resource\grid\custom\akn_logical_template_2.xml
-data=\epoc32\data\z\resource\grid\custom\akn_logical_template_3.xml          resource\grid\custom\akn_logical_template_3.xml
-data=\epoc32\data\z\resource\grid\custom\akn_logical_template_4.xml          resource\grid\custom\akn_logical_template_4.xml
+data=\epoc32\data\z\resource\grid\custom\akn_single_large_graphic_pane.xml      resource\grid\custom\akn_single_large_graphic_pane.xml
+data=\epoc32\data\z\resource\grid\custom\akn_logical_template_1.xml      	resource\grid\custom\akn_logical_template_1.xml
+data=\epoc32\data\z\resource\grid\custom\akn_logical_template_2.xml      	resource\grid\custom\akn_logical_template_2.xml
+data=\epoc32\data\z\resource\grid\custom\akn_logical_template_3.xml             resource\grid\custom\akn_logical_template_3.xml
+data=\epoc32\data\z\resource\grid\custom\akn_logical_template_4.xml      	resource\grid\custom\akn_logical_template_4.xml
 
 
 //lct exports
 
-data=\epoc32\data\z\resource\list\lct\akn_list_single_hc_apps_pane.xml       resource\list\lct\akn_list_single_hc_apps_pane.xml
-data=\epoc32\data\z\resource\list\lct\akn_single_large_graphic_pane.xml      resource\list\lct\akn_single_large_graphic_pane.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_1.xml             resource\list\lct\akn_logical_template_1.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_2.xml             resource\list\lct\akn_logical_template_2.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_3.xml             resource\list\lct\akn_logical_template_3.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_4.xml             resource\list\lct\akn_logical_template_4.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_5.xml             resource\list\lct\akn_logical_template_5.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_6.xml             resource\list\lct\akn_logical_template_6.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_6a.xml            resource\list\lct\akn_logical_template_6a.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_7.xml             resource\list\lct\akn_logical_template_7.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_8.xml             resource\list\lct\akn_logical_template_8.xml
-data=\epoc32\data\z\resource\list\lct\akn_logical_template_12.xml            resource\list\lct\akn_logical_template_12.xml
+data=\epoc32\data\z\resource\list\lct\akn_list_single_hc_apps_pane.xml      	resource\list\lct\akn_list_single_hc_apps_pane.xml
+data=\epoc32\data\z\resource\list\lct\akn_single_large_graphic_pane.xml      	resource\list\lct\akn_single_large_graphic_pane.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_1.xml      	 	resource\list\lct\akn_logical_template_1.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_2.xml      	 	resource\list\lct\akn_logical_template_2.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_3.xml             	resource\list\lct\akn_logical_template_3.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_4.xml      	 	resource\list\lct\akn_logical_template_4.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_5.xml      	 	resource\list\lct\akn_logical_template_5.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_6.xml      	 	resource\list\lct\akn_logical_template_6.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_6a.xml      	 	resource\list\lct\akn_logical_template_6a.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_7.xml      	 	resource\list\lct\akn_logical_template_7.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_8.xml      	 	resource\list\lct\akn_logical_template_8.xml
+data=\epoc32\data\z\resource\list\lct\akn_logical_template_12.xml      	 	resource\list\lct\akn_logical_template_12.xml
 
-
-#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4) 
-    data=\epoc32\data\z\resource\grid\lct\akn_logical_template_3_vga.xml     resource\grid\lct\akn_logical_template_3.xml
-#else
-    data=\epoc32\data\z\resource\grid\lct\akn_logical_template_3.xml         resource\grid\lct\akn_logical_template_3.xml
-#endif
-
+data=\epoc32\data\z\resource\grid\lct\akn_logical_template_3.xml      	 	resource\grid\lct\akn_logical_template_3.xml
 
 #endif // MATRIXWIDGETS_IBY

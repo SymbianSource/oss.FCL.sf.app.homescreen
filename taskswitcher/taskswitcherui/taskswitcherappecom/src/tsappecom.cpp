@@ -74,7 +74,6 @@ void CTsEcomPlugin::ConstructL()
     TSLOG_IN();
     
     DefineTaskswitcherStateProperty();
-    User::LeaveIfError( iApaLsSession.Connect() );
     
     TSLOG_OUT();
     }
@@ -86,7 +85,6 @@ void CTsEcomPlugin::ConstructL()
 //
 CTsEcomPlugin::~CTsEcomPlugin()
     {
-    iApaLsSession.Close();
     }
 
 // ---------------------------------------------------------------------------
@@ -190,11 +188,18 @@ TBool CTsEcomPlugin::IsReady()
     TSLOG_CONTEXT( CTsEcomPlugin::IsReady, TSLOG_LOCAL );
     TSLOG_IN();
 
-    TBool ret = ETrue;    
+    TBool ret = EFalse;    
+    CEikonEnv* eikonEnv = CEikonEnv::Static();
     
-    if( !IsTaskSwitcherStarted() )
+    if ( eikonEnv )
         {
-        ret = (KErrNone == StartTaskSwitcher()) ? ETrue : EFalse;
+        TApaTaskList taskList( eikonEnv->WsSession() );
+        TApaTask task = taskList.FindApp( KTaskswitcherAppUidValue ); 
+    
+        if ( task.Exists() )
+            {
+            ret = ETrue;
+            }
         }
     
     TSLOG1_OUT( "IsReady returns: %d", ret );
@@ -242,74 +247,6 @@ void CTsEcomPlugin::DefineTaskswitcherStateProperty()
         }              
     
     TSLOG_OUT();
-    }
-
-// -----------------------------------------------------------------------------
-// CTsEcomPlugin::IsTaskSwitcherStarted
-// -----------------------------------------------------------------------------
-//
-TBool CTsEcomPlugin::IsTaskSwitcherStarted()
-    {
-    TSLOG_CONTEXT( CTsEcomPlugin::IsTaskSwitcherStarted, TSLOG_LOCAL );
-    TSLOG_IN();
-    
-    TBool ret(EFalse);
-    CEikonEnv* eikonEnv = CEikonEnv::Static();
-    if ( eikonEnv )
-        {
-        TApaTaskList taskList( eikonEnv->WsSession() );
-        TApaTask task = taskList.FindApp( KTaskswitcherAppUidValue ); 
-        if ( task.Exists() )
-            {
-            ret = ETrue;
-            }
-        }
-    TSLOG1( TSLOG_INFO, "TaskSwitcherStarted: %d", ret);
-    TSLOG_OUT();
-    return ret;
-    }
-
-// -----------------------------------------------------------------------------
-// CTsEcomPlugin::StartTaskSwitcher
-// -----------------------------------------------------------------------------
-//
-TInt CTsEcomPlugin::StartTaskSwitcher()
-    {
-    TInt ret(0);
-    TRAPD(err, ret = StartTaskSwitcherL() );
-    if( KErrNone != err )
-        {
-        ret = err;
-        }
-    return ret;
-    }
-
-// -----------------------------------------------------------------------------
-// CTsEcomPlugin::StartTaskSwitcherL
-// -----------------------------------------------------------------------------
-//
-TInt CTsEcomPlugin::StartTaskSwitcherL()
-    {
-    TSLOG_CONTEXT( CTsEcomPlugin::StartTaskSwitcher, TSLOG_LOCAL );
-    TSLOG_IN();
-    TInt ret(KErrNone);
-    
-    TApaAppInfo appInfo;
-    TApaAppCapabilityBuf capabilityBuf;
-    ret = iApaLsSession.GetAppInfo( appInfo, KTaskswitcherAppUidValue );
-    if ( !ret )
-        {
-        TFileName appName = appInfo.iFullName;
-        CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
-        cmdLine->SetExecutableNameL( appName );
-        cmdLine->SetCommandL( EApaCommandRun );
-        ret = iApaLsSession.StartApp( *cmdLine );
-        CleanupStack::PopAndDestroy( cmdLine );
-        }
-    
-    TSLOG1( TSLOG_INFO, "RApaLsSession::StartApp returned with: %d", ret );
-    TSLOG_OUT();
-    return ret;
     }
 
 // End of file 

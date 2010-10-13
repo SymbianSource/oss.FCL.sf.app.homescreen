@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Application UI class
-*  Version     : %version: MM_83.1.2.1.23.1.24 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_83.1.2.1.23.1.21 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -372,8 +372,7 @@ private:
     enum TExitKeyType
         {
         EExitKeyApplication,
-        EExitKeyRed,
-        ECommingFromBackground
+        EExitKeyRed
         };
 
     /**
@@ -1012,10 +1011,10 @@ private: // Data
      */
     TBool iHasFocus;
 
-    /**
+  /**
      * ETrue if Matrix is hidden from TS which is used on startup.
      */
-    TBool isHiddenFromFS;
+  TBool isHiddenFromFS;
 
     /**
      * Own.

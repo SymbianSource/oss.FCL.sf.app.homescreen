@@ -25,7 +25,7 @@
 #include <hscontentpublisher.h>
 #include <hspublisherinfo.h>
 #include <activeidle2domainpskeys.h>
-#include <ainativeui.rsg>
+#include <AiNativeUi.rsg>
 #include "aidialogrenderer.h"
 #include "ainativeuiplugins.h"
 #ifdef __COVER_DISPLAY
@@ -48,7 +48,7 @@
 #include <PsetSAObserver.h>              // for CPsetSAObserver
 #include <gsmerror.h>                    // for GSM-specific error messages
 
-#include <gsnetworkpluginrsc.rsg>        // for resource IDs
+#include <GsNetworkPluginRsc.rsg>        // for resource IDs
 #include <CoreApplicationUIsSDKCRKeys.h> // for KCRUidCoreApplicationUIs, TCoreAppUIsNetworkConnectionAllowed
 #include <featmgr.h>
 

@@ -18,11 +18,11 @@
 #ifndef __DOUBLE_ROW_WIDGET_2001FDC2_IBY__
 #define __DOUBLE_ROW_WIDGET_2001FDC2_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools
 data=ZPRIVATE\200159c0\install\double_row_widget_2001fdc2\hsps\00\manifest.dat \private\200159c0\install\double_row_widget_2001fdc2\hsps\00\manifest.dat
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif // __DOUBLE_ROW_WIDGET_2001FDC2_IBY__

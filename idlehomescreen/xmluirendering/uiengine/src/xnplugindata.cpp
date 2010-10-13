@@ -37,7 +37,6 @@
 
 // Constants
 _LIT8( KLockingStatusLocked, "locked" );
-_LIT8( KLockingStatusPermanent, "permanent" );
 
 // ============================ LOCAL FUNCTIONS ================================
 
@@ -498,25 +497,12 @@ void CXnPluginData::InitialFocusNodesL( RPointerArray< CXnNode >& aList ) const
 void CXnPluginData::Flush()
     {
     // Don't touch to iOwner, because this plugin might be reused later
-    
-    delete iDirtyRegion;
-    iDirtyRegion = NULL;
-    
-    // clear all flags, except editable and removable
-    TBool removable = iFlags.IsSet( EIsRemovable );
-    TBool editable = iFlags.IsSet( EIsEditable );
-    
+           
     iFlags.ClearAll();
     
-    if( removable )
-        {
-        iFlags.Set( EIsRemovable );
-        }
-    if( editable )
-        {
-        iFlags.Set( EIsEditable );
-        }    
-
+    // This is default
+    iFlags.Set( EIsRemovable );    
+           
     iNode = NULL;
     
     delete iConfigurationId;
@@ -565,7 +551,7 @@ TBool CXnPluginData::Empty() const
     }
 
 // -----------------------------------------------------------------------------
-// CXnPluginData::SetEmptyL()
+// CXnPluginData::SetEmpty()
 // 
 // -----------------------------------------------------------------------------
 //
@@ -638,38 +624,14 @@ void CXnPluginData::PopupNodesL( RPointerArray< CXnNode >& aList ) const
 //
 void CXnPluginData::SetLockingStatus( const TDesC8& aStatus )
     {
-    if( aStatus.CompareF( KLockingStatusPermanent ) == 0 )
+    if ( aStatus.CompareF( KLockingStatusLocked ) == 0 )
         {
         iFlags.Clear( EIsRemovable );
-        iFlags.Clear( EIsEditable );
-        }
-    else if( aStatus.CompareF( KLockingStatusLocked ) == 0 )
-        {
-        iFlags.Clear( EIsRemovable );
-        iFlags.Set( EIsEditable );
         }
     else
         {
         iFlags.Set( EIsRemovable );
-        iFlags.Set( EIsEditable );               
         }
     }
 
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-//
-TXnDirtyRegion* CXnPluginData::CreateDirtyRegionL( CXnNode& aRootNode, 
-    CCoeControl& aControl )
-    {
-    delete iDirtyRegion;
-    iDirtyRegion = NULL;
-    iDirtyRegion = new (ELeave) TXnDirtyRegion;
-    iDirtyRegion->iRegion.Clear();
-    iDirtyRegion->iControl = &aControl;
-    iDirtyRegion->iRootNode = &aRootNode;
-    iDirtyRegion->iDirtyList.Reset();
-    iDirtyRegion->iLayoutControl = 0;
-    return iDirtyRegion;
-    }
-    
 // End of file

@@ -19,11 +19,11 @@
 #ifndef __WIDEIMAGE_10009DFF_IBY__
 #define __WIDEIMAGE_10009DFF_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools
 data=ZPRIVATE\200159c0\install\wideimage_10009dff\hsps\00\manifest.dat \private\200159c0\install\wideimage_10009dff\hsps\00\manifest.dat
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif // __WIDEIMAGE_10009DFF_IBY__

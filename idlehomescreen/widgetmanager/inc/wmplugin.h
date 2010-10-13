@@ -33,7 +33,6 @@ class CWmMainContainer;
 class CWmEffectManager;
 class CWmWidgetData;
 class CWmInstaller;
-class CWmConfiguration;
 
 /**
  * CWmPlugin 
@@ -168,11 +167,6 @@ public: // plugin services
     CWmInstaller& WmInstaller();
     
     /**
-     * reference to iWmConfiguration
-     */
-    CWmConfiguration& Configuration();
-    
-    /**
      * Get widget by Uid. Used for getting widget details 
      * when error has occured during uninstallation.
      * @param aUid Uid of widget
@@ -256,11 +250,6 @@ private: // data members
      * Counter for execute command delay.
      */
     TInt iExecutionCount;
-    
-    /**
-     * The configuration
-     */
-    CWmConfiguration*       iConfiguration;
     
 #ifdef _WM_UNIT_TEST
     friend class CWmUnitTest;

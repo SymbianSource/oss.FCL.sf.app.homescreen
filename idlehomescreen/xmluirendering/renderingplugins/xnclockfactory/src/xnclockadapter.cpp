@@ -31,14 +31,15 @@
 #include "xncontroladapter.h"
 #include "xnclockcontrol.h"
 #include "xnclockadapter.h"
-#include "xndatecontrol.h"
 #include "c_xnutils.h"
 
 // Constants
-_LIT8( KDisplay, "display" );
-_LIT8( KNone, "none" );
-_LIT8( KBlock, "block" );
-_LIT( KLogicalSecondaryFont, "EAknLogicalFontSecondaryFont" );
+_LIT8( KDateInformation, "Clock/DateInformation" );
+_LIT8( KDayInformation, "Clock/DayInformation" );
+
+_LIT( KDigitalFont, "EAknLogicalFontSecondaryFont" );
+_LIT( KAmPmFont, "EAknLogicalFontSecondaryFont" );
+_LIT( KDateFont, "EAknLogicalFontSecondaryFont" );
 
 // ============================ LOCAL FUNCTIONS ===============================    
 
@@ -119,8 +120,6 @@ CXnClockAdapter::~CXnClockAdapter()
 
     delete iLightObserver;    
     delete iClockControl;
-    delete iDateControl;
-    delete iDayControl;
     }
 
 // -----------------------------------------------------------------------------
@@ -136,177 +135,45 @@ void CXnClockAdapter::ConstructL()
     
     iLightObserver = CHWRMLight::NewL( this );
     
-    TBool useLocale;
-    CXnProperty* prop( 
-        iNode.GetPropertyL( XnPropertyNames::clock::KS60Format ) );
-    TClockFormat format( ClockFormat( prop, useLocale ) );
-    
     RPointerArray< CXnNodePluginIf > children( iNode.ChildrenL() );
     CleanupClosePushL( children );
     
-    for ( TInt i = 0; i < children.Count(); i++ )
+    for( TInt i = 0; i < children.Count(); i++ )
         {
         CXnNodePluginIf* child( children[i] );
-        const TDesC8& clocktype = child->Type()->Type();
         
-        if ( clocktype == XnPropertyNames::clock::format::KDigital )
+        CXnProperty* id( child->IdL() );
+        
+        if( id )         
             {
-            iDigital = child;
+            if( id->StringValue() == KDateInformation )
+                {
+                iDate = child;                               
+                }
+            else if( id->StringValue() == KDayInformation )
+                {
+                iDay = child;
+                }
             }
-        else if ( clocktype == XnPropertyNames::clock::format::KAnalog )
-            {
-            iAnalog = child;
-            }
-        else if ( clocktype == XnPropertyNames::clock::KDate )
-            {
-            if ( !iDateControl )
-                {
-                iDateControl = CXnDateControl::NewL( *this, EDate );
-                }
-            iDate = child;
-            }
-
-        RPointerArray< CXnNodePluginIf > clockChildren( child->ChildrenL() );
-        CleanupClosePushL( clockChildren );
-        for ( TInt j = 0; j < clockChildren.Count(); j++ )
-            {
-            CXnNodePluginIf* clockChild( clockChildren[j] );
-            const TDesC8& childType = clockChild->Type()->Type();
-            
-            if ( childType == XnPropertyNames::clock::KFace12 )
-                {
-                if ( !iClockControl )
-                    {
-                    iClockControl = CXnClockControl::NewL( *this, useLocale, format );
-                    }
-                iDigitalFace12 = clockChild;
-                }
-            else if ( childType == XnPropertyNames::clock::KFace24 )
-                {
-                if ( !iClockControl )
-                    {
-                    iClockControl = CXnClockControl::NewL( *this, useLocale, format );
-                    }
-                iDigitalFace24 = clockChild;
-                }
-            else if ( childType == XnPropertyNames::clock::KFace )
-               {
-                if ( !iClockControl )
-                    {
-                    iClockControl = CXnClockControl::NewL( *this, useLocale, format );
-                    }
-                iAnalogFace = clockChild;
-               }
-            else if ( childType == XnPropertyNames::clock::KDate &&
-                      clocktype == XnPropertyNames::clock::format::KDigital )
-                {
-                if ( !iDateControl )
-                    {
-                    iDateControl = CXnDateControl::NewL( *this, EDate );
-                    }
-                iDigitalDate = clockChild;
-                }
-            else if ( childType == XnPropertyNames::clock::KDate &&
-                      clocktype == XnPropertyNames::clock::format::KAnalog )
-                {
-                if ( !iDateControl )
-                    {
-                    iDateControl = CXnDateControl::NewL( *this, EDate );
-                    }
-                iAnalogDate = clockChild;
-                }
-            else if ( childType == XnPropertyNames::clock::KDay )
-               {
-                if ( !iDayControl )
-                    {
-                    iDayControl = CXnDateControl::NewL( *this, EDay );
-                    }
-                iDay = clockChild;
-               }
-            else if ( childType == XnPropertyNames::clock::KAmpm )
-               {
-                iAmpm = clockChild;
-               }
-            }
-        CleanupStack::PopAndDestroy( &clockChildren );
         }
         
     CleanupStack::PopAndDestroy( &children );
     
-    SetClockFormatL( format );
+    TBool useLocale;
+
+    CXnProperty* prop( 
+        iNode.GetPropertyL( XnPropertyNames::clock::KS60Format ) );    
+    
+    TClockFormat format( ClockFormat( prop, useLocale ) );   
+    
+    iClockControl = CXnClockControl::NewL( this, useLocale, format );    
     
     iCoeEnv->AddMessageMonitorObserverL( *this );
 	}
-
-// -----------------------------------------------------------------------------
-// CXnClockAdapter::SetDisplayToBlockL
-// -----------------------------------------------------------------------------
-// 
-void CXnClockAdapter::SetDisplayToBlockL( CXnNodePluginIf& aNode, TBool aBlock )
-    {
-    CXnDomStringPool& sp = aNode.UiEngineL()->StringPool();
-    CXnProperty* prop;
-    if ( aBlock )
-        {
-        prop = CXnProperty::NewL( 
-            KDisplay, KBlock, CXnDomPropertyValue::EString, sp );
-        }
-    else
-        {
-        prop = CXnProperty::NewL( 
-            KDisplay, KNone, CXnDomPropertyValue::EString, sp );
-        }
-    CleanupStack::PushL( prop );
-    aNode.SetPropertyL( prop );
-    CleanupStack::Pop( prop );
-    }
-
-// -----------------------------------------------------------------------------
-// CXnClockAdapter::SetClockFormatL
-// -----------------------------------------------------------------------------
-// 
-void CXnClockAdapter::SetClockFormatL( TClockFormat aFormat )
-    {
-    if ( iAnalog && iDigital )
-        {
-        if ( aFormat == EClockAnalog  )
-            {
-            SetDisplayToBlockL( *iAnalog, ETrue );
-            SetDisplayToBlockL( *iDigital, EFalse );
-            }
-        else
-            {
-            SetDisplayToBlockL( *iDigital, ETrue );
-            SetDisplayToBlockL( *iAnalog, EFalse );
-            // check whether time format is 12 or 24
-            if ( iDigitalFace12 && iDigitalFace24 )
-                {
-                if ( TLocale().TimeFormat() == ETime12 )
-                    {
-                    SetDisplayToBlockL( *iDigitalFace12, ETrue );
-                    if ( iAmpm )
-                        {
-                        SetDisplayToBlockL( *iAmpm, ETrue );
-                        }
-                    SetDisplayToBlockL( *iDigitalFace24, EFalse );
-                    }
-                else
-                    {
-                    SetDisplayToBlockL( *iDigitalFace24, ETrue );
-                    SetDisplayToBlockL( *iDigitalFace12, EFalse );
-                    if ( iAmpm )
-                        {
-                        SetDisplayToBlockL( *iAmpm, EFalse );
-                        }
-                    }
-                }
-            }
-        iNode.UiEngineL()->LayoutUIL( &iNode );
-        }
-    }
  
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::DoHandlePropertyChangeL
+//
 // -----------------------------------------------------------------------------
 //
 void CXnClockAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
@@ -315,7 +182,7 @@ void CXnClockAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
         {
         const TDesC8& name( aProperty->Property()->Name() );
         
-        if( iClockControl && name == XnPropertyNames::clock::KS60Format )
+        if( name == XnPropertyNames::clock::KS60Format )
             {
             TBool useLocale;
             
@@ -323,11 +190,28 @@ void CXnClockAdapter::DoHandlePropertyChangeL( CXnProperty* aProperty )
             
             iClockControl->SetFormatL( useLocale, format );
             }
+        else if( name == XnPropertyNames::clock::KS60DigitalFontSize )            
+            {
+            iDigitalFont = NULL;            
+            }
+        else if( name == XnPropertyNames::clock::KS60AmPmFontSize )
+            {
+            iAmPmFont = NULL;
+            }
+        else if( name == XnPropertyNames::clock::KS60DateFontSize )
+            {
+            iDateFont = NULL;
+            }
+        else if( name == XnPropertyNames::appearance::common::KColor )
+            {
+            iColorSet = EFalse;
+            }
         }
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::UpdateDisplay
+// Draws the clock component
 // -----------------------------------------------------------------------------
 //
 void CXnClockAdapter::UpdateDisplay() const
@@ -340,6 +224,7 @@ void CXnClockAdapter::UpdateDisplay() const
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::Draw
+// Draws the clock component
 // -----------------------------------------------------------------------------
 //
 void CXnClockAdapter::Draw( const TRect& aRect ) const
@@ -347,51 +232,13 @@ void CXnClockAdapter::Draw( const TRect& aRect ) const
     CXnControlAdapter::Draw( aRect );
     
     CWindowGc& gc( SystemGc() );
-
-    if ( iClockControl )
-        {
-        TClockFormat format = iClockControl->Format();
-        if ( format == EClockAnalog )
-            {
-            iClockControl->Draw( gc, iAnalogFace, NULL );
-            }
-        else
-            {
-            if ( TLocale().TimeFormat() == ETime12 )
-                {
-                iClockControl->Draw( gc, iDigitalFace12, iAmpm );
-                }
-            else
-                {
-                iClockControl->Draw( gc, iDigitalFace24, NULL );
-                }
-            }
-        }
-    
-    if ( iDateControl )
-        {
-        if ( iClockControl && iClockControl->Format() == EClockAnalog && iAnalogDate )
-            {
-            TRAP_IGNORE( iDateControl->DrawL( gc, iAnalogDate ) );
-            }
-        else if ( iClockControl && iClockControl->Format() == EClockDigital && iDigitalDate )
-            {
-            TRAP_IGNORE( iDateControl->DrawL( gc, iDigitalDate ) );
-            }
-        else
-            {
-            TRAP_IGNORE( iDateControl->DrawL( gc, iDate ) );
-            }
-        }
-    
-    if ( iDayControl )
-        {
-        TRAP_IGNORE( iDayControl->DrawL( gc, iDay ) );
-        }
+           
+    iClockControl->Draw( gc, iNode.Rect() );
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::MakeVisible
+// 
 // -----------------------------------------------------------------------------
 //        
 void CXnClockAdapter::MakeVisible( TBool aVisible )
@@ -416,6 +263,7 @@ void CXnClockAdapter::MakeVisible( TBool aVisible )
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::MonitorWsMessage
+// 
 // -----------------------------------------------------------------------------
 //    
 void CXnClockAdapter::MonitorWsMessage( const TWsEvent& aEvent )
@@ -436,13 +284,9 @@ void CXnClockAdapter::MonitorWsMessage( const TWsEvent& aEvent )
     if( foreground != iForeground )            
         {
         if( iForeground )
-            {
-            // check if clock format has changed
-            if ( iClockControl )
-                {
-                TRAP_IGNORE( iClockControl->CheckClockFormatL() );
-                }
+            {   
             UpdateDisplay();
+            
             // Start clock ensures UI state
             StartClock();
             }
@@ -455,6 +299,7 @@ void CXnClockAdapter::MonitorWsMessage( const TWsEvent& aEvent )
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::LightStatusChanged
+// 
 // -----------------------------------------------------------------------------
 //    
 void CXnClockAdapter::LightStatusChanged( TInt aTarget, 
@@ -483,128 +328,185 @@ void CXnClockAdapter::LightStatusChanged( TInt aTarget,
         }
     }
 
+
 // -----------------------------------------------------------------------------
-// CXnClockAdapter::GetTextAlignL
-// -----------------------------------------------------------------------------
+// CXnClockAdapter::FontL
 // 
-CGraphicsContext::TTextAlign CXnClockAdapter::GetTextAlignL( CXnNodePluginIf& aNode )
+// -----------------------------------------------------------------------------
+//    
+const CAknLayoutFont* CXnClockAdapter::FontL( const TInt aType )
     {
-    CGraphicsContext::TTextAlign ret = CGraphicsContext::ECenter;
-    CXnProperty* prop( aNode.GetPropertyL( 
-            XnPropertyNames::appearance::common::KTextAlign ) );
+    CFont* font( NULL );
     
-    if( prop )
+    if( aType == EDigitalFont )
         {
-        if ( prop->StringValue() ==
-                XnPropertyNames::appearance::common::textalign::KAlignLeft )
-            {
-            ret = CGraphicsContext::ELeft;
+        if( !iDigitalFont )
+            {            
+            CreateFontL( aType );
             }
-        else if ( prop->StringValue() ==
-                XnPropertyNames::appearance::common::textalign::KAlignRight )
-            {
-            ret = CGraphicsContext::ERight;
-            }
-        else if ( prop->StringValue() ==
-                XnPropertyNames::appearance::common::textalign::KAlignCenter )
-            {
-            ret = CGraphicsContext::ECenter;
-            }
+        
+        font = iDigitalFont;        
         }
-    return ret;
+    else if( aType == EAmPmFont )
+        {
+        if( !iAmPmFont )
+            {
+            CreateFontL( aType );        
+            }
+        
+        font = iAmPmFont;
+        }
+    else if( aType == EDateFont )
+        {
+        if( !iDateFont )
+            {
+            CreateFontL( aType );        
+            }
+        
+        font = iDateFont;        
+        }
+    
+    if( font )
+        {
+        return CAknLayoutFont::AsCAknLayoutFontOrNull( font );
+        }
+    
+    return NULL;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnClockAdapter::TextColorL
+// 
+// -----------------------------------------------------------------------------
+//    
+const TRgb& CXnClockAdapter::TextColorL()
+    {    
+    if( !iColorSet )
+        {
+        CreateColorL();
+        }
+        
+    return iColor;            
+    }
+
+// -----------------------------------------------------------------------------
+// CXnClockAdapter::Date
+// 
+// -----------------------------------------------------------------------------
+//    
+CXnNodePluginIf* CXnClockAdapter::Date() const
+    {
+    return iDate;
+    }
+
+// -----------------------------------------------------------------------------
+// CXnClockAdapter::Day
+// 
+// -----------------------------------------------------------------------------
+//    
+CXnNodePluginIf* CXnClockAdapter::Day() const
+    {
+    return iDay;
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::CreateFontL
+// 
 // -----------------------------------------------------------------------------
 //    
-void CXnClockAdapter::CreateFontL( CXnNodePluginIf& aNode,
-                                   CFont*& aFont )
+void CXnClockAdapter::CreateFontL( const TInt aType )   
     {
     TFontSpec spec;
     TInt dummy;
-    
-    CXnProperty* prop( aNode.GetPropertyL( 
-        XnPropertyNames::clock::KS60FontSize ) );
 
-    // default
-    TInt height( ( aNode.Rect().Height() / 5 ) );
+    if( aType == EDigitalFont )
+        {
+        iDigitalFont = NULL;
+        
+        CXnProperty* prop( iNode.GetPropertyL( 
+            XnPropertyNames::clock::KS60DigitalFontSize ) );
 
-    if ( prop )
-        {
-        height = aNode.UiEngineL()->VerticalPixelValueL(
-            prop, aNode.Rect().Height() );
-        }
-    else
-        {
-        // check if fontsize is defined in clock element
-        prop = iNode.GetPropertyL( 
-            XnPropertyNames::clock::KS60FontSize );
+        // default
+        TInt height( ( iNode.Rect().Height() / 3 ) * 2 );
+
         if ( prop )
             {
             height = iNode.UiEngineL()->VerticalPixelValueL(
                 prop, iNode.Rect().Height() );
             }
-        }
-    
-    TBool fontNotSet( ETrue );
-    prop = aNode.GetPropertyL(
-            XnPropertyNames::appearance::common::KFontFamily );
-    
-    if ( prop )
-        {
-        CXnDomPropertyValue* value = static_cast< CXnDomPropertyValue* >(
-            prop->Property()->PropertyValueList().Item( 0 ) );
-        
-        if ( CXnDomPropertyValue::EIdent == value->PrimitiveValueType()
-                ||CXnDomPropertyValue::EString == value->PrimitiveValueType() )
-            {
-            const TDesC& fontName( prop->StringValueL()->Des() );
-            
-            // No need to relase avkon font
-            CXnUtils::CreateFontL( fontName, 
-                                   height,
-                                   spec.iFontStyle,
-                                   aFont,
-                                   dummy );
-            
-            fontNotSet = EFalse;
-            }
-        }
-    
-    if( fontNotSet )
-        {
+                                            
         // No need to relase avkon font
-        CXnUtils::CreateFontL( KLogicalSecondaryFont, 
+        CXnUtils::CreateFontL( KDigitalFont, 
                                height,
                                spec.iFontStyle,
-                               aFont,
+                               iDigitalFont,
                                dummy );
+        }
+    else if( aType == EAmPmFont )
+        {
+        iAmPmFont = NULL;
+
+        CXnProperty* prop( iNode.GetPropertyL( 
+            XnPropertyNames::clock::KS60AmPmFontSize ) );
+        
+        // default
+        TInt height( ( iNode.Rect().Height() / 5 ) );
+
+        if ( prop )
+            {
+            height = iNode.UiEngineL()->VerticalPixelValueL(
+                prop, iNode.Rect().Height() );
+            }        
+        
+        // No need to relase avkon font
+        CXnUtils::CreateFontL( KAmPmFont, 
+                               height,
+                               spec.iFontStyle,
+                               iAmPmFont,
+                               dummy );      
+        }
+    else if( aType == EDateFont )
+        {
+        iDateFont = NULL;
+        
+        CXnProperty* prop( iNode.GetPropertyL( 
+            XnPropertyNames::clock::KS60DateFontSize ) );
+        
+        // default 
+        TInt height( ( iNode.Rect().Height() / 5 ) );
+        
+        if ( prop )
+            {
+            height = iNode.UiEngineL()->VerticalPixelValueL(
+                prop, iNode.Rect().Height() );
+            }
+        
+        // No need to relase avkon font
+        CXnUtils::CreateFontL( KDateFont, 
+                               height,
+                               spec.iFontStyle,
+                               iDateFont,
+                               dummy );              
         }
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::CreateColorL
+// 
 // -----------------------------------------------------------------------------
 //    
-void CXnClockAdapter::CreateColorL( CXnNodePluginIf& aNode, TRgb& aColor )
+void CXnClockAdapter::CreateColorL()
     {        
     TRgb color;
             
     TInt result( KErrNone );
         
-    CXnProperty* prop( aNode.GetPropertyL( 
+    CXnProperty* prop( iNode.GetPropertyL( 
         XnPropertyNames::appearance::common::KColor ) );
     
     if( !prop )
         {
-        // check if color is defined in clock element
-        prop = iNode.GetPropertyL( 
-            XnPropertyNames::appearance::common::KColor );
-        if ( !prop )
-            {
-            return;
-            }
+        return;
         }
         
     CXnDomProperty* domProp( prop->Property() );
@@ -652,78 +554,53 @@ void CXnClockAdapter::CreateColorL( CXnNodePluginIf& aNode, TRgb& aColor )
         
     if( result == KErrNone )
         {
-        aColor = color;
+        iColorSet = ETrue;
+        iColor = color;
         }            
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::SkinChanged
+// Skin change notification
 // -----------------------------------------------------------------------------
 //  
 void CXnClockAdapter::SkinChanged()
     {
-    if ( iClockControl )
-        {
-        iClockControl->ResetFont();
-        }
-    if ( iDateControl )
-        {
-        iDateControl->ResetFont();
-        }
-    if ( iDayControl )
-        {
-        iDayControl->ResetFont();
-        }
+    iAmPmFont = iDigitalFont = iDateFont = NULL;
+    iColorSet = EFalse;
     
     CXnControlAdapter::SkinChanged();
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::HandleScreenDeviceChangedL
+// Screen device change notification
 // -----------------------------------------------------------------------------
 //  
 void CXnClockAdapter::HandleScreenDeviceChangedL()
     {
-    if ( iClockControl )
-        {
-        iClockControl->ResetFont();
-        }
-    if ( iDateControl )
-        {
-        iDateControl->ResetFont();
-        }
-    if ( iDayControl )
-        {
-        iDayControl->ResetFont();
-        }
+    iAmPmFont = iDigitalFont = iDateFont = NULL;
+    iColorSet = EFalse;
     
     CXnControlAdapter::HandleScreenDeviceChangedL();
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::SizeChanged
+// Size changed notification
 // -----------------------------------------------------------------------------
 //  
 void CXnClockAdapter::SizeChanged()
     {
-    if ( iClockControl )
-        {
-        iClockControl->ResetFont();
-        }
-    if ( iDateControl )
-        {
-        iDateControl->ResetFont();
-        }
-    if ( iDayControl )
-        {
-        iDayControl->ResetFont();
-        }
+    iAmPmFont = iDigitalFont = iDateFont = NULL;
+    iColorSet = EFalse;
     
     CXnControlAdapter::SizeChanged();    
     }
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::StartClock
+// 
 // -----------------------------------------------------------------------------
 // 
 void CXnClockAdapter::StartClock()
@@ -743,6 +620,7 @@ void CXnClockAdapter::StartClock()
 
 // -----------------------------------------------------------------------------
 // CXnClockAdapter::StopClock
+// 
 // -----------------------------------------------------------------------------
 // 
 void CXnClockAdapter::StopClock()
@@ -750,7 +628,7 @@ void CXnClockAdapter::StopClock()
     if ( iClockControl )
         {
         iClockControl->StopTimer();
-        }
+        }    
     }
 
 // End of file

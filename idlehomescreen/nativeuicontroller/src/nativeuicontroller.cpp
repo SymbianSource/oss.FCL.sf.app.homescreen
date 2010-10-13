@@ -447,7 +447,7 @@ void CNativeUiController::LoadUIDefinitionL()
         THsPublisherInfo deviceStatus( KDeviceStatusPluginUid, 
             KDeviceStatusPluginName, KNativeUiNamespace );
         
-        iPlugins.AppendL( deviceStatus );
+        iPlugins.Append( deviceStatus );
         
         TAiFwPublisherInfo devstatInfo( 
             deviceStatus, TAiFwCallback(), EAiFwSystemStartup );
@@ -457,7 +457,7 @@ void CNativeUiController::LoadUIDefinitionL()
         THsPublisherInfo profile( KProfilePluginUid, 
             KProfilePluginName, KNativeUiNamespace );
 
-        iPlugins.AppendL( profile );
+        iPlugins.Append( profile );
 
         TAiFwPublisherInfo profileInfo( 
             profile, TAiFwCallback(), EAiFwSystemStartup );

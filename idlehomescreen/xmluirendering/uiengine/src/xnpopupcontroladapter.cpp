@@ -204,19 +204,13 @@ void CXnPopupControlAdapter::TryDisplayingStylusPopupL( CXnNode& aPlugin )
     
     CXnViewManager* manager( iUiEngine->ViewManager() );            
     CXnPluginData* plugin( manager->ActiveViewData().Plugin( &aPlugin ) );
-            
+    
     if ( !plugin )
         {
         return;
         }
     
     CXnViewAdapter& adapter( iUiEngine->AppUiAdapter().ViewAdapter() );
-
-    // this is to avoid stylus popup on widget manager   
-    if ( !adapter.IsForegroundAdapter() )
-        {
-        return;
-        }
     
     const TPointerEvent& event( adapter.EventDispatcher()->PointerEvent() );
     

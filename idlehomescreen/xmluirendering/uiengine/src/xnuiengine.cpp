@@ -526,7 +526,7 @@ void CXnUiEngine::SetEventDispatcher( CXnKeyEventDispatcher* aDispatcher )
 // CXnUiEngine::EnablePartialTouchInput()
 // -----------------------------------------------------------------------------
 //               
-void CXnUiEngine::EnablePartialTouchInput( CXnNode* aNode, TBool aEnable )
+void CXnUiEngine::EnablePartialTouchInput( CXnNode& aNode, TBool aEnable )
     {
     iUiEngineImpl->EnablePartialTouchInput(aNode, aEnable);
     }

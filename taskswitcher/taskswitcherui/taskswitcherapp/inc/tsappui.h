@@ -45,6 +45,9 @@ class CTsAppUi : public CAknAppUi,
 
 public:
     enum {
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //TODO make maping to NGA transition id
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ENoneTransition = 0,
     EForegroundTransition = 3,
     EBackgroundTransition = 4,
@@ -211,13 +214,6 @@ private: // New functions
      *          Currently it recognises only camera app as multimedia app.
      */
     TBool IsUnderlyingAppMultimediaL();
-    
-    /**
-     * Obtain aplication id by it's window group Id.
-     * 
-     * @return  TUid aplication id.
-     */
-    TUid GetAppIdL( TInt aWgId );
 
 private:
 

@@ -23,9 +23,9 @@
 #include "xnnodepluginif.h"
 #include "xnnode.h"
 
+#include "xndomdocument.h"
 #include "xndomnode.h"
 #include "xnproperty.h"
-#include "xnviewswitcher.h"
 
 #include "xnviewcontroladapter.h"
 
@@ -73,7 +73,7 @@ static void ResetGrabbingL( CXnControlAdapter* aControl,
 //
 CXnViewControlAdapter* CXnViewControlAdapter::NewL( CXnNodePluginIf& aNode )
     {
-	CXnViewControlAdapter* self = new( ELeave ) CXnViewControlAdapter();
+	CXnViewControlAdapter* self = new( ELeave ) CXnViewControlAdapter( aNode );
 
     CleanupStack::PushL( self );
     self->ConstructL( aNode );
@@ -126,8 +126,8 @@ void CXnViewControlAdapter::ConstructL( CXnNodePluginIf& aNode )
 // C++ default constructor
 // -----------------------------------------------------------------------------
 //
-CXnViewControlAdapter::CXnViewControlAdapter() : 
-    iAppUi( static_cast< CXnAppUiAdapter& >( *iAvkonAppUi ) )    
+CXnViewControlAdapter::CXnViewControlAdapter( CXnNodePluginIf& aNode ) 
+    : iNode( aNode ), iAppUi( static_cast< CXnAppUiAdapter& >( *iAvkonAppUi ) )    
     {    
     }
 
@@ -187,18 +187,9 @@ void CXnViewControlAdapter::Draw( const TRect& aRect ) const
 //
 void CXnViewControlAdapter::HandlePointerEventL( 
     const TPointerEvent& aPointerEvent )
-    {
-    if ( iForegroundStatus != EBackground && 
-        ( iAppUi.UiEngine().IsPartialInputActive() || // no swipe if partial input active 
-        IsWidgetGestureDest() ||  // no swipe if widget handles it 
-        iAppUi.ViewSwitcher() == NULL || // no swipe if VS not available
-        !iAppUi.ViewSwitcher()->ProcessPointerEventL( aPointerEvent ) ) ) // no swipe if event not handled by VS
+    {    
+    if ( iForegroundStatus != EBackground )
         {
-        if ( IsWidgetGestureDest() && iAppUi.ViewSwitcher() != NULL )
-            {
-            iAppUi.ViewSwitcher()->StopViewSwitchL();
-            }
-        
         iAppUi.UiEngine().DisableRenderUiLC();
             
         CXnControlAdapter::HandlePointerEventL( aPointerEvent );

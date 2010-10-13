@@ -140,8 +140,7 @@ private:
     // from MTsFastSwapPreviewObserver
     void HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle );
     void HandleFswPpApplicationUnregistered( TInt aWgId );
-    void HandleFswPpApplicationBitmapRotation( TInt aWgId, 
-            TInt aFbsHandle, TBool aClockwise );
+    void HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise );
 
     void RotateL( CFbsBitmap& aBitmap, TInt aWgId, TBool aClockwise );
 

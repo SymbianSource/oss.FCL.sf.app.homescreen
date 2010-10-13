@@ -18,7 +18,7 @@
 #ifndef __SINGLE_ROW_WIDGET_2001FDC0_RESOURCES_IBY__
 #define __SINGLE_ROW_WIDGET_2001FDC0_RESOURCES_IBY__
 
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
+#if defined (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 // Enabled by DTD-localization tools, language specific
 #if defined (__LOCALES_37_IBY__)
@@ -34,6 +34,6 @@ data=ZPRIVATE\200159c0\install\single_row_icon_widget_2001fdc0\xuikon\57\single_
 data=ZPRIVATE\200159c0\install\single_row_icon_widget_2001fdc0\xuikon\94\single_row_icon_widget.o0094 \private\200159c0\install\single_row_icon_widget_2001fdc0\xuikon\94\single_row_icon_widget.o0094
 #endif
 
-#endif // FF_LAYOUT_480_640_TOUCH_VGA4 || FF_LAYOUT_640_480_TOUCH_VGA4
+#endif // (FF_LAYOUT_480_640_VGA3) || defined (FF_LAYOUT_640_480_VGA3) || defined (FF_LAYOUT_480_640_TOUCH_VGA4) || defined (FF_LAYOUT_640_480_TOUCH_VGA4)
 
 #endif // __SINGLE_ROW_WIDGET_2001FDC0_RESOURCES_IBY__

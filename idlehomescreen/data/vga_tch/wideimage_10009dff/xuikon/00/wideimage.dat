@@ -8,4 +8,5 @@
     <ThemeVersion>1.0</ThemeVersion>
     <FileXML>wideimage.xml</FileXML>
     <FileCSS>wideimage.css</FileCSS>
+    <FileDTD>wideimage.dtd</FileDTD>
 </data>

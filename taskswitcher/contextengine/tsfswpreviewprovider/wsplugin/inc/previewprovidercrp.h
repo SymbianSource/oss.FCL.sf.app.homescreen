@@ -117,7 +117,7 @@ private:
     /*
      * Allocate resources and take screenshot
      */
-    void ScreenshotL( TBool aRotation );
+    void ScreenshotL();
     
     /**
      * Takes the screenshot.
@@ -144,12 +144,17 @@ private:
     /**
      * Notifies the PreviewProviderClient when screenshot is ready for copying.
      */     
-    void ScaleCompleteL( const CFbsBitmap& aBitmap, TBool aRotation );
+    void ScaleCompleteL(const CFbsBitmap& aBitmap);
     
     /**
      * Notifies the PreviewProviderClient when an application has been exited.
      */
     void UnregisterComplete( TInt aWgId );
+    
+    /**
+     * Notifies the PreviewProviderClient that specific bitmap needs rotation.
+     */
+    void BitmapRotationNeeded( TInt aWgId, TBool aClockwise );
     
     /**
      * Uses window server front buffer to create a screenshot.

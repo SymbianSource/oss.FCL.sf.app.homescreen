@@ -232,11 +232,6 @@ void CXnWidgetExtensionAdapter::MakeVisible( TBool aVisible )
         effectStarted = ETrue;
         }
 
-    if ( aVisible && OwnsWindow() )
-        {
-        Window().SetOrdinalPosition( 0 );
-        }
-
     CCoeControl::MakeVisible( aVisible );
 
     if ( effectStarted )

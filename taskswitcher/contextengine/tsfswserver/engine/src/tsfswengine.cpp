@@ -364,7 +364,6 @@ TBool CTsFswEngine::CollectTasksL()
 void CTsFswEngine::HiddenAppListUpdated()
     {
     UpdateTaskList();
-    TRAP_IGNORE( iDataList->RemoveHiddenAppsScrenshotsL(); )
     }
 
 // --------------------------------------------------------------------------
@@ -490,15 +489,11 @@ void CTsFswEngine::HandleFswPpApplicationChange( TInt aWgId, TInt aFbsHandle )
         wgId = aWgId;
         }
     TInt err = iDataList->AppUidForWgId( wgId, appUid );
-    TBool hidden = EFalse;
-    TRAP_IGNORE( 
-    hidden = iDataList->HiddenApps()->IsHiddenL( appUid, iWsSession, aWgId) );
-    if ( err || 
-         KTsCameraUid == appUid ||
-         hidden )
+    TBool exists = iDataList->CheckForWgIdUsage( wgId );
+    if ( err || appUid == KTsCameraUid || !exists )
         {
-        // Dont't assign screenshot to camera app or hidden app
-        TSLOG0( TSLOG_LOCAL, "Screenshot for camera or hidden app - ignore" );
+        // Dont't assign screenshot to camera app
+        TSLOG0( TSLOG_LOCAL, "Screenshot for camera - ignore" );
         iPreviewProvider->AckPreview(aFbsHandle);
         TSLOG_OUT();
         return;
@@ -535,13 +530,10 @@ void CTsFswEngine::HandleFswPpApplicationUnregistered( TInt aWgId )
 // Callback from CTsFastSwapPreviewProvider
 // --------------------------------------------------------------------------
 //
-void CTsFswEngine::HandleFswPpApplicationBitmapRotation( TInt aWgId,
-        TInt aFbsHandle, TBool aClockwise )
+void CTsFswEngine::HandleFswPpApplicationBitmapRotation( TInt aWgId, TBool aClockwise )
     {
     TSLOG_CONTEXT( HandleFswPpApplicationBitmapRotation, TSLOG_LOCAL );
     TSLOG1_IN( "aWgId = %d", aWgId );
-    
-    HandleFswPpApplicationChange( aWgId, aFbsHandle );
     
     CFbsBitmap** bmp = iDataList->FindScreenshot(aWgId);
             
@@ -596,8 +588,13 @@ void CTsFswEngine::RotationComplete( TInt aWgId,
         // Update task list
         iRotaTasks.Remove(idx);
         }
-    
-    if ( aError == KErrNone )
+    TInt wgId = iDataList->FindMostTopParentWgId(aWgId);
+    if ( wgId == KErrNotFound )
+        {
+        wgId = aWgId;
+        }
+    TBool exists = iDataList->CheckForWgIdUsage( wgId );
+    if ( aError == KErrNone && exists )
         {
         StoreScreenshot(aWgId, aBitmap);
         }

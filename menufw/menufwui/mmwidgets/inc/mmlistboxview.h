@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: MM_12.1.10 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: MM_12.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -187,13 +187,6 @@ public:
      * @return
      */
     TInt ModelItemsCount();
-    
-    /**
-     * Sets a proper flag if the list is brought to foreground.
-     *
-     *  @param aCommingFromBackground indicates whether the list is brought to foreground.
-     */
-    void SetListCommingFromBackground(TBool aCommingFromBackground);
 
 private:
 
@@ -230,14 +223,7 @@ private:
    * @since S60 v3.0
    * @param aIndex Current Item index.
    */
-   void SetPreviouslyDrawnCurrentItemIndex( TBool aIndex );
-    
-   /**
-    * Gets the flag indicating if the list is being brought to foreground.
-    * @return Last item index.
-    */
-   TBool GetListCommingFromBackground() const;
-    
+    void SetPreviouslyDrawnCurrentItemIndex( TBool aIndex );
 
 private:
 
@@ -250,11 +236,6 @@ private:
    * When ETrue, disables ScrollToMakeItemVisible method.
    */
   TBool iScrollToItemDisabled;
-  
-  /**
-   * When ETrue the list is being brought from background
-   */
-  TBool iListCommingFromBackground;
     };
 
 #endif // MMLISTBOXVIEW_H

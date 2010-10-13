@@ -160,37 +160,23 @@
                             mask_id="16405"
                             param="messaging:audiomsg"/>
          
-            <menu:shortcut    flags="hidden"
+          <menu:shortcut    flags="hidden"
                             uid="0x99999991"
                             long_name="&qtn_apps_undefined_list;"
                             icon_file="aimcsplugin.mif"
-                            icon_id="16410"
-                            mask_id="16411"
-                            icon_skin_minor_id="0x24ba"
+                            icon_id="16388"
+                            mask_id="16389"
+                            icon_skin_minor_id="0x1af5"
                             icon_skin_major_id="0x101F86E3"/>
-
-            <menu:shortcut    uid="0x99999989"
+                            
+          <menu:shortcut    uid="0x99999989"
                             long_name="&qtn_apps_dialledcalls_list;"
                             icon_file="aimcsplugin.mif"
                             icon_id="16398"
                             mask_id="16399"
-                            param="logs:dialed"/>
-
-            <menu:shortcut    flags="hidden"
-                            uid="0x99999990"
-                            long_name="&qtn_apps_manage_list;"
-                            icon_file="aimcsplugin.mif"
-                            icon_id="16408"
-                            mask_id="16409"
-                            icon_skin_minor_id="0x25f0"
-                            icon_skin_major_id="0x101F86E3"/>
-
-            <menu:shortcut    uid="0x99999992"
-                            long_name="&qtn_apps_profiles_list;"
-                            icon_file="profileapp_aif.mif"
-                            icon_id="16384"
-                            mask_id="16385"
-                            param="profiles"/>
+                            param="logs:dialed"
+                            icon_skin_minor_id="0x1a00"
+                            icon_skin_major_id="0x100056c6"/>
 
           <!-- Menu Application Launcher -->
           <menu:application uid="0x101F4CD2"/>

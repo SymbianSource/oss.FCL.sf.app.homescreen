@@ -256,15 +256,24 @@ public:
      * @since Series 60 5.0     
      */                        
     IMPORT_C void DisableRenderUiLC();
-        
+    
+    /**
+     * Enables partial touch input
+     * 
+     * @since Series 60 5.2
+     * @param aNode Editor Node
+     * @param TBool True if partial input is open      
+     */      
+    IMPORT_C void EnablePartialTouchInput( CXnNodePluginIf& aNode, TBool aEnable );
+
     /**
      * Checks if text editor is focused or partioal touch input open.
      * 
-     * @since S60 5.2
+     * @since Series 60 5.2
      * @return TBool True if partial input is open or editor focused
      */      
     IMPORT_C TBool IsTextEditorActive();
-    
+
 private:
     // Data
 

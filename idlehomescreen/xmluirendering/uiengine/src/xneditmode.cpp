@@ -504,7 +504,6 @@ void CXnEditMode::HandlePointerEventL( const TPointerEvent& aPointerEvent )
             CXnPluginData* plugin( iUiEngine.ViewManager()->
                     ActiveViewData().Plugin( node ) );
             
-
             if ( plugin && plugin->Occupied() )
                 {
                 StartDragL( *plugin );

@@ -544,11 +544,6 @@ private: // data
      */
     CHnSuiteModel* iForegroundTriggeringSuite;
 
-    /**
-     * Repository open item change observer.
-     */
-    CHnRepositoryObserver* iRepositoryOpenItemObserver;
-
     };
 
 #endif // C_HNMDMODEL_H

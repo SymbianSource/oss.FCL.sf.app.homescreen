@@ -355,8 +355,6 @@ void CAiStatusPanel::UpdatePhoneDisplayInfo( const TTelTitleDisplay& aDisplayInf
 
 void CAiStatusPanel::SetNaviPaneTextL( const TDesC& aText )
     {
-    __PRINT(__DBG_FORMAT("XAI: CAiStatusPanel::SetNaviPaneTextL aText = %S"), 
-        &aText );
     delete iNaviPaneText;
     iNaviPaneText = NULL;
     if ( !AknStatuspaneUtils::FlatLayoutActive() )
@@ -370,9 +368,6 @@ void CAiStatusPanel::SetNaviPaneTextL( const TDesC& aText )
 
 void CAiStatusPanel::SetTitlePaneTextL( const TDesC& aText )
     {
-    __PRINT(__DBG_FORMAT("XAI: CAiStatusPanel::SetTitlePaneTextL aText = %S"), 
-        &aText );
-
     HBufC* temp = aText.AllocL();
     delete iTitlePaneText;
     iTitlePaneText = temp;
@@ -400,22 +395,18 @@ void CAiStatusPanel::RenderNaviPaneL()
 
 void CAiStatusPanel::StopTitlePaneScrollingL()
     {
-    __PRINTS("XAI: CAiStatusPanel::StopTitlePaneScrollingL");
     // stop scrolling
     if(  iTextInTitlePane && iTitlePane->Text() )
         {
-        __PRINTS("XAI: stop scrolling");
         iTitlePane->SetTextL( *iTitlePane->Text(), EFalse );
         }
     }
 
 void CAiStatusPanel::ScrollTitlePaneTextL()
     {
-    __PRINTS("XAI: CAiStatusPanel::ScrollTitlePaneTextL");
     // start scrolling
     if ( iTextInTitlePane && iTitlePane->Text() )           
         {
-        __PRINTS("XAI: start scrolling");
         iTitlePane->SetTextL( *iTitlePane->Text(), ETrue );
         }
     }
