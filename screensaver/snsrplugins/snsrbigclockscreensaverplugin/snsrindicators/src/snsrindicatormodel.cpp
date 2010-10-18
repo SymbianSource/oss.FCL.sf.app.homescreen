@@ -17,8 +17,8 @@
 
 #include <qglobal.h>
 #ifdef Q_OS_SYMBIAN
-#include <xqsettingsmanager.h>
-#include <xqsettingskey.h>
+#include <XQSettingsManager>
+#include <XQSettingsKey>
 #include <coreapplicationuissdkcrkeys.h>
 #endif //Q_OS_SYMBIAN
 

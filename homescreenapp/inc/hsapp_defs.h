@@ -33,6 +33,7 @@ namespace Hs {
     const char openActionIdentifier[] = "open";
     const char removeActionIdentifier[] = "remove";
     const char itemIdKey[] = "item_id";
+    const char scrollPositionKey[] = "scroll_pos";
     const char collectionIdKey[] = "collection_id";
     const char collectionSortOrderKey[] = "collection_sort_order";
     const char appSortOrderKey[] = "app_sort_order";
@@ -57,8 +58,8 @@ namespace Hs {
     
     const char translationFilename[] = "widget:translation_file";
     const char activityHsIdleView[] = "HsIdleView";
-    const char activityAppLibMainView[] = "AppLibMainView";
-    
+    const char activityHsHomeKeyPressedOnBackground[] = "HsHomeKeyPressedOnBackground";
+    const char activityAppLibMainView[] = "AppLibMainView";    
 
     const char tsDeviceDialogUri[] = 
         "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
@@ -79,6 +80,11 @@ namespace Hs {
     const int oviLauncherApplicationUid  = 0x2002D07F;
     
     const char drivesIconIdsAttributeName[] = "drivesIconIds";
+    
+    // notice new applib properties structure
+    const char KAppLibPath[] = "/ApplicationLibrary";
+    const char KViewAllAppsPath[] = "/ApplicationLibrary/View/AllApps";
+    const char KGridPath[] = "Grid";
 
     // Sort attribute
     enum HsSortAttribute {

@@ -83,7 +83,10 @@
  \retval void
  */
 HsAppsCheckList::HsAppsCheckList() :
-    mAppsSelectDialog(0), mActionConfirm(0), mListView(0), mModel(0),
+    mAppsSelectDialog(0),
+    mActionConfirm(0),
+    mListView(0),
+    mModel(0),
     mSortAttribute(Hs::AscendingNameHsSortAttribute)
 {
 }
@@ -111,7 +114,7 @@ void HsAppsCheckList::cleanUp()
 }
 
 /*!
- Sets sort order for applications.
+ Sets sort order for items.
  \param sortAttribute sort order.
  */
 void HsAppsCheckList::setSortOrder(Hs::HsSortAttribute sortOrder)
@@ -123,7 +126,8 @@ void HsAppsCheckList::setSortOrder(Hs::HsSortAttribute sortOrder)
  Shows check box list with all application.
  \param sortAttribute order to sort applications.
  */
-void HsAppsCheckList::showAppsCheckboxList(Hs::HsSortAttribute sortOrder)
+void HsAppsCheckList::showAppsCheckboxList(Hs::HsSortAttribute sortOrder,
+                                           int scrollPosition)
 {
     HSMENUTEST_FUNC_ENTRY("HsAppsCheckList::showAppsCheckboxList");
     if (!mModel) {
@@ -132,6 +136,11 @@ void HsAppsCheckList::showAppsCheckboxList(Hs::HsSortAttribute sortOrder)
     // fills model with data
     // constucts controls such as checklist
     constructControls();
+    // scrolls list to given position
+    if (scrollPosition != 0) {
+        mListView->scrollTo(mModel->index(scrollPosition, 0),
+                        HbAbstractItemView::PositionAtTop);
+    }
     
     if (mAppsSelectDialog) {
         mAppsSelectDialog->setTimeout(HbPopup::NoTimeout);

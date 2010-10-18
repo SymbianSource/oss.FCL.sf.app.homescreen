@@ -29,6 +29,7 @@
 #include <HbToolBarExtension>
 #include <HbShrinkingVkbHost>
 #include <HbScrollBar>
+#include <HbFrameBackground>
 
 #include "hsallappsstate.h"
 #include "hsallcollectionsstate.h"
@@ -74,22 +75,26 @@
  \param stateContext Variable representing view context the view is to be prepared for.
  \param mainWindow Object responsible for making a given view
     a currently displayed view.
+ \param operationalContext representing operational context.
  */
 HsMenuView::HsMenuView(HsMenuViewBuilder &builder,
                        HsStateContext stateContext,
-                       HsMainWindow &mainWindow):
+                       HsMainWindow &mainWindow,
+                       HsOperationalContext operationalContext):
     mBuilder(builder),
     mStateContext(stateContext),
-    mOperationalContext(HsItemViewContext),
+    mOperationalContext(operationalContext),
     mMainWindow(mainWindow),
-    mHsSearchView(new HsSearchView(mBuilder, mStateContext, mMainWindow))
+    mHsSearchView(new HsSearchView(mBuilder, mStateContext,
+            mMainWindow, mOperationalContext))
+
 {
     synchronizeCache();
 
-    connect(mListView,
+    connect(mAbstractItemView,
             SIGNAL(activated(QModelIndex)),
             this, SIGNAL(activated(QModelIndex)));
-    connect(mListView,
+    connect(mAbstractItemView,
             SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             this, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)));
 
@@ -120,26 +125,41 @@ void HsMenuView::setModel(QAbstractItemModel *model)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::setModel");
 
-    if (mListView != NULL) {
-        if (mListView->model()) {
-            disconnect(mListView->model(),
+    if (mAbstractItemView != NULL) {
+        if (mAbstractItemView->model()) {
+            disconnect(mAbstractItemView->model(),
                        SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
                        this,
                        SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
-            disconnect(mListView->model(), SIGNAL(countChange()),
+            disconnect(mAbstractItemView->model(), SIGNAL(countChange()),
                        this,
                        SIGNAL(listViewChange()));
         }
+        mAbstractItemView->setItemPixmapCacheEnabled(true);// TODO: remove when enabled from default
+        if (mOperationalContext == HsGridPortraitContext ||
+            mOperationalContext == HsGridLandscapeContext) {
+            HbFrameBackground frame;
+            frame.setFrameGraphicsName(QString(""));
+            mAbstractItemView->itemPrototypes()[0]->setDefaultFrame(frame);
+            mAbstractItemView->setModel(model);
+        } else {
+            mAbstractItemView->setModel(model, new HsListViewItem());
+        }
+        if(mOperationalContext == HsGridLandscapeContext)
+            {
+            mAbstractItemView->horizontalScrollBar()->setInteractive(true);
+            }
+        else
+            {
+            mAbstractItemView->verticalScrollBar()->setInteractive(true);
+            }
 
-        mListView->setItemPixmapCacheEnabled(true); // TODO: remove when enabled from default
-        mListView->setModel(model, new HsListViewItem());
-        mListView->verticalScrollBar()->setInteractive(true);
-        if (mListView->model()) {
-            connect(mListView->model(),
+        if (mAbstractItemView->model()) {
+            connect(mAbstractItemView->model(),
                     SIGNAL(scrollTo(int, QAbstractItemView::ScrollHint)),
                     this,
                     SLOT(scrollToRow(int, QAbstractItemView::ScrollHint)));
-            connect(mListView->model(), SIGNAL(countChange()),
+            connect(mAbstractItemView->model(), SIGNAL(countChange()),
                     this,
                     SIGNAL(listViewChange()));
         }
@@ -153,8 +173,8 @@ void HsMenuView::setModel(QAbstractItemModel *model)
  */
 QAbstractItemModel *HsMenuView::model() const
 {
-    if (mListView != NULL) {
-        return mListView->model();
+    if (mAbstractItemView != NULL) {
+        return mAbstractItemView->model();
     } else {
         return NULL;
     }
@@ -169,12 +189,12 @@ HbView *HsMenuView::view() const
 }
 
 /*!
-\return List view widget of the menu view
+\return item view widget of the menu view
  if available in the context or NULL otherwise.
  */
-HbListView *HsMenuView::listView() const
+HbAbstractItemView *HsMenuView::itemView() const
 {
-    return mListView;
+    return mAbstractItemView;
 }
 
 /*!
@@ -188,13 +208,25 @@ HbGroupBox *HsMenuView::viewLabel() const
 }
 
 /*!
+    Return current scroll position for the list from the view.
+    \return first visible row from model displayed in list
+ */
+QPersistentModelIndex HsMenuView::currentScrollPosition() const
+{
+    const QList<HbAbstractViewItem *> items = mAbstractItemView->visibleItems();
+    if (!items.empty()) {
+        return QPersistentModelIndex(items.at(0)->modelIndex());
+    }
+    return QModelIndex();
+}
+
+/*!
  Makes search panel visible.
  Equivalent to \a setSearchPanelVisible(true)
  */
 void HsMenuView::showSearchPanel()
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::showSearchPanel");
-
     mHsSearchView->setSearchPanelVisible(true);
 
     HSMENUTEST_FUNC_EXIT("HsMenuView::showSearchPanel");
@@ -207,9 +239,7 @@ void HsMenuView::showSearchPanel()
 void HsMenuView::hideSearchPanel()
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::hideSearchPanel");
-
     mHsSearchView->setSearchPanelVisible(false);
-
     HSMENUTEST_FUNC_EXIT("HsMenuView::hideSearchPanel");
 }
 
@@ -248,9 +278,9 @@ void HsMenuView::scrollToRow(int row, QAbstractItemView::ScrollHint hint)
 {
     HSMENUTEST_FUNC_ENTRY("HsMenuView::scrollToRow");
 
-    if (mListView != NULL) {
-        mListView->scrollTo(
-            mListView->model()->index(row, 0), convertScrollHint(hint));
+    if (mAbstractItemView != NULL) {
+        mAbstractItemView->scrollTo(
+                mAbstractItemView->model()->index(row, 0), convertScrollHint(hint));
     }
 
     HSMENUTEST_FUNC_EXIT("HsMenuView::scrollToRow");
@@ -309,6 +339,15 @@ void HsMenuView::inactivate()
  */
 void HsMenuView::reset(HsOperationalContext operationalContext)
 {
+    if (mAbstractItemView) {
+    disconnect(mAbstractItemView,
+            SIGNAL(activated(QModelIndex)),
+            this, SIGNAL(activated(QModelIndex)));
+    disconnect(mAbstractItemView,
+            SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
+            this, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)));
+    }
+
     QString viewLabelHeading;
 
     // before changing context read current view label heading ...
@@ -328,6 +367,15 @@ void HsMenuView::reset(HsOperationalContext operationalContext)
         mBuilder.currentViewLabel()->setHeading(viewLabelHeading);
     }
     mView->setNavigationAction(backKeyAction);
+
+    connect(mAbstractItemView,
+            SIGNAL(activated(QModelIndex)),
+            this, SIGNAL(activated(QModelIndex)));
+    connect(mAbstractItemView,
+            SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
+            this, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)));
+
+    mHsSearchView->setOperationalContext(operationalContext);
 }
 
 /*!
@@ -350,7 +398,7 @@ void HsMenuView::synchronizeCache()
     switchBuilderContext();
 
     mView = mBuilder.currentView();
-    mListView = mBuilder.currentListView();
+    mAbstractItemView = mBuilder.currentAbstractItemView();
     mViewLabel = mBuilder.currentViewLabel();
 }
 
@@ -363,9 +411,9 @@ void HsMenuView::synchronizeCache()
  */
 void HsMenuView::handleSearchComplete(const QModelIndex& firstMatching)
 {
-    if (mListView != NULL) {
-        mListView->scrollTo(firstMatching, HbAbstractItemView::PositionAtTop);
+    if (mAbstractItemView != NULL) {
+        mAbstractItemView->scrollTo(firstMatching,
+                HbAbstractItemView::PositionAtTop);
     }
-
     activate();
 }

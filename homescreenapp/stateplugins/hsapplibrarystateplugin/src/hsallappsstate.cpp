@@ -23,6 +23,8 @@
 #include <HbListView>
 #include <HbView>
 #include <HbGroupBox>
+#include <HbInstance>
+#include <HbMainWindow>
 
 #include <cadefs.h>
 #include <caentry.h>
@@ -68,12 +70,29 @@ HsAllAppsState::HsAllAppsState(HsMenuViewBuilder &menuViewBuilder,
     mAddModeProxyModel(0),
     mSortAttribute(Hs::AscendingNameHsSortAttribute),
     mAscendingMenuAction(0),
-    mDescendingMenuAction(0)
+    mDescendingMenuAction(0),
+    mListMenuAction(0),
+    mGridMenuAction(0),
+    mPublisher(NULL),
+    mSubscriber(NULL)
 {
-    initialize(menuViewBuilder, HsAllAppsContext);
+    mPublisher = new QValueSpacePublisher(QValueSpace::PermanentLayer, Hs::KViewAllAppsPath, this);
+    mSubscriber = new QValueSpaceSubscriber(QString("%1/%2").arg(Hs::KViewAllAppsPath).arg(Hs::KGridPath), this);
+    mGrid = mSubscriber->value().toBool();
+    mMainWindow = HbInstance::instance()->allMainWindows().value(0);
+    if (mGrid && mMainWindow) {
+        if (mMainWindow->orientation() == Qt::Vertical) {
+            initialize(menuViewBuilder, HsAllAppsContext, HsGridPortraitContext);
+        } else {
+            initialize(menuViewBuilder, HsAllAppsContext, HsGridLandscapeContext);
+        }
+    } else {
+        initialize(menuViewBuilder, HsAllAppsContext);
+    }
+    
     construct();
     mAddModeProxyModel = new HsAddModeProxyModel(this);
-    mAddModeProxyModel->setSourceModel(mModel);
+    mAddModeProxyModel->setSourceModel(mModel);    
 }
 
 /*!
@@ -92,6 +111,9 @@ void HsAllAppsState::construct()
     connect(mBackKeyAction, SIGNAL(triggered()), SIGNAL(toAppLibraryState()));
 
     mModel = HsMenuService::getAllApplicationsModel(mSortAttribute);
+    if (mGrid) {
+        mModel->setSecondLineVisibility(false);
+    }
     mMenuView->setModel(mModel);
     updateLabel();
     connect(mModel, SIGNAL(countChange()), SLOT(updateLabel()));
@@ -100,7 +122,7 @@ void HsAllAppsState::construct()
 
     HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView->view());
     indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
-    indexFeedback->setItemView(mMenuView->listView());
+    indexFeedback->setItemView(mMenuView->itemView());
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::construct");
 }
@@ -123,6 +145,14 @@ void HsAllAppsState::setMenuOptions()
     mDescendingMenuAction =
         mViewOptions->addAction(hbTrId("txt_applib_menu_sort_by_descending"),
             this, SLOT(descendingMenuAction()));
+    
+    mListMenuAction =
+        mViewOptions->addAction(hbTrId("txt_applib_opt_list_view"),
+                            this, SLOT(listMenuAction()));
+    mGridMenuAction =
+        mViewOptions->addAction(hbTrId("txt_applib_opt_grid_view"),
+            this, SLOT(gridMenuAction()));
+    
     mViewOptions->addAction(hbTrId("txt_applib_opt_check_software_updates"),
         static_cast<HsBaseViewState*>(this), SLOT(checkSoftwareUpdates()));
     mViewOptions->addAction(
@@ -134,6 +164,12 @@ void HsAllAppsState::setMenuOptions()
     } else {
         mDescendingMenuAction->setVisible(false);
     }
+    
+    if (mGrid) {
+        mGridMenuAction->setVisible(false);
+    } else {
+        mListMenuAction->setVisible(false);
+    }
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::setMenuOptions");
 }
@@ -144,8 +180,29 @@ void HsAllAppsState::setMenuOptions()
 
 HsAllAppsState::~HsAllAppsState()
 {
+    delete mPublisher;
+    delete mSubscriber;
 }
 
+
+/*!
+ Slot invoked when normal mode entered.
+ */
+void HsAllAppsState::stateEntered()
+{
+    orientationChanged(mMainWindow->orientation(), false);
+    HsBaseViewState::stateEntered();
+    connect(mMainWindow,
+            SIGNAL(aboutToChangeOrientation()),
+            this,
+            SLOT(orientationGoingToBeChanged())
+            );    
+    connect(mMainWindow,
+            SIGNAL(orientationChanged(Qt::Orientation)),
+            this,
+            SLOT(orientationChanged(Qt::Orientation))
+            );
+}
 
 /*!
  Slot invoked when normal mode entered.
@@ -183,7 +240,7 @@ void HsAllAppsState::scrollToBeginning()
 {
     QAbstractItemModel* model = mMenuView->model();
     if (model != NULL ) {
-        mMenuView->listView()->scrollTo(
+        mMenuView->itemView()->scrollTo(
                 model->index(0,0), HbAbstractItemView::PositionAtTop);
     }
 }
@@ -194,7 +251,19 @@ void HsAllAppsState::scrollToBeginning()
 void HsAllAppsState::stateExited()
 {
     HSMENUTEST_FUNC_ENTRY("HsAllAppsState::stateExited");
-
+    
+    disconnect(mMainWindow,
+            SIGNAL(orientationChanged(Qt::Orientation)),
+            this,
+            SLOT(orientationChanged(Qt::Orientation))
+            );
+    
+    disconnect(mMainWindow,
+            SIGNAL(aboutToChangeOrientation()),
+            this,
+            SLOT(orientationGoingToBeChanged())
+            );
+    
     HsBaseViewState::stateExited();
 
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::stateExited");
@@ -219,7 +288,8 @@ void HsAllAppsState::addToCollection()
     // a new/an existing collection via the All view
     machine()->postEvent(
         HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
-            mSortAttribute));
+            mSortAttribute,0,
+            mMenuView->currentScrollPosition().row()));
 }
 
 /*!
@@ -296,5 +366,87 @@ void HsAllAppsState::descendingMenuAction()
     mAscendingMenuAction->setVisible(true);
     mDescendingMenuAction->setVisible(false);
     HSMENUTEST_FUNC_EXIT("HsAllAppsState::descendingMenuAction");
-
 }
+
+/*!
+ Menu list action slot.
+ */
+void HsAllAppsState::listMenuAction()
+{
+    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::listMenuAction");
+    mGrid = false;
+    mPublisher->setValue(Hs::KGridPath, static_cast<int>(false));
+    
+    mListMenuAction->setVisible(false);
+    mGridMenuAction->setVisible(true);
+    scrollToBeginning();
+    
+    mMenuView->reset(HsItemViewContext);
+    mModel->setSecondLineVisibility(true);
+    mMenuView->setModel(mModel);
+    
+    if (mViewOptions) {
+        mMenuView->view()->setMenu(mViewOptions);
+    }
+    HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView->view());
+    indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
+    indexFeedback->setItemView(mMenuView->itemView());    
+    mMenuView->activate();
+
+    HSMENUTEST_FUNC_EXIT("HsAllAppsState::listMenuAction");
+}
+
+/*!
+ Menu grid action slot.
+ */
+void HsAllAppsState::gridMenuAction()
+{
+    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::gridMenuAction");
+    mGrid = true;
+    mPublisher->setValue(Hs::KGridPath, static_cast<int>(true));
+    scrollToBeginning();
+    orientationChanged(mMainWindow->orientation());
+    HSMENUTEST_FUNC_EXIT("HsAllAppsState::gridMenuAction");
+}
+
+/*!
+ Orientation changed slot.
+ */
+void HsAllAppsState::orientationChanged(Qt::Orientation orientation, 
+        bool ifActivate)
+{
+    HSMENUTEST_FUNC_ENTRY("HsAllAppsState::orientationChanged");
+    if (mGrid && mListMenuAction && mGridMenuAction) {
+        mListMenuAction->setVisible(true);
+        mGridMenuAction->setVisible(false);        
+        if (orientation == Qt::Vertical) {
+            mMenuView->reset(HsGridPortraitContext);
+        } else {
+            mMenuView->reset(HsGridLandscapeContext);
+        }
+        mModel->setSecondLineVisibility(false);        
+        mMenuView->setModel(mModel);        
+        mMenuView->itemView()->scrollTo(mCurrentVisibleItemIndex, HbAbstractItemView::PositionAtTop);
+        mCurrentVisibleItemIndex = QPersistentModelIndex();
+        if (mViewOptions) {
+            mMenuView->view()->setMenu(mViewOptions);
+        }
+        HbIndexFeedback *indexFeedback = new HbIndexFeedback(mMenuView->view());
+        indexFeedback->setIndexFeedbackPolicy(HbIndexFeedback::IndexFeedbackSingleCharacter);
+        indexFeedback->setItemView(mMenuView->itemView());        
+
+        if (ifActivate) {
+            mMenuView->activate();
+        }
+    }
+    HSMENUTEST_FUNC_EXIT("HsAllAppsState::orientationChanged");
+}
+/*!
+ orientationAboutToBeChanged slot.
+ getting current first visible item index
+ */
+void HsAllAppsState::orientationGoingToBeChanged()
+    {
+    mCurrentVisibleItemIndex = mMenuView->currentScrollPosition();
+    }
+

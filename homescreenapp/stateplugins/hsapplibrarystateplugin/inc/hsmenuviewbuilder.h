@@ -32,7 +32,7 @@ class QActionGroup;
 class HbAction;
 class HbGroupBox;
 class HbLineEdit;
-class HbListView;
+class HbAbstractItemView;
 class HbToolBar;
 class HbView;
 class HbWidget;
@@ -49,6 +49,8 @@ enum HsStateContext {
 enum HsOperationalContext {
     HsItemViewContext = 0,
     HsEmptyLabelContext,
+    HsGridPortraitContext,
+    HsGridLandscapeContext,
     InvalidOperationalContext
 };
 
@@ -73,7 +75,7 @@ public:
 
     // mandatory context dependent widgets accessors
     HbView *currentView();
-    HbListView *currentListView();
+    HbAbstractItemView *currentAbstractItemView();
 
 
     // optional widgets accessors

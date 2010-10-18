@@ -200,11 +200,13 @@ QEvent *HsMenuEventFactory::createCollectionDeletedEvent()
  */
 QEvent *HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
     Hs::HsSortAttribute aApplicationsSortOder,
-    int aItemId)
+    int aItemId,
+    int scrollPosition)
 {
     QVariantMap params;
     params.insert(Hs::appSortOrderKey, aApplicationsSortOder);
     params.insert(Hs::itemIdKey, aItemId);
+    params.insert(Hs::scrollPositionKey, scrollPosition);
     return  new HsMenuEvent(HsMenuEvent::AddAppsToCollection, params);
 }
 
@@ -217,10 +219,10 @@ QEvent *HsMenuEventFactory::createAddAppsFromApplicationsViewEvent(
  */
 QEvent *HsMenuEventFactory::createAddAppsFromCollectionViewEvent(
     int aCollectionId,
-    int aApplicationId)
+    int aItemId)
 {
     QVariantMap params;
-    params.insert(Hs::itemIdKey, aApplicationId);
+    params.insert(Hs::itemIdKey, aItemId);
     params.insert(Hs::collectionIdKey, aCollectionId);
     return new HsMenuEvent(HsMenuEvent::AddAppsToCollection, params);
 }

@@ -19,6 +19,8 @@ docmlFiles+= \
     resource/common_objects.docml \
     resource/emptylabeledview.docml \
     resource/labeledlistview.docml \
+    resource/labeledgridviewportrait.docml \
+    resource/labeledgridviewlandscape.docml \
     resource/searchview.docml
 
     qrcFile = hsapplibrarystateplugin.qrc

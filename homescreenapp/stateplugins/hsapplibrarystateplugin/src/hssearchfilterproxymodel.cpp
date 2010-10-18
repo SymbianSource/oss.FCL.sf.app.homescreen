@@ -96,8 +96,7 @@ void HsSearchFilterProxyModel::setFilterString(const QString &filterCriteria)
 {
     mInSettingFilterString = true;
     mFilterCriteria = filterCriteria;
-    setFilterRegExp(
-            QRegExp("(^|\\b)" + filterCriteria, Qt::CaseInsensitive));
+    filterChanged();
     mInSettingFilterString = false;
 }
 
@@ -113,14 +112,23 @@ QString HsSearchFilterProxyModel::filterString() const
  \param source_row row in source model.
  \param source_parent source parent index.
  */
-bool HsSearchFilterProxyModel::filterAcceptsRow (int source_row, 
-        const QModelIndex &source_parent) const
+bool HsSearchFilterProxyModel::filterAcceptsRow (int sourceRow, 
+        const QModelIndex &sourceParent) const
 {
-    bool retVal = QSortFilterProxyModel::filterAcceptsRow(source_row, 
-            source_parent);
+    bool retVal = false;
+    QModelIndex sourceIndex = sourceModel()->index(sourceRow, filterKeyColumn(), sourceParent);
+    QString key = sourceModel()->data(sourceIndex, filterRole()).toString();
+    QStringList words = key.split(QRegExp("\\s+", Qt::CaseInsensitive));
+    for (int i = 0 ; i < words.count() ; ++ i) {
+        if (words[i].indexOf(mFilterCriteria, 0, Qt::CaseInsensitive) == 0) {
+            retVal = true;
+            break;
+        }
+    }
+
     if (mInSettingFilterString && retVal) {
-        QModelIndex mi = mapFromSource(sourceModel()->index(source_row, 0, 
-                source_parent));
+        QModelIndex mi = mapFromSource(sourceModel()->index(sourceRow, 0, 
+                sourceParent));
         emit const_cast<HsSearchFilterProxyModel*>(this)->dataChanged(mi, mi);
     }
     return retVal;

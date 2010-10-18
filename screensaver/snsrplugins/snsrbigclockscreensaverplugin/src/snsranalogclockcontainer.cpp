@@ -23,10 +23,10 @@
 
 #include <HbExtendedLocale>
 #include <HbMainWindow>
+#include <HbPushButton>
 
 #include "snsranalogclockwidget.h"
 #include "snsrindicatorwidget.h"
-#include "snsrswipewidget.h"
 #include "snsrlabel.h"
 
 /*!
@@ -36,7 +36,7 @@
  */
 
 const char *gAnalogLayoutDocml = ":/xml/snsrbigclockscreensaveranalog.docml";
-const char *gSwipeAnalogLayoutDocml = ":/xml/snsrbigclockscreensaveranalogswipe.docml";
+const char *gUnlockAnalogLayoutDocml = ":/xml/snsrbigclockscreensaveranalogunlockbutton.docml";
 
 
 const char *gPortraitSectionName = "portrait";
@@ -50,7 +50,7 @@ const char *gDateLabelName = "dateLabel";
 const char *gAnalogClockWidgetName = "analogClockWidget";
 const char *gIndicatorWidgetName = "indicatorWidget";
 
-const char *gSwipeWidgetName = "swipeWidget";
+const char *gUnlockButtonName = "unlockButton";
 
 const char *gDateFormatStr = r_qtn_date_usual_with_zero; //"%E%,% %*D%*N%/0%4%/1%5";
 
@@ -62,7 +62,7 @@ SnsrAnalogClockContainer::SnsrAnalogClockContainer() :
     SnsrBigClockContainer(),
     mDateLabel(0),
     mAnalogClockWidget(0),
-    mSwipeWidget(0)
+    mUnlockButton(0)
 {
     SCREENSAVER_TEST_FUNC_ENTRY("SnsrAnalogClockContainer::SnsrAnalogClockContainer")
     SCREENSAVER_TEST_FUNC_EXIT("SnsrAnalogClockContainer::SnsrAnalogClockContainer")
@@ -91,10 +91,6 @@ void SnsrAnalogClockContainer::update()
     mDateLabel->setPlainText(
         HbExtendedLocale().format(QDate::currentDate(), gDateFormatStr)
         );
-
-    if (mSwipeWidget) {
-        mSwipeWidget->setCurrentOrientation(mCurrentOrientation);
-    }
     
     SCREENSAVER_TEST_FUNC_EXIT("SnsrAnalogClockContainer::update")
 }
@@ -112,11 +108,12 @@ int SnsrAnalogClockContainer::updateIntervalInMilliseconds()
  */
 void SnsrAnalogClockContainer::loadWidgets()
 {
-    //if swipe is used we load the docml file containing it
-    if ( swipeToUnlockSupported() ) {
-        loadWidgets(gSwipeAnalogLayoutDocml);
-        Q_ASSERT_X( mSwipeWidget, gSwipeAnalogLayoutDocml, "Swipe widget not found in DocML file.");
-        connect( mSwipeWidget, SIGNAL(swipeDownDetected()), SIGNAL(unlockRequested()) );
+    //if unlockbutton is used we load the docml file containing it
+    if ( unlockButtonSupported() ) {
+        loadWidgets(gUnlockAnalogLayoutDocml);
+        Q_ASSERT_X( mUnlockButton, gUnlockAnalogLayoutDocml, "unlock button not found in DocML file.");
+        mUnlockButton->setText("Unlock");
+        connect( mUnlockButton, SIGNAL(clicked()), SIGNAL(unlockRequested()) );
     }
     else {
         loadWidgets(gAnalogLayoutDocml);
@@ -135,7 +132,7 @@ void SnsrAnalogClockContainer::loadWidgets(const char* docmlName)
     mDateLabel = 0;
     mAnalogClockWidget = 0;
     mIndicatorWidget = 0;
-    mSwipeWidget = 0;
+    mUnlockButton = 0;
     // load widgets from docml
     qDebug() << docmlName;
     mDocumentObjects = mDocumentLoader.load(docmlName, &ok);
@@ -148,8 +145,8 @@ void SnsrAnalogClockContainer::loadWidgets(const char* docmlName)
             mDocumentLoader.findWidget(gAnalogClockWidgetName));
         mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
             mDocumentLoader.findWidget(gIndicatorWidgetName));
-        mSwipeWidget = qobject_cast<SnsrSwipeWidget *>(
-            mDocumentLoader.findWidget(gSwipeWidgetName));
+        mUnlockButton = qobject_cast<HbPushButton *>(
+                mDocumentLoader.findWidget(gUnlockButtonName));
         
         Q_ASSERT_X(
             mMainView && mDateLabel && mAnalogClockWidget &&

@@ -301,11 +301,11 @@ void MenuStatesTest::listItemLongPressed()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
-        //HsScene::setInstance( new HsScene(window.data()) );
+        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        HsScene::setInstance( new HsScene(window.data()) );
 
         HsMenuViewBuilder builder;
-        HsMainWindowMock mainWindow;
+        HsMainWindow mainWindow;
 
         QScopedPointer<QState> parent(new QState);
 

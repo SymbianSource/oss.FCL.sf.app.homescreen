@@ -149,7 +149,7 @@ void MenuStatesTest::HsMenuViewBuilder_listView()
     builder.setStateContext(HsAllAppsContext);
     builder.setOperationalContext(HsItemViewContext);
 
-    const HbAbstractItemView *const itemView = builder.currentListView();
+    const HbAbstractItemView *const itemView = builder.currentAbstractItemView();
 
     QVERIFY(itemView);
     QVERIFY(itemView->inherits("HbListView"));
@@ -353,7 +353,6 @@ void MenuStatesTest::HsMenuView_scrolling()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-    QFAIL("! Due to bug in hb wk36 we are forced to skip this test !");
         QScopedPointer<HbMainWindow> window(new HbMainWindow);
         HsScene::setInstance( new HsScene(window.data()) );
 
@@ -380,18 +379,18 @@ void MenuStatesTest::HsMenuView_scrolling()
 
         const int expectedRow(0);
 
-        QVERIFY(allAppsState->mMenuView->listView() != NULL);
-        QVERIFY(allAppsState->mMenuView->listView()->visibleItems().count() >= 1);
+        QVERIFY(allAppsState->mMenuView->itemView() != NULL);
+        QVERIFY(allAppsState->mMenuView->itemView()->visibleItems().count() >= 1);
 
         int actualRow =
-            allAppsState->mMenuView->listView()->visibleItems().at(0)->modelIndex().row();
+            allAppsState->mMenuView->itemView()->visibleItems().at(0)->modelIndex().row();
 
         QCOMPARE(actualRow, expectedRow);
 
         allAppsState->mMenuView->scrollToRow(rowCount -1);
 
         actualRow =
-            allAppsState->mMenuView->listView()->visibleItems().at(0)->modelIndex().row();
+            allAppsState->mMenuView->itemView()->visibleItems().at(0)->modelIndex().row();
 
         QVERIFY(actualRow != expectedRow);
         qApp->processEvents();
@@ -399,7 +398,7 @@ void MenuStatesTest::HsMenuView_scrolling()
         allAppsState->mMenuView->scrollToRow(expectedRow);
 
         actualRow =
-            allAppsState->mMenuView->listView()->visibleItems().at(0)->modelIndex().row();
+            allAppsState->mMenuView->itemView()->visibleItems().at(0)->modelIndex().row();
 
         QCOMPARE(actualRow, expectedRow);
         qApp->processEvents();

@@ -57,7 +57,7 @@ protected:
 
     virtual void loadWidgets() = 0;
     virtual void changeEvent(QEvent * event);
-    virtual bool swipeToUnlockSupported();
+    bool unlockButtonSupported();
     QPointF randomPosition(const QRectF &rect);
     QPointF nextRandomPosition(const QPointF &curPos, QPointF &destPos, const QRectF &containerRect);
     void connectIndicatorWidgetToModel();

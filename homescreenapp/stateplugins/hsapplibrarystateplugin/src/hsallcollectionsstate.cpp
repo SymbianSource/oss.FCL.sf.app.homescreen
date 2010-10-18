@@ -205,7 +205,7 @@ void HsAllCollectionsState::createArrangeCollection()
     int topItemId(0);
 
     const QList<HbAbstractViewItem *> array =
-        mMenuView->listView()->visibleItems();
+        mMenuView->itemView()->visibleItems();
 
     if (array.count() >= 1) {
         QModelIndex idx = array[0]->modelIndex();

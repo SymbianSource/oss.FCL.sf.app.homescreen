@@ -24,7 +24,7 @@ SCREENSAVER_TEST_CLASS(T_SnsrBigClockScreensaverPlugin)
 
 class SnsrLabel;
 class SnsrAnalogClockWidget;
-class SnsrSwipeWidget;
+class HbPushButton;
 
 class SnsrAnalogClockContainer : public SnsrBigClockContainer
 {
@@ -52,7 +52,7 @@ private: // data
 
     SnsrLabel *mDateLabel;
     SnsrAnalogClockWidget *mAnalogClockWidget;
-    SnsrSwipeWidget *mSwipeWidget;
+    HbPushButton *mUnlockButton;
 
     SCREENSAVER_TEST_FRIEND_CLASS(T_SnsrBigClockScreensaverPlugin)
 };

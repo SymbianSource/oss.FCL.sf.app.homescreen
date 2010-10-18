@@ -177,7 +177,7 @@ void TestClockWidget::testOnUninitialize()
 void TestClockWidget::testOnSettingsChanged()
 {
     mClockWidget->mClockType = QString(ANALOG);
-    mClockWidget->mTimeType = QString(TIME12);
+    mClockWidget->mTimeFormat = QString(TIME12);
 
     mClockWidget->onInitialize();
     mClockWidget->onShow();

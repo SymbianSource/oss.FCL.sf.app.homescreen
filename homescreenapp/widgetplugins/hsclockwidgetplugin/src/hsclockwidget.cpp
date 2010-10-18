@@ -56,12 +56,12 @@ HsClockWidget::HsClockWidget(QGraphicsItem *parent, Qt::WindowFlags flags)
     mWidget(0),
     mLayout(0),
     mClockType(ANALOG),
-    mTimeType(TIME12)
+    mTimeFormat(TIME12)
 {
 #ifdef Q_OS_SYMBIAN    
     mClockSettingsNotifier = new HsClockSettingsNotifier(this);
-    mClockType = mClockSettingsNotifier->clockFormat();
-    mTimeType = mClockSettingsNotifier->timeFormat();
+    mClockType = mClockSettingsNotifier->clockType();
+    mTimeFormat = mClockSettingsNotifier->timeFormat();
 #endif
 }
 
@@ -140,10 +140,10 @@ void HsClockWidget::updateTime()
 /*!
     \internal
 */
-void HsClockWidget::onSettingsChanged(const QString &clockFormat, const QString &timeFormat)
+void HsClockWidget::onSettingsChanged(const QString &clockType, const QString &timeFormat)
 {
-    if (mClockType != clockFormat) {        
-        mClockType = clockFormat;
+    if (mClockType != clockType) {        
+        mClockType = clockType;
         mLayout->removeItem(mWidget);
         delete mWidget;
         mWidget = 0;
@@ -151,10 +151,10 @@ void HsClockWidget::onSettingsChanged(const QString &clockFormat, const QString 
         mLayout->addItem(mWidget);        
     }    
     
-    if (mTimeType != timeFormat) {
-        mTimeType = timeFormat;
+    if (mTimeFormat != timeFormat) {
+        mTimeFormat = timeFormat;
         if (mClockType == DIGITAL) {
-            if (mTimeType == TIME12) {
+            if (mTimeFormat == TIME12) {
                 static_cast<HsDigitalClockWidget*>(mWidget)->setAmPm(true);
             } else {
             static_cast<HsDigitalClockWidget*>(mWidget)->setAmPm(false);
@@ -171,10 +171,10 @@ void HsClockWidget::onClockTapped()
 #ifndef Q_OS_SYMBIAN
     if (mClockType == ANALOG) {
         mClockType = DIGITAL;
-        if (mTimeType == TIME12) {
-            mTimeType = TIME24;
+        if (mTimeFormat == TIME12) {
+            mTimeFormat = TIME24;
         } else {
-            mTimeType = TIME12;
+            mTimeFormat = TIME12;
         }    
     } else {
         mClockType = ANALOG;
@@ -213,7 +213,7 @@ HbWidget *HsClockWidget::loadClockWidget()
 
     if (mClockType == DIGITAL) {
         bool useAmPm = true;
-        if (mTimeType == TIME24) {
+        if (mTimeFormat == TIME24) {
             useAmPm = false;
         }   
         clockWidget = new HsDigitalClockWidget(useAmPm);

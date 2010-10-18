@@ -45,6 +45,7 @@
 #include "hsconfiguration.h"
 #include "hstest_global.h"
 #include "hswidgetpositioningonwidgetmove.h"
+#include "hssystemevents.h"
 
 QTM_USE_NAMESPACE
 #define hbApp qobject_cast<HbApplication*>(qApp)
@@ -440,6 +441,9 @@ void HsStateMachine::activityRequested(const QString &name)
         }
     } else if (name == Hs::activityHsIdleView) {
         emit event_toIdle();
+    } else if (name == Hs::activityHsHomeKeyPressedOnBackground) {
+        HsSystemEvents *systemEvents = HsSystemEvents::instance();
+        emit systemEvents->homeKeyClicked();
     } else if (name == Hs::activityAppLibMainView) {
         emit event_toAppLib();
     }

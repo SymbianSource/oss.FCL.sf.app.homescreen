@@ -72,11 +72,11 @@ public:
 
     static QEvent *createAddAppsFromApplicationsViewEvent(
         Hs::HsSortAttribute aApplicationsSortOder,
-        int aItemId = 0);
+        int aItemId = 0, int scrollPosition = 0);
 
     static QEvent *createAddAppsFromCollectionViewEvent(
         int aCollectionId,
-        int aApplicationId = 0);
+        int aItemId = 0);
 
     static QEvent *createRemoveAppFromCollectionEvent(int aItemId, int aCollectionId);
 

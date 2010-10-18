@@ -22,6 +22,7 @@
 // ========================= DECLARATIONS ==================================
 _LIT( KHsExeName, "hsapplication.exe" );
 _LIT( KHsProcessName, "hsapplication.exe" );
+_LIT( KHsProcessFindString, "#hsapplication[20022f35]*" );
 const TInt KSleepOnRetry = 250000; // 250ms
 const TUid KPSCategoryUid = TUid::Uid( 0x20022F36 );
 const TInt KPSCrashCountKey = 1;
@@ -380,8 +381,16 @@ void CHsLaunch::StartHomeScreen()
     // Create app or connect to existing.
     TInt processExisted = EFalse;
     
+    TFindProcess processFinder( KHsProcessFindString );
+    TFullName fullName;
+    // check that hsapplication is not running (in case launcher was killed)    
+    while( processFinder.Next( fullName ) == KErrNone )
+        {
+        return;
+        }
+    
     RProcess process;
-    TInt processError = process.Create( KHsExeName, KNullDesC );    
+    TInt processError = process.Create( KHsExeName, KNullDesC );
     if( processError == KErrAlreadyExists )
         {        
         processError = process.Open( KHsProcessName, EOwnerProcess );

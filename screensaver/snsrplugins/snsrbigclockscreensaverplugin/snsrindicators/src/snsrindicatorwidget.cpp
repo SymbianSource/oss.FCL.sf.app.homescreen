@@ -19,7 +19,7 @@
 #include "snsrindicatorinfo.h"
 #include "snsrcolors.h"
 
-#include <hbevent.h>
+#include <HbEvent>
 #include <HbColorScheme>
 #include <QDebug>
 #include <QSizePolicy>
@@ -53,7 +53,7 @@ SnsrIndicatorWidget::SnsrIndicatorWidget(QGraphicsItem* parent):
     HbStyleLoader::registerFilePath(gIndicatorWidgetMLFilePath);
    
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-          
+    
     createPrimitives();
 }
 
@@ -130,7 +130,7 @@ void SnsrIndicatorWidget::showIndicators(const QList<SnsrIndicatorInfo> &indicat
     for (int i=0; i < indicatorAmount && i < mIcons.size(); ++i) {
         mIcons.at(i)->setIconName(indicators.at(i).iconPath);
         mIcons.at(i)->setFlags(HbIcon::Colorized);
-        mIcons.at(i)->setColor(mIconColor);        
+        mIcons.at(i)->setColor(mIconColor);
     }
 
     // To recalculate layouts
@@ -159,7 +159,7 @@ void SnsrIndicatorWidget::changeEvent(QEvent * event)
         mIconColorType == ThemedColorForActiveMode) {
         mIconColor = HbColorScheme::color(SnsrColors::WidgetColorRole.latin1());
         for (int i=0; i < mIcons.size(); ++i) {
-            mIcons.at(i)->setColor(mIconColor);        
+            mIcons.at(i)->setColor(mIconColor);
         }
     }
     return HbWidget::changeEvent(event);

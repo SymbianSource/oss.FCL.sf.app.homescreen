@@ -483,7 +483,7 @@ void MenuStatesTest::AppsCheckList_showAppsCheckboxList()
         mCommitEmited = false;
         connect(&checkList,SIGNAL(commit(const QList<int>&)),
                 this,SLOT(testCommitSlot(const QList<int>&)));
-        checkList.showAppsCheckboxList(sortOrder);
+        checkList.showAppsCheckboxList(sortOrder,0);
         QVERIFY(checkList.mModel != NULL);
         QVERIFY(checkList.mActionConfirm != NULL);
         QVERIFY(checkList.mListView != NULL);

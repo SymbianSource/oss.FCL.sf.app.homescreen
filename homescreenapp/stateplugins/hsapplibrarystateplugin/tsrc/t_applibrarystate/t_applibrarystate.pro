@@ -16,7 +16,7 @@
 
 TEMPLATE = app
 CONFIG += hb mobility
-MOBILITY = serviceframework
+MOBILITY += serviceframework publishsubscribe
 
 include(../../../../common.pri)
 include(../../docml.pri)

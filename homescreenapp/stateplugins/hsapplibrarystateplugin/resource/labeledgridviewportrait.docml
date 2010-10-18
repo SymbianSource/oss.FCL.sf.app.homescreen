@@ -7,10 +7,11 @@
                 <bool name="marqueeHeading" value="TRUE"/>
                 <fontspec name="fontSpec" role="Title" textheight="0"/>
             </widget>
-            <widget name="abstractItemView" type="HbListView">
-                <bool name="itemRecycling" value="TRUE"/>
-                <enums name="horizontalScrollBarPolicy" value="ScrollBarAutoHide"/>
-                <bool name="frictionEnabled" value="TRUE"/>
+            <widget name="abstractItemView" type="HbGridView">
+                <widget name="gridItemPrototype" role="HbAbstractView:prototype" type="HbGridViewItem"/>
+                <integer name="columnCount" value="3"/>
+                <integer name="rowCount" value="4"/>
+                <enums name="scrollDirections" value="Vertical"/>
             </widget>
             <layout orientation="Vertical" spacing="0.0un" type="linear">
                 <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>

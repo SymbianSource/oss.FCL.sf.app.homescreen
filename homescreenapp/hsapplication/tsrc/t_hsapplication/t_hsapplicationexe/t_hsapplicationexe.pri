@@ -53,6 +53,7 @@ symbian:{
                ./../../../../hsdomainmodel/inc/hswidgethostvisual.h \
                ./../../../../hsdomainmodel/inc/hswidgettoucharea.h \
                ./../../../../hsdomainmodel/inc/hsbackuprestoreactivecallback.h \
+               ./../../../../hsdomainmodel/inc/hssystemevents.h \
                ./../../../../hsutils/inc/hsspinnerdialog.h \
                ./../../../../hsutils/inc/hssnapline.h        
 
@@ -69,6 +70,7 @@ symbian:{
                ./../../../../hsdomainmodel/src/hsbackuprestoreobserver.cpp \
                ./../../../../hsdomainmodel/src/hsbackuprestoreactivecallback.cpp \
                ./../../../../hsdomainmodel/src/hswidgetpositioningonwidgetadd.cpp \
+               ./../../../../hsdomainmodel/src/hssystemevents.cpp \
                ./../../../../hsutils/src/hsmenueventfactory.cpp \
                ./../../../../hsutils/src/hswidgetpositioningonorientationchange.cpp \
                ./../../../../hsutils/src/hswidgetpositioningonwidgetmove.cpp \

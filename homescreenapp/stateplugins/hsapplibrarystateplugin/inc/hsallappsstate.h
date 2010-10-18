@@ -19,6 +19,8 @@
 #define HSALLAPPSSTATE_H
 
 #include <QState>
+#include <qvaluespacepublisher.h>
+#include <qvaluespacesubscriber.h>
 #include "hsbaseviewstate.h"
 #include "hsmenumodewrapper.h"
 
@@ -34,6 +36,8 @@ class HsMenuItemModel;
 class HsMenuModeWrapper;
 class HsMainWindow;
 
+QTM_USE_NAMESPACE
+
 class HsAllAppsState: public HsBaseViewState
 {
     Q_OBJECT
@@ -46,7 +50,7 @@ public:
     ~HsAllAppsState();
     void scrollToBeginning();
     void setModel(Hs::HsMenuMode menuMode);
-    
+
 signals:
     void toAppLibraryState();
 
@@ -54,9 +58,14 @@ private slots:
     void addToCollection();
     void ascendingMenuAction();
     void descendingMenuAction();
+    void listMenuAction();
+    void gridMenuAction();
+    void orientationChanged(Qt::Orientation orientation, bool ifActivate = true);
     void normalModeEntered();
     void stateExited();
     void updateLabel();
+    void stateEntered();
+    void orientationGoingToBeChanged();
     
 private:
     void construct();
@@ -68,6 +77,16 @@ private:
     Hs::HsSortAttribute mSortAttribute;
     HbAction *mAscendingMenuAction; //not own
     HbAction *mDescendingMenuAction; //not own
+    HbAction *mListMenuAction; //not own
+    HbAction *mGridMenuAction; //not own
+    HbMainWindow *mMainWindow; //not own
+    
+    //Grid request publisher
+    QValueSpacePublisher *mPublisher;
+    //Grid status request subscriber
+    QValueSpaceSubscriber *mSubscriber;
+    bool mGrid;
+    QPersistentModelIndex  mCurrentVisibleItemIndex;
 };
 
 #endif // HSALLAPPSSTATE_H

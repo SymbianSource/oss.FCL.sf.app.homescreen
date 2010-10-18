@@ -19,7 +19,7 @@
 #define SNSRINDICATORINFO_H
 
 //  INCLUDES
-#include <hbindicatorinterface.h>
+#include <HbIndicatorInterface>
 #include <QString>
 
 /*!

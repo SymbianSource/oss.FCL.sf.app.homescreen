@@ -70,8 +70,10 @@ public slots:
     void allAppsStateEntered();
 
     void allCollectionsStateEntered();
-    
+
     void collectionStateEntered();
+
+    void addFromInstalledTransition(QState *state);
 
 protected:
 
@@ -89,7 +91,7 @@ private:
 
     HsAllAppsState *mAllAppsState;
 
-    HsMenuModeTransition *mHistoryTransaction;
+    HsMenuModeTransition *mHistoryTransition;
 
     HsAllCollectionsState *mAllCollectionsState;
 
@@ -98,9 +100,9 @@ private:
     HsInstalledAppsState *mInstalledAppsState;
 
     HsMenuModeWrapper mMenuMode;
-    
+
     HsMainWindow mMainWindow;
-    
+
 };
 
 #endif //HSAPPLIBRARYSTATE_H

@@ -124,7 +124,7 @@ void MenuStatesTest::HsSearchViewBuilder_searchViewConstruction()
     HsMenuViewBuilder builder;
     HsMainWindowMock window;
 
-    HsSearchView search(builder, HsAllAppsContext, window);
+    HsSearchView search(builder, HsAllAppsContext, window, HsItemViewContext);
 
     QCOMPARE(search.mProxyModel->filterRole(), int(CaItemModel::TextRole));
     QCOMPARE(search.mProxyModel->filterKeyColumn(), 0);
@@ -140,7 +140,7 @@ void MenuStatesTest::HsSearchViewBuilder_activatedProxySlot()
     HsMenuViewBuilder builder;
     HsMainWindowMock window;
 
-    HsSearchView search(builder, HsAllAppsContext, window);
+    HsSearchView search(builder, HsAllAppsContext, window, HsItemViewContext);
     connect(&search, SIGNAL(activated(QModelIndex)),
             this, SLOT(testSlot()));
     QModelIndex idx;
@@ -159,7 +159,7 @@ void MenuStatesTest::HsSearchViewBuilder_longPressedProxySlot()
     HsMenuViewBuilder builder;
     HsMainWindowMock window;
 
-    HsSearchView search(builder, HsAllAppsContext, window);
+    HsSearchView search(builder, HsAllAppsContext, window, HsItemViewContext);
     connect(&search, SIGNAL(longPressed(HbAbstractViewItem *, QPointF)),
             this, SLOT(testSlot()));
 
@@ -180,7 +180,7 @@ void MenuStatesTest::HsSearchViewBuilder_showHide()
     HsMenuViewBuilder builder;
     HsMainWindowMock window;
 
-    HsSearchView search(builder, HsAllAppsContext, window);
+    HsSearchView search(builder, HsAllAppsContext, window, HsItemViewContext);
 
     search.setSearchPanelVisible(true);
     QVERIFY(search.mSearchListView);
@@ -219,7 +219,7 @@ void MenuStatesTest::HsSearchViewBuilder_hideVkb()
     HsMenuViewBuilder builder;
     HsMainWindowMock window;
 
-    HsSearchView search(builder, HsAllAppsContext, window);
+    HsSearchView search(builder, HsAllAppsContext, window, HsItemViewContext);
 
     MockInputContext *const newInputContext(new MockInputContext());
 

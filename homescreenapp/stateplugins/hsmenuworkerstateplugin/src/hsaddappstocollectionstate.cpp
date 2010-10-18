@@ -172,11 +172,22 @@
  \param parent Parent state.
  */
 HsAddAppsToCollectionState::HsAddAppsToCollectionState(QState *parent) :
-    QState(parent), mCollectionName(), mCollectionId(0), mAppList(),
-    mShowConfirmation(0), mInitialState(0), mSelectCollectionState(0),
-    mNewCollectionState(0), mAppsCheckListState(0), mActionType(
-        NoActionType), mApplicationsSortAttribute(Hs::NoHsSortAttribute),
-    mAppsCheckList(0), mEditorDialog(0), mListDialog(0), mModel(0)
+    QState(parent),
+    mCollectionName(),
+    mCollectionId(0),
+    mScrollPosition(),
+    mAppList(),
+    mShowConfirmation(0),
+    mInitialState(0),
+    mSelectCollectionState(0),
+    mNewCollectionState(0),
+    mAppsCheckListState(0),
+    mActionType(NoActionType),
+    mApplicationsSortAttribute(Hs::NoHsSortAttribute),
+    mAppsCheckList(0),
+    mEditorDialog(0),
+    mListDialog(0),
+    mModel(0)
 {
     construct();
 }
@@ -326,6 +337,7 @@ void HsAddAppsToCollectionState::onEntry(QEvent *event)
 
     const int itemId = data.value(Hs::itemIdKey).toInt();
     mCollectionId = data.value(Hs::collectionIdKey).toInt();
+    mScrollPosition = data.value(Hs::scrollPositionKey).toInt();
 
     if (itemId) {
         //add selected app item from allAppView or collectionView
@@ -354,7 +366,9 @@ void HsAddAppsToCollectionState::stateExited()
     QList<QAbstractTransition *> transitionsList =
         mInitialState->findChildren<QAbstractTransition *> ();
     if (transitionsList.count()) {
-        mInitialState->removeTransition(transitionsList[0]);
+		QAbstractTransition* transition = transitionsList[0];
+		mInitialState->removeTransition(transition);
+		delete transition;
     }
     delete mAppsCheckList;
     mAppsCheckList = NULL;
@@ -561,7 +575,8 @@ void HsAddAppsToCollectionState::appsCheckListState()
 
     }
     mAppsCheckList->setSortOrder(mApplicationsSortAttribute);
-    mAppsCheckList->showAppsCheckboxList(mApplicationsSortAttribute);
+    mAppsCheckList->showAppsCheckboxList(mApplicationsSortAttribute,
+                                         mScrollPosition);
     HSMENUTEST_FUNC_EXIT("HsAddAppsToCollectionState::appsCheckListState");
 }
 /*!

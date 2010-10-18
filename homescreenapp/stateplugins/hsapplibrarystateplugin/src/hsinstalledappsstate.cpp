@@ -182,7 +182,7 @@ void HsInstalledAppsState::stateEntered()
     else {
 		mMenuView->reset(HsItemViewContext);
         mMenuView->setModel(mModel);
-        mMenuView->listView()->scrollTo(
+        mMenuView->itemView()->scrollTo(
             mModel->index(0));
     }
 

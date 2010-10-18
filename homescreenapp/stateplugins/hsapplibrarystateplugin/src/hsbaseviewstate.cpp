@@ -84,12 +84,13 @@ HsBaseViewState::HsBaseViewState(HsMainWindow &mainWindow,
  \param menuViewBuilder object providing widgets for menu view.
  \param stateContext state context of the view the builder
      is to provide widgets for.
+ \param operationalContext operational context.
  */
 void HsBaseViewState::initialize(HsMenuViewBuilder &menuViewBuilder,
-    HsStateContext stateContext)
+    HsStateContext stateContext, HsOperationalContext operationalContext)
 {
     mMenuView.reset(new HsMenuView(
-            menuViewBuilder, stateContext, mMainWindow));
+            menuViewBuilder, stateContext, mMainWindow, operationalContext));
     mMenuView->view()->setNavigationAction(mBackKeyAction);
     mMenuView->view()->setMenu(mViewOptions);
 
@@ -432,7 +433,7 @@ void HsBaseViewState::addModeShowContextMenu(HbAbstractViewItem *item,
  */
 void HsBaseViewState::scrollToBeginning()
 {
-    mMenuView->listView()->scrollTo(
+    mMenuView->itemView()->scrollTo(
             mModel->index(0), HbAbstractItemView::PositionAtTop);
 }
 

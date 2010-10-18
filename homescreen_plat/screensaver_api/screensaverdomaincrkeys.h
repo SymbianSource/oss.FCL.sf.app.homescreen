@@ -18,7 +18,7 @@
 #ifndef SCREENSAVERDOMAINCRKEYS_H
 #define SCREENSAVERDOMAINCRKEYS_H
 
-#include <e32cmn.h>
+#include <qglobal.h>
 
 /**
 * Screensaver Settings repository UID.
@@ -26,25 +26,30 @@
 * @publishedPartner
 * @released
 */
-const TUid KCRUidScreensaverSettings = {0x2002FFAB};
+const long int KCRUidValueScreensaverSettings = 0x2002FFAB;
+
+#ifdef Q_OS_SYMBIAN
+#include <e32cmn.h>
+const TUid KCRUidScreensaverSettings = {KCRUidValueScreensaverSettings};
+#endif
 
 
 /*
-* Swipe to open  
+* Unlock button 
 *
-* Boolean value for swipe-to-open widget on active mode. 
+* Boolean value for unlock Button on active mode. 
 * 
 * Possible integer values:
 *
-* 0 = Swipe_to_open  not used
-* 1 = Swipe_to_open exists on active mode
+* 0 = unlock button not used
+* 1 = unlock button exists on active mode
 *
 * Default value: 1
 *
 * @publishedPartner
 * @released
 */
-const unsigned long int KScreensaverSwipeToOpen                   = 0x00000001;
+const unsigned long int KScreensaverUnlockWidget                   = 0x00000001;
 
 /**
 * Timeout from active mode to power save mode
@@ -56,7 +61,7 @@ const unsigned long int KScreensaverSwipeToOpen                   = 0x00000001;
 *
 * 5 - 60 Seconds
 *
-* Default value: 30
+* Default value: 7
 *
 * @publishedPartner
 * @released

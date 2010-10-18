@@ -35,7 +35,7 @@ INCLUDEPATH += ./inc \
 		
 symbian: {
     TARGET.UID3 = 0x20022F6C
-    LIBS += -lbafl -lapgrfx -lcone
+    LIBS += -lbafl -lapgrfx -lcone -lxqsettingsmanager
     MMP_RULES += SMPSAFE
     
 }

@@ -13,6 +13,12 @@ SnsrOledClockWidget::oled_clock_background {
     zvalue: 0;
 }
 
+SnsrOledClockWidget::oled_clock_axis {
+    pref-height: 32.8un;
+    pref-width: 32.8un;
+    zvalue: 4;
+}
+
 SnsrOledClockWidget::oled_clock_hour_hand {
     pref-height: 32.8un;
     pref-width: 32.8un;

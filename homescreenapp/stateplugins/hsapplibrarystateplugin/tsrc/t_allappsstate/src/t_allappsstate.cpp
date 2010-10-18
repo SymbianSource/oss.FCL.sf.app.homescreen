@@ -317,12 +317,12 @@ void MenuStatesTest::contextMenuAction()
     {
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
 
-        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
-        //HsScene::setInstance( new HsScene(window.data()) );
+        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        HsScene::setInstance( new HsScene(window.data()) );
 
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
-        HsMainWindowMock mainWindow;
+        HsMainWindow mainWindow;
 
         QScopedPointer<HsAllAppsState> allAppsState(new HsAllAppsState(
             builder, menuMode, mainWindow, machine.data()));
@@ -662,6 +662,48 @@ void MenuStatesTest::checkSoftwareUpdates()
             HsMenuService::executeAction(entryId, QString("close"));            
         }
 
+    }
+#ifdef Q_OS_SYMBIAN
+#ifdef UT_MEMORY_CHECK
+    __UHEAP_MARKEND;
+#endif//UT_MEMORY_CHECK
+#endif//Q_OS_SYMBIAN
+}
+#endif//Q_OS_SYMBIAN
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+#ifdef Q_OS_SYMBIAN
+void MenuStatesTest::switchLayout()
+{
+#ifdef Q_OS_SYMBIAN
+    User::ResetInactivityTime();//it should help for Viewserver11 panic
+#ifdef UT_MEMORY_CHECK
+    __UHEAP_MARK;
+#endif//UT_MEMORY_CHECK
+#endif//Q_OS_SYMBIAN
+    {
+        QScopedPointer<HbMainWindow> window(new HbMainWindow());
+        
+        HsMenuViewBuilder builder;
+        HsMenuModeWrapper menuMode;
+        HsMainWindowMock mainWindow;
+        
+        QScopedPointer<HsAllAppsState> allAppsState(new HsAllAppsState(
+            builder, menuMode, mainWindow, 0));
+        
+        allAppsState->setMenuOptions();        
+        QVERIFY(allAppsState->mListMenuAction);
+        QVERIFY(allAppsState->mGridMenuAction);
+        
+        allAppsState->gridMenuAction();
+        QVERIFY(allAppsState->mGrid);
+       
+        allAppsState->listMenuAction();
+        QVERIFY(!allAppsState->mGrid);
+        
+        QVERIFY(allAppsState);
     }
 #ifdef Q_OS_SYMBIAN
 #ifdef UT_MEMORY_CHECK

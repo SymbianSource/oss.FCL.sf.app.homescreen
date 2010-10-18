@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository target="CRepository" uidValue="0x20022F97">
+    <key int="0x9" ref="/ApplicationLibrary/View/AllApps/Grid">
+    </key>
+</repository>

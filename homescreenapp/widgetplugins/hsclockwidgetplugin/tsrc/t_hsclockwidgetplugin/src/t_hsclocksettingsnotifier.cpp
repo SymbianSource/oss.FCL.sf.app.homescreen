@@ -53,7 +53,7 @@ void TestClockWidget::testSettingOfClockAndTimeFormat()
     TClockFormat clockFormat = locale.ClockFormat();
     TTimeFormat timeFormat = locale.TimeFormat();
 
-    QCOMPARE( clockSettingsNotifier.clockFormat(), QString(ANALOG));
+    QCOMPARE( clockSettingsNotifier.clockType(), QString(ANALOG));
     QCOMPARE( clockSettingsNotifier.timeFormat(), QString(TIME12));
 
     // ANALOG, TIME24
@@ -65,7 +65,7 @@ void TestClockWidget::testSettingOfClockAndTimeFormat()
     clockFormat = locale.ClockFormat();
     timeFormat = locale.TimeFormat();
         
-    QCOMPARE( clockSettingsNotifier.clockFormat(), QString(ANALOG));
+    QCOMPARE( clockSettingsNotifier.clockType(), QString(ANALOG));
     QCOMPARE( clockSettingsNotifier.timeFormat(), QString(TIME24));
     
     // DIGITAL, TIME24
@@ -77,7 +77,7 @@ void TestClockWidget::testSettingOfClockAndTimeFormat()
     clockFormat = locale.ClockFormat();
     timeFormat = locale.TimeFormat();
         
-    QCOMPARE( clockSettingsNotifier.clockFormat(), QString(DIGITAL));
+    QCOMPARE( clockSettingsNotifier.clockType(), QString(DIGITAL));
     QCOMPARE( clockSettingsNotifier.timeFormat(), QString(TIME24));
 
     // DIGITAL, TIME12
@@ -89,10 +89,10 @@ void TestClockWidget::testSettingOfClockAndTimeFormat()
     clockFormat = locale.ClockFormat();
     timeFormat = locale.TimeFormat();
         
-    QCOMPARE( clockSettingsNotifier.clockFormat(), QString(DIGITAL));
+    QCOMPARE( clockSettingsNotifier.clockType(), QString(DIGITAL));
     QCOMPARE( clockSettingsNotifier.timeFormat(), QString(TIME12));
 
-    clockSettingsNotifier.createObserver();
+    clockSettingsNotifier.createSystemChangeObserver();
     QVERIFY(clockSettingsNotifier.mDateTimeNotifier);
     QVERIFY(clockSettingsNotifier.mDateTimeNotifier->IsActive());
     }

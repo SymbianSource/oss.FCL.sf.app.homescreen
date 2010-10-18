@@ -21,7 +21,7 @@
 */
 
 #include <qglobal.h>
-#include <qdebug.h>
+#include <QDebug>
 #include "snsrdevicedialogdisplaycontrol.h"
 
 /*!

@@ -6,6 +6,8 @@
         <file alias="snsrbigclockscreensaveroleddigital.docml">resource/snsrbigclockscreensaveroleddigital.docml</file>
         <file alias="snsrbigclockscreensaveranalogswipe.docml">resource/snsrbigclockscreensaveranalogswipe.docml</file>
         <file alias="snsrbigclockscreensaverdigitalswipe.docml">resource/snsrbigclockscreensaverdigitalswipe.docml</file>
+        <file alias="snsrbigclockscreensaveranalogunlockbutton.docml">resource/snsrbigclockscreensaveranalogunlockbutton.docml</file>
+        <file alias="snsrbigclockscreensaverdigitalunlockbutton.docml">resource/snsrbigclockscreensaverdigitalunlockbutton.docml</file>
         <file alias="qtg_anim_swipe.axml">snsrswipewidget/resource/qtg_anim_swipe.axml</file>	
         </qresource>
     <qresource prefix="/style" >

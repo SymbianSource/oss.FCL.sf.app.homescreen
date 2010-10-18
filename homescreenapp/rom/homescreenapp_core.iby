@@ -68,6 +68,7 @@ file=ABI_DIR\BUILD_DIR\hsmenuserviceprovider.dll  SHARED_LIB_DIR\hsmenuservicepr
 // -------- hsapplibrarystateplugin
 file=ABI_DIR\BUILD_DIR\hsapplibrarystateplugin.dll                            SHARED_LIB_DIR\hsapplibrarystateplugin.dll
 data=DATAZ_\RESOURCE_FILES_DIR\qt\plugins\homescreen\hsapplibrarystateplugin.qtplugin  RESOURCE_FILES_DIR\qt\plugins\homescreen\hsapplibrarystateplugin.qtplugin
+data=DATAZ_\RESOURCE_FILES_DIR\qt\crml\hsapplibrary.qcrml   RESOURCE_FILES_DIR\qt\crml\hsapplibrary.qcrml
 
 // -------- hshomescreenstateplugin
 file=ABI_DIR\BUILD_DIR\hshomescreenstateplugin.dll                            SHARED_LIB_DIR\hshomescreenstateplugin.dll

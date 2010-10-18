@@ -44,7 +44,7 @@ const char *gOledClockWidgetMLFilePath = ":/style/snsroledclockwidget.widgetml";
  */
 SnsrOledClockWidget::SnsrOledClockWidget(QGraphicsItem* parent):
     HbWidget(parent),
-    mClockBackground(0), mClockHourHand(0), mClockMinuteHand(0),
+    mClockBackground(0), mClockAxis(0), mClockHourHand(0), mClockMinuteHand(0),
     mClockAmPmLabel(0)
 {
     HbStyleLoader::registerFilePath(gOledClockCssFilePath);
@@ -85,20 +85,29 @@ void SnsrOledClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
  */
 void SnsrOledClockWidget::createPrimitives()
 {
-    // TODO: final graphics will be named qtg_graf_screensaver_clock_oled_xxx.
-    // not available in platform yet
-
     if (!mClockBackground) {
-        mClockBackground = new HbIconItem(QLatin1String("qtg_graf_clock_night_bg"), this);
+        mClockBackground = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_screensaver_face"), this);
         HbStyle::setItemName(mClockBackground, QLatin1String("oled_clock_background"));
+        mClockBackground->setFlags(HbIcon::Colorized);
+        mClockBackground->setColor(SnsrColors::PowerSaveModeWidgetColor);
+    }
+    if (!mClockAxis) {
+        mClockAxis = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_screensaver_point"), this);
+        HbStyle::setItemName(mClockAxis, QLatin1String("oled_clock_axis"));
+        mClockAxis->setFlags(HbIcon::Colorized);
+        mClockAxis->setColor(SnsrColors::BackgroundColor);
     }
     if (!mClockHourHand) {
-        mClockHourHand = new HbIconItem(QLatin1String("qtg_graf_clock_night_hour"), this);
+        mClockHourHand = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_screensaver_hours"), this);
         HbStyle::setItemName(mClockHourHand, QLatin1String("oled_clock_hour_hand"));
+        mClockHourHand->setFlags(HbIcon::Colorized);
+        mClockHourHand->setColor(SnsrColors::PowerSaveModeWidgetColor);
     }
     if (!mClockMinuteHand) {
-        mClockMinuteHand = new HbIconItem(QLatin1String("qtg_graf_clock_night_min"), this);
+        mClockMinuteHand = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_screensaver_minutes"), this);
         HbStyle::setItemName(mClockMinuteHand, QLatin1String("oled_clock_minute_hand"));
+        mClockMinuteHand->setFlags(HbIcon::Colorized);
+        mClockMinuteHand->setColor(SnsrColors::PowerSaveModeWidgetColor);
     }
     if (!mClockAmPmLabel) {
         mClockAmPmLabel = new HbTextItem(this);

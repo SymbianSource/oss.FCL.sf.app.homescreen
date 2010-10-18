@@ -40,7 +40,8 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hspagetoucharea.h \
            ./inc/hsidlewidget.h \
            ./inc/hsdocumentloader.h \
-           ./inc/hswidgetpositioningonwidgetadd.h
+           ./inc/hswidgetpositioningonwidgetadd.h \
+           ./inc/hssystemevents.h
         
 
 SOURCES += ./src/hscontentservice.cpp \
@@ -66,7 +67,8 @@ SOURCES += ./src/hscontentservice.cpp \
            ./src/hspagetoucharea.cpp \
            ./src/hsidlewidget.cpp \
            ./src/hsdocumentloader.cpp \
-           ./src/hswidgetpositioningonwidgetadd.cpp
+           ./src/hswidgetpositioningonwidgetadd.cpp \
+           ./src/hssystemevents.cpp
 
 symbian: {
 HEADERS += ./inc/hsbackuprestoreobserver_p.h \

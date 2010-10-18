@@ -25,6 +25,9 @@
 HOMESCREEN_TEST_CLASS(TestClockWidget)
 
 class CEnvironmentChangeNotifier;
+class XQSettingsManager;
+class XQSettingsKey;
+
 class HsClockSettingsNotifier : public QObject
 {
     Q_OBJECT
@@ -34,26 +37,29 @@ public:
     HsClockSettingsNotifier(QObject *parent = 0);
     ~HsClockSettingsNotifier();
 
-    QString clockFormat() const;
+    QString clockType() const;
     QString timeFormat() const;
     
     static TInt EnvironmentChanged( TAny *aObj );
     
 signals:
-    void settingsChanged(QString clockFormat, QString timeFormat);
+    void settingsChanged(QString clockType, QString timeFormat);
         
 private: 
-    void createObserver();
-    QString clockFormatString()const;
+    void createSystemChangeObserver();
+    QString clockTypeString()const;
     QString timeFormatString()const;
     
 private slots:
+    void onClockTypeChanged( const XQSettingsKey& key, const QVariant& value );
     void onSettingsChanged();
 
 private:
     CEnvironmentChangeNotifier *mDateTimeNotifier;
+	XQSettingsManager *mSettingsManager;
+	XQSettingsKey *mClockTypeSettingsKey;
     
-    QString mClockFormat;
+    QString mClockType;
     QString mTimeFormat;
     
     Q_DISABLE_COPY(HsClockSettingsNotifier)

@@ -89,10 +89,11 @@
  */
 HsAppLibraryState::HsAppLibraryState(QState *parent) :
     QState(parent), mAllAppsState(0),
-    mHistoryTransaction(0), mAllCollectionsState(0), mCollectionState(0),
+    mHistoryTransition(0), mAllCollectionsState(0), mCollectionState(0),
     mMenuMode(),mMainWindow(&mMenuMode)
 {
     construct();
+    CaService::instance()->preloadHandlers();
 }
 
 /*!
@@ -104,7 +105,6 @@ HsAppLibraryState::~HsAppLibraryState()
     delete mAllCollectionsState;
     delete mCollectionState;
     delete mInstalledAppsState;
-
 }
 
 /*!
@@ -124,10 +124,10 @@ void HsAppLibraryState::construct()
     QState *initialState = new QState(this);
     setInitialState(initialState);
 
-    mHistoryTransaction =  new HsMenuModeTransition(
+    mHistoryTransition =  new HsMenuModeTransition(
         mMenuMode, Hs::NormalHsMenuMode, mAllAppsState);
 
-    initialState->addTransition(mHistoryTransaction);
+    initialState->addTransition(mHistoryTransition);
     initialState->addTransition(
         new HsMenuModeTransition(
         mMenuMode, Hs::AddHsMenuMode, mAllAppsState));
@@ -344,16 +344,9 @@ int HsAppLibraryState::oviStoreAction()
 void HsAppLibraryState::allAppsStateEntered()
 {
     if (mMenuMode.getHsMenuMode() == Hs::NormalHsMenuMode) {
-        mHistoryTransaction->setTargetState(mAllAppsState);
+        mHistoryTransition->setTargetState(mAllAppsState);
     }
-    while (!mInstalledAppsState->transitions().isEmpty()) {
-        mInstalledAppsState->removeTransition(
-            mInstalledAppsState->transitions()[0]);
-    }
-    HsMenuEventTransition *fromInstalledAppsTransition =
-        new HsMenuEventTransition(HsMenuEvent::BackFromInstalledView,
-        mInstalledAppsState, mAllAppsState);
-    mInstalledAppsState->addTransition(fromInstalledAppsTransition);
+    addFromInstalledTransition(mAllAppsState);
 }
 
 /*!
@@ -362,16 +355,9 @@ void HsAppLibraryState::allAppsStateEntered()
 void HsAppLibraryState::allCollectionsStateEntered()
 {
     if (mMenuMode.getHsMenuMode() == Hs::NormalHsMenuMode) {
-        mHistoryTransaction->setTargetState(mAllCollectionsState);
+        mHistoryTransition->setTargetState(mAllCollectionsState);
     }
-    while (!mInstalledAppsState->transitions().isEmpty()) {
-        mInstalledAppsState->removeTransition(
-            mInstalledAppsState->transitions()[0]);
-    }
-    HsMenuEventTransition *fromInstalledAppsTransition =
-        new HsMenuEventTransition(HsMenuEvent::BackFromInstalledView,
-        mInstalledAppsState, mAllCollectionsState);
-    mInstalledAppsState->addTransition(fromInstalledAppsTransition);
+    addFromInstalledTransition(mAllCollectionsState);
 }
 
 /*!
@@ -379,12 +365,22 @@ void HsAppLibraryState::allCollectionsStateEntered()
  */
 void HsAppLibraryState::collectionStateEntered()
 {
+    addFromInstalledTransition(mCollectionState);
+}
+
+/*!
+ Adds transition back from installed state.
+ */
+void HsAppLibraryState::addFromInstalledTransition(QState *state)
+{
     while (!mInstalledAppsState->transitions().isEmpty()) {
-        mInstalledAppsState->removeTransition(
-            mInstalledAppsState->transitions()[0]);
+        QAbstractTransition* transition
+            = mInstalledAppsState->transitions()[0];
+        mInstalledAppsState->removeTransition(transition);
+        delete transition;
     }
-    HsMenuEventTransition *fromInstalledAppsTransition =
-        new HsMenuEventTransition(HsMenuEvent::BackFromInstalledView,
-        mInstalledAppsState, mCollectionState);
+    HsMenuEventTransition *fromInstalledAppsTransition
+        = new HsMenuEventTransition(
+            HsMenuEvent::BackFromInstalledView, mInstalledAppsState, state);
     mInstalledAppsState->addTransition(fromInstalledAppsTransition);
 }

@@ -364,20 +364,20 @@ void SnsrBigClockContainer::setBackgroundColor()
 
 
 /*
- * Returns true if swipe widget is used,
- * false if swipe is not used.
+ * Returns true if unlockbutton is used,
+ * false if it is not used.
  */
-bool SnsrBigClockContainer::swipeToUnlockSupported()
+bool SnsrBigClockContainer::unlockButtonSupported()
 {
 #ifdef Q_OS_SYMBIAN 
     XQSettingsManager::Error error;
-    int swipeWidget = 0; 
+    int unlockButton = 0; 
     XQCentralRepositorySettingsKey settingsKey(
-             KCRUidScreensaverSettings.iUid, KScreensaverSwipeToOpen ); 
+            KCRUidValueScreensaverSettings, KScreensaverUnlockWidget ); 
     XQSettingsManager settingsManager;
-    swipeWidget = settingsManager.readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
+    unlockButton = settingsManager.readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
     error = settingsManager.error();
-    if (error == XQSettingsManager::NoError && swipeWidget == 1) {
+    if (error == XQSettingsManager::NoError && unlockButton == 1) {
         return true;
     }
     else {

@@ -10,7 +10,7 @@
 # Description:
 TEMPLATE = lib
 CONFIG += plugin hb mobility
-MOBILITY = serviceframework
+MOBILITY += serviceframework publishsubscribe
 
 PLUGIN_SUBDIR = /resource/qt/plugins/homescreen
 include(../../common.pri)
@@ -39,6 +39,10 @@ symbian {
     
     include(hsapplibrarystateplugin_exports_to_rom.pri)
     LIBS += -lxqsettingsmanager
+    
+	crmlFile.sources = ./conf/hsapplibrary.qcrml
+	crmlFile.path = c:/resource/qt/crml
+	DEPLOYMENT += crmlFile
 }
 
 RESOURCES = $$qrcFile

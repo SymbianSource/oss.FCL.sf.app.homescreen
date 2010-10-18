@@ -23,6 +23,7 @@
 #include <QModelIndex>
 #include <QScopedPointer>
 #include <QSortFilterProxyModel>
+#include <QPersistentModelIndex>
 #include <HbAbstractItemView>
 #include "hsmenustates_global.h"
 #include "hsmenuviewbuilder.h"
@@ -50,17 +51,20 @@ class HsMenuView: public QObject
 
 public:
     HsMenuView(HsMenuViewBuilder &builder, HsStateContext stateContext,
-               HsMainWindow& mainWindow);
+               HsMainWindow& mainWindow,
+               HsOperationalContext operationalContext = HsItemViewContext);
     ~HsMenuView();
 
     HbView *view() const;
 
-    HbListView *listView() const;
+    HbAbstractItemView *itemView() const;
 
     void activate();
     void inactivate();
 
     HbGroupBox *viewLabel() const;
+
+    QPersistentModelIndex  currentScrollPosition() const;
 
     void setModel(QAbstractItemModel *model);
     QAbstractItemModel *model() const;
@@ -98,7 +102,7 @@ private:
     HsMainWindow &mMainWindow;
 
     HbView *mView; // once this is constructed it is not NULL
-    HbListView *mListView; // may be NULL in some contexts
+    HbAbstractItemView *mAbstractItemView; // may be NULL in some contexts
     HbGroupBox *mViewLabel; // may be NULL in some contexts
 
     QScopedPointer<HsSearchView> mHsSearchView;

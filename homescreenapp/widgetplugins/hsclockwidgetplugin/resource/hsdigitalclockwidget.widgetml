@@ -6,8 +6,8 @@
         <meshitem src="background" srcEdge="LEFT" dst="" dstEdge="LEFT" />
         <meshitem src="background" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
 
-        <meshitem src="ampm" srcEdge="TOP" dst="toucharea" dstEdge="TOP" />
-        <meshitem src="ampm" srcEdge="LEFT" dst="toucharea" dstEdge="LEFT" />
+        <meshitem src="ampm" srcEdge="TOP" dst="" dstEdge="TOP" />
+        <meshitem src="ampm" srcEdge="LEFT" dst="" dstEdge="LEFT" />
         
         <meshitem src="digit1" srcEdge="CENTERV" dst="" dstEdge="CENTERV" />
 

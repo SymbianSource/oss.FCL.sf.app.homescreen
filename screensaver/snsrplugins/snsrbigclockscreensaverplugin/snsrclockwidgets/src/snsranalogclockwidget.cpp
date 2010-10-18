@@ -23,7 +23,7 @@
 #include <HbExtendedLocale>
 #include <HbStyleLoader>
 #include <HbIconItem>
-#include <hbevent.h>
+#include <HbEvent>
 #include <HbColorScheme>
 #include <HbTextItem>
 
@@ -87,22 +87,20 @@ void SnsrAnalogClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
  */
 void SnsrAnalogClockWidget::createPrimitives()
 {
-    // TODO: when final graphics are available in platform (qtg_graf_screensaver_clock_xxx)
-    // use them instead.
     if (!mClockBackground) {
-        mClockBackground = new HbIconItem(QLatin1String("qtg_graf_clock_day_bg"), this);
+        mClockBackground = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_face"), this);
         HbStyle::setItemName(mClockBackground, QLatin1String("analog_clock_background"));
     }
     if (!mClockHourHand) {
-        mClockHourHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_hour"), this);
+        mClockHourHand = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_hours"), this);
         HbStyle::setItemName(mClockHourHand, QLatin1String("analog_clock_hour_hand"));
     }
     if (!mClockMinuteHand) {
-        mClockMinuteHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_min"), this);
+        mClockMinuteHand = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_minutes"), this);
         HbStyle::setItemName(mClockMinuteHand, QLatin1String("analog_clock_minute_hand"));
     }
     if (!mClockSecondHand) {
-        mClockSecondHand = new HbIconItem(QLatin1String("qtg_graf_clock_day_sec"), this);
+        mClockSecondHand = new HbIconItem(QLatin1String("qtg_graf_bigclock_analogue_seconds"), this);
         HbStyle::setItemName(mClockSecondHand, QLatin1String("analog_clock_second_hand"));
     }
     if (!mClockAmPmLabel) {

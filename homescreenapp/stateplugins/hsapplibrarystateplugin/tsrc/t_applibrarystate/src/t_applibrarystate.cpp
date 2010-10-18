@@ -195,7 +195,7 @@ void MenuStatesTest::ApplicationLibraryState_historySlots()
 
         appLibrary.allCollectionsStateEntered();
         QCOMPARE(qobject_cast<QAbstractState *>(appLibrary.mAllCollectionsState),
-            appLibrary.mHistoryTransaction->targetState());
+            appLibrary.mHistoryTransition->targetState());
         QCOMPARE(appLibrary.mInstalledAppsState->transitions().length(), 1);
         QCOMPARE(appLibrary.mInstalledAppsState->transitions()[0]->sourceState(),
             qobject_cast<QState *>(appLibrary.mInstalledAppsState));
@@ -204,7 +204,7 @@ void MenuStatesTest::ApplicationLibraryState_historySlots()
 
         appLibrary.allAppsStateEntered();
         QCOMPARE(qobject_cast<QAbstractState *>(appLibrary.mAllAppsState),
-            appLibrary.mHistoryTransaction->targetState());
+            appLibrary.mHistoryTransition->targetState());
         QCOMPARE(appLibrary.mInstalledAppsState->transitions().length(), 1);
         QCOMPARE(appLibrary.mInstalledAppsState->transitions()[0]->sourceState(),
             qobject_cast<QState *>(appLibrary.mInstalledAppsState));
@@ -239,9 +239,6 @@ void MenuStatesTest::ApplicationLibraryState_backSteppingAction()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-
-        QFAIL("! Due to bug in hb wk36 we are forced to skip this test !");
-        
         QScopedPointer<HbMainWindow> wind(new HbMainWindow);
         HsScene::setInstance( new HsScene(wind.data()) );
         //create statemachine to perform transitions

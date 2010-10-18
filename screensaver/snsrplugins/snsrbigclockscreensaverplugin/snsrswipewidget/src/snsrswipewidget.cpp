@@ -17,13 +17,10 @@
 
 #include <QDebug>
 #include <HbStyleLoader>
-#include <hbeffect.h>
-#include <hblabel.h>
+#include <HbLabel>
 #include <HbIconItem>
 #include <HbIconAnimationManager>
-
-#include <hbiconitem.h>
-#include <hbiconanimator.h>
+#include <HbIconAnimator>
 
 #include "snsrbigclockcontainer.h"
 #include "snsranalogclockcontainer.h"

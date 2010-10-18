@@ -49,6 +49,9 @@ HsMenuItemModel::HsMenuItemModel(const CaQuery &query, QObject *parent) :
         CaSoftwareRegistry::create()->createUninstallNotifier();
     connect(mUninstallNotifier, SIGNAL(progressChange(int, int)),
             this, SLOT(uninstallChange(int, int)));
+    QVariantMap lastProgressNote = mUninstallNotifier->getLastNotification();
+    uninstallChange(lastProgressNote.value(uninstallNotifierComponentIdKey).toInt(),
+    		lastProgressNote.value(uninstallNotifierValueOfProgressKey).toInt());
 }
 
 /*!

@@ -18,7 +18,6 @@
 #include "snsroledtimelabel.h"
 #include "snsrcolors.h"
 
-#include <hbevent.h>
 #include <QPainter>
 
 

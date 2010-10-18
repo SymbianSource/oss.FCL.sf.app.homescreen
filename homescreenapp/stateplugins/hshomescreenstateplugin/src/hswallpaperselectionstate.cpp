@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -21,6 +21,9 @@
 #include "hspage.h"
 #include "hswallpaper.h"
 #include "hsconfiguration.h"
+#include "hssystemevents.h"
+
+#include <QDebug>
 
 #ifdef Q_OS_SYMBIAN
 #include "hsimagehandlingclient.h"
@@ -77,19 +80,20 @@ void HsWallpaperSelectionState::setupStates()
     state_processing->setInitialState(state_selectingImage);
     
     // Transitions
+    
 #if defined (Q_OS_SYMBIAN) && !defined (__WINSCW__)
     state_selectingImage->addTransition(
-        this, SIGNAL(event_assignImage()), state_editingImage);
+        this, SIGNAL(event_assignImage()), state_editingImage);           
 #else
     state_selectingImage->addTransition(
         this, SIGNAL(event_assignImage()), state_assigningImage);
 #endif // Q_OS_SYMBIAN
-    
+   
     state_processing->addTransition(
         this, SIGNAL(event_error()), state_errorMessage);
 
     // Actions
-
+    
     ENTRY_ACTION(state_selectingImage, action_selectingImage_start)
     EXIT_ACTION(state_selectingImage, action_imageHandler_cleanup)
 
@@ -119,10 +123,13 @@ void HsWallpaperSelectionState::action_selectingImage_start()
             this, SLOT(onFetchCompleted(const QString&)));
     connect(mImageHandler, SIGNAL(fetchFailed(int, const QString&)),
             this, SLOT(onFetchFailed(int, const QString&)));
+    // Qt::QueuedConnection due to different event loop -> we use deleteLater
+    connect(HsSystemEvents::instance(), SIGNAL(homeKeyClicked()),
+            SIGNAL(event_waitInput()), Qt::QueuedConnection);  
 
     mImageHandler->fetch();
 }
- 
+  
 /*!
 
 */
@@ -203,6 +210,8 @@ void HsWallpaperSelectionState::action_editingImage_start()
             this, SLOT(onEditorCompleted()));
     connect(mImageHandler, SIGNAL(editorFailed(int, const QString&)),
             this, SLOT(onFetchFailed(int, const QString&)));
+    connect(HsSystemEvents::instance(), SIGNAL(homeKeyClicked()),
+            SIGNAL(event_waitInput()), Qt::QueuedConnection);  
 
     mImageHandler->edit(mImagePath);
 #endif //Q_OS_SYMBIAN

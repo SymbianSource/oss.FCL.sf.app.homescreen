@@ -419,12 +419,12 @@ void MenuStatesTest::contextMenuAction()
     {
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
 
-        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
-        //HsScene::setInstance( new HsScene(window.data()) );
+        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        HsScene::setInstance( new HsScene(window.data()) );
 
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
-        HsMainWindowMock mainWindow;
+        HsMainWindow mainWindow;
 
         QScopedPointer<HsAllCollectionsState> allCollectionsState (new HsAllCollectionsState(
             builder, menuMode, mainWindow, machine.data()));

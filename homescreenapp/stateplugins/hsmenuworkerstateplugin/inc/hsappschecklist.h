@@ -47,7 +47,8 @@ public:
 
     void setSortOrder(Hs::HsSortAttribute sortAttribute);
 
-    void showAppsCheckboxList(Hs::HsSortAttribute sortAttribute);
+    void showAppsCheckboxList(Hs::HsSortAttribute sortAttribute,
+                              int scrollPosition);
 
 signals:
 

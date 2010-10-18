@@ -18,7 +18,7 @@
 #ifndef SNSRINDICATORMODEL_H
 #define SNSRINDICATORMODEL_H
 
-#include <qobject.h>
+#include <QObject>
 #include "snsrindicatorinfo.h"
 #include "snsrtest_global.h"
 

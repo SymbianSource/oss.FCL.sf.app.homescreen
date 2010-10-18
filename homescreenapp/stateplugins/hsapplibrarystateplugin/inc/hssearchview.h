@@ -43,17 +43,16 @@ class HsSearchView : public QObject
 
 public:
 
-    HsSearchView(
-            HsMenuViewBuilder &builder,
-            HsStateContext stateContext,
-            HsMainWindow &mainWindow);
+    HsSearchView(HsMenuViewBuilder &builder, HsStateContext stateContext,
+            HsMainWindow &mainWindow, HsOperationalContext operationalContext);
     ~HsSearchView();
 
     void setSearchPanelVisible(bool visible);
     bool isActive() const;
+    void setOperationalContext(HsOperationalContext operationalContext);
 private:
 
-    QModelIndex firstVisibleItemIndex(const HbListView *view) const;
+    QModelIndex firstVisibleItemIndex(const HbAbstractItemView *view) const;
     void searchBegins();
 
     void connectSearchItemViewsSignals();
@@ -99,10 +98,10 @@ private:
     HbListView *mSearchListView;
     HbSearchPanel *mSearchPanel;
     const HsStateContext mStateContext;
-    HsOperationalContext mAfterSearchContext;
+    HsOperationalContext mOperationalContext;
     HsMenuViewBuilder &mBuilder;
     HsMainWindow &mMainWindow;
-    HbListView *mListView;
+    HbAbstractItemView *mView;
     QScopedPointer<HbShrinkingVkbHost> mVkbHost;
     HsSearchViewBuilder mSearchViewBuilder;
     bool mEmptyResultText;

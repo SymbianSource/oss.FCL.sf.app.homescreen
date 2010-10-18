@@ -160,7 +160,7 @@ bool SnsrDeviceDialog::setDeviceDialogParameters(const QVariantMap &parameters)
         XQSettingsManager::Error error;
         int startupView = 0; 
         XQCentralRepositorySettingsKey settingsKey(
-                 KCRUidScreensaverSettings.iUid, KScreensaverStartupView ); // TUid as same repository used in control panel via Symbian APIs 
+                KCRUidValueScreensaverSettings, KScreensaverStartupView ); 
         XQSettingsManager settingsManager;
         startupView = settingsManager.readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
         error = settingsManager.error();
@@ -169,9 +169,9 @@ bool SnsrDeviceDialog::setDeviceDialogParameters(const QVariantMap &parameters)
         }
     }
 #else
-    if (viewType == ViewTypeInitial ) {
+    if ( viewType == ViewTypeInitial ) {
         viewType = ViewTypeStandby;
-	}
+    }
 #endif //Q_OS_SYMBIAN
     
     switch (viewType) {

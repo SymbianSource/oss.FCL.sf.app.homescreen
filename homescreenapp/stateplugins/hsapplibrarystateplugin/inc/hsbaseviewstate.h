@@ -77,8 +77,10 @@ protected slots:
     
 protected:
     
-    void initialize(
-        HsMenuViewBuilder &menuViewBuilder, HsStateContext stateContext);
+    void initialize(HsMenuViewBuilder &menuViewBuilder,
+            HsStateContext stateContext,
+            HsOperationalContext operationalContext = HsItemViewContext);
+    
     void createApplicationLaunchFailMessage(int errorCode,int itemId);
     void defineTransitions();
 

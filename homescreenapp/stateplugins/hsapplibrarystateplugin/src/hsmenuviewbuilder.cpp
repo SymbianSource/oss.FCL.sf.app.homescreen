@@ -28,6 +28,7 @@
 #include <HbMainWindow>
 #include <HbInputMethod>
 #include <HbToolBarExtension>
+#include <HbGridView>
 
 #include "hsmenuviewbuilder.h"
 #include "hsmenustates_global.h"
@@ -36,7 +37,7 @@ static const char* DOCUMENT_BASE_NAME_MAP
         [InvalidOperationalContext] =
                             /*HsItemViewContext,    HsEmptyLabelContext*/
 {
-     "labeledlistview",     "emptylabeledview"
+     "labeledlistview", "emptylabeledview", "labeledgridviewportrait", "labeledgridviewlandscape"
 };
 
 static const QString DOCUMENT_NAME_PREFIX(QLatin1String(":/xml/"));
@@ -44,7 +45,7 @@ static const QString DOCUMENT_NAME_EXT(QLatin1String(".docml"));
 static const QString COMMON_OBJECTS_DOCUMENT_BASE_NAME(
         QLatin1String("common_objects"));
 static const QString VIEW_NAME(QLatin1String("view"));
-static const QString LIST_VIEW_NAME(QLatin1String("listView"));
+static const QString ABSTRACT_ITEM_VIEW(QLatin1String("abstractItemView"));
 static const QString VIEW_LABEL_NAME(QLatin1String("label"));
 
 /*!
@@ -78,18 +79,18 @@ HbView *HsMenuViewBuilder::currentView()
 }
 
 /*!
- \return Pointer to list view resulting from last \a build call or NULL if
+ \return Pointer to abstract item view resulting from last \a build call or NULL if
  the \a build has not yet been called.
  The pointer is valid until the HsMenuViewBuilder instance is destroyed.
  Memory ownership is not changed.
  */
-HbListView *HsMenuViewBuilder::currentListView()
+HbAbstractItemView *HsMenuViewBuilder::currentAbstractItemView()
 {
-    HbListView *const listView =
-        qobject_cast<HbListView *>(
-                currentLoader()->findWidget(LIST_VIEW_NAME));
+    HbAbstractItemView *const abstractItemView =
+        qobject_cast<HbAbstractItemView *>(
+                currentLoader()->findWidget(ABSTRACT_ITEM_VIEW));
 
-    return listView;
+    return abstractItemView;
 }
 
 /*!

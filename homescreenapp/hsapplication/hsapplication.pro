@@ -44,9 +44,18 @@ LIBS += -lhsutils \
 
 
 symbian: {
+
+    myIfdefBlock = \
+    "$${LITERAL_HASH}ifdef WINSCW" \
+    "EPOCHEAPSIZE 0x20000 0x1600000" \
+    "$${LITERAL_HASH}else" \
+    "EPOCHEAPSIZE 0x20000 0x2000000" \
+    "$${LITERAL_HASH}endif"
+    
+    MMP_RULES += myIfdefBlock
+ 
     TARGET.UID3 = 0x20022F35
     TARGET.CAPABILITY = CAP_APPLICATION AllFiles TrustedUI
-    TARGET.EPOCHEAPSIZE = 0x20000 0x1600000 // 128kB - 23MB
     ICON = resource/qgn_menu_appsgrid.svg
 
     LIBS +=  -lapgrfx \

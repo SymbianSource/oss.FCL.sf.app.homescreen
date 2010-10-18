@@ -18,7 +18,7 @@
 #ifndef SNSRINDICATORWIDGET_H
 #define SNSRINDICATORWIDGET_H
 
-#include <hbwidget.h>
+#include <HbWidget>
 #include "snsrtest_global.h"
 
 SCREENSAVER_TEST_CLASS(T_SnsrIndicators)

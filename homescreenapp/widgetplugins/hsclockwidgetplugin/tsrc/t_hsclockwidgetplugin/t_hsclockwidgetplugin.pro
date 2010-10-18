@@ -53,13 +53,14 @@ win32:include(t_hsclockwidgetplugin_win.pri)
 symbian:include(t_hsclockwidgetplugin_symbian.pri)
 
 symbian: {
+    INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
     CONFIG += symbian_test
     CONFIG -= hb
     load(hb.prf)
     CONFIG -= symbian_i18n
     TARGET.UID3 = 0x20022F6D
     TARGET.CAPABILITY = CAP_APPLICATION AllFiles WriteDeviceData ReadDeviceData
-    LIBS += -lbafl -lapgrfx -lcone
+    LIBS += -lbafl -lapgrfx -lcone -lxqsettingsmanager
     
     MMP_RULES += SMPSAFE
 

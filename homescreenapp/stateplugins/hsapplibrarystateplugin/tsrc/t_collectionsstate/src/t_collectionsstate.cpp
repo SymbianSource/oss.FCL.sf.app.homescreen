@@ -284,12 +284,12 @@ void MenuStatesTest::contextMenuAction()
 #endif//UT_MEMORY_CHECK
 #endif//Q_OS_SYMBIAN
     {
-        //QScopedPointer<HbMainWindow> window(new HbMainWindow);
-        //HsScene::setInstance( new HsScene(window.data()) );
+        QScopedPointer<HbMainWindow> window(new HbMainWindow);
+        HsScene::setInstance( new HsScene(window.data()) );
 
         HsMenuViewBuilder builder;
         HsMenuModeWrapper menuMode;
-        HsMainWindowMock mainWindow;
+        HsMainWindow mainWindow;
 
         QScopedPointer<QStateMachine> machine(new QStateMachine(0));
 
@@ -662,49 +662,29 @@ void MenuStatesTest::updateLabel()
         HsMenuModeWrapper menuMode;
         HsMainWindowMock mainWindow;
 
-        QScopedPointer<QStateMachine> machine(new QStateMachine(0));
-        QState *rootState = new QState(machine.data());
-        machine->setInitialState(rootState);
+        const QString collectionName("testCollection" 
+        		+ QDateTime::currentDateTime().toString(
+        				"ddmmyyyy_hh_mm_ss_zzz"));
 
-        const QString collectionName("testCollection" +
-                                     QDateTime::currentDateTime().
-                                     toString("ddmmyyyy_hh_mm_ss_zzz"));
+        const int collectionId = HsMenuService::createCollection(
+        		collectionName);
 
-        const int collectionId =
-            HsMenuService::createCollection(collectionName);
+        HsCollectionState collectionState(builder, menuMode, mainWindow);
 
-        HsCollectionState *collectionState =
-            new HsCollectionState(builder, menuMode, mainWindow, rootState);
+        collectionState.mModel = HsMenuService::getCollectionModel(
+        		collectionId );
 
-        collectionState->mCollectionId = collectionId;
-
-        collectionState->mModel =
-            static_cast<HsMenuItemModel *>(
-                HsMenuService::getCollectionModel(collectionState->mCollectionId,
-                        collectionState->mSortAttribute));
-
-        const QString newName(collectionName +
-                              QDateTime::currentDateTime().
-                              toString("ddmmyyyy_hh_mm_ss_zzz"));
-
-        const bool renamed = HsMenuService::renameCollection(
-                                 collectionState->mCollectionId, newName);
-
-        QVERIFY(renamed);
-
-        QTest::qWait(3000);
-
-        collectionState->updateLabel();
+        collectionState.updateLabel();
 
         const QString label = builder.currentViewLabel()->heading();
 
-        //now label is different than collection name but should contain this name
-        QVERIFY(label.contains(newName));
-
-        QVERIFY(HsMenuService::renameCollection(collectionState->mCollectionId, collectionName));
+        QString parentName = collectionState.mModel->root().data(
+        		CaItemModel::CollectionTitleRole).toString();
 
         // cleanup
         HsMenuService::removeCollection(collectionId);
+        
+        QCOMPARE(label, parentName);
     }
 #ifdef UT_MEMORY_CHECK
     __UHEAP_MARKEND;

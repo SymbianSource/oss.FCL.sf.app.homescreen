@@ -798,7 +798,6 @@ void HsIdleState::action_idle_connectOrientationChangeEventHandler()
 
 void HsIdleState::action_idle_orientationChanged()
 {
-    HsScene::instance()->activePage()->resetNewWidgets();
     stopPageChangeAnimations();
     action_idle_showActivePage();
 }

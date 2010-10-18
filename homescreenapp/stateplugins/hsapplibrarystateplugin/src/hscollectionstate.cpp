@@ -352,7 +352,7 @@ void HsCollectionState::reconnectViewComponents(bool empty)
     } else {
         mMenuView->reset(HsItemViewContext);
         mMenuView->setModel(mModel);
-        mMenuView->listView()->scrollTo(
+        mMenuView->itemView()->scrollTo(
             mModel->index(0), HbAbstractItemView::PositionAtTop);
     }
     mMenuView->disableSearch(empty);
@@ -508,9 +508,9 @@ void HsCollectionState::createArrangeCollection()
     // Arrange collection via the Arrange view
     int topItemId(0);
 
-    if (mMenuView->listView() != NULL) {
+    if (mMenuView->itemView() != NULL) {
         const QList<HbAbstractViewItem *> array =
-            mMenuView->listView()->visibleItems();
+            mMenuView->itemView()->visibleItems();
 
         if (array.count() >= 1) {
             QModelIndex idx = array[0]->modelIndex();

@@ -50,6 +50,7 @@ private:
 private:
 
     HbIconItem *mClockBackground;
+    HbIconItem *mClockAxis;
     HbIconItem *mClockHourHand;
     HbIconItem *mClockMinuteHand;
     HbTextItem *mClockAmPmLabel;

@@ -20,9 +20,7 @@
 
 #include <QGesture>
 
-#include <hbwidget.h>
-#include <hblabel.h>
-#include <hbeffect.h>
+#include <HbWidget>
 #include "snsrtest_global.h"
 
 SCREENSAVER_TEST_CLASS(T_SnsrSwipeWidget)
@@ -57,7 +55,7 @@ signals:
 private: // data
 
     HbLabel *mSlideLabel;
-    HbIconItem* mIconItem;
+    HbIconItem *mIconItem;
     //for swipe direction we need to know if the device is in landscapemode
     int mCurrentOrientation;
 

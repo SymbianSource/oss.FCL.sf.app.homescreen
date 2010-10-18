@@ -19,6 +19,9 @@
 #include "hsclocksettingsnotifier_symbian.h"
 
 #include <bacntf.h> // CEnvironmentChangeNotifier
+#include <xqsettingsmanager.h>
+#include <xqsettingskey.h>
+#include <clockdomaincrkeys.h>
 
 
 namespace
@@ -44,9 +47,22 @@ HsClockSettingsNotifier::HsClockSettingsNotifier(QObject *parent)
     : QObject(parent),
       mDateTimeNotifier(0)
 {
-    mClockFormat = clockFormatString();
     mTimeFormat = timeFormatString();
-    createObserver();
+    createSystemChangeObserver();
+    
+	// Connect for the clock type changes to refresh the view
+	mSettingsManager = new XQSettingsManager();
+	mClockTypeSettingsKey = new XQSettingsKey(
+							XQSettingsKey::TargetCentralRepository,
+							KCRUidClockApp,
+							KClockType);
+	
+    mClockType = clockTypeString();
+	
+	mSettingsManager->startMonitoring(*mClockTypeSettingsKey);
+	connect(mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
+				this, SLOT(onClockTypeChanged(XQSettingsKey, QVariant)));
+
 }
 
 
@@ -57,14 +73,17 @@ HsClockSettingsNotifier::HsClockSettingsNotifier(QObject *parent)
 HsClockSettingsNotifier::~HsClockSettingsNotifier()
 {
     delete mDateTimeNotifier;
+    mSettingsManager->stopMonitoring(*mClockTypeSettingsKey);
+    delete mClockTypeSettingsKey;
+    delete mSettingsManager;
 }
 
 /*!
     Returns the clock format ('analog'/'digital')
 */
-QString HsClockSettingsNotifier::clockFormat() const
+QString HsClockSettingsNotifier::clockType() const
 {
-    return mClockFormat;
+    return mClockType;
 }
 
 /*!
@@ -91,9 +110,23 @@ TInt HsClockSettingsNotifier::EnvironmentChanged( TAny* aSelf )
 }
 
 /*!
+	Slot which is called when the value changes in cenrep.
+
+	\param key The key which got changed in cenrep.
+	\param value The new value of that key.
+ */
+void HsClockSettingsNotifier::onClockTypeChanged( const XQSettingsKey& key, const QVariant& value )
+{
+    Q_UNUSED(value)
+	if (key.uid() == KCRUidClockApp && key.key() == KClockType) {
+		onSettingsChanged();
+	}
+}
+
+/*!
  Creates CEnvironmentChangeNotifier object to listen system settings changes.
 */
-void HsClockSettingsNotifier::createObserver() 
+void HsClockSettingsNotifier::createSystemChangeObserver() 
 {
     if ( !mDateTimeNotifier ){
         mDateTimeNotifier = CEnvironmentChangeNotifier::NewL( 
@@ -107,11 +140,15 @@ void HsClockSettingsNotifier::createObserver()
 /*!
     Reads clock format from system locale settings
 */
-QString HsClockSettingsNotifier::clockFormatString() const
+QString HsClockSettingsNotifier::clockTypeString() const
 {
-    TLocale locale;
-    TClockFormat clockFormat = locale.ClockFormat();
-    if ( clockFormat==EClockAnalog ) {
+	int clockType = -1;
+	// Read the clocktype value from the cenrep
+	// 0 is for Analogue type and 1 for Digital
+	QVariant value = mSettingsManager->readItemValue(*mClockTypeSettingsKey);
+	clockType = value.toInt();
+
+    if ( clockType == 0 ) {
         return QString(ANALOG);
     } else {
         return QString(DIGITAL);
@@ -125,7 +162,7 @@ QString HsClockSettingsNotifier::timeFormatString() const
 {
     TLocale locale;
     TTimeFormat timeFormat = locale.TimeFormat();
-    if ( timeFormat==ETime12 ) {
+    if ( timeFormat == ETime12 ) {
         return QString(TIME12);
     } else {
         return QString(TIME24);
@@ -136,12 +173,12 @@ QString HsClockSettingsNotifier::timeFormatString() const
 */
 void HsClockSettingsNotifier::onSettingsChanged()
 {
-    QString clockFormat = clockFormatString();
+    QString clockType = clockTypeString();
     QString timeFormat = timeFormatString();
-    if ( clockFormat != mClockFormat || timeFormat != mTimeFormat ) {
-        mClockFormat = clockFormat;
+    if ( clockType != mClockType || timeFormat != mTimeFormat ) {
+        mClockType = clockType;
         mTimeFormat = timeFormat;
-        emit settingsChanged(mClockFormat, mTimeFormat);
+        emit settingsChanged(mClockType, mTimeFormat);
     }
 }
 

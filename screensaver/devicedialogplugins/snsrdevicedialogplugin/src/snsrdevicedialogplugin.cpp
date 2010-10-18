@@ -17,8 +17,8 @@
 
 #include <QtPlugin>
 #include <QDebug>
-#include <qservicemanager.h>
-#include <hbdevicedialog.h>
+#include <QServiceManager>
+#include <HbDeviceDialog>
 
 #include "snsrdevicedialogplugin.h"
 #include "snsrdevicedialog.h"

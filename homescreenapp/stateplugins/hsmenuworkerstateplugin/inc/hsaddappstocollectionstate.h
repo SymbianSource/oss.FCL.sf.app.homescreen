@@ -115,6 +115,8 @@ private:
 
     int mCollectionId;
 
+    int mScrollPosition;
+
     QList<int> mAppList;
 
     bool mShowConfirmation;

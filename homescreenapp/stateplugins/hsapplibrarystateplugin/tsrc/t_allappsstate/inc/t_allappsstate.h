@@ -55,6 +55,7 @@ private slots:
     void addModeShowContextMenu();
     void addModeEnteredExited();
 #ifdef Q_OS_SYMBIAN
+    void switchLayout();
     void checkSoftwareUpdates();
 #endif//Q_OS_SYMBIAN
     //HsAddModeProxyModel

@@ -59,11 +59,13 @@
   \param mainWindow Enables switching between originating and search view.
  */
 HsSearchView::HsSearchView(HsMenuViewBuilder &builder,
-        HsStateContext stateContext, HsMainWindow &mainWindow) :
+        HsStateContext stateContext, HsMainWindow &mainWindow, 
+        HsOperationalContext operationalContext) :
     mProxyModel(new HsSearchFilterProxyModel(this)), mSearchView(NULL),
     mSearchListView(NULL), mSearchPanel(NULL), mStateContext(stateContext),
-    mBuilder(builder), mMainWindow(mainWindow), mListView(NULL),
-    mVkbHost(NULL), mSearchViewBuilder(), mEmptyResultText(true)
+    mOperationalContext(operationalContext), mBuilder(builder), 
+    mMainWindow(mainWindow), mView(NULL), mVkbHost(NULL), 
+    mSearchViewBuilder(), mEmptyResultText(true)
 {
     mProxyModel->setFilterRole(CaItemModel::TextRole);
     mProxyModel->setFilterKeyColumn(0);
@@ -106,7 +108,8 @@ void HsSearchView::setSearchPanelVisible(bool visible)
     \return Index of F=first visible item of \a view if any
     or default QModelIndex otherwise.
  */
-QModelIndex HsSearchView::firstVisibleItemIndex(const HbListView *view) const
+QModelIndex HsSearchView::firstVisibleItemIndex(
+        const HbAbstractItemView *view) const
 {
     const QList<HbAbstractViewItem *> array = view->visibleItems();
     if (array.count()) {
@@ -124,11 +127,11 @@ void HsSearchView::searchBegins()
 
     setOriginatingContext();
 
-    mListView = mBuilder.currentListView();
-    mSearchViewInitialIndex = firstVisibleItemIndex(mListView);
+    mView = mBuilder.currentAbstractItemView();
+    mSearchViewInitialIndex = firstVisibleItemIndex(mView);
 
     mProxyModel->invalidate();
-    mProxyModel->setSourceModel(mListView->model());
+    mProxyModel->setSourceModel(mView->model());
     mCriteria = QString("");
     mProxyModel->setFilterString(mCriteria);
 
@@ -159,14 +162,14 @@ void HsSearchView::searchBegins()
                 HbIndexFeedback::IndexFeedbackSingleCharacter);
         indexFeedback->setItemView(mSearchListView);
     }
+
+    mSearchListView->scrollTo(
+            mProxyModel->mapFromSource(mSearchViewInitialIndex),
+            HbAbstractItemView::PositionAtTop);
     
     mMainWindow.setCurrentView(mSearchView);
 
     openVkb();
-
-    mSearchListView->scrollTo(
-        mProxyModel->mapFromSource(mSearchViewInitialIndex),
-        HbAbstractItemView::PositionAtTop);
 
     setNoResultsVisibility();
     HSMENUTEST_FUNC_EXIT("HsSearchView::searchBegins");
@@ -382,7 +385,7 @@ HbLineEdit *HsSearchView::searchPanelLineEdit(
 void HsSearchView::setOriginatingContext()
 {
     mBuilder.setStateContext(mStateContext);
-    mBuilder.setOperationalContext(HsItemViewContext);
+    mBuilder.setOperationalContext(mOperationalContext);
 }
 
 /*!
@@ -392,6 +395,16 @@ void HsSearchView::setOriginatingContext()
 bool HsSearchView::isActive() const
 {
     return mSearchListView != NULL;
+}
+
+/*!
+  Sets the operation context to the mOperationalContext.
+  \param operationalContext value of operational context to be set.  
+ */
+void HsSearchView::setOperationalContext(
+        HsOperationalContext operationalContext)
+{
+    mOperationalContext = operationalContext;
 }
 
 /*!

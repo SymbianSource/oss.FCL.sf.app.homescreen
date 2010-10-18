@@ -18,9 +18,9 @@
 #include "snsrbigclockscreensaver.h"
 
 #ifdef Q_OS_SYMBIAN
-#include <e32std.h>
 #include <XQSettingsManager> 
 #include <screensaverdomaincrkeys.h>
+#include <clockdomaincrkeys.h>
 #endif // Q_OS_SYMBIAN
 
 #include <QDebug>
@@ -57,6 +57,9 @@ SnsrBigClockScreensaver::SnsrBigClockScreensaver() :
     // This model holds indicator status information and must exist as
     // long as screensaver does.
     mIndicatorModel = new SnsrIndicatorModel(this);
+    
+    // connect timer for time updates
+    connect( &mTimer, SIGNAL(timeout()), SLOT(updateTime()) );
 }
 
 /*!
@@ -117,12 +120,12 @@ bool SnsrBigClockScreensaver::onPartialForeground()
     // Check ScreensaverStatus from repository
     XQSettingsManager::Error error;
     XQCentralRepositorySettingsKey settingsKey(
-            KCRUidScreensaverSettings.iUid, KScreensaverStatus ); // TUid as same repository used in control panel via Symbian APIs 
+            KCRUidValueScreensaverSettings, KScreensaverStatus ); 
     XQSettingsManager setManager;
     int screensaverOn = setManager.readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
     error = setManager.error();
     if (error != XQSettingsManager::NoError) {
-        qDebug("Error reading value from XQSettingsManager.. error = %d", error);
+        qDebug("Error reading screensaver status from XQSettingsManager.. error = %d", error);
     }
 #else
     int screensaverOn = 1;
@@ -298,11 +301,16 @@ void SnsrBigClockScreensaver::updateTime()
 SnsrBigClockScreensaver::ClockFormat SnsrBigClockScreensaver::clockFormat()
 {
 #ifdef Q_OS_SYMBIAN
-    if (TLocale().ClockFormat() == EClockAnalog) {
-        return ClockFormatAnalog;
-    } else {
-        return ClockFormatDigital;
+    XQSettingsManager::Error error;
+    XQCentralRepositorySettingsKey settingsKey(
+        KCRUidClockApp, KClockType ); 
+    XQSettingsManager setManager;
+    int useDigital = setManager.readItemValue(settingsKey, XQSettingsManager::TypeInt).toInt();
+    error = setManager.error();
+    if (error != XQSettingsManager::NoError) {
+        qDebug("Error reading clock format from XQSettingsManager.. error = %d", error);
     }
+    return ( useDigital ? ClockFormatDigital : ClockFormatAnalog );
 #else
     // windows build - change the format every 30 seconds for testing purposes
     if (QTime::currentTime().second() < 30) {
@@ -316,13 +324,6 @@ SnsrBigClockScreensaver::ClockFormat SnsrBigClockScreensaver::clockFormat()
 void SnsrBigClockScreensaver::removeCurrentContainer()
 {
     if ( mCurrentContainer ) {
-        disconnect(
-            &mTimer, SIGNAL(timeout()),
-            this, SLOT(updateTime())
-            );
-        disconnect( 
-            mCurrentContainer, SIGNAL(unlockRequested()), 
-            this, SIGNAL(unlockRequested()) );
         if (mTimer.timerId()!= -1) {
             mTimer.stop();
         }
@@ -337,7 +338,6 @@ void SnsrBigClockScreensaver::setCurrentContainer( SnsrBigClockContainer* newCon
 {
     mCurrentContainer = newContainer;
     mCurrentContainer->setParent(this);
-    connect( &mTimer, SIGNAL(timeout()), SLOT(updateTime()) );
     connect( mCurrentContainer, SIGNAL(unlockRequested()), SIGNAL(unlockRequested()) );
     
     mCurrentContainer->setIndicatorModel(*mIndicatorModel);

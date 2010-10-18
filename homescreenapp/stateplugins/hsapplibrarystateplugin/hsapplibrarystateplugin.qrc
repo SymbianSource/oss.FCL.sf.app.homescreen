@@ -3,6 +3,8 @@
         <file alias="common_objects.docml">resource/common_objects.docml.bin</file>
         <file alias="emptylabeledview.docml">resource/emptylabeledview.docml.bin</file>
         <file alias="labeledlistview.docml">resource/labeledlistview.docml.bin</file>
+        <file alias="labeledgridviewportrait.docml">resource/labeledgridviewportrait.docml.bin</file>
+        <file alias="labeledgridviewlandscape.docml">resource/labeledgridviewlandscape.docml.bin</file>
         <file alias="searchview.docml">resource/searchview.docml.bin</file>
     </qresource>
     <qresource prefix="/css">

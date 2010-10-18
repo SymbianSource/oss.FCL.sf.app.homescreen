@@ -46,7 +46,7 @@ public slots:
     void onUninitialize();
 
     void updateTime();
-    void onSettingsChanged(const QString &clockFormat, const QString &timeFormat);
+    void onSettingsChanged(const QString &clockType, const QString &timeFormat);
     void onClockTapped();
 
 private:
@@ -57,7 +57,7 @@ private:
     HbWidget *mWidget;
     QGraphicsLinearLayout *mLayout;    
     QString mClockType;
-    QString mTimeType;        
+    QString mTimeFormat;        
 #ifdef Q_OS_SYMBIAN
     HsClockSettingsNotifier *mClockSettingsNotifier;
 #endif //Q_OS_SYMBIAN

@@ -23,8 +23,8 @@
 
 #include <HbExtendedLocale>
 #include <HbMainWindow>
+#include <HbPushButton>
 
-#include "snsrswipewidget.h"
 #include "snsrindicatorwidget.h"
 #include "snsrlabel.h"
 
@@ -35,7 +35,7 @@
  */
 
 const char *gDigitalLayoutDocml = ":/xml/snsrbigclockscreensaverdigital.docml";
-const char *gSwipeDigitalLayoutDocml = ":/xml/snsrbigclockscreensaverdigitalswipe.docml";
+const char *gUnlockDigitalLayoutDocml = ":/xml/snsrbigclockscreensaverdigitalunlockbutton.docml";
 
 extern const char *gPortraitSectionName;
 extern const char *gLandscapeSectionName;
@@ -53,7 +53,7 @@ extern const char *gDateFormatStr;
 const char *gTimeFormatStr = "%:0%J%:1%T%:3";
 
 extern const char *gIndicatorWidgetName;
-extern const char *gSwipeWidgetName;
+extern const char *gUnlockButtonName;
 
 
 /*!
@@ -64,7 +64,7 @@ SnsrDigitalClockContainer::SnsrDigitalClockContainer() :
     mTimeLabel(0),
     mAmPmLabel(0),
     mDateLabel(0),
-    mSwipeWidget(0)
+    mUnlockButton(0)
 {
     SCREENSAVER_TEST_FUNC_ENTRY("SnsrDigitalClockContainer::SnsrDigitalClockContainer")
     SCREENSAVER_TEST_FUNC_EXIT("SnsrDigitalClockContainer::SnsrDigitalClockContainer")
@@ -110,10 +110,6 @@ void SnsrDigitalClockContainer::update()
     mDateLabel->setPlainText(
         locale.format(QDate::currentDate(), gDateFormatStr)
         );
-    
-    if (mSwipeWidget) {
-        mSwipeWidget->setCurrentOrientation(mCurrentOrientation);
-    }
 
     SCREENSAVER_TEST_FUNC_EXIT("SnsrDigitalClockContainer::update")
 }
@@ -131,11 +127,12 @@ int SnsrDigitalClockContainer::updateIntervalInMilliseconds()
  */
 void SnsrDigitalClockContainer::loadWidgets()
 {
-    //if swipe is used we load the docml file containing it
-    if ( swipeToUnlockSupported() ) {
-        loadWidgets(gSwipeDigitalLayoutDocml);
-        Q_ASSERT_X( mSwipeWidget, gSwipeDigitalLayoutDocml, "Swipe widget not found in DocML file.");
-        connect( mSwipeWidget, SIGNAL(swipeDownDetected()), SIGNAL(unlockRequested()) );
+    //if unlockbutton is used we load the docml file containing it
+    if ( unlockButtonSupported() ) {
+        loadWidgets(gUnlockDigitalLayoutDocml);
+        Q_ASSERT_X( mUnlockButton, gUnlockDigitalLayoutDocml, "Unlock button not found in DocML file.");
+        mUnlockButton->setText("Unlock");
+        connect( mUnlockButton, SIGNAL(clicked()), SIGNAL(unlockRequested()) );
     }
     else {
         loadWidgets(gDigitalLayoutDocml);
@@ -155,7 +152,7 @@ void SnsrDigitalClockContainer::loadWidgets(const char* docmlName)
     mTimeLabel = 0;
     mAmPmLabel = 0;
     mIndicatorWidget = 0;
-    mSwipeWidget = 0;
+    mUnlockButton = 0;
     // load widgets from docml
     qDebug() << docmlName;
     mDocumentObjects = mDocumentLoader.load(docmlName, &ok);
@@ -170,8 +167,8 @@ void SnsrDigitalClockContainer::loadWidgets(const char* docmlName)
                 mDocumentLoader.findWidget(gAmPmLabelName));
         mIndicatorWidget = qobject_cast<SnsrIndicatorWidget *>(
                 mDocumentLoader.findWidget(gIndicatorWidgetName));
-        mSwipeWidget = qobject_cast<SnsrSwipeWidget *>(
-            mDocumentLoader.findWidget(gSwipeWidgetName));
+        mUnlockButton = qobject_cast<HbPushButton *>(
+            mDocumentLoader.findWidget(gUnlockButtonName));
         
         Q_ASSERT_X(
             mMainView && mDateLabel && mTimeLabel && mAmPmLabel &&

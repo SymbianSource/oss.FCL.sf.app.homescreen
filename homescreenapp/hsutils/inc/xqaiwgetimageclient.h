@@ -40,6 +40,10 @@ class HSUTILS_EXPORT XQAIWGetImageClient : public QObject
 public:
     XQAIWGetImageClient();
     ~XQAIWGetImageClient();
+
+signals:
+    void fetchCompleted(const QString&);
+    void fetchFailed(int, const QString&);
     
 public slots:
     void fetch();
@@ -49,12 +53,9 @@ private slots:
     void requestCompleted(const QVariant& val);
     void imageSelectionCancelled();
 
-signals:
-    void fetchCompleted(const QString&);
-    void fetchFailed(int, const QString&);
-
 private:
     void findImages(const QString &aDir, const QStringList &aFilters, QStringList &aFoundImages);
+    
 private:
     QPointer<HsImageGridWidget> mImageGrid;//added
     HbAction *mBackAction;//added
