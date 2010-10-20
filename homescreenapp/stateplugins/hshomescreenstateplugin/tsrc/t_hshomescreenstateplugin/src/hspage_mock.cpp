@@ -192,7 +192,7 @@ void HsPage::layoutNewWidgets()
         return;
     }
 
-    updateZValues();
+    updateZValues(HsScene::instance()->activeWidget());
     HsWidgetHost *widget = 0;
     for (int i = 0; i < mNewWidgets.count(); ++i) {
         widget = mNewWidgets.at(i);
@@ -362,9 +362,9 @@ void HsPage::setOnline(bool online)
     Update widgets z-values and persist those. Active widget has top most
     z-value.
 */
-void HsPage::updateZValues()
+void HsPage::updateZValues(HsWidgetHost *activeWidget)
 {
-
+    Q_UNUSED(activeWidget)
 }
 
 /*!

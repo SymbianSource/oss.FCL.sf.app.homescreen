@@ -18,6 +18,7 @@
 #include "hsloadscenestate.h"
 #include "hsscene.h"
 #include "hsgui.h"
+#include "hsdbupdatethread.h"
 
 #ifdef Q_OS_SYMBIAN
 #include <XQSettingsManager>
@@ -92,8 +93,11 @@ void HsLoadSceneState::action_loadScene()
 #else
 
     showUi();
-
 #endif
+    if (HsDbUpdateThread::instance() && !HsDbUpdateThread::instance()->isRunning()) {
+       // HsDbUpdateThread::instance()->start();
+    }
+   
 }
 #ifdef Q_OS_SYMBIAN
 /*!
@@ -122,8 +126,7 @@ void HsLoadSceneState::handleKeyChange(XQSettingsKey key, const QVariant &value)
 
 void HsLoadSceneState::showUi()
 {
-    qDebug() << "HsLoadSceneState::showUi";
-  
     HsGui::instance()->show();
     emit event_history();
+   
 }

@@ -18,11 +18,11 @@
 #define HSDEVICEINFOLISTENER_H
 
 #include <QObject>
-//#include <QSystemDeviceInfo>
-//#include <QSystemNetworkInfo>
 #ifdef HSUTILS_TEST
 #include "mocksysteminfo.h"
 #else
+#include <QSystemDeviceInfo>
+#include <QSystemNetworkInfo>
 #include <QSystemInfo>
 QTM_USE_NAMESPACE
 #endif

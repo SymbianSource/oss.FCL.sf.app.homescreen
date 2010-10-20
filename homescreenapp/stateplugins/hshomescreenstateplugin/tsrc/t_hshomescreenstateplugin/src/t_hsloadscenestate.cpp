@@ -38,18 +38,19 @@ void HomeScreenStatePluginTest::testLoadSceneStateOnEntryExit()
 {
     HbInstance::instance();
     HbMainWindow mainWindow;
-    mainWindow.show();
-
+   
     HsLoadSceneState *lss = new HsLoadSceneState;
 
     QStateMachine *sm = new QStateMachine;
     sm->addState(lss);
     sm->setInitialState(lss);
     sm->start();
-    QCoreApplication::sendPostedEvents();
+ 
+    QCoreApplication::sendPostedEvents(sm,0);
     // main window deleted -> HsGui must be deleted also
     delete HsGui::takeInstance();
     delete sm;
+  
 }
 
 #ifdef Q_OS_SYMBIAN
@@ -57,8 +58,8 @@ void HomeScreenStatePluginTest::testLoadSceneStateHandleKeyChange()
 {
     HbInstance::instance();
     HbMainWindow mainWindow;
-    mainWindow.show();
-    QCoreApplication::sendPostedEvents();
+  //  mainWindow.show();
+   // QCoreApplication::sendPostedEvents();
     
     HsLoadSceneState *lss = new HsLoadSceneState;
     XQSettingsKey testKey(XQSettingsKey::TargetPublishAndSubscribe, KPSUidStartup.iUid, KPSStartupUiPhase);

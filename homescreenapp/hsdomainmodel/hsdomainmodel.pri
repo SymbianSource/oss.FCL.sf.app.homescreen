@@ -41,7 +41,8 @@ HEADERS += ./inc/hscontentservice.h \
            ./inc/hsidlewidget.h \
            ./inc/hsdocumentloader.h \
            ./inc/hswidgetpositioningonwidgetadd.h \
-           ./inc/hssystemevents.h
+           ./inc/hssystemevents.h \
+           ./inc/hsdbupdatethread.h
         
 
 SOURCES += ./src/hscontentservice.cpp \
@@ -68,7 +69,8 @@ SOURCES += ./src/hscontentservice.cpp \
            ./src/hsidlewidget.cpp \
            ./src/hsdocumentloader.cpp \
            ./src/hswidgetpositioningonwidgetadd.cpp \
-           ./src/hssystemevents.cpp
+           ./src/hssystemevents.cpp \
+           ./src/hsdbupdatethread.cpp
 
 symbian: {
 HEADERS += ./inc/hsbackuprestoreobserver_p.h \

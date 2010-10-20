@@ -53,7 +53,8 @@ HEADERS += ../../../hsutils/inc/hspropertyanimationwrapper.h \
            ./../../inc/hsgui.h \
            ./../../inc/hsidlewidget.h \
            ./../../inc/hsdocumentloader.h \
-           ./../../inc/hswidgetpositioningonwidgetadd.h
+           ./../../inc/hswidgetpositioningonwidgetadd.h  \
+           ./../../inc/hsdbupdatethread.h
 
 SOURCES += ../../../hsutils/src/hswidgetpositioningonorientationchange.cpp \
            ../../../hsutils/src/hsmenueventfactory.cpp \
@@ -85,7 +86,8 @@ SOURCES += ../../../hsutils/src/hswidgetpositioningonorientationchange.cpp \
            ./../../src/hsgui.cpp \
            ./../../src/hsidlewidget.cpp \
            ./../../src/hsdocumentloader.cpp \
-           ./../../src/hswidgetpositioningonwidgetadd.cpp
+           ./../../src/hswidgetpositioningonwidgetadd.cpp \
+           ./../../src/hsdbupdatethread.cpp
            
 symbian: {
 HEADERS += ./../../inc/hsbackuprestoreobserver_p.h \

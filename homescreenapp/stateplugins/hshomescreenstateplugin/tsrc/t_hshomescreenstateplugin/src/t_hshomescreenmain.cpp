@@ -36,6 +36,7 @@
 #include "hswidgetpositioningonorientationchange.h"
 #include "hswidgetpositioningonwidgetadd.h"
 #include "hswidgetpositioningonwidgetmove.h"
+#include "hsdbupdatethread.h"
 
 #ifdef Q_OS_SYMBIAN
 #include <e32base.h>
@@ -67,11 +68,15 @@ void HomeScreenStatePluginTest::initTestCase()
 
     HsConfiguration::setInstance(new HsConfiguration);
    
+  //  HsDbUpdateThread *updateThread = new HsDbUpdateThread("mockme","mockme");
+  //  HsDbUpdateThread::setInstance(updateThread);
+   // updateThread->start();
 }
 
 void HomeScreenStatePluginTest::cleanupTestCase()
 {
-    
+ //   HsDbUpdateThread::instance()->quit();
+ //   HsDbUpdateThread::setInstance(0);    
 }
 
 void HomeScreenStatePluginTest::cleanup()
@@ -83,7 +88,7 @@ void HomeScreenStatePluginTest::cleanup()
 
 void HomeScreenStatePluginTest::init()
 {
-
+   
 }
 
 void HomeScreenStatePluginTest::createSceneAndWindow(int pageCount, int defaultPageIndex, int maximumPageCount)

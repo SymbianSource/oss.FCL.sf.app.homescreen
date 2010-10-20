@@ -36,8 +36,7 @@ void HomeScreenStatePluginTest::testLoadBackupRestoreStateOnEntryExit()
 {
     HbInstance::instance();
     HbMainWindow mainWindow;
-    mainWindow.show();   
-    QCoreApplication::sendPostedEvents();
+   // mainWindow.show();   
    
     QStateMachine *sm = new QStateMachine;
     HsBackupRestoreState *brs = new HsBackupRestoreState;
@@ -52,7 +51,7 @@ void HomeScreenStatePluginTest::testLoadBackupRestoreStateOnEntryExit()
     brs->addTransition(this, SIGNAL(finishStateMachine()), fs);
 
     sm->start();   
-    QCoreApplication::sendPostedEvents();  
+    QCoreApplication::sendPostedEvents(sm,0);  
     emit finishStateMachine();
 
     sm->stop();

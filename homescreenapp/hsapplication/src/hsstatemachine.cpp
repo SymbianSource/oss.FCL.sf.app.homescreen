@@ -46,6 +46,7 @@
 #include "hstest_global.h"
 #include "hswidgetpositioningonwidgetmove.h"
 #include "hssystemevents.h"
+#include "hsdbupdatethread.h"
 
 QTM_USE_NAMESPACE
 #define hbApp qobject_cast<HbApplication*>(qApp)
@@ -97,6 +98,13 @@ HsStateMachine::HsStateMachine(QObject *parent)
 #endif    
     db->open();
     HsDatabase::setInstance(db);
+    QString dbName("private/20022f35/homescreen.db");
+#ifdef  Q_OS_SYMBIAN
+    dbName = "c:/private/20022f35/homescreen.db";
+#endif
+    HsDbUpdateThread *updateDb = new HsDbUpdateThread("update.dbc",dbName,QCoreApplication::instance());
+    HsDbUpdateThread::setInstance(updateDb);
+    
 
     HsConfiguration::setInstance(new HsConfiguration(QCoreApplication::instance()));
     HsConfiguration::instance()->load();
@@ -128,6 +136,7 @@ HsStateMachine::HsStateMachine(QObject *parent)
         connect(hbApp->activityManager(), SIGNAL(activityRequested(QString)), 
                 this, SLOT(activityRequested(QString)));
     }
+    
     HSTEST_FUNC_EXIT("HS::HsStateMachine::HsStateMachine");
 }
 
@@ -136,6 +145,7 @@ HsStateMachine::HsStateMachine(QObject *parent)
 */
 HsStateMachine::~HsStateMachine()
 {
+    HsDbUpdateThread::instance()->quit();
     HsWidgetPositioningOnOrientationChange::setInstance(0);
     HsWidgetPositioningOnWidgetAdd::setInstance(0);
     HsWidgetPositioningOnWidgetMove::setInstance(0);

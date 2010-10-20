@@ -200,7 +200,7 @@ void HsPage::layoutNewWidgets()
         return;
     }
 
-    updateZValues();
+    updateZValues(HsScene::instance()->activeWidget());
     HsWidgetHost *widget = 0;
     for (int i = 0; i < mNewWidgets.count(); ++i) {
         widget = mNewWidgets.at(i);
@@ -228,7 +228,7 @@ void HsPage::resetNewWidgets()
 */
 bool HsPage::deleteFromDatabase()
 {
-    //Not used in mock
+	//Not used in mock
     return true;
 }
 
@@ -386,10 +386,10 @@ void HsPage::setOnline(bool online)
     Update widgets z-values and persist those. Active widget has top most
     z-value.
 */
-void HsPage::updateZValues()
+void HsPage::updateZValues(HsWidgetHost *activeWidget)
 {
     int z = 0;
-
+    Q_UNUSED(activeWidget)
     /*if (!mWidgets.isEmpty()) {
         QMultiMap<qreal, HsWidgetHost *> map;
         foreach (HsWidgetHost *widget, mWidgets) {
@@ -551,5 +551,5 @@ void HsPage::onPageMarginChanged(const QString &value)
 
 HsPageVisual *HsPage::visual()const
 {
-    return 0;
+	return 0;	
 }

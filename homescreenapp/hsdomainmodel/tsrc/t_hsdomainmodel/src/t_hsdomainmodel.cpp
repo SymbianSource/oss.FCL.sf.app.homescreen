@@ -29,7 +29,7 @@
 #include "caservice.h"
 #include "hsconfiguration.h"
 #include "hswallpaper.h"
-
+#include "hsdbupdatethread.h"
 QTM_USE_NAMESPACE
 
 #ifdef Q_OS_SYMBIAN
@@ -77,6 +77,7 @@ void TestHsDomainModel::initTestCase()
 
     HsWidgetPositioningOnWidgetAdd::setInstance(
         new HsAnchorPointInBottomRight);
+    
 }
 
 // ---------------------------------------------------------------------------
@@ -96,6 +97,7 @@ void TestHsDomainModel::cleanupTestCase()
 
     delete HsShortcutService::mInstance;
     HsShortcutService::mInstance = 0;
+
 }
 
 void TestHsDomainModel::init()
@@ -112,13 +114,18 @@ void TestHsDomainModel::init()
     db->setConnectionName("homescreen.dbc");
     db->setDatabaseName(dbFile);
     db->open();
-
+    
+    HsDbUpdateThread *dbUpdateThread = new HsDbUpdateThread("homescreen.dbc",dbFile);
+    HsDbUpdateThread::setInstance(dbUpdateThread);
+    //dbUpdateThread->start();
     mWallpaperTypeScene = true;
 }
 
 void TestHsDomainModel::cleanup()
 {
     // cleanup all the pages and widgets
+   // HsDbUpdateThread::instance()->quit();
+    HsDbUpdateThread::setInstance(0);
     HsDatabase::setInstance(0);
     QString path = QDir(WIDGET_PLUGIN_PATH).absolutePath();
     QApplication::addLibraryPath( path );

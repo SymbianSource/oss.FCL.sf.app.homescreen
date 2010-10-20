@@ -59,8 +59,10 @@ public:
     
     HsPropertyAnimationWrapper *pageChangeAnimation();
     HsPropertyAnimationWrapper *pageCrawlingAnimation();
+
 signals:
     void orientationChanged(Qt::Orientation);
+    void aboutToChangeOrientation();        
     void navigateToApplibrary();
  
 private:

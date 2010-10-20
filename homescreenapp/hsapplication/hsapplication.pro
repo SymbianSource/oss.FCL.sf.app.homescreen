@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -36,11 +36,9 @@ INCLUDEPATH += . \
                 ../hsutils/inc \
                 ../hsdomainmodel/inc
 
-TRANSLATIONS = homescreen.ts
-
 LIBS += -lhsutils \
         -lhsdomainmodel \
-	-lcaclient
+        -lcaclient
 
 
 symbian: {
@@ -70,12 +68,14 @@ symbian: {
     SERVICE.FILE = ipc_service_conf.xml
     
     MMP_RULES += SMPSAFE
+    
+    TRANSLATIONS = homescreen.ts
 }
 
 !symbian: {
     include(installs_win.pri)
+    TRANSLATIONS = ./resource/resource_win/homescreen.ts
+    exportResources(./resource/resource_win/*.qm, resource/qt/translations)
 }
 
 include(hsapplication.pri)
-
-exportResources(./*.qm, resource/qt/translations)

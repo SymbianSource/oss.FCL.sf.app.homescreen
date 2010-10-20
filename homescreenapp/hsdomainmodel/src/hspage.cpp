@@ -33,7 +33,7 @@
 #include "hswidgetpositioningonorientationchange.h"
 #include "hsconfiguration.h"
 #include "hsgui.h"
-
+#include "hsdbupdatethread.h"
 
 /*!
     \class HsPage
@@ -266,7 +266,7 @@ void HsPage::layoutNewWidgets()
         newWidgetLayout = new HsPageNewWidgetLayout(mTouchPoint);
         visual()->setLayout(newWidgetLayout);
     }    
-    updateZValues();
+    updateZValues(HsScene::instance()->activeWidget());
     HsWidgetHost *widget = 0;
     for (int i = 0; i < mNewWidgets.count(); ++i) {
         widget = mNewWidgets.at(i);
@@ -496,7 +496,7 @@ void HsPage::setOnline(bool online)
     Update widgets z-values and persist those. Active widget has top most 
     z-value.
 */
-void HsPage::updateZValues()
+void HsPage::updateZValues(HsWidgetHost *activeWidget)
 {
     int z = 0;
 
@@ -510,7 +510,6 @@ void HsPage::updateZValues()
 
         QList<HsWidgetHost *> sortedWidgets = map.values();
 
-        HsWidgetHost *activeWidget = HsScene::instance()->activeWidget();
         if (sortedWidgets.contains(activeWidget)) {
             sortedWidgets.removeOne(activeWidget);
             sortedWidgets.append(activeWidget);
@@ -530,7 +529,7 @@ void HsPage::updateZValues()
     }
 
     if (!widgetZValues.isEmpty()) {
-        HsDatabase::instance()->updateWidgetZValues(
+        HsDbUpdateThread::instance()->slotUpdateWidgetZValues(
             widgetZValues, HsGui::instance()->orientation());
     }
 }

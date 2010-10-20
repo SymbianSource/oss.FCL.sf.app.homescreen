@@ -35,6 +35,7 @@ HEADERS += ./inc/*.h \
            ../../../../hsdomainmodel/inc/hsdocumentloader.h \ 
            ../../../../hsdomainmodel/inc/hsconfiguration.h \
            ../../../../hsdomainmodel/inc/hssystemevents.h \
+           ../../../../hsdomainmodel/inc/hsdbupdatethread.h \
            ../../../../hsutils/inc/*.h \
            ../../../../hsutils/tsrc/t_hsutils/inc/mocksysteminfo.h 
            
@@ -53,7 +54,8 @@ SOURCES += ./src/*.cpp \
            ../../../../hsdomainmodel/src/hswidgethostvisual.cpp \
            ../../../../hsdomainmodel/src/hswidgettoucharea.cpp \
            ../../../../hsdomainmodel/src/hswidgetpositioningonwidgetadd.cpp \
-           ../../../../hsdomainmodel/src/hssystemevents.cpp \       
+           ../../../../hsdomainmodel/src/hssystemevents.cpp \  
+           ../../../../hsdomainmodel/src/hsdbupdatethread.cpp \     
            ../../../../hsutils/src/hsimagegridwidget.cpp \
            ../../../../hsutils/src/hsmenuevent.cpp \
            ../../../../hsutils/src/hsmenueventfactory.cpp \

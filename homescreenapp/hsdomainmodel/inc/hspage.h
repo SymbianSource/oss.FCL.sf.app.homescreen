@@ -69,7 +69,7 @@ public slots:
     void showWidgets();
     void hideWidgets();
     void setOnline(bool online = true);
-    void updateZValues();
+    void updateZValues(HsWidgetHost *activeWidget);
     int pageIndex();
 
 private:

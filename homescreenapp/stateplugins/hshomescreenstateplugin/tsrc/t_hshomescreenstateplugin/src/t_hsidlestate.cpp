@@ -65,7 +65,7 @@ void HomeScreenStatePluginTest::testIdleStateEntryAndExit()
 
     sm->start();
    // QApplication::processEvents();
-    QCoreApplication::sendPostedEvents();
+    QCoreApplication::sendPostedEvents(sm,0);
 
     emit finishStateMachine();
 
@@ -493,7 +493,7 @@ void HomeScreenStatePluginTest::testIdleStateDragWidget()
 
 void HomeScreenStatePluginTest::testIdleStateDeleteWidget()
 {
-    createSceneAndWindow(2, 0, 3);
+   createSceneAndWindow(2, 0, 3);
     QStateMachine *sm = new QStateMachine;
     HsIdleState *is = new HsIdleState;
     sm->addState(is);
@@ -519,6 +519,7 @@ void HomeScreenStatePluginTest::testIdleStateDeleteWidget()
     QSignalSpy waitInputSpy(is, SIGNAL(event_waitInput()));
     scene->setActiveWidget(0);
     is->onWidgetMoveFinished(QPointF(150, 150), widget);
+    
     QCOMPARE(waitInputSpy.count(), 1);
     QCOMPARE(waitDeleteSpy.count(), 1);
     
@@ -535,7 +536,7 @@ void HomeScreenStatePluginTest::testIdleStateDeleteWidget()
 
 void HomeScreenStatePluginTest::testIdleStateMisc()
 {
-    createSceneAndWindow(2, 0);
+   createSceneAndWindow(2, 0);
 
     HsIdleState *is = new HsIdleState;
 
@@ -557,6 +558,7 @@ void HomeScreenStatePluginTest::testIdleStateMisc()
     delete sm;
 
     deleteSceneAndWindow();
+    
 }
 
 void HomeScreenStatePluginTest::testIdleStateChromeBehaviour()
@@ -596,6 +598,7 @@ void HomeScreenStatePluginTest::testIdleStateChromeBehaviour()
     QCOMPARE(idleView->title(), t2);
 
     deleteSceneAndWindow();
+
 }
 
 void HomeScreenStatePluginTest::testEventFilter()
@@ -625,11 +628,12 @@ void HomeScreenStatePluginTest::testEventFilter()
 
 	deleteSceneAndWindow();
 	delete is;
+    
 }
 
 void HomeScreenStatePluginTest::testIdleStateSnapToObject()
 {
-    createSceneAndWindow(2, 0);
+   createSceneAndWindow(2, 0);
 
     HsIdleState *is = new HsIdleState;
 
@@ -648,6 +652,7 @@ void HomeScreenStatePluginTest::testIdleStateSnapToObject()
     delete sm;
 
     deleteSceneAndWindow();
+  
 }
 
 void HomeScreenStatePluginTest::testIdleStateSnapToObjectSnapEffectDisabled()
@@ -672,11 +677,12 @@ void HomeScreenStatePluginTest::testIdleStateSnapToObjectSnapEffectDisabled()
     delete sm;
 
     deleteSceneAndWindow();
+   
 }
 
 void HomeScreenStatePluginTest::testIdleStateSnapToObjectSnappingDisabled()
 {
-    createSceneAndWindow(2, 0);
+   createSceneAndWindow(2, 0);
 
     HSCONFIGURATION_SET(setSnapEnabled, false);
     HsIdleState *is = new HsIdleState;
@@ -696,11 +702,12 @@ void HomeScreenStatePluginTest::testIdleStateSnapToObjectSnappingDisabled()
     delete sm;
 
     deleteSceneAndWindow();
+   
 }
 
 void HomeScreenStatePluginTest::testOnVerticalSnapLineTimerTimeout()
 {
-    createSceneAndWindow(1, 0);
+   createSceneAndWindow(1, 0);
 
     HsIdleState *is = new HsIdleState;
 
@@ -714,6 +721,7 @@ void HomeScreenStatePluginTest::testOnVerticalSnapLineTimerTimeout()
     delete sm;
 
     deleteSceneAndWindow();
+    
 }
 
 void HomeScreenStatePluginTest::testOnHorizontalSnapLineTimerTimeout()
@@ -732,11 +740,12 @@ void HomeScreenStatePluginTest::testOnHorizontalSnapLineTimerTimeout()
     delete sm;
 
     deleteSceneAndWindow();
+   
 }
 
 void HomeScreenStatePluginTest::testShowHorizontalLine()
 {
-    createSceneAndWindow(1, 0);
+   createSceneAndWindow(1, 0);
 
     HsIdleState *is = new HsIdleState;
 
@@ -750,11 +759,12 @@ void HomeScreenStatePluginTest::testShowHorizontalLine()
     delete sm;
 
     deleteSceneAndWindow();
+    
 }
 
 void HomeScreenStatePluginTest::testEditorAndVKB()
 {
-    createSceneAndWindow(1, 0);
+   createSceneAndWindow(1, 0);
 
     HsIdleState *is = new HsIdleState;
     
@@ -769,4 +779,5 @@ void HomeScreenStatePluginTest::testEditorAndVKB()
     delete is;
     
     deleteSceneAndWindow();
+    
 }

@@ -78,14 +78,17 @@ namespace
     //Sends request to all widgets to disable data connections
     const char hsLocTextId_OptionsMenu_HsToOffline[] = "txt_homescreen_opt_home_screen_to_offline";
 
-    //Home screen canvas menu item for opening picture gallery
-    const char hsLocTextId_ContextMenu_ChangeWallpaper[] = "txt_homescreen_list_change_wallpaper";
-
-    //Home screen canvas menu item for opening Application library
-    const char hsLocTextId_ContextMenu_AddContent[] = "txt_homescreen_opt_add_content";
-
     //Home screen options menu item for opening Task switcher
     const char hsLocTextId_OptionsMenu_TaskSwitcher[] = "txt_homescreen_opt_task_switcher";
+
+    //Home screen options menu item for opening Application library
+    const char hsLocTextId_OptionsMenu_AddContent[] = "txt_homescreen_opt_add_content";
+
+    //Home screen canvas menu item for opening Application library
+    const char hsLocTextId_ContextMenu_AddContent[] = "txt_homescreen_list_add_content";
+
+    //Home screen canvas menu item for opening picture gallery
+    const char hsLocTextId_ContextMenu_ChangeWallpaper[] = "txt_homescreen_list_change_wallpaper";
 
     //Heading text in confirmation dialog while removing page with content
     const char hsLocTextId_Title_RemovePage[] = "txt_homescreen_title_remove_page";
@@ -143,6 +146,7 @@ HsIdleState::HsIdleState(QState *parent)
 
     mVerticalSnapLineTimer.setSingleShot(true);
     mHorizontalSnapLineTimer.setSingleShot(true);
+    qRegisterMetaType<HsWidgetHost *>("HsWidgetHost *");
 }
 
 /*!
@@ -328,7 +332,9 @@ void HsIdleState::setupStates()
     EXIT_ACTION(state_preRemovePage, action_preRemovePage_exit);
 
     ENTRY_ACTION(state_removePage, action_removePage_startRemovePageAnimation)
+    ENTRY_ACTION(state_removePage, action_removePage_connectAboutToChangeOrientationEventHandler)
     EXIT_ACTION(state_removePage, action_removePage_removePage)
+    EXIT_ACTION(state_removePage, action_removePage_disconnectAboutToChangeOrientationEventHandler)
 
     ENTRY_ACTION(state_toggleConnection, action_toggleConnection_toggleConnection)
 }
@@ -636,7 +642,10 @@ void HsIdleState::onWidgetTapStarted(QPointF point, HsWidgetHost *widget)
 {
     HsScene *scene = HsScene::instance();
     HsPage *page = scene->activePage();
-    QMetaObject::invokeMethod(page, "updateZValues", Qt::QueuedConnection);
+    // If z-values are changed in this event handler flow, then active widget will be
+    // one benieth this one
+    QMetaObject::invokeMethod(page, "updateZValues", Qt::QueuedConnection, Q_ARG(HsWidgetHost *,widget));
+    
     HbVkbHost::HbVkbStatus status = HbVkbHostBridge::instance()->keypadStatus();
     if ( status == HbVkbHost::HbVkbStatusOpened && !isEditor(point, widget) ) {
         closeVirtualKeyboard();
@@ -881,7 +890,7 @@ void HsIdleState::action_waitInput_updateOptionsMenu()
         this, SLOT(openTaskSwitcher()));
     
     // Add content
-    menu->addAction(hbTrId(hsLocTextId_ContextMenu_AddContent),
+    menu->addAction(hbTrId(hsLocTextId_OptionsMenu_AddContent),
         this, SLOT(onAddContentFromOptionsMenuActionTriggered()));
     // Add page
     if (scene->pages().count() < HSCONFIGURATION_GET(maximumPageCount)) {
@@ -1107,7 +1116,7 @@ void HsIdleState::action_moveWidget_reparentToPage()
         widget->visual()->setPos(adjustedWidgetPosition);
 
         widget->savePresentation();
-        page->updateZValues();
+        page->updateZValues(widget);
 
         widget->visual()->setParentItem(HsScene::instance()->activePage()->visual());
     }
@@ -1332,17 +1341,29 @@ void HsIdleState::action_removePage_startRemovePageAnimation()
         animation->stop();
     }
     animation->disconnect(this);
+
     connect(animation,
             SIGNAL(finished()),
             SIGNAL(event_waitInput()), 
             Qt::UniqueConnection);
+
     animation->setEndValue(pageLayerXPos(nextPageIndex));
     animation->setDuration(HSCONFIGURATION_GET(pageRemovedAnimationDuration));
    
     animation->start();
     
     HbInstantFeedback::play(HSCONFIGURATION_GET(pageChangeFeedbackEffect));
-    
+}
+
+/*!
+    Connects the SIGNAL for about to change the orientation for removePage state 
+    to go back to waitInput state
+*/
+void HsIdleState::action_removePage_connectAboutToChangeOrientationEventHandler()
+{
+    connect(HsGui::instance(),
+        SIGNAL(aboutToChangeOrientation()),
+        SIGNAL(event_waitInput()));
 }
 
 /*!
@@ -1368,8 +1389,20 @@ void HsIdleState::action_removePage_removePage()
     idleWidget->setSceneX(x);
     // delete it   
     pageToRemove->deleteLater();
-   
 }
+
+/*!
+    Disconnects the SIGNAL for about to change the orientation for removePage state 
+    to go back to waitInput state
+
+*/
+void HsIdleState::action_removePage_disconnectAboutToChangeOrientationEventHandler()
+{
+    disconnect(HsGui::instance(),
+        SIGNAL(aboutToChangeOrientation()),
+        this, SIGNAL(event_waitInput()));
+}
+
 /*!
     Toggles the homescreen online/offline state.
 */

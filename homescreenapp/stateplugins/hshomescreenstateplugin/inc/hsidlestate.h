@@ -126,7 +126,9 @@ private slots:
     void action_preRemovePage_showQuery();
     void action_preRemovePage_exit();
     void action_removePage_startRemovePageAnimation();
+    void action_removePage_connectAboutToChangeOrientationEventHandler();
     void action_removePage_removePage();
+    void action_removePage_disconnectAboutToChangeOrientationEventHandler();
     void action_toggleConnection_toggleConnection();
     void action_idle_setupTitle();
     void action_idle_cleanupTitle();

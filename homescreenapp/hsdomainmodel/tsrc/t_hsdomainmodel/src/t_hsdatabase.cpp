@@ -387,4 +387,10 @@ void TestHsDomainModel::testHsDatabaseUpdateWidgetZValues()
     QCOMPARE(presentation1.zValue, qreal(2));
     QVERIFY(db->widgetPresentation(presentation2));    
     QCOMPARE(presentation2.zValue, qreal(3));
+    QList<HsWidgetPresentationData> presentations;
+    presentations.append(presentation1);
+    presentations.append(presentation2);
+    QVERIFY(db->updateWidgetPresentations(presentations,Qt::Vertical));    
+
+
 }

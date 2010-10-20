@@ -50,20 +50,16 @@ HsWidgetHostVisual::HsWidgetHostVisual(QGraphicsItem *parent)
 {
     setFlag(QGraphicsItem::ItemClipsChildrenToShape);
     setFlag(QGraphicsItem::ItemHasNoContents);
-
-    grabGesture(Qt::TapGesture);
-    grabGesture(Qt::TapAndHoldGesture);
+    setFlag(QGraphicsItem::ItemIsPanel);
+    
     grabGesture(Qt::PanGesture);
-    grabGesture(Qt::PinchGesture);
-    grabGesture(Qt::SwipeGesture);
-    grabGesture(Qt::CustomGesture);
     
     setupTouchArea();
     setupEffects();
     
     setMinimumSize(HSCONFIGURATION_GET(minimumWidgetSizeInPixels));
     setMaximumSize(HSCONFIGURATION_GET(maximumWidgetSizeInPixels));
-    
+
 }
 
 /*!

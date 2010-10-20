@@ -79,7 +79,7 @@ public:
     bool setWidgetPreferences(int widgetId, const QVariantHash &data);
 
     bool configuration(QVariantHash &configuration);
-
+public slots:
     bool updateWidgetZValues(const QHash<int, qreal> &data, Qt::Orientation orientation);
     
     bool updateWidgetPresentations(const QList<HsWidgetPresentationData> &data, Qt::Orientation orientation);

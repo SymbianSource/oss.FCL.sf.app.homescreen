@@ -196,4 +196,6 @@ HsGui::HsGui(QObject *parent):
     mImpl->mWindow = hbInstance->allMainWindows().first();
     connect(mImpl->mWindow, SIGNAL(orientationChanged(Qt::Orientation)),
         SIGNAL(orientationChanged(Qt::Orientation)));
+    connect(mImpl->mWindow, SIGNAL(aboutToChangeOrientation()),
+        SIGNAL(aboutToChangeOrientation()));
 }
