@@ -69,9 +69,9 @@ _LIT8( KView, "view" );
 const TInt KSkinGfxInnerRectShrink = 5;
 const TInt KFocusGrowValue = 3;
 
-const TInt KLongTapStartShortDelay( 150000 ); // 0.15s for Sk
+const TInt KLongTapStartShortDelay( 350000 ); // 0.35s for Sk
 const TInt KLongTapStartLongDelay( 500000 ); // 0.5s
-const TInt KLongTapTimeShortDelay( 600000 ); // 0.6s for SK
+const TInt KLongTapTimeShortDelay( 1300000 ); // 1.3s for SK
 const TInt KLongTapTimeLongDelay( 1500000 ); // 1.5s
 
 const TInt KDragThreshold = 100; // pixels

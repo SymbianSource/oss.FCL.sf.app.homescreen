@@ -238,7 +238,19 @@ void CXnTextEditorAdapter::ConstructL()
                                                 
     iEditor->CreateTextViewL();
     
+    // Whether to publish text to CPS
+    CXnProperty* cpspublishingProp( iNode.GetPropertyL( KCpsPublishing ) );
+    CXnProperty* idProp( iNode.IdL() );
+    
+    if ( cpspublishingProp && idProp && 
+        cpspublishingProp->StringValue() == XnPropertyNames::KTrue )
+        {
+        iEditorPublisher = CXnTextEditorPublisher::NewL( 
+                *this, idProp->StringValue() );
+        }  
+    
     SetPropertiesL();
+    SetEditorMarginPropertiesL();
 	}
  
 // -----------------------------------------------------------------------------
@@ -598,6 +610,18 @@ HBufC* CXnTextEditorAdapter::Text() const
     return text;
     }
 
+// ---------------------------------------------------------
+// CXnTextEditorAdapter::SkinChanged()
+// Called by framework when the skin is changed
+// ---------------------------------------------------------
+//
+void CXnTextEditorAdapter::SkinChanged()
+    {    
+    TRAP_IGNORE( SetPropertiesL(););    
+    
+    CXnControlAdapter::SkinChanged();
+    }
+
 // -----------------------------------------------------------------------------
 // CXnTextEditorAdapter::HandleEditorEvent
 // -----------------------------------------------------------------------------
@@ -620,18 +644,7 @@ void CXnTextEditorAdapter::HandleEditorEvent( TInt aReason )
 // -----------------------------------------------------------------------------
 //
 void CXnTextEditorAdapter::SetPropertiesL()
-    {    
-    // Whether to publish text to CPS
-    CXnProperty* cpspublishingProp( iNode.GetPropertyL( KCpsPublishing ) );
-    CXnProperty* idProp( iNode.IdL() );
-    
-    if ( cpspublishingProp && idProp && 
-        cpspublishingProp->StringValue() == XnPropertyNames::KTrue )
-        {
-        iEditorPublisher = CXnTextEditorPublisher::NewL( 
-                *this, idProp->StringValue() );
-        }    
-
+    {
     // Store current state
     if ( iFont && iReleaseFont )
         {
@@ -741,8 +754,19 @@ void CXnTextEditorAdapter::SetPropertiesL()
                 }
             }
         }
-    
-    SetEditorMarginPropertiesL();
+    else
+        {
+        TInt error( KErrNotSupported );
+        
+        MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
+        error = AknsUtils::GetCachedColor(skinInstance, textColor, KAknsIIDQsnTextColors,
+        EAknsCIQsnTextColorsCG6);
+        
+        if ( error == KErrNone )
+            {
+            cf.iFontPresentation.iTextColor = textColor;
+            }
+        }
     
     CCharFormatLayer *pCharFL = CCharFormatLayer::NewL(cf,cfm);
     iEditor->SetCharFormatLayer(pCharFL);

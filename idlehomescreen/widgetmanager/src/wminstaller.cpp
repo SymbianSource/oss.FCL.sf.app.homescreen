@@ -18,6 +18,9 @@
 
 #include <e32base.h>
 #include <eikenv.h>
+#include <StringLoader.h>
+#include <widgetinstallerui.rsg>
+#include <aknnotewrappers.h>
 
 #include "wminstaller.h"
 #include "wmwidgetdata.h"
@@ -126,10 +129,12 @@ void CWmInstaller::RunL()
         widget->StopUninstallAnimation();
         }
 
-    if ( KErrNone !=  iStatus.Int() )
+    if ( KErrNone != iStatus.Int() )
         {
-        // display error note incase of error
-        CEikonEnv::Static()->HandleError( iStatus.Int() );
+        HBufC* string = StringLoader::LoadLC( R_WIDGETUI_UNINSTALL_CANCELED );
+        CAknConfirmationNote* note = new ( ELeave ) CAknConfirmationNote( ETrue );
+        note->ExecuteLD( *string );
+        CleanupStack::PopAndDestroy( string );
         }
 
     // close SWI session

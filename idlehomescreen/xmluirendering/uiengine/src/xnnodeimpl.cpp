@@ -87,6 +87,9 @@ _LIT8( KNone, "none" );
 _LIT8( KGainEnd, "gainend" );
 _LIT8( KLoseEnd, "loseend" );
 
+_LIT8( KWidgetExtensionNodeName, "widgetextension" );
+_LIT8( KPopUpNodeName, "popup" );
+
 struct CLayoutPropertyCache : public CBase
     {
     CLayoutPropertyCache() :
@@ -344,6 +347,7 @@ static CXnNode* FindPluginNode( CXnNode& aNode );
 static TBool DoInternalFocusChangeL(
     CXnUiEngine& aEngine, CXnNode& aNode, const TKeyEvent& aKeyEvent,
     TEventCode aType );
+static CXnNode* WidgetExtensionParent( CXnNode* aNode );
 static TBool DoTriggerKeyEventL(
     CXnNodeImpl* aThis, CXnUiEngine& aEngine, CXnNode& aNode,
     const TKeyEvent& aKeyEvent, TEventCode aType );
@@ -4811,6 +4815,13 @@ static CXnNode* FindNextNodeFromRightL(
             continue;
             }
         
+        CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+        
+        if( stayInNamespace && !popupParent )
+            {
+            continue;
+            }
+        
         // TODO: only plugin widgets are available in edit mode
 
         TRect tmpRect = tmpNode->PaddingRect();
@@ -4931,6 +4942,13 @@ static CXnNode* FindNextNodeFromRightL(
                 {
                 // if staying in the same namespace is required,
                 // do not shift focus to a different namespace
+                continue;
+                }
+            
+            CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+            
+            if( stayInNamespace && !popupParent )
+                {
                 continue;
                 }
             // TODO: only plugin widgets are available in edit mode
@@ -5054,6 +5072,13 @@ static CXnNode* FindNextNodeFromRightL(
                 {
                 // if staying in the same namespace is required,
                 // do not shift focus to a different namespace
+                continue;
+                }
+            
+            CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+                
+            if( stayInNamespace && !popupParent )
+                {
                 continue;
                 }
             
@@ -5242,6 +5267,13 @@ static CXnNode* FindNextNodeFromLeftL(
             continue;
             }
         
+        CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+        
+        if( stayInNamespace && !popupParent )
+            {
+            continue;
+            }
+        
         // TODO: only plugin widgets are available in edit mode
 
         TRect tmpRect = tmpNode->PaddingRect();
@@ -5361,6 +5393,13 @@ static CXnNode* FindNextNodeFromLeftL(
                 {
                 // if staying in the same namespace is required,
                 // do not shift focus to a different namespace
+                continue;
+                }
+        
+            CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+            
+            if( stayInNamespace && !popupParent )
+                {
                 continue;
                 }
             
@@ -5496,6 +5535,12 @@ static CXnNode* FindNextNodeFromLeftL(
                 continue;
                 }
             
+            CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+            
+            if( stayInNamespace && !popupParent )
+                {
+                continue;
+                }
             
             // TODO: only plugin widgets are available in edit mode
             TRect tmpRect = tmpNode->PaddingRect();
@@ -5681,6 +5726,13 @@ static CXnNode* FindNextNodeFromBelowL(
             continue;
             }
         
+        CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+        
+        if( stayInNamespace && !popupParent )
+            {
+            continue;
+            }
+        
         // TODO: only plugin widgets are available in edit mode
 
         TRect tmpRect = tmpNode->PaddingRect();
@@ -5762,6 +5814,13 @@ static CXnNode* FindNextNodeFromBelowL(
                 {
                 // if staying in the same namespace is required,
                 // do not shift focus to a different namespace
+                continue;
+                }
+            
+            CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+            
+            if( stayInNamespace && !popupParent )
+                {
                 continue;
                 }
             
@@ -5857,6 +5916,13 @@ static CXnNode* FindNextNodeFromAboveL(
             continue;
             }
         
+        CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+        
+        if( stayInNamespace && !popupParent )
+            {
+            continue;
+            }
+        
         // TODO: only plugin widgets are available in edit mode
         TRect tmpRect = tmpNode->PaddingRect();
 
@@ -5937,6 +6003,13 @@ static CXnNode* FindNextNodeFromAboveL(
                 {
                 // if staying in the same namespace is required,
                 // do not shift focus to a different namespace
+                continue;
+                }
+            
+            CXnNode* popupParent( WidgetExtensionParent( tmpNode ) );
+            
+            if( stayInNamespace && !popupParent )
+                {
                 continue;
                 }
             
@@ -6174,6 +6247,35 @@ static TBool DoInternalFocusChangeL( CXnUiEngine& aEngine,
         return match;
         }
     return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// WidgetExtensionParentL
+// -----------------------------------------------------------------------------
+//
+static CXnNode* WidgetExtensionParent( CXnNode* aNode )
+    {
+    CXnNode* parent( aNode->Parent() );
+    
+    for( ; parent; )
+        {
+        CXnType* type( parent->Type() );
+        
+        if( type )
+            {
+            const TDesC8& typeDes( type->Type() );
+            
+            if( typeDes.Compare( KWidgetExtensionNodeName) == 0
+                    || typeDes.Compare( KPopUpNodeName) == 0 )
+                {
+                return parent;
+                }
+            }
+        
+        parent = parent->Parent();
+        }
+    
+    return NULL;
     }
 
 // -----------------------------------------------------------------------------

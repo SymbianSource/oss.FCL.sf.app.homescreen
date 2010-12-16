@@ -82,6 +82,11 @@ public:
      * @return Text, ownership is transfered      
      */
     HBufC* Text() const;
+    
+    /**
+     * Skin change notification
+     */
+    void SkinChanged();
 
     /**
      * Handles editor events

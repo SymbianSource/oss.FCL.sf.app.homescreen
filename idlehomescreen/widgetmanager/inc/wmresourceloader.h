@@ -84,8 +84,11 @@ private: // internal methods
     /** 2nd phase constructor */
     void ConstructL();
 
-    /** load the resource */
-    void LoadResourcesL();
+    /** load widgetmanager resource */
+    void LoadWmResourcesL();
+    
+	/** load installer resource */
+    void LoadInstallerResourceFileL();
 
     /** free resources */
     void UnloadResources();
@@ -104,11 +107,6 @@ private: // members
      * name of this DLL
      */
     TFileName   iDllName;
-
-    /**
-     * resource file offset
-     */
-    TInt        iResourceFileOffset;
 
     /**
      * ICON file
@@ -134,6 +132,11 @@ private: // members
      * text to replace title
      */    
     HBufC*      iUninstalling;
+    
+    /**
+     * resource file offsets
+     */
+    RArray<TInt> iResourceFileOffsets;
     };
 
 #endif // WMRESOURCELOADER_H_

@@ -783,7 +783,14 @@ void CTsFastSwapArea::RenderContentL( TBool aSuppressAnimation )
     iEvtHandler.ReInitPhysicsL( GridWorldSize(), ViewSize(), ETrue );
     if ( SelectedIndex() >= GridItemCount() && GridItemCount() )
         {
-        iGrid->SetCurrentDataIndex( GridItemCount() - 1 );
+        if ( AknLayoutUtils::LayoutMirrored() )
+            {
+            iGrid->SetCurrentDataIndex( 0 );
+            }
+        else
+            {
+            iGrid->SetCurrentDataIndex( GridItemCount() - 1 );
+            }
         }
     UpdateGrid( ETrue, !aSuppressAnimation );
     

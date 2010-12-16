@@ -744,4 +744,10 @@ CHARACTER_SET UTF8
 //r: 1.0
 #define qtn_att_ovimaps_grid "Ovi Maps"
 
+//d: Title of the New message.
+//d: Displayed as an item title in grid.
+//l: cell_app_pane_t1
+//r: 1.0
+#define qtn_apps_newmessage_grid "New msg."
+
 // end of file

@@ -32,6 +32,9 @@ _LIT( KZdrive, "Z:" );
 _LIT( KRelativeMifPath, "\\resource\\apps\\widgetmanager.mif" );
 _LIT( KRelativeResourcePathWithWildcard, "\\resource\\apps\\widgetmanagerview.r*" );
 _LIT( KRelativeResourcePath, "\\resource\\apps\\widgetmanagerview.rsc" );
+_LIT( KResourceFileFolder, "\\resource\\");
+_LIT( KResourceDir, "Z:WidgetInstallerUI.rsc" );
+_LIT( KResourceFileName, "\\resource\\WidgetInstallerUI.rsc" );
 
 // ---------------------------------------------------------
 // CWmResourceLoader::NewL
@@ -63,6 +66,7 @@ CWmResourceLoader::CWmResourceLoader( CEikonEnv& aEnv )
 CWmResourceLoader::~CWmResourceLoader()
     {
     UnloadResources();
+    iResourceFileOffsets.Close();
     delete iNote;
     delete iNoDescription;
     delete iWrtDescription;
@@ -77,7 +81,9 @@ void CWmResourceLoader::ConstructL()
     {
     Dll::FileName( iDllName );
 
-    LoadResourcesL();
+    LoadWmResourcesL();
+    LoadInstallerResourceFileL();
+	
     DetermineIconFilePath();
     
     iNoDescription = StringLoader::LoadL( 
@@ -91,10 +97,35 @@ void CWmResourceLoader::ConstructL()
     }
 
 // ---------------------------------------------------------
+// CWmResourceLoader::LoadInstallerResourceFileL
+// ---------------------------------------------------------
+//
+void CWmResourceLoader::LoadInstallerResourceFileL()
+    {
+    RFs& fs = iEnv.FsSession();
+    TFileName resourceFileName;
+    TParse parse;
+    Dll::FileName(resourceFileName);
+    parse.Set(KResourceFileName, &resourceFileName, NULL);
+    resourceFileName = parse.FullName();
+    
+    BaflUtils::NearestLanguageFile(fs, resourceFileName);
+    if (!BaflUtils::FileExists(fs, resourceFileName))
+        {
+        // Use resource file on the Z drive instead
+        parse.Set(KResourceDir, &KResourceFileFolder, NULL);
+        resourceFileName = parse.FullName();
+        BaflUtils::NearestLanguageFile(fs, resourceFileName);
+        }
+    
+    iResourceFileOffsets.AppendL(iEnv.AddResourceFileL(resourceFileName));
+    }
+
+// ---------------------------------------------------------
 // CWmResourceLoader::LoadResourcesL
 // ---------------------------------------------------------
 //
-void CWmResourceLoader::LoadResourcesL()
+void CWmResourceLoader::LoadWmResourcesL()
     {    
     TFileName resourceFile;
     RFs& fs = iEnv.FsSession();
@@ -122,7 +153,7 @@ void CWmResourceLoader::LoadResourcesL()
                 }
             }
         }
-    iResourceFileOffset = iEnv.AddResourceFileL( resourceFile );
+    iResourceFileOffsets.AppendL(iEnv.AddResourceFileL( resourceFile ));
     }
 
 // ---------------------------------------------------------
@@ -131,9 +162,9 @@ void CWmResourceLoader::LoadResourcesL()
 //
 void CWmResourceLoader::UnloadResources()
     {
-    if ( iResourceFileOffset )
+    for ( TInt i = 0; i < iResourceFileOffsets.Count(); i++ ) 
         {
-        iEnv.DeleteResourceFile( iResourceFileOffset );
+        iEnv.DeleteResourceFile( iResourceFileOffsets[i] );   
         }
     }
 
